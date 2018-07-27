@@ -1,0 +1,38 @@
+local functional = require "utils.functional"
+
+local function keysTest()
+	local table = {
+		foo = true,
+		bar = true
+	}
+
+	local keys = functional.keys(table)
+	local passed = keys[1] == 'foo' and keys[2] == 'bar'
+	assert(passed, "incorrect list of keys")
+end
+
+local function composeTest()
+	local callCount = 0
+	local function func1(fn)
+		callCount = callCount + 1
+		return function()
+			fn()
+		end
+	end
+	local composedFunc = functional.compose(func1)(func1)
+	composedFunc()
+	assert(callCount == 2, "should be called twice")
+end
+
+local function runTests()
+	keysTest()
+	composeTest()
+end
+
+function init(self)
+	runTests()
+end
+
+function on_reload(self)
+	runTests()
+end

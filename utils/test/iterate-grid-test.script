@@ -1,0 +1,37 @@
+local iterateGrid = require("utils.iterate-grid")
+local makeGrid = require("utils.make-grid")
+
+local function test()
+	if not sys.get_engine_info().is_debug then
+		return
+	end
+	
+	local cols = 2
+	local rows = 2
+	local grid = makeGrid(cols, rows, 1)
+	local reverseAxis = {
+		x = false,
+		y = false
+	}
+	local testOrder = {
+		{1,1},
+		{2,1},
+		{1,2},
+		{2,2},
+	}
+	local i = 1
+	iterateGrid(grid, function(v,x,y)
+		local coords = testOrder[i]
+		local passed = x == coords[1] and y == coords[2]
+		assert(passed, "[iterate-grid test] iteration failed")
+		i = i + 1
+	end, reverseAxis.x, reverseAxis.y)
+end
+
+function init(self)
+	test()
+end
+
+function on_reload()
+	test()
+end
