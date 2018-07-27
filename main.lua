@@ -1,7 +1,10 @@
+require 'modules.autobatch'
 local socket = require 'socket'
 local inspect = require('utils.inspect')
 local loadJsonFile = require 'utils.load-json-file'
-local memoize = require 'utils.memoize'
+local perf = require 'utils.perf'
+local config = require 'config'
+local Animation = require 'modules.animation'
 
 local width, height = love.window.getMode()
 local position = {
@@ -9,56 +12,11 @@ local position = {
   y = height / 2
 }
 
-local keyboard = {
-  UP = 'w',
-  RIGHT = 'd',
-  DOWN = 's',
-  LEFT = 'a'
-}
-
 local sprite
 local spriteAtlas
 local spriteData
 local frameRate = 60
 local speed = 5 * frameRate -- per frame
-
--- returns a hash of animations by name with a value set to a coroutine
-local function Animation(frames, frameJson, spriteAtlas)
-  local animation = {}
-  for aniName, aniFrames in pairs(frames) do
-    animation[aniName] = memoize(function(fps)
-      local frameRate = 60
-      local maxFrames = #aniFrames
-      local firstFrame = frameJson.frames[aniFrames[1]]
-      local w = firstFrame.sourceSize.w
-      local h = firstFrame.sourceSize.h
-      local sprite = love.graphics.newQuad(0, 0, w, h, spriteAtlas:getDimensions())
-      local co = function()
-        local tick = 0
-        local index = 1 -- frame index
-        local every = frameRate / fps -- new index after every `x` ticks
-        while true do
-          if every == tick then
-            tick = 0
-            index = index + 1
-            if index > maxFrames then
-              index = 1
-            end
-          end
-          local frameKey = aniFrames[index]
-          local frame = frameJson.frames[frameKey]
-          -- readjust position if the height is less
-          local offsetY = frame.sourceSize.h - frame.frame.h
-          sprite:setViewport(frame.frame.x, frame.frame.y - offsetY, frame.sourceSize.w, frame.sourceSize.h)
-          coroutine.yield(sprite)
-          tick = tick + 1
-        end
-      end
-      return coroutine.wrap(co)
-    end)
-  end
-  return animation
-end
 
 local animations = {}
 local activeAnimation
@@ -88,27 +46,28 @@ function love.load()
   animations = Animation(frames, spriteData, spriteAtlas)
 end
 
+local keyMap = config.keyboard
 function love.update(dt)
   local moveAmount = speed * dt
   local moving = false
-  if love.keyboard.isDown(keyboard.RIGHT) then
+  if love.keyboard.isDown(keyMap.RIGHT) then
     position.x = position.x + moveAmount
     moving = true
     flipAnimation = false
   end
 
-  if love.keyboard.isDown(keyboard.LEFT) then
+  if love.keyboard.isDown(keyMap.LEFT) then
     position.x = position.x - moveAmount
     moving = true
     flipAnimation = true
   end
 
-  if love.keyboard.isDown(keyboard.UP) then
+  if love.keyboard.isDown(keyMap.UP) then
     position.y = position.y - moveAmount
     moving = true
   end
 
-  if love.keyboard.isDown(keyboard.DOWN) then
+  if love.keyboard.isDown(keyMap.DOWN) then
     position.y = position.y + moveAmount
     moving = true
   end

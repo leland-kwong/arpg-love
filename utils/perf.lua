@@ -1,5 +1,3 @@
-local Global = require("component.global")
-local isDebug = Global.isDebug
 local socket = require 'socket'
 local objectUtils = require("utils.object-utils")
 
@@ -15,10 +13,6 @@ local defaultOptions = {
 }
 -- profiler function to measure the performance cost to run the provided function
 local function perf(func, options)
-	if not isDebug then
-		return func
-	end
-
 	options = objectUtils.assign({}, defaultOptions, options)
 
 	if not options.enabled then
