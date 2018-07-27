@@ -14,8 +14,12 @@ M.NON_NIL = function(v)
 	return v ~= nil, 'non_nil'
 end
 
-function M.validate(value, validType)
+function M.validate(value, validType, required)
 	if not enabled then
+		return
+	end
+
+	if value == nil and not required then
 		return
 	end
 

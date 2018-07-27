@@ -1,3 +1,4 @@
+local socket = require 'socket'
 math.randomseed(socket.gettime())
 
 local random = math.random
