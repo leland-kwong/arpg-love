@@ -5,6 +5,10 @@ local uid = require 'utils.uid'
 local inspect = require 'utils.inspect'
 local noop = require 'utils.noop'
 
+local errorMsg = {
+  getInitialProps = "getInitialProps must return a table"
+}
+
 function M.newGroup()
   local C = {}
   local componentsById = {}
@@ -15,36 +19,41 @@ function M.newGroup()
     initialProps[table] - a key/value hash of properties
   ]]
   function C.createFactory(blueprint)
-    function blueprint:create(props)
+    tc.validate(blueprint.getInitialProps, tc.FUNCTION)
+
+    function blueprint.create(props)
       local c = blueprint.getInitialProps(props)
+
+      -- type check
+      if isDebug then
+        assert(type(c) == tc.TABLE, errorMsg.getInitialProps)
+        tc.validate(c.x, tc.NUMBER) -- x-axis position
+        tc.validate(c.y, tc.NUMBER) -- y-axis position
+        tc.validate(c.z, tc.NUMBER, false) -- z-order
+        tc.validate(c.angle, tc.NUMBER, false)
+      end
+
       local id = uid()
       c._id = id
       componentsById[id] = c
       setmetatable(c, blueprint)
       blueprint.__index = blueprint
 
-      -- type check
-      if isDebug then
-        -- x and y properties are for positioning
-        tc.validate(c.x, tc.NUMBER)
-        tc.validate(c.y, tc.NUMBER)
-        tc.validate(c.angle, tc.NUMBER, false)
-      end
-
       c:init()
       return c
     end
 
-    local defaultMethods = {
+    local defaults = {
+      z = 0,
       init = noop,
       update = noop,
       draw = noop,
       final = noop
     }
     -- default methods
-    for k,cb in pairs(defaultMethods) do
+    for k,v in pairs(defaults) do
       if not blueprint[k] then
-        blueprint[k] = cb
+        blueprint[k] = v
       end
     end
 

@@ -19,7 +19,7 @@ function M.validate(value, validType, required)
 		return
 	end
 
-	if value == nil and not required then
+	if value == nil and required == false then
 		return
 	end
 
