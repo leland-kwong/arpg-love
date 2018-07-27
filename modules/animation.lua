@@ -1,10 +1,9 @@
 local memoize = require 'utils.memoize'
 
 -- returns a key/value pair of {animation name, animation coroutine}
-local function Animation(frames, frameJson, spriteAtlas)
-  local animation = {}
-  for aniName, aniFrames in pairs(frames) do
-    animation[aniName] = memoize(function(fps)
+local function Animation(frameJson, spriteAtlas)
+  local function createAnimation(aniFrames)
+    return memoize(function(fps)
       local frameRate = 60
       local maxFrames = #aniFrames
       local frameData = frameJson.frames
@@ -36,7 +35,7 @@ local function Animation(frames, frameJson, spriteAtlas)
       return coroutine.wrap(co)
     end)
   end
-  return animation
+  return createAnimation
 end
 
 return Animation

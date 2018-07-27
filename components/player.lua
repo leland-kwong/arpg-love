@@ -1,3 +1,4 @@
+local Color = require 'modules.color'
 local groups = require 'components.groups'
 local config = require 'config'
 local socket = require 'socket'
@@ -14,13 +15,9 @@ local startPos = {
   y = height / 2
 }
 
-local sprite
-local spriteAtlas
-local spriteData
 local frameRate = 60
 local speed = 5 * frameRate -- per frame
 
-local animations = {}
 local activeAnimation
 local flipAnimation = false
 
@@ -33,28 +30,27 @@ local playerFactory = groups.all.createFactory({
     }
   end,
 
-  init = function()
+  init = function(self)
     love.graphics.setDefaultFilter('nearest', 'nearest')
-    spriteAtlas = love.graphics.newImage('assets/built/sprite.png')
-    spriteData = loadJsonFile('assets/built/sprite.json')
+    self.spriteAtlas = love.graphics.newImage('assets/built/sprite.png')
+    local spriteData = loadJsonFile('assets/built/sprite.json')
+    local createAnimation = Animation(spriteData, self.spriteAtlas)
 
-    local frames = {
-      idle = {
+    self.animations = {
+      idle = createAnimation({
         'character-1',
         'character-8',
         'character-9',
         'character-10',
         'character-11'
-      },
-      run = {
+      }),
+      run = createAnimation({
         'character-15',
         'character-16',
         'character-17',
         'character-18',
-      }
+      })
     }
-
-    animations = Animation(frames, spriteData, spriteAtlas)
   end,
 
   update = function(self, dt)
@@ -83,7 +79,7 @@ local playerFactory = groups.all.createFactory({
       moving = true
     end
 
-    self.activeAnimation = moving and animations.run(15) or animations.idle(5)
+    self.activeAnimation = moving and self.animations.run(15) or self.animations.idle(5)
   end,
 
   draw = function(self)
@@ -95,19 +91,9 @@ local playerFactory = groups.all.createFactory({
     local offsetX = (w/2) * aniDir * scale
 
     love.graphics.draw(
-      spriteAtlas,
+      self.spriteAtlas,
       sprite,
       self.x - offsetX,
-      self.y,
-      math.rad(angle),
-      scale * aniDir,
-      scale
-    )
-
-    love.graphics.draw(
-      spriteAtlas,
-      sprite,
-      self.x - offsetX + w * 2,
       self.y,
       math.rad(angle),
       scale * aniDir,
@@ -116,4 +102,4 @@ local playerFactory = groups.all.createFactory({
   end
 })
 
-playerFactory:create()
+playerFactory.create()
