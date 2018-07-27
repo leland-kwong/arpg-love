@@ -1,5 +1,6 @@
-local Global = require("main.global")
+local Global = require("component.global")
 local isDebug = Global.isDebug
+local socket = require 'socket'
 local objectUtils = require("utils.object-utils")
 
 local getTime = socket.gettime
@@ -16,10 +17,10 @@ local defaultOptions = {
 local function perf(func, options)
 	if not isDebug then
 		return func
-	end	
+	end
 
 	options = objectUtils.assign({}, defaultOptions, options)
-	
+
 	if not options.enabled then
 		return func
 	end
@@ -38,7 +39,7 @@ local function perf(func, options)
 		local out1, out2, out3 = func(a1, a2, a3, a4)
 
 		local executionTimeMs = (getTime() - ts) * 1000
-		
+
 		local maxTime = options.maxTime
 		local title = options.title
 		if maxTime < executionTimeMs then
@@ -46,7 +47,7 @@ local function perf(func, options)
 			print('[PERF WARNING]'..prefix..' - '..executionTimeMs..'(ms) exceeds maxAvgTime of '..maxTime..'(ms)')
 		end
 		options.done(executionTimeMs, title)
-		
+
 		return out1, out2, out3
 	end
 end
