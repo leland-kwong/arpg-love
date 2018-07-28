@@ -32,9 +32,9 @@ local playerFactory = groups.all.createFactory({
 
   init = function(self)
     love.graphics.setDefaultFilter('nearest', 'nearest')
-    self.spriteAtlas = love.graphics.newImage('assets/built/sprite.png')
-    local spriteData = loadJsonFile('assets/built/sprite.json')
-    local createAnimation = Animation(spriteData, self.spriteAtlas)
+    self.spriteAtlas = love.graphics.newImage('built/sprite.png')
+    local spriteData = loadJsonFile('built/sprite.json')
+    local createAnimation = Animation(spriteData, self.spriteAtlas, 2)
 
     self.animations = {
       idle = createAnimation({
@@ -51,6 +51,11 @@ local playerFactory = groups.all.createFactory({
         'character-18',
       })
     }
+
+    local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
+    self.shader = love.graphics.newShader(pixelOutlineShader)
+    self.shader:send('sprite_size', {spriteData.meta.size.w, spriteData.meta.size.h})
+    self.shader:send('outline_width', 1)
   end,
 
   update = function(self, dt)
@@ -90,6 +95,7 @@ local playerFactory = groups.all.createFactory({
     local angle = 0
     local offsetX = (w/2) * aniDir * scale
 
+    love.graphics.setShader(self.shader)
     love.graphics.draw(
       self.spriteAtlas,
       sprite,
@@ -99,6 +105,7 @@ local playerFactory = groups.all.createFactory({
       scale * aniDir,
       scale
     )
+    love.graphics.setShader()
   end
 })
 

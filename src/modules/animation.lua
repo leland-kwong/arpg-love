@@ -1,7 +1,7 @@
 local memoize = require 'utils.memoize'
 
 -- returns a key/value pair of {animation name, animation coroutine}
-local function Animation(frameJson, spriteAtlas)
+local function Animation(frameJson, spriteAtlas, paddingOffset)
   local function createAnimation(aniFrames)
     return memoize(function(fps)
       local frameRate = 60
@@ -27,7 +27,7 @@ local function Animation(frameJson, spriteAtlas)
           local frame = frameData[frameKey]
           -- readjust position if the height is less
           local offsetY = frame.sourceSize.h - frame.frame.h
-          sprite:setViewport(frame.frame.x, frame.frame.y - offsetY, frame.sourceSize.w, frame.sourceSize.h)
+          sprite:setViewport(frame.frame.x - paddingOffset, frame.frame.y - offsetY, frame.sourceSize.w + paddingOffset, frame.spriteSourceSize.h + paddingOffset)
           coroutine.yield(sprite)
           tick = tick + 1
         end
