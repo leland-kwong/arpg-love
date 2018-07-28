@@ -221,10 +221,24 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/fireball.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.666667</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>7,5,13,9</rect>
+                <key>scale9Paddings</key>
+                <rect>7,5,13,9</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
         </map>
         <key>fileList</key>
         <array>
             <filename>custom-art/characters/player</filename>
+            <filename>custom-art/fireball.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
