@@ -26,7 +26,6 @@ local playerFactory = groups.all.createFactory({
     return {
       x = startPos.x,
       y = startPos.y,
-      activeAnimation = nil
     }
   end,
 
@@ -36,6 +35,7 @@ local playerFactory = groups.all.createFactory({
     local spriteData = loadJsonFile('built/sprite.json')
     local createAnimation = Animation(spriteData, self.spriteAtlas, 2)
 
+    self.animation = animation
     self.animations = {
       idle = createAnimation({
         'character-1',
@@ -53,9 +53,11 @@ local playerFactory = groups.all.createFactory({
     }
 
     local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
+    self.outlineColor = {1,1,1,1}
     self.shader = love.graphics.newShader(pixelOutlineShader)
     self.shader:send('sprite_size', {spriteData.meta.size.w, spriteData.meta.size.h})
     self.shader:send('outline_width', 1)
+    self.shader:send('outline_color', self.outlineColor)
   end,
 
   update = function(self, dt)
@@ -84,14 +86,15 @@ local playerFactory = groups.all.createFactory({
       moving = true
     end
 
-    self.activeAnimation = moving and self.animations.run(15) or self.animations.idle(5)
+    local activeAnimation = moving and self.animations.run.next(dt / 4) or self.animations.idle.next(dt / 12)
+    self.sprite = activeAnimation
   end,
 
   draw = function(self)
     local aniDir = flipAnimation and -1 or 1
-    local sprite = self.activeAnimation()
+    local sprite = self.sprite
     local x,y,w = sprite:getViewport()
-    local scale = 3
+    local scale = config.scaleFactor
     local angle = 0
     local offsetX = (w/2) * aniDir * scale
 

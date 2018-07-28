@@ -9,4 +9,6 @@ M.keyboard = {
   LEFT = 'a'
 }
 
+M.scaleFactor = 3
+
 return M
