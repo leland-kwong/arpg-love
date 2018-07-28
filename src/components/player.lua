@@ -101,7 +101,6 @@ local playerFactory = groups.all.createFactory({
   end,
 
   draw = function(self)
-    -- local posX, posY, ox, oy = getCenter(self)
     local ox, oy = self.animation.getOffset()
     local scale = config.scaleFactor
     local aniDir = flipAnimation and -1 or 1
