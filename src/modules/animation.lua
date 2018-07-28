@@ -1,4 +1,7 @@
-local memoize = require 'utils.memoize'
+--[[
+  animation library for handling sprite atlas animations in Love2d
+]]
+
 local abs = math.abs
 
 local function Animation(frameJson, spriteAtlas, paddingOffset, frameRate)
