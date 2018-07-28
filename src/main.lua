@@ -1,7 +1,11 @@
 require 'modules.test.index'
-require 'components.player'
+local player = require 'components.player'
+local collisionTest = require 'components.collision-test'
 local groups = require 'components.groups'
 local functional = require 'utils.functional'
+
+player.create()
+collisionTest.create()
 
 function pprint(v)
   local inspect = require 'utils.inspect'
@@ -9,6 +13,7 @@ function pprint(v)
 end
 
 function love.load()
+  love.window.setTitle('pathfinder')
 end
 
 -- function love.keypressed(key, scanCode, isRepeated)

@@ -27,8 +27,8 @@ function M.newGroup()
       -- type check
       if isDebug then
         assert(type(c) == tc.TABLE, errorMsg.getInitialProps)
-        tc.validate(c.x, tc.NUMBER) -- x-axis position
-        tc.validate(c.y, tc.NUMBER) -- y-axis position
+        tc.validate(c.x, tc.NUMBER, false) -- x-axis position
+        tc.validate(c.y, tc.NUMBER, false) -- y-axis position
         tc.validate(c.z, tc.NUMBER, false) -- z-order
         tc.validate(c.angle, tc.NUMBER, false)
       end

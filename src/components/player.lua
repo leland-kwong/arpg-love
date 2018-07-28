@@ -2,6 +2,9 @@ local Color = require 'modules.color'
 local groups = require 'components.groups'
 local config = require 'config'
 local animationFactory = require 'components.animation-factory'
+local bump = require 'modules.bump'
+
+local world = bump.newWorld(64)
 
 local keyMap = config.keyboard
 local mouseInputMap = config.mouseInputMap
@@ -117,6 +120,7 @@ local playerFactory = groups.all.createFactory({
       ox,
       oy
     )
+
     love.graphics.setShader()
 
     if self.debug then
@@ -131,4 +135,4 @@ local playerFactory = groups.all.createFactory({
   end
 })
 
-playerFactory.create({ debug = false })
+return playerFactory
