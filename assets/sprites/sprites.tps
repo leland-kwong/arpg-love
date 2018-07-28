@@ -224,7 +224,7 @@
             <key type="filename">custom-art/fireball.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.666667</point_f>
+                <point_f>0.692308,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>

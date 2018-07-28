@@ -38,14 +38,19 @@ function M.newGroup()
       componentsById[id] = c
       setmetatable(c, blueprint)
       blueprint.__index = blueprint
-
-      c:init()
       return c
     end
 
     local defaults = {
+      x = 0,
+      y = 0,
       z = 0,
+      angle = 0,
+
+      -- gets called on the next `update` frame
       init = noop,
+
+      -- these methods will not be called until the component has been initialized
       update = noop,
       draw = noop,
       final = noop
@@ -66,14 +71,20 @@ function M.newGroup()
   end
 
   function C.updateAll(dt)
-    for id,component in pairs(componentsById) do
-      component:update(dt)
+    for id,c in pairs(componentsById) do
+      if not c._initialized then
+        c._initialized = true
+        c:init()
+      end
+      c:update(dt)
     end
   end
 
   function C.drawAll()
-    for id,component in pairs(componentsById) do
-      component:draw()
+    for id,c in pairs(componentsById) do
+      if c._initialized then
+        c:draw()
+      end
     end
   end
 

@@ -1,13 +1,10 @@
 local Color = require 'modules.color'
 local groups = require 'components.groups'
 local config = require 'config'
-local socket = require 'socket'
-local inspect = require('utils.inspect')
-local loadJsonFile = require 'utils.load-json-file'
-local perf = require 'utils.perf'
-local Animation = require 'modules.animation'
+local animationFactory = require 'components.animation-factory'
 
 local keyMap = config.keyboard
+local mouseInputMap = config.mouseInputMap
 
 local width, height = love.window.getMode()
 local startPos = {
@@ -30,21 +27,15 @@ local playerFactory = groups.all.createFactory({
   end,
 
   init = function(self)
-    love.graphics.setDefaultFilter('nearest', 'nearest')
-    self.spriteAtlas = love.graphics.newImage('built/sprite.png')
-    local spriteData = loadJsonFile('built/sprite.json')
-    local createAnimation = Animation(spriteData, self.spriteAtlas, 2)
-
-    self.animation = animation
     self.animations = {
-      idle = createAnimation({
+      idle = animationFactory.create({
         'character-1',
         'character-8',
         'character-9',
         'character-10',
         'character-11'
       }),
-      run = createAnimation({
+      run = animationFactory.create({
         'character-15',
         'character-16',
         'character-17',
@@ -55,6 +46,7 @@ local playerFactory = groups.all.createFactory({
     local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
     self.outlineColor = {1,1,1,1}
     self.shader = love.graphics.newShader(pixelOutlineShader)
+    local spriteData = animationFactory.spriteData
     self.shader:send('sprite_size', {spriteData.meta.size.w, spriteData.meta.size.h})
     self.shader:send('outline_width', 1)
     self.shader:send('outline_color', self.outlineColor)
@@ -86,30 +78,58 @@ local playerFactory = groups.all.createFactory({
       moving = true
     end
 
-    local activeAnimation = moving and self.animations.run.next(dt / 4) or self.animations.idle.next(dt / 12)
-    self.sprite = activeAnimation
+    if moving then
+      local a = self.animations.run
+      self.animation = a
+      self.sprite = a.next(dt / 4)
+    else
+      local a = self.animations.idle
+      self.animation = a
+      self.sprite = a.next(dt / 12)
+    end
+
+    if love.keyboard.isDown(keyMap.SKILL_1) or love.mouse.isDown(mouseInputMap.SKILL_1) then
+      local fireball = require 'components.fireball'
+      fireball.create({
+          debug = false
+        , x = self.x
+        , y = self.y
+        , x2 = love.mouse.getX()
+        , y2 = love.mouse.getY()
+      })
+    end
   end,
 
   draw = function(self)
-    local aniDir = flipAnimation and -1 or 1
-    local sprite = self.sprite
-    local x,y,w = sprite:getViewport()
+    -- local posX, posY, ox, oy = getCenter(self)
+    local ox, oy = self.animation.getOffset()
     local scale = config.scaleFactor
-    local angle = 0
-    local offsetX = (w/2) * aniDir * scale
+    local aniDir = flipAnimation and -1 or 1
 
     love.graphics.setShader(self.shader)
     love.graphics.draw(
-      self.spriteAtlas,
-      sprite,
-      self.x - offsetX,
+      animationFactory.spriteAtlas,
+      self.sprite,
+      self.x,
       self.y,
-      math.rad(angle),
+      math.rad(self.angle),
       scale * aniDir,
-      scale
+      scale,
+      ox,
+      oy
     )
     love.graphics.setShader()
+
+    if self.debug then
+      local w,h = select(3, self.sprite:getViewport())
+      local rw, rh = w*scale, h*scale
+      love.graphics.setColor(1,1,1,0.5)
+      -- DEBUG SHAPES
+      local debug = require 'modules.debug'
+      debug.boundingBox(self.x, self.y, rw, rh)
+      love.graphics.setColor(1,1,1,1)
+    end
   end
 })
 
-playerFactory.create()
+playerFactory.create({ debug = false })
