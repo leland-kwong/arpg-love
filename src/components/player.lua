@@ -94,7 +94,7 @@ local playerFactory = groups.all.createFactory({
     local aniDir = flipAnimation and -1 or 1
     local sprite = self.sprite
     local x,y,w = sprite:getViewport()
-    local scale = 3
+    local scale = config.scaleFactor
     local angle = 0
     local offsetX = (w/2) * aniDir * scale
 
