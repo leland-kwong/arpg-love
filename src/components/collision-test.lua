@@ -34,16 +34,16 @@ local factory = groups.all.createFactory({
       collided = false,
       x = love.mouse.getX(),
       y = love.mouse.getY(),
-      w = 32,
-      h = 32
+      w = 16,
+      h = 16
     }
 
     self.B = B
-    world:add(B,  B.x, B.y, B.w, B.h)
+    world:add(B, B.x, B.y, B.w, B.h)
 
     self.obstacles = {}
 
-    for i=1, 100 do
+    for i=1, 10 do
       local obstacle = {
         name = "obstacle_"..i,
         x = math.random( 0, love.graphics.getWidth() ),
@@ -51,8 +51,26 @@ local factory = groups.all.createFactory({
         w = 20,
         h = 20,
       }
-      self.obstacles[i] = obstacle
       world:add(obstacle, obstacle.x, obstacle.y, obstacle.w, obstacle.h)
+      self.obstacles[i] = {
+        draw = coroutine.wrap(function()
+          local gfx = love.graphics
+          local o = obstacle
+          local mode = 'fill'
+          local color1 = {0,0.7,1,1}
+          while true do
+            gfx.setColor(color1)
+            gfx.rectangle(
+              mode,
+              o.x,
+              o.y,
+              o.w,
+              o.h
+            )
+            coroutine.yield()
+          end
+        end)
+      }
     end
   end,
 
@@ -70,11 +88,6 @@ local factory = groups.all.createFactory({
     self.B.x = actualX
     self.B.y = actualY
     self.B.collided = false
-
-    -- prints "Attempted to move to 0,64, but ended up in 0,-32 due to 1 collisions"
-    if len > 0 then
-      -- self:delete()
-    end
 
     -- prints the new coordinates of B: 0, -32, 32, 32
     -- print(self.world:getRect(self.B))
@@ -94,6 +107,13 @@ local factory = groups.all.createFactory({
       -- print(("Collision with %s."):format(col.other.name))
     end
 
+    local collisionStateChanged = self.previouslyCollided ~= self.B.collided
+    if collisionStateChanged then
+      -- reset perf time
+      time = 0
+      updateCount = 0
+    end
+    self.previouslyCollided = self.B.collided
     -- remove A and B from the world
     -- world:remove(A)
     -- world:remove(B)
@@ -119,18 +139,12 @@ local factory = groups.all.createFactory({
     gfx.setColor(colorA)
     for i=1, #self.obstacles do
       local rect = self.obstacles[i]
-      gfx.rectangle(
-        'fill',
-        rect.x,
-        rect.y,
-        rect.w,
-        rect.h
-      )
+      rect.draw()
     end
     gfx.setColor(1,1,1,1)
 
     gfx.print(
-      avgTime,
+      'collision perf: '..avgTime,
       0,
       0
     )
