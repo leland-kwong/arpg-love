@@ -84,7 +84,7 @@
         <key>textureFormat</key>
         <enum type="SettingsBase::TextureFormat">png</enum>
         <key>borderPadding</key>
-        <uint>4</uint>
+        <uint>0</uint>
         <key>maxTextureSize</key>
         <QSize>
             <key>width</key>
@@ -169,7 +169,7 @@
             <key>trimMargin</key>
             <uint>1</uint>
             <key>trimMode</key>
-            <enum type="SpriteSettings::TrimMode">None</enum>
+            <enum type="SpriteSettings::TrimMode">Trim</enum>
             <key>tracerTolerance</key>
             <int>200</int>
             <key>heuristicMask</key>
@@ -211,7 +211,7 @@
             <key type="filename">custom-art/characters/player/character-9.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
+                <point_f>0.5,1</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -221,10 +221,24 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/fireball.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.692308,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>7,5,13,9</rect>
+                <key>scale9Paddings</key>
+                <rect>7,5,13,9</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
         </map>
         <key>fileList</key>
         <array>
             <filename>custom-art/characters/player</filename>
+            <filename>custom-art/fireball.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

@@ -47,7 +47,7 @@ local dt = 1
 group.updateAll(dt)
 group.drawAll()
 
-component:delete()
+group.delete(component)
 group.updateAll(dt)
 
 assert(#calls.initialProps == 1)

@@ -2,10 +2,11 @@ uniform vec2 sprite_size;
 uniform float outline_width;
 uniform vec4 outline_color;
 
+float pixelSizeX = 1.0 / sprite_size.x;
+float pixelSizeY = 1.0 / sprite_size.y;
+
 vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords )
 {
-  float pixelSizeX = 1.0 / sprite_size.x;
-  float pixelSizeY = 1.0 / sprite_size.y;
   float offsetX = pixelSizeX * outline_width;
   float offsetY = pixelSizeY * outline_width;
   vec4 col = texture2D(texture, texture_coords);
