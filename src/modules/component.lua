@@ -4,12 +4,39 @@ local tc = require 'utils.type-check'
 local uid = require 'utils.uid'
 local inspect = require 'utils.inspect'
 local noop = require 'utils.noop'
+local Q = require 'modules.queue'
+
+local drawQ = Q:new({ development = isDebug})
 
 local errorMsg = {
   getInitialProps = "getInitialProps must return a table"
 }
 
-function M.newGroup()
+-- built-in defaults
+local floor = math.floor
+local baseProps = {
+  x = 0,
+  y = 0,
+  angle = 0,
+
+  zDepth = function(self)
+    local z = floor(self.y)
+    return z < 1 and 1 or z
+  end,
+
+  -- gets called on the next `update` frame
+  init = noop,
+
+  -- these methods will not be called until the component has been initialized
+  update = noop,
+  draw = noop,
+  final = noop
+}
+
+local pprint = require 'utils.pprint'
+function M.newGroup(factoryDefaults)
+  factoryDefaults = factoryDefaults or {}
+
   local C = {}
   local componentsById = {}
   local count = 0
@@ -20,6 +47,13 @@ function M.newGroup()
     initialProps[table] - a key/value hash of properties
   ]]
   function C.createFactory(blueprint)
+    -- call the blueprint with the factory defaults
+    if type(blueprint) == 'function' then
+      return C.createFactory(
+        blueprint(factoryDefaults)
+      )
+    end
+
     tc.validate(blueprint.getInitialProps, tc.FUNCTION)
 
     function blueprint.create(props)
@@ -43,24 +77,10 @@ function M.newGroup()
       return c
     end
 
-    local defaults = {
-      x = 0,
-      y = 0,
-      z = 0,
-      angle = 0,
-
-      -- gets called on the next `update` frame
-      init = noop,
-
-      -- these methods will not be called until the component has been initialized
-      update = noop,
-      draw = noop,
-      final = noop
-    }
     -- default methods
-    for k,v in pairs(defaults) do
+    for k,v in pairs(baseProps) do
       if not blueprint[k] then
-        blueprint[k] = v
+        blueprint[k] = factoryDefaults[k] or v
       end
     end
 
@@ -80,9 +100,10 @@ function M.newGroup()
   function C.drawAll()
     for id,c in pairs(componentsById) do
       if c._initialized then
-        c:draw()
+        drawQ:add(c:zDepth(), c.draw, c)
       end
     end
+    drawQ:flush()
   end
 
   function C.getStats()

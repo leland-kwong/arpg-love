@@ -36,12 +36,12 @@ local pprint = require 'utils.pprint'
 
 function Console.draw()
   love.graphics.print(
-    'count: '..groups.all.getStats(),
-    0,
-    15
+    'components: '..groups.all.getStats(),
+    10,
+    10
   )
 
-  -- pprint(love.graphics.getStats())
+  pprint(love.graphics.getStats())
 end
 
 return groups.all.createFactory(Console)

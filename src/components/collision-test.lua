@@ -118,8 +118,21 @@ local factory = groups.all.createFactory({
     -- world:remove(B)
   end),
 
+  zDepth = function()
+    return 1000
+  end,
+
   draw = function(self)
     local gfx = love.graphics
+
+    local colorA = {0,0.7,1,1}
+    gfx.setColor(colorA)
+    for i=1, #self.obstacles do
+      local rect = self.obstacles[i]
+      rect.draw()
+    end
+    gfx.setColor(1,1,1,1)
+
     local collisionTint = {1,1,0,1}
     local colorB = {1,0.5,1,1}
     if self.B.collided then
@@ -132,20 +145,6 @@ local factory = groups.all.createFactory({
       self.B.y,
       self.B.w,
       self.B.h
-    )
-
-    local colorA = {0,0.7,1,1}
-    gfx.setColor(colorA)
-    for i=1, #self.obstacles do
-      local rect = self.obstacles[i]
-      rect.draw()
-    end
-    gfx.setColor(1,1,1,1)
-
-    gfx.print(
-      'collision perf: '..avgTime,
-      0,
-      0
     )
   end
 })

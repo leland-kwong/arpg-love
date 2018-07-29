@@ -24,7 +24,7 @@ local function colFilter(item, other)
   return 'touch'
 end
 
-local factory = groups.all.createFactory({
+local Fireball = {
   getInitialProps = function(props)
     local dx, dy = direction(props.x, props.y, props.x2, props.y2)
     props.direction = {x = dx, y = dy}
@@ -62,6 +62,7 @@ local factory = groups.all.createFactory({
     local angle = math.atan2( self.direction.y, self.direction.x )
     local scale = config.scaleFactor
     local ox, oy = self.animation.getOffset()
+    love.graphics.setColor(1,1,1,1)
     love.graphics.draw(
         animationFactory.spriteAtlas
       , self.sprite
@@ -83,6 +84,15 @@ local factory = groups.all.createFactory({
   final = function(self)
     colMap:remove(self)
   end
-})
+}
+
+local factory = groups.all.createFactory(function(factoryDefaults)
+  local zDepth = factoryDefaults.zDepth
+  -- increment z depth by 1 more than the default
+  Fireball.zDepth = function(self)
+    return zDepth(self) + 10
+  end
+  return Fireball
+end)
 
 return factory

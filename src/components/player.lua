@@ -30,7 +30,7 @@ end
 
 local skillHandlers = {
   SKILL_1 = (function()
-    local cooldown = 0.1
+    local cooldown = 0.01
     local curCooldown = 0
     local skill = {}
 
@@ -110,6 +110,10 @@ local playerFactory = groups.all.createFactory({
     self.shader:send('outline_width', 1)
     self.shader:send('outline_color', self.outlineColor)
   end,
+
+  -- zDepth = function(self)
+  --   return 700
+  -- end,
 
   update = function(self, dt)
     local moveAmount = speed * dt
