@@ -1,10 +1,13 @@
+local Color = require 'modules.color'
 local M = {}
 
-function M.boundingBox(x, y, w, h)
+-- creates a bounding box centered to point x,y
+function M.boundingBox(mode, x, y, w, h)
+  local ox, oy = -w/2, -h/2
   love.graphics.rectangle(
-    'line',
-    x - w/2,
-    y - h/2,
+    mode,
+    x + ox,
+    y + oy,
     w,
     h
   )
