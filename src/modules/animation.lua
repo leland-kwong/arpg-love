@@ -16,7 +16,7 @@ local function Animation(frameJson, spriteAtlas, paddingOffset, frameRate)
     local firstFrame = frameData[aniFrames[1]]
     local w = firstFrame.sourceSize.w
     local h = firstFrame.sourceSize.h
-    local sprite = love.graphics.newQuad(0, 0, w + pad, h + pad, spriteAtlas:getDimensions())
+    local sprite = love.graphics.newQuad(0, 0, w, h, spriteAtlas:getDimensions())
     local index = 1 -- frame index
     local timePerFrame = 1 / frameRate
     local frame = frameData[aniFrames[index]]
@@ -60,6 +60,14 @@ local function Animation(frameJson, spriteAtlas, paddingOffset, frameRate)
       local ox = (pivot.x * w)
       local oy = (pivot.y * h)
       return ox, oy
+    end
+
+    function animation.getHeight()
+      return frame.sourceSize.h
+    end
+
+    function animation.getWidth()
+      return frame.sourceSize.w
     end
 
     return animation
