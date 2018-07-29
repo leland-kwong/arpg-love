@@ -1,7 +1,7 @@
 local M = {}
 
 M.isDebug = true
-M.collisionDebug = true
+M.collisionDebug = false
 
 M.keyboard = {
   UP = 'w',

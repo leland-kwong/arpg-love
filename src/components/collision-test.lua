@@ -1,4 +1,5 @@
 local groups = require 'components.groups'
+local collisionWorlds = require 'components.collision-worlds'
 local color = require 'modules.color'
 local perf = require 'utils.perf'
 
@@ -16,17 +17,17 @@ local function extract(t, key1, key2, key3, key4, key5, key6)
     t[key6]
 end
 
+local mouseCollisionFilter = function(item, other)
+  return (other.type == 'player') and 'slide' or false
+end
+
 local factory = groups.all.createFactory({
   getInitialProps = function()
     return {}
   end,
 
   init = function(self)
-    local bump = require 'modules.bump'
-
-    -- The grid cell size can be specified via the initialize method
-    -- By default, the cell size is 64
-    local world = bump.newWorld(50)
+    local world = collisionWorlds.map
     self.world = world
 
     local B = {
@@ -46,10 +47,11 @@ local factory = groups.all.createFactory({
     for i=1, 10 do
       local obstacle = {
         name = "obstacle_"..i,
+        type = 'obstacle',
         x = math.random( 0, love.graphics.getWidth() ),
         y = math.random( 0, love.graphics.getHeight() ),
-        w = 20,
-        h = 20,
+        w = math.random(20, 30),
+        h = math.random(20, 30),
       }
       world:add(obstacle, obstacle.x, obstacle.y, obstacle.w, obstacle.h)
       self.obstacles[i] = {
@@ -83,8 +85,7 @@ local factory = groups.all.createFactory({
   })(function(self, dt)
     local posX = love.mouse.getX() - self.B.w/2
     local posY = love.mouse.getY() - self.B.h/2
-    -- Try to move B to 0,64. If it collides with A, "slide over it"
-    local actualX, actualY, cols, len = self.world:move(self.B, posX, posY)
+    local actualX, actualY, cols, len = self.world:move(self.B, posX, posY, mouseCollisionFilter)
     self.B.x = actualX
     self.B.y = actualY
     self.B.collided = false
@@ -96,12 +97,10 @@ local factory = groups.all.createFactory({
     -- prints "Collision with A"
     for i=1,len do -- If more than one simultaneous collision, they are sorted out by proximity
       local col = cols[i]
-      -- pprint(col)
       self[col.item.name].collided = true
 
       local curCol = self.cols[i]
       if curCol then
-        -- pprint(curCol)
       end
       self.cols[i] = col
       -- print(("Collision with %s."):format(col.other.name))

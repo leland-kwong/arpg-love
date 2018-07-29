@@ -12,6 +12,7 @@ local errorMsg = {
 function M.newGroup()
   local C = {}
   local componentsById = {}
+  local count = 0
 
   --[[
     x[NUMBER]
@@ -36,6 +37,7 @@ function M.newGroup()
       local id = uid()
       c._id = id
       componentsById[id] = c
+      count = count + 1
       setmetatable(c, blueprint)
       blueprint.__index = blueprint
       return c
@@ -62,11 +64,6 @@ function M.newGroup()
       end
     end
 
-    function blueprint:delete()
-      componentsById[self._id] = nil
-      self:final()
-    end
-
     return blueprint
   end
 
@@ -86,6 +83,16 @@ function M.newGroup()
         c:draw()
       end
     end
+  end
+
+  function C.getStats()
+    return count
+  end
+
+  function C.delete(component)
+    componentsById[component._id] = nil
+    count = count - 1
+    component:final()
   end
 
   return C

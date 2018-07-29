@@ -1,12 +1,21 @@
 require 'lua_modules.strict'
 require 'modules.test.index'
-require 'modules.console'
+local console = require 'modules.console'
+local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local player = require 'components.player'
 local collisionTest = require 'components.collision-test'
 local groups = require 'components.groups'
 local functional = require 'utils.functional'
+local perf = require 'utils.perf'
 
+local measureFunc = perf({
+  done = function(timeTaken)
+    print(timeTaken)
+  end
+})
+
+console.create()
 player.create()
 collisionTest.create()
 
@@ -17,6 +26,8 @@ end
 function love.update(dt)
   groups.all.updateAll(dt)
 end
+
+-- love.update = measureFunc(love.update)
 
 local inputMsg = require 'utils.pooled-table'(function(t, key, scanCode, isRepeated)
   t.key = key

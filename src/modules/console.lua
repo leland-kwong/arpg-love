@@ -1,3 +1,4 @@
+local groups = require 'components.groups'
 local inputBus = require 'components.msg-bus'.input
 local config = require 'config'
 local modifier = false
@@ -25,4 +26,22 @@ inputBus.subscribe(function(msgType, v)
   end
 end)
 
+local Console = {}
 
+function Console.getInitialProps()
+  return {}
+end
+
+local pprint = require 'utils.pprint'
+
+function Console.draw()
+  love.graphics.print(
+    'count: '..groups.all.getStats(),
+    0,
+    15
+  )
+
+  -- pprint(love.graphics.getStats())
+end
+
+return groups.all.createFactory(Console)
