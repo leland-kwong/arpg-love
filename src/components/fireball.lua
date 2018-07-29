@@ -6,6 +6,10 @@ local gameWorld = require 'components.game-world'
 
 local colMap = collisionWorlds.map
 
+-- DEFAULTS
+local speed = 500
+local scale = config.scaleFactor
+
 -- direction normalization
 local function direction(x1, y1, x2, y2)
   local a = y2 - y1
@@ -28,7 +32,7 @@ local Fireball = {
   getInitialProps = function(props)
     local dx, dy = direction(props.x, props.y, props.x2, props.y2)
     props.direction = {x = dx, y = dy}
-    props.speed = 300
+    props.speed = speed
     return props
   end,
 
@@ -39,7 +43,7 @@ local Fireball = {
     self.sprite = self.animation.next(0)
 
     local w,h = select(3, self.sprite:getViewport())
-    local cw, ch = 15*config.scaleFactor, 15*config.scaleFactor -- collision dimensions
+    local cw, ch = 15*scale, 15*scale -- collision dimensions
     self.w = cw
     self.h = ch
     colMap:add(self, self.x - self.w/2, self.y - self.w/2, cw, ch)
@@ -60,8 +64,21 @@ local Fireball = {
 
   draw = function(self)
     local angle = math.atan2( self.direction.y, self.direction.x )
-    local scale = config.scaleFactor
     local ox, oy = self.animation.getOffset()
+
+    love.graphics.setColor(0,0,0,0.15)
+    love.graphics.draw(
+      animationFactory.spriteAtlas
+      , self.sprite
+      , self.x
+      , self.y + self.h
+      , angle
+      , scale
+      , scale / 2
+      , ox
+      , oy
+    )
+
     love.graphics.setColor(1,1,1,1)
     love.graphics.draw(
         animationFactory.spriteAtlas
@@ -77,7 +94,7 @@ local Fireball = {
 
     if config.collisionDebug then
       local debug = require 'modules.debug'
-      debug.boundingBox('line', self.x, self.y, self.w, self.h)
+      debug.boundingBox('fill', self.x, self.y, self.w, self.h)
     end
   end,
 
@@ -86,11 +103,11 @@ local Fireball = {
   end
 }
 
-local factory = groups.all.createFactory(function(factoryDefaults)
-  local zDepth = factoryDefaults.zDepth
-  -- increment z depth by 1 more than the default
-  Fireball.zDepth = function(self)
-    return zDepth(self) + 10
+local factory = groups.all.createFactory(function(defaults)
+  -- set order a little above default
+  Fireball.drawOrder = function(self)
+    local order = defaults.drawOrder(self) + 5
+    return order
   end
   return Fireball
 end)

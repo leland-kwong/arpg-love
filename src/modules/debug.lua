@@ -30,9 +30,11 @@ local Debug = {
     return {}
   end,
 
+  drawOrder = groups.DRAW_ORDER_COLLISION_DEBUG,
+
   draw = function()
     for i=1, #queue do
-      love.graphics.setColor(0.1 * i,0.1 * i,1,0.5)
+      love.graphics.setColor(1,1,1,0.5)
       queue[i]()
       queue[i] = nil
     end
@@ -41,8 +43,8 @@ local Debug = {
 }
 
 groups.all.createFactory(function(defaults)
-  Debug.zDepth = function(self)
-    return defaults.zDepth(self) + 20
+  Debug.drawOrder = function(self)
+    return defaults.drawOrder(self) + 20
   end
   return Debug
 end).create()

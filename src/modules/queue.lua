@@ -1,4 +1,5 @@
 local perf = require 'utils.perf'
+local typeCheck = require 'utils.type-check'
 
 local Q = {}
 
@@ -7,7 +8,8 @@ function Q:new(options)
   local queue = {
     list = {},
     length = 0,
-    maxOrder = 0,
+    maxOrder = 0, -- highest order that has been added to the queue
+    maxAllowedOrder = 1000, -- default to 1000 since this is where we can still remain performant
     development = options.development
   }
   setmetatable(queue, self)
@@ -17,15 +19,21 @@ end
 
 local itemPool = {}
 local NUMBER = 'number'
-local orderError = 'order must be greater than 0 and an integer'
-local max = math.max
+local orderError = function(order)
+  local valid = type(order) == NUMBER
+    and order > 0
+    and order % 1 == 0 -- must be integer
+  if valid then return true end
+  return false, 'order must be greater than 0 and an integer, received `'..tostring(order)..'`'
+end
+local max, min = math.max, math.min
 -- insert callback
 function Q:add(order, cb, a, b)
+  order = min(order, self.maxAllowedOrder)
+
   if self.development then
-    assert(
-      type(order) == NUMBER
-        and order > 0
-        and order % 1 == 0, -- must be integer
+    typeCheck.validate(
+      order,
       orderError
     )
   end
@@ -50,6 +58,7 @@ function Q:add(order, cb, a, b)
   list[#list + 1] = item
   self.length = self.length + 1
   self.maxOrder = max(self.maxOrder, order)
+  return self
 end
 
 -- iterate callbacks by `order` and clears the queue
@@ -68,6 +77,12 @@ function Q:flush()
   end
   self.length = 0
   self.maxOrder = 0
+  return self
+end
+
+function Q:setMaxOrder(order)
+  self.maxAllowedOrder = order
+  return self
 end
 
 return Q

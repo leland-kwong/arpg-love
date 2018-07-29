@@ -5,7 +5,7 @@ local animationFactory = require 'components.animation-factory'
 local collisionWorlds = require 'components.collision-worlds'
 
 local colMap = collisionWorlds.map
-
+local scale = config.scaleFactor
 local keyMap = config.keyboard
 local mouseInputMap = config.mouseInputMap
 
@@ -30,7 +30,7 @@ end
 
 local skillHandlers = {
   SKILL_1 = (function()
-    local cooldown = 0.01
+    local cooldown = 0.1
     local curCooldown = 0
     local skill = {}
 
@@ -39,11 +39,10 @@ local skillHandlers = {
         return skill
       else
         local fireball = require 'components.fireball'
-        local col = self.collisionObj
         fireball.create({
             debug = false
-          , x = col.x
-          , y = col.y
+          , x = self.x
+          , y = self.y
           , x2 = love.mouse.getX()
           , y2 = love.mouse.getY()
         })
@@ -61,30 +60,21 @@ local skillHandlers = {
   end)()
 }
 
-local playerFactory = groups.all.createFactory({
+local Player = {
   getInitialProps = function()
     return {
       x = startPos.x,
       y = startPos.y,
+
+      -- collision properties
+      type = 'player',
+      h = 1,
+      w = 1
     }
   end,
 
   init = function(self)
-    self.collisionObj = {
-      name = 'PLAYER',
-      type = 'player',
-      x = 0,
-      y = 0,
-      w = 1,
-      h = 1
-    }
-    colMap:add(
-      self.collisionObj,
-      self.collisionObj.x,
-      self.collisionObj.y,
-      self.collisionObj.w,
-      self.collisionObj.h
-    )
+    colMap:add(self, self.x, self.y, self.w, self.h)
 
     self.animations = {
       idle = animationFactory.create({
@@ -106,12 +96,12 @@ local playerFactory = groups.all.createFactory({
     self.outlineColor = {1,1,1,1}
     self.shader = love.graphics.newShader(pixelOutlineShader)
     local spriteData = animationFactory.spriteData
-    self.shader:send('sprite_size', {spriteData.meta.size.w, spriteData.meta.size.h})
-    self.shader:send('outline_width', 1)
+    self.shader:send('sprite_size', {spriteData.meta.size.w * scale, spriteData.meta.size.h * scale})
+    self.shader:send('outline_width', 1 * scale)
     self.shader:send('outline_color', self.outlineColor)
   end,
 
-  -- zDepth = function(self)
+  -- drawOrder = function(self)
   --   return 700
   -- end,
 
@@ -120,6 +110,7 @@ local playerFactory = groups.all.createFactory({
     local moving = false
     local origx, origy = self.x, self.y
 
+    -- MOVEMENT
     if love.keyboard.isDown(keyMap.RIGHT) then
       self.x = self.x + moveAmount
       moving = true
@@ -142,6 +133,7 @@ local playerFactory = groups.all.createFactory({
       moving = true
     end
 
+    -- ANIMATION STATES
     if moving then
       local a = self.animations.run
       self.animation = a
@@ -158,59 +150,79 @@ local playerFactory = groups.all.createFactory({
     end
     skillHandlers.SKILL_1.updateCooldown(dt)
 
+    -- dynamically get the current animation frame's height
     local sw,sh = self.animation.getWidth(), self.animation.getHeight()
-    local scale = config.scaleFactor
     local w,h = sw*scale, sh*scale
     -- true center taking into account pivot
     local nextx, nexty = self.x, self.y
     local oX, oY = -w/2, -h/2
     local col = self.collisionObj
 
+    -- COLLISION UPDATES
     colMap:update(
-      self.collisionObj,
+      self,
       -- use current coordinates because we only want to update size
       origx + oX,
       origy + oY,
       w,
       h
     )
-    col.w = w
-    col.h = h
 
-    local actualX, actualY = colMap:move(col, nextx + oX, nexty + oY, collisionFilter)
+    local actualX, actualY = colMap:move(self, nextx + oX, nexty + oY, collisionFilter)
     self.x = actualX - oX
     self.y = actualY - oY
-    col.x = self.x
-    col.y = self.y
-  end,
-
-  draw = function(self)
-    local ox, oy = self.animation.getOffset()
-    local scale = config.scaleFactor
-    local aniDir = flipAnimation and -1 or 1
-
-    love.graphics.setShader(self.shader)
-    love.graphics.draw(
-      animationFactory.spriteAtlas,
-      self.sprite,
-      self.x,
-      self.y,
-      math.rad(self.angle),
-      scale * aniDir,
-      scale,
-      ox,
-      oy - self.animation.getHeight()/2
-    )
-
-    love.graphics.setShader()
-
-    if config.collisionDebug then
-      love.graphics.setColor(1,1,1,0.5)
-      local debug = require 'modules.debug'
-      local col = self.collisionObj
-      debug.boundingBox('fill', self.x, self.y, col.w, col.h)
-    end
+    self.h = h
+    self.w = w
   end
-})
+}
+
+local function drawShadow(self, ox, oy, scaleX, scaleY)
+  -- SHADOW
+  love.graphics.setColor(0,0,0,0.2)
+  love.graphics.draw(
+    animationFactory.spriteAtlas,
+    self.sprite,
+    self.x,
+    self.y + self.h / 2,
+    math.rad(self.angle),
+    scaleX,
+    -(scaleY / 2),
+    ox,
+    oy - self.animation.getHeight()/2
+  )
+end
+
+local function drawDebug(self)
+  if config.collisionDebug then
+    love.graphics.setColor(1,1,1,0.5)
+    local debug = require 'modules.debug'
+    debug.boundingBox('fill', self.x, self.y, self.w, self.h)
+  end
+end
+
+function Player.draw(self)
+  local ox, oy = self.animation.getOffset()
+  local aniDir = flipAnimation and -1 or 1
+  local scaleX, scaleY = scale * aniDir, scale
+
+  drawShadow(self, ox, oy, scaleX, scaleY)
+  drawDebug(self)
+
+  love.graphics.setShader(self.shader)
+  love.graphics.draw(
+    animationFactory.spriteAtlas,
+    self.sprite,
+    self.x,
+    self.y,
+    math.rad(self.angle),
+    scaleX,
+    scaleY,
+    ox,
+    oy - self.animation.getHeight()/2
+  )
+  love.graphics.setShader()
+end
+
+local playerFactory = groups.all.createFactory(Player)
 
 return playerFactory

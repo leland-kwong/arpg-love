@@ -16,6 +16,8 @@ M.mouseInputMap = {
   SKILL_2 = 2
 }
 
-M.scaleFactor = 3
+local w,h = 640, 360
+M.scaleFactor = 2
+love.window.setMode(w * M.scaleFactor, h * M.scaleFactor)
 
 return M

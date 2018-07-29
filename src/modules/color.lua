@@ -1,6 +1,7 @@
 local Color = {
   SKY_BLUE = {0.8,1,1,1},
   WHITE = {1,1,1,1},
+  MED_GRAY = {0.7,0.7,0.7,1},
 
   multiply = function(a, b)
     return {

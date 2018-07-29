@@ -21,7 +21,7 @@ local mouseCollisionFilter = function(item, other)
   return (other.type == 'player') and 'slide' or false
 end
 
-local factory = groups.all.createFactory({
+local CollisionTest = {
   getInitialProps = function()
     return {}
   end,
@@ -118,10 +118,6 @@ local factory = groups.all.createFactory({
     -- world:remove(B)
   end),
 
-  zDepth = function()
-    return 1000
-  end,
-
   draw = function(self)
     local gfx = love.graphics
 
@@ -147,6 +143,6 @@ local factory = groups.all.createFactory({
       self.B.h
     )
   end
-})
+}
 
-return factory
+return groups.all.createFactory(CollisionTest)

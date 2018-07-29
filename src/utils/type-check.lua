@@ -25,14 +25,15 @@ function M.validate(value, validType, required)
 
 	local receivedType = type(value)
 	local assertion = receivedType == validType
+	local errorMessage = nil
 
 	-- evaluate valid type as a function
 	if type(validType) == M.FUNCTION then
 		assertion, errorMessage = validType(value)
-		if errorMessage == nil then
-			error("type validator should return both an assertion value and error message as a `string`")
-		end
 		if not assertion then
+			if errorMessage == nil then
+				error("type validator should return both an assertion value and error message as a `string`")
+			end
 			error(errorMessage)
 		end
 	end

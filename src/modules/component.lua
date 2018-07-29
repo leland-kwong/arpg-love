@@ -1,4 +1,3 @@
-local M = {}
 local isDebug = require 'config'.isDebug
 local tc = require 'utils.type-check'
 local uid = require 'utils.uid'
@@ -6,11 +5,16 @@ local inspect = require 'utils.inspect'
 local noop = require 'utils.noop'
 local Q = require 'modules.queue'
 
-local drawQ = Q:new({ development = isDebug})
+local M = {}
 
+local drawQ = Q:new({development = isDebug})
 local errorMsg = {
   getInitialProps = "getInitialProps must return a table"
 }
+
+function M.setMaxOrder(v)
+  drawQ:setMaxOrder(v)
+end
 
 -- built-in defaults
 local floor = math.floor
@@ -19,9 +23,9 @@ local baseProps = {
   y = 0,
   angle = 0,
 
-  zDepth = function(self)
-    local z = floor(self.y)
-    return z < 1 and 1 or z
+  drawOrder = function(self)
+    local o = floor(self.y)
+    return o < 1 and 1 or o
   end,
 
   -- gets called on the next `update` frame
@@ -100,7 +104,7 @@ function M.newGroup(factoryDefaults)
   function C.drawAll()
     for id,c in pairs(componentsById) do
       if c._initialized then
-        drawQ:add(c:zDepth(), c.draw, c)
+        drawQ:add(c:drawOrder(), c.draw, c)
       end
     end
     drawQ:flush()
