@@ -41,7 +41,7 @@ local FloorTile = {
   end,
 
   update = function(self, dt)
-    self.sprite = self.animation.next(dt)
+    self.sprite = self.animation:next(dt)
   end,
 
   draw = function(self)
@@ -143,7 +143,7 @@ local CollisionTest = {
         end),
 
         advanceFrame = function(dt)
-          sprite = tileAnimation.next(dt)
+          sprite = tileAnimation:next(dt)
         end
       }
       i = i + 1

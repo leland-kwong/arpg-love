@@ -143,11 +143,11 @@ local Player = {
     if moving then
       local a = self.animations.run
       self.animation = a
-      self.sprite = a.next(dt / 3)
+      self.sprite = a:next(dt / 3)
     else
       local a = self.animations.idle
       self.animation = a
-      self.sprite = a.next(dt / 12)
+      self.sprite = a:next(dt / 12)
     end
 
     -- SKILL_1
@@ -157,7 +157,7 @@ local Player = {
     skillHandlers.SKILL_1.updateCooldown(dt)
 
     -- dynamically get the current animation frame's height
-    local sw,sh = self.animation.getWidth(), self.animation.getHeight()
+    local sw,sh = self.animation:getWidth(), self.animation:getHeight()
     local w,h = sw, sh
     -- true center taking into account pivot
     local nextx, nexty = self.x, self.y
@@ -194,7 +194,7 @@ local function drawShadow(self, ox, oy, sx, sy)
     sx,
     -sy / 2,
     ox,
-    oy - self.animation.getHeight()/2
+    oy - self.animation:getHeight()/2
   )
 end
 
@@ -207,7 +207,7 @@ local function drawDebug(self)
 end
 
 function Player.draw(self)
-  local ox, oy = self.animation.getOffset()
+  local ox, oy = self.animation:getOffset()
   local scaleX, scaleY = 1 * self.dir, 1
 
   drawShadow(self, ox, oy, scaleX, scaleY)
@@ -223,7 +223,7 @@ function Player.draw(self)
     scaleX,
     scaleY,
     ox,
-    oy - self.animation.getHeight()/2
+    oy - self.animation:getHeight()/2
   )
   love.graphics.setShader()
 end
