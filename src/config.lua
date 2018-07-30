@@ -16,6 +16,7 @@ M.mouseInputMap = {
   SKILL_2 = 2
 }
 
+M.gridSize = 16
 M.scaleFactor = 2
 M.resolution = {
   w = 640,

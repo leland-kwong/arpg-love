@@ -6,6 +6,7 @@ local perf = require 'utils.perf'
 local camera = require 'components.camera'
 local Map = require 'modules.map-generator.index'
 local iterateGrid = require 'utils.iterate-grid'
+local config = require 'config'
 
 local map = Map.createAdjacentRooms(4, 15)
 local time = 0
@@ -18,6 +19,12 @@ local mouseCollisionFilter = function(item, other)
 end
 
 local floorTileTypes = {
+  'floor',
+  'floor',
+  'floor',
+  'floor',
+  'floor',
+  'floor',
   'floor',
   'floor-1',
   'floor-2'
@@ -93,7 +100,7 @@ local CollisionTest = {
     }
 
     iterateGrid(map.grid, function(v, x, y)
-      local gridSize = 16
+      local gridSize = config.gridSize
       local tileX, tileY = x * gridSize, y * gridSize
       if walkable == v then
         return FloorTileFactory.create({
