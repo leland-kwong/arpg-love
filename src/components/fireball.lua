@@ -35,9 +35,8 @@ local Fireball = {
     self.animation = animationFactory.create({
       'fireball'
     })
-    self.sprite = self.animation:next(0)
 
-    local w,h = select(3, self.sprite:getViewport())
+    local w,h = select(3, self.animation.sprite:getViewport())
     local cw, ch = 15*scale, 15*scale -- collision dimensions
     self.w = cw
     self.h = ch
@@ -51,7 +50,7 @@ local Fireball = {
     local dy = self.direction.y * dt * self.speed
     self.x = self.x + dx
     self.y = self.y + dy
-    self.sprite = self.animation:next(dt)
+    self.animation:update(dt)
     local cols, len = select(3, colMap:move(self, self.x - self.w/2, self.y - self.h/2, colFilter))
     -- local len = 0
     if len > 0 or self.maxLifeTime <= 0 then
@@ -66,7 +65,7 @@ local Fireball = {
     love.graphics.setColor(0,0,0,0.15)
     love.graphics.draw(
       animationFactory.spriteAtlas
-      , self.sprite
+      , self.animation.sprite
       , self.x
       , self.y + self.h
       , angle
@@ -79,7 +78,7 @@ local Fireball = {
     love.graphics.setColor(1,1,1,1)
     love.graphics.draw(
         animationFactory.spriteAtlas
-      , self.sprite
+      , self.animation.sprite
       , self.x
       , self.y
       , angle

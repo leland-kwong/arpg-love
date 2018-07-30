@@ -141,13 +141,11 @@ local Player = {
 
     -- ANIMATION STATES
     if moving then
-      local a = self.animations.run
-      self.animation = a
-      self.sprite = a:next(dt / 2)
+      self.animation = self.animations.run
+        :update(dt/2)
     else
-      local a = self.animations.idle
-      self.animation = a
-      self.sprite = a:next(dt / 12)
+      self.animation = self.animations.idle
+        :update(dt/12)
     end
 
     -- SKILL_1
@@ -187,7 +185,7 @@ local function drawShadow(self, ox, oy, sx, sy)
   love.graphics.setColor(0,0,0,0.2)
   love.graphics.draw(
     animationFactory.spriteAtlas,
-    self.sprite,
+    self.animation.sprite,
     self.x,
     self.y + self.h / 2,
     math.rad(self.angle),
@@ -216,7 +214,7 @@ function Player.draw(self)
   love.graphics.setShader(self.shader)
   love.graphics.draw(
     animationFactory.spriteAtlas,
-    self.sprite,
+    self.animation.sprite,
     self.x,
     self.y,
     math.rad(self.angle),

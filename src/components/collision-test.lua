@@ -41,7 +41,7 @@ local FloorTile = {
   end,
 
   update = function(self, dt)
-    self.sprite = self.animation:next(dt)
+    self.animation:update(dt)
   end,
 
   draw = function(self)
@@ -49,7 +49,7 @@ local FloorTile = {
     gfx.setColor(1,1,1,1)
     gfx.draw(
       animationFactory.spriteAtlas,
-      self.sprite,
+      self.animation.sprite,
       self.x,
       self.y,
       0,
@@ -120,7 +120,6 @@ local CollisionTest = {
       local tileAnimation = animationFactory.create({
         wallTileTypes[math.random(1,3)]
       })
-      local sprite
       self.obstacles[i] = {
         draw = coroutine.wrap(function()
           local gfx = love.graphics
@@ -129,7 +128,7 @@ local CollisionTest = {
             gfx.setColor(1,1,1,1)
             gfx.draw(
               animationFactory.spriteAtlas,
-              sprite,
+              tileAnimation.sprite,
               o.x,
               o.y,
               0,
@@ -143,7 +142,7 @@ local CollisionTest = {
         end),
 
         advanceFrame = function(dt)
-          sprite = tileAnimation:next(dt)
+          tileAnimation:update(dt)
         end
       }
       i = i + 1
@@ -167,12 +166,9 @@ local CollisionTest = {
     self.B.y = actualY
     self.B.collided = false
 
-    -- prints the new coordinates of B: 0, -32, 32, 32
-    -- print(self.world:getRect(self.B))
-
+    -- set collision states
     self.cols = self.cols or {}
-    -- prints "Collision with A"
-    for i=1,len do -- If more than one simultaneous collision, they are sorted out by proximity
+    for i=1,len do
       local col = cols[i]
       self[col.item.name].collided = true
 
@@ -180,7 +176,6 @@ local CollisionTest = {
       if curCol then
       end
       self.cols[i] = col
-      -- print(("Collision with %s."):format(col.other.name))
     end
 
     local collisionStateChanged = self.previouslyCollided ~= self.B.collided

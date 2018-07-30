@@ -35,7 +35,7 @@ local function Animation(frameJson, spriteAtlas, paddingOffset, frameRate)
   end
 
   -- increments the animation by the time amount
-  function meta:next(dt)
+  function meta:update(dt)
     if self.maxFrames > 1 then
       -- whether we should move forward or backward in the animation
       local direction = dt > 0 and 1 or -1
@@ -61,7 +61,7 @@ local function Animation(frameJson, spriteAtlas, paddingOffset, frameRate)
       self.frame.spriteSourceSize.h + pad
     )
     self.time = self.time + dt
-    return self.sprite
+    return self
   end
 
   local function createAnimation(aniFrames)

@@ -21,6 +21,7 @@ local Camera = function()
     return self
   end
 
+  -- returns bounds in screen pixels
   function camera:getBounds()
     local minX = (self.x * self.scale) - self.w/2
     local maxX = (self.x * self.scale) + self.w/2
