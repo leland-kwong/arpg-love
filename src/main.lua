@@ -3,11 +3,12 @@ require 'modules.test.index'
 local console = require 'modules.console'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
-local player = require 'components.player'
+local Player = require 'components.player'
 local collisionTest = require 'components.collision-test'
 local groups = require 'components.groups'
 local functional = require 'utils.functional'
 local perf = require 'utils.perf'
+local camera = require 'components.camera'
 
 local measureFunc = perf({
   done = function(timeTaken)
@@ -16,7 +17,7 @@ local measureFunc = perf({
 })
 
 console.create()
-player.create()
+local player = Player.create()
 collisionTest.create()
 
 function love.load()
@@ -24,6 +25,11 @@ function love.load()
 end
 
 function love.update(dt)
+  -- update the player first to make sure camera info is up to date
+  -- before updating all other things
+  groups.player.updateAll(dt)
+  camera:setPosition(player.x, player.y)
+
   groups.all.updateAll(dt)
 end
 
@@ -51,7 +57,10 @@ function love.keyreleased(key, scanCode)
 end
 
 function love.draw()
+  camera:attach()
   -- background
   love.graphics.clear(0.2,0.2,0.2)
+  groups.player.drawAll()
   groups.all.drawAll()
+  camera:detach()
 end

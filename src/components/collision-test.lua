@@ -2,6 +2,7 @@ local groups = require 'components.groups'
 local collisionWorlds = require 'components.collision-worlds'
 local color = require 'modules.color'
 local perf = require 'utils.perf'
+local camera = require 'components.camera'
 
 local time = 0
 local updateCount = 0
@@ -30,11 +31,12 @@ local CollisionTest = {
     local world = collisionWorlds.map
     self.world = world
 
+    local mx, my = camera:getMousePosition()
     local B = {
       name = "B",
       collided = false,
-      x = love.mouse.getX(),
-      y = love.mouse.getY(),
+      x = mx,
+      y = my,
       w = 16,
       h = 16
     }
@@ -83,8 +85,9 @@ local CollisionTest = {
       avgTime = time / updateCount
     end
   })(function(self, dt)
-    local posX = love.mouse.getX() - self.B.w/2
-    local posY = love.mouse.getY() - self.B.h/2
+    local mx, my = camera:getMousePosition()
+    local posX = mx - self.B.w/2
+    local posY = my - self.B.h/2
     local actualX, actualY, cols, len = self.world:move(self.B, posX, posY, mouseCollisionFilter)
     self.B.x = actualX
     self.B.y = actualY

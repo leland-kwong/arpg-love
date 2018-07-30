@@ -3,6 +3,7 @@ local groups = require 'components.groups'
 local config = require 'config'
 local animationFactory = require 'components.animation-factory'
 local collisionWorlds = require 'components.collision-worlds'
+local camera = require 'components.camera'
 
 local colMap = collisionWorlds.map
 local scale = config.scaleFactor
@@ -39,12 +40,13 @@ local skillHandlers = {
         return skill
       else
         local fireball = require 'components.fireball'
+        local mx, my = camera:getMousePosition()
         fireball.create({
             debug = false
           , x = self.x
           , y = self.y
-          , x2 = love.mouse.getX()
-          , y2 = love.mouse.getY()
+          , x2 = mx
+          , y2 = my
         })
         curCooldown = cooldown
         return skill
@@ -223,6 +225,6 @@ function Player.draw(self)
   love.graphics.setShader()
 end
 
-local playerFactory = groups.all.createFactory(Player)
+local playerFactory = groups.player.createFactory(Player)
 
 return playerFactory
