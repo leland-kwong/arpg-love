@@ -3,6 +3,7 @@ local groups = require 'components.groups'
 local animationFactory = require 'components.animation-factory'
 local collisionWorlds = require 'components.collision-worlds'
 local gameWorld = require 'components.game-world'
+local Position = require 'utils.position'
 
 local colMap = collisionWorlds.map
 
@@ -10,14 +11,6 @@ local colMap = collisionWorlds.map
 local speed = 500
 local scale = 1
 local maxLifeTime = 2
-
--- direction normalization
-local function direction(x1, y1, x2, y2)
-  local a = y2 - y1
-  local b = x2 - x1
-  local c = math.sqrt(math.pow(a, 2) + math.pow(b, 2))
-  return b/c, a/c
-end
 
 local filters = {
   obstacle = true,
@@ -31,7 +24,7 @@ end
 
 local Fireball = {
   getInitialProps = function(props)
-    local dx, dy = direction(props.x, props.y, props.x2, props.y2)
+    local dx, dy = Position.getDirection(props.x, props.y, props.x2, props.y2)
     props.direction = {x = dx, y = dy}
     props.speed = speed
     props.maxLifeTime = maxLifeTime

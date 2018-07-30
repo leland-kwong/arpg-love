@@ -4,6 +4,7 @@ local config = require 'config'
 local animationFactory = require 'components.animation-factory'
 local collisionWorlds = require 'components.collision-worlds'
 local camera = require 'components.camera'
+local Position = require 'utils.position'
 
 local colMap = collisionWorlds.map
 local keyMap = config.keyboard
@@ -19,7 +20,8 @@ local frameRate = 60
 local speed = 5 * frameRate -- per frame
 
 local activeAnimation
-local flipAnimation = false
+local DIRECTION_RIGHT = 1
+local DIRECTION_LEFT = -1
 
 local function collisionFilter(item, other)
   if other.type ~= 'obstacle' then
@@ -75,6 +77,7 @@ local Player = {
   end,
 
   init = function(self)
+    self.dir = DIRECTION_RIGHT
     colMap:add(self, self.x, self.y, self.w, self.h)
 
     self.animations = {
@@ -111,17 +114,19 @@ local Player = {
     local moving = false
     local origx, origy = self.x, self.y
 
+    local mx, my = camera:getMousePosition()
+    local dx = Position.getDirection(self.x, self.y, mx, my)
+    self.dir = dx > 0 and DIRECTION_RIGHT or DIRECTION_LEFT
+
     -- MOVEMENT
     if love.keyboard.isDown(keyMap.RIGHT) then
       self.x = self.x + moveAmount
       moving = true
-      flipAnimation = false
     end
 
     if love.keyboard.isDown(keyMap.LEFT) then
       self.x = self.x - moveAmount
       moving = true
-      flipAnimation = true
     end
 
     if love.keyboard.isDown(keyMap.UP) then
@@ -203,8 +208,7 @@ end
 
 function Player.draw(self)
   local ox, oy = self.animation.getOffset()
-  local aniDir = flipAnimation and -1 or 1
-  local scaleX, scaleY = 1 * aniDir, 1
+  local scaleX, scaleY = 1 * self.dir, 1
 
   drawShadow(self, ox, oy, scaleX, scaleY)
   drawDebug(self)
