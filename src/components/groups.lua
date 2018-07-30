@@ -17,14 +17,6 @@ local Groups = {
     end,
   }),
 
-  player = Component.newGroup({
-    -- automatic draw-ordering based on y position
-    drawOrder = function(self)
-      local order = floor(self.y / gridSize)
-      return max(1, order)
-    end,
-  }),
-
   gui = Component.newGroup({
     -- automatic draw-ordering based on y position
     drawOrder = function(self)

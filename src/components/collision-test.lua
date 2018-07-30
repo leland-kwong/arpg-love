@@ -1,3 +1,4 @@
+local animationFactory = require 'components.animation-factory'
 local groups = require 'components.groups'
 local collisionWorlds = require 'components.collision-worlds'
 local color = require 'modules.color'
@@ -16,9 +17,51 @@ local mouseCollisionFilter = function(item, other)
   -- return (other.type == 'player') and 'slide' or false
 end
 
+local floorTileTypes = {
+  'floor',
+  'floor-1',
+  'floor-2'
+}
+local FloorTile = {
+  init = function(self)
+    self.animation = animationFactory.create({
+      floorTileTypes[math.random(1, #floorTileTypes)]
+    })
+  end,
+
+  drawOrder = function()
+    return 1
+  end,
+
+  update = function(self, dt)
+    self.sprite = self.animation.next(dt)
+  end,
+
+  draw = function(self)
+    local gfx = love.graphics
+    gfx.setColor(1,1,1,1)
+    gfx.draw(
+      animationFactory.spriteAtlas,
+      self.sprite,
+      self.x,
+      self.y,
+      0,
+      1,
+      1,
+      0,
+      12
+    )
+  end
+}
+local FloorTileFactory = groups.all.createFactory(FloorTile)
+
 local CollisionTest = {
   getInitialProps = function()
     return {}
+  end,
+
+  drawOrder = function()
+    return 2
   end,
 
   init = function(self)
@@ -43,38 +86,58 @@ local CollisionTest = {
     local walkable = 1
     local unwalkable = 0
     local i = 1
+    local wallTileTypes = {
+      'wall',
+      'wall-2',
+      'wall-3'
+    }
+
     iterateGrid(map.grid, function(v, x, y)
-      if unwalkable ~= v then
-        return
-      end
       local gridSize = 16
+      local tileX, tileY = x * gridSize, y * gridSize
+      if walkable == v then
+        return FloorTileFactory.create({
+          x = tileX,
+          y = tileY
+        })
+      end
       local obstacle = {
         name = "obstacle_"..i,
         type = 'obstacle',
-        x = x * gridSize,
-        y = y * gridSize,
+        x = tileX,
+        y = tileY,
         w = gridSize,
         h = gridSize,
       }
       world:add(obstacle, obstacle.x, obstacle.y, obstacle.w, obstacle.h)
+      local tileAnimation = animationFactory.create({
+        wallTileTypes[math.random(1,3)]
+      })
+      local sprite
       self.obstacles[i] = {
         draw = coroutine.wrap(function()
           local gfx = love.graphics
           local o = obstacle
-          local mode = 'fill'
-          local color1 = {0,0.7,1,1}
           while true do
-            gfx.setColor(color1)
-            gfx.rectangle(
-              mode,
+            gfx.setColor(1,1,1,1)
+            gfx.draw(
+              animationFactory.spriteAtlas,
+              sprite,
               o.x,
               o.y,
-              o.w,
-              o.h
+              0,
+              1,
+              1,
+              0,
+              12
             )
             coroutine.yield()
           end
-        end)
+        end),
+
+        advanceFrame = function(dt)
+          sprite = tileAnimation.next(dt)
+        end
       }
       i = i + 1
     end)
@@ -118,9 +181,11 @@ local CollisionTest = {
       updateCount = 0
     end
     self.previouslyCollided = self.B.collided
-    -- remove A and B from the world
-    -- world:remove(A)
-    -- world:remove(B)
+
+    for i=1, #self.obstacles do
+      local rect = self.obstacles[i]
+      rect.advanceFrame(dt)
+    end
   end),
 
   draw = function(self)
@@ -140,10 +205,12 @@ local CollisionTest = {
       colorB = color.multiply(colorB, collisionTint)
     end
     gfx.setColor(colorB)
+    local mx, my = camera:getMousePosition()
     gfx.rectangle(
       'fill',
-      self.B.x,
-      self.B.y,
+      -- recenter
+      mx - self.B.w/2,
+      my - self.B.h/2,
       self.B.w,
       self.B.h
     )

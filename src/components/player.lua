@@ -228,6 +228,6 @@ function Player.draw(self)
   love.graphics.setShader()
 end
 
-local playerFactory = groups.player.createFactory(Player)
+local playerFactory = groups.all.createFactory(Player)
 
 return playerFactory

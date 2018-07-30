@@ -70,7 +70,7 @@
             </struct>
         </struct>
         <key>shapePadding</key>
-        <uint>4</uint>
+        <uint>3</uint>
         <key>jpgQuality</key>
         <uint>80</uint>
         <key>pngOptimizationLevel</key>
@@ -84,7 +84,7 @@
         <key>textureFormat</key>
         <enum type="SettingsBase::TextureFormat">png</enum>
         <key>borderPadding</key>
-        <uint>0</uint>
+        <uint>3</uint>
         <key>maxTextureSize</key>
         <QSize>
             <key>width</key>
@@ -234,11 +234,43 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/floor/floor-1.png</key>
+            <key type="filename">custom-art/floor/floor-2.png</key>
+            <key type="filename">custom-art/floor/floor.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.666667</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9Paddings</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/wall-2.png</key>
+            <key type="filename">custom-art/tiles/wall-3.png</key>
+            <key type="filename">custom-art/tiles/wall.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.666667</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,8,8,15</rect>
+                <key>scale9Paddings</key>
+                <rect>4,8,8,15</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
         </map>
         <key>fileList</key>
         <array>
             <filename>custom-art/characters/player</filename>
             <filename>custom-art/fireball.png</filename>
+            <filename>custom-art/tiles</filename>
+            <filename>custom-art/floor</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

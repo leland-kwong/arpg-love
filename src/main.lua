@@ -27,16 +27,23 @@ function love.load()
 end
 
 function love.update(dt)
-  -- update the player first to make sure camera info is up to date
-  -- before updating all other things
-  groups.player.updateAll(dt)
-  camera:setPosition(player.x, player.y)
-
   groups.all.updateAll(dt)
+  camera:setPosition(player.x, player.y)
   groups.gui.updateAll(dt)
 end
 
--- love.update = measureFunc(love.update)
+-- BENCHMARKING
+-- local perf = require 'utils.perf'
+-- local TestFactory = groups.all.createFactory({})
+-- local bench = perf({
+--   done = function(t)
+--     print('update', t)
+--   end
+-- })(function()
+--   for i=1, 100 do
+--     TestFactory.create({})
+--   end
+-- end)
 
 local inputMsg = require 'utils.pooled-table'(function(t, key, scanCode, isRepeated)
   t.key = key
@@ -63,7 +70,6 @@ function love.draw()
   camera:attach()
   -- background
   love.graphics.clear(0.2,0.2,0.2)
-  groups.player.drawAll()
   groups.all.drawAll()
   camera:detach()
   groups.gui.drawAll()
