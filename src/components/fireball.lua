@@ -9,6 +9,7 @@ local colMap = collisionWorlds.map
 -- DEFAULTS
 local speed = 500
 local scale = config.scaleFactor
+local maxLifeTime = 2
 
 -- direction normalization
 local function direction(x1, y1, x2, y2)
@@ -33,6 +34,7 @@ local Fireball = {
     local dx, dy = direction(props.x, props.y, props.x2, props.y2)
     props.direction = {x = dx, y = dy}
     props.speed = speed
+    props.maxLifeTime = maxLifeTime
     return props
   end,
 
@@ -50,6 +52,8 @@ local Fireball = {
   end,
 
   update = function(self, dt)
+    self.maxLifeTime = self.maxLifeTime - dt
+
     local dx = self.direction.x * dt * self.speed
     local dy = self.direction.y * dt * self.speed
     self.x = self.x + dx
@@ -57,7 +61,7 @@ local Fireball = {
     self.sprite = self.animation.next(dt)
     local cols, len = select(3, colMap:move(self, self.x - self.w/2, self.y - self.h/2, colFilter))
     -- local len = 0
-    if len > 0 or gameWorld.isOutOfScreen(self.x, self.y) then
+    if len > 0 or self.maxLifeTime <= 0 then
       groups.all.delete(self)
     end
   end,
@@ -106,7 +110,7 @@ local Fireball = {
 local factory = groups.all.createFactory(function(defaults)
   -- set order a little above default
   Fireball.drawOrder = function(self)
-    local order = defaults.drawOrder(self) + 5
+    local order = defaults.drawOrder(self) + 1
     return order
   end
   return Fireball

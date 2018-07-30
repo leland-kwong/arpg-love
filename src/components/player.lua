@@ -31,7 +31,7 @@ end
 
 local skillHandlers = {
   SKILL_1 = (function()
-    local cooldown = 0.1
+    local cooldown = 0.05
     local curCooldown = 0
     local skill = {}
 

@@ -25,6 +25,14 @@ local Groups = {
     end,
   }),
 
+  gui = Component.newGroup({
+    -- automatic draw-ordering based on y position
+    drawOrder = function(self)
+      local order = floor(self.y / gridSize)
+      return max(1, order)
+    end,
+  }),
+
   DRAW_ORDER_CONSOLE = function() return maxDrawOrder end,
   DRAW_ORDER_COLLISION_DEBUG = function() return maxDrawOrder - 1 end,
 }

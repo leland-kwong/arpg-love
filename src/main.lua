@@ -10,12 +10,6 @@ local functional = require 'utils.functional'
 local perf = require 'utils.perf'
 local camera = require 'components.camera'
 
-local measureFunc = perf({
-  done = function(timeTaken)
-    print(timeTaken)
-  end
-})
-
 console.create()
 local player = Player.create()
 collisionTest.create()
@@ -31,6 +25,7 @@ function love.update(dt)
   camera:setPosition(player.x, player.y)
 
   groups.all.updateAll(dt)
+  groups.gui.updateAll(dt)
 end
 
 -- love.update = measureFunc(love.update)
@@ -63,4 +58,5 @@ function love.draw()
   groups.player.drawAll()
   groups.all.drawAll()
   camera:detach()
+  groups.gui.drawAll()
 end

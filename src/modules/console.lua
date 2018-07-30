@@ -73,4 +73,4 @@ function Console.draw()
   )
 end
 
-return groups.all.createFactory(Console)
+return groups.gui.createFactory(Console)
