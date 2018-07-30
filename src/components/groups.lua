@@ -1,12 +1,22 @@
 local Component = require 'modules.component'
+local msgBus = require 'components.msg-bus'
 local config = require 'config'
 
-local gridSize = 16 * config.scaleFactor
+local gridSize = config.gridSize
 local floor = math.floor
 local max = math.max
+local maxDrawOrder = 100
 
-local maxDrawOrder = floor(love.graphics.getHeight() / gridSize) + 20
-Component.setMaxOrder(maxDrawOrder)
+msgBus.subscribe(function(msgType)
+  print(msgType)
+  if msgBus.GAME_LOADED ==  msgType then
+    maxDrawOrder = floor((love.graphics.getHeight() * config.scaleFactor) / gridSize) + 20
+    Component.setMaxOrder(maxDrawOrder)
+    print('game loaded', maxDrawOrder)
+    return msgBus.CLEANUP
+  end
+end)
+
 
 local Groups = {
   all = Component.newGroup({

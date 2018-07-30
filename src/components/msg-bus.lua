@@ -1,8 +1,8 @@
 local messageBus = require 'utils.message-bus'
 
-local M = {}
-M.input = messageBus.new()
-M.input.KEY_PRESSED = 'KEY_PRESSED'
-M.input.KEY_RELEASED = 'KEY_RELEASED'
+local M = messageBus.new()
+M.GAME_LOADED = 'GAME_LOADED'
+M.KEY_PRESSED = 'KEY_PRESSED'
+M.KEY_RELEASED = 'KEY_RELEASED'
 
 return M

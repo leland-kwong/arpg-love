@@ -236,7 +236,7 @@
             </struct>
             <key type="filename">custom-art/floor/floor-1.png</key>
             <key type="filename">custom-art/floor/floor-2.png</key>
-            <key type="filename">custom-art/floor/floor.png</key>
+            <key type="filename">custom-art/floor/floor-3.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.666667</point_f>

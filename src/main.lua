@@ -24,6 +24,7 @@ function love.load()
     :setSize(vw, vh)
     :setScale(scale)
   love.window.setTitle('pathfinder')
+  msgBus.send(msgBus.GAME_LOADED)
 end
 
 function love.update(dt)
@@ -53,15 +54,15 @@ local inputMsg = require 'utils.pooled-table'(function(t, key, scanCode, isRepea
 end)
 
 function love.keypressed(key, scanCode, isRepeated)
-  msgBus.input.send(
-    msgBus.input.KEY_PRESSED,
+  msgBus.send(
+    msgBus.KEY_PRESSED,
     inputMsg(key, scanCode, isRepeated)
   )
 end
 
 function love.keyreleased(key, scanCode)
-  msgBus.input.send(
-    msgBus.input.KEY_RELEASED,
+  msgBus.send(
+    msgBus.KEY_RELEASED,
     inputMsg(key, scanCode, false)
   )
 end

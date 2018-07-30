@@ -279,7 +279,7 @@
 	"sourceSize": {"w":16,"h":16},
 	"pivot": {"x":0.5,"y":0.666667}
 },
-"floor":
+"floor-3":
 {
 	"frame": {"x":21,"y":123,"w":16,"h":16},
 	"rotated": false,
@@ -322,6 +322,6 @@
 	"format": "RGBA8888",
 	"size": {"w":59,"h":163},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:bfd7abe6b8db98633c5ceda31f5e6179:5cee7d850c24d3ffd2422f79f13e0466:68d88b3cf7eafc9b5accfffdfb2fda91$"
+	"smartupdate": "$TexturePacker:SmartUpdate:71003df43bc95a40df22fb5d43c716ec:614feeb61468736f18722d6b55732fe0:68d88b3cf7eafc9b5accfffdfb2fda91$"
 }
 }

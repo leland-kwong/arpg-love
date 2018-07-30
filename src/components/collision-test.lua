@@ -19,15 +19,15 @@ local mouseCollisionFilter = function(item, other)
 end
 
 local floorTileTypes = {
-  'floor',
-  'floor',
-  'floor',
-  'floor',
-  'floor',
-  'floor',
-  'floor',
   'floor-1',
-  'floor-2'
+  'floor-1',
+  'floor-1',
+  'floor-1',
+  'floor-1',
+  'floor-1',
+  'floor-1',
+  'floor-2',
+  'floor-3'
 }
 local FloorTile = {
   init = function(self)
@@ -157,6 +157,8 @@ local CollisionTest = {
       avgTime = time / updateCount
     end
   })(function(self, dt)
+    -- print(camera:getBounds())
+
     local mx, my = camera:getMousePosition()
     local posX = mx - self.B.w/2
     local posY = my - self.B.h/2

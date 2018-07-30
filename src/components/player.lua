@@ -12,8 +12,8 @@ local mouseInputMap = config.mouseInputMap
 
 local width, height = love.window.getMode()
 local startPos = {
-  x = config.resolution.w / 2,
-  y = config.resolution.h / 2,
+  x = 48,
+  y = 48,
 }
 
 local frameRate = 60
@@ -143,7 +143,7 @@ local Player = {
     if moving then
       local a = self.animations.run
       self.animation = a
-      self.sprite = a:next(dt / 3)
+      self.sprite = a:next(dt / 2)
     else
       local a = self.animations.idle
       self.animation = a

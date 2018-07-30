@@ -103,7 +103,7 @@ local Fireball = {
 local factory = groups.all.createFactory(function(defaults)
   -- set order a little above default
   Fireball.drawOrder = function(self)
-    local order = defaults.drawOrder(self) + 1
+    local order = defaults.drawOrder(self) + 2
     return order
   end
   return Fireball
