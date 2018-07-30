@@ -9,12 +9,20 @@ local groups = require 'components.groups'
 local functional = require 'utils.functional'
 local perf = require 'utils.perf'
 local camera = require 'components.camera'
+local config = require 'config'
 
 console.create()
 local player = Player.create()
 collisionTest.create()
 
 function love.load()
+  local scale = config.scaleFactor
+  local resolution = config.resolution
+  local vw, vh = resolution.w * scale, resolution.h * scale
+  love.window.setMode(vw, vh)
+  camera
+    :setSize(vw, vh)
+    :setScale(scale)
   love.window.setTitle('pathfinder')
 end
 

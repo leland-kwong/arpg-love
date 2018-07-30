@@ -3,23 +3,17 @@ local collisionWorlds = require 'components.collision-worlds'
 local color = require 'modules.color'
 local perf = require 'utils.perf'
 local camera = require 'components.camera'
+local Map = require 'modules.map-generator.index'
+local iterateGrid = require 'utils.iterate-grid'
 
+local map = Map.createAdjacentRooms(4, 15)
 local time = 0
 local updateCount = 0
 local avgTime = 0
 
-local function extract(t, key1, key2, key3, key4, key5, key6)
-  return
-    t[key1],
-    t[key2],
-    t[key3],
-    t[key4],
-    t[key5],
-    t[key6]
-end
-
 local mouseCollisionFilter = function(item, other)
-  return (other.type == 'player') and 'slide' or false
+  return false
+  -- return (other.type == 'player') and 'slide' or false
 end
 
 local CollisionTest = {
@@ -37,8 +31,8 @@ local CollisionTest = {
       collided = false,
       x = mx,
       y = my,
-      w = 16,
-      h = 16
+      w = 8,
+      h = 8
     }
 
     self.B = B
@@ -46,14 +40,21 @@ local CollisionTest = {
 
     self.obstacles = {}
 
-    for i=1, 10 do
+    local walkable = 1
+    local unwalkable = 0
+    local i = 1
+    iterateGrid(map.grid, function(v, x, y)
+      if unwalkable ~= v then
+        return
+      end
+      local gridSize = 16
       local obstacle = {
         name = "obstacle_"..i,
         type = 'obstacle',
-        x = math.random( 0, love.graphics.getWidth() ),
-        y = math.random( 0, love.graphics.getHeight() ),
-        w = math.random(20, 30),
-        h = math.random(20, 30),
+        x = x * gridSize,
+        y = y * gridSize,
+        w = gridSize,
+        h = gridSize,
       }
       world:add(obstacle, obstacle.x, obstacle.y, obstacle.w, obstacle.h)
       self.obstacles[i] = {
@@ -75,7 +76,8 @@ local CollisionTest = {
           end
         end)
       }
-    end
+      i = i + 1
+    end)
   end,
 
   update = perf({

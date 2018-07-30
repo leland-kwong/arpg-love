@@ -42,7 +42,7 @@ local function Animation(frameJson, spriteAtlas, paddingOffset, frameRate)
       end
       local frameKey = aniFrames[index]
       frame = frameData[frameKey]
-      sprite:setViewport(frame.frame.x - pad/2, frame.frame.y - pad/2, frame.sourceSize.w + pad, frame.spriteSourceSize.h + pad)
+      sprite:setViewport(frame.frame.x - pad/2, frame.frame.y - pad/2, frame.sourceSize.w + pad/2, frame.spriteSourceSize.h + pad)
       time = time + dt
       return sprite
     end

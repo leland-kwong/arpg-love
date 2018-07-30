@@ -6,14 +6,13 @@ local collisionWorlds = require 'components.collision-worlds'
 local camera = require 'components.camera'
 
 local colMap = collisionWorlds.map
-local scale = config.scaleFactor
 local keyMap = config.keyboard
 local mouseInputMap = config.mouseInputMap
 
 local width, height = love.window.getMode()
 local startPos = {
-  x = width / 2,
-  y = height / 2,
+  x = config.resolution.w / 2,
+  y = config.resolution.h / 2,
 }
 
 local frameRate = 60
@@ -98,8 +97,8 @@ local Player = {
     self.outlineColor = {1,1,1,1}
     self.shader = love.graphics.newShader(pixelOutlineShader)
     local spriteData = animationFactory.spriteData
-    self.shader:send('sprite_size', {spriteData.meta.size.w * scale, spriteData.meta.size.h * scale})
-    self.shader:send('outline_width', 1 * scale)
+    self.shader:send('sprite_size', {spriteData.meta.size.w, spriteData.meta.size.h})
+    self.shader:send('outline_width', 1)
     self.shader:send('outline_color', self.outlineColor)
   end,
 
@@ -139,7 +138,7 @@ local Player = {
     if moving then
       local a = self.animations.run
       self.animation = a
-      self.sprite = a.next(dt / 4)
+      self.sprite = a.next(dt / 3)
     else
       local a = self.animations.idle
       self.animation = a
@@ -154,7 +153,7 @@ local Player = {
 
     -- dynamically get the current animation frame's height
     local sw,sh = self.animation.getWidth(), self.animation.getHeight()
-    local w,h = sw*scale, sh*scale
+    local w,h = sw, sh
     -- true center taking into account pivot
     local nextx, nexty = self.x, self.y
     local oX, oY = -w/2, -h/2
@@ -178,7 +177,7 @@ local Player = {
   end
 }
 
-local function drawShadow(self, ox, oy, scaleX, scaleY)
+local function drawShadow(self, ox, oy, sx, sy)
   -- SHADOW
   love.graphics.setColor(0,0,0,0.2)
   love.graphics.draw(
@@ -187,8 +186,8 @@ local function drawShadow(self, ox, oy, scaleX, scaleY)
     self.x,
     self.y + self.h / 2,
     math.rad(self.angle),
-    scaleX,
-    -(scaleY / 2),
+    sx,
+    -sy / 2,
     ox,
     oy - self.animation.getHeight()/2
   )
@@ -205,7 +204,7 @@ end
 function Player.draw(self)
   local ox, oy = self.animation.getOffset()
   local aniDir = flipAnimation and -1 or 1
-  local scaleX, scaleY = scale * aniDir, scale
+  local scaleX, scaleY = 1 * aniDir, 1
 
   drawShadow(self, ox, oy, scaleX, scaleY)
   drawDebug(self)

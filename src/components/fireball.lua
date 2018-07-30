@@ -8,7 +8,7 @@ local colMap = collisionWorlds.map
 
 -- DEFAULTS
 local speed = 500
-local scale = config.scaleFactor
+local scale = 1
 local maxLifeTime = 2
 
 -- direction normalization
