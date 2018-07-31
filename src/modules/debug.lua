@@ -30,8 +30,6 @@ local Debug = {
     return {}
   end,
 
-  drawOrder = groups.DRAW_ORDER_COLLISION_DEBUG,
-
   draw = function()
     for i=1, #queue do
       love.graphics.setColor(1,1,1,0.5)
@@ -42,11 +40,6 @@ local Debug = {
   end
 }
 
-groups.all.createFactory(function(defaults)
-  Debug.drawOrder = function(self)
-    return defaults.drawOrder(self) + 20
-  end
-  return Debug
-end).create()
+groups.debug.createFactory(Debug).create()
 
 return M

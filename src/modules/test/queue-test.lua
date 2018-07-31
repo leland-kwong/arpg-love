@@ -2,27 +2,26 @@ local Q = require 'modules.queue'
 
 local queue = Q:new()
 
-local maxDrawOrder = 100
-queue:setMaxOrder(maxDrawOrder)
-
 local calls = {}
 queue:add(2, function()
   table.insert(calls, 2)
 end)
+
+assert(
+  queue.minOrder == 2 and queue.maxOrder == 2,
+  'min and max order should be same since its the first item'
+)
+
 queue:add(1, function()
   table.insert(calls, 1)
-end)
-queue:add(math.huge, function()
-  table.insert(calls, maxDrawOrder)
 end)
 
 queue:flush()
 
-assert(#calls == 3, 'should be equal to number of items in queue')
+assert(#calls == 2, 'should be equal to number of items in queue')
 assert(
   calls[1] == 1
-  and calls[2] == 2
-  and calls[3] == maxDrawOrder,
+  and calls[2] == 2,
 
   'should be called based on `order` value'
 )

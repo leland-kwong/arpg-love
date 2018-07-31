@@ -49,8 +49,6 @@ local function printTable(t, fontSize, x, y)
   end
 end
 
-Console.drawOrder = groups.DRAW_ORDER_CONSOLE
-
 function Console.draw()
   local gfx = love.graphics
   gfx.setColor(Color.WHITE)

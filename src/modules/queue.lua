@@ -8,8 +8,8 @@ function Q:new(options)
   local queue = {
     list = {},
     length = 0,
+    minOrder = 0,
     maxOrder = 0, -- highest order that has been added to the queue
-    maxAllowedOrder = 1000, -- default to 1000 since this is where we can still remain performant
     development = options.development
   }
   setmetatable(queue, self)
@@ -27,9 +27,13 @@ local orderError = function(order)
   return false, 'order must be greater than 0 and an integer, received `'..tostring(order)..'`'
 end
 local max, min = math.max, math.min
--- insert callback
+
+-- insert callback with maximum 2 arguments
 function Q:add(order, cb, a, b)
-  order = min(order, self.maxAllowedOrder)
+  local isNewQueue = self.length == 0
+  if isNewQueue then
+    self.minOrder = order
+  end
 
   if self.development then
     typeCheck.validate(
@@ -57,13 +61,14 @@ function Q:add(order, cb, a, b)
 
   list[#list + 1] = item
   self.length = self.length + 1
+  self.minOrder = min(self.minOrder, order)
   self.maxOrder = max(self.maxOrder, order)
   return self
 end
 
 -- iterate callbacks by `order` and clears the queue
 function Q:flush()
-  for i=1, self.maxOrder do
+  for i=self.minOrder, self.maxOrder do
     local row = self.list[i]
     if row and #row > 0 then
       for j=1, #row do
@@ -77,11 +82,6 @@ function Q:flush()
   end
   self.length = 0
   self.maxOrder = 0
-  return self
-end
-
-function Q:setMaxOrder(order)
-  self.maxAllowedOrder = order
   return self
 end
 
