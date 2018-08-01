@@ -12,12 +12,12 @@ local mouseInputMap = config.mouseInputMap
 
 local width, height = love.window.getMode()
 local startPos = {
-  x = 48,
-  y = 48,
+  x = 16 * 30,
+  y = 16 * 30,
 }
 
 local frameRate = 60
-local speed = 5 * frameRate -- per frame
+local speed = 300 -- per frame
 
 local activeAnimation
 local DIRECTION_RIGHT = 1

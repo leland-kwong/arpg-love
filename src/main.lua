@@ -7,16 +7,63 @@ local Player = require 'components.player'
 local collisionTest = require 'components.collision-test'
 local groups = require 'components.groups'
 local functional = require 'utils.functional'
+local cloneGrid = require 'utils.clone-grid'
 local perf = require 'utils.perf'
 local camera = require 'components.camera'
 local config = require 'config'
+local Map = require 'modules.map-generator.index'
+local Minimap = require 'components.map.minimap'
+local MainMap = require 'components.map.main-map'
+require 'components.map.minimap'
 
+local map = Map.createAdjacentRooms(4, 20)
+local WALKABLE = 1
+local gridTileTypes = {
+  -- unwalkable
+  [0] = {
+    'wall',
+    'wall-2',
+    'wall-3'
+  },
+  -- walkable
+  [1] = {
+    'floor-1',
+    'floor-1',
+    'floor-1',
+    'floor-1',
+    'floor-1',
+    'floor-1',
+    'floor-1',
+    'floor-2',
+    'floor-3'
+  }
+}
+local gridTileDefinitions = cloneGrid(map.grid, function(v, x, y)
+  local tileGroup = gridTileTypes[v]
+  return tileGroup[math.random(1, #tileGroup)]
+end)
+
+local scale = config.scaleFactor
 console.create()
 local player = Player.create()
-collisionTest.create()
+collisionTest.create({
+  map = map,
+  walkable = WALKABLE
+})
+
+Minimap.create({
+  camera = camera,
+  grid = map.grid
+})
+
+MainMap.create({
+  camera = camera,
+  grid = map.grid,
+  tileRenderDefinition = gridTileDefinitions,
+  walkable = WALKABLE
+})
 
 function love.load()
-  local scale = config.scaleFactor
   local resolution = config.resolution
   local vw, vh = resolution.w * scale, resolution.h * scale
   love.window.setMode(vw, vh)
@@ -29,6 +76,7 @@ end
 
 function love.update(dt)
   groups.all.updateAll(dt)
+  groups.debug.updateAll(dt)
   camera:setPosition(player.x, player.y)
   groups.gui.updateAll(dt)
 end
@@ -72,6 +120,7 @@ function love.draw()
   -- background
   love.graphics.clear(0.2,0.2,0.2)
   groups.all.drawAll()
+  groups.debug.drawAll()
   camera:detach()
   groups.gui.drawAll()
 end

@@ -175,7 +175,7 @@
             <key>heuristicMask</key>
             <false/>
             <key>defaultPivotPoint</key>
-            <point_f>0.5,0.666667</point_f>
+            <point_f>0.5,0.266667</point_f>
             <key>writePivotPoints</key>
             <true/>
         </struct>
@@ -239,7 +239,7 @@
             <key type="filename">custom-art/floor/floor-3.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.666667</point_f>
+                <point_f>0,1</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -254,7 +254,7 @@
             <key type="filename">custom-art/tiles/wall.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.666667</point_f>
+                <point_f>0.5,0.8</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>

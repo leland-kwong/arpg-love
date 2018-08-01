@@ -21,13 +21,13 @@ local Camera = function()
     return self
   end
 
-  -- returns bounds in screen pixels
   function camera:getBounds()
-    local minX = (self.x * self.scale) - self.w/2
-    local maxX = (self.x * self.scale) + self.w/2
-    local minY = (self.y * self.scale) - self.h/2
-    local maxY = (self.y * self.scale) + self.h/2
-    return minX, maxX, minY, maxY
+    local scale = self.scale
+    local west = (self.x * scale) - self.w/2
+    local east = (self.x * scale) + self.w/2
+    local north = (self.y * scale) - self.h/2
+    local south = (self.y * scale) + self.h/2
+    return west, east, north, south
   end
 
   function camera:setScale(scale)

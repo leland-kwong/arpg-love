@@ -4,11 +4,9 @@ local collisionWorlds = require 'components.collision-worlds'
 local color = require 'modules.color'
 local perf = require 'utils.perf'
 local camera = require 'components.camera'
-local Map = require 'modules.map-generator.index'
 local iterateGrid = require 'utils.iterate-grid'
 local config = require 'config'
 
-local map = Map.createAdjacentRooms(4, 15)
 local time = 0
 local updateCount = 0
 local avgTime = 0
@@ -18,54 +16,10 @@ local mouseCollisionFilter = function(item, other)
   -- return (other.type == 'player') and 'slide' or false
 end
 
-local floorTileTypes = {
-  'floor-1',
-  'floor-1',
-  'floor-1',
-  'floor-1',
-  'floor-1',
-  'floor-1',
-  'floor-1',
-  'floor-2',
-  'floor-3'
-}
-local FloorTile = {
-  init = function(self)
-    self.animation = animationFactory.create({
-      floorTileTypes[math.random(1, #floorTileTypes)]
-    })
-  end,
-
-  drawOrder = function()
-    return 1
-  end,
-
-  update = function(self, dt)
-    self.animation:update(dt)
-  end,
-
-  draw = function(self)
-    local gfx = love.graphics
-    gfx.setColor(1,1,1,1)
-    gfx.draw(
-      animationFactory.spriteAtlas,
-      self.animation.sprite,
-      self.x,
-      self.y,
-      0,
-      1,
-      1,
-      0,
-      12
-    )
-  end
-}
-local FloorTileFactory = groups.all.createFactory(FloorTile)
-
 local CollisionTest = {
-  getInitialProps = function()
-    return {}
-  end,
+  map = {
+    {}
+  },
 
   drawOrder = function()
     return 2
@@ -73,6 +27,7 @@ local CollisionTest = {
 
   init = function(self)
     local world = collisionWorlds.map
+    local map = self.map
     self.world = world
 
     local mx, my = camera:getMousePosition()
@@ -90,23 +45,13 @@ local CollisionTest = {
 
     self.obstacles = {}
 
-    local walkable = 1
-    local unwalkable = 0
     local i = 1
-    local wallTileTypes = {
-      'wall',
-      'wall-2',
-      'wall-3'
-    }
 
     iterateGrid(map.grid, function(v, x, y)
       local gridSize = config.gridSize
       local tileX, tileY = x * gridSize, y * gridSize
-      if walkable == v then
-        return FloorTileFactory.create({
-          x = tileX,
-          y = tileY
-        })
+      if self.walkable == v then
+        return
       end
       local obstacle = {
         name = "obstacle_"..i,
@@ -117,34 +62,6 @@ local CollisionTest = {
         h = gridSize,
       }
       world:add(obstacle, obstacle.x, obstacle.y, obstacle.w, obstacle.h)
-      local tileAnimation = animationFactory.create({
-        wallTileTypes[math.random(1,3)]
-      })
-      self.obstacles[i] = {
-        draw = coroutine.wrap(function()
-          local gfx = love.graphics
-          local o = obstacle
-          while true do
-            gfx.setColor(1,1,1,1)
-            gfx.draw(
-              animationFactory.spriteAtlas,
-              tileAnimation.sprite,
-              o.x,
-              o.y,
-              0,
-              1,
-              1,
-              0,
-              12
-            )
-            coroutine.yield()
-          end
-        end),
-
-        advanceFrame = function(dt)
-          tileAnimation:update(dt)
-        end
-      }
       i = i + 1
     end)
   end,
@@ -194,14 +111,6 @@ local CollisionTest = {
 
   draw = function(self)
     local gfx = love.graphics
-
-    local colorA = {0,0.7,1,1}
-    gfx.setColor(colorA)
-    for i=1, #self.obstacles do
-      local rect = self.obstacles[i]
-      rect.draw()
-    end
-    gfx.setColor(1,1,1,1)
 
     local collisionTint = {1,1,0,1}
     local colorB = {1,0.5,1,1}

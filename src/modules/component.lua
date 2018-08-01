@@ -65,7 +65,7 @@ function M.newGroup(factoryDefaults)
     tc.validate(blueprint.getInitialProps, tc.FUNCTION, false)
 
     function blueprint.create(props)
-      local c = blueprint.getInitialProps(props)
+      local c = blueprint.getInitialProps(props or {})
 
       -- type check
       if isDebug then

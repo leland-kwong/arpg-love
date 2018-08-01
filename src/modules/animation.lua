@@ -83,6 +83,7 @@ local function Animation(frameJson, spriteAtlas, paddingOffset, frameRate)
     setmetatable(animation, meta)
     meta.__index = meta
 
+    animation:update(0)
     return animation
   end
 
