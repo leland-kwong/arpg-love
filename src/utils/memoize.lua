@@ -12,7 +12,7 @@ local defaultOptions = {
 -- [function] options.onCacheHit
 local function memoize(fn, options)
 	options = objectUtils.assign({}, defaultOptions, options)
-	
+
 	local shouldCurry = type(fn) == 'table'
 	if shouldCurry then
 		options = func
@@ -21,24 +21,26 @@ local function memoize(fn, options)
 		end
 	end
 
-	local lastArgs = {nil, nil, nil}
+	local lastArgs = {nil, nil, nil, nil}
 	local out1 = nil
 	local out2 = nil
 	local out3 = nil
+	local out4 = nil
 	local resolver = options.resolver
 	local onCacheHit = options.onCacheHit
 
-	return function(input1, input2, input3)
-		local isNewInputs = resolver(lastArgs, input1, input2, input3)
+	return function(input1, input2, input3, input4)
+		local isNewInputs = resolver(lastArgs, input1, input2, input3, input4)
 		if not isNewInputs then
-			onCacheHit(input1, input2, input3)
-			return out1, out2, out3
+			onCacheHit(input1, input2, input3, input4)
+		else
+			lastArgs[1] = input1
+			lastArgs[2] = input2
+			lastArgs[3] = input3
+			lastArgs[4] = input4
+			out1, out2, out3, out4 = fn(input1, input2, input3, input4)
 		end
-		lastArgs[1] = input1
-		lastArgs[2] = input2
-		lastArgs[3] = input3
-		out1, out2, out3 = fn(input1, input2, input3)
-		return out1, out2, out3
+		return out1, out2, out3, out4
 	end
 end
 

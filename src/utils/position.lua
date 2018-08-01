@@ -1,7 +1,6 @@
 -- position tools
 local pixelsToGrid = require("utils.pixels-to-grid-units")
 local gridToPixels = require("utils.grid-units-to-screen-units")
-local gameConfig = require("main.config.game-config")
 local memoize = require("utils.memoize")
 
 local Position = {
@@ -9,9 +8,8 @@ local Position = {
   gridToPixels = gridToPixels
 }
 
-local function findNearestWalkableTileFromPosition(grid, gridX, gridY)
+local function findNearestWalkableTileFromPosition(grid, gridX, gridY, walkable)
 	local x,y = gridX, gridY
-	local walkable = gameConfig.pixel_type.walkable
 	local positions = {
 		{x-1, y-1}, -- nw
 		{x, y-1}, -- n
@@ -35,17 +33,12 @@ end
 
 local mathAbs = math.abs
 
-Position.getDirection = memoize(function(from, to)
-	local pointerOffsetY = 8 -- adjust it so that its slightly above the point
-	local cursorDirX = to.x >= from.x and 1 or -1
-	local cursorDirY = to.y >= from.y and 1 or -1
-	local dx = mathAbs(to.x - from.x)
-	local dy = mathAbs(to.y - from.y)
-	local x = dx * cursorDirX
-	local y = (dy * cursorDirY) + pointerOffsetY
-	return vmath.normalize(
-		vmath.vector3(x, y, 0)
-	)
+-- returns normalized values
+Position.getDirection = memoize(function(x1, y1, x2, y2)
+  local a = y2 - y1
+  local b = x2 - x1
+  local c = math.sqrt(math.pow(a, 2) + math.pow(b, 2))
+	return b/c, a/c
 end)
 
 Position.findNearestWalkableTile = {

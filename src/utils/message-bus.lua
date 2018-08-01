@@ -88,7 +88,9 @@ local function callSubscribersAndHandleCleanup(msgHandlers, msgType, nextValue)
 end
 
 function M.new()
-	local msgBus = {}
+	local msgBus = {
+		CLEANUP = CLEANUP
+	}
 	local allReducers = {}
 	local msgHandlers = {}
 

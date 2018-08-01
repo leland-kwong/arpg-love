@@ -1,13 +1,10 @@
-local loadJsonFile = require 'utils.load-json-file'
+local json = require 'lua_modules.json'
 local Animation = require 'modules.animation'
 
 love.graphics.setDefaultFilter('nearest', 'nearest')
 local spriteAtlas = love.graphics.newImage('built/sprite.png')
-local spriteData = loadJsonFile('built/sprite.json')
-local createAnimation = Animation(spriteData, spriteAtlas, 4)
+local spriteData = json.decode(
+  love.filesystem.read('built/sprite.json')
+)
 
-return {
-  create = createAnimation,
-  spriteAtlas = spriteAtlas,
-  spriteData = spriteData
-}
+return Animation(spriteData, spriteAtlas, 1)

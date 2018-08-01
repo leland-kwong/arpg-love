@@ -23,6 +23,10 @@ local baseProps = {
   y = 0,
   angle = 0,
 
+  getInitialProps = function(props)
+    return props
+  end,
+
   drawOrder = function(self)
     local o = floor(self.y)
     return o < 1 and 1 or o
@@ -58,10 +62,10 @@ function M.newGroup(factoryDefaults)
       )
     end
 
-    tc.validate(blueprint.getInitialProps, tc.FUNCTION)
+    tc.validate(blueprint.getInitialProps, tc.FUNCTION, false)
 
     function blueprint.create(props)
-      local c = blueprint.getInitialProps(props)
+      local c = blueprint.getInitialProps(props or {})
 
       -- type check
       if isDebug then

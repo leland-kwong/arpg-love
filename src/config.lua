@@ -16,8 +16,11 @@ M.mouseInputMap = {
   SKILL_2 = 2
 }
 
-local w,h = 640, 360
+M.gridSize = 16
 M.scaleFactor = 2
-love.window.setMode(w * M.scaleFactor, h * M.scaleFactor)
+M.resolution = {
+  w = 640,
+  h = 360
+}
 
 return M

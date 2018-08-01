@@ -1,0 +1,82 @@
+local config = require 'config'
+local iterateGrid = require 'utils.iterate-grid'
+local bump = require 'modules.bump'
+local pprint = require 'utils.pprint'
+local noop = require 'utils.noop'
+local Map = require 'modules.map-generator.index'
+local Camera = require 'modules.camera'
+
+local floor, max = math.floor, math.max
+
+local function adjust(v)
+  return floor(v)
+end
+
+local function getGridBounds(gridSize, camera)
+  local w, e, n, s = camera:getBounds(false)
+  local scale = config.scaleFactor
+  return w / scale / gridSize,
+    e / scale / gridSize,
+    n / scale / gridSize,
+    s / scale / gridSize
+end
+
+-- a,b,c are arguments to pass to the callback
+local function iterateActiveGrid(self, cb, a, b, c)
+  local w,e,n,s = getGridBounds(self.gridSize, self.camera)
+
+  -- viewport origin
+  local originX = max(1, w)
+  local originY = max(1, s)
+
+  -- FIXME: thresholds are here as a way to make sure rendering reaches the edge of the screen
+  local thresholdSouth = 2
+  local thresholdWest = 0
+  local thresholdEast = 1
+
+  local y = n - self.offset
+  while y < s + self.offset + thresholdSouth do
+    local isInRowViewport = y >= n and y <= s
+    local startX = w - self.offset - thresholdWest
+    local endX = e + self.offset + thresholdEast
+    for x=startX, endX do
+      -- adjust coordinates to be integer values since grid coordinates are integers
+      local _x = adjust(x)
+      local _y = adjust(y)
+      local row = self.grid[_y]
+      local value = row and row[_x]
+      local isInColViewport = x >= w and x <= e
+      local isInViewport = isInRowViewport and isInColViewport
+      if value ~= nil then
+        cb(self, value, _x, _y, originX, originY, isInViewport, a, b, c)
+      end
+    end
+    y = y + 1
+  end
+end
+
+local mapBlueprint = {
+  offset = 0,
+  gridSize = 16,
+  walkable = 1,
+  camera = Camera(),
+  grid = {
+    {}
+  },
+  onUpdate = noop,
+  renderStart = noop,
+  render = noop,
+  renderEnd = noop,
+
+  update = function(self, dt)
+    iterateActiveGrid(self, self.onUpdate, dt)
+  end,
+
+  draw = function(self)
+    self.renderStart(self)
+    iterateActiveGrid(self, self.render)
+    self.renderEnd(self)
+  end
+}
+
+return mapBlueprint

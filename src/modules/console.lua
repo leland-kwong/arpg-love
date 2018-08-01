@@ -1,5 +1,5 @@
 local groups = require 'components.groups'
-local inputBus = require 'components.msg-bus'.input
+local msgBus = require 'components.msg-bus'
 local Color = require 'modules.color'
 local config = require 'config'
 
@@ -12,11 +12,11 @@ local function toggleCollisionDebug()
   config.collisionDebug = not config.collisionDebug
 end
 
-inputBus.subscribe(function(msgType, v)
-  if ((inputBus.KEY_PRESSED == msgType) or (inputBus.KEY_RELEASED == msgType)) and
+msgBus.subscribe(function(msgType, v)
+  if ((msgBus.KEY_PRESSED == msgType) or (msgBus.KEY_RELEASED == msgType)) and
     not v.isRepeated
   then
-    keysPressed[v.key] = inputBus.KEY_PRESSED == msgType
+    keysPressed[v.key] = msgBus.KEY_PRESSED == msgType
   end
 
   -- toggle collision debugger
@@ -48,8 +48,6 @@ local function printTable(t, fontSize, x, y)
     i = i + 1
   end
 end
-
-Console.drawOrder = groups.DRAW_ORDER_CONSOLE
 
 function Console.draw()
   local gfx = love.graphics

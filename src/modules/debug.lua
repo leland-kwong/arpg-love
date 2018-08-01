@@ -5,9 +5,11 @@ local M = {}
 local queue = {}
 
 -- creates a bounding box centered to point x,y
-function M.boundingBox(mode, x, y, w, h)
+function M.boundingBox(mode, x, y, w, h, center)
+  center = center == nil and true or center
   local function draw()
-    local ox, oy = -w/2, -h/2
+    local ox, oy = center and -w/2 or 0,
+      center and -h/2 or 0
     love.graphics.rectangle(
       mode,
       x + ox,
@@ -30,8 +32,6 @@ local Debug = {
     return {}
   end,
 
-  drawOrder = groups.DRAW_ORDER_COLLISION_DEBUG,
-
   draw = function()
     for i=1, #queue do
       love.graphics.setColor(1,1,1,0.5)
@@ -42,11 +42,6 @@ local Debug = {
   end
 }
 
-groups.all.createFactory(function(defaults)
-  Debug.drawOrder = function(self)
-    return defaults.drawOrder(self) + 20
-  end
-  return Debug
-end).create()
+groups.debug.createFactory(Debug).create()
 
 return M

@@ -3,27 +3,20 @@ local groups = require 'components.groups'
 local animationFactory = require 'components.animation-factory'
 local collisionWorlds = require 'components.collision-worlds'
 local gameWorld = require 'components.game-world'
+local Position = require 'utils.position'
 
 local colMap = collisionWorlds.map
 
 -- DEFAULTS
 local speed = 500
-local scale = config.scaleFactor
+local scale = 1
 local maxLifeTime = 2
-
--- direction normalization
-local function direction(x1, y1, x2, y2)
-  local a = y2 - y1
-  local b = x2 - x1
-  local c = math.sqrt(math.pow(a, 2) + math.pow(b, 2))
-  return b/c, a/c
-end
 
 local filters = {
   obstacle = true,
 }
 local function colFilter(item, other)
-  if not filters[other.type] then
+  if not filters[other.group] then
     return false
   end
   return 'touch'
@@ -31,7 +24,7 @@ end
 
 local Fireball = {
   getInitialProps = function(props)
-    local dx, dy = direction(props.x, props.y, props.x2, props.y2)
+    local dx, dy = Position.getDirection(props.x, props.y, props.x2, props.y2)
     props.direction = {x = dx, y = dy}
     props.speed = speed
     props.maxLifeTime = maxLifeTime
@@ -39,12 +32,11 @@ local Fireball = {
   end,
 
   init = function(self)
-    self.animation = animationFactory.create({
+    self.animation = animationFactory:new({
       'fireball'
     })
-    self.sprite = self.animation.next(0)
 
-    local w,h = select(3, self.sprite:getViewport())
+    local w,h = select(3, self.animation.sprite:getViewport())
     local cw, ch = 15*scale, 15*scale -- collision dimensions
     self.w = cw
     self.h = ch
@@ -58,7 +50,7 @@ local Fireball = {
     local dy = self.direction.y * dt * self.speed
     self.x = self.x + dx
     self.y = self.y + dy
-    self.sprite = self.animation.next(dt)
+    self.animation:update(dt)
     local cols, len = select(3, colMap:move(self, self.x - self.w/2, self.y - self.h/2, colFilter))
     -- local len = 0
     if len > 0 or self.maxLifeTime <= 0 then
@@ -68,12 +60,12 @@ local Fireball = {
 
   draw = function(self)
     local angle = math.atan2( self.direction.y, self.direction.x )
-    local ox, oy = self.animation.getOffset()
+    local ox, oy = self.animation:getOffset()
 
     love.graphics.setColor(0,0,0,0.15)
     love.graphics.draw(
-      animationFactory.spriteAtlas
-      , self.sprite
+      animationFactory.atlas
+      , self.animation.sprite
       , self.x
       , self.y + self.h
       , angle
@@ -85,8 +77,8 @@ local Fireball = {
 
     love.graphics.setColor(1,1,1,1)
     love.graphics.draw(
-        animationFactory.spriteAtlas
-      , self.sprite
+        animationFactory.atlas
+      , self.animation.sprite
       , self.x
       , self.y
       , angle
@@ -110,7 +102,7 @@ local Fireball = {
 local factory = groups.all.createFactory(function(defaults)
   -- set order a little above default
   Fireball.drawOrder = function(self)
-    local order = defaults.drawOrder(self) + 1
+    local order = defaults.drawOrder(self) + 2
     return order
   end
   return Fireball
