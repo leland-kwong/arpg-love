@@ -8,7 +8,6 @@ local function getAnimation(animationCache, position, name)
   local fromCache = animationCache:get(position)
 
   if not fromCache then
-    print('new', position)
     animationCache:set(position, animationFactory.create({name}))
     return animationCache:get(position)
   end
@@ -24,7 +23,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   tileRenderDefinition = {},
 
   init = function(self)
-    self.animationCache = lru.new(1000)
+    self.animationCache = lru.new(1400)
   end,
 
   onUpdate = function(self, value, x, y, originX, originY, isInViewport, dt)
