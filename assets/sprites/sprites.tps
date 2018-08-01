@@ -211,7 +211,7 @@
             <key type="filename">custom-art/characters/player/character-9.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,1</point_f>
+                <point_f>0.5,0.666667</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -254,7 +254,7 @@
             <key type="filename">custom-art/tiles/wall.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0</point_f>
+                <point_f>0.5,0.8</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>

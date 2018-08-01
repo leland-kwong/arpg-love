@@ -67,15 +67,21 @@ function CollisionObject:update(x, y, w, h, offsetX, offsetY)
     return self
   end
 
+  offsetX = offsetX or 0
+  offsetY = offsetY or 0
+
   self.x = x
   self.y = y
   self.w = w
   self.h = h
-  self.ox = offsetX or 0
-  self.oy = offsetY or 0
+  self.ox = offsetX
+  self.oy = offsetY
   self.world:update(
     self,
-    x, y, w, h, offsetX, offsetY
+    x - offsetX,
+    y - offsetY,
+    w,
+    h
   )
   return self
 end

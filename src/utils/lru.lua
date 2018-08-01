@@ -4,8 +4,10 @@
 -- https://github.com/starius/lua-lru
 
 local lru = {}
+local noop = function() end
 
-function lru.new(max_size, max_bytes)
+function lru.new(max_size, max_bytes, pruneCallback)
+	pruneCallback = pruneCallback or noop
 
 	assert(max_size >= 1, "max_size must be >= 1")
 	assert(not max_bytes or max_bytes >= 1,
@@ -84,7 +86,9 @@ function lru.new(max_size, max_bytes)
 		(max_bytes and bytes_used + bytes > max_bytes)
 		do
 			assert(oldest, "not enough storage for cache")
-			del(oldest[KEY], oldest)
+			local key = oldest[KEY]
+			del(key, oldest)
+			pruneCallback(key, oldest[VALUE])
 		end
 	end
 

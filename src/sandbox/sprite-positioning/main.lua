@@ -1,8 +1,7 @@
 local Animation = require 'modules.animation'
-local json = require "lua_modules.json"
+local json = require 'lua_modules.json'
 local bump = require 'modules.bump'
 local collisionObject = require 'modules.collision'
-
 
 local world = bump.newWorld(32)
 
@@ -135,6 +134,16 @@ function love.update(dt)
     runAnimation:update(dt / 3) or
     idleAnimation:update(dt / 12)
 
+  local ox,oy = state.player.animation:getSourceOffset()
+  state.player.collisionObject:update(
+    state.player.x,
+    state.player.y,
+    state.player.w,
+    state.player.h,
+    ox,
+    oy
+  )
+
   local actualX, actualY, cols = state.player.collisionObject:move(
     state.player.x + dx,
     state.player.y + dy
@@ -164,7 +173,6 @@ local function drawSpriteDebug(animation, x, y, scaleX, scaleY)
   end
 
   local ox, oy = animation:getOffset()
-  local ox,oy = animation:getOffset()
   local _x,_y,w,h = animation.sprite:getViewport()
   love.graphics.setColor(1,1,1,0.2)
   love.graphics.rectangle(

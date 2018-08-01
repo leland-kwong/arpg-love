@@ -5,9 +5,11 @@ local M = {}
 local queue = {}
 
 -- creates a bounding box centered to point x,y
-function M.boundingBox(mode, x, y, w, h)
+function M.boundingBox(mode, x, y, w, h, center)
+  center = center == nil and true or center
   local function draw()
-    local ox, oy = -w/2, -h/2
+    local ox, oy = center and -w/2 or 0,
+      center and -h/2 or 0
     love.graphics.rectangle(
       mode,
       x + ox,

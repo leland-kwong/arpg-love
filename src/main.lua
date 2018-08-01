@@ -4,7 +4,6 @@ local console = require 'modules.console'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local Player = require 'components.player'
-local collisionTest = require 'components.collision-test'
 local groups = require 'components.groups'
 local functional = require 'utils.functional'
 local cloneGrid = require 'utils.clone-grid'
@@ -46,10 +45,6 @@ end)
 local scale = config.scaleFactor
 console.create()
 local player = Player.create()
-collisionTest.create({
-  map = map,
-  walkable = WALKABLE
-})
 
 Minimap.create({
   camera = camera,

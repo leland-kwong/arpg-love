@@ -3,6 +3,7 @@ local groups = require 'components.groups'
 local config = require 'config'
 local animationFactory = require 'components.animation-factory'
 local collisionWorlds = require 'components.collision-worlds'
+local collisionObject = require 'modules.collision'
 local camera = require 'components.camera'
 local Position = require 'utils.position'
 
@@ -24,7 +25,7 @@ local DIRECTION_RIGHT = 1
 local DIRECTION_LEFT = -1
 
 local function collisionFilter(item, other)
-  if other.type ~= 'obstacle' then
+  if other.group ~= 'obstacle' then
     return false
   end
   return 'slide'
@@ -72,7 +73,7 @@ local Player = {
       -- collision properties
       type = 'player',
       h = 1,
-      w = 1
+      w = 1,
     }
   end,
 
@@ -81,14 +82,14 @@ local Player = {
     colMap:add(self, self.x, self.y, self.w, self.h)
 
     self.animations = {
-      idle = animationFactory.create({
+      idle = animationFactory:new({
         'character-1',
         'character-8',
         'character-9',
         'character-10',
         'character-11'
       }),
-      run = animationFactory.create({
+      run = animationFactory:new({
         'character-15',
         'character-16',
         'character-17',
@@ -99,10 +100,18 @@ local Player = {
     local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
     self.outlineColor = {1,1,1,1}
     self.shader = love.graphics.newShader(pixelOutlineShader)
-    local spriteData = animationFactory.spriteData
-    self.shader:send('sprite_size', {spriteData.meta.size.w, spriteData.meta.size.h})
+    local atlasData = animationFactory.atlasData
+    self.shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
     self.shader:send('outline_width', 1)
     self.shader:send('outline_color', self.outlineColor)
+
+    self.colObj = collisionObject:new(
+      'player',
+      self.x,
+      self.y,
+      self.w,
+      self.h
+    ):addToWorld(colMap)
   end,
 
   -- drawOrder = function(self)
@@ -155,52 +164,61 @@ local Player = {
     skillHandlers.SKILL_1.updateCooldown(dt)
 
     -- dynamically get the current animation frame's height
-    local sw,sh = self.animation:getWidth(), self.animation:getHeight()
+    local sx, sy, sw, sh = self.animation.sprite:getViewport()
     local w,h = sw, sh
     -- true center taking into account pivot
     local nextx, nexty = self.x, self.y
-    local oX, oY = -w/2, -h/2
+    local oX, oY = self.animation:getSourceOffset()
     local col = self.collisionObj
 
     -- COLLISION UPDATES
-    colMap:update(
-      self,
+    self.colObj:update(
       -- use current coordinates because we only want to update size
-      origx + oX,
-      origy + oY,
+      origx,
+      origy,
       w,
-      h
+      h,
+      oX,
+      oY
     )
 
-    local actualX, actualY = colMap:move(self, nextx + oX, nexty + oY, collisionFilter)
-    self.x = actualX - oX
-    self.y = actualY - oY
+    local actualX, actualY = self.colObj:move(nextx, nexty, collisionFilter)
+    self.x = actualX
+    self.y = actualY
     self.h = h
     self.w = w
   end
 }
 
-local function drawShadow(self, ox, oy, sx, sy)
+local function drawShadow(self, sx, sy, ox, oy)
   -- SHADOW
   love.graphics.setColor(0,0,0,0.2)
   love.graphics.draw(
-    animationFactory.spriteAtlas,
+    animationFactory.atlas,
     self.animation.sprite,
     self.x,
-    self.y + self.h / 2,
+    self.y + self.h/2,
     math.rad(self.angle),
     sx,
     -sy / 2,
     ox,
-    oy - self.animation:getHeight()/2
+    oy
   )
 end
 
 local function drawDebug(self)
   if config.collisionDebug then
+    local ox, oy = self.animation:getOffset()
     love.graphics.setColor(1,1,1,0.5)
     local debug = require 'modules.debug'
-    debug.boundingBox('fill', self.x, self.y, self.w, self.h)
+    debug.boundingBox(
+      'fill',
+      self.x - ox,
+      self.y - oy,
+      self.w,
+      self.h,
+      false
+    )
   end
 end
 
@@ -208,12 +226,12 @@ function Player.draw(self)
   local ox, oy = self.animation:getOffset()
   local scaleX, scaleY = 1 * self.dir, 1
 
-  drawShadow(self, ox, oy, scaleX, scaleY)
+  drawShadow(self, scaleX, scaleY, ox, oy)
   drawDebug(self)
 
   love.graphics.setShader(self.shader)
   love.graphics.draw(
-    animationFactory.spriteAtlas,
+    animationFactory.atlas,
     self.animation.sprite,
     self.x,
     self.y,
@@ -221,7 +239,7 @@ function Player.draw(self)
     scaleX,
     scaleY,
     ox,
-    oy - self.animation:getHeight()/2
+    oy
   )
   love.graphics.setShader()
 end

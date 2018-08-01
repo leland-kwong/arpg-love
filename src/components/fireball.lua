@@ -16,7 +16,7 @@ local filters = {
   obstacle = true,
 }
 local function colFilter(item, other)
-  if not filters[other.type] then
+  if not filters[other.group] then
     return false
   end
   return 'touch'
@@ -32,7 +32,7 @@ local Fireball = {
   end,
 
   init = function(self)
-    self.animation = animationFactory.create({
+    self.animation = animationFactory:new({
       'fireball'
     })
 
@@ -64,7 +64,7 @@ local Fireball = {
 
     love.graphics.setColor(0,0,0,0.15)
     love.graphics.draw(
-      animationFactory.spriteAtlas
+      animationFactory.atlas
       , self.animation.sprite
       , self.x
       , self.y + self.h
@@ -77,7 +77,7 @@ local Fireball = {
 
     love.graphics.setColor(1,1,1,1)
     love.graphics.draw(
-        animationFactory.spriteAtlas
+        animationFactory.atlas
       , self.animation.sprite
       , self.x
       , self.y

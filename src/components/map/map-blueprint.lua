@@ -29,10 +29,17 @@ local function iterateActiveGrid(self, cb, a, b, c)
   local originX = max(1, w)
   local originY = max(1, s)
 
+  -- FIXME: thresholds are here as a way to make sure rendering reaches the edge of the screen
+  local thresholdSouth = 2
+  local thresholdWest = 0
+  local thresholdEast = 1
+
   local y = n - self.offset
-  while y < s + self.offset + 1 do
+  while y < s + self.offset + thresholdSouth do
     local isInRowViewport = y >= n and y <= s
-    for x=w - self.offset - 1, e + self.offset + 1 do
+    local startX = w - self.offset - thresholdWest
+    local endX = e + self.offset + thresholdEast
+    for x=startX, endX do
       -- adjust coordinates to be integer values since grid coordinates are integers
       local _x = adjust(x)
       local _y = adjust(y)
