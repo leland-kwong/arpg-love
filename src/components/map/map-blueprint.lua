@@ -6,8 +6,10 @@ local noop = require 'utils.noop'
 local Map = require 'modules.map-generator.index'
 local Camera = require 'modules.camera'
 
+local floor, max = math.floor, math.max
+
 local function adjust(v)
-  return math.floor(v)
+  return floor(v)
 end
 
 local function getGridBounds(gridSize, camera)
@@ -24,13 +26,13 @@ local function iterateActiveGrid(self, cb, a, b, c)
   local w,e,n,s = getGridBounds(self.gridSize, self.camera)
 
   -- viewport origin
-  local originX = math.max(1, w)
-  local originY = math.max(1, s)
+  local originX = max(1, w)
+  local originY = max(1, s)
 
   local y = n - self.offset
-  while y < s + self.offset do
+  while y < s + self.offset + 1 do
     local isInRowViewport = y >= n and y <= s
-    for x=w - self.offset, e + self.offset do
+    for x=w - self.offset - 1, e + self.offset + 1 do
       -- adjust coordinates to be integer values since grid coordinates are integers
       local _x = adjust(x)
       local _y = adjust(y)
