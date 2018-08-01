@@ -34,7 +34,7 @@
         <key>dataFormat</key>
         <string>json</string>
         <key>textureFileName</key>
-        <filename></filename>
+        <filename>built/sprite.png</filename>
         <key>flipPVR</key>
         <false/>
         <key>pvrCompressionQuality</key>
@@ -132,7 +132,7 @@
             <key>data</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>../../src/built/sprite.json</filename>
+                <filename>built/sprite.json</filename>
             </struct>
         </map>
         <key>multiPack</key>
@@ -175,43 +175,43 @@
             <key>heuristicMask</key>
             <false/>
             <key>defaultPivotPoint</key>
-            <point_f>0.5,0.266667</point_f>
+            <point_f>0.5,0.8</point_f>
             <key>writePivotPoints</key>
             <true/>
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">custom-art/characters/player/character-1.png</key>
-            <key type="filename">custom-art/characters/player/character-10.png</key>
-            <key type="filename">custom-art/characters/player/character-11.png</key>
-            <key type="filename">custom-art/characters/player/character-12.png</key>
-            <key type="filename">custom-art/characters/player/character-13.png</key>
-            <key type="filename">custom-art/characters/player/character-14.png</key>
-            <key type="filename">custom-art/characters/player/character-15.png</key>
-            <key type="filename">custom-art/characters/player/character-16.png</key>
-            <key type="filename">custom-art/characters/player/character-17.png</key>
-            <key type="filename">custom-art/characters/player/character-18.png</key>
-            <key type="filename">custom-art/characters/player/character-19.png</key>
-            <key type="filename">custom-art/characters/player/character-2.png</key>
-            <key type="filename">custom-art/characters/player/character-20.png</key>
-            <key type="filename">custom-art/characters/player/character-21.png</key>
-            <key type="filename">custom-art/characters/player/character-22.png</key>
-            <key type="filename">custom-art/characters/player/character-23.png</key>
-            <key type="filename">custom-art/characters/player/character-24.png</key>
-            <key type="filename">custom-art/characters/player/character-25.png</key>
-            <key type="filename">custom-art/characters/player/character-26.png</key>
-            <key type="filename">custom-art/characters/player/character-27.png</key>
-            <key type="filename">custom-art/characters/player/character-28.png</key>
-            <key type="filename">custom-art/characters/player/character-3.png</key>
-            <key type="filename">custom-art/characters/player/character-4.png</key>
-            <key type="filename">custom-art/characters/player/character-5.png</key>
-            <key type="filename">custom-art/characters/player/character-6.png</key>
-            <key type="filename">custom-art/characters/player/character-7.png</key>
-            <key type="filename">custom-art/characters/player/character-8.png</key>
-            <key type="filename">custom-art/characters/player/character-9.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-1.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-10.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-11.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-12.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-13.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-14.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-15.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-16.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-17.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-18.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-19.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-2.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-20.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-21.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-22.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-23.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-24.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-25.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-26.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-27.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-28.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-3.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-4.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-5.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-6.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-7.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-8.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/characters/player/character-9.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,1</point_f>
+                <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -221,7 +221,7 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/fireball.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/fireball.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.692308,0.5</point_f>
@@ -234,9 +234,9 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/floor/floor-1.png</key>
-            <key type="filename">custom-art/floor/floor-2.png</key>
-            <key type="filename">custom-art/floor/floor-3.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/floor/floor-1.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/floor/floor-2.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/floor/floor-3.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,1</point_f>
@@ -249,12 +249,12 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/tiles/wall-2.png</key>
-            <key type="filename">custom-art/tiles/wall-3.png</key>
-            <key type="filename">custom-art/tiles/wall.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/tiles/wall-2.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/tiles/wall-3.png</key>
+            <key type="filename">../../../assets/sprites/custom-art/tiles/wall.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0</point_f>
+                <point_f>0.5,0.8</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -267,10 +267,10 @@
         </map>
         <key>fileList</key>
         <array>
-            <filename>custom-art/characters/player</filename>
-            <filename>custom-art/fireball.png</filename>
-            <filename>custom-art/tiles</filename>
-            <filename>custom-art/floor</filename>
+            <filename>../../../assets/sprites/custom-art/characters/player</filename>
+            <filename>../../../assets/sprites/custom-art/fireball.png</filename>
+            <filename>../../../assets/sprites/custom-art/tiles</filename>
+            <filename>../../../assets/sprites/custom-art/floor</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
