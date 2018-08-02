@@ -1,4 +1,6 @@
-require 'lua_modules.strict'
+-- can't use lua strict right now because 'jumper' library uses globals which throws errors
+-- require 'lua_modules.strict'
+
 require 'modules.test.index'
 
 -- NOTE: this is necessary for crisp pixel rendering

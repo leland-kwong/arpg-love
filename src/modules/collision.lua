@@ -39,6 +39,7 @@ end
 
 function CollisionObject:move(goalX, goalY, filter)
   if not self.world then
+    error('collision object must be added to a world')
     return
   end
 
