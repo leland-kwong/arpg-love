@@ -49,16 +49,28 @@ local function printTable(t, fontSize, x, y)
   end
 end
 
+local function getAllGameObjectStats()
+  local stats = {
+    count = 0
+  }
+  for _,group in pairs(groups) do
+    stats.count = stats.count + group.getStats()
+  end
+  return stats
+end
+
 function Console.draw()
   local gfx = love.graphics
+  gfx.setColor(Color.MED_GRAY)
+  gfx.print('COMPONENTS', edgeOffset, edgeOffset)
   gfx.setColor(Color.WHITE)
   gfx.print(
-    'objects: '..groups.all.getStats(),
+    'objects: '..getAllGameObjectStats().count,
     edgeOffset,
-    edgeOffset
+    edgeOffset + fontSize
   )
 
-  local startY = (fontSize * 2) + edgeOffset
+  local startY = (fontSize * 3) + edgeOffset
   gfx.setColor(Color.MED_GRAY)
   gfx.print('GRAPHICS', edgeOffset, startY)
   gfx.setColor(Color.WHITE)

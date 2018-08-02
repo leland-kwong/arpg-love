@@ -2,10 +2,13 @@ local Animation = require 'modules.animation'
 local json = require 'lua_modules.json'
 local bump = require 'modules.bump'
 local collisionObject = require 'modules.collision'
+local groups = require 'components.groups'
+
+local M = {}
 
 local world = bump.newWorld(32)
 
-local scale = 4
+local scale = 1
 love.graphics.setDefaultFilter('nearest', 'nearest')
 local spriteAtlas = love.graphics.newImage('built/sprite.png')
 local spriteData = json.decode(
@@ -43,19 +46,18 @@ local tileAnimation = animationFactory:new({
 })
 
 -- GAME STATE
-local startX, startY = screenCenter(scale)
 local state = {
   player = {
-    x = startX,
-    y = startY,
+    x = 0,
+    y = 0,
     w = idleAnimation:getWidth(),
     h = idleAnimation:getHeight(),
     animation = idleAnimation,
     collisionObject = nil
   },
   wall = {
-    x = startX + 50,
-    y = startY,
+    x = 0 + 50,
+    y = 0,
     w = tileAnimation:getSourceSize(),
     h = select(2, tileAnimation:getSourceSize()),
     collisionObject = nil
@@ -66,7 +68,7 @@ local state = {
   }
 }
 
-local pixelOutlineShader = love.filesystem.read('shaders/pixel-outline.fsh')
+local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
 local outlineColor = {1,1,1,1}
 local shader = love.graphics.newShader(pixelOutlineShader)
 local atlasData = animationFactory.atlasData
@@ -74,7 +76,7 @@ shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
 shader:send('outline_width', 1)
 shader:send('outline_color', outlineColor)
 
-function love.load()
+function M.init()
   love.window.setTitle('sprite and collision detection demo')
   love.keyboard.setKeyRepeat(true)
 
@@ -101,7 +103,7 @@ function love.load()
   ):addToWorld(world)
 end
 
-function love.update(dt)
+function M.update(self, dt)
   local moving = false
   local dx, dy = 0, 0
   local isDown = love.keyboard.isDown
@@ -224,9 +226,8 @@ end
 
 local function drawFireball()
   local gfx = love.graphics
-  local x,y = screenCenter(scale)
 
-  local posx, posy = x, y + 30
+  local posx, posy = 0, 0 + 30
   gfx.setColor(1,1,1,1)
   gfx.setShader(shader)
   drawAnimation(fireballAnimation, posx, posy, math.rad(0))
@@ -246,7 +247,7 @@ local function drawTile(wallState)
   drawCollisionDebug(wallState.collisionObject)
 end
 
-function love.draw()
+function M.draw()
   local gfx = love.graphics
 
   gfx.clear(0.3,0.3,0.3,1)
@@ -256,3 +257,5 @@ function love.draw()
   drawTile(state.wall)
 
 end
+
+return groups.debug.createFactory(M)

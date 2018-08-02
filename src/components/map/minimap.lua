@@ -6,6 +6,7 @@ local config = require 'config'
 local COLOR_TILE_OUT_OF_VIEW = {1,1,1,0.3}
 local COLOR_TILE_IN_VIEW = {1,1,1,1}
 local FILL_STYLE = 'fill'
+local floor = math.floor
 local minimapTileRenderers = {
   -- obstacle
   [0] = function(self, x, y, originX, originY, isInViewport)
@@ -16,10 +17,11 @@ local minimapTileRenderers = {
     love.graphics.setColor(isInViewport and COLOR_TILE_IN_VIEW or COLOR_TILE_OUT_OF_VIEW)
 
     local rectSize = 1
+    local x = (self.x * rectSize) + actualX
+    local y = (self.y * rectSize) + actualY
     love.graphics.rectangle(
       FILL_STYLE,
-      self.x + (actualX * rectSize),
-      self.y + (actualY * rectSize), rectSize, rectSize
+      x, y, rectSize, rectSize
     )
 
     love.graphics.setColor(_r, _g, _b, _a)
@@ -48,7 +50,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   renderEnd = function(self)
     love.graphics.setCanvas()
     love.graphics.setColor(1,1,1,1)
-    love.graphics.scale(config.scaleFactor)
+    love.graphics.scale(self.scale)
     love.graphics.setBlendMode('alpha', 'premultiplied')
     love.graphics.draw(minimapCanvas)
     love.graphics.setBlendMode('alpha')

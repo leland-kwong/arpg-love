@@ -40,7 +40,6 @@ end
 local function removeCollisionObject(self, positionIndex)
   local colObj = self.collisionObjectCache:get(positionIndex)
   if colObj then
-    print('remove')
     colObj:removeFromWorld(collisionWorlds.map)
   end
 end
@@ -51,10 +50,11 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   init = function(self)
     self.animationCache = lru.new(1400)
 
+    -- remove collision objects when the lru cache automatically prunes
     local collisionPruneCallback = function(key)
       removeCollisionObject(self, key)
     end
-    self.collisionObjectCache = lru.new(1000, nil, collisionPruneCallback)
+    self.collisionObjectCache = lru.new(600, nil, collisionPruneCallback)
   end,
 
   onUpdate = function(self, value, x, y, originX, originY, isInViewport, dt)
