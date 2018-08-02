@@ -1,5 +1,9 @@
 # Thoughts - a place for quickly jotting down ideas
 
+## Ai movement
+
+If collision is detected, offset the endpoint by the collision normal.
+
 ## Continuous Effects on player
 
 - aura

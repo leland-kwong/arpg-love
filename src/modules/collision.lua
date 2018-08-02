@@ -87,4 +87,8 @@ function CollisionObject:update(x, y, w, h, offsetX, offsetY)
   return self
 end
 
+function CollisionObject:check(goalX, goalY, filter)
+  return self.world:check(self, goalX, goalY, filter)
+end
+
 return CollisionObject

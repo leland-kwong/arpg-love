@@ -30,7 +30,12 @@ to the destination where the likelihood of obstacles is small.
 ]]--
 local HEURISTIC = pathfinder.Heuristics.EUCLIDIAN
 local FINDER_NAME = "JPS"
-local function search_path(self, map, start_grid_pt, end_grid_pt, walkable)
+local TYPE_NUMBER = 'number'
+local errorMessages = {
+	walkable = 'walkable value must be a number'
+}
+local function search_path(map, start_grid_pt, end_grid_pt, walkable)
+	assert(type(walkable) == TYPE_NUMBER, errorMessages.walkable)
 	-- Define start and goal locations coordinates
 	local startx, starty = unpack(start_grid_pt)
 	local endx, endy = unpack(end_grid_pt)
@@ -61,9 +66,9 @@ local function search_path(self, map, start_grid_pt, end_grid_pt, walkable)
 	--[[
 		TODO: optimize to lazily smoothen the path via iterators.
 	]]--
-	local result = smoothen_path(map, compressedPath, walkable)
-	cache:set(cacheKey, result)
-	return result
+	-- local result = smoothen_path(map, compressedPath, walkable)
+	cache:set(cacheKey, compressedPath)
+	return compressedPath
 end
 
 return search_path
