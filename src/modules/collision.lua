@@ -65,6 +65,7 @@ end
 
 function CollisionObject:update(x, y, w, h, offsetX, offsetY)
   if not self.world then
+    error('[collision.update]: collision object must be added to a world')
     return self
   end
 
