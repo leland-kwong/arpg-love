@@ -13,7 +13,7 @@ local camera = require 'components.camera'
 local AiTest = {}
 
 -- grid generated with https://stackblitz.com/edit/pathfinding-simplify?file=index.js
-local grid = {{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1},{1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1},{1,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1},{1,0,0,0,0,1,1,1,1,1,1,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1},{1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,1},{1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},{0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}}
+local grid = {{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1},{1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1},{1,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1},{1,0,0,0,0,1,1,1,1,1,1,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1},{1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,1},{1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},{0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}}
 
 local WALKABLE = 0
 local OBSTACLE = 1
@@ -24,7 +24,7 @@ local function gridPositionConverter(gridSize)
   return function(position, toGridUnits)
     if toGridUnits then
       return round(
-        position / gridSize
+        math.ceil(position / gridSize)
       )
     end
     return round(position) * gridSize
@@ -82,11 +82,11 @@ end
 function AiTest.init(self)
   local enemySize = config.gridSize
   local ai = {
-    x = gridPosition(4),
+    x = gridPosition(8),
     y = gridPosition(2),
     w = enemySize,
     h = enemySize,
-    speed = 50
+    speed = 150
   }
   self.ai = ai
   ai.collisionObject = collisionObject:new(
@@ -102,7 +102,7 @@ function AiTest.init(self)
     y = gridPosition(2),
     w = config.gridSize,
     h = config.gridSize,
-    speed = 200
+    speed = 250
   }
   self.player.collisionObject = collisionObject:new(
     'player',
@@ -163,12 +163,6 @@ local function playerMovement(player, dt)
 end
 
 local aiPathCanvas = love.graphics.newCanvas()
-local function clearAiPathCanvas()
-  -- clear canvas
-  love.graphics.setCanvas(aiPathCanvas)
-  love.graphics.clear(1,1,1,0)
-  love.graphics.setCanvas()
-end
 
 local function drawAiPath(...)
   love.graphics.setCanvas(aiPathCanvas)
@@ -186,13 +180,45 @@ local function subPathCollisionFilter(item, other)
   return 'slide'
 end
 
+local stopDistance = 25
+local abs = math.abs
+
+local tempCollisionObject = collisionObject:new(
+  'temp',
+  0,
+  0,
+  config.gridSize,
+  config.gridSize
+)
+-- adds a temporary object to the world to do a quick collision check
+local function tempCollisionCheck(world, x1, y1, w, h, x2, y2, filter)
+  tempCollisionObject:update(x1, y1, w, h)
+  tempCollisionObject:addToWorld(world)
+  local actualX, actualY, cols, len =
+    tempCollisionObject:check(x, y, filter)
+  tempCollisionObject:removeFromWorld(world)
+  return actualX, actualY, cols, len
+end
+
 -- ai will move until the last known path using raycasting to check visibility.
 local function aiPathing(self, dt)
   local hasPlayerMoved = self.player.x ~= self.lastPlayerX or self.player.y ~= self.lastPlayerY
   self.lastPlayerX = self.player.x
   self.lastPlayerY = self.player.y
 
-  if getDist(self.ai.x, self.ai.y, self.player.x, self.player.y) <= 22 then
+  local isNewEndPt = false
+  if self.aiMover then
+    local currentEndPt = self.aiMover.path[#self.aiMover.path]
+    isNewEndPt = (self.player.x ~= currentEndPt.x) or (self.player.y ~= currentEndPt.y)
+  end
+
+  local shouldStopNearPlayer = getDist(
+    self.ai.x,
+    self.ai.y,
+    self.player.x,
+    self.player.y
+  ) <= stopDistance
+  if shouldStopNearPlayer then
     self.aiMover = nil
     return
   end
@@ -205,7 +231,8 @@ local function aiPathing(self, dt)
   local caix, caiy = self.ai.x + centerOffset, self.ai.y + centerOffset
   -- player center point
   local cpx, cpy = self.player.x + centerOffset, self.player.y + centerOffset
-  if hasPlayerMoved then
+
+  if hasPlayerMoved or isNewEndPt then
     if not hasObstacles then
       local path = {
         {
@@ -214,37 +241,46 @@ local function aiPathing(self, dt)
         }
       }
 
-      local actualX, actualY, cols, len = self.ai.collisionObject:check(
-        cpx, cpy
-      )
+      local endX, endY = path[1].x, path[1].y
+      local actualX, actualY, cols, len =
+        self.ai.collisionObject:check(endX, endY)
       local isValidPath = true
-      if len > 0 then
-        if cols[1].other.group == 'wall' then
-          local normal = cols[1].normal
-          local newPoint = {x = path[1].x, y = path[1].y}
-          -- -- add a point perpendicular to the normal and end point
-          if normal.x ~= 0 then
-            newPoint.x = actualX
+      if len > 0 and cols[1].other.group == 'wall' then
+        local normal = cols[1].normal
+        local newPoint = {x = path[1].x, y = path[1].y}
+        -- -- add a point perpendicular to the normal and end point
+        if normal.x ~= 0 then
+          newPoint.x = actualX
+        end
+        if normal.y ~= 0 then
+          newPoint.y = actualY
+        end
+        -- if this new point collides, then we invalidate the new path
+        if (path[1].x ~= newPoint.x) or (path[1].y ~= newPoint.y) then
+          local actualX,
+                actualY,
+                cols,
+                len = tempCollisionCheck(
+                  collisionWorlds.map,
+                  newPoint.x, newPoint.y,
+                  endX, endY,
+                  config.gridSize, config.gridSize,
+                  subPathCollisionFilter
+                )
+          isValidPath = len == 0
+
+          -- sometimes the collisions are from hugging the wall, so we handle that here
+          if len > 0 then
+            -- allowed distance from intended point
+            local threshold = config.gridSize/2
+            if (
+              abs(actualX - path[1].x) <= threshold and
+              abs(actualY - path[1].y) <= threshold
+            ) then
+              isValidPath = true
+            end
           end
-          if normal.y ~= 0 then
-            newPoint.y = actualY
-          end
-          -- if this new point collides, then we invalidate the new path
-          if (path[1].x ~= newPoint.x) or (path[1].y ~= newPoint.y) then
-            local obj = collisionObject:new(
-              'faux-ai',
-              newPoint.x,
-              newPoint.y,
-              config.gridSize,
-              config.gridSize
-            ):addToWorld(collisionWorlds.map)
-            local actualX,
-                  actualY,
-                  cols,
-                  len = obj:check(path[1].x, path[1].y, subPathCollisionFilter)
-            obj:removeFromWorld(collisionWorlds.map)
-            isValidPath = len == 0
-          end
+
           if isValidPath then
             table.insert(path, 1, newPoint)
           end
@@ -299,6 +335,13 @@ local function aiPathing(self, dt)
   end
 
 end
+
+local perf = require 'utils.perf'
+aiPathing = perf({
+  done = function(t)
+    print('pathfind:', t)
+  end
+})(aiPathing)
 
 function AiTest.update(self, dt)
   playerMovement(self.player, dt)
