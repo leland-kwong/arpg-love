@@ -79,23 +79,43 @@ function Positioner.new(x1, y1, path, speed)
   }, Positioner)
 end
 
-function AiTest.init(self)
-  local enemySize = config.gridSize
-  local ai = {
-    x = gridPosition(8),
-    y = gridPosition(2),
-    w = enemySize,
-    h = enemySize,
-    speed = 150
-  }
-  self.ai = ai
-  ai.collisionObject = collisionObject:new(
+local enemySize = config.gridSize
+local Ai = {}
+local Ai_mt = {__index = Ai}
+
+function Ai.new(gridX, gridY)
+  local w, h = enemySize, enemySize
+  local x, y = gridPosition(gridX), gridPosition(gridY)
+  local colObj = collisionObject:new(
     'ai',
-    ai.x,
-    ai.y,
-    ai.w,
-    ai.h
+    x,
+    y,
+    w,
+    h
   ):addToWorld(collisionWorlds.map)
+
+  return setmetatable({
+    x = x,
+    y = y,
+    w = w,
+    h = h,
+    speed = 150,
+    collisionObject = colObj
+  }, Ai_mt)
+end
+
+function Ai:drawPath(...)
+  self.canvas = self.canvas or love.graphics.newCanvas()
+  love.graphics.setCanvas(self.canvas)
+  love.graphics.clear(1,1,1,0)
+  love.graphics.setColor(0,1,1,1)
+  love.graphics.setLineStyle('rough')
+  love.graphics.line(...)
+  love.graphics.setCanvas()
+end
+
+function AiTest.init(self)
+  self.ai = Ai.new(8, 2)
 
   self.player = {
     x = gridPosition(2),
@@ -147,40 +167,30 @@ local function playerMovement(player, dt)
     dy = dy + moveAmount
   end
 
-  local ax, ay = player.collisionObject:move(
-    player.x + dx,
-    player.y + dy,
-    function(item, other)
-      if other.group == 'wall' or other.group == 'ai' then
-        return 'slide'
+  if dx ~= 0 or dy ~= 0 then
+    local ax, ay = player.collisionObject:move(
+      player.x + dx,
+      player.y + dy,
+      function(item, other)
+        if other.group == 'wall' or other.group == 'ai' then
+          return 'slide'
+        end
+        return false
       end
-      return false
-    end
-  )
+    )
 
-  player.x = ax
-  player.y = ay
-end
-
-local aiPathCanvas = love.graphics.newCanvas()
-
-local function drawAiPath(...)
-  love.graphics.setCanvas(aiPathCanvas)
-  love.graphics.clear(1,1,1,0)
-  love.graphics.setColor(0,1,1,1)
-  love.graphics.setLineStyle('rough')
-  love.graphics.line(...)
-  love.graphics.setCanvas()
+    player.x = ax
+    player.y = ay
+  end
 end
 
 local function subPathCollisionFilter(item, other)
-  if other.group == 'player' then
-    return false
+  if other.group == 'wall' then
+    return 'slide'
   end
-  return 'slide'
+  return false
 end
 
-local stopDistance = 25
 local abs = math.abs
 
 local tempCollisionObject = collisionObject:new(
@@ -190,6 +200,7 @@ local tempCollisionObject = collisionObject:new(
   1,
   1
 )
+
 -- adds a temporary object to the world to do a quick collision check
 local function tempCollisionCheck(world, x1, y1, w, h, x2, y2, filter)
   tempCollisionObject:addToWorld(world)
@@ -200,10 +211,11 @@ local function tempCollisionCheck(world, x1, y1, w, h, x2, y2, filter)
   return actualX, actualY, cols, len
 end
 
+math.randomseed(os.time())
 -- ai will move until the last known path using raycasting to check visibility.
 -- self [table] - the ai object to move
 local function aiPathing(self, target, dt)
-  local hasPlayerMoved = target.x ~= self.lastTargetX or target.y ~= self.lastTargetY
+  local hasTargetMoved = target.x ~= self.lastTargetX or target.y ~= self.lastTargetY
   self.lastTargetX = target.x
   self.lastTargetY = target.y
 
@@ -213,12 +225,13 @@ local function aiPathing(self, target, dt)
     isNewEndPt = (target.x ~= currentEndPt.x) or (target.y ~= currentEndPt.y)
   end
 
+  self.stopDistance = self.stopDistance or 30
   local shouldStopNearTarget = self.positioner and getDist(
     self.x,
     self.y,
     target.x,
     target.y
-  ) <= stopDistance
+  ) <= self.stopDistance
   if shouldStopNearTarget then
     self.positioner = nil
     return
@@ -227,12 +240,13 @@ local function aiPathing(self, target, dt)
   local centerOffset = config.gridSize/2
   local ax, ay = gridPosition(self.x, true), gridPosition(self.y, true)
   local tx, ty = gridPosition(target.x, true), gridPosition(target.y, true)
+
   -- ai center point
   local caix, caiy = self.x + centerOffset, self.y + centerOffset
   -- target center point
   local ctx, cty = target.x + centerOffset, target.y + centerOffset
 
-  if hasPlayerMoved or isNewEndPt then
+  if hasTargetMoved or isNewEndPt then
     local hasObstacles = pathObstacles(grid, ax, ay, tx, ty, WALKABLE)
     if not hasObstacles then
       local path = {
@@ -246,47 +260,52 @@ local function aiPathing(self, target, dt)
       local actualX, actualY, cols, len =
         self.collisionObject:check(endX, endY)
       local isValidPath = true
-      if len > 0 and cols[1].other.group == 'wall' then
-        local normal = cols[1].normal
-        local newPoint = {
-          x = endX,
-          y = endY
-        }
-        -- -- add a point perpendicular to the normal and end point
-        if normal.x ~= 0 then
-          newPoint.x = actualX
-        end
-        if normal.y ~= 0 then
-          newPoint.y = actualY
-        end
-        -- if this new point collides, then we invalidate the new path
-        if (endX ~= newPoint.x) or (endY ~= newPoint.y) then
-          local actualX,
-                actualY,
-                cols,
-                len = tempCollisionCheck(
-                  collisionWorlds.map,
-                  newPoint.x, newPoint.y,
-                  config.gridSize, config.gridSize,
-                  endX, endY,
-                  subPathCollisionFilter
-                )
-          isValidPath = len == 0
-
-          -- sometimes the collisions are from hugging the wall, so we handle that here
-          if len > 0 then
-            -- allowed distance from intended point
-            local threshold = config.gridSize/2
-            if (
-              abs(actualX - endX) <= threshold and
-              abs(actualY - endY) <= threshold
-            ) then
-              isValidPath = true
+      if len > 0 then
+        for i=1, len do
+          local col = cols[i]
+          if col.other.group == 'wall' or col.other.group == 'ai' then
+            local normal = col.normal
+            local newPoint = {
+              x = endX,
+              y = endY
+            }
+            -- -- add a point perpendicular to the normal and end point
+            if normal.x ~= 0 then
+              newPoint.x = actualX
             end
-          end
+            if normal.y ~= 0 then
+              newPoint.y = actualY
+            end
+            -- if this new point collides, then we invalidate the new path
+            if (endX ~= newPoint.x) or (endY ~= newPoint.y) then
+              local actualX,
+                    actualY,
+                    cols,
+                    len = tempCollisionCheck(
+                      collisionWorlds.map,
+                      newPoint.x, newPoint.y,
+                      config.gridSize, config.gridSize,
+                      endX, endY,
+                      subPathCollisionFilter
+                    )
+              isValidPath = len == 0
 
-          if isValidPath then
-            table.insert(path, 1, newPoint)
+              -- sometimes the collisions are from hugging the wall, so we handle that here
+              if len > 0 then
+                -- allowed distance from intended point
+                local threshold = config.gridSize/2
+                if (
+                  abs(actualX - endX) <= threshold and
+                  abs(actualY - endY) <= threshold
+                ) then
+                  isValidPath = true
+                end
+              end
+
+              if isValidPath then
+                table.insert(path, 1, newPoint)
+              end
+            end
           end
         end
       end
@@ -319,7 +338,7 @@ local function aiPathing(self, target, dt)
 
       local p = self.positioner.path
       if p[2] then
-        drawAiPath({
+        self:drawPath({
           caix,
           caiy,
           p[1].x,
@@ -328,7 +347,7 @@ local function aiPathing(self, target, dt)
           p[2].y
         })
       else
-        drawAiPath(
+        self:drawPath(
           caix,
           caiy,
           p[1].x,
@@ -343,7 +362,7 @@ end
 local perf = require 'utils.perf'
 aiPathing = perf({
   done = function(t)
-    print('pathfind:', t)
+    -- print('pathfind:', t)
   end
 })(aiPathing)
 
@@ -390,7 +409,7 @@ function AiTest.draw(self)
   )
 
   love.graphics.setColor(1,1,1,1)
-  love.graphics.draw(aiPathCanvas)
+  love.graphics.draw(ai.canvas)
 end
 
 return groups.debug.createFactory(AiTest)
