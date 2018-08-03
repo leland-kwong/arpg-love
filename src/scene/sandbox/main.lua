@@ -4,7 +4,7 @@ local SandboxBlueprint = {}
 
 -- SCENES
 local spritePositioning = require 'scene.sandbox.sprite-positioning'
-local ai = require 'scene.sandbox.ai'
+local ai = require 'scene.sandbox.ai.ai'
 
 local state = {
   activeScene = ai

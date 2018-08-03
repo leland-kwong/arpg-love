@@ -34,9 +34,11 @@ end
 
 local gridPosition = gridPositionConverter(config.gridSize)
 
-local Move = {}
+local Positioner = {}
+Positioner.__index = Positioner
+
 local getDist = require 'utils.math'.dist
-function Move:update(dt)
+function Positioner:update(dt)
   local isNewIndex = self.lastPathIndex ~= self.pathIndex
   local done = self.pathIndex > #self.path
   if done then
@@ -55,7 +57,7 @@ function Move:update(dt)
     end
 
     local duration = dist / self.speed
-    self.positionTween = tween.new(duration, self, path, 'linear')
+    self.positionTween = tween.new(duration, self, path, tween.easing.linear)
   end
   self.lastPathIndex = self.pathIndex
   self.positionTween:update(dt)
@@ -65,8 +67,8 @@ function Move:update(dt)
   return self.x, self.y
 end
 
-local function moveToPosition(x1, y1, path, speed)
-  local pos = {
+function Positioner.new(x1, y1, path, speed)
+  return setmetatable({
     x = x1,
     y = y1,
     path = path,
@@ -74,10 +76,7 @@ local function moveToPosition(x1, y1, path, speed)
     pathIndex = 1,
     done = false,
     speed = speed
-  }
-  setmetatable(pos, Move)
-  Move.__index = Move
-  return pos
+  }, Positioner)
 end
 
 function AiTest.init(self)
@@ -293,7 +292,7 @@ local function aiPathing(self, target, dt)
       end
 
       if isValidPath then
-        self.positioner = moveToPosition(
+        self.positioner = Positioner.new(
           caix, caiy,
           path,
           self.speed,
