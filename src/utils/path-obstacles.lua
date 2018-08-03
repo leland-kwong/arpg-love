@@ -37,7 +37,6 @@ local function hasObstaclePoints(grid, x1, y1, x2, y2, walkable)
 	mutableProps.grid = grid
 	mutableProps.walkableFn = walkableFn
 	mutableProps.walkable = walkable
-	-- OPTIMIZE: pull out this closure function
 
 	bline(x1, y1, x2, y2, blineCallback, mutableProps)
 	return mutableProps.hasObstacles

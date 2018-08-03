@@ -6,6 +6,7 @@ local pathfinder = require 'utils.search-path'
 local iterateGrid = require 'utils.iterate-grid'
 local getDirection = require 'utils.position'.getDirection
 local pathObstacles = require 'utils.path-obstacles'
+local memoize = require 'utils.memoize'
 local tween = require 'modules.tween'
 local config = require 'config'
 local camera = require 'components.camera'
@@ -201,49 +202,50 @@ local function tempCollisionCheck(world, x1, y1, w, h, x2, y2, filter)
 end
 
 -- ai will move until the last known path using raycasting to check visibility.
-local function aiPathing(self, dt)
-  local hasPlayerMoved = self.player.x ~= self.lastPlayerX or self.player.y ~= self.lastPlayerY
-  self.lastPlayerX = self.player.x
-  self.lastPlayerY = self.player.y
+-- self [table] - the ai object to move
+local function aiPathing(self, target, dt)
+  local hasPlayerMoved = target.x ~= self.lastTargetX or target.y ~= self.lastTargetY
+  self.lastTargetX = target.x
+  self.lastTargetY = target.y
 
   local isNewEndPt = false
-  if self.aiMover then
-    local currentEndPt = self.aiMover.path[#self.aiMover.path]
-    isNewEndPt = (self.player.x ~= currentEndPt.x) or (self.player.y ~= currentEndPt.y)
+  if self.positioner then
+    local currentEndPt = self.positioner.path[#self.positioner.path]
+    isNewEndPt = (target.x ~= currentEndPt.x) or (target.y ~= currentEndPt.y)
   end
 
-  local shouldStopNearPlayer = self.aiMover and getDist(
-    self.ai.x,
-    self.ai.y,
-    self.player.x,
-    self.player.y
+  local shouldStopNearTarget = self.positioner and getDist(
+    self.x,
+    self.y,
+    target.x,
+    target.y
   ) <= stopDistance
-  if shouldStopNearPlayer then
-    self.aiMover = nil
+  if shouldStopNearTarget then
+    self.positioner = nil
     return
   end
 
   local centerOffset = config.gridSize/2
-  local ax, ay = gridPosition(self.ai.x, true), gridPosition(self.ai.y, true)
-  local px, py = gridPosition(self.player.x, true), gridPosition(self.player.y, true)
-  local hasObstacles = pathObstacles(grid, ax, ay, px, py, WALKABLE)
+  local ax, ay = gridPosition(self.x, true), gridPosition(self.y, true)
+  local tx, ty = gridPosition(target.x, true), gridPosition(target.y, true)
   -- ai center point
-  local caix, caiy = self.ai.x + centerOffset, self.ai.y + centerOffset
-  -- player center point
-  local cpx, cpy = self.player.x + centerOffset, self.player.y + centerOffset
+  local caix, caiy = self.x + centerOffset, self.y + centerOffset
+  -- target center point
+  local ctx, cty = target.x + centerOffset, target.y + centerOffset
 
   if hasPlayerMoved or isNewEndPt then
+    local hasObstacles = pathObstacles(grid, ax, ay, tx, ty, WALKABLE)
     if not hasObstacles then
       local path = {
         {
-          x = cpx,
-          y = cpy
+          x = ctx,
+          y = cty
         }
       }
 
       local endX, endY = path[1].x, path[1].y
       local actualX, actualY, cols, len =
-        self.ai.collisionObject:check(endX, endY)
+        self.collisionObject:check(endX, endY)
       local isValidPath = true
       if len > 0 and cols[1].other.group == 'wall' then
         local normal = cols[1].normal
@@ -291,32 +293,32 @@ local function aiPathing(self, dt)
       end
 
       if isValidPath then
-        self.aiMover = moveToPosition(
+        self.positioner = moveToPosition(
           caix, caiy,
           path,
-          self.ai.speed,
+          self.speed,
           gridPosition
         )
       end
     end
   end
 
-  if self.aiMover then
-    local newX, newY = self.aiMover:update(dt)
-    if self.aiMover.done then
-      self.aiMover = nil
+  if self.positioner then
+    local newX, newY = self.positioner:update(dt)
+    if self.positioner.done then
+      self.positioner = nil
     -- update ai position
     else
-      self.ai.x = newX - centerOffset
-      self.ai.y = newY - centerOffset
-      self.ai.collisionObject:update(
-        self.ai.x,
-        self.ai.y,
-        self.ai.w,
-        self.ai.h
+      self.x = newX - centerOffset
+      self.y = newY - centerOffset
+      self.collisionObject:update(
+        self.x,
+        self.y,
+        self.w,
+        self.h
       )
 
-      local p = self.aiMover.path
+      local p = self.positioner.path
       if p[2] then
         drawAiPath({
           caix,
@@ -348,7 +350,7 @@ aiPathing = perf({
 
 function AiTest.update(self, dt)
   playerMovement(self.player, dt)
-  aiPathing(self, dt)
+  aiPathing(self.ai, self.player, dt)
 
   camera:setPosition(self.player.x, self.player.y)
 end
