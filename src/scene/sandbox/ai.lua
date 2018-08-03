@@ -184,18 +184,18 @@ local stopDistance = 25
 local abs = math.abs
 
 local tempCollisionObject = collisionObject:new(
-  'temp',
+  'TempCollisionObject',
   0,
   0,
-  config.gridSize,
-  config.gridSize
+  1,
+  1
 )
 -- adds a temporary object to the world to do a quick collision check
 local function tempCollisionCheck(world, x1, y1, w, h, x2, y2, filter)
-  tempCollisionObject:update(x1, y1, w, h)
   tempCollisionObject:addToWorld(world)
+  tempCollisionObject:update(x1, y1, w, h)
   local actualX, actualY, cols, len =
-    tempCollisionObject:check(x, y, filter)
+    tempCollisionObject:check(x2, y2, filter)
   tempCollisionObject:removeFromWorld(world)
   return actualX, actualY, cols, len
 end
@@ -212,7 +212,7 @@ local function aiPathing(self, dt)
     isNewEndPt = (self.player.x ~= currentEndPt.x) or (self.player.y ~= currentEndPt.y)
   end
 
-  local shouldStopNearPlayer = getDist(
+  local shouldStopNearPlayer = self.aiMover and getDist(
     self.ai.x,
     self.ai.y,
     self.player.x,
@@ -247,7 +247,10 @@ local function aiPathing(self, dt)
       local isValidPath = true
       if len > 0 and cols[1].other.group == 'wall' then
         local normal = cols[1].normal
-        local newPoint = {x = path[1].x, y = path[1].y}
+        local newPoint = {
+          x = endX,
+          y = endY
+        }
         -- -- add a point perpendicular to the normal and end point
         if normal.x ~= 0 then
           newPoint.x = actualX
@@ -256,15 +259,15 @@ local function aiPathing(self, dt)
           newPoint.y = actualY
         end
         -- if this new point collides, then we invalidate the new path
-        if (path[1].x ~= newPoint.x) or (path[1].y ~= newPoint.y) then
+        if (endX ~= newPoint.x) or (endY ~= newPoint.y) then
           local actualX,
                 actualY,
                 cols,
                 len = tempCollisionCheck(
                   collisionWorlds.map,
                   newPoint.x, newPoint.y,
-                  endX, endY,
                   config.gridSize, config.gridSize,
+                  endX, endY,
                   subPathCollisionFilter
                 )
           isValidPath = len == 0
@@ -274,8 +277,8 @@ local function aiPathing(self, dt)
             -- allowed distance from intended point
             local threshold = config.gridSize/2
             if (
-              abs(actualX - path[1].x) <= threshold and
-              abs(actualY - path[1].y) <= threshold
+              abs(actualX - endX) <= threshold and
+              abs(actualY - endY) <= threshold
             ) then
               isValidPath = true
             end
