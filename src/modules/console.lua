@@ -7,6 +7,14 @@ local modifier = false
 local keysPressed = {}
 local L_SUPER = 'lgui'
 local R_SUPER = 'rgui'
+local fontSize = 16
+local lineHeight = fontSize * 1
+local font = love.graphics.newFont(
+  -- 'built/fonts/PolygonPixel5x7Cyrillic.ttf',
+  'built/fonts/StarPerv.ttf',
+  fontSize
+)
+love.graphics.setFont(font)
 
 local function toggleCollisionDebug()
   config.collisionDebug = not config.collisionDebug
@@ -35,15 +43,14 @@ function Console.getInitialProps()
 end
 
 local edgeOffset = 10
-local fontSize = 14
 
-local function printTable(t, fontSize, x, y)
+local function printTable(t, lineHeight, x, y)
   local i = 0
   for k,v in pairs(t) do
     love.graphics.print(
       k..': '..v,
       x,
-      y + (i * fontSize)
+      y + (i * lineHeight)
     )
     i = i + 1
   end
@@ -59,28 +66,39 @@ local function getAllGameObjectStats()
   return stats
 end
 
+local canvas = love.graphics.newCanvas()
+
 function Console.draw()
   local gfx = love.graphics
+
+  gfx.push()
+  gfx.setCanvas(canvas)
+  gfx.clear(0,0,0,0)
   gfx.setColor(Color.MED_GRAY)
   gfx.print('COMPONENTS', edgeOffset, edgeOffset)
   gfx.setColor(Color.WHITE)
   gfx.print(
     'objects: '..getAllGameObjectStats().count,
     edgeOffset,
-    edgeOffset + fontSize
+    edgeOffset + lineHeight
   )
 
-  local startY = (fontSize * 3) + edgeOffset
+  local startY = edgeOffset + (lineHeight * 3)
   gfx.setColor(Color.MED_GRAY)
   gfx.print('GRAPHICS', edgeOffset, startY)
   gfx.setColor(Color.WHITE)
   -- print out each stat on its own line
   printTable(
     gfx.getStats(),
-    fontSize,
+    lineHeight,
     edgeOffset,
-    startY + fontSize
+    startY + lineHeight
   )
+  gfx.setBlendMode('alpha', 'premultiplied')
+  gfx.setCanvas()
+  gfx.draw(canvas)
+  gfx.pop()
+  gfx.setBlendMode('alpha')
 end
 
 return groups.gui.createFactory(Console)

@@ -39,7 +39,6 @@ function love.load()
   camera
     :setSize(vw, vh)
     :setScale(scale)
-  love.window.setTitle('pathfinder')
   msgBus.send(msgBus.GAME_LOADED)
 
   globalState.activeScene.create()
