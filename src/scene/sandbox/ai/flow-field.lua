@@ -85,6 +85,7 @@ end
 ]]
 local function flowField(grid, startX, startY, canVisitCallback)
   local start = {startX, startY, 1}
+  -- list of nodes to visit
   local frontier = {
     start
   }

@@ -1,23 +1,24 @@
 local socket = require 'socket'
 local pprint = require 'utils.pprint'
-local flowField = require 'scene.sandbox.ai.flow-field'
+local memoize = require 'utils.memoize'
+local flowField = memoize(require 'scene.sandbox.ai.flow-field')
 local groups = require 'components.groups'
 
 local arrow = love.graphics.newImage('scene/sandbox/ai/arrow-up.png')
 
 local grid = {
-  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1},
-  {1,0,0,0,1,0,0,0,0,0,1,1,1,0,0,0,1},
-  {1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,1,1,0,0,0,0,0,0,0,0,1,0,1},
-  {1,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1},
-  {1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,1},
+  {1,0,0,0,1,0,0,0,0,0,1,1,1,0,0,0,0,1},
+  {1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,1,1,0,0,0,0,0,0,0,0,1,0,0,1},
+  {1,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1},
+  {1,0,0,0,0,1,1,1,1,1,0,0,1,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
 }
 
 -- pprint(
@@ -25,7 +26,7 @@ local grid = {
 -- )
 
 local gridSize = 50
-local offX, offY = 330, 75
+local offX, offY = 300, 75
 local WALKABLE = 0
 
 local flowFieldTestBlueprint = {}
@@ -95,7 +96,7 @@ function flowFieldTestBlueprint.draw(self)
   love.graphics.setColor(0.5,0.5,0.5)
   if self.executionTimeMs ~= nil then
     love.graphics.print(
-      'execution time: '..self.executionTimeMs..'ms',
+      string.format('execution time: %.4f(ms)', self.executionTimeMs),
       offX + 20,
       50
     )
