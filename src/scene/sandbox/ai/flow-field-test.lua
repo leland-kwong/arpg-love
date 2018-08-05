@@ -8,10 +8,10 @@ local arrow = love.graphics.newImage('scene/sandbox/ai/arrow-up.png')
 local grid = {
   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
@@ -36,7 +36,7 @@ end
 
 local function isGridCellVisitable(grid, x, y, dist)
   return not outOfBoundsCheck(grid, x, y) and
-    grid[y][x] ~= 1 and
+    grid[y][x] == WALKABLE and
     dist <= 9
 end
 
@@ -66,9 +66,21 @@ end
 
 local function arrowRotationFromDirection(dx, dy)
   if dx < 0 then
+    if dy < 0 then
+      return math.rad(-45)
+    end
+    if dy > 0 then
+      return math.rad(225)
+    end
     return math.rad(-90)
   end
   if dx > 0 then
+    if dy < 0 then
+      return math.rad(-315)
+    end
+    if dy > 0 then
+      return math.rad(135)
+    end
     return math.rad(90)
   end
   if dy < 0 then

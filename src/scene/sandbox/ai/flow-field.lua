@@ -30,11 +30,15 @@ local function addCellData(grid, x, y, from, frontier, cameFromList, canVisit)
 end
 
 local function visitNeighbors(grid, start, frontier, cameFromList, canVisit)
-  local x,y = start[1], start[2]
+  local x,y,dist = start[1], start[2], start[3]
+  -- east
   addCellData(grid, x+1, y, start, frontier, cameFromList, canVisit)
-	addCellData(grid, x-1, y, start, frontier, cameFromList, canVisit)
-	addCellData(grid, x, y+1, start, frontier, cameFromList, canVisit)
-	addCellData(grid, x, y-1, start, frontier, cameFromList, canVisit)
+  -- west
+  addCellData(grid, x-1, y, start, frontier, cameFromList, canVisit)
+  -- south
+  addCellData(grid, x, y+1, start, frontier, cameFromList, canVisit)
+  -- north
+  addCellData(grid, x, y-1, start, frontier, cameFromList, canVisit)
 end
 
 --[[
