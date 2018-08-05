@@ -29,6 +29,7 @@ to the destination where the likelihood of obstacles is small.
 
 ]]--
 local HEURISTIC = pathfinder.Heuristics.EUCLIDIAN
+local MODE = 'ORTHOGONAL'
 local FINDER_NAME = "JPS"
 local TYPE_NUMBER = 'number'
 local errorMessages = {
@@ -55,6 +56,7 @@ local function search_path(map, start_grid_pt, end_grid_pt, walkable)
 	local grid = makeGrid(map)
 	local path = Pathfinder(grid, FINDER_NAME, walkable)
 		:setHeuristic(HEURISTIC)
+		:setMode(MODE)
 		-- Calculates the path, and its length
 		:getPath(startx, starty, endx, endy)
 

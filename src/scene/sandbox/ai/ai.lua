@@ -1,3 +1,4 @@
+local socket = require 'socket'
 local groups = require 'components.groups'
 local pprint = require 'utils.pprint'
 local collisionWorlds = require 'components.collision-worlds'
@@ -10,6 +11,7 @@ local memoize = require 'utils.memoize'
 local tween = require 'modules.tween'
 local config = require 'config'
 local camera = require 'components.camera'
+local round = require 'utils.math'.round
 
 local AiTest = {}
 
@@ -70,7 +72,7 @@ local enemySize = config.gridSize
 local Ai = {}
 local Ai_mt = {__index = Ai}
 
-function Ai.new(gridX, gridY)
+function Ai.new(gridX, gridY, speed)
   local w, h = enemySize, enemySize
   local x, y = gridPosition(gridX), gridPosition(gridY)
   local colObj = collisionObject:new(
@@ -86,7 +88,7 @@ function Ai.new(gridX, gridY)
     y = y,
     w = w,
     h = h,
-    speed = 100,
+    speed = speed,
     collisionObject = colObj
   }, Ai_mt)
 end
@@ -102,11 +104,11 @@ function Ai:drawPath(...)
 end
 
 function AiTest.init(self)
-  self.ai = Ai.new(24, 15)
+  self.ai = Ai.new(24, 15, 100)
 
   self.player = {
     x = gridPosition(24),
-    y = gridPosition(2),
+    y = gridPosition(5),
     w = config.gridSize,
     h = config.gridSize,
     speed = 250
@@ -186,16 +188,24 @@ local tempCollisionObject = collisionObject:new(
   0,
   1,
   1
-)
+):addToWorld(collisionWorlds.map)
 
 -- adds a temporary object to the world to do a quick collision check
 local function tempCollisionCheck(world, x1, y1, w, h, x2, y2, filter)
-  tempCollisionObject:addToWorld(world)
   tempCollisionObject:update(x1, y1, w, h)
   local actualX, actualY, cols, len =
     tempCollisionObject:check(x2, y2, filter)
-  tempCollisionObject:removeFromWorld(world)
   return actualX, actualY, cols, len
+end
+
+local function getLineOfSight(collisionWorld, x1, y1, x2, y2, filter)
+  local ts = socket.gettime()
+  local a, b, cols, len
+  for i=1, 100 do
+    a, b, cols, len = tempCollisionCheck(collisionWorld, x1, y1, 1, 1, x2, y2, filter)
+  end
+  print('vision check', (socket.gettime() - ts) * 1000)
+  return len == 0
 end
 
 -- ai will move until the last known path using raycasting to check visibility.
@@ -204,11 +214,6 @@ local function aiPathing(self, target, dt)
   local hasTargetMoved = target.x ~= self.lastTargetX or target.y ~= self.lastTargetY
   self.lastTargetX = target.x
   self.lastTargetY = target.y
-
-  local isNewEndPt = false
-  if self.moving then
-    isNewEndPt = (target.x ~= self.x2) or (target.y ~= self.y2)
-  end
 
   local centerOffset = config.gridSize/2
   local ax, ay = gridPosition(self.x, true), gridPosition(self.y, true)
@@ -219,104 +224,48 @@ local function aiPathing(self, target, dt)
   -- target center point
   local ctx, cty = target.x + centerOffset, target.y + centerOffset
 
+  local isNewEndPt = false
+  if self.positionTween then
+    local d = self.destination
+    local diffX, diffY = abs(ctx - d.x), abs(cty - d.y)
+    local changeThreshold = 5
+    isNewEndPt = diffX > changeThreshold or diffY > changeThreshold
+  end
+
   if hasTargetMoved or isNewEndPt then
-    local hasObstacles = false
-    -- local hasObstacles = pathObstacles(grid, ax, ay, tx, ty, WALKABLE)
-    if not hasObstacles then
-      self.path = {
-        {ctx, cty}
-      }
-      self.pathIndex = 1
-
-      -- local isDirectPath = true
-      local actualX, actualY, cols, len = tempCollisionCheck(
-        collisionWorlds.map,
-        caix, caiy, self.w, self.h,
-        ctx, cty,
-        function(item, other)
-          if other.group == 'wall' then
-            return 'slide'
-          end
-          return false
-        end
-      )
-      local isDirectPath = len == 0
-      print('direct path:', isDirectPath)
-      if not isDirectPath then
-        local newPath = pathfinder(grid, {ax, ay}, {tx, ty}, WALKABLE)
-        if newPath then
-          -- pprint(newPath)
-          local functional = require 'utils.functional'
-          local convertToPixels = function(path, point, i)
-            path[i] = {gridPosition(point[1]), gridPosition(point[2])}
-            -- point[1] = gridPosition(point[1]) + centerOffset
-            -- point[2] = gridPosition(point[2]) + centerOffset
-            return path
-          end
-          local convertedPath = functional.reduce(newPath, convertToPixels, {})
-          -- pprint(convertedPath)
-          self.path = convertedPath
-          self.pathIndex = 2
-        end
-      end
-
-      self.moving = true
+    -- check for vision of player using collision check to target
+    local canSeeTarget = getLineOfSight(
+      collisionWorlds.map,
+      caix, caiy,
+      ctx, cty,
+      subPathCollisionFilter
+    )
+    if canSeeTarget then
+      local endX, endY = ctx, cty
+      local dist = require'utils.math'.dist
+      local duration = dist(self.x, self.y, endX, endY) / (self.speed)
+      self.destination = {x = endX, y = endY}
+      self.positionTween = tween.new(duration, self, self.destination, tween.easing.linear)
     end
   end
 
-  if self.moving then
-    local point = self.path[self.pathIndex]
-    local x2, y2 = point[1], point[2]
-    local dirX, dirY = require 'utils.position'.getDirection(self.x, self.y, x2, y2)
-
-    -- distance to move this frame
-    local dist = self.speed * dt
-    local dx, dy = dist * dirX, dist * dirY
-    local centerOffset = config.gridSize / 2
-    local nextX, nextY = self.x + dx, self.y + dy
+  if self.positionTween then
+    local arrived = self.positionTween:update(dt)
+    local nextX, nextY = self.x, self.y
     local actualX, actualY, cols, len = self.collisionObject:move(
       nextX, nextY
     )
 
+    -- if there is a wall collision, adjust our path
     if len > 0 then
-      -- when we hit a corner, there are times where it will get stuck at that corner due to some issue with the
-      -- way `slide` collision works. The logic here solves that issue by making sure the slide amount is always the intended speed
-      if cols[1].normal.y ~= 0 then
-        local actualDx = math.abs(actualX - self.x)
-        if actualDx < dist then
-          local slideDirection = actualX - self.x < 0 and -1 or 1
-          actualX = self.x + slideDirection * dist
-        end
-      end
-
-      if cols[1].normal.x ~= 0 then
-        local actualDy = math.abs(actualY - self.y)
-        if actualDy < dist then
-          local slideDirection = actualY - self.y < 0 and -1 or 1
-          actualY = self.y + slideDirection * dist
-        end
-      end
+      local collision = cols[1]
+      -- print(socket.gettime(), 'hit')
     end
 
-    self.x = actualX
-    self.y = actualY
+    self:drawPath(caix, caiy, self.destination.x, self.destination.y)
 
-    local stopThreshold = 30
-    local centerOffset = 8
-
-    self:drawPath(
-      caix,
-      caiy,
-      x2,
-      y2
-    )
-
-    if (
-      abs(self.x - x2) <= stopThreshold and
-      abs(self.y - y2) <= stopThreshold
-    ) then
-      self.pathIndex = self.pathIndex + 1
-      self.moving = self.pathIndex <= #self.path
+    if (arrived) then
+      self.positionTween = nil
     end
   end
 
