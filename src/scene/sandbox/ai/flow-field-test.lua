@@ -3,7 +3,10 @@ local pprint = require 'utils.pprint'
 local memoize = require 'utils.memoize'
 local flowField = require 'scene.sandbox.ai.flow-field'
 local groups = require 'components.groups'
+local collisionObject = require 'modules.collision'
+local bump = require 'modules.bump'
 
+local colWorld = bump.newWorld(50)
 local arrow = love.graphics.newImage('scene/sandbox/ai/arrow-up.png')
 
 local grid = {
@@ -21,42 +24,149 @@ local grid = {
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 }
 
--- pprint(
---   flowField(grid, 2, 1)
--- )
-
 local gridSize = 50
 local offX, offY = 300, 75
 local WALKABLE = 0
 
 local flowFieldTestBlueprint = {}
 
+local function isOutOfBounds(grid, x, y)
+  return y < 1 or x < 1 or y > #grid or x > #grid[1]
+end
+
 local function isGridCellVisitable(grid, x, y, dist)
-  local isOutOfBounds = y < 1 or x < 1 or y > #grid or x > #grid[1]
-  return not isOutOfBounds and
+  return not isOutOfBounds(grid, x, y) and
     grid[y][x] == WALKABLE
 end
 
-function flowFieldTestBlueprint.init(self)
-  self.flowField = flowField(grid, 2, 2, isGridCellVisitable)
+local function pxToGridUnits(screenX, screenY)
+  local gridPixelX, gridPixelY = screenX - offX, screenY - offY
+  local gridX, gridY =
+    math.floor(gridPixelX / gridSize) + 1,
+    math.floor(gridPixelY / gridSize) + 1
+  return gridX, gridY
 end
 
-function flowFieldTestBlueprint.update(self)
+local function getFlowAtPosition(flowField, x, y)
+  if flowField[y] then
+    local flowData = flowField[y][x]
+    return flowData
+  end
+  return nil
+end
+
+local function createAi(x, y)
+  local w, h = gridSize - 2, gridSize - 2
+  local colObj = collisionObject
+    :new('ai', x, y, w, h)
+    :addToWorld(colWorld)
+  return {
+    x = x,
+    y = y,
+    w = w,
+    h = h,
+    speed = 300,
+    collision = colObj,
+    move = function(self, flowField, dt)
+      local actualX, actualY = self.x + offX, self.y + offY
+      local threshold = 5
+      local shouldMove = not self.dx or ((actualX % gridSize) <= threshold and (actualY % gridSize) <= threshold)
+      local gridX, gridY = pxToGridUnits(self.x, self.y)
+      if shouldMove then
+        local ffv = flowField[gridY][gridX] -- flow field value
+        local normalize = require'utils.position'.normalizeVector
+        local dirX, dirY = normalize(ffv[1], ffv[2])
+        self.dx = self.speed * dirX * dt
+        self.dy = self.speed * dirY * dt
+      end
+
+      local nextX, nextY = self.x + self.dx, self.y + self.dy
+      local adjustedX, adjustedY, cols = self.collision:move(nextX, nextY)
+
+
+      if #cols > 0 then
+        local c = cols[1]
+        if c.other.group == 'wall' then
+          local n = c.normal
+          pprint(n)
+          -- nudge position so that it moves towards the center of the tile which should prevent it from
+          -- colliding with the wall
+          if n.x ~= 0 then
+            local yAxisBias = (adjustedY - offY) % gridSize
+            if yAxisBias < (gridSize / 2) then
+              adjustedY = adjustedY - 1
+            else
+              adjustedY = adjustedY + 1
+            end
+          end
+
+          if n.y ~= 0 then
+            local xAxisBias = (adjustedX - offX) % gridSize
+            if xAxisBias < (gridSize / 2) then
+              adjustedX = adjustedX - 1
+            else
+              adjustedX = adjustedX + 1
+            end
+          end
+        end
+      end
+
+      self.x = adjustedX
+      self.y = adjustedY
+    end,
+    draw = function(self)
+      love.graphics.setColor(1,0.2,0, 0.8)
+      local padding = 0
+      love.graphics.rectangle(
+        'fill',
+        self.x + padding,
+        self.y + padding,
+        self.w - padding * 2,
+        self.h - padding * 2
+      )
+    end
+  }
+end
+
+function flowFieldTestBlueprint.init(self)
+  local iterateGrid = require 'utils.iterate-grid'
+  self.wallCollisions = {}
+  iterateGrid(grid, function(v, x, y)
+    if v ~= WALKABLE then
+      self.wallCollisions[y] = self.wallCollisions[y] or {}
+      self.wallCollisions[y][x] = collisionObject:new(
+        'wall',
+        ((x - 1) * gridSize) + offX,
+        ((y - 1) * gridSize) + offY,
+        gridSize, gridSize
+      ):addToWorld(colWorld)
+    end
+  end)
+
+  self.flowField = flowField(grid, 5, 2, isGridCellVisitable)
+  self.ai = createAi(offX, offY)
+end
+
+function flowFieldTestBlueprint.update(self, dt)
   if love.mouse.isDown(1) then
     local mx, my = love.mouse.getX(), love.mouse.getY()
-    local gridPixelX, gridPixelY = mx - offX, my - offY
-    local gridX, gridY =
-      math.floor(gridPixelX / gridSize) + 1,
-      math.floor(gridPixelY / gridSize) + 1
-    local gridValue = grid[gridY][gridX]
+    local gridX, gridY = pxToGridUnits(mx, my)
 
+    if isOutOfBounds(grid, gridX, gridY) then
+      return
+    end
+
+    local gridValue = grid[gridY][gridX]
     if gridValue ~= WALKABLE then
       return
     end
+
     local ts = socket.gettime()
     self.flowField = flowField(grid, gridX, gridY, isGridCellVisitable)
     self.executionTimeMs = (socket.gettime() - ts) * 1000
   end
+
+  self.ai:move(self.flowField, dt)
 end
 
 local function arrowRotationFromDirection(dx, dy)
@@ -126,13 +236,28 @@ function flowFieldTestBlueprint.draw(self)
             COLOR_UNWALKABLE
         )
       end
+
       love.graphics.rectangle(
         'fill',
         drawX + 1,
         drawY + 1,
-        gridSize - 1,
-        gridSize - 1
+        gridSize - 2,
+        gridSize - 2
       )
+
+      -- wall collision rectangle
+      if self.wallCollisions[y] and self.wallCollisions[y][x] then
+        love.graphics.setColor(0,0.6,1,0.4)
+        local margin = 2
+        love.graphics.rectangle(
+          'line',
+          drawX + margin,
+          drawY + margin,
+          gridSize - margin * 2,
+          gridSize - margin * 2
+        )
+      end
+
       if cell then
         arrowDrawQueue[#arrowDrawQueue + 1] = function()
           -- arrow
@@ -174,6 +299,8 @@ function flowFieldTestBlueprint.draw(self)
       end
     end
   end
+
+  self.ai:draw()
 
   for i=1, #arrowDrawQueue do
     arrowDrawQueue[i]()

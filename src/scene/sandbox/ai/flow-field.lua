@@ -1,5 +1,7 @@
 -- https://www.geeksforgeeks.org/flood-fill-algorithm-implement-fill-paint/
 
+local sqrt, pow = math.sqrt, math.pow
+
 local function addCellData(grid, x, y, from, frontier, cameFromList, canVisit)
   cameFromList[y] = cameFromList[y] or {}
   local hasVisited = cameFromList[y][x] ~= nil
@@ -11,20 +13,10 @@ local function addCellData(grid, x, y, from, frontier, cameFromList, canVisit)
     frontier[#frontier + 1] = {x, y, dist + 1}
   end
 
-  -- get directions
-  local dirX = 0
-  if x - from[1] > 0 then
-    dirX = -1
-  elseif x - from[1] < 0 then
-    dirX = 1
-  end
-
-  local dirY = 0
-  if y - from[2] > 0 then
-    dirY = -1
-  elseif y - from[2] < 0 then
-    dirY = 1
-  end
+  -- directions
+  -- we multiply by -1 because we want the direction to where it came from
+  local dirX = (x - from[1]) * -1
+  local dirY = (y - from[2]) * -1
 
   cameFromList[y][x] = {dirX, dirY, dist}
 end

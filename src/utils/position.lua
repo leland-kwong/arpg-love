@@ -41,6 +41,12 @@ Position.getDirection = memoize(function(x1, y1, x2, y2)
 	return b/c, a/c
 end)
 
+function Position.normalizeVector(a, b)
+	local c = math.sqrt(math.pow(a, 2) + math.pow(b, 2))
+	return a == 0 and 0 or a/c,
+		b == 0 and 0 or b/c
+end
+
 Position.findNearestWalkableTile = {
 	fromGridPosition = function(grid, x, y)
 		return findNearestWalkableTileFromPosition(grid, x, y)
