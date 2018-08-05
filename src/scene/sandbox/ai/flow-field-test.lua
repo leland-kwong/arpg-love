@@ -18,8 +18,8 @@ local grid = {
   {0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0},
   {0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0},
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
-  {0,0,0,0,0,1,1,1,1,1,0,0,1,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0},
+  {0,0,0,0,0,1,1,1,1,1,0,0,0,1,0,0,0,0},
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 }
@@ -56,7 +56,8 @@ local function getFlowAtPosition(flowField, x, y)
 end
 
 local function createAi(x, y)
-  local w, h = gridSize - 2, gridSize - 2
+  local scale = 1
+  local w, h = (gridSize * scale) - 2, (gridSize * scale) - 2
   local colObj = collisionObject
     :new('ai', x, y, w, h)
     :addToWorld(colWorld)
@@ -69,11 +70,12 @@ local function createAi(x, y)
     collision = colObj,
     move = function(self, flowField, dt)
       local actualX, actualY = self.x + offX, self.y + offY
-      local threshold = 5
-      local shouldMove = not self.dx or ((actualX % gridSize) <= threshold and (actualY % gridSize) <= threshold)
+      local slop = 5 * scale
       local gridX, gridY = pxToGridUnits(self.x, self.y)
-      if shouldMove then
-        local ffv = flowField[gridY][gridX] -- flow field value
+      local ffv = flowField[gridY][gridX] -- flow field value
+      local isNewTile = ((actualX % gridSize) <= slop and (actualY % gridSize) <= slop)
+      -- if its a new tile lets use its vector info
+      if isNewTile then
         local normalize = require'utils.position'.normalizeVector
         local dirX, dirY = normalize(ffv[1], ffv[2])
         self.dx = self.speed * dirX * dt
@@ -83,15 +85,13 @@ local function createAi(x, y)
       local nextX, nextY = self.x + self.dx, self.y + self.dy
       local adjustedX, adjustedY, cols = self.collision:move(nextX, nextY)
 
-
       if #cols > 0 then
         local c = cols[1]
         if c.other.group == 'wall' then
           local n = c.normal
-          pprint(n)
-          -- nudge position so that it moves towards the center of the tile which should prevent it from
-          -- colliding with the wall
-          if n.x ~= 0 then
+          -- When ai is moving opposite the normal we'll adjust the positioning so its at least
+          -- moving somewhat diagonally to wall. This prevents it from being stuck trying to go around the wall.
+          if n.x ~= 0 and n.y == 0 then
             local yAxisBias = (adjustedY - offY) % gridSize
             if yAxisBias < (gridSize / 2) then
               adjustedY = adjustedY - 1
@@ -100,7 +100,7 @@ local function createAi(x, y)
             end
           end
 
-          if n.y ~= 0 then
+          if n.x == 0 and n.y ~= 0 then
             local xAxisBias = (adjustedX - offX) % gridSize
             if xAxisBias < (gridSize / 2) then
               adjustedX = adjustedX - 1
