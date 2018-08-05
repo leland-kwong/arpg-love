@@ -5,26 +5,57 @@ local groups = require 'components.groups'
 local arrow = love.graphics.newImage('scene/sandbox/ai/arrow-up.png')
 
 local grid = {
-  {1,1,1,1,1,1,1},
-  {1,1,1,1,1,1,1},
-  {1,1,1,1,1,1,1},
-  -- {1,1,1,1,1,1,1},
-  -- {1,1,1,1,1,1,1},
-  -- {1,1,1,1,1,1,1},
+  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
 }
 
 -- pprint(
 --   flowField(grid, 2, 1)
 -- )
 
+local gridSize = 50
+local offX, offY = 330, 75
+local WALKABLE = 0
+
 local flowFieldTestBlueprint = {}
 
-function flowFieldTestBlueprint.init(self)
-  self.flowField = flowField(grid, 2, 2)
+local function outOfBoundsCheck(grid, x, y)
+  return y < 1 or x < 1 or y > #grid or x > #grid[1]
 end
 
-local function arrowRotationFromDirection(d)
-  local dx, dy = d[1], d[2]
+local function isGridCellVisitable(grid, x, y, dist)
+  return not outOfBoundsCheck(grid, x, y) and
+    grid[y][x] ~= 1 and
+    dist <= 4
+end
+
+function flowFieldTestBlueprint.init(self)
+  self.flowField = flowField(grid, 2, 2, isGridCellVisitable)
+end
+
+function flowFieldTestBlueprint.update(self)
+  if love.mouse.isDown(1) then
+    local mx, my = love.mouse.getX(), love.mouse.getY()
+    local gridPixelX, gridPixelY = mx - offX, my - offY
+    local gridX, gridY =
+      math.floor(gridPixelX / gridSize) + 1,
+      math.floor(gridPixelY / gridSize) + 1
+
+    self.flowField = flowField(grid, gridX, gridY, isGridCellVisitable)
+  end
+end
+
+local function arrowRotationFromDirection(dx, dy)
   if dx < 0 then
     return math.rad(-90)
   end
@@ -37,50 +68,69 @@ local function arrowRotationFromDirection(d)
   return math.rad(180)
 end
 
+local COLOR_UNWALKABLE = {0.2,0.2,0.2,1}
+local COLOR_WALKABLE = {0.2,0.3,0.5,1}
+local COLOR_START_POINT = {0,1,1}
+
 function flowFieldTestBlueprint.draw(self)
   love.graphics.clear(0,0,0,1)
 
-  local offX, offY = 250, 100
+  love.graphics.setColor(1,1,1,1)
+  love.graphics.print('CLICK GRID TO SET CONVERGENCE POINT', offX + 20, 20)
 
-  for y=1, #self.flowField do
-    local row = self.flowField[y]
-    for x=1, #row do
-      local size = 80
+  for y=1, #grid do
+    local row = self.flowField[y] or {}
+    for x=1, #grid[1] do
+      local cell = row[x]
       local drawX, drawY =
-        (x * size) + offX,
-        (y * size) + offY
-      love.graphics.setColor(0.2,0.3,0.5,1)
+        ((x-1) * gridSize) + offX,
+        ((y-1) * gridSize) + offY
+
+      local oData = grid[y][x]
+      local ffd = row[x] -- flow field cell data
+      local isStartPoint = ffd and (ffd[1] == 0 and ffd[2] == 0)
+      if isStartPoint then
+        love.graphics.setColor(COLOR_START_POINT)
+      else
+        love.graphics.setColor(
+          oData == WALKABLE and
+            COLOR_WALKABLE or
+            COLOR_UNWALKABLE
+        )
+      end
       love.graphics.rectangle(
         'fill',
         drawX + 1,
         drawY + 1,
-        size - 1,
-        size - 1
+        gridSize - 1,
+        gridSize - 1
       )
-      love.graphics.setColor(0.6,0.6,0.6,1)
-      love.graphics.print(
-        row[x][1]..' '..row[x][2],
-        drawX + 10,
-        drawY + 10
-      )
-
-      -- arrow
-      love.graphics.setColor(1,1,0.2)
-      local direction = row[x]
-      local isStartPoint = direction[1] == 0 and direction[2] == 0
-      if not isStartPoint then
-        local rot = arrowRotationFromDirection(direction)
-        local offsetCenter = 8
-        love.graphics.draw(
-          arrow,
-          drawX + 38,
-          drawY + 43,
-          rot,
-          1,
-          1,
-          8,
-          8
+      if cell then
+        love.graphics.scale(0.5)
+        love.graphics.setColor(0.6,0.6,0.6,1)
+        love.graphics.print(
+          row[x][1]..' '..row[x][2]..' '..row[x][3],
+          (drawX + 5) * 2,
+          (drawY + 5) * 2
         )
+        love.graphics.scale(2)
+
+        -- arrow
+        love.graphics.setColor(1,1,0.2)
+        if not isStartPoint then
+          local rot = arrowRotationFromDirection(ffd[1], ffd[2])
+          local offsetCenter = 8
+          love.graphics.draw(
+            arrow,
+            drawX + 24,
+            drawY + 25,
+            rot,
+            1,
+            1,
+            8,
+            8
+          )
+        end
       end
     end
   end
