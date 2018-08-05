@@ -1,24 +1,24 @@
 local socket = require 'socket'
 local pprint = require 'utils.pprint'
 local memoize = require 'utils.memoize'
-local flowField = memoize(require 'scene.sandbox.ai.flow-field')
+local flowField = require 'scene.sandbox.ai.flow-field'
 local groups = require 'components.groups'
 
 local arrow = love.graphics.newImage('scene/sandbox/ai/arrow-up.png')
 
 local grid = {
-  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,1},
-  {1,0,0,0,1,0,0,0,0,0,1,1,1,0,0,0,0,1},
-  {1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,1,1,0,0,0,0,0,0,0,0,1,0,0,1},
-  {1,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1},
-  {1,0,0,0,0,1,1,1,1,1,0,0,1,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,0},
+  {0,0,0,0,1,0,0,0,0,0,1,1,1,0,0,0,0,0},
+  {0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0},
+  {0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
+  {0,0,0,0,0,1,1,1,1,1,0,0,1,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 }
 
 -- pprint(
@@ -32,7 +32,9 @@ local WALKABLE = 0
 local flowFieldTestBlueprint = {}
 
 local function isGridCellVisitable(grid, x, y, dist)
-  return grid[y][x] == WALKABLE
+  local isOutOfBounds = y < 1 or x < 1 or y > #grid or x > #grid[1]
+  return not isOutOfBounds and
+    grid[y][x] == WALKABLE
 end
 
 function flowFieldTestBlueprint.init(self)
@@ -41,8 +43,6 @@ end
 
 function flowFieldTestBlueprint.update(self)
   if love.mouse.isDown(1) then
-    local ts = socket.gettime()
-
     local mx, my = love.mouse.getX(), love.mouse.getY()
     local gridPixelX, gridPixelY = mx - offX, my - offY
     local gridX, gridY =
@@ -53,6 +53,7 @@ function flowFieldTestBlueprint.update(self)
     if gridValue ~= WALKABLE then
       return
     end
+    local ts = socket.gettime()
     self.flowField = flowField(grid, gridX, gridY, isGridCellVisitable)
     self.executionTimeMs = (socket.gettime() - ts) * 1000
   end
@@ -84,11 +85,11 @@ local function arrowRotationFromDirection(dx, dy)
 end
 
 local COLOR_UNWALKABLE = {0.2,0.2,0.2,1}
-local COLOR_WALKABLE = {0.2,0.3,0.5,1}
+local COLOR_WALKABLE = {0.2,0.35,0.55,1}
 local COLOR_START_POINT = {0,1,1}
 
 function flowFieldTestBlueprint.draw(self)
-  love.graphics.clear(0,0,0,1)
+  love.graphics.clear(0.1,0.1,0.1,1)
 
   love.graphics.setColor(1,1,1,1)
   love.graphics.print('CLICK GRID TO SET CONVERGENCE POINT', offX + 20, 20)

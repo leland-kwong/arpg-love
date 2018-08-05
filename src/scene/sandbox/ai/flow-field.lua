@@ -1,11 +1,6 @@
 -- https://www.geeksforgeeks.org/flood-fill-algorithm-implement-fill-paint/
 
 local function addCellData(grid, x, y, from, frontier, cameFromList, canVisit)
-  local isOutOfBounds = y < 1 or x < 1 or y > #grid or x > #grid[1]
-  if isOutOfBounds then
-    return
-  end
-
   cameFromList[y] = cameFromList[y] or {}
   local hasVisited = cameFromList[y][x] ~= nil
   local dist = from[3]
