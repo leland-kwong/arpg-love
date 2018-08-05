@@ -101,4 +101,8 @@ function Console.draw()
   gfx.setBlendMode('alpha')
 end
 
+function Console.drawOrder()
+  return 2
+end
+
 return groups.gui.createFactory(Console)

@@ -12,6 +12,9 @@ local tween = require 'modules.tween'
 local config = require 'config'
 local camera = require 'components.camera'
 local round = require 'utils.math'.round
+local flowFieldtest = require 'scene.sandbox.ai.flow-field-test'
+
+flowFieldtest.create()
 
 local AiTest = {}
 
@@ -204,7 +207,7 @@ local function getLineOfSight(collisionWorld, x1, y1, x2, y2, filter)
   for i=1, 100 do
     a, b, cols, len = tempCollisionCheck(collisionWorld, x1, y1, 1, 1, x2, y2, filter)
   end
-  print('vision check', (socket.gettime() - ts) * 1000)
+  -- print('vision check', (socket.gettime() - ts) * 1000)
   return len == 0
 end
 
@@ -297,6 +300,16 @@ function AiTest.draw(self)
         screenY,
         tileSize,
         tileSize
+      )
+    else
+      local size = tileSize - 1
+      love.graphics.setColor(0,0,0.2,1)
+      love.graphics.rectangle(
+        'fill',
+        screenX + 1,
+        screenY + 1,
+        size,
+        size
       )
     end
   end)
