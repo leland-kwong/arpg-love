@@ -1,3 +1,4 @@
+local socket = require 'socket'
 local pprint = require 'utils.pprint'
 local flowField = require 'scene.sandbox.ai.flow-field'
 local groups = require 'components.groups'
@@ -11,10 +12,10 @@ local grid = {
   {1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
 }
@@ -36,7 +37,7 @@ end
 local function isGridCellVisitable(grid, x, y, dist)
   return not outOfBoundsCheck(grid, x, y) and
     grid[y][x] ~= 1 and
-    dist <= 4
+    dist <= 9
 end
 
 function flowFieldTestBlueprint.init(self)
@@ -45,13 +46,21 @@ end
 
 function flowFieldTestBlueprint.update(self)
   if love.mouse.isDown(1) then
+    local ts = socket.gettime()
+
     local mx, my = love.mouse.getX(), love.mouse.getY()
     local gridPixelX, gridPixelY = mx - offX, my - offY
     local gridX, gridY =
       math.floor(gridPixelX / gridSize) + 1,
       math.floor(gridPixelY / gridSize) + 1
+    local gridValue = grid[gridY][gridX]
+
+    if gridValue ~= WALKABLE then
+      return
+    end
 
     self.flowField = flowField(grid, gridX, gridY, isGridCellVisitable)
+    self.executionTimeMs = (socket.gettime() - ts) * 1000
   end
 end
 
@@ -77,6 +86,15 @@ function flowFieldTestBlueprint.draw(self)
 
   love.graphics.setColor(1,1,1,1)
   love.graphics.print('CLICK GRID TO SET CONVERGENCE POINT', offX + 20, 20)
+
+  love.graphics.setColor(0.5,0.5,0.5)
+  if self.executionTimeMs ~= nil then
+    love.graphics.print(
+      'execution time: '..self.executionTimeMs..'ms',
+      offX + 20,
+      50
+    )
+  end
 
   for y=1, #grid do
     local row = self.flowField[y] or {}
