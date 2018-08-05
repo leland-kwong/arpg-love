@@ -1,6 +1,11 @@
 -- https://www.geeksforgeeks.org/flood-fill-algorithm-implement-fill-paint/
 
 local function addCellData(grid, x, y, from, frontier, cameFromList, canVisit)
+  local isOutOfBounds = y < 1 or x < 1 or y > #grid or x > #grid[1]
+  if isOutOfBounds then
+    return
+  end
+
   cameFromList[y] = cameFromList[y] or {}
   local hasVisited = cameFromList[y][x] ~= nil
   local dist = from[3]
@@ -29,16 +34,49 @@ local function addCellData(grid, x, y, from, frontier, cameFromList, canVisit)
   cameFromList[y][x] = {dirX, dirY, dist}
 end
 
+--[[
+  IMPORTANT: we should do the cardinal directions before the intercardinal directions. This way
+  the directions are prioritised by the cardinal directions first.
+]]
 local function visitNeighbors(grid, start, frontier, cameFromList, canVisit)
   local x,y,dist = start[1], start[2], start[3]
+
   -- east
   addCellData(grid, x+1, y, start, frontier, cameFromList, canVisit)
+
   -- west
   addCellData(grid, x-1, y, start, frontier, cameFromList, canVisit)
+
   -- south
   addCellData(grid, x, y+1, start, frontier, cameFromList, canVisit)
+
   -- north
   addCellData(grid, x, y-1, start, frontier, cameFromList, canVisit)
+
+
+  --[[
+    NOTE: these `canVisit` checks are here to prevent diagonal movements from
+    cutting into corner walls.
+  ]]
+  -- north-east
+  if canVisit(grid, x, y-1, dist) and canVisit(grid, x+1, y, dist) then
+    addCellData(grid, x+1, y-1, start, frontier, cameFromList, canVisit)
+  end
+
+  -- south-west
+  if canVisit(grid, x, y+1, dist) and canVisit(grid, x-1, y, dist) then
+    addCellData(grid, x-1, y+1, start, frontier, cameFromList, canVisit)
+  end
+
+  -- south-east
+  if canVisit(grid, x, y+1, dist) and canVisit(grid, x+1, y, dist) then
+    addCellData(grid, x+1, y+1, start, frontier, cameFromList, canVisit)
+  end
+
+  -- north-west
+  if canVisit(grid, x, y-1, dist) and canVisit(grid, x-1, y, dist) then
+    addCellData(grid, x-1, y-1, start, frontier, cameFromList, canVisit)
+  end
 end
 
 --[[

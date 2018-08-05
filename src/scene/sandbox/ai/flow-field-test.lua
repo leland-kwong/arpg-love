@@ -8,13 +8,13 @@ local arrow = love.graphics.newImage('scene/sandbox/ai/arrow-up.png')
 local grid = {
   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1},
+  {1,0,0,0,1,0,0,0,0,0,1,1,1,0,0,0,1},
   {1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,1},
+  {1,0,0,0,1,1,0,0,0,0,0,0,0,0,1,0,1},
+  {1,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1},
   {1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
@@ -30,14 +30,8 @@ local WALKABLE = 0
 
 local flowFieldTestBlueprint = {}
 
-local function outOfBoundsCheck(grid, x, y)
-  return y < 1 or x < 1 or y > #grid or x > #grid[1]
-end
-
 local function isGridCellVisitable(grid, x, y, dist)
-  return not outOfBoundsCheck(grid, x, y) and
-    grid[y][x] == WALKABLE and
-    dist <= 9
+  return grid[y][x] == WALKABLE
 end
 
 function flowFieldTestBlueprint.init(self)
@@ -58,7 +52,6 @@ function flowFieldTestBlueprint.update(self)
     if gridValue ~= WALKABLE then
       return
     end
-
     self.flowField = flowField(grid, gridX, gridY, isGridCellVisitable)
     self.executionTimeMs = (socket.gettime() - ts) * 1000
   end
@@ -108,6 +101,9 @@ function flowFieldTestBlueprint.draw(self)
     )
   end
 
+  local textDrawQueue = {}
+  local arrowDrawQueue = {}
+
   for y=1, #grid do
     local row = self.flowField[y] or {}
     for x=1, #grid[1] do
@@ -136,33 +132,53 @@ function flowFieldTestBlueprint.draw(self)
         gridSize - 1
       )
       if cell then
-        love.graphics.scale(0.5)
-        love.graphics.setColor(0.6,0.6,0.6,1)
-        love.graphics.print(
-          row[x][1]..' '..row[x][2]..' '..row[x][3],
-          (drawX + 5) * 2,
-          (drawY + 5) * 2
-        )
-        love.graphics.scale(2)
+        arrowDrawQueue[#arrowDrawQueue + 1] = function()
+          -- arrow
+          love.graphics.setColor(1,1,0.2)
+          if not isStartPoint then
+            local rot = arrowRotationFromDirection(ffd[1], ffd[2])
+            local offsetCenter = 8
+            love.graphics.draw(
+              arrow,
+              drawX + 25,
+              drawY + 26,
+              rot,
+              1,
+              1,
+              8,
+              8
+            )
+          end
+        end
 
-        -- arrow
-        love.graphics.setColor(1,1,0.2)
-        if not isStartPoint then
-          local rot = arrowRotationFromDirection(ffd[1], ffd[2])
-          local offsetCenter = 8
-          love.graphics.draw(
-            arrow,
-            drawX + 24,
-            drawY + 25,
-            rot,
-            1,
-            1,
-            8,
-            8
+        textDrawQueue[#textDrawQueue + 1] = function()
+          -- text
+          love.graphics.scale(0.5)
+          love.graphics.setColor(0.6,0.6,0.6,1)
+          -- direction vectors
+          love.graphics.print(
+            row[x][1]..' '..row[x][2],
+            (drawX + 5) * 2,
+            (drawY + 5) * 2
           )
+          -- distance
+          love.graphics.print(
+            row[x][3],
+            (drawX + 25) * 2,
+            (drawY + 38) * 2
+          )
+          love.graphics.scale(2)
         end
       end
     end
+  end
+
+  for i=1, #arrowDrawQueue do
+    arrowDrawQueue[i]()
+  end
+
+  for i=1, #textDrawQueue do
+    textDrawQueue[i]()
   end
 end
 
