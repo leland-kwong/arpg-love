@@ -13,15 +13,15 @@ local grid = {
   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1},
+  {1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1},
+  {1,0,0,1,1,1,1,1,1,1,0,0,0,0,0,1,0,0,0,0,1},
+  {1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,1},
+  {1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1},
@@ -55,14 +55,6 @@ local function pxToGridUnits(screenX, screenY)
   return gridX, gridY
 end
 
-local function getFlowAtPosition(flowField, x, y)
-  if flowField[y] then
-    local flowData = flowField[y][x]
-    return flowData
-  end
-  return nil
-end
-
 local function getFlowFieldValue(flowField, gridX, gridY)
   local row = flowField[gridY]
   local v = row[gridX]
@@ -72,74 +64,49 @@ local function getFlowFieldValue(flowField, gridX, gridY)
   return v[1], v[2], v[3]
 end
 
-local function shouldStopMoving(vx, vy)
-  return vx == 0 and vy == 0
-end
-
 local Ai = {}
 local Ai_mt = {__index = Ai}
 
-function Ai:getDirections(flowField)
-  local gridX, gridY = pxToGridUnits(self.x, self.y)
-  local vx, vy = getFlowFieldValue(flowField, gridX, gridY)
-  local clearance = self.scale
-  -- adjust vector if part of the agent will collide with a wall
-  if clearance > 1 then
-    if vx < 0 then
-      if grid[gridY + 1][gridX - 1] ~= WALKABLE then
-        return getFlowFieldValue(flowField, gridX, gridY + 1)
-      end
-    end
-    if vx > 0 then
-      if grid[gridY + 1][gridX + 2] ~= WALKABLE then
-        return getFlowFieldValue(flowField, gridX + 1, gridY + 1)
-      end
-    end
-    if vy > 0 then
-      if grid[gridY + 2][gridX + 1] ~= WALKABLE then
-        return getFlowFieldValue(flowField, gridX + 1, gridY + 1)
-      end
-    end
-    if vy < 0 then
-      if grid[gridY - 1][gridX + 1] ~= WALKABLE then
-        return getFlowFieldValue(flowField, gridX + 1, gridY)
-      end
-    end
-  end
-  return vx, vy
+local function isZeroVector(vx, vy)
+  return vx == 0 and vy == 0
 end
+
+-- gets directions from grid position, adjusting vectors to handle wall collisions as needed
+local normalize = require'utils.position'.normalizeVector
+Ai.getDirections = require'scene.sandbox.ai.pathing-with-steering'
+Ai.getPathWithAstar = require'scene.sandbox.ai.pathing-with-astar'
 
 function Ai:move(flowField, dt)
   local actualX, actualY = self.x - offX, self.y - offY
-  local slop = 5
+  local slop = 8
 
   local gridX, gridY = pxToGridUnits(self.x, self.y)
-  local vx, vy = self:getDirections(flowField)
-  local round = require'utils.math'.round
-
-  local isSameTile = self.gridX == gridX and self.gridY == gridY
-  local isSameVectors = self.vx == vx and self.vy == vy
-  local slopX, slopY = (actualX % gridSize), (actualY % gridSize)
-  local isNewTile = (slopX <= slop) and (slopY <= slop) or
-    (isSameTile and not isSameVectors)
-
-  self.gridX = gridX
-  self.gridY = gridY
+  self.pathWithAstar = self:getPathWithAstar(flowField, grid, gridX, gridY, 5, WALKABLE)
+  local vx, vy = self:getDirections(flowField, grid, gridX, gridY)
   self.vx = vx
   self.vy = vy
-
-  -- if its a new tile lets use its vector info
-  if isNewTile then
-    local normalize = require'utils.position'.normalizeVector
-    local dirX, dirY = normalize(vx, vy)
-    self.dx = self.speed * dirX * dt
-    self.dy = self.speed * dirY * dt
-  end
+  self.dx = self.speed * vx * dt
+  self.dy = self.speed * vy * dt
 
   local nextX, nextY = self.x + self.dx, self.y + self.dy
   local adjustedX, adjustedY, cols, len = self.collision:move(nextX, nextY)
   self.x = adjustedX
   self.y = adjustedY
+end
+
+local function drawPathWithAstar(self)
+  local p = self.pathWithAstar
+  love.graphics.setColor(1,1,1,1)
+  for i=1, #p do
+    local x,y = unpack(p[i])
+    love.graphics.rectangle(
+      'line',
+      (x - 1) * gridSize + offX,
+      (y - 1) * gridSize + offY,
+      gridSize,
+      gridSize
+    )
+  end
 end
 
 function Ai:draw()
@@ -161,11 +128,20 @@ function Ai:draw()
     self.collision.h,
     self.collision.w
   )
+
+  local round = require'utils.math'.round
+  love.graphics.print(
+    'vx: '..round(self.vx, 2)..'\nvy: '..round(self.vy, 2),
+    self.x,
+    self.y
+  )
+
+  drawPathWithAstar(self)
 end
 
 local function createAi(x, y)
-  local scale = 1
-  local size = (gridSize * scale) - 10
+  local scale = 1.3
+  local size = (gridSize * scale) - 5
   local w, h = size, size
   local colObj = collisionObject
     :new('ai', x, y, w, h)
@@ -178,7 +154,7 @@ local function createAi(x, y)
     dx = 0,
     dy = 0,
     scale = scale,
-    speed = 200,
+    speed = 0,
     collision = colObj
   }, Ai_mt)
 end
@@ -198,8 +174,8 @@ function flowFieldTestBlueprint.init(self)
     end
   end)
 
-  self.flowField = flowField(grid, 5, 2, isGridCellVisitable)
-  self.ai = createAi(offX + 11 * gridSize, offY + 5 * gridSize)
+  self.flowField = flowField(grid, 7, 5, isGridCellVisitable)
+  self.ai = createAi(offX + 10 * gridSize, offY + 3 * gridSize)
 end
 
 function flowFieldTestBlueprint.update(self, dt)
@@ -389,8 +365,6 @@ function flowFieldTestBlueprint.draw(self)
     end
   end
 
-  self.ai:draw()
-
   for i=1, #arrowDrawQueue do
     arrowDrawQueue[i]()
   end
@@ -399,6 +373,7 @@ function flowFieldTestBlueprint.draw(self)
     textDrawQueue[i]()
   end
 
+  self.ai:draw()
   drawMousePosition()
 end
 
