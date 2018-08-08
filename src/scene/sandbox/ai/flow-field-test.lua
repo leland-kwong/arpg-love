@@ -14,17 +14,17 @@ local grid = {
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1},
-  {1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1},
-  {1,0,0,1,1,1,1,1,1,1,0,0,0,0,0,1,0,0,0,0,1},
-  {1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,1},
-  {1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,1,0,0,0,1},
+  {1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,1,0,0,0,0,1},
+  {1,0,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,1},
+  {1,0,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,1,0,0,0,1},
+  {1,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1},
+  {1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1},
+  {1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,1},
+  {1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,1},
   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
 }
 
@@ -74,14 +74,20 @@ end
 -- gets directions from grid position, adjusting vectors to handle wall collisions as needed
 local normalize = require'utils.position'.normalizeVector
 Ai.getDirections = require'scene.sandbox.ai.pathing-with-steering'
-Ai.getPathWithAstar = require'scene.sandbox.ai.pathing-with-astar'
+local aiPathWithAstar = require'scene.sandbox.ai.pathing-with-astar'
+Ai.getPathWithAstar = require'utils.perf'({
+  enabled = false,
+  done = function(t)
+    print('ai path:', t)
+  end
+})(aiPathWithAstar)
 
 function Ai:move(flowField, dt)
   local actualX, actualY = self.x - offX, self.y - offY
   local slop = 8
 
   local gridX, gridY = pxToGridUnits(self.x, self.y)
-  self.pathWithAstar = self:getPathWithAstar(flowField, grid, gridX, gridY, 5, WALKABLE)
+  self.pathWithAstar = self:getPathWithAstar(flowField, grid, gridX, gridY, 30, WALKABLE)
   local vx, vy = self:getDirections(flowField, grid, gridX, gridY)
   self.vx = vx
   self.vy = vy
@@ -96,16 +102,59 @@ end
 
 local function drawPathWithAstar(self)
   local p = self.pathWithAstar
-  love.graphics.setColor(1,1,1,1)
+  local agentSilhouetteDrawQueue = {}
+  local agentPathDrawQueue = {}
+
   for i=1, #p do
-    local x,y = unpack(p[i])
-    love.graphics.rectangle(
-      'line',
-      (x - 1) * gridSize + offX,
-      (y - 1) * gridSize + offY,
-      gridSize,
-      gridSize
+    local point = p[i]
+    local x, y = (point[1] - 1) * gridSize + offX,
+      (point[2] - 1) * gridSize + offY
+
+    -- agent silhouette
+    table.insert(
+      agentSilhouetteDrawQueue,
+      function()
+        love.graphics.setColor(1,1,1,1)
+        love.graphics.setLineWidth(2)
+        love.graphics.rectangle(
+          'fill',
+          x, y,
+          gridSize * 2,
+          gridSize * 2
+        )
+      end
     )
+
+    -- agent path
+    table.insert(
+      agentPathDrawQueue,
+      function()
+        love.graphics.setColor(0.6,0.7,0.0,0.5)
+        love.graphics.rectangle(
+          'fill',
+          x, y,
+          gridSize,
+          gridSize
+        )
+
+        love.graphics.setColor(1,1,1,1)
+        love.graphics.print(i, x + 5, y + 5)
+      end
+    )
+  end
+
+  self.canvasAgentSilhouette = self.canvasAgentSilhouette or love.graphics.newCanvas()
+  love.graphics.setCanvas(self.canvasAgentSilhouette)
+  love.graphics.clear()
+  for i=1, #agentSilhouetteDrawQueue do
+    agentSilhouetteDrawQueue[i]()
+  end
+  love.graphics.setCanvas()
+  love.graphics.setColor(1,1,1,0.3)
+  love.graphics.draw(self.canvasAgentSilhouette)
+
+  for i=1, #agentPathDrawQueue do
+    agentPathDrawQueue[i]()
   end
 end
 
@@ -140,7 +189,7 @@ function Ai:draw()
 end
 
 local function createAi(x, y)
-  local scale = 1.3
+  local scale = 1
   local size = (gridSize * scale) - 5
   local w, h = size, size
   local colObj = collisionObject
@@ -174,8 +223,10 @@ function flowFieldTestBlueprint.init(self)
     end
   end)
 
-  self.flowField = flowField(grid, 7, 5, isGridCellVisitable)
-  self.ai = createAi(offX + 10 * gridSize, offY + 3 * gridSize)
+  self.flowField = flowField(grid, 5, 7, isGridCellVisitable)
+
+  local gridOffset = -1
+  self.ai = createAi(offX + ((gridOffset + 11) * gridSize), offY + ((gridOffset + 6) * gridSize))
 end
 
 function flowFieldTestBlueprint.update(self, dt)
@@ -227,7 +278,7 @@ end
 
 local COLOR_UNWALKABLE = {0.2,0.2,0.2,1}
 local COLOR_WALKABLE = {0.2,0.35,0.55,1}
-local COLOR_ARROW = {0.75,0.75,0.75}
+local COLOR_ARROW = {0.7,0.7,0.7}
 local COLOR_START_POINT = {0,1,0}
 
 local function drawMousePosition()
@@ -274,7 +325,7 @@ function flowFieldTestBlueprint.draw(self)
 
       local oData = grid[y][x]
       local ffd = row[x] -- flow field cell data
-      local isStartPoint = ffd and (ffd[1] == 0 and ffd[2] == 0)
+      local isStartPoint = ffd and (ffd.x == 0 and ffd.y == 0)
       if isStartPoint then
         love.graphics.setColor(COLOR_START_POINT)
       else
@@ -311,7 +362,7 @@ function flowFieldTestBlueprint.draw(self)
           -- arrow
           love.graphics.setColor(COLOR_ARROW)
           if not isStartPoint then
-            local rot = arrowRotationFromDirection(ffd[1], ffd[2])
+            local rot = arrowRotationFromDirection(ffd.x, ffd.y)
             local offsetCenter = 8
             love.graphics.draw(
               arrow,
@@ -346,14 +397,14 @@ function flowFieldTestBlueprint.draw(self)
 
             -- direction vectors
             love.graphics.print(
-              row[x][1]..' '..row[x][2],
+              row[x].x..' '..row[x].y,
               (drawX + 5) * 2,
               (drawY + 5) * 2
             )
 
             -- distance
             love.graphics.print(
-              row[x][3],
+              row[x].dist,
               (drawX + gridSize/2) * 2,
               (drawY + gridSize - 6) * 2
             )
