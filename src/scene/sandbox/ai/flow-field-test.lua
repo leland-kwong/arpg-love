@@ -5,6 +5,7 @@ local flowField = require 'scene.sandbox.ai.flow-field'
 local groups = require 'components.groups'
 local collisionObject = require 'modules.collision'
 local bump = require 'modules.bump'
+local tween = require 'modules.tween'
 
 local colWorld = bump.newWorld(50)
 local arrow = love.graphics.newImage('scene/sandbox/ai/arrow-up.png')
@@ -83,21 +84,39 @@ Ai.getPathWithAstar = require'utils.perf'({
 })(aiPathWithAstar)
 
 function Ai:move(flowField, dt)
-  local actualX, actualY = self.x - offX, self.y - offY
-  local slop = 8
+  local isNewPath = self.lastFlowField ~= flowField
+  if isNewPath then
+    local actualX, actualY = self.x - offX, self.y - offY
+    local gridX, gridY = pxToGridUnits(self.x, self.y)
+    self.pathWithAstar = self:getPathWithAstar(flowField, grid, gridX, gridY, 30, WALKABLE, self.scale)
 
-  local gridX, gridY = pxToGridUnits(self.x, self.y)
-  self.pathWithAstar = self:getPathWithAstar(flowField, grid, gridX, gridY, 30, WALKABLE)
-  local vx, vy = self:getDirections(flowField, grid, gridX, gridY)
-  self.vx = vx
-  self.vy = vy
-  self.dx = self.speed * vx * dt
-  self.dy = self.speed * vy * dt
+    local index = 1
+    local path = self.pathWithAstar
+    local posTween
+    local done = true
+    self.positionTweener = function(dt)
+      if done then
+        if index > #path then
+          return
+        end
+        local nextPos = {
+          x = (path[index].x - 1) * gridSize + offX,
+          y = (path[index].y - 1) * gridSize + offY
+        }
+        local dist = require'utils.math'.dist(self.x, self.y, nextPos.x, nextPos.y)
+        local duration = dist / self.speed
+        posTween = tween.new(duration, self, nextPos)
+        index = index + 1
+      end
+      done = posTween:update(dt)
+    end
+  end
 
-  local nextX, nextY = self.x + self.dx, self.y + self.dy
+  self.positionTweener(dt)
+  local nextX, nextY = self.x, self.y
   local adjustedX, adjustedY, cols, len = self.collision:move(nextX, nextY)
-  self.x = adjustedX
-  self.y = adjustedY
+
+  self.lastFlowField = flowField
 end
 
 local function drawPathWithAstar(self)
@@ -107,8 +126,8 @@ local function drawPathWithAstar(self)
 
   for i=1, #p do
     local point = p[i]
-    local x, y = (point[1] - 1) * gridSize + offX,
-      (point[2] - 1) * gridSize + offY
+    local x, y = (point.x - 1) * gridSize + offX,
+      (point.y - 1) * gridSize + offY
 
     -- agent silhouette
     table.insert(
@@ -178,18 +197,11 @@ function Ai:draw()
     self.collision.w
   )
 
-  local round = require'utils.math'.round
-  love.graphics.print(
-    'vx: '..round(self.vx, 2)..'\nvy: '..round(self.vy, 2),
-    self.x,
-    self.y
-  )
-
   drawPathWithAstar(self)
 end
 
-local function createAi(x, y)
-  local scale = 1
+local function createAi(x, y, speed, scale)
+  local scale = scale or 1
   local size = (gridSize * scale) - 5
   local w, h = size, size
   local colObj = collisionObject
@@ -203,7 +215,7 @@ local function createAi(x, y)
     dx = 0,
     dy = 0,
     scale = scale,
-    speed = 0,
+    speed = speed or 100,
     collision = colObj
   }, Ai_mt)
 end
@@ -223,10 +235,15 @@ function flowFieldTestBlueprint.init(self)
     end
   end)
 
-  self.flowField = flowField(grid, 5, 7, isGridCellVisitable)
+  self.flowField = flowField(grid, 8, 5, isGridCellVisitable)
 
   local gridOffset = -1
-  self.ai = createAi(offX + ((gridOffset + 11) * gridSize), offY + ((gridOffset + 6) * gridSize))
+  self.ai = createAi(
+    offX + ((gridOffset + 9) * gridSize),
+    offY + ((gridOffset + 2) * gridSize),
+    200,
+    1.8
+  )
 end
 
 function flowFieldTestBlueprint.update(self, dt)

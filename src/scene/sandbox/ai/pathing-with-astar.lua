@@ -46,8 +46,9 @@ local function getDirection(vx, vy)
 end
 
 -- check clearance and adjust direction to avoid collision
-local function getNextDirectionWithAdjustmentIfNeeded(grid, vx, vy, vx2, vy2, gridX, gridY, WALKABLE)
+local function getNextDirectionWithAdjustmentIfNeeded(grid, vx, vy, vx2, vy2, curGridX, curGridY, gridX, gridY, WALKABLE)
   local dir = getDirection(vx, vy)
+  local dir2 = getDirection(vx2, vy2)
 
   if direction.W == dir then
     if grid[gridY][gridX + 1] ~= WALKABLE or grid[gridY + 1][gridX + 1] ~= WALKABLE then
@@ -59,7 +60,8 @@ local function getNextDirectionWithAdjustmentIfNeeded(grid, vx, vy, vx2, vy2, gr
   end
 
   if direction.SW == dir then
-    if grid[gridY][gridX + 1] ~= WALKABLE or grid[gridY + 1][gridX + 1] ~= WALKABLE then
+    if grid[gridY][gridX + 1] ~= WALKABLE or
+      grid[gridY + 1][gridX + 1] ~= WALKABLE then
       return - 1, 0
     end
     if grid[gridY + 1][gridX] ~= WALKABLE then
@@ -77,7 +79,24 @@ local function getNextDirectionWithAdjustmentIfNeeded(grid, vx, vy, vx2, vy2, gr
   end
 
   if direction.SE == dir then
-    if grid[gridY][gridX + 1] ~= WALKABLE or grid[gridY + 1][gridX + 1] ~= WALKABLE then
+    if grid[curGridY][curGridX + 2] ~= WALKABLE then
+      return 0, 1
+    end
+
+    if (direction.E == dir2 or direction.S == dir2) and grid[gridY + 1][gridX - 1] ~= WALKABLE then
+      return 1, 0
+    end
+
+    if direction.E == dir2 and grid[gridY - 1][gridX + 1] == WALKABLE then
+      return 1, 0
+    end
+
+    if direction.S == dir2 and grid[gridY + 1][gridX - 1] == WALKABLE then
+      return 0, 1
+    end
+
+    if grid[gridY][gridX + 1] ~= WALKABLE or
+      grid[gridY + 1][gridX + 1] ~= WALKABLE then
       if vx2 == 0 and vy2 == 1 then
         return 0, 1
       end
@@ -99,6 +118,10 @@ local function getNextDirectionWithAdjustmentIfNeeded(grid, vx, vy, vx2, vy2, gr
   end
 
   if direction.NE == dir then
+    if dir2 == direction.N and grid[gridY - 1][gridX - 1] == WALKABLE then
+      return 0, -1
+    end
+
     if grid[gridY][gridX + 1] ~= WALKABLE then
       return 0, -1
     end
@@ -116,18 +139,23 @@ local function getNextDirectionWithAdjustmentIfNeeded(grid, vx, vy, vx2, vy2, gr
   return vx, vy
 end
 
-local function aiPath(self, flowField, grid, gridX, gridY, length, WALKABLE)
-  local curPosition = {gridX, gridY}
+local function aiPath(self, flowField, grid, gridX, gridY, length, WALKABLE, clearance)
+  local curPosition = {x = gridX, y = gridY}
   local path = {}
 
   while #path < length do
-    local px, py = curPosition[1], curPosition[2]
+    local px, py = curPosition.x, curPosition.y
     local vx, vy = getFlowFieldValue(flowField, px, py)
     local nextPx, nextPy = px + vx, py + vy
     local nextVx, nextVy = getFlowFieldValue(flowField, nextPx, nextPy)
-    -- check one step ahead and adjust the current direction if needed
-    local vxActual, vyActual = getNextDirectionWithAdjustmentIfNeeded(grid, vx, vy, nextVx, nextVy, nextPx, nextPy, WALKABLE)
-    local nextPosition = {px + vxActual, py + vyActual}
+    local vxActual, vyActual = vx, vy
+
+    if clearance > 1 then
+      -- check one step ahead and adjust the current direction if needed
+      vxActual, vyActual = getNextDirectionWithAdjustmentIfNeeded(grid, vx, vy, nextVx, nextVy, px, py, nextPx, nextPy, WALKABLE)
+    end
+
+    local nextPosition = {x = px + vxActual, y = py + vyActual}
 
     if (nextVx == 0 and nextVy == 0) then
       return path
