@@ -83,14 +83,6 @@ local function getNextDirectionWithAdjustmentIfNeeded(grid, vx, vy, vx2, vy2, cu
       return 0, 1
     end
 
-    if (direction.E == dir2 or direction.S == dir2) and grid[gridY + 1][gridX - 1] ~= WALKABLE then
-      return 1, 0
-    end
-
-    if direction.E == dir2 and grid[gridY - 1][gridX + 1] == WALKABLE then
-      return 1, 0
-    end
-
     if direction.S == dir2 and grid[gridY + 1][gridX - 1] == WALKABLE then
       return 0, 1
     end

@@ -26,10 +26,12 @@ local grid = {
   {1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1},
   {1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,1},
   {1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
 }
 
-local gridSize = 40
+local gridSize = 36
 local offX, offY = 220, 70
 local WALKABLE = 0
 
@@ -119,6 +121,45 @@ function Ai:move(flowField, dt)
   self.lastFlowField = flowField
 end
 
+local perf = require'utils.perf'
+local f = require'utils.functional'
+local drawSmoothenedPath = perf({
+  enabled = false,
+  done = function(t)
+    print('bezier curve:', t)
+  end
+})(function(path)
+  -- bezier curve must have at least 2 points
+  if #path < 2 then
+    return
+  end
+
+  -- draw path curve
+  local curve = love.math.newBezierCurve(
+    f.reduce(path, function(points, v)
+      points[#points + 1] = (v.x - 1) * gridSize + offX
+      points[#points + 1] = (v.y - 1) * gridSize + offY
+      return points
+    end, {})
+  )
+
+  -- simulating many ops
+  -- for i=1, 50 do
+  --   love.math.newBezierCurve(
+  --     f.reduce(path, function(points, v)
+  --       points[#points + 1] = (v.x - 1) * gridSize + i
+  --       points[#points + 1] = (v.y - 1) * gridSize + i
+  --       return points
+  --     end, {})
+  --   )
+  -- end
+
+  local curveCoords = curve:render(2)
+  love.graphics.setLineWidth(4)
+  love.graphics.setColor(0.5,0.8,1,1)
+  love.graphics.line(curveCoords)
+end)
+
 local function drawPathWithAstar(self)
   local p = self.pathWithAstar
   local agentSilhouetteDrawQueue = {}
@@ -175,6 +216,8 @@ local function drawPathWithAstar(self)
   for i=1, #agentPathDrawQueue do
     agentPathDrawQueue[i]()
   end
+
+  drawSmoothenedPath(p)
 end
 
 function Ai:draw()
