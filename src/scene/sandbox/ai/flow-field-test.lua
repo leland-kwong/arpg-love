@@ -53,8 +53,8 @@ end
 local function pxToGridUnits(screenX, screenY)
   local gridPixelX, gridPixelY = screenX - offX, screenY - offY
   local gridX, gridY =
-    math.floor(gridPixelX / gridSize) + 1,
-    math.floor(gridPixelY / gridSize) + 1
+    math.floor(gridPixelX / gridSize),
+    math.floor(gridPixelY / gridSize)
   return gridX, gridY
 end
 
@@ -102,8 +102,8 @@ function Ai:move(flowField, dt)
           return
         end
         local nextPos = {
-          x = (path[index].x - 1) * gridSize + offX,
-          y = (path[index].y - 1) * gridSize + offY
+          x = (path[index].x) * gridSize + offX,
+          y = (path[index].y) * gridSize + offY
         }
         local dist = require'utils.math'.dist(self.x, self.y, nextPos.x, nextPos.y)
         local duration = dist / self.speed
@@ -137,8 +137,8 @@ local drawSmoothenedPath = perf({
   -- draw path curve
   local curve = love.math.newBezierCurve(
     f.reduce(path, function(points, v)
-      points[#points + 1] = (v.x - 1) * gridSize + offX
-      points[#points + 1] = (v.y - 1) * gridSize + offY
+      points[#points + 1] = (v.x) * gridSize + offX
+      points[#points + 1] = (v.y) * gridSize + offY
       return points
     end, {})
   )
@@ -147,8 +147,8 @@ local drawSmoothenedPath = perf({
   -- for i=1, 50 do
   --   love.math.newBezierCurve(
   --     f.reduce(path, function(points, v)
-  --       points[#points + 1] = (v.x - 1) * gridSize + i
-  --       points[#points + 1] = (v.y - 1) * gridSize + i
+  --       points[#points + 1] = v.x * gridSize + i
+  --       points[#points + 1] = v.y * gridSize + i
   --       return points
   --     end, {})
   --   )
@@ -167,8 +167,8 @@ local function drawPathWithAstar(self)
 
   for i=1, #p do
     local point = p[i]
-    local x, y = (point.x - 1) * gridSize + offX,
-      (point.y - 1) * gridSize + offY
+    local x, y = (point.x) * gridSize + offX,
+      (point.y) * gridSize + offY
 
     -- agent silhouette
     table.insert(
@@ -271,8 +271,8 @@ function flowFieldTestBlueprint.init(self)
       self.wallCollisions[y] = self.wallCollisions[y] or {}
       self.wallCollisions[y][x] = collisionObject:new(
         'wall',
-        ((x - 1) * gridSize) + offX,
-        ((y - 1) * gridSize) + offY,
+        (x * gridSize) + offX,
+        (y * gridSize) + offY,
         gridSize, gridSize
       ):addToWorld(colWorld)
     end
@@ -280,7 +280,7 @@ function flowFieldTestBlueprint.init(self)
 
   self.flowField = flowField(grid, 8, 5, isGridCellVisitable)
 
-  local gridOffset = -1
+  local gridOffset = 0
   self.ai = createAi(
     offX + ((gridOffset + 9) * gridSize),
     offY + ((gridOffset + 2) * gridSize),
@@ -350,8 +350,8 @@ local function drawMousePosition()
   love.graphics.setLineWidth(2)
   love.graphics.rectangle(
     'line',
-    (gridX - 1) * gridSize + offX,
-    (gridY - 1) * gridSize + offY,
+    gridX * gridSize + offX,
+    gridY * gridSize + offY,
     gridSize,
     gridSize
   )
@@ -380,8 +380,8 @@ function flowFieldTestBlueprint.draw(self)
     for x=1, #grid[1] do
       local cell = row[x]
       local drawX, drawY =
-        ((x-1) * gridSize) + offX,
-        ((y-1) * gridSize) + offY
+        (x * gridSize) + offX,
+        (y * gridSize) + offY
 
       local oData = grid[y][x]
       local ffd = row[x] -- flow field cell data
