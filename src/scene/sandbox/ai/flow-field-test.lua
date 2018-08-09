@@ -8,6 +8,7 @@ local collisionObject = require 'modules.collision'
 local bump = require 'modules.bump'
 local tween = require 'modules.tween'
 local arrow = love.graphics.newImage('scene/sandbox/ai/arrow-up.png')
+local f = require'utils.functional'
 
 local gridSize = 32
 local offX, offY = 100, 0
@@ -108,7 +109,6 @@ function Ai:move(flowField, dt)
 end
 
 local perf = require'utils.perf'
-local f = require'utils.functional'
 local drawSmoothenedPath = perf({
   enabled = false,
   done = function(t)
@@ -236,6 +236,12 @@ function Ai:draw()
 end
 
 local function createAi(x, y, speed, scale, showAiPath)
+  if scale % 1 == 0 then
+    -- to prevent wall collision from getting stuck when pathing around corners, we'll adjust
+    -- the agent size so its slightly smaller than the grid size.
+    scale = scale - (2 / gridSize)
+  end
+
   local scale = scale or 1
   local size = gridSize * scale
   --[[
@@ -279,15 +285,43 @@ function flowFieldTestBlueprint.init(self)
   end)
 
   self.flowField = flowField(grid, 8, 5, isGridCellVisitable)
+  self.ai = {
+    createAi(
+      2 * gridSize,
+      2 * gridSize,
+      240,
+      1.5,
+      self.showAiPath
+    ),
+    createAi(
+      4 * gridSize,
+      2 * gridSize,
+      300,
+      1.2,
+      self.showAiPath
+    )
+  }
 
-  local gridOffset = 0
-  self.ai = createAi(
-    ((gridOffset + 9) * gridSize),
-    ((gridOffset + 2) * gridSize),
-    360,
-    1.5,
-    self.showAiPath
-  )
+  local positionsFilled = {}
+  while #self.ai <= 70 do
+    local gridX = math.random(6, 20)
+    local gridY = math.random(2, 20)
+    local positionId = gridY * 20 + gridX
+
+    if grid[gridY][gridX] == WALKABLE and not positionsFilled[positionId] then
+      positionsFilled[positionId] = true
+      table.insert(
+        self.ai,
+        createAi(
+          gridX * gridSize,
+          gridY * gridSize,
+          360,
+          0.7,
+          self.showAiPath
+        )
+      )
+    end
+  end
 end
 
 function flowFieldTestBlueprint.update(self, dt)
@@ -309,7 +343,9 @@ function flowFieldTestBlueprint.update(self, dt)
     self.executionTimeMs = (socket.gettime() - ts) * 1000
   end
 
-  self.ai:move(self.flowField, dt)
+  f.forEach(self.ai, function(ai)
+    ai:move(self.flowField, dt)
+  end)
 end
 
 local function arrowRotationFromDirection(dx, dy)
@@ -468,14 +504,15 @@ local function drawScene(self)
   end
 
   local function drawTitle()
+    local offsetX = 50
     love.graphics.setColor(1,1,1,1)
-    love.graphics.print('CLICK GRID TO SET CONVERGENCE POINT', 20, 20)
+    love.graphics.print('CLICK GRID TO SET CONVERGENCE POINT', 20 + offsetX, 20)
 
     if self.executionTimeMs ~= nil then
       love.graphics.setColor(0.5,0.5,0.5)
       love.graphics.print(
         string.format('execution time: %.4f(ms)', self.executionTimeMs),
-        20,
+        20 + offsetX,
         50
       )
     end
@@ -491,7 +528,9 @@ local function drawScene(self)
     textDrawQueue[i]()
   end
 
-  self.ai:draw()
+  f.forEach(self.ai, function(ai)
+    ai:draw(self.flowField, dt)
+  end)
   drawMousePosition()
 end
 

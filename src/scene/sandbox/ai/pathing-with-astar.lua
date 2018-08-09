@@ -2,6 +2,10 @@ local pprint = require 'utils.pprint'
 
 local function getFlowFieldValue(flowField, gridX, gridY)
   local row = flowField[gridY]
+  if not row then
+    return 0, 0, 0
+  end
+
   local v = row[gridX]
   if not v then
     return 0, 0, 0
