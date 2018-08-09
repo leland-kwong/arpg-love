@@ -2,34 +2,13 @@ local socket = require 'socket'
 local pprint = require 'utils.pprint'
 local memoize = require 'utils.memoize'
 local flowField = require 'scene.sandbox.ai.flow-field'
+local grid = require 'scene.sandbox.ai.grid'
 local groups = require 'components.groups'
 local collisionObject = require 'modules.collision'
 local bump = require 'modules.bump'
 local tween = require 'modules.tween'
 
-local colWorld = bump.newWorld(50)
 local arrow = love.graphics.newImage('scene/sandbox/ai/arrow-up.png')
-
-local grid = {
-  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1},
-  {1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,1,0,0,0,1},
-  {1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,1,0,0,0,0,1},
-  {1,0,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,1},
-  {1,0,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,1,0,0,0,1},
-  {1,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1},
-  {1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1},
-  {1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,1},
-  {1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-}
 
 local gridSize = 36
 local offX, offY = 220, 0
@@ -38,8 +17,10 @@ local WALKABLE = 0
 local flowFieldTestBlueprint = {
   showFlowFieldText = false,
   showGridCoordinates = true,
-  showAiPath = false
+  showAiPath = true
 }
+
+local colWorld = bump.newWorld(gridSize)
 
 local function isOutOfBounds(grid, x, y)
   return y < 1 or x < 1 or y > #grid or x > #grid[1]
@@ -77,7 +58,6 @@ end
 
 -- gets directions from grid position, adjusting vectors to handle wall collisions as needed
 local normalize = require'utils.position'.normalizeVector
-Ai.getDirections = require'scene.sandbox.ai.pathing-with-steering'
 local aiPathWithAstar = require'scene.sandbox.ai.pathing-with-astar'
 Ai.getPathWithAstar = require'utils.perf'({
   enabled = false,
@@ -87,7 +67,10 @@ Ai.getPathWithAstar = require'utils.perf'({
 })(aiPathWithAstar)
 
 function Ai:move(flowField, dt)
-  local isNewPath = self.lastFlowField ~= flowField
+  local centerOffset = self.padding
+  local isNewPath = self.collided or self.lastFlowField ~= flowField
+  self.collided = false
+
   if isNewPath then
     local actualX, actualY = self.x - offX, self.y - offY
     local gridX, gridY = pxToGridUnits(self.x, self.y)
@@ -103,8 +86,8 @@ function Ai:move(flowField, dt)
           return
         end
         local nextPos = {
-          x = (path[index].x) * gridSize + offX,
-          y = (path[index].y) * gridSize + offY
+          x = (path[index].x) * gridSize + offX + centerOffset,
+          y = (path[index].y) * gridSize + offY + centerOffset
         }
         local dist = require'utils.math'.dist(self.x, self.y, nextPos.x, nextPos.y)
         local duration = dist / self.speed
@@ -119,6 +102,9 @@ function Ai:move(flowField, dt)
   local nextX, nextY = self.x, self.y
   local adjustedX, adjustedY, cols, len = self.collision:move(nextX, nextY)
 
+  self.x = adjustedX
+  self.y = adjustedY
+  self.collided = len > 0
   self.lastFlowField = flowField
 end
 
@@ -247,9 +233,14 @@ function Ai:draw()
   end
 end
 
-local function createAi(x, y, speed, scale)
+local function createAi(x, y, speed, scale, showAiPath)
   local scale = scale or 1
-  local size = (gridSize * scale) - 5
+  local size = gridSize * scale
+  --[[
+    Padding is the difference between the full grid size and the actual rectangle size.
+    Ie: if scale is 1.5, then the difference is (2 - 1.5) * gridSize
+  ]]
+  local padding = math.ceil(scale) * gridSize - size
   local w, h = size, size
   local colObj = collisionObject
     :new('ai', x, y, w, h)
@@ -259,11 +250,14 @@ local function createAi(x, y, speed, scale)
     y = y,
     w = w,
     h = h,
+    -- used for centering the agent during movement
+    padding = math.ceil(padding / 2),
     dx = 0,
     dy = 0,
     scale = scale,
     speed = speed or 100,
-    collision = colObj
+    collision = colObj,
+    showAiPath = showAiPath
   }, Ai_mt)
 end
 
@@ -289,7 +283,8 @@ function flowFieldTestBlueprint.init(self)
     offX + ((gridOffset + 9) * gridSize),
     offY + ((gridOffset + 2) * gridSize),
     200,
-    1.8
+    1.2,
+    self.showAiPath
   )
 end
 
