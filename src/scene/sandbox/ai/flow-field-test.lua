@@ -9,14 +9,14 @@ local bump = require 'modules.bump'
 local tween = require 'modules.tween'
 local arrow = love.graphics.newImage('scene/sandbox/ai/arrow-up.png')
 
-local gridSize = 36
-local offX, offY = 220, 0
+local gridSize = 32
+local offX, offY = 100, 0
 local WALKABLE = 0
 
 local flowFieldTestBlueprint = {
   showFlowFieldText = false,
   showGridCoordinates = true,
-  showAiPath = true
+  showAiPath = false
 }
 
 local colWorld = bump.newWorld(gridSize)
@@ -284,8 +284,8 @@ function flowFieldTestBlueprint.init(self)
   self.ai = createAi(
     ((gridOffset + 9) * gridSize),
     ((gridOffset + 2) * gridSize),
-    200,
-    1.2,
+    360,
+    1.5,
     self.showAiPath
   )
 end
