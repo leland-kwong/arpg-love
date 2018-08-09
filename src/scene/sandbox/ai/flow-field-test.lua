@@ -32,12 +32,13 @@ local grid = {
 }
 
 local gridSize = 36
-local offX, offY = 220, 70
+local offX, offY = 220, 0
 local WALKABLE = 0
 
 local flowFieldTestBlueprint = {
   showFlowFieldText = false,
-  showGridCoordinates = true
+  showGridCoordinates = true,
+  showAiPath = false
 }
 
 local function isOutOfBounds(grid, x, y)
@@ -231,6 +232,7 @@ function Ai:draw()
     self.h - padding * 2
   )
 
+  -- collision shape
   love.graphics.setColor(1,1,1,1)
   love.graphics.rectangle(
     'line',
@@ -240,7 +242,9 @@ function Ai:draw()
     self.collision.w
   )
 
-  drawPathWithAstar(self)
+  if self.showAiPath then
+    drawPathWithAstar(self)
+  end
 end
 
 local function createAi(x, y, speed, scale)
@@ -360,18 +364,6 @@ end
 function flowFieldTestBlueprint.draw(self)
   love.graphics.clear(0.1,0.1,0.1,1)
 
-  love.graphics.setColor(1,1,1,1)
-  love.graphics.print('CLICK GRID TO SET CONVERGENCE POINT', offX + 20, 20)
-
-  if self.executionTimeMs ~= nil then
-    love.graphics.setColor(0.5,0.5,0.5)
-    love.graphics.print(
-      string.format('execution time: %.4f(ms)', self.executionTimeMs),
-      offX + 20,
-      50
-    )
-  end
-
   local textDrawQueue = {}
   local arrowDrawQueue = {}
 
@@ -475,6 +467,22 @@ function flowFieldTestBlueprint.draw(self)
       end
     end
   end
+
+  local function drawTitle()
+    love.graphics.setColor(1,1,1,1)
+    love.graphics.print('CLICK GRID TO SET CONVERGENCE POINT', offX + 20, 20)
+
+    if self.executionTimeMs ~= nil then
+      love.graphics.setColor(0.5,0.5,0.5)
+      love.graphics.print(
+        string.format('execution time: %.4f(ms)', self.executionTimeMs),
+        offX + 20,
+        50
+      )
+    end
+  end
+
+  table.insert(textDrawQueue, drawTitle)
 
   for i=1, #arrowDrawQueue do
     arrowDrawQueue[i]()
