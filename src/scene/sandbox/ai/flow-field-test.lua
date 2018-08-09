@@ -7,7 +7,6 @@ local groups = require 'components.groups'
 local collisionObject = require 'modules.collision'
 local bump = require 'modules.bump'
 local tween = require 'modules.tween'
-
 local arrow = love.graphics.newImage('scene/sandbox/ai/arrow-up.png')
 
 local gridSize = 36
@@ -32,8 +31,8 @@ local function isGridCellVisitable(grid, x, y, dist)
 end
 
 -- returns grid units relative to the ui
-local function pxToGridUnits(screenX, screenY)
-  local gridPixelX, gridPixelY = screenX - offX, screenY - offY
+local function pxToGridUnits(screenX, screenY, offX, offY)
+  local gridPixelX, gridPixelY = screenX - (offX or 0), screenY - (offY or 0)
   local gridX, gridY =
     math.floor(gridPixelX / gridSize),
     math.floor(gridPixelY / gridSize)
@@ -72,7 +71,7 @@ function Ai:move(flowField, dt)
   self.collided = false
 
   if isNewPath then
-    local actualX, actualY = self.x - offX, self.y - offY
+    local actualX, actualY = self.x, self.y
     local gridX, gridY = pxToGridUnits(self.x, self.y)
     self.pathWithAstar = self:getPathWithAstar(flowField, grid, gridX, gridY, 30, WALKABLE, self.scale)
 
@@ -86,8 +85,8 @@ function Ai:move(flowField, dt)
           return
         end
         local nextPos = {
-          x = (path[index].x) * gridSize + offX + centerOffset,
-          y = (path[index].y) * gridSize + offY + centerOffset
+          x = (path[index].x) * gridSize + centerOffset,
+          y = (path[index].y) * gridSize + centerOffset
         }
         local dist = require'utils.math'.dist(self.x, self.y, nextPos.x, nextPos.y)
         local duration = dist / self.speed
@@ -124,8 +123,8 @@ local drawSmoothenedPath = perf({
   -- draw path curve
   local curve = love.math.newBezierCurve(
     f.reduce(path, function(points, v)
-      points[#points + 1] = (v.x) * gridSize + offX
-      points[#points + 1] = (v.y) * gridSize + offY
+      points[#points + 1] = (v.x) * gridSize
+      points[#points + 1] = (v.y) * gridSize
       return points
     end, {})
   )
@@ -154,8 +153,8 @@ local function drawPathWithAstar(self)
 
   for i=1, #p do
     local point = p[i]
-    local x, y = (point.x) * gridSize + offX,
-      (point.y) * gridSize + offY
+    local x, y = (point.x) * gridSize,
+      (point.y) * gridSize
 
     -- agent silhouette
     table.insert(
@@ -198,7 +197,10 @@ local function drawPathWithAstar(self)
   end
   love.graphics.setCanvas()
   love.graphics.setColor(1,1,1,0.3)
+  -- need to translate canvas because parent scene is translated
+  love.graphics.translate(-offX, 0)
   love.graphics.draw(self.canvasAgentSilhouette)
+  love.graphics.translate(offX, 0)
 
   for i=1, #agentPathDrawQueue do
     agentPathDrawQueue[i]()
@@ -269,8 +271,8 @@ function flowFieldTestBlueprint.init(self)
       self.wallCollisions[y] = self.wallCollisions[y] or {}
       self.wallCollisions[y][x] = collisionObject:new(
         'wall',
-        (x * gridSize) + offX,
-        (y * gridSize) + offY,
+        (x * gridSize),
+        (y * gridSize),
         gridSize, gridSize
       ):addToWorld(colWorld)
     end
@@ -280,8 +282,8 @@ function flowFieldTestBlueprint.init(self)
 
   local gridOffset = 0
   self.ai = createAi(
-    offX + ((gridOffset + 9) * gridSize),
-    offY + ((gridOffset + 2) * gridSize),
+    ((gridOffset + 9) * gridSize),
+    ((gridOffset + 2) * gridSize),
     200,
     1.2,
     self.showAiPath
@@ -291,7 +293,7 @@ end
 function flowFieldTestBlueprint.update(self, dt)
   if love.mouse.isDown(1) or love.keyboard.isDown('space') then
     local mx, my = love.mouse.getX(), love.mouse.getY()
-    local gridX, gridY = pxToGridUnits(mx, my)
+    local gridX, gridY = pxToGridUnits(mx, my, offX, offY)
 
     if isOutOfBounds(grid, gridX, gridY) then
       return
@@ -343,20 +345,22 @@ local COLOR_START_POINT = {0,1,0}
 local function drawMousePosition()
   local gridX, gridY = pxToGridUnits(
     love.mouse.getX(),
-    love.mouse.getY()
+    love.mouse.getY(),
+    offX,
+    offY
   )
   love.graphics.setColor(1,1,0,1)
   love.graphics.setLineWidth(2)
   love.graphics.rectangle(
     'line',
-    gridX * gridSize + offX,
-    gridY * gridSize + offY,
+    gridX * gridSize,
+    gridY * gridSize,
     gridSize,
     gridSize
   )
 end
 
-function flowFieldTestBlueprint.draw(self)
+local function drawScene(self)
   love.graphics.clear(0.1,0.1,0.1,1)
 
   local textDrawQueue = {}
@@ -367,8 +371,8 @@ function flowFieldTestBlueprint.draw(self)
     for x=1, #grid[1] do
       local cell = row[x]
       local drawX, drawY =
-        (x * gridSize) + offX,
-        (y * gridSize) + offY
+        (x * gridSize),
+        (y * gridSize)
 
       local oData = grid[y][x]
       local ffd = row[x] -- flow field cell data
@@ -465,13 +469,13 @@ function flowFieldTestBlueprint.draw(self)
 
   local function drawTitle()
     love.graphics.setColor(1,1,1,1)
-    love.graphics.print('CLICK GRID TO SET CONVERGENCE POINT', offX + 20, 20)
+    love.graphics.print('CLICK GRID TO SET CONVERGENCE POINT', 20, 20)
 
     if self.executionTimeMs ~= nil then
       love.graphics.setColor(0.5,0.5,0.5)
       love.graphics.print(
         string.format('execution time: %.4f(ms)', self.executionTimeMs),
-        offX + 20,
+        20,
         50
       )
     end
@@ -489,6 +493,12 @@ function flowFieldTestBlueprint.draw(self)
 
   self.ai:draw()
   drawMousePosition()
+end
+
+function flowFieldTestBlueprint.draw(self)
+  love.graphics.translate(offX, offY)
+  drawScene(self)
+  love.graphics.translate(-offX, -offY)
 end
 
 return groups.gui.createFactory(flowFieldTestBlueprint)
