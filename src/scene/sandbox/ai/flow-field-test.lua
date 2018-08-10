@@ -9,6 +9,7 @@ local bump = require 'modules.bump'
 local tween = require 'modules.tween'
 local arrow = love.graphics.newImage('scene/sandbox/ai/arrow-up.png')
 local f = require'utils.functional'
+local uid = require'utils.uid'
 
 local gridSize = 32
 local offX, offY = 100, 0
@@ -66,14 +67,54 @@ Ai.getPathWithAstar = require'utils.perf'({
   end
 })(aiPathWithAstar)
 
+local adjacentPositions = {
+  {-1, -1}, -- NW
+  {0, -1}, -- N
+  {1, -1}, -- NE
+  {-1, 0}, -- W
+  {1, 0}, -- E
+  {-1, 1}, -- SW
+  {0, -1}, -- S
+  {1, -1} -- SE
+}
+local function getAdjacentWalkablePosition(grid, x, y, WALKABLE)
+  for i=1, #adjacentPositions do
+    local pos = adjacentPositions[i]
+    local posX, posY = x + pos[1], y + pos[2]
+    local row = grid[posY]
+    local posValue = row and row[posX]
+    if posValue == WALKABLE then
+      return posX, posY
+    end
+  end
+end
+
+function Ai:autoUnstuckFromWallIfNeeded(gridX, gridY)
+  local isInsideWall = grid[gridY][gridX] ~= WALKABLE
+
+  if isInsideWall then
+    local openX, openY = getAdjacentWalkablePosition(grid, gridX, gridY, WALKABLE)
+    if openX then
+      local nextX, nextY = openX * gridSize, openY * gridSize
+      self.x = nextX
+      self.y = nextY
+      self.collision:update(
+        self.x,
+        self.y,
+        self.w,
+        self.h
+      )
+    end
+  end
+end
+
 function Ai:move(flowField, dt)
   local centerOffset = self.padding
-  local isNewPath = self.collided or self.lastFlowField ~= flowField
-  self.collided = false
+  local isNewPath = self.hasDeviatedPosition or (self.lastFlowField ~= flowField)
+  local gridX, gridY = pxToGridUnits(self.x, self.y)
+  self:autoUnstuckFromWallIfNeeded(gridX, gridY)
 
   if isNewPath then
-    local actualX, actualY = self.x, self.y
-    local gridX, gridY = pxToGridUnits(self.x, self.y)
     self.pathWithAstar = self:getPathWithAstar(flowField, grid, gridX, gridY, 30, WALKABLE, self.scale)
 
     local index = 1
@@ -85,9 +126,10 @@ function Ai:move(flowField, dt)
         if index > #path then
           return
         end
+        local pos = path[index]
         local nextPos = {
-          x = (path[index].x) * gridSize + centerOffset,
-          y = (path[index].y) * gridSize + centerOffset
+          x = pos.x * gridSize + centerOffset,
+          y = pos.y * gridSize + centerOffset
         }
         local dist = require'utils.math'.dist(self.x, self.y, nextPos.x, nextPos.y)
         local duration = dist / self.speed
@@ -98,13 +140,26 @@ function Ai:move(flowField, dt)
     end
   end
 
+  local originalX, originalY = self.x, self.y
   self.positionTweener(dt)
   local nextX, nextY = self.x, self.y
-  local adjustedX, adjustedY, cols, len = self.collision:move(nextX, nextY)
 
-  self.x = adjustedX
-  self.y = adjustedY
-  self.collided = len > 0
+  local isMoving = originalX ~= nextX or originalY ~= nextY
+  if not isMoving then
+    return
+  end
+
+  local actualX, actualY, cols, len = self.collision:move(nextX, nextY)
+  local hasCollisions = len > 0
+
+  local dx, dy = math.abs(originalX - actualX), math.abs(originalY - actualY)
+  self.hasDeviatedPosition = hasCollisions and
+    (originalX ~= actualX or originalY ~= actualY)
+
+  self.prevX = self.x
+  self.prevY = self.y
+  self.x = actualX
+  self.y = actualY
   self.lastFlowField = flowField
 end
 
@@ -210,7 +265,15 @@ local function drawPathWithAstar(self)
 end
 
 function Ai:draw()
-  love.graphics.setColor(1,0.2,0, 0.8)
+  local isNewPath = self.prevPath ~= self.pathWithAstar
+  -- agent color
+  love.graphics.setColor(
+    isNewPath and
+      self.COLOR_NEW_PATH or
+      self.COLOR_FILL
+  )
+  self.prevPath = self.pathWithAstar
+
   local padding = 0
   love.graphics.rectangle(
     'fill',
@@ -258,6 +321,7 @@ local function createAi(x, y, speed, scale, showAiPath)
     y = y,
     w = w,
     h = h,
+    id = uid(),
     -- used for centering the agent during movement
     padding = math.ceil(padding / 2),
     dx = 0,
@@ -265,7 +329,10 @@ local function createAi(x, y, speed, scale, showAiPath)
     scale = scale,
     speed = speed or 100,
     collision = colObj,
-    showAiPath = showAiPath
+    showAiPath = showAiPath,
+
+    COLOR_NEW_PATH = {1,0,0,0.8},
+    COLOR_FILL = {0.7,0.7,0,0.8}
   }, Ai_mt)
 end
 
@@ -299,9 +366,18 @@ function flowFieldTestBlueprint.init(self)
       300,
       1.2,
       self.showAiPath
+    ),
+    -- put one that is stuck inside a wall to test automatic wall unstuck
+    createAi(
+      1 * gridSize,
+      6 * gridSize,
+      320,
+      1.1,
+      self.showAiPath
     )
   }
 
+  -- generate random ai agents
   local positionsFilled = {}
   while #self.ai <= 70 do
     local gridX = math.random(6, 20)
