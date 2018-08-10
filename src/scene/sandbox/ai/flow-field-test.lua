@@ -2,33 +2,26 @@ local socket = require 'socket'
 local pprint = require 'utils.pprint'
 local memoize = require 'utils.memoize'
 local flowField = require 'scene.sandbox.ai.flow-field'
+local grid = require 'scene.sandbox.ai.grid'
 local groups = require 'components.groups'
 local collisionObject = require 'modules.collision'
 local bump = require 'modules.bump'
-
-local colWorld = bump.newWorld(50)
+local tween = require 'modules.tween'
 local arrow = love.graphics.newImage('scene/sandbox/ai/arrow-up.png')
+local f = require'utils.functional'
+local uid = require'utils.uid'
 
-local grid = {
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,0},
-  {0,0,0,0,1,0,0,0,0,0,1,1,1,0,0,0,0,0},
-  {0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0},
-  {0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0},
-  {0,0,0,0,0,1,1,1,1,1,0,0,0,1,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-}
-
-local gridSize = 50
-local offX, offY = 300, 75
+local gridSize = 32
+local offX, offY = 100, 0
 local WALKABLE = 0
 
-local flowFieldTestBlueprint = {}
+local flowFieldTestBlueprint = {
+  showFlowFieldText = false,
+  showGridCoordinates = true,
+  showAiPath = false
+}
+
+local colWorld = bump.newWorld(gridSize)
 
 local function isOutOfBounds(grid, x, y)
   return y < 1 or x < 1 or y > #grid or x > #grid[1]
@@ -39,93 +32,308 @@ local function isGridCellVisitable(grid, x, y, dist)
     grid[y][x] == WALKABLE
 end
 
-local function pxToGridUnits(screenX, screenY)
-  local gridPixelX, gridPixelY = screenX - offX, screenY - offY
+-- returns grid units relative to the ui
+local function pxToGridUnits(screenX, screenY, offX, offY)
+  local gridPixelX, gridPixelY = screenX - (offX or 0), screenY - (offY or 0)
   local gridX, gridY =
-    math.floor(gridPixelX / gridSize) + 1,
-    math.floor(gridPixelY / gridSize) + 1
+    math.floor(gridPixelX / gridSize),
+    math.floor(gridPixelY / gridSize)
   return gridX, gridY
 end
 
-local function getFlowAtPosition(flowField, x, y)
-  if flowField[y] then
-    local flowData = flowField[y][x]
-    return flowData
+local function getFlowFieldValue(flowField, gridX, gridY)
+  local row = flowField[gridY]
+  local v = row[gridX]
+  if not v then
+    return 0, 0, 0
   end
-  return nil
+  return v[1], v[2], v[3]
 end
 
-local function createAi(x, y)
-  local scale = 1
-  local w, h = (gridSize * scale) - 2, (gridSize * scale) - 2
+local Ai = {}
+local Ai_mt = {__index = Ai}
+
+local function isZeroVector(vx, vy)
+  return vx == 0 and vy == 0
+end
+
+-- gets directions from grid position, adjusting vectors to handle wall collisions as needed
+local normalize = require'utils.position'.normalizeVector
+local aiPathWithAstar = require'scene.sandbox.ai.pathing-with-astar'
+Ai.getPathWithAstar = require'utils.perf'({
+  enabled = false,
+  done = function(t)
+    print('ai path:', t)
+  end
+})(aiPathWithAstar)
+
+local adjacentPositions = {
+  {-1, -1}, -- NW
+  {0, -1}, -- N
+  {1, -1}, -- NE
+  {-1, 0}, -- W
+  {1, 0}, -- E
+  {-1, 1}, -- SW
+  {0, -1}, -- S
+  {1, -1} -- SE
+}
+local function getAdjacentWalkablePosition(grid, x, y, WALKABLE)
+  for i=1, #adjacentPositions do
+    local pos = adjacentPositions[i]
+    local posX, posY = x + pos[1], y + pos[2]
+    local row = grid[posY]
+    local posValue = row and row[posX]
+    if posValue == WALKABLE then
+      return posX, posY
+    end
+  end
+end
+
+function Ai:autoUnstuckFromWallIfNeeded(gridX, gridY)
+  local isInsideWall = grid[gridY][gridX] ~= WALKABLE
+
+  if isInsideWall then
+    local openX, openY = getAdjacentWalkablePosition(grid, gridX, gridY, WALKABLE)
+    if openX then
+      local nextX, nextY = openX * gridSize, openY * gridSize
+      self.x = nextX
+      self.y = nextY
+      self.collision:update(
+        self.x,
+        self.y,
+        self.w,
+        self.h
+      )
+    end
+  end
+end
+
+function Ai:move(flowField, dt)
+  local centerOffset = self.padding
+  local isNewPath = self.hasDeviatedPosition or (self.lastFlowField ~= flowField)
+  local gridX, gridY = pxToGridUnits(self.x, self.y)
+  self:autoUnstuckFromWallIfNeeded(gridX, gridY)
+
+  if isNewPath then
+    self.pathWithAstar = self:getPathWithAstar(flowField, grid, gridX, gridY, 30, WALKABLE, self.scale)
+
+    local index = 1
+    local path = self.pathWithAstar
+    local posTween
+    local done = true
+    self.positionTweener = function(dt)
+      if done then
+        if index > #path then
+          return
+        end
+        local pos = path[index]
+        local nextPos = {
+          x = pos.x * gridSize + centerOffset,
+          y = pos.y * gridSize + centerOffset
+        }
+        local dist = require'utils.math'.dist(self.x, self.y, nextPos.x, nextPos.y)
+        local duration = dist / self.speed
+        posTween = tween.new(duration, self, nextPos)
+        index = index + 1
+      end
+      done = posTween:update(dt)
+    end
+  end
+
+  local originalX, originalY = self.x, self.y
+  self.positionTweener(dt)
+  local nextX, nextY = self.x, self.y
+
+  local isMoving = originalX ~= nextX or originalY ~= nextY
+  if not isMoving then
+    return
+  end
+
+  local actualX, actualY, cols, len = self.collision:move(nextX, nextY)
+  local hasCollisions = len > 0
+
+  local dx, dy = math.abs(originalX - actualX), math.abs(originalY - actualY)
+  self.hasDeviatedPosition = hasCollisions and
+    (originalX ~= actualX or originalY ~= actualY)
+
+  self.prevX = self.x
+  self.prevY = self.y
+  self.x = actualX
+  self.y = actualY
+  self.lastFlowField = flowField
+end
+
+local perf = require'utils.perf'
+local drawSmoothenedPath = perf({
+  enabled = false,
+  done = function(t)
+    print('bezier curve:', t)
+  end
+})(function(path)
+  -- bezier curve must have at least 2 points
+  if #path < 2 then
+    return
+  end
+
+  -- draw path curve
+  local curve = love.math.newBezierCurve(
+    f.reduce(path, function(points, v)
+      points[#points + 1] = (v.x) * gridSize
+      points[#points + 1] = (v.y) * gridSize
+      return points
+    end, {})
+  )
+
+  -- simulating many ops
+  -- for i=1, 50 do
+  --   love.math.newBezierCurve(
+  --     f.reduce(path, function(points, v)
+  --       points[#points + 1] = v.x * gridSize + i
+  --       points[#points + 1] = v.y * gridSize + i
+  --       return points
+  --     end, {})
+  --   )
+  -- end
+
+  local curveCoords = curve:render(2)
+  love.graphics.setLineWidth(4)
+  love.graphics.setColor(0.5,0.8,1,1)
+  love.graphics.line(curveCoords)
+end)
+
+local function drawPathWithAstar(self)
+  local p = self.pathWithAstar
+  local agentSilhouetteDrawQueue = {}
+  local agentPathDrawQueue = {}
+
+  for i=1, #p do
+    local point = p[i]
+    local x, y = (point.x) * gridSize,
+      (point.y) * gridSize
+
+    -- agent silhouette
+    table.insert(
+      agentSilhouetteDrawQueue,
+      function()
+        love.graphics.setColor(1,1,1,1)
+        love.graphics.setLineWidth(2)
+        love.graphics.rectangle(
+          'fill',
+          x, y,
+          gridSize * 2,
+          gridSize * 2
+        )
+      end
+    )
+
+    -- agent path
+    table.insert(
+      agentPathDrawQueue,
+      function()
+        love.graphics.setColor(0.6,0.7,0.0,0.5)
+        love.graphics.rectangle(
+          'fill',
+          x, y,
+          gridSize,
+          gridSize
+        )
+
+        love.graphics.setColor(1,1,1,1)
+        love.graphics.print(i, x + 5, y + 5)
+      end
+    )
+  end
+
+  self.canvasAgentSilhouette = self.canvasAgentSilhouette or love.graphics.newCanvas()
+  love.graphics.setCanvas(self.canvasAgentSilhouette)
+  love.graphics.clear()
+  for i=1, #agentSilhouetteDrawQueue do
+    agentSilhouetteDrawQueue[i]()
+  end
+  love.graphics.setCanvas()
+  love.graphics.setColor(1,1,1,0.3)
+  -- need to translate canvas because parent scene is translated
+  love.graphics.translate(-offX, 0)
+  love.graphics.draw(self.canvasAgentSilhouette)
+  love.graphics.translate(offX, 0)
+
+  for i=1, #agentPathDrawQueue do
+    agentPathDrawQueue[i]()
+  end
+
+  drawSmoothenedPath(p)
+end
+
+function Ai:draw()
+  local isNewPath = self.prevPath ~= self.pathWithAstar
+  -- agent color
+  love.graphics.setColor(
+    isNewPath and
+      self.COLOR_NEW_PATH or
+      self.COLOR_FILL
+  )
+  self.prevPath = self.pathWithAstar
+
+  local padding = 0
+  love.graphics.rectangle(
+    'fill',
+    self.x + padding,
+    self.y + padding,
+    self.w - padding * 2,
+    self.h - padding * 2
+  )
+
+  -- collision shape
+  love.graphics.setColor(1,1,1,1)
+  love.graphics.rectangle(
+    'line',
+    self.collision.x + self.collision.ox,
+    self.collision.y + self.collision.oy,
+    self.collision.h,
+    self.collision.w
+  )
+
+  if self.showAiPath then
+    drawPathWithAstar(self)
+  end
+end
+
+local function createAi(x, y, speed, scale, showAiPath)
+  if scale % 1 == 0 then
+    -- to prevent wall collision from getting stuck when pathing around corners, we'll adjust
+    -- the agent size so its slightly smaller than the grid size.
+    scale = scale - (2 / gridSize)
+  end
+
+  local scale = scale or 1
+  local size = gridSize * scale
+  --[[
+    Padding is the difference between the full grid size and the actual rectangle size.
+    Ie: if scale is 1.5, then the difference is (2 - 1.5) * gridSize
+  ]]
+  local padding = math.ceil(scale) * gridSize - size
+  local w, h = size, size
   local colObj = collisionObject
     :new('ai', x, y, w, h)
     :addToWorld(colWorld)
-  return {
+  return setmetatable({
     x = x,
     y = y,
     w = w,
     h = h,
-    speed = 300,
+    id = uid(),
+    -- used for centering the agent during movement
+    padding = math.ceil(padding / 2),
+    dx = 0,
+    dy = 0,
+    scale = scale,
+    speed = speed or 100,
     collision = colObj,
-    move = function(self, flowField, dt)
-      local actualX, actualY = self.x + offX, self.y + offY
-      local slop = 5 * scale
-      local gridX, gridY = pxToGridUnits(self.x, self.y)
-      local ffv = flowField[gridY][gridX] -- flow field value
-      local isNewTile = ((actualX % gridSize) <= slop and (actualY % gridSize) <= slop)
-      -- if its a new tile lets use its vector info
-      if isNewTile then
-        local normalize = require'utils.position'.normalizeVector
-        local dirX, dirY = normalize(ffv[1], ffv[2])
-        self.dx = self.speed * dirX * dt
-        self.dy = self.speed * dirY * dt
-      end
+    showAiPath = showAiPath,
 
-      local nextX, nextY = self.x + self.dx, self.y + self.dy
-      local adjustedX, adjustedY, cols = self.collision:move(nextX, nextY)
-
-      if #cols > 0 then
-        local c = cols[1]
-        if c.other.group == 'wall' then
-          local n = c.normal
-          -- When ai is moving opposite the normal we'll adjust the positioning so its at least
-          -- moving somewhat diagonally to wall. This prevents it from being stuck trying to go around the wall.
-          if n.x ~= 0 and n.y == 0 then
-            local yAxisBias = (adjustedY - offY) % gridSize
-            if yAxisBias < (gridSize / 2) then
-              adjustedY = adjustedY - 1
-            else
-              adjustedY = adjustedY + 1
-            end
-          end
-
-          if n.x == 0 and n.y ~= 0 then
-            local xAxisBias = (adjustedX - offX) % gridSize
-            if xAxisBias < (gridSize / 2) then
-              adjustedX = adjustedX - 1
-            else
-              adjustedX = adjustedX + 1
-            end
-          end
-        end
-      end
-
-      self.x = adjustedX
-      self.y = adjustedY
-    end,
-    draw = function(self)
-      love.graphics.setColor(1,0.2,0, 0.8)
-      local padding = 0
-      love.graphics.rectangle(
-        'fill',
-        self.x + padding,
-        self.y + padding,
-        self.w - padding * 2,
-        self.h - padding * 2
-      )
-    end
-  }
+    COLOR_NEW_PATH = {1,0,0,0.8},
+    COLOR_FILL = {0.7,0.7,0,0.8}
+  }, Ai_mt)
 end
 
 function flowFieldTestBlueprint.init(self)
@@ -136,21 +344,66 @@ function flowFieldTestBlueprint.init(self)
       self.wallCollisions[y] = self.wallCollisions[y] or {}
       self.wallCollisions[y][x] = collisionObject:new(
         'wall',
-        ((x - 1) * gridSize) + offX,
-        ((y - 1) * gridSize) + offY,
+        (x * gridSize),
+        (y * gridSize),
         gridSize, gridSize
       ):addToWorld(colWorld)
     end
   end)
 
-  self.flowField = flowField(grid, 5, 2, isGridCellVisitable)
-  self.ai = createAi(offX, offY)
+  self.flowField = flowField(grid, 8, 5, isGridCellVisitable)
+  self.ai = {
+    createAi(
+      2 * gridSize,
+      2 * gridSize,
+      240,
+      1.5,
+      self.showAiPath
+    ),
+    createAi(
+      4 * gridSize,
+      2 * gridSize,
+      300,
+      1.2,
+      self.showAiPath
+    ),
+    -- put one that is stuck inside a wall to test automatic wall unstuck
+    createAi(
+      1 * gridSize,
+      6 * gridSize,
+      320,
+      1.1,
+      self.showAiPath
+    )
+  }
+
+  -- generate random ai agents
+  local positionsFilled = {}
+  while #self.ai <= 70 do
+    local gridX = math.random(6, 20)
+    local gridY = math.random(2, 20)
+    local positionId = gridY * 20 + gridX
+
+    if grid[gridY][gridX] == WALKABLE and not positionsFilled[positionId] then
+      positionsFilled[positionId] = true
+      table.insert(
+        self.ai,
+        createAi(
+          gridX * gridSize,
+          gridY * gridSize,
+          360,
+          0.7,
+          self.showAiPath
+        )
+      )
+    end
+  end
 end
 
 function flowFieldTestBlueprint.update(self, dt)
-  if love.mouse.isDown(1) then
+  if love.mouse.isDown(1) or love.keyboard.isDown('space') then
     local mx, my = love.mouse.getX(), love.mouse.getY()
-    local gridX, gridY = pxToGridUnits(mx, my)
+    local gridX, gridY = pxToGridUnits(mx, my, offX, offY)
 
     if isOutOfBounds(grid, gridX, gridY) then
       return
@@ -166,7 +419,9 @@ function flowFieldTestBlueprint.update(self, dt)
     self.executionTimeMs = (socket.gettime() - ts) * 1000
   end
 
-  self.ai:move(self.flowField, dt)
+  f.forEach(self.ai, function(ai)
+    ai:move(self.flowField, dt)
+  end)
 end
 
 local function arrowRotationFromDirection(dx, dy)
@@ -196,22 +451,29 @@ end
 
 local COLOR_UNWALKABLE = {0.2,0.2,0.2,1}
 local COLOR_WALKABLE = {0.2,0.35,0.55,1}
-local COLOR_START_POINT = {0,1,1}
+local COLOR_ARROW = {0.7,0.7,0.7}
+local COLOR_START_POINT = {0,1,0}
 
-function flowFieldTestBlueprint.draw(self)
+local function drawMousePosition()
+  local gridX, gridY = pxToGridUnits(
+    love.mouse.getX(),
+    love.mouse.getY(),
+    offX,
+    offY
+  )
+  love.graphics.setColor(1,1,0,1)
+  love.graphics.setLineWidth(2)
+  love.graphics.rectangle(
+    'line',
+    gridX * gridSize,
+    gridY * gridSize,
+    gridSize,
+    gridSize
+  )
+end
+
+local function drawScene(self)
   love.graphics.clear(0.1,0.1,0.1,1)
-
-  love.graphics.setColor(1,1,1,1)
-  love.graphics.print('CLICK GRID TO SET CONVERGENCE POINT', offX + 20, 20)
-
-  love.graphics.setColor(0.5,0.5,0.5)
-  if self.executionTimeMs ~= nil then
-    love.graphics.print(
-      string.format('execution time: %.4f(ms)', self.executionTimeMs),
-      offX + 20,
-      50
-    )
-  end
 
   local textDrawQueue = {}
   local arrowDrawQueue = {}
@@ -221,12 +483,12 @@ function flowFieldTestBlueprint.draw(self)
     for x=1, #grid[1] do
       local cell = row[x]
       local drawX, drawY =
-        ((x-1) * gridSize) + offX,
-        ((y-1) * gridSize) + offY
+        (x * gridSize),
+        (y * gridSize)
 
       local oData = grid[y][x]
       local ffd = row[x] -- flow field cell data
-      local isStartPoint = ffd and (ffd[1] == 0 and ffd[2] == 0)
+      local isStartPoint = ffd and (ffd.x == 0 and ffd.y == 0)
       if isStartPoint then
         love.graphics.setColor(COLOR_START_POINT)
       else
@@ -261,14 +523,14 @@ function flowFieldTestBlueprint.draw(self)
       if cell then
         arrowDrawQueue[#arrowDrawQueue + 1] = function()
           -- arrow
-          love.graphics.setColor(1,1,0.2)
+          love.graphics.setColor(COLOR_ARROW)
           if not isStartPoint then
-            local rot = arrowRotationFromDirection(ffd[1], ffd[2])
+            local rot = arrowRotationFromDirection(ffd.x, ffd.y)
             local offsetCenter = 8
             love.graphics.draw(
               arrow,
-              drawX + 25,
-              drawY + 26,
+              drawX + gridSize / 2,
+              drawY + gridSize / 2,
               rot,
               1,
               1,
@@ -278,29 +540,61 @@ function flowFieldTestBlueprint.draw(self)
           end
         end
 
-        textDrawQueue[#textDrawQueue + 1] = function()
-          -- text
-          love.graphics.scale(0.5)
-          love.graphics.setColor(0.6,0.6,0.6,1)
-          -- direction vectors
-          love.graphics.print(
-            row[x][1]..' '..row[x][2],
-            (drawX + 5) * 2,
-            (drawY + 5) * 2
-          )
-          -- distance
-          love.graphics.print(
-            row[x][3],
-            (drawX + 25) * 2,
-            (drawY + 38) * 2
-          )
-          love.graphics.scale(2)
+        if self.showGridCoordinates then
+          textDrawQueue[#textDrawQueue + 1] = function()
+            love.graphics.setColor(0.5,0.8,0.5)
+            love.graphics.scale(0.5)
+            love.graphics.print(
+              x..' '..y,
+              drawX * 2 + 5,
+              drawY * 2 + 6
+            )
+            love.graphics.scale(2)
+          end
+        end
+
+        if self.showFlowFieldText then
+          textDrawQueue[#textDrawQueue + 1] = function()
+            love.graphics.scale(0.5)
+            love.graphics.setColor(0.6,0.6,0.6,1)
+
+            -- direction vectors
+            love.graphics.print(
+              row[x].x..' '..row[x].y,
+              (drawX + 5) * 2,
+              (drawY + 5) * 2
+            )
+
+            -- distance
+            love.graphics.print(
+              row[x].dist,
+              (drawX + gridSize/2) * 2,
+              (drawY + gridSize - 6) * 2
+            )
+
+            love.graphics.scale(2)
+          end
         end
       end
     end
   end
 
-  self.ai:draw()
+  local function drawTitle()
+    local offsetX = 50
+    love.graphics.setColor(1,1,1,1)
+    love.graphics.print('CLICK GRID TO SET CONVERGENCE POINT', 20 + offsetX, 20)
+
+    if self.executionTimeMs ~= nil then
+      love.graphics.setColor(0.5,0.5,0.5)
+      love.graphics.print(
+        string.format('execution time: %.4f(ms)', self.executionTimeMs),
+        20 + offsetX,
+        50
+      )
+    end
+  end
+
+  table.insert(textDrawQueue, drawTitle)
 
   for i=1, #arrowDrawQueue do
     arrowDrawQueue[i]()
@@ -309,6 +603,17 @@ function flowFieldTestBlueprint.draw(self)
   for i=1, #textDrawQueue do
     textDrawQueue[i]()
   end
+
+  f.forEach(self.ai, function(ai)
+    ai:draw(self.flowField, dt)
+  end)
+  drawMousePosition()
+end
+
+function flowFieldTestBlueprint.draw(self)
+  love.graphics.translate(offX, offY)
+  drawScene(self)
+  love.graphics.translate(-offX, -offY)
 end
 
 return groups.gui.createFactory(flowFieldTestBlueprint)

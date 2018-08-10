@@ -27,10 +27,10 @@ local function perf(func, options)
 		end
 	end
 
-	return function(a, b, c, d, e)
+	return function(a, b, c, d, e, f, g, h)
 		local ts = getTime()
 
-		local out1, out2, out3 = func(a, b, c, d, e)
+		local out1, out2, out3 = func(a, b, c, d, e, f, g, h)
 
 		local executionTimeMs = (getTime() - ts) * 1000
 
