@@ -2,6 +2,8 @@ local getAdjacentWalkablePosition = require 'modules.get-adjacent-open-position'
 local collisionObject = require 'modules.collision'
 local uid = require'utils.uid'
 local tween = require 'modules.tween'
+local socket = require 'socket'
+local distOfLine = require'utils.math'.dist
 
 local Ai = {}
 local Ai_mt = {__index = Ai}
@@ -12,8 +14,8 @@ function Ai.setGridSize(size)
 end
 
 -- gets directions from grid position, adjusting vectors to handle wall collisions as needed
-local aiPathWithAstar = require'scene.sandbox.ai.pathing-with-astar'
-Ai.getPathWithAstar = require'utils.perf'({
+local aiPathWithAstar = require'modules.flow-field.pathing-with-astar'
+local getPathWithAstar = require'utils.perf'({
   enabled = false,
   done = function(t)
     print('ai path:', t)
@@ -40,31 +42,53 @@ function Ai:autoUnstuckFromWallIfNeeded(grid, gridX, gridY)
   end
 end
 
+local COLLISION_SLIDE = 'slide'
+local function collisionFilter()
+  return COLLISION_SLIDE
+end
+
 function Ai:move(grid, flowField, dt)
   local centerOffset = self.padding
-  local isNewPath = self.hasDeviatedPosition or (self.lastFlowField ~= flowField)
+  local prevGridX, prevGridY = self.pxToGridUnits(self.prevX or 0, self.prevY or 0)
   local gridX, gridY = self.pxToGridUnits(self.x, self.y)
+  -- we can use this detect whether the agent is stuck if the grid position has remained the same for several frames and was trying to move
+  local isNewGridPosition = prevGridX ~= gridX or prevGridY ~= gridY
+  local isNewFlowField = self.lastFlowField ~= flowField
+  local shouldGetNewPath =
+    isNewFlowField or
+    self.pathComplete or
+    self.hasDeviatedPosition
   self:autoUnstuckFromWallIfNeeded(grid, gridX, gridY)
 
-  if isNewPath then
-    local distanceToPlanAhead = 10
-    self.pathWithAstar = self:getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
+  if shouldGetNewPath then
+    self.pathComplete = false
+    local distanceToPlanAhead = 5
+    self.pathWithAstar = getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
 
     local index = 1
     local path = self.pathWithAstar
+    local pathLen = #path
     local posTween
     local done = true
+    local isEmptyPath = pathLen == 0
+
+    if isEmptyPath then
+      return
+    end
+
     self.positionTweener = function(dt)
+      if index > pathLen then
+        self.pathComplete = true
+        return
+      end
+
       if done then
-        if index > #path then
-          return
-        end
         local pos = path[index]
         local nextPos = {
           x = pos.x * gridSize + centerOffset,
           y = pos.y * gridSize + centerOffset
         }
-        local dist = require'utils.math'.dist(self.x, self.y, nextPos.x, nextPos.y)
+        local dist = distOfLine(self.x, self.y, nextPos.x, nextPos.y)
         local duration = dist / self.speed
 
         local easing = tween.easing.linear
@@ -84,7 +108,7 @@ function Ai:move(grid, flowField, dt)
     return
   end
 
-  local actualX, actualY, cols, len = self.collision:move(nextX, nextY)
+  local actualX, actualY, cols, len = self.collision:move(nextX, nextY, collisionFilter)
   local hasCollisions = len > 0
 
   self.hasDeviatedPosition = hasCollisions and
@@ -98,14 +122,8 @@ function Ai:move(grid, flowField, dt)
 end
 
 function Ai:draw()
-  local isNewPath = self.prevPath ~= self.pathWithAstar
   -- agent color
-  love.graphics.setColor(
-    isNewPath and
-      self.COLOR_NEW_PATH or
-      self.COLOR_FILL
-  )
-  self.prevPath = self.pathWithAstar
+  love.graphics.setColor(self.COLOR_FILL)
 
   local padding = 0
   love.graphics.rectangle(
@@ -172,8 +190,7 @@ function Ai.create(x, y, speed, scale, collisionWorld, pxToGridUnits, WALKABLE, 
     pxToGridUnits = pxToGridUnits,
     WALKABLE = WALKABLE,
 
-    COLOR_NEW_PATH = {1,0,0,0.8},
-    COLOR_FILL = {0.7,0.7,0,0.8}
+    COLOR_FILL = {1,0,0,0.8}
   }, Ai_mt)
 end
 

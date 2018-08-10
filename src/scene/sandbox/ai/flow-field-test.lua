@@ -1,7 +1,7 @@
 local socket = require 'socket'
 local pprint = require 'utils.pprint'
 local memoize = require 'utils.memoize'
-local flowField = require 'scene.sandbox.ai.flow-field'
+local flowField = require 'modules.flow-field.flow-field'
 local grid = require 'scene.sandbox.ai.grid'
 local groups = require 'components.groups'
 local collisionObject = require 'modules.collision'
@@ -33,11 +33,12 @@ local function isGridCellVisitable(grid, x, y, dist)
 end
 
 -- returns grid units relative to the ui
+local floor = math.floor
 local function pxToGridUnits(screenX, screenY, offX, offY)
   local gridPixelX, gridPixelY = screenX - (offX or 0), screenY - (offY or 0)
   local gridX, gridY =
-    math.floor(gridPixelX / gridSize),
-    math.floor(gridPixelY / gridSize)
+    floor(gridPixelX / gridSize),
+    floor(gridPixelY / gridSize)
   return gridX, gridY
 end
 
@@ -49,44 +50,6 @@ local function getFlowFieldValue(flowField, gridX, gridY)
   end
   return v[1], v[2], v[3]
 end
-
-local perf = require'utils.perf'
-local drawSmoothenedPath = perf({
-  enabled = false,
-  done = function(t)
-    print('bezier curve:', t)
-  end
-})(function(path)
-  -- bezier curve must have at least 2 points
-  if #path < 2 then
-    return
-  end
-
-  -- draw path curve
-  local curve = love.math.newBezierCurve(
-    f.reduce(path, function(points, v)
-      points[#points + 1] = (v.x) * gridSize
-      points[#points + 1] = (v.y) * gridSize
-      return points
-    end, {})
-  )
-
-  -- simulating many ops
-  -- for i=1, 50 do
-  --   love.math.newBezierCurve(
-  --     f.reduce(path, function(points, v)
-  --       points[#points + 1] = v.x * gridSize + i
-  --       points[#points + 1] = v.y * gridSize + i
-  --       return points
-  --     end, {})
-  --   )
-  -- end
-
-  local curveCoords = curve:render(2)
-  love.graphics.setLineWidth(4)
-  love.graphics.setColor(0.5,0.8,1,1)
-  love.graphics.line(curveCoords)
-end)
 
 local function drawPathWithAstar(ai)
   local self = ai
@@ -148,8 +111,6 @@ local function drawPathWithAstar(ai)
   for i=1, #agentPathDrawQueue do
     agentPathDrawQueue[i]()
   end
-
-  drawSmoothenedPath(p)
 end
 
 function flowFieldTestBlueprint.init(self)
@@ -204,7 +165,7 @@ function flowFieldTestBlueprint.init(self)
 
   -- generate random ai agents
   local positionsFilled = {}
-  while #self.ai <= 70 do
+  while #self.ai <= 100 do
     local gridX = math.random(6, 20)
     local gridY = math.random(2, 20)
     local positionId = gridY * 20 + gridX
@@ -217,7 +178,7 @@ function flowFieldTestBlueprint.init(self)
           gridX * gridSize,
           gridY * gridSize,
           360,
-          0.7,
+          0.5,
           colWorld,
           pxToGridUnits,
           WALKABLE,
