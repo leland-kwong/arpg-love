@@ -1,8 +1,10 @@
+-- The main map that the player and ai interact with.
+
 local objectUtils = require 'utils.object-utils'
 local groups = require 'components.groups'
-local collisionWorlds = require 'components.collision-worlds'
-local collisionObject = require 'modules.collision'
 local mapBlueprint = require 'components.map.map-blueprint'
+local Map = require 'modules.map-generator.index'
+local MainMapSolidsFactory = require 'components.map.main-map-solids'
 local animationFactory = require 'components.animation-factory'
 local lru = require 'utils.lru'
 
@@ -21,26 +23,20 @@ local function getIndexByCoordinate(x, y, maxCols)
   return (y * maxCols) + x
 end
 
--- coordinates are in pixels
-local function addCollisionObject(self, animation, positionIndex, sx, sy)
-  local fromCache = self.collisionObjectCache:get(positionIndex)
-  if fromCache then
-    return fromCache
-  end
-  local w = animation:getSourceSize()
-  local ox, oy = animation:getSourceOffset()
-  local object = collisionObject:new(
-    'obstacle',
-    sx, sy, w, self.gridSize, ox, oy - (self.gridSize / 2)
-  ):addToWorld(collisionWorlds.map)
-  self.collisionObjectCache:set(positionIndex, object)
-  return object
+local function getWallEntity(self, positionIndex)
+  return self.wallTileCache:get(positionIndex)
 end
 
-local function removeCollisionObject(self, positionIndex)
-  local colObj = self.collisionObjectCache:get(positionIndex)
-  if colObj then
-    colObj:removeFromWorld(collisionWorlds.map)
+local function addWallTileEntity(self, positionIndex, entityProps)
+  local wallTileEntity = MainMapSolidsFactory.create(entityProps)
+  self.wallTileCache:set(positionIndex, wallTileEntity)
+end
+
+local function removeWallTileEntity(self, positionIndex)
+  local wallEntity = getWallEntity(self, positionIndex)
+  if wallEntity then
+    wallEntity:delete()
+    self.wallTileCache:delete(positionIndex)
   end
 end
 
@@ -48,13 +44,17 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   tileRenderDefinition = {},
 
   init = function(self)
-    self.animationCache = lru.new(1400)
-
-    -- remove collision objects when the lru cache automatically prunes
-    local collisionPruneCallback = function(key)
-      removeCollisionObject(self, key)
+    local function wallTilePruneCallback(key, entity)
+      entity:delete()
     end
-    self.collisionObjectCache = lru.new(600, nil, collisionPruneCallback)
+    self.wallTileCache = lru.new(400, nil, wallTilePruneCallback)
+
+    self.animationCache = lru.new(1400)
+  end,
+
+  onUpdateStart = function(self)
+    self.itemsAddedByIndex = self.itemsAddedByIndex or {}
+    self.itemsToPruneByIndex = self.itemsToPruneByIndex or {}
   end,
 
   onUpdate = function(self, value, x, y, originX, originY, isInViewport, dt)
@@ -63,12 +63,27 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     local animationName = self.tileRenderDefinition[y][x]
     local animation = getAnimation(self.animationCache, index, animationName)
       :update(dt)
-    -- if its unwalkable, add a collision object
-    if value ~= self.walkable then
-      addCollisionObject(self, animation, index, x * self.gridSize, y * self.gridSize)
+    -- if its unwalkable, add a collision object and create wall tile
+    if value ~= Map.WALKABLE then
+      local tileX, tileY = x * self.gridSize, y * self.gridSize
+      local ox, oy = animation:getOffset()
+      if not getWallEntity(self, index) then
+        addWallTileEntity(self, index, {
+          animation = animation,
+          x = tileX,
+          y = tileY,
+          ox = ox,
+          oy = oy,
+          gridSize = self.gridSize
+        })
+      end
+    -- cleanup previous collision objects and wall tiles
     else
-      removeCollisionObject(self, index)
+      removeWallTileEntity(self, index)
     end
+  end,
+
+  onUpdateEnd = function(self)
   end,
 
   render = function(self, value, x, y, originX, originY)
@@ -78,17 +93,20 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     local animation = getAnimation(self.animationCache, index, animationName)
     local ox, oy = animation:getOffset()
     local tileX, tileY = x * self.gridSize, y * self.gridSize
-    love.graphics.draw(
-      animation.atlas,
-      animation.sprite,
-      tileX,
-      tileY,
-      0,
-      1,
-      1,
-      ox,
-      oy
-    )
+
+    if value == Map.WALKABLE then
+      love.graphics.draw(
+        animation.atlas,
+        animation.sprite,
+        tileX,
+        tileY,
+        0,
+        1,
+        1,
+        ox,
+        oy
+      )
+    end
   end
 })
 

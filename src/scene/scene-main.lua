@@ -3,12 +3,11 @@ local Map = require 'modules.map-generator.index'
 local Player = require 'components.player'
 local Minimap = require 'components.map.minimap'
 local MainMap = require 'components.map.main-map'
+local SpawnerAi = require 'components.spawn.spawn-ai'
 local config = require 'config'
 local camera = require 'components.camera'
 local cloneGrid = require 'utils.clone-grid'
 
-local map = Map.createAdjacentRooms(4, 20)
-local WALKABLE = 1
 local gridTileTypes = {
   -- unwalkable
   [0] = {
@@ -29,15 +28,24 @@ local gridTileTypes = {
     'floor-3'
   }
 }
-local gridTileDefinitions = cloneGrid(map.grid, function(v, x, y)
-  local tileGroup = gridTileTypes[v]
-  return tileGroup[math.random(1, #tileGroup)]
-end)
 
 local MainScene = {}
 
 function MainScene.init(self)
-  local player = Player.create()
+  local map = Map.createAdjacentRooms(4, 20)
+  local gridTileDefinitions = cloneGrid(map.grid, function(v, x, y)
+    local tileGroup = gridTileTypes[v]
+    return tileGroup[math.random(1, #tileGroup)]
+  end)
+
+  local player = Player.create({
+    mapGrid = map.grid
+  })
+
+  SpawnerAi.create({
+    grid = map.grid,
+    walkable = map.WALKABLE
+  })
 
   Minimap.create({
     camera = camera,
@@ -49,7 +57,7 @@ function MainScene.init(self)
     camera = camera,
     grid = map.grid,
     tileRenderDefinition = gridTileDefinitions,
-    walkable = WALKABLE
+    walkable = map.WALKABLE
   })
 end
 

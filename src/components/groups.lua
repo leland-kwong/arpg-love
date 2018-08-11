@@ -10,7 +10,11 @@ local Groups = {
   all = Component.newGroup({
     -- automatic draw-ordering based on y position
     drawOrder = function(self)
-      local order = floor(self.y / gridSize)
+      --[[
+        number of layers between each order. This is to allow multiple different items to be stacked within the same draw order
+      ]]
+      local layers = 5
+      local order = floor(self.y / gridSize) + layers
       return max(1, order)
     end,
   }),

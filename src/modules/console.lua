@@ -28,7 +28,7 @@ msgBus.subscribe(function(msgType, v)
   end
 
   -- toggle collision debugger
-  if (keysPressed[L_SUPER] or keysPressed[R_SUPER])
+  if (msgBus.KEY_PRESSED == msgType) and (keysPressed[L_SUPER] or keysPressed[R_SUPER])
     and keysPressed.p
     and not v.isRepeated
   then
@@ -36,7 +36,13 @@ msgBus.subscribe(function(msgType, v)
   end
 end)
 
-local Console = {}
+local Console = {
+  stats = {
+    accumulatedMemoryUsed = 0,
+    currentMemoryUsed = 0,
+    frameCount = 0
+  }
+}
 
 function Console.getInitialProps()
   return {}
@@ -68,8 +74,16 @@ end
 
 local canvas = love.graphics.newCanvas()
 
-function Console.draw()
+function Console.update(self)
+  local s = self.stats
+  s.currentMemoryUsed = collectgarbage('count')
+  s.frameCount = s.frameCount + 1
+  s.accumulatedMemoryUsed = s.accumulatedMemoryUsed + s.currentMemoryUsed
+end
+
+function Console.draw(self)
   local gfx = love.graphics
+  local s = self.stats
 
   gfx.push()
   gfx.setCanvas(canvas)
@@ -94,6 +108,19 @@ function Console.draw()
     edgeOffset,
     startY + lineHeight
   )
+
+  gfx.setColor(Color.MED_GRAY)
+  gfx.print('SYSTEM', edgeOffset, startY + 10 * lineHeight)
+  gfx.setColor(Color.WHITE)
+  printTable({
+      memory = string.format('%0.2f', s.currentMemoryUsed / 1024),
+      memoryAvg = string.format('%0.2f', s.accumulatedMemoryUsed / s.frameCount / 1024)
+    },
+    lineHeight,
+    edgeOffset,
+    startY + 11 * lineHeight
+  )
+
   gfx.setBlendMode('alpha', 'premultiplied')
   gfx.setCanvas()
   gfx.draw(canvas)

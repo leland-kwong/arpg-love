@@ -6,6 +6,9 @@ local collisionWorlds = require 'components.collision-worlds'
 local collisionObject = require 'modules.collision'
 local camera = require 'components.camera'
 local Position = require 'utils.position'
+local Map = require 'modules.map-generator.index'
+local flowfield = require 'modules.flow-field.flow-field'
+local msgBus = require 'components.msg-bus'
 
 local colMap = collisionWorlds.map
 local keyMap = config.keyboard
@@ -13,12 +16,12 @@ local mouseInputMap = config.mouseInputMap
 
 local width, height = love.window.getMode()
 local startPos = {
-  x = 16 * 30,
-  y = 16 * 30,
+  x = config.gridSize * 3,
+  y = config.gridSize * 3,
 }
 
 local frameRate = 60
-local speed = 300 -- per frame
+local speed = 400 -- per frame
 
 local activeAnimation
 local DIRECTION_RIGHT = 1
@@ -65,7 +68,7 @@ local skillHandlers = {
 }
 
 local Player = {
-  getInitialProps = function()
+  getInitialProps = function(props)
     return {
       x = startPos.x,
       y = startPos.y,
@@ -74,6 +77,7 @@ local Player = {
       type = 'player',
       h = 1,
       w = 1,
+      mapGrid = props.mapGrid
     }
   end,
 
@@ -112,6 +116,15 @@ local Player = {
       self.w,
       self.h
     ):addToWorld(colMap)
+
+    local function isOutOfBounds(grid, x, y)
+      return y < 1 or x < 1 or y > #grid or x > #grid[1]
+    end
+    self.isGridCellVisitable = function(grid, x, y, dist)
+      return not isOutOfBounds(grid, x, y) and
+        grid[y][x] == Map.WALKABLE and
+        dist < 20
+    end
   end,
 
   -- drawOrder = function(self)
@@ -172,14 +185,16 @@ local Player = {
     local col = self.collisionObj
 
     -- COLLISION UPDATES
+    local colOrigX, colOrigY = self.colObj.x, self.colObj.y
+    local sizeOffset = 10
     self.colObj:update(
       -- use current coordinates because we only want to update size
-      origx,
-      origy,
+      colOrigX,
+      colOrigY,
       w,
-      h,
+      h - sizeOffset,
       oX,
-      oY
+      oY - sizeOffset
     )
 
     local actualX, actualY = self.colObj:move(nextx, nexty, collisionFilter)
@@ -189,6 +204,11 @@ local Player = {
     self.w = w
 
     camera:setPosition(self.x, self.y)
+
+    local gridX, gridY = Position.pixelsToGrid(self.x, self.y, config.gridSize)
+    msgBus.send(msgBus.NEW_FLOWFIELD, {
+      flowField = flowfield(self.mapGrid, gridX, gridY, self.isGridCellVisitable)
+    })
   end
 }
 
@@ -210,15 +230,15 @@ end
 
 local function drawDebug(self)
   if config.collisionDebug then
-    local ox, oy = self.animation:getOffset()
+    local c = self.colObj
     love.graphics.setColor(1,1,1,0.5)
     local debug = require 'modules.debug'
     debug.boundingBox(
       'fill',
-      self.x - ox,
-      self.y - oy,
-      self.w,
-      self.h,
+      c.x - c.ox,
+      c.y - c.oy,
+      c.w,
+      c.h,
       false
     )
   end
@@ -246,6 +266,11 @@ function Player.draw(self)
   love.graphics.setShader()
 end
 
-local playerFactory = groups.all.createFactory(Player)
+local playerFactory = groups.all.createFactory(function(defaults)
+  Player.drawOrder = function(self)
+    return defaults.drawOrder(self) + 1
+  end
+  return Player
+end)
 
 return playerFactory

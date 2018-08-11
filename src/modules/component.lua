@@ -124,9 +124,17 @@ function M.newGroup(factoryDefaults)
   end
 
   function C.delete(component)
+    if component._deleted then
+      if isDebug then
+        print('component already deleted:', component._id)
+      end
+      return
+    end
+
     componentsById[component._id] = nil
     count = count - 1
     component:final()
+    component._deleted = true
   end
 
   return C

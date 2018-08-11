@@ -30,7 +30,7 @@ local scenes = {
 }
 
 local globalState = {
-  activeScene = scenes.sandbox,
+  activeScene = scenes.main,
 }
 
 function love.load()
@@ -54,7 +54,7 @@ end
 local inputMsg = require 'utils.pooled-table'(function(t, key, scanCode, isRepeated)
   t.key = key
   t.code = scanCode
-  t.repeated = isRepeated
+  t.isRepeated = isRepeated
   return t
 end)
 
