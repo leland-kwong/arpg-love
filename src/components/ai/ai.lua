@@ -161,7 +161,7 @@ function Ai:draw()
     self.collision.w
   )
 
-  self:debugLineOfSight()
+  -- self:debugLineOfSight()
 end
 
 function Ai.create(x, y, speed, scale, collisionWorld, pxToGridUnits, findNearestTarget, grid, gridSize, WALKABLE, showAiPath)
