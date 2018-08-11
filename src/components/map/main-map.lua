@@ -32,14 +32,6 @@ local function addWallTileEntity(self, positionIndex, entityProps)
   self.wallTileCache:set(positionIndex, wallTileEntity)
 end
 
-local function removeWallTileEntity(self, positionIndex)
-  local wallEntity = getWallEntity(self, positionIndex)
-  if wallEntity then
-    wallEntity:delete()
-    self.wallTileCache:delete(positionIndex)
-  end
-end
-
 local blueprint = objectUtils.assign({}, mapBlueprint, {
   tileRenderDefinition = {},
 
@@ -48,7 +40,6 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
       entity:delete()
     end
     self.wallTileCache = lru.new(400, nil, wallTilePruneCallback)
-
     self.animationCache = lru.new(1400)
   end,
 
@@ -77,9 +68,6 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
           gridSize = self.gridSize
         })
       end
-    -- cleanup previous collision objects and wall tiles
-    else
-      removeWallTileEntity(self, index)
     end
   end,
 

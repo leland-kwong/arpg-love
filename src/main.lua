@@ -2,7 +2,6 @@
 -- require 'lua_modules.strict'
 
 require 'components.run'
-require 'modules.test.index'
 
 -- NOTE: this is necessary for crisp pixel rendering
 love.graphics.setDefaultFilter('nearest', 'nearest')
@@ -14,6 +13,12 @@ local groups = require 'components.groups'
 local config = require 'config'
 local camera = require 'components.camera'
 local SceneMain = require 'scene.scene-main'
+
+-- run tests
+if config.isDebug then
+  require 'modules.test.index'
+  require 'utils.test.index'
+end
 
 local scale = config.scaleFactor
 console.create()
