@@ -135,7 +135,7 @@ local function getNextDirectionWithAdjustmentIfNeeded(grid, vx, vy, vx2, vy2, cu
   return vx, vy
 end
 
-local function aiPath(self, flowField, grid, gridX, gridY, length, WALKABLE, clearance)
+local function aiPath(flowField, grid, gridX, gridY, length, WALKABLE, clearance)
   local curPosition = {x = gridX, y = gridY}
   local path = {}
 
@@ -146,16 +146,17 @@ local function aiPath(self, flowField, grid, gridX, gridY, length, WALKABLE, cle
     local nextVx, nextVy = getFlowFieldValue(flowField, nextPx, nextPy)
     local vxActual, vyActual = vx, vy
 
+    local isZeroVector = nextVx == 0 and nextVy == 0
+    if isZeroVector then
+      return path
+    end
+
     if clearance > 1 then
       -- check one step ahead and adjust the current direction if needed
       vxActual, vyActual = getNextDirectionWithAdjustmentIfNeeded(grid, vx, vy, nextVx, nextVy, px, py, nextPx, nextPy, WALKABLE)
     end
 
     local nextPosition = {x = px + vxActual, y = py + vyActual}
-
-    if (nextVx == 0 and nextVy == 0) then
-      return path
-    end
 
     table.insert(path, nextPosition)
     curPosition = nextPosition

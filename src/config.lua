@@ -1,3 +1,5 @@
+-- global game configuration
+
 local M = {}
 
 M.isDebug = true

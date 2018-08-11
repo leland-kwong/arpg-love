@@ -2,15 +2,15 @@ local groups = require 'components.groups'
 
 local SandboxBlueprint = {}
 
--- SCENES
-local spritePositioning = require 'scene.sandbox.sprite-positioning'
-local ai = require 'scene.sandbox.ai.ai'
-
-local state = {
-  activeScene = ai
-}
-
 function SandboxBlueprint.init()
+  -- SCENES
+  local spritePositioning = require 'scene.sandbox.sprite-positioning'
+  local ai = require 'scene.sandbox.ai.test-scene'
+
+  local state = {
+    activeScene = ai
+  }
+
   state.activeScene.create()
 end
 

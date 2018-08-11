@@ -1,6 +1,7 @@
 -- can't use lua strict right now because 'jumper' library uses globals which throws errors
 -- require 'lua_modules.strict'
 
+require 'components.run'
 require 'modules.test.index'
 
 -- NOTE: this is necessary for crisp pixel rendering
@@ -29,7 +30,7 @@ local scenes = {
 }
 
 local globalState = {
-  activeScene = scenes.sandbox
+  activeScene = scenes.sandbox,
 }
 
 function love.load()
