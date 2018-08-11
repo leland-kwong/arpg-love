@@ -4,23 +4,36 @@ local uid = require'utils.uid'
 local tween = require 'modules.tween'
 local socket = require 'socket'
 local distOfLine = require'utils.math'.dist
+local memoize = require'utils.memoize'
+local LineOfSight = memoize(require'modules.line-of-sight')
+local Perf = require'utils.perf'
+local dynamic = require'modules.dynamic-module'
 
 local Ai = {}
 local Ai_mt = {__index = Ai}
-local gridSize = nil
-
-function Ai.setGridSize(size)
-  gridSize = size
-end
 
 -- gets directions from grid position, adjusting vectors to handle wall collisions as needed
 local aiPathWithAstar = require'modules.flow-field.pathing-with-astar'
-local getPathWithAstar = require'utils.perf'({
+local getPathWithAstar = Perf({
   enabled = false,
   done = function(t)
     print('ai path:', t)
   end
 })(aiPathWithAstar)
+
+Ai.debugLineOfSight = dynamic('components/ai/line-of-sight.debug.lua')
+
+function Ai:checkLineOfSight(grid, WALKABLE, targetX, targetY, debug)
+  if not targetX then
+    return false
+  end
+
+  local gridX, gridY = self.pxToGridUnits(self.x, self.y)
+  local gridTargetX, gridTargetY = self.pxToGridUnits(targetX, targetY)
+  return LineOfSight(grid, WALKABLE, debug)(
+    gridX, gridY, gridTargetX, gridTargetY
+  )
+end
 
 function Ai:autoUnstuckFromWallIfNeeded(grid, gridX, gridY)
   local row = grid[gridY]
@@ -29,7 +42,7 @@ function Ai:autoUnstuckFromWallIfNeeded(grid, gridX, gridY)
   if isInsideWall then
     local openX, openY = getAdjacentWalkablePosition(grid, gridX, gridY, self.WALKABLE)
     if openX then
-      local nextX, nextY = openX * gridSize, openY * gridSize
+      local nextX, nextY = openX * self.gridSize, openY * self.gridSize
       self.x = nextX
       self.y = nextY
       self.collision:update(
@@ -47,22 +60,21 @@ local function collisionFilter()
   return COLLISION_SLIDE
 end
 
-function Ai:move(grid, flowField, dt)
+function Ai:update(grid, flowField, dt)
   local centerOffset = self.padding
   local prevGridX, prevGridY = self.pxToGridUnits(self.prevX or 0, self.prevY or 0)
   local gridX, gridY = self.pxToGridUnits(self.x, self.y)
   -- we can use this detect whether the agent is stuck if the grid position has remained the same for several frames and was trying to move
   local isNewGridPosition = prevGridX ~= gridX or prevGridY ~= gridY
   local isNewFlowField = self.lastFlowField ~= flowField
-  local shouldGetNewPath =
-    isNewFlowField or
-    self.pathComplete or
-    self.hasDeviatedPosition
+  local targetX, targetY = self.findNearestTarget(self.x, self.y, self.sightRadius)
+  local canSeeTarget = self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY)
+  local shouldGetNewPath = canSeeTarget
   self:autoUnstuckFromWallIfNeeded(grid, gridX, gridY)
 
   if shouldGetNewPath then
     self.pathComplete = false
-    local distanceToPlanAhead = 5
+    local distanceToPlanAhead = self.sightRadius / self.gridSize
     self.pathWithAstar = getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
 
     local index = 1
@@ -85,8 +97,8 @@ function Ai:move(grid, flowField, dt)
       if done then
         local pos = path[index]
         local nextPos = {
-          x = pos.x * gridSize + centerOffset,
-          y = pos.y * gridSize + centerOffset
+          x = pos.x * self.gridSize + centerOffset,
+          y = pos.y * self.gridSize + centerOffset
         }
         local dist = distOfLine(self.x, self.y, nextPos.x, nextPos.y)
         local duration = dist / self.speed
@@ -97,6 +109,10 @@ function Ai:move(grid, flowField, dt)
       end
       done = posTween:update(dt)
     end
+  end
+
+  if not self.positionTweener then
+    return
   end
 
   local originalX, originalY = self.x, self.y
@@ -144,16 +160,16 @@ function Ai:draw()
     self.collision.h,
     self.collision.w
   )
+
+  self:debugLineOfSight()
 end
 
-function Ai.create(x, y, speed, scale, collisionWorld, pxToGridUnits, WALKABLE, showAiPath)
+function Ai.create(x, y, speed, scale, collisionWorld, pxToGridUnits, findNearestTarget, grid, gridSize, WALKABLE, showAiPath)
   assert(WALKABLE ~= nil)
   assert(type(pxToGridUnits) == 'function')
   assert(collisionWorld ~= nil)
-
-  if gridSize == nil then
-    error('grid size must be defined. Call `Ai.setGridSize` to define it')
-  end
+  assert(type(grid) == 'table')
+  assert(type(gridSize) == 'number')
 
   if scale % 1 == 0 then
     -- to prevent wall collision from getting stuck when pathing around corners, we'll adjust
@@ -182,12 +198,15 @@ function Ai.create(x, y, speed, scale, collisionWorld, pxToGridUnits, WALKABLE, 
     padding = math.ceil(padding / 2),
     dx = 0,
     dy = 0,
-    grid = grid,
     scale = scale,
     speed = speed or 100,
+    sightRadius = 10 * gridSize, -- pixel units
     collision = colObj,
+    grid = grid,
+    gridSize = gridSize,
     showAiPath = showAiPath,
     pxToGridUnits = pxToGridUnits,
+    findNearestTarget = findNearestTarget,
     WALKABLE = WALKABLE,
 
     COLOR_FILL = {1,0,0,0.8}

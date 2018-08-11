@@ -8,7 +8,8 @@ local collisionObject = require 'modules.collision'
 local bump = require 'modules.bump'
 local arrow = love.graphics.newImage('scene/sandbox/ai/arrow-up.png')
 local f = require'utils.functional'
-local Ai = require'components.ai'
+local Ai = require'components.ai.ai'
+local Math = require'utils.math'
 
 local gridSize = 32
 local offX, offY = 100, 0
@@ -17,11 +18,11 @@ local WALKABLE = 0
 local flowFieldTestBlueprint = {
   showFlowFieldText = false,
   showGridCoordinates = true,
-  showAiPath = false
+  showAiPath = false,
+  showAi = true
 }
 
 local colWorld = bump.newWorld(gridSize)
-Ai.setGridSize(gridSize)
 
 local function isOutOfBounds(grid, x, y)
   return y < 1 or x < 1 or y > #grid or x > #grid[1]
@@ -129,43 +130,45 @@ function flowFieldTestBlueprint.init(self)
   end)
 
   self.flowField = flowField(grid, 8, 5, isGridCellVisitable)
-  self.ai = {
-    Ai.create(
-      2 * gridSize,
-      2 * gridSize,
-      240,
-      1.5,
+  local function findNearestTarget(otherX, otherY, otherSightRadius)
+    if not self.targetPosition then
+      return nil
+    end
+
+    local dist = Math.dist(self.targetPosition.x, self.targetPosition.y, otherX, otherY)
+    local withinVision = dist <= otherSightRadius
+    if withinVision then
+      return self.targetPosition.x, self.targetPosition.y
+    end
+
+    return nil
+  end
+
+  local function AiFactory(x, y, speed, scale)
+    return Ai.create(
+      x * gridSize, y * gridSize,
+      speed,
+      scale,
       colWorld,
       pxToGridUnits,
-      WALKABLE,
-      self.showAiPath
-    ),
-    Ai.create(
-      4 * gridSize,
-      2 * gridSize,
-      300,
-      1.2,
-      colWorld,
-      pxToGridUnits,
-      WALKABLE,
-      self.showAiPath
-    ),
-    -- put one that is stuck inside a wall to test automatic wall unstuck
-    Ai.create(
-      1 * gridSize,
-      6 * gridSize,
-      320,
-      1.1,
-      colWorld,
-      pxToGridUnits,
+      findNearestTarget,
+      grid,
+      gridSize,
       WALKABLE,
       self.showAiPath
     )
+  end
+
+  self.ai = {
+    AiFactory(2, 2, 240, 1.5),
+    AiFactory(4, 2, 300, 1.2),
+    -- put one that is stuck inside a wall to test automatic wall unstuck
+    AiFactory(1, 6, 320, 1.1)
   }
 
   -- generate random ai agents
   local positionsFilled = {}
-  while #self.ai <= 100 do
+  while #self.ai <= 5 do
     local gridX = math.random(6, 20)
     local gridY = math.random(2, 20)
     local positionId = gridY * 20 + gridX
@@ -174,16 +177,7 @@ function flowFieldTestBlueprint.init(self)
       positionsFilled[positionId] = true
       table.insert(
         self.ai,
-        Ai.create(
-          gridX * gridSize,
-          gridY * gridSize,
-          360,
-          0.5,
-          colWorld,
-          pxToGridUnits,
-          WALKABLE,
-          self.showAiPath
-        )
+        AiFactory(gridX, gridY, 360, 0.5)
       )
     end
   end
@@ -204,12 +198,13 @@ function flowFieldTestBlueprint.update(self, dt)
     end
 
     local ts = socket.gettime()
+    self.targetPosition = {x = mx - offX, y = my - offY}
     self.flowField = flowField(grid, gridX, gridY, isGridCellVisitable)
     self.executionTimeMs = (socket.gettime() - ts) * 1000
   end
 
   f.forEach(self.ai, function(ai)
-    ai:move(grid, self.flowField, dt)
+    ai:update(grid, self.flowField, dt)
   end)
 end
 
@@ -393,12 +388,15 @@ local function drawScene(self)
     textDrawQueue[i]()
   end
 
-  f.forEach(self.ai, function(ai)
-    ai:draw(self.flowField, dt)
-    if ai.showAiPath then
-      drawPathWithAstar(ai)
-    end
-  end)
+  if self.showAi then
+    f.forEach(self.ai, function(ai)
+      ai:draw(self.flowField, dt)
+      if ai.showAiPath then
+        drawPathWithAstar(ai)
+      end
+    end)
+  end
+
   drawMousePosition()
 end
 
