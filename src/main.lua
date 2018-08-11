@@ -13,6 +13,7 @@ local groups = require 'components.groups'
 local config = require 'config'
 local camera = require 'components.camera'
 local SceneMain = require 'scene.scene-main'
+local devPauseScreen = require 'components.dev-pause-screen'
 
 local scale = config.scaleFactor
 console.create()
@@ -29,8 +30,14 @@ local scenes = {
 }
 
 local globalState = {
-  activeScene = scenes.sandbox
+  activeScene = scenes.sandbox,
+  windowFocused = true
 }
+
+function love.focus(focused)
+  print('window '..(focused and 'focused' or 'unfocused'))
+  globalState.windowFocused = focused
+end
 
 function love.load()
   local resolution = config.resolution
@@ -45,6 +52,10 @@ function love.load()
 end
 
 function love.update(dt)
+  if (config.debug and not globalState.windowFocused) then
+    return
+  end
+
   groups.all.updateAll(dt)
   groups.debug.updateAll(dt)
   groups.gui.updateAll(dt)
@@ -72,6 +83,11 @@ function love.keyreleased(key, scanCode)
 end
 
 function love.draw()
+  if (config.isDebug and not globalState.windowFocused) then
+    devPauseScreen()
+    return
+  end
+
   camera:attach()
   -- background
   love.graphics.clear(0.2,0.2,0.2)
