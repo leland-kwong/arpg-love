@@ -29,8 +29,11 @@ local function iterateActiveGrid(self, cb, a, b, c)
   local originX = max(1, w)
   local originY = max(1, s)
 
-  -- FIXME: thresholds are here as a way to make sure rendering reaches the edge of the screen
-  local thresholdSouth = 2
+  --[[
+    FIXME: thresholds are here as a way to make sure rendering reaches the edge of the screen.
+    The "correct" way to do it would be to figure out exactly what the edges are instead of just adding to the edges to fill.
+  ]]
+  local thresholdSouth = 3
   local thresholdWest = 0
   local thresholdEast = 1
 
