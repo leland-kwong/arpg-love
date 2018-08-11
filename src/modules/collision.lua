@@ -39,6 +39,7 @@ end
 
 function CollisionObject:move(goalX, goalY, filter)
   if not self.world then
+    error('collision object must be added to a world')
     return
   end
 
@@ -64,6 +65,7 @@ end
 
 function CollisionObject:update(x, y, w, h, offsetX, offsetY)
   if not self.world then
+    error('[collision.update]: collision object must be added to a world')
     return self
   end
 
@@ -84,6 +86,10 @@ function CollisionObject:update(x, y, w, h, offsetX, offsetY)
     h
   )
   return self
+end
+
+function CollisionObject:check(goalX, goalY, filter)
+  return self.world:check(self, goalX, goalY, filter)
 end
 
 return CollisionObject

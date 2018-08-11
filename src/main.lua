@@ -1,62 +1,37 @@
-require 'lua_modules.strict'
+-- can't use lua strict right now because 'jumper' library uses globals which throws errors
+-- require 'lua_modules.strict'
+
+require 'components.run'
 require 'modules.test.index'
+
+-- NOTE: this is necessary for crisp pixel rendering
+love.graphics.setDefaultFilter('nearest', 'nearest')
+
 local console = require 'modules.console'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
-local Player = require 'components.player'
 local groups = require 'components.groups'
-local functional = require 'utils.functional'
-local cloneGrid = require 'utils.clone-grid'
-local perf = require 'utils.perf'
-local camera = require 'components.camera'
 local config = require 'config'
-local Map = require 'modules.map-generator.index'
-local Minimap = require 'components.map.minimap'
-local MainMap = require 'components.map.main-map'
-require 'components.map.minimap'
-
-local map = Map.createAdjacentRooms(4, 20)
-local WALKABLE = 1
-local gridTileTypes = {
-  -- unwalkable
-  [0] = {
-    'wall',
-    'wall-2',
-    'wall-3'
-  },
-  -- walkable
-  [1] = {
-    'floor-1',
-    'floor-1',
-    'floor-1',
-    'floor-1',
-    'floor-1',
-    'floor-1',
-    'floor-1',
-    'floor-2',
-    'floor-3'
-  }
-}
-local gridTileDefinitions = cloneGrid(map.grid, function(v, x, y)
-  local tileGroup = gridTileTypes[v]
-  return tileGroup[math.random(1, #tileGroup)]
-end)
+local camera = require 'components.camera'
+local SceneMain = require 'scene.scene-main'
 
 local scale = config.scaleFactor
 console.create()
-local player = Player.create()
 
-Minimap.create({
-  camera = camera,
-  grid = map.grid
-})
+local scenes = {
+  main = SceneMain,
+  -- When in production, this module will not get loaded since it will not exist
+  sandbox = (function()
+    local scene = love.filesystem.load('scene/sandbox/main.lua')
+    if scene then
+      return scene()
+    end
+  end)()
+}
 
-MainMap.create({
-  camera = camera,
-  grid = map.grid,
-  tileRenderDefinition = gridTileDefinitions,
-  walkable = WALKABLE
-})
+local globalState = {
+  activeScene = scenes.sandbox,
+}
 
 function love.load()
   local resolution = config.resolution
@@ -65,29 +40,16 @@ function love.load()
   camera
     :setSize(vw, vh)
     :setScale(scale)
-  love.window.setTitle('pathfinder')
   msgBus.send(msgBus.GAME_LOADED)
+
+  globalState.activeScene.create()
 end
 
 function love.update(dt)
   groups.all.updateAll(dt)
   groups.debug.updateAll(dt)
-  camera:setPosition(player.x, player.y)
   groups.gui.updateAll(dt)
 end
-
--- BENCHMARKING
--- local perf = require 'utils.perf'
--- local TestFactory = groups.all.createFactory({})
--- local bench = perf({
---   done = function(t)
---     print('update', t)
---   end
--- })(function()
---   for i=1, 100 do
---     TestFactory.create({})
---   end
--- end)
 
 local inputMsg = require 'utils.pooled-table'(function(t, key, scanCode, isRepeated)
   t.key = key

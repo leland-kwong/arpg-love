@@ -85,6 +85,11 @@ function M.newGroup(factoryDefaults)
       return c
     end
 
+    function blueprint:delete()
+      C.delete(self)
+      return self
+    end
+
     -- default methods
     for k,v in pairs(baseProps) do
       if not blueprint[k] then

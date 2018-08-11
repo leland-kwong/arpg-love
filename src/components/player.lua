@@ -187,6 +187,8 @@ local Player = {
     self.y = actualY
     self.h = h
     self.w = w
+
+    camera:setPosition(self.x, self.y)
   end
 }
 
