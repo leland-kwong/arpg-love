@@ -1,5 +1,6 @@
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
+local font = require 'components.font'
 local Color = require 'modules.color'
 local config = require 'config'
 
@@ -7,14 +8,8 @@ local modifier = false
 local keysPressed = {}
 local L_SUPER = 'lgui'
 local R_SUPER = 'rgui'
-local fontSize = 16
-local lineHeight = fontSize * 1
-local font = love.graphics.newFont(
-  -- 'built/fonts/PolygonPixel5x7Cyrillic.ttf',
-  'built/fonts/StarPerv.ttf',
-  fontSize
-)
-love.graphics.setFont(font)
+local lineHeight = font.primary.lineHeight
+love.graphics.setFont(font.primary.font)
 
 local function toggleCollisionDebug()
   config.collisionDebug = not config.collisionDebug

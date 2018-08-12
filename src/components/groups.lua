@@ -1,3 +1,7 @@
+--[[
+  Component groups for grouping together entities and handling proper draw ordering
+]]
+
 local Component = require 'modules.component'
 local msgBus = require 'components.msg-bus'
 local config = require 'config'
@@ -19,6 +23,8 @@ local Groups = {
       return max(1, order)
     end,
   }),
+
+  overlay = Component.newGroup(),
 
   debug = Component.newGroup(),
 

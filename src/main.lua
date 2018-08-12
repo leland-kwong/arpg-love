@@ -52,6 +52,7 @@ end
 
 function love.update(dt)
   groups.all.updateAll(dt)
+  groups.overlay.updateAll(dt)
   groups.debug.updateAll(dt)
   groups.gui.updateAll(dt)
 end
@@ -82,6 +83,7 @@ function love.draw()
   -- background
   love.graphics.clear(0.2,0.2,0.2)
   groups.all.drawAll()
+  groups.overlay.drawAll()
   groups.debug.drawAll()
   camera:detach()
   groups.gui.drawAll()

@@ -9,8 +9,6 @@ local Position = require 'utils.position'
 
 local colMap = collisionWorlds.map
 
--- DEFAULTS
-local speed = 500
 local scale = 1
 local maxLifeTime = 2
 
@@ -27,23 +25,28 @@ local function colFilter(item, other)
 end
 
 local Fireball = {
-  damage = 1,
+  -- DEFAULTS
+  minDamage = 1,
+  maxDamage = 3,
+  scale = 1,
+  maxLifeTime = 2,
+  speed = 500,
+  cooldown = 0.1,
 
   getInitialProps = function(props)
     local dx, dy = Position.getDirection(props.x, props.y, props.x2, props.y2)
     props.direction = {x = dx, y = dy}
-    props.speed = speed
-    props.maxLifeTime = maxLifeTime
     return props
   end,
 
   init = function(self)
+    self.damage = math.random(self.minDamage, self.maxDamage)
     self.animation = animationFactory:new({
       'fireball'
     })
 
     local w,h = select(3, self.animation.sprite:getViewport())
-    local cw, ch = 15*scale, 15*scale -- collision dimensions
+    local cw, ch = 15*self.scale, 15*self.scale -- collision dimensions
     self.w = cw
     self.h = ch
     self.colObj = collisionObject

@@ -41,7 +41,6 @@ end
 
 local skillHandlers = {
   SKILL_1 = (function()
-    local cooldown = 0.05
     local curCooldown = 0
     local skill = {}
 
@@ -49,16 +48,16 @@ local skillHandlers = {
       if curCooldown > 0 then
         return skill
       else
-        local fireball = require 'components.fireball'
+        local Fireball = require 'components.fireball'
         local mx, my = camera:getMousePosition()
-        fireball.create({
+        local projectile = Fireball.create({
             debug = false
           , x = self.x
           , y = self.y
           , x2 = mx
           , y2 = my
         })
-        curCooldown = cooldown
+        curCooldown = projectile.cooldown
         return skill
       end
     end
