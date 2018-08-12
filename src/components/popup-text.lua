@@ -3,18 +3,7 @@ local groups = require 'components.groups'
 local tween = require 'modules.tween'
 local f = require 'utils.functional'
 
-require'utils.perf'({
-  done = function(t)
-    print('distance:', t)
-  end
-})(function()
-  local dist = require'utils.math'.dist
-  for i=1, 10000 do
-    dist(i, i + 50, i * 100, i * 100)
-  end
-end)()
-
-local DamageNumberBlueprint = {
+local PopupTextBlueprint = {
   x = 0,
   y = 0,
 }
@@ -32,6 +21,11 @@ local function animationCo()
   end
 end
 
+function PopupTextBlueprint:new(text, x, y)
+  local animation = coroutine.wrap(animationCo)
+  table.insert(self.textObjectsList, {text, x, y, animation})
+end
+
 local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
 local outlineColor = {0,0,0,1}
 local shader = love.graphics.newShader(pixelOutlineShader)
@@ -44,11 +38,11 @@ shader:send('include_corners', true)
 
 local textObj = love.graphics.newText(font.secondary.font, '')
 
-function DamageNumberBlueprint.init(self)
+function PopupTextBlueprint.init(self)
   self.textObjectsList = {}
 end
 
-function DamageNumberBlueprint.update(self)
+function PopupTextBlueprint.update(self)
   textObj:clear()
 
   local i = 1
@@ -67,7 +61,7 @@ function DamageNumberBlueprint.update(self)
   end
 end
 
-function DamageNumberBlueprint.draw(self)
+function PopupTextBlueprint.draw(self)
   love.graphics.setShader(shader)
   love.graphics.setColor(1,1,1,1)
   love.graphics.draw(
@@ -78,9 +72,4 @@ function DamageNumberBlueprint.draw(self)
   love.graphics.setShader()
 end
 
-function DamageNumberBlueprint:add(text, x, y)
-  local animation = coroutine.wrap(animationCo)
-  table.insert(self.textObjectsList, {text, x, y, animation})
-end
-
-return groups.overlay.createFactory(DamageNumberBlueprint)
+return groups.overlay.createFactory(PopupTextBlueprint)

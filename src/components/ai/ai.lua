@@ -1,6 +1,6 @@
 local animationFactory = require 'components.animation-factory'
 local msgBus = require 'components.msg-bus'
-local DamageNumberController = require 'components.damage-numbers'
+local PopupTextController = require 'components.popup-text'
 local getAdjacentWalkablePosition = require 'modules.get-adjacent-open-position'
 local collisionObject = require 'modules.collision'
 local uid = require'utils.uid'
@@ -15,7 +15,7 @@ local dynamic = require'modules.dynamic-module'
 local Ai = {}
 local Ai_mt = {__index = Ai}
 
-local damageNumbers = DamageNumberController.create()
+local popupText = PopupTextController.create()
 
 -- gets directions from grid position, adjusting vectors to handle wall collisions as needed
 local aiPathWithAstar = require'modules.flow-field.pathing-with-astar'
@@ -83,7 +83,7 @@ local function handleHits(self)
       self.health = self.health - hit.damage
 
       local offsetCenter = 6
-      damageNumbers:add(
+      popupText:new(
         hit.damage,
         self.x + (self.w / 2) - offsetCenter,
         self.y - self.h
