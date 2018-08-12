@@ -45,7 +45,7 @@ function MainScene.init(self)
   local aiCount = 50
   local generated = 0
   while generated < aiCount do
-    local posX, posY = math.random(3, 20), math.random(3, 20)
+    local posX, posY = math.random(3, 60), math.random(3, 60)
     local isValidPosition = map.grid[posY][posX] == Map.WALKABLE
     if isValidPosition then
       generated = generated + 1
@@ -56,7 +56,7 @@ function MainScene.init(self)
         x = posX,
         y = posY,
         speed = 80,
-        scale = 1
+        scale = 0.5 + (math.random(1, 7) / 10)
       })
     end
   end

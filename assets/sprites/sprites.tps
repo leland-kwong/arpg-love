@@ -249,6 +249,19 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/primitives/pixel-white-1x1.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.266667</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>0,0,1,1</rect>
+                <key>scale9Paddings</key>
+                <rect>0,0,1,1</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/tiles/wall-2.png</key>
             <key type="filename">custom-art/tiles/wall-3.png</key>
             <key type="filename">custom-art/tiles/wall.png</key>
@@ -271,6 +284,7 @@
             <filename>custom-art/fireball.png</filename>
             <filename>custom-art/tiles</filename>
             <filename>custom-art/floor</filename>
+            <filename>custom-art/primitives</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

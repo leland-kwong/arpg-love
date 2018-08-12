@@ -14,7 +14,8 @@ local Groups = {
         number of layers between each order. This is to allow multiple different items to be stacked within the same draw order
       ]]
       local layers = 5
-      local order = floor(self.y / gridSize) + layers
+      local granularity = self.y / (gridSize / 2)
+      local order = floor(granularity) + layers
       return max(1, order)
     end,
   }),

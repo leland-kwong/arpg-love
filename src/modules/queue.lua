@@ -33,6 +33,7 @@ function Q:add(order, cb, a, b)
   local isNewQueue = self.length == 0
   if isNewQueue then
     self.minOrder = order
+    self.maxOrder = order
   end
 
   if self.development then
@@ -81,8 +82,11 @@ function Q:flush()
     end
   end
   self.length = 0
-  self.maxOrder = 0
   return self
+end
+
+function Q:getStats()
+  return self.minOrder, self.maxOrder, self.length
 end
 
 return Q

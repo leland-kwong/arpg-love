@@ -12,10 +12,6 @@ local errorMsg = {
   getInitialProps = "getInitialProps must return a table"
 }
 
-function M.setMaxOrder(v)
-  drawQ:setMaxOrder(v)
-end
-
 -- built-in defaults
 local floor = math.floor
 local baseProps = {
@@ -126,6 +122,7 @@ function M.newGroup(factoryDefaults)
         drawQ:add(c:drawOrder(), c.draw, c)
       end
     end
+
     drawQ:flush()
   end
 

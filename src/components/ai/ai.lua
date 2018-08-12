@@ -1,3 +1,4 @@
+local animationFactory = require 'components.animation-factory'
 local getAdjacentWalkablePosition = require 'modules.get-adjacent-open-position'
 local collisionObject = require 'modules.collision'
 local uid = require'utils.uid'
@@ -144,40 +145,52 @@ function Ai:update(grid, flowField, dt)
   self.lastFlowField = flowField
 end
 
-local function drawShadow(x, y, w, h)
-  love.graphics.setColor(0,0,0,0.1)
-  love.graphics.rectangle('fill', x, y + 10, w, h)
+local function drawShadow(self)
+  love.graphics.setColor(0,0,0,0.15)
+  love.graphics.draw(
+    animationFactory.atlas,
+    self.animation.sprite,
+    self.x + 1,
+    self.y + 10,
+    0,
+    self.w - 2,
+    self.h,
+    1,
+    1
+  )
 end
 
 function Ai:draw()
   local padding = 0
 
-  drawShadow(
-    self.x + padding,
-    self.y + padding,
-    self.w - padding * 2,
-    self.h - padding * 2
+  drawShadow(self)
+
+  -- border
+  local borderWidth = 2
+  love.graphics.setColor(0,0,0)
+  love.graphics.draw(
+    animationFactory.atlas,
+    self.animation.sprite,
+    self.x,
+    self.y,
+    0,
+    self.w,
+    self.h,
+    1,
+    1
   )
 
-  -- agent color
-  love.graphics.setColor(self.COLOR_FILL)
-  love.graphics.rectangle(
-    'fill',
-    self.x + padding,
-    self.y + padding,
-    self.w - padding * 2,
-    self.h - padding * 2
-  )
-
-  -- -- collision shape
-  love.graphics.setColor(1,1,1,1)
-  love.graphics.setLineWidth(2)
-  love.graphics.rectangle(
-    'line',
-    self.collision.x + self.collision.ox,
-    self.collision.y + self.collision.oy,
-    self.collision.h,
-    self.collision.w
+  love.graphics.setColor(0,1,0.4,1)
+  love.graphics.draw(
+    animationFactory.atlas,
+    self.animation.sprite,
+    self.x + borderWidth/2,
+    self.y + borderWidth/2,
+    0,
+    self.w - borderWidth,
+    self.h - borderWidth,
+    1,
+    1
   )
 
   -- self:debugLineOfSight()
@@ -228,6 +241,9 @@ function Ai.create(x, y, speed, scale, collisionWorld, pxToGridUnits, findNeares
     findNearestTarget = findNearestTarget,
     WALKABLE = WALKABLE,
 
+    animation = animationFactory:new({
+      'pixel-white-1x1'
+    }),
     COLOR_FILL = {1,0,0,0.85}
   }, Ai_mt)
 end
