@@ -1,5 +1,6 @@
 local config = require 'config'
 local groups = require 'components.groups'
+local msgBus = require 'components.msg-bus'
 local animationFactory = require 'components.animation-factory'
 local collisionWorlds = require 'components.collision-worlds'
 local collisionObject = require 'modules.collision'
@@ -26,6 +27,8 @@ local function colFilter(item, other)
 end
 
 local Fireball = {
+  damage = 1,
+
   getInitialProps = function(props)
     local dx, dy = Position.getDirection(props.x, props.y, props.x2, props.y2)
     props.direction = {x = dx, y = dy}
@@ -58,8 +61,19 @@ local Fireball = {
     self.animation:update(dt)
     local cols, len = select(3, self.colObj:move(self.x, self.y, colFilter))
     local hasCollisions = len > 0
+    local isExpired = self.maxLifeTime <= 0
 
-    if hasCollisions or self.maxLifeTime <= 0 then
+    if hasCollisions or isExpired then
+      if hasCollisions then
+        for i=1, len do
+          local col = cols[i]
+          msgBus.send(msgBus.CHARACTER_HIT, {
+            parent = col.other.parent,
+            damage = self.damage
+          })
+        end
+      end
+
       self:delete()
     end
   end,

@@ -28,6 +28,11 @@ function CollisionObject:new(group, x, y, w, h, offsetX, offsetY)
   return obj
 end
 
+function CollisionObject:setParent(object)
+  self.parent = object
+  return self
+end
+
 function CollisionObject:addToWorld(collisionWorld)
   collisionWorld:add(
     self,

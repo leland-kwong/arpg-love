@@ -2,10 +2,7 @@ local Ai = require 'components.ai.ai'
 local msgBus = require 'components.msg-bus'
 local collisionWorlds = require 'components.collision-worlds'
 local groups = require 'components.groups'
-local noop = require 'utils.noop'
-local f = require 'utils.functional'
 local config = require 'config'
-local pprint = require 'utils.pprint'
 local typeCheck = require 'utils.type-check'
 local Math = require 'utils.math'
 
@@ -78,6 +75,10 @@ end
 function SpawnerAi.update(self, dt)
   self.ai:update(self.grid, self.flowField, dt)
   self:setPosition(self.ai.x, self.ai.y)
+
+  if self.ai.deleted then
+    self:delete()
+  end
 end
 
 function SpawnerAi.draw(self)

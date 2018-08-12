@@ -1,4 +1,5 @@
 local animationFactory = require 'components.animation-factory'
+local msgBus = require 'components.msg-bus'
 local getAdjacentWalkablePosition = require 'modules.get-adjacent-open-position'
 local collisionObject = require 'modules.collision'
 local uid = require'utils.uid'
@@ -61,7 +62,49 @@ local function collisionFilter()
   return COLLISION_SLIDE
 end
 
+local function hitAnimation()
+  local frame = 0
+  local animationLength = 4
+  while frame < animationLength do
+    frame = frame + 1
+    coroutine.yield(false)
+  end
+  coroutine.yield(true)
+end
+
+local function handleHits(self)
+  local hitCount = #self.hits
+  if hitCount > 0 then
+    for i=1, hitCount do
+      local hit = self.hits[i]
+      self.health = self.health - hit.damage
+
+      local isDestroyed = self.health <= 0
+      if isDestroyed then
+        self:final()
+        return
+      end
+    end
+
+    self.hitAnimation = coroutine.wrap(hitAnimation)
+    self.hits = {}
+  end
+end
+
 function Ai:update(grid, flowField, dt)
+  handleHits(self)
+
+  if self.deleted then
+    return
+  end
+
+  if self.hitAnimation then
+    local done = self.hitAnimation()
+    if done then
+      self.hitAnimation = nil
+    end
+  end
+
   local centerOffset = self.padding
   local prevGridX, prevGridY = self.pxToGridUnits(self.prevX or 0, self.prevY or 0, self.gridSize)
   local gridX, gridY = self.pxToGridUnits(self.x, self.y, self.gridSize)
@@ -180,7 +223,11 @@ function Ai:draw()
     1
   )
 
-  love.graphics.setColor(0,1,0.4,1)
+  if self.hitAnimation then
+    love.graphics.setColor(1,1,1,1)
+  else
+    love.graphics.setColor(self.COLOR_FILL)
+  end
   love.graphics.draw(
     animationFactory.atlas,
     self.animation.sprite,
@@ -194,6 +241,11 @@ function Ai:draw()
   )
 
   -- self:debugLineOfSight()
+end
+
+function Ai:final()
+  self.deleted = true
+  self.collision:delete()
 end
 
 function Ai.create(x, y, speed, scale, collisionWorld, pxToGridUnits, findNearestTarget, grid, gridSize, WALKABLE, showAiPath)
@@ -220,12 +272,15 @@ function Ai.create(x, y, speed, scale, collisionWorld, pxToGridUnits, findNeares
   local colObj = collisionObject
     :new('ai', x, y, w, h)
     :addToWorld(collisionWorld)
-  return setmetatable({
+
+  local entity = setmetatable({
     x = x,
     y = y,
     w = w,
     h = h,
+    health = 10,
     id = uid(),
+    hits = {},
     -- used for centering the agent during movement
     padding = math.ceil(padding / 2),
     dx = 0,
@@ -244,8 +299,20 @@ function Ai.create(x, y, speed, scale, collisionWorld, pxToGridUnits, findNeares
     animation = animationFactory:new({
       'pixel-white-1x1'
     }),
-    COLOR_FILL = {1,0,0,0.85}
+    COLOR_FILL = {0,0.9,0.3,1}
   }, Ai_mt)
+
+  local self = entity
+
+  msgBus.subscribe(function(msgType, msgValue)
+    if msgBus.CHARACTER_HIT == msgType and msgValue.parent == self then
+      table.insert(self.hits, msgValue)
+    end
+  end)
+
+  colObj:setParent(self)
+
+  return self
 end
 
 return Ai
