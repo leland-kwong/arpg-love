@@ -6,16 +6,24 @@ local noop = require 'utils.noop'
 local f = require 'utils.functional'
 local config = require 'config'
 local pprint = require 'utils.pprint'
+local typeCheck = require 'utils.type-check'
+local Math = require 'utils.math'
 
 local floor = math.floor
 
 local SpawnerAi = {
+  x = 0,
+  y = 0,
+  speed = 0,
+  scale = 1,
   -- these need to be passed in
   grid = nil,
-  WALKABLE = 0,
+  WALKABLE = nil,
 
   colWorld = collisionWorlds.map,
-  pxToGridUnits = function(screenX, screenY)
+  pxToGridUnits = function(screenX, screenY, gridSize)
+    typeCheck.validate(gridSize, typeCheck.NUMBER)
+
     local gridPixelX, gridPixelY = screenX, screenY
     local gridX, gridY =
       floor(gridPixelX / gridSize),
@@ -23,17 +31,33 @@ local SpawnerAi = {
     return gridX, gridY
   end,
   gridSize = config.gridSize,
-  findNearestTarget = noop,
 }
 
 local function AiFactory(self, x, y, speed, scale)
+  local function findNearestTarget(otherX, otherY, otherSightRadius)
+    if not self.target then
+      return nil
+    end
+
+    local tPosX, tPosY = self.target:getPosition()
+    local dist = Math.dist(tPosX, tPosY, otherX, otherY)
+    local withinVision = dist <= otherSightRadius
+
+    if withinVision then
+      return tPosX, tPosY
+    end
+
+    return nil
+  end
+
   return Ai.create(
-    x * self.gridSize, y * self.gridSize,
-    speed,
-    scale,
+    self.x * self.gridSize,
+    self.y * self.gridSize,
+    self.speed,
+    self.scale,
     self.colWorld,
     self.pxToGridUnits,
-    self.findNearestTarget,
+    findNearestTarget,
     self.grid,
     self.gridSize,
     self.WALKABLE,
@@ -48,27 +72,16 @@ function SpawnerAi.init(self)
     end
   end)
 
-  self.ai = {
-    AiFactory(
-      self,
-      3,
-      3,
-      150,
-      1
-    )
-  }
+  self.ai = AiFactory(self)
 end
 
 function SpawnerAi.update(self, dt)
-  -- f.forEach(self.ai, function(ai)
-  --   ai:update(self.grid, self.flowField, dt)
-  -- end)
+  self.ai:update(self.grid, self.flowField, dt)
+  self:setPosition(self.ai.x, self.ai.y)
 end
 
 function SpawnerAi.draw(self)
-  f.forEach(self.ai, function(ai)
-    ai:draw()
-  end)
+  self.ai:draw()
 end
 
 return groups.all.createFactory(function(defaults)

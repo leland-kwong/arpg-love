@@ -85,6 +85,16 @@ function M.newGroup(factoryDefaults)
       return c
     end
 
+    function blueprint:getPosition()
+      return self.x, self.y
+    end
+
+    function blueprint:setPosition(x, y)
+      self.x = x
+      self.y = y
+      return self
+    end
+
     function blueprint:delete()
       C.delete(self)
       return self

@@ -28,8 +28,8 @@ function Ai:checkLineOfSight(grid, WALKABLE, targetX, targetY, debug)
     return false
   end
 
-  local gridX, gridY = self.pxToGridUnits(self.x, self.y)
-  local gridTargetX, gridTargetY = self.pxToGridUnits(targetX, targetY)
+  local gridX, gridY = self.pxToGridUnits(self.x, self.y, self.gridSize)
+  local gridTargetX, gridTargetY = self.pxToGridUnits(targetX, targetY, self.gridSize)
   return LineOfSight(grid, WALKABLE, debug)(
     gridX, gridY, gridTargetX, gridTargetY
   )
@@ -62,15 +62,17 @@ end
 
 function Ai:update(grid, flowField, dt)
   local centerOffset = self.padding
-  local prevGridX, prevGridY = self.pxToGridUnits(self.prevX or 0, self.prevY or 0)
-  local gridX, gridY = self.pxToGridUnits(self.x, self.y)
+  local prevGridX, prevGridY = self.pxToGridUnits(self.prevX or 0, self.prevY or 0, self.gridSize)
+  local gridX, gridY = self.pxToGridUnits(self.x, self.y, self.gridSize)
   -- we can use this detect whether the agent is stuck if the grid position has remained the same for several frames and was trying to move
   local isNewGridPosition = prevGridX ~= gridX or prevGridY ~= gridY
   local isNewFlowField = self.lastFlowField ~= flowField
   local targetX, targetY = self.findNearestTarget(self.x, self.y, self.sightRadius)
   local canSeeTarget = self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY)
-  local shouldGetNewPath = canSeeTarget
+  local shouldGetNewPath = flowField and canSeeTarget
   self:autoUnstuckFromWallIfNeeded(grid, gridX, gridY)
+
+  self.canSeeTarget = canSeeTarget
 
   if shouldGetNewPath then
     self.pathComplete = false
@@ -101,7 +103,12 @@ function Ai:update(grid, flowField, dt)
           y = pos.y * self.gridSize + centerOffset
         }
         local dist = distOfLine(self.x, self.y, nextPos.x, nextPos.y)
-        local duration = dist / self.speed
+
+        if dist == 0 then
+          print(self.x, self.y, nextPos.x, nextPos.y)
+        end
+
+          local duration = dist / self.speed
 
         local easing = tween.easing.linear
         posTween = tween.new(duration, self, nextPos, easing)
@@ -137,11 +144,23 @@ function Ai:update(grid, flowField, dt)
   self.lastFlowField = flowField
 end
 
+local function drawShadow(x, y, w, h)
+  love.graphics.setColor(0,0,0,0.1)
+  love.graphics.rectangle('fill', x, y + 10, w, h)
+end
+
 function Ai:draw()
+  local padding = 0
+
+  drawShadow(
+    self.x + padding,
+    self.y + padding,
+    self.w - padding * 2,
+    self.h - padding * 2
+  )
+
   -- agent color
   love.graphics.setColor(self.COLOR_FILL)
-
-  local padding = 0
   love.graphics.rectangle(
     'fill',
     self.x + padding,
@@ -150,7 +169,7 @@ function Ai:draw()
     self.h - padding * 2
   )
 
-  -- collision shape
+  -- -- collision shape
   love.graphics.setColor(1,1,1,1)
   love.graphics.setLineWidth(2)
   love.graphics.rectangle(
@@ -209,7 +228,7 @@ function Ai.create(x, y, speed, scale, collisionWorld, pxToGridUnits, findNeares
     findNearestTarget = findNearestTarget,
     WALKABLE = WALKABLE,
 
-    COLOR_FILL = {1,0,0,0.8}
+    COLOR_FILL = {1,0,0,0.85}
   }, Ai_mt)
 end
 

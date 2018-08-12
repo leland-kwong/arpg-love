@@ -1,5 +1,6 @@
 local bump = require 'modules.bump'
 local typeCheck = require 'utils.type-check'
+local uid = require 'utils.uid'
 
 bump.TOUCH = 'touch'
 
@@ -9,6 +10,8 @@ function CollisionObject:new(group, x, y, w, h, offsetX, offsetY)
   typeCheck.validate(group, typeCheck.STRING)
 
   local obj = {
+    _id = uid(),
+
     group = group,
     x = x,
     y = y,
@@ -56,6 +59,11 @@ function CollisionObject:move(goalX, goalY, filter)
     finalY,
     cols,
     len
+end
+
+function CollisionObject:delete()
+  self.world:remove(self)
+  return self
 end
 
 function CollisionObject:removeFromWorld(collisionWorld)

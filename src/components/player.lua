@@ -27,8 +27,13 @@ local activeAnimation
 local DIRECTION_RIGHT = 1
 local DIRECTION_LEFT = -1
 
+local collisionGroups = {
+  obstacle = true,
+  ai = true
+}
+
 local function collisionFilter(item, other)
-  if other.group ~= 'obstacle' then
+  if not collisionGroups[other.group] then
     return false
   end
   return 'slide'
@@ -127,39 +132,32 @@ local Player = {
     end
   end,
 
-  -- drawOrder = function(self)
-  --   return 700
-  -- end,
-
   update = function(self, dt)
     local moveAmount = speed * dt
-    local moving = false
     local origx, origy = self.x, self.y
-
     local mx, my = camera:getMousePosition()
     local dx = Position.getDirection(self.x, self.y, mx, my)
+    local nextX, nextY = self.x, self.y
     self.dir = dx > 0 and DIRECTION_RIGHT or DIRECTION_LEFT
 
     -- MOVEMENT
     if love.keyboard.isDown(keyMap.RIGHT) then
-      self.x = self.x + moveAmount
-      moving = true
+      nextX = nextX + moveAmount
     end
 
     if love.keyboard.isDown(keyMap.LEFT) then
-      self.x = self.x - moveAmount
-      moving = true
+      nextX = nextX - moveAmount
     end
 
     if love.keyboard.isDown(keyMap.UP) then
-      self.y = self.y - moveAmount
-      moving = true
+      nextY = nextY - moveAmount
     end
 
     if love.keyboard.isDown(keyMap.DOWN) then
-      self.y = self.y + moveAmount
-      moving = true
+      nextY = nextY + moveAmount
     end
+
+    local moving = self.x ~= nextX or self.y ~= nextY
 
     -- ANIMATION STATES
     if moving then
@@ -180,7 +178,6 @@ local Player = {
     local sx, sy, sw, sh = self.animation.sprite:getViewport()
     local w,h = sw, sh
     -- true center taking into account pivot
-    local nextx, nexty = self.x, self.y
     local oX, oY = self.animation:getSourceOffset()
     local col = self.collisionObj
 
@@ -197,7 +194,7 @@ local Player = {
       oY - sizeOffset
     )
 
-    local actualX, actualY = self.colObj:move(nextx, nexty, collisionFilter)
+    local actualX, actualY = self.colObj:move(nextX, nextY, collisionFilter)
     self.x = actualX
     self.y = actualY
     self.h = h

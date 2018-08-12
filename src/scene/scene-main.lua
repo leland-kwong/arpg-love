@@ -42,10 +42,24 @@ function MainScene.init(self)
     mapGrid = map.grid
   })
 
-  SpawnerAi.create({
-    grid = map.grid,
-    walkable = map.WALKABLE
-  })
+  local aiCount = 50
+  local generated = 0
+  while generated < aiCount do
+    local posX, posY = math.random(3, 20), math.random(3, 20)
+    local isValidPosition = map.grid[posY][posX] == Map.WALKABLE
+    if isValidPosition then
+      generated = generated + 1
+      SpawnerAi.create({
+        grid = map.grid,
+        WALKABLE = Map.WALKABLE,
+        target = player,
+        x = posX,
+        y = posY,
+        speed = 80,
+        scale = 1
+      })
+    end
+  end
 
   Minimap.create({
     camera = camera,
@@ -57,7 +71,7 @@ function MainScene.init(self)
     camera = camera,
     grid = map.grid,
     tileRenderDefinition = gridTileDefinitions,
-    walkable = map.WALKABLE
+    walkable = Map.WALKABLE
   })
 end
 

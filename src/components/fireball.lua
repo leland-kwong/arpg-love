@@ -2,6 +2,7 @@ local config = require 'config'
 local groups = require 'components.groups'
 local animationFactory = require 'components.animation-factory'
 local collisionWorlds = require 'components.collision-worlds'
+local collisionObject = require 'modules.collision'
 local gameWorld = require 'components.game-world'
 local Position = require 'utils.position'
 
@@ -14,6 +15,8 @@ local maxLifeTime = 2
 
 local filters = {
   obstacle = true,
+  obstacle2 = true,
+  ai = true
 }
 local function colFilter(item, other)
   if not filters[other.group] then
@@ -40,7 +43,9 @@ local Fireball = {
     local cw, ch = 15*scale, 15*scale -- collision dimensions
     self.w = cw
     self.h = ch
-    colMap:add(self, self.x - self.w/2, self.y - self.w/2, cw, ch)
+    self.colObj = collisionObject
+      :new('projectile', self.x, self.y, cw, ch, self.w/2, self.h/2)
+      :addToWorld(collisionWorlds.map)
   end,
 
   update = function(self, dt)
@@ -51,10 +56,11 @@ local Fireball = {
     self.x = self.x + dx
     self.y = self.y + dy
     self.animation:update(dt)
-    local cols, len = select(3, colMap:move(self, self.x - self.w/2, self.y - self.h/2, colFilter))
-    -- local len = 0
-    if len > 0 or self.maxLifeTime <= 0 then
-      groups.all.delete(self)
+    local cols, len = select(3, self.colObj:move(self.x, self.y, colFilter))
+    local hasCollisions = len > 0
+
+    if hasCollisions or self.maxLifeTime <= 0 then
+      self:delete()
     end
   end,
 
@@ -62,6 +68,7 @@ local Fireball = {
     local angle = math.atan2( self.direction.y, self.direction.x )
     local ox, oy = self.animation:getOffset()
 
+    -- shadow
     love.graphics.setColor(0,0,0,0.15)
     love.graphics.draw(
       animationFactory.atlas
@@ -95,7 +102,7 @@ local Fireball = {
   end,
 
   final = function(self)
-    colMap:remove(self)
+    self.colObj:delete()
   end
 }
 

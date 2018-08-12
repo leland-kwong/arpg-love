@@ -35,7 +35,7 @@ end
 
 -- returns grid units relative to the ui
 local floor = math.floor
-local function pxToGridUnits(screenX, screenY, offX, offY)
+local function pxToGridUnits(screenX, screenY, gridSize, offX, offY)
   local gridPixelX, gridPixelY = screenX - (offX or 0), screenY - (offY or 0)
   local gridX, gridY =
     floor(gridPixelX / gridSize),
@@ -168,7 +168,7 @@ function flowFieldTestBlueprint.init(self)
 
   -- generate random ai agents
   local positionsFilled = {}
-  while #self.ai <= 10 do
+  while #self.ai <= 50 do
     local gridX = math.random(6, 20)
     local gridY = math.random(2, 20)
     local positionId = gridY * 20 + gridX
@@ -186,7 +186,7 @@ end
 function flowFieldTestBlueprint.update(self, dt)
   if love.mouse.isDown(1) or love.keyboard.isDown('space') then
     local mx, my = love.mouse.getX(), love.mouse.getY()
-    local gridX, gridY = pxToGridUnits(mx, my, offX, offY)
+    local gridX, gridY = pxToGridUnits(mx, my, gridSize, offX, offY)
 
     if isOutOfBounds(grid, gridX, gridY) then
       return
@@ -242,6 +242,7 @@ local function drawMousePosition()
   local gridX, gridY = pxToGridUnits(
     love.mouse.getX(),
     love.mouse.getY(),
+    gridSize,
     offX,
     offY
   )
