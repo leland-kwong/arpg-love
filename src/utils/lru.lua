@@ -87,8 +87,8 @@ function lru.new(max_size, max_bytes, pruneCallback)
 		do
 			assert(oldest, "not enough storage for cache")
 			local key = oldest[KEY]
-			del(key, oldest)
 			pruneCallback(key, oldest[VALUE])
+			del(key, oldest)
 		end
 	end
 

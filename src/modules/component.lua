@@ -12,10 +12,6 @@ local errorMsg = {
   getInitialProps = "getInitialProps must return a table"
 }
 
-function M.setMaxOrder(v)
-  drawQ:setMaxOrder(v)
-end
-
 -- built-in defaults
 local floor = math.floor
 local baseProps = {
@@ -85,6 +81,16 @@ function M.newGroup(factoryDefaults)
       return c
     end
 
+    function blueprint:getPosition()
+      return self.x, self.y
+    end
+
+    function blueprint:setPosition(x, y)
+      self.x = x
+      self.y = y
+      return self
+    end
+
     function blueprint:delete()
       C.delete(self)
       return self
@@ -116,6 +122,7 @@ function M.newGroup(factoryDefaults)
         drawQ:add(c:drawOrder(), c.draw, c)
       end
     end
+
     drawQ:flush()
   end
 
@@ -124,9 +131,19 @@ function M.newGroup(factoryDefaults)
   end
 
   function C.delete(component)
+    if component._deleted then
+      if isDebug then
+        print('[WARNING] component already deleted:', component._id)
+      end
+      return
+    end
+
     componentsById[component._id] = nil
     count = count - 1
-    component:final()
+    if component._initialized then
+      component:final()
+    end
+    component._deleted = true
   end
 
   return C

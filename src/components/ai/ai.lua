@@ -1,3 +1,6 @@
+local animationFactory = require 'components.animation-factory'
+local msgBus = require 'components.msg-bus'
+local PopupTextController = require 'components.popup-text'
 local getAdjacentWalkablePosition = require 'modules.get-adjacent-open-position'
 local collisionObject = require 'modules.collision'
 local uid = require'utils.uid'
@@ -11,6 +14,8 @@ local dynamic = require'modules.dynamic-module'
 
 local Ai = {}
 local Ai_mt = {__index = Ai}
+
+local popupText = PopupTextController.create()
 
 -- gets directions from grid position, adjusting vectors to handle wall collisions as needed
 local aiPathWithAstar = require'modules.flow-field.pathing-with-astar'
@@ -28,8 +33,8 @@ function Ai:checkLineOfSight(grid, WALKABLE, targetX, targetY, debug)
     return false
   end
 
-  local gridX, gridY = self.pxToGridUnits(self.x, self.y)
-  local gridTargetX, gridTargetY = self.pxToGridUnits(targetX, targetY)
+  local gridX, gridY = self.pxToGridUnits(self.x, self.y, self.gridSize)
+  local gridTargetX, gridTargetY = self.pxToGridUnits(targetX, targetY, self.gridSize)
   return LineOfSight(grid, WALKABLE, debug)(
     gridX, gridY, gridTargetX, gridTargetY
   )
@@ -60,17 +65,68 @@ local function collisionFilter()
   return COLLISION_SLIDE
 end
 
+local function hitAnimation()
+  local frame = 0
+  local animationLength = 4
+  while frame < animationLength do
+    frame = frame + 1
+    coroutine.yield(false)
+  end
+  coroutine.yield(true)
+end
+
+local function handleHits(self)
+  local hitCount = #self.hits
+  if hitCount > 0 then
+    for i=1, hitCount do
+      local hit = self.hits[i]
+      self.health = self.health - hit.damage
+
+      local offsetCenter = 6
+      popupText:new(
+        hit.damage,
+        self.x + (self.w / 2) - offsetCenter,
+        self.y - self.h
+      )
+
+      local isDestroyed = self.health <= 0
+      if isDestroyed then
+        self:final()
+        return
+      end
+    end
+
+    self.hitAnimation = coroutine.wrap(hitAnimation)
+    self.hits = {}
+  end
+end
+
 function Ai:update(grid, flowField, dt)
+  handleHits(self)
+
+  if self.deleted then
+    return
+  end
+
+  if self.hitAnimation then
+    local done = self.hitAnimation()
+    if done then
+      self.hitAnimation = nil
+    end
+  end
+
   local centerOffset = self.padding
-  local prevGridX, prevGridY = self.pxToGridUnits(self.prevX or 0, self.prevY or 0)
-  local gridX, gridY = self.pxToGridUnits(self.x, self.y)
+  local prevGridX, prevGridY = self.pxToGridUnits(self.prevX or 0, self.prevY or 0, self.gridSize)
+  local gridX, gridY = self.pxToGridUnits(self.x, self.y, self.gridSize)
   -- we can use this detect whether the agent is stuck if the grid position has remained the same for several frames and was trying to move
   local isNewGridPosition = prevGridX ~= gridX or prevGridY ~= gridY
   local isNewFlowField = self.lastFlowField ~= flowField
   local targetX, targetY = self.findNearestTarget(self.x, self.y, self.sightRadius)
   local canSeeTarget = self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY)
-  local shouldGetNewPath = canSeeTarget
+  local shouldGetNewPath = flowField and canSeeTarget
   self:autoUnstuckFromWallIfNeeded(grid, gridX, gridY)
+
+  self.canSeeTarget = canSeeTarget
 
   if shouldGetNewPath then
     self.pathComplete = false
@@ -101,7 +157,12 @@ function Ai:update(grid, flowField, dt)
           y = pos.y * self.gridSize + centerOffset
         }
         local dist = distOfLine(self.x, self.y, nextPos.x, nextPos.y)
-        local duration = dist / self.speed
+
+        if dist == 0 then
+          print(self.x, self.y, nextPos.x, nextPos.y)
+        end
+
+          local duration = dist / self.speed
 
         local easing = tween.easing.linear
         posTween = tween.new(duration, self, nextPos, easing)
@@ -137,31 +198,64 @@ function Ai:update(grid, flowField, dt)
   self.lastFlowField = flowField
 end
 
-function Ai:draw()
-  -- agent color
-  love.graphics.setColor(self.COLOR_FILL)
+local function drawShadow(self)
+  love.graphics.setColor(0,0,0,0.15)
+  love.graphics.draw(
+    animationFactory.atlas,
+    self.animation.sprite,
+    self.x + 1,
+    self.y + 10,
+    0,
+    self.w - 2,
+    self.h,
+    1,
+    1
+  )
+end
 
+function Ai:draw()
   local padding = 0
-  love.graphics.rectangle(
-    'fill',
-    self.x + padding,
-    self.y + padding,
-    self.w - padding * 2,
-    self.h - padding * 2
+
+  drawShadow(self)
+
+  -- border
+  local borderWidth = 2
+  love.graphics.setColor(0,0,0)
+  love.graphics.draw(
+    animationFactory.atlas,
+    self.animation.sprite,
+    self.x,
+    self.y,
+    0,
+    self.w,
+    self.h,
+    1,
+    1
   )
 
-  -- collision shape
-  love.graphics.setColor(1,1,1,1)
-  love.graphics.setLineWidth(2)
-  love.graphics.rectangle(
-    'line',
-    self.collision.x + self.collision.ox,
-    self.collision.y + self.collision.oy,
-    self.collision.h,
-    self.collision.w
+  if self.hitAnimation then
+    love.graphics.setColor(1,1,1,1)
+  else
+    love.graphics.setColor(self.COLOR_FILL)
+  end
+  love.graphics.draw(
+    animationFactory.atlas,
+    self.animation.sprite,
+    self.x + borderWidth/2,
+    self.y + borderWidth/2,
+    0,
+    self.w - borderWidth,
+    self.h - borderWidth,
+    1,
+    1
   )
 
   -- self:debugLineOfSight()
+end
+
+function Ai:final()
+  self.deleted = true
+  self.collision:delete()
 end
 
 function Ai.create(x, y, speed, scale, collisionWorld, pxToGridUnits, findNearestTarget, grid, gridSize, WALKABLE, showAiPath)
@@ -188,12 +282,15 @@ function Ai.create(x, y, speed, scale, collisionWorld, pxToGridUnits, findNeares
   local colObj = collisionObject
     :new('ai', x, y, w, h)
     :addToWorld(collisionWorld)
-  return setmetatable({
+
+  local entity = setmetatable({
     x = x,
     y = y,
     w = w,
     h = h,
+    health = 10,
     id = uid(),
+    hits = {},
     -- used for centering the agent during movement
     padding = math.ceil(padding / 2),
     dx = 0,
@@ -209,8 +306,23 @@ function Ai.create(x, y, speed, scale, collisionWorld, pxToGridUnits, findNeares
     findNearestTarget = findNearestTarget,
     WALKABLE = WALKABLE,
 
-    COLOR_FILL = {1,0,0,0.8}
+    animation = animationFactory:new({
+      'pixel-white-1x1'
+    }),
+    COLOR_FILL = {0,0.9,0.3,1}
   }, Ai_mt)
+
+  local self = entity
+
+  msgBus.subscribe(function(msgType, msgValue)
+    if msgBus.CHARACTER_HIT == msgType and msgValue.parent == self then
+      table.insert(self.hits, msgValue)
+    end
+  end)
+
+  colObj:setParent(self)
+
+  return self
 end
 
 return Ai

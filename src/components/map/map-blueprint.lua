@@ -29,8 +29,11 @@ local function iterateActiveGrid(self, cb, a, b, c)
   local originX = max(1, w)
   local originY = max(1, s)
 
-  -- FIXME: thresholds are here as a way to make sure rendering reaches the edge of the screen
-  local thresholdSouth = 2
+  --[[
+    FIXME: thresholds are here as a way to make sure rendering reaches the edge of the screen.
+    The "correct" way to do it would be to figure out exactly what the edges are instead of just adding to the edges to fill.
+  ]]
+  local thresholdSouth = 3
   local thresholdWest = 0
   local thresholdEast = 1
 
@@ -47,7 +50,8 @@ local function iterateActiveGrid(self, cb, a, b, c)
       local value = row and row[_x]
       local isInColViewport = x >= w and x <= e
       local isInViewport = isInRowViewport and isInColViewport
-      if value ~= nil then
+      local tileExists = value ~= nil
+      if tileExists then
         cb(self, value, _x, _y, originX, originY, isInViewport, a, b, c)
       end
     end
@@ -63,13 +67,17 @@ local mapBlueprint = {
   grid = {
     {}
   },
+  onUpdateStart = noop,
   onUpdate = noop,
+  onUpdateEnd = noop,
   renderStart = noop,
   render = noop,
   renderEnd = noop,
 
   update = function(self, dt)
+    self.onUpdateStart(self)
     iterateActiveGrid(self, self.onUpdate, dt)
+    self.onUpdateEnd(self)
   end,
 
   draw = function(self)

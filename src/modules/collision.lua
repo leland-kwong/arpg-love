@@ -1,5 +1,6 @@
 local bump = require 'modules.bump'
 local typeCheck = require 'utils.type-check'
+local uid = require 'utils.uid'
 
 bump.TOUCH = 'touch'
 
@@ -9,6 +10,8 @@ function CollisionObject:new(group, x, y, w, h, offsetX, offsetY)
   typeCheck.validate(group, typeCheck.STRING)
 
   local obj = {
+    _id = uid(),
+
     group = group,
     x = x,
     y = y,
@@ -23,6 +26,11 @@ function CollisionObject:new(group, x, y, w, h, offsetX, offsetY)
   self.__index = self
 
   return obj
+end
+
+function CollisionObject:setParent(object)
+  self.parent = object
+  return self
 end
 
 function CollisionObject:addToWorld(collisionWorld)
@@ -58,6 +66,11 @@ function CollisionObject:move(goalX, goalY, filter)
     len
 end
 
+function CollisionObject:delete()
+  self.world:remove(self)
+  return self
+end
+
 function CollisionObject:removeFromWorld(collisionWorld)
   collisionWorld:remove(self)
   self.world = nil
@@ -69,21 +82,21 @@ function CollisionObject:update(x, y, w, h, offsetX, offsetY)
     return self
   end
 
-  offsetX = offsetX or 0
-  offsetY = offsetY or 0
+  -- offsetX = offsetX or 0
+  -- offsetY = offsetY or 0
 
-  self.x = x
-  self.y = y
-  self.w = w
-  self.h = h
-  self.ox = offsetX
-  self.oy = offsetY
+  self.x = x or self.x
+  self.y = y or self.y
+  self.w = w or self.w
+  self.h = h or self.h
+  self.ox = offsetX or self.ox
+  self.oy = offsetY or self.oy
   self.world:update(
     self,
-    x - offsetX,
-    y - offsetY,
-    w,
-    h
+    self.x - self.ox,
+    self.y - self.ox,
+    self.w,
+    self.h
   )
   return self
 end
