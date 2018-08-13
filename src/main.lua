@@ -56,6 +56,7 @@ function love.update(dt)
   groups.overlay.updateAll(dt)
   groups.debug.updateAll(dt)
   groups.gui.updateAll(dt)
+  groups.system.updateAll(dt)
 end
 
 local inputMsg = require 'utils.pooled-table'(function(t, key, scanCode, isRepeated)
@@ -93,6 +94,10 @@ function love.mousereleased( x, y, button, istouch, presses )
   )
 end
 
+function love.wheelmoved(x, y)
+  msgBus.send(msgBus.MOUSE_WHEEL_MOVED, {x, y})
+end
+
 function love.textinput(t)
   msgBus.send(
     msgBus.GUI_TEXT_INPUT,
@@ -109,4 +114,5 @@ function love.draw()
   groups.debug.drawAll()
   camera:detach()
   groups.gui.drawAll()
+  groups.system.drawAll()
 end

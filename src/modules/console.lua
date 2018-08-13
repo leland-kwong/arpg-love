@@ -83,6 +83,7 @@ function Console.draw(self)
   gfx.push()
   gfx.setCanvas(canvas)
   gfx.clear(0,0,0,0)
+
   gfx.setColor(Color.MED_GRAY)
   gfx.print('COMPONENTS', edgeOffset, edgeOffset)
   gfx.setColor(Color.WHITE)
@@ -116,15 +117,11 @@ function Console.draw(self)
     startY + 11 * lineHeight
   )
 
-  gfx.setBlendMode('alpha', 'premultiplied')
   gfx.setCanvas()
+  gfx.setBlendMode('alpha', 'premultiplied')
   gfx.draw(canvas)
   gfx.pop()
   gfx.setBlendMode('alpha')
 end
 
-function Console.drawOrder()
-  return 2
-end
-
-return groups.gui.createFactory(Console)
+return groups.system.createFactory(Console)

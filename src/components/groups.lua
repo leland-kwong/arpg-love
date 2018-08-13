@@ -34,7 +34,9 @@ local Groups = {
       local order = floor(self.y / gridSize)
       return max(1, order)
     end,
-  })
+  }),
+
+  system = Component.newGroup()
 }
 
 return Groups

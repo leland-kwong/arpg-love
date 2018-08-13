@@ -82,9 +82,6 @@ function CollisionObject:update(x, y, w, h, offsetX, offsetY)
     return self
   end
 
-  -- offsetX = offsetX or 0
-  -- offsetY = offsetY or 0
-
   self.x = x or self.x
   self.y = y or self.y
   self.w = w or self.w
