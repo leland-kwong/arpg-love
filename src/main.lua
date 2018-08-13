@@ -35,7 +35,7 @@ local scenes = {
 }
 
 local globalState = {
-  activeScene = scenes.main,
+  activeScene = scenes.sandbox,
 }
 
 function love.load()
@@ -75,6 +75,20 @@ function love.keyreleased(key, scanCode)
   msgBus.send(
     msgBus.KEY_RELEASED,
     inputMsg(key, scanCode, false)
+  )
+end
+
+function love.mousepressed( x, y, button, istouch, presses )
+  msgBus.send(
+    msgBus.MOUSE_PRESSED,
+    { x, y, button, isTouch, presses }
+  )
+end
+
+function love.mousereleased( x, y, button, istouch, presses )
+  msgBus.send(
+    msgBus.MOUSE_RELEASED,
+    { x, y, button, isTouch, presses }
   )
 end
 

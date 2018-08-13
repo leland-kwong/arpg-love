@@ -12,9 +12,6 @@ local tween = require 'modules.tween'
 local config = require 'config'
 local camera = require 'components.camera'
 local round = require 'utils.math'.round
-local flowFieldtest = require 'scene.sandbox.ai.ai-test'
+local FlowFieldtest = require 'scene.sandbox.ai.ai-test'
 
-flowFieldtest.create()
-
-local AiTest = {}
-return groups.debug.createFactory(AiTest)
+return FlowFieldtest

@@ -9,7 +9,6 @@ local keysPressed = {}
 local L_SUPER = 'lgui'
 local R_SUPER = 'rgui'
 local lineHeight = font.primary.lineHeight
-love.graphics.setFont(font.primary.font)
 
 local function toggleCollisionDebug()
   config.collisionDebug = not config.collisionDebug
@@ -77,6 +76,7 @@ function Console.update(self)
 end
 
 function Console.draw(self)
+  love.graphics.setFont(font.primary.font)
   local gfx = love.graphics
   local s = self.stats
 

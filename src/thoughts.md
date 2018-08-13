@@ -41,3 +41,8 @@ Whenever an event occurs, it sends that information to the event bus. Each event
 **Static modifiers** are applied once and never change.
 
 **Dynamic modifiers** are applied in response to a message and modify and transform the message output as necessary.
+
+## GUI code architecture
+
+- gui component generates a hitbox with hover, click, onChange handlers
+- we do the rendering separately in the `render` method
