@@ -5,6 +5,7 @@ local msgBus = require 'components.msg-bus'
 local collisionObject = require 'modules.collision'
 local scale = require 'config'.scaleFactor
 local noop = require 'utils.noop'
+local min, max = math.min, math.max
 
 local COLLISION_CROSS = 'cross'
 local mouseCollisionFilter = function()
@@ -21,33 +22,45 @@ msgBus.send(msgBus.SET_TEXT_INPUT, false)
 local guiType = {
   BUTTON = 'BUTTON',
   TOGGLE = 'TOGGLE',
-  TEXT_INPUT = 'TEXT_INPUT'
+  TEXT_INPUT = 'TEXT_INPUT',
+  LIST = 'LIST'
 }
 
 local Gui = {
   -- props
-  x = 0,
-  y = 0,
-  w = 0,
-  h = 0,
+  x = 1,
+  y = 1,
+  w = 1,
+  h = 1,
   onClick = noop,
   onChange = noop,
   onFocus = noop,
   onBlur = noop,
+  onScroll = noop,
   render = noop,
   type = 'button',
+
+  -- for LIST type to define what axis is scrollable
+  scrollableX = false,
+  scrollableY = true,
+  -- scroll limits. The value here represents how far you can scroll in each direction.
+  scrollHeight = 0,
+  scrollWidth = 0,
+
   checked = false,
   text = '',
 
   -- built-in state; these should not be externally mutated
   hovered = false,
   focused = false,
+  scrollTop = 0,
+  scrollLeft = 0,
 
   -- statics
   types = guiType
 }
 
-local function handleFocusChange(origFocused, self)
+local function handleFocusChange(self, origFocused)
   local isFocusChange = origFocused ~= self.focused
   if isFocusChange then
     if self.focused then
@@ -62,7 +75,29 @@ local function handleFocusChange(origFocused, self)
   end
 end
 
+local function handleScroll(self, dx, dy)
+  self.scrollLeft = self.scrollableX and min(0, self.scrollLeft - dx) or 0
+  local maxScrollLeft = -self.scrollWidth
+  if self.scrollLeft <= maxScrollLeft then
+    self.scrollLeft = maxScrollLeft
+  end
+
+  self.scrollTop = self.scrollableY and min(0, self.scrollTop + dy) or 0
+  local maxScrollTop = -self.scrollHeight
+  if self.scrollTop <= maxScrollTop then
+    self.scrollTop = maxScrollTop
+  end
+
+  self.onScroll(self)
+end
+
 function Gui.init(self)
+  assert(guiType[self.type] ~= nil, 'invalid gui type'..tostring(self.type))
+
+  if guiType.LIST == self.type then
+    assert(self.h <= love.graphics.getHeight() / self.scale, 'scrollable list height should not be greater than window height')
+  end
+
   if guiType.TEXT_INPUT == self.type then
     assert(type(self.text) == 'string')
   end
@@ -72,15 +107,23 @@ function Gui.init(self)
   end
 
   msgBus.subscribe(function(msgType, msgValue)
+    -- cleanup
     if msgBus.GUI_NODE_CLEANUP == msgType and msgValue == self:getId() then
       return msgBus.CLEANUP
+    end
+
+    if guiType.LIST == self.type and
+      msgBus.MOUSE_WHEEL_MOVED == msgType and
+      self.hovered
+    then
+      handleScroll(self, msgValue[1], msgValue[2])
     end
 
     if msgBus.MOUSE_RELEASED == msgType then
       local origFocused = self.focused
       self.focused = self.hovered
 
-      handleFocusChange(origFocused, self)
+      handleFocusChange(self, origFocused)
 
       if self.hovered then
         self.onClick(self)
@@ -105,14 +148,18 @@ function Gui.init(self)
     end
   end)
 
+  local posX, posY = self:getPosition()
   self.colObj = collisionObject:new(
     'button',
-    self.x, self.y,
+    posX, posY,
     self.w, self.h
   ):addToWorld(collisionWorlds.gui)
 end
 
 function Gui.update(self)
+  local posX, posY = self:getPosition()
+  self.colObj:update(posX, posY, self.w, self.h)
+
   local items, len = collisionWorlds.gui:queryPoint(
     love.mouse.getX() / scale, love.mouse.getY() / scale, mouseCollisionFilter
   )
