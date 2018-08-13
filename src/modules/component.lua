@@ -96,6 +96,10 @@ function M.newGroup(factoryDefaults)
       return self
     end
 
+    function blueprint:getId()
+      return self._id
+    end
+
     -- default methods
     for k,v in pairs(baseProps) do
       if not blueprint[k] then

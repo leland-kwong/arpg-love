@@ -8,7 +8,7 @@ local GuiTestBlueprint = {}
 
 local COLOR_BUTTON = {0,1,0.5,1}
 local COLOR_BUTTON_HOVER = {0,0.9,0.8,1}
-local COLOR_TOGGLE_BOX = {0.5,0.5,0.5}
+local COLOR_TOGGLE_BOX = Color.LIGHT_GRAY
 local COLOR_TOGGLE_UNCHECKED = {0,0,0,0}
 local COLOR_TOGGLE_CHECKED = {0,1,0.5,1}
 local buttonPadding = 10
@@ -16,21 +16,22 @@ local buttonPadding = 10
 local function guiButton()
   local buttonText = love.graphics.newText(font.secondary.font, 'Button 1')
   local w, h = buttonText:getWidth(), buttonText:getHeight()
-  Gui.create({
+
+  return Gui.create({
+    type = Gui.types.BUTTON,
     x = 200,
     y = 50,
     w = w + buttonPadding,
     h = h + buttonPadding,
     onClick = function(self)
-      print('clicked!', self._id)
+      print('clicked!', self:getId())
     end,
-    type = Gui.types.BUTTON,
     render = function(self)
       love.graphics.push()
       love.graphics.scale(scale)
 
       local x, y = self.x, self.y
-      love.graphics.setColor(self.buttonHovered and COLOR_BUTTON_HOVER or COLOR_BUTTON)
+      love.graphics.setColor(self.hovered and COLOR_BUTTON_HOVER or COLOR_BUTTON)
       love.graphics.rectangle(
         'fill',
         x, y,
@@ -52,7 +53,8 @@ local function guiToggle()
   local toggleText = love.graphics.newText(font.secondary.font, 'Toggle')
   local toggleBoxSize = 14
 
-  Gui.create({
+  return Gui.create({
+    type = Gui.types.TOGGLE,
     x = 200,
     y = 100,
     w = toggleBoxSize + toggleText:getWidth(),
@@ -61,10 +63,8 @@ local function guiToggle()
     onChange = function(self, checked)
       print('toggled!', checked)
     end,
-    type = Gui.types.TOGGLE,
     render = function(self)
       love.graphics.push()
-      love.graphics.translate(2, 0)
       love.graphics.scale(scale)
 
       local x, y = self.x, self.y
@@ -73,7 +73,8 @@ local function guiToggle()
       -- toggle box
       love.graphics.setColor(COLOR_TOGGLE_BOX)
       local lineWidth = 2
-      love.graphics.setLineWidth(2)
+      love.graphics.translate(lineWidth / 2, 0)
+      love.graphics.setLineWidth(lineWidth)
       love.graphics.rectangle(
         'line',
         x, y,
@@ -96,9 +97,87 @@ local function guiToggle()
   })
 end
 
+local function guiTextInput()
+  local textGraphic = love.graphics.newText(font.secondary.font, 'foo')
+
+  local blinkCursorCo = function()
+    local show = true
+    local frame = 0
+    while true do
+      frame = frame + 1
+      if show and frame >= 28 then
+        show = false
+        frame = 0
+      elseif not show and frame >= 25 then
+        show = true
+        frame = 0
+      end
+      coroutine.yield(show)
+    end
+  end
+
+  return Gui.create({
+    x = 200,
+    y = 150,
+    w = 200,
+    h = 22,
+    type = Gui.types.TEXT_INPUT,
+    onFocus = function(self)
+      self.blinkCursor = coroutine.wrap(blinkCursorCo)
+    end,
+    onBlur = function(self)
+      self.blinkCursor = function() return false end
+    end,
+    render = function(self)
+      love.graphics.push()
+      love.graphics.scale(scale)
+
+      -- text box
+      love.graphics.setColor(
+        self.focused and COLOR_BUTTON or Color.LIGHT_GRAY
+      )
+      local lineWidth = 2
+      love.graphics.setLineWidth(lineWidth)
+      love.graphics.translate(lineWidth / 2, lineWidth / 2)
+      love.graphics.rectangle(
+        'line',
+        self.x,
+        self.y,
+        self.w - lineWidth * 2,
+        self.h - lineWidth * 2
+      )
+
+      -- adjust content to center of text box
+      love.graphics.translate(4, 5)
+
+      -- draw text
+      love.graphics.setColor(Color.WHITE)
+      textGraphic:set(self.text)
+      love.graphics.draw(textGraphic, self.x, self.y)
+
+      -- draw cursor
+      local isCursorVisible = self.focused and self.blinkCursor()
+      if isCursorVisible then
+        local w, h = textGraphic:getWidth(), font.secondary.fontSize + 2
+        love.graphics.setColor(COLOR_BUTTON)
+        love.graphics.rectangle(
+          'fill',
+          self.x + w,
+          self.y - 1,
+          2,
+          h
+        )
+      end
+
+      love.graphics.pop()
+    end
+  })
+end
+
 function GuiTestBlueprint.init(self)
   guiButton()
   guiToggle()
+  guiTextInput()
 end
 
 return groups.gui.createFactory(GuiTestBlueprint)

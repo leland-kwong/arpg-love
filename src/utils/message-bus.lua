@@ -23,7 +23,7 @@ local function reduceValueAndHandleCleanup(allReducers, msgType, msgValue)
 		local ret = nil
 		local shouldRemove = false
 		if reducer then
-			ret = reducer(msgType, nextValue, CLEANUP)
+			ret = reducer(msgType, nextValue)
 			shouldRemove = ret == CLEANUP
 			nextValue = shouldRemove and nextValue or ret
 		end
@@ -65,7 +65,7 @@ local function callSubscribersAndHandleCleanup(msgHandlers, msgType, nextValue)
 		local ret = nil
 		local shouldRemove = false
 		if subscriber then
-			ret = subscriber(msgType, nextValue, CLEANUP)
+			ret = subscriber(msgType, nextValue)
 			shouldRemove = ret == CLEANUP
 		end
 		if shouldRemove then

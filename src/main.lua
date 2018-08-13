@@ -39,6 +39,7 @@ local globalState = {
 }
 
 function love.load()
+  love.keyboard.setKeyRepeat(true)
   local resolution = config.resolution
   local vw, vh = resolution.w * scale, resolution.h * scale
   love.window.setMode(vw, vh)
@@ -89,6 +90,13 @@ function love.mousereleased( x, y, button, istouch, presses )
   msgBus.send(
     msgBus.MOUSE_RELEASED,
     { x, y, button, isTouch, presses }
+  )
+end
+
+function love.textinput(t)
+  msgBus.send(
+    msgBus.GUI_TEXT_INPUT,
+    t
   )
 end
 
