@@ -56,14 +56,7 @@ local baseProps = {
   y[NUMBER]
   initialProps[table] - a key/value hash of properties
 ]]
-local function createFactory(blueprint, factoryDefaults, group)
-  -- call the blueprint with the factory defaults
-  if type(blueprint) == 'function' then
-    return group.createFactory(
-      blueprint(factoryDefaults)
-    )
-  end
-
+local function createFactory(blueprint, factoryDefaults)
   tc.validate(blueprint.getInitialProps, tc.FUNCTION, false)
 
   function blueprint.create(props)
@@ -82,7 +75,7 @@ local function createFactory(blueprint, factoryDefaults, group)
     setmetatable(c, blueprint)
     blueprint.__index = blueprint
 
-    group.addComponent(c)
+    c.group.addComponent(c)
     return c
   end
 
@@ -103,7 +96,7 @@ local function createFactory(blueprint, factoryDefaults, group)
   end
 
   function blueprint:delete()
-    group.delete(self)
+    self.group.delete(self)
     return self
   end
 
@@ -133,15 +126,22 @@ function M.newGroup(factoryDefaults, groupOptions)
   groupOptions = objectUtils.immutableApply(defaultGroupOptions, groupOptions or {})
 
   local drawQ = Q:new({development = isDebug})
-  local C = {}
+  local Group = {}
   local componentsById = {}
   local count = 0
 
-  C.createFactory = function(blueprint)
-    return createFactory(blueprint, factoryDefaults, C)
+  Group.createFactory = function(blueprint)
+    -- call the blueprint with the factory defaults
+    if type(blueprint) == 'function' then
+      return Group.createFactory(
+        blueprint(factoryDefaults)
+      )
+    end
+    blueprint.group = blueprint.group or Group
+    return createFactory(blueprint, factoryDefaults)
   end
 
-  function C.updateAll(dt)
+  function Group.updateAll(dt)
     for id,c in pairs(componentsById) do
       if not c._initialized then
         c._initialized = true
@@ -149,10 +149,10 @@ function M.newGroup(factoryDefaults, groupOptions)
       end
       c:_update(dt)
     end
-    return C
+    return Group
   end
 
-  function C.drawAll()
+  function Group.drawAll()
     groupOptions.preDraw()
 
     for id,c in pairs(componentsById) do
@@ -163,19 +163,19 @@ function M.newGroup(factoryDefaults, groupOptions)
 
     drawQ:flush()
     groupOptions.postDraw()
-    return C
+    return Group
   end
 
-  function C.getStats()
+  function Group.getStats()
     return count
   end
 
-  function C.addComponent(component)
+  function Group.addComponent(component)
     count = count + 1
     componentsById[component:getId()] = component
   end
 
-  function C.delete(component)
+  function Group.delete(component)
     if component._deleted then
       if isDebug then
         print('[WARNING] component already deleted:', component._id)
@@ -189,17 +189,17 @@ function M.newGroup(factoryDefaults, groupOptions)
       component:final()
     end
     component._deleted = true
-    return C
+    return Group
   end
 
-  function C.deleteAll()
+  function Group.deleteAll()
     for id,c in pairs(componentsById) do
       c:delete()
     end
-    return C
+    return Group
   end
 
-  return C
+  return Group
 end
 
 return M
