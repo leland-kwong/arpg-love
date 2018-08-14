@@ -1,8 +1,13 @@
 local groups = require 'components.groups'
 local Gui = require 'components.gui.gui'
+local GuiTextLayer = require 'components.gui.gui-text'
 local Color = require 'modules.color'
 local font = require 'components.font'
+local f = require 'utils.functional'
+local pprint = require 'utils.pprint'
 local scale = require 'config'.scaleFactor
+
+local guiText = GuiTextLayer.create()
 
 local GuiTestBlueprint = {
   dx = 0,
@@ -16,9 +21,15 @@ local COLOR_TOGGLE_UNCHECKED = {0,0,0,0}
 local COLOR_TOGGLE_CHECKED = COLOR_PRIMARY
 local buttonPadding = 10
 
+local textForMeasuring = love.graphics.newText(font.secondary.font, '')
+local function getTextSize(text)
+  textForMeasuring:set(text)
+  return textForMeasuring:getWidth(), textForMeasuring:getHeight()
+end
+
 local function guiButton(x, y, w, h, buttonText)
-  local buttonText = love.graphics.newText(font.secondary.font, buttonText)
-  local w, h = w or buttonText:getWidth(), h or buttonText:getHeight()
+  local buttonW, buttonH = getTextSize(buttonText)
+  w, h = w or buttonW, h or buttonH
 
   return Gui.create({
     type = Gui.types.BUTTON,
@@ -31,8 +42,6 @@ local function guiButton(x, y, w, h, buttonText)
       print('clicked!', self:getId())
     end,
     render = function(self)
-      love.graphics.push()
-      love.graphics.scale(self.scale)
       local x, y = self.x, self.y
       love.graphics.setColor(self.hovered and COLOR_BUTTON_HOVER or COLOR_PRIMARY)
       love.graphics.rectangle(
@@ -40,26 +49,25 @@ local function guiButton(x, y, w, h, buttonText)
         x, y,
         w + buttonPadding, h + buttonPadding
       )
-      love.graphics.setColor(0,0,0)
-      love.graphics.draw(
+      guiText:add(
         buttonText,
+        Color.BLACK,
         x + buttonPadding / 2,
         y + buttonPadding / 2
       )
-      love.graphics.pop()
     end
   })
 end
 
 local function guiToggle(x, y, toggleText)
-  local toggleText = love.graphics.newText(font.secondary.font, toggleText)
   local toggleBoxSize = 14
+  local toggleTextWidth = getTextSize(toggleText)
 
   return Gui.create({
     type = Gui.types.TOGGLE,
     x = x,
     y = y,
-    w = toggleBoxSize + toggleText:getWidth(),
+    w = toggleBoxSize + toggleTextWidth,
     h = toggleBoxSize,
     scale = scale,
     checked = true,
@@ -68,7 +76,6 @@ local function guiToggle(x, y, toggleText)
     end,
     render = function(self)
       love.graphics.push()
-      love.graphics.scale(self.scale)
 
       local x, y = self:getPosition()
       local w, h = self.w, self.h
@@ -85,7 +92,12 @@ local function guiToggle(x, y, toggleText)
       )
 
       love.graphics.setColor(Color.WHITE)
-      love.graphics.draw(toggleText, self.x + 2 + toggleBoxSize, self.y + 1)
+      guiText:add(
+        toggleText,
+        Color.WHITE,
+        self.x + 2 + toggleBoxSize,
+        self.y + 1
+      )
 
       local toggleColor = self.checked and COLOR_TOGGLE_CHECKED or COLOR_TOGGLE_UNCHECKED
       love.graphics.setColor(toggleColor)
@@ -100,9 +112,7 @@ local function guiToggle(x, y, toggleText)
   })
 end
 
-local function guiTextInput(x, y, w, h, scale, placeholder)
-  local textGraphic = love.graphics.newText(font.secondary.font, '')
-
+local function guiTextInput(x, y, w, h, scale, placeholderText)
   local blinkCursorCo = function()
     local show = true
     local frame = 0
@@ -124,8 +134,6 @@ local function guiTextInput(x, y, w, h, scale, placeholder)
     y = y,
     w = w,
     h = h,
-    placeholder = placeholder,
-    scale = scale,
     type = Gui.types.TEXT_INPUT,
     onFocus = function(self)
       self.blinkCursor = coroutine.wrap(blinkCursorCo)
@@ -135,13 +143,12 @@ local function guiTextInput(x, y, w, h, scale, placeholder)
     end,
     render = function(self)
       love.graphics.push()
-      love.graphics.scale(self.scale)
+
       local posX, posY = self:getPosition()
+      local ctrlColor = self.focused and COLOR_PRIMARY or Color.LIGHT_GRAY
 
       -- text box
-      love.graphics.setColor(
-        self.focused and COLOR_PRIMARY or Color.LIGHT_GRAY
-      )
+      love.graphics.setColor(ctrlColor)
       local lineWidth = 2
       love.graphics.setLineWidth(lineWidth)
       local tx, ty = lineWidth / 2, lineWidth / 2
@@ -155,7 +162,8 @@ local function guiTextInput(x, y, w, h, scale, placeholder)
       )
 
       -- adjust content to center of text box
-      love.graphics.translate(4, 5)
+      local tx2, ty2 = 4, 5
+      love.graphics.translate(tx2, ty2)
 
       -- placeholder text
       local placeholderOffX, placeholderOffY = 0, 0
@@ -163,18 +171,27 @@ local function guiTextInput(x, y, w, h, scale, placeholder)
       if self.focused or hasContent then
         placeholderOffX, placeholderOffY = 0, -self.h + 2
       end
-      textGraphic:set(self.placeholder)
-      love.graphics.draw(textGraphic, posX + placeholderOffX, posY + placeholderOffY)
+
+      guiText:add(
+        placeholderText,
+        ctrlColor,
+        posX + placeholderOffX + tx + tx2,
+        posY + placeholderOffY + ty + ty2
+      )
 
       -- draw text
-      love.graphics.setColor(Color.WHITE)
-      textGraphic:set(self.text)
-      love.graphics.draw(textGraphic, posX, posY)
+      guiText:add(
+        self.text,
+        Color.WHITE,
+        posX + tx + tx2,
+        posY + ty + ty2
+      )
 
       -- draw cursor
       local isCursorVisible = self.focused and self.blinkCursor()
       if isCursorVisible then
-        local w, h = textGraphic:getWidth(), font.secondary.fontSize + 2
+        local w = getTextSize(self.text)
+        local h = font.secondary.fontSize + 2
         love.graphics.setColor(COLOR_PRIMARY)
         love.graphics.rectangle(
           'fill',
@@ -219,18 +236,15 @@ local function guiList(parent, children)
 
   return Gui.create({
     x = 180,
-    y = 1,
+    y = 30,
     w = 240,
-    h = 360,
-    scale = scale,
+    h = 300,
     type = Gui.types.LIST,
     children = children,
     scrollHeight = 50,
     onScroll = function(self)
     end,
     render = function(self)
-      love.graphics.push()
-      love.graphics.scale(self.scale)
       love.graphics.setColor(0.1,0.1,0.1)
 
       local posX, posY = self:getPosition()
@@ -242,7 +256,6 @@ local function guiList(parent, children)
         self.h
       )
       scrollbars(self)
-      love.graphics.pop()
     end,
     drawOrder = function(self)
       return 1

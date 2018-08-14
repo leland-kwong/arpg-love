@@ -66,6 +66,15 @@ function CollisionObject:move(goalX, goalY, filter)
     len
 end
 
+--[[
+  used for referencing in the collision filter
+  to know what object this collision object is related to
+]]
+function CollisionObject:setParent(parent)
+  self.parent = parent
+  return self
+end
+
 function CollisionObject:delete()
   self.world:remove(self)
   return self

@@ -3,6 +3,7 @@ local Color = {
   WHITE = {1,1,1,1},
   MED_GRAY = {0.7,0.7,0.7,1},
   LIGHT_GRAY = {0.5,0.5,0.5},
+  BLACK = {0,0,0},
 
   multiply = function(a, b)
     return {

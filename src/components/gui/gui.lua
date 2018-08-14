@@ -31,7 +31,7 @@ local guiType = {
   BUTTON = 'BUTTON',
   TOGGLE = 'TOGGLE',
   TEXT_INPUT = 'TEXT_INPUT',
-  LIST = 'LIST'
+  LIST = 'LIST',
 }
 
 local Gui = {
@@ -164,11 +164,13 @@ function Gui.init(self)
       if msgBus.GUI_TEXT_INPUT == msgType then
         local txt = msgValue
         self.text = self.text..txt
+        self.onChange(self)
       end
 
       -- handle backspace for text input
       if msgBus.KEY_PRESSED == msgType and msgValue.key == 'backspace' then
         self.text = string.sub(self.text, 1, #self.text - 1)
+        self.onChange(self)
       end
     end
   end)

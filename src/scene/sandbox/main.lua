@@ -9,7 +9,7 @@ function SandboxBlueprint.init()
   local gui = require 'scene.sandbox.gui.test-scene'
 
   local state = {
-    activeScene = gui
+    activeScene = ai
   }
 
   state.activeScene.create()
