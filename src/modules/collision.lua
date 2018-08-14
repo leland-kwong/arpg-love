@@ -28,16 +28,16 @@ function CollisionObject:new(group, x, y, w, h, offsetX, offsetY)
   return obj
 end
 
-function CollisionObject:setParent(object)
-  self.parent = object
-  return self
+function CollisionObject:getPositionWithOffset()
+  return self.x - self.ox, self.y - self.oy
 end
 
 function CollisionObject:addToWorld(collisionWorld)
+  local x, y = self:getPositionWithOffset()
   collisionWorld:add(
     self,
-    self.x - self.ox,
-    self.y - self.oy,
+    x,
+    y,
     self.w,
     self.h
   )
@@ -88,10 +88,12 @@ function CollisionObject:update(x, y, w, h, offsetX, offsetY)
   self.h = h or self.h
   self.ox = offsetX or self.ox
   self.oy = offsetY or self.oy
+
+  local x, y = self:getPositionWithOffset()
   self.world:update(
     self,
-    self.x - self.ox,
-    self.y - self.ox,
+    x,
+    y,
     self.w,
     self.h
   )
