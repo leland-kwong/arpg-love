@@ -51,6 +51,76 @@ local baseProps = {
   end
 }
 
+--[[
+  x[NUMBER]
+  y[NUMBER]
+  initialProps[table] - a key/value hash of properties
+]]
+local function createFactory(blueprint, factoryDefaults, group)
+  -- call the blueprint with the factory defaults
+  if type(blueprint) == 'function' then
+    return group.createFactory(
+      blueprint(factoryDefaults)
+    )
+  end
+
+  tc.validate(blueprint.getInitialProps, tc.FUNCTION, false)
+
+  function blueprint.create(props)
+    local c = blueprint.getInitialProps(props or {})
+
+    -- type check
+    if isDebug then
+      assert(type(c) == tc.TABLE, errorMsg.getInitialProps)
+      tc.validate(c.x, tc.NUMBER, false) -- x-axis position
+      tc.validate(c.y, tc.NUMBER, false) -- y-axis position
+      tc.validate(c.angle, tc.NUMBER, false)
+    end
+
+    local id = uid()
+    c._id = id
+    setmetatable(c, blueprint)
+    blueprint.__index = blueprint
+
+    group.addComponent(c)
+    return c
+  end
+
+  function blueprint:getPosition()
+    return self.x, self.y
+  end
+
+  function blueprint:setPosition(x, y)
+    self.x = x
+    self.y = y
+    return self
+  end
+
+  -- sets the parent if a parent is provided, otherwise unsets it (when parent is `nil`)
+  function blueprint:setParent(parent)
+    self.parent = parent
+    return self
+  end
+
+  function blueprint:delete()
+    group.delete(self)
+    return self
+  end
+
+  function blueprint:getId()
+    return self._id
+  end
+
+  -- default methods
+  for k,v in pairs(baseProps) do
+    if not blueprint[k] then
+      blueprint[k] = factoryDefaults[k] or v
+    end
+  end
+
+  return blueprint
+end
+
 local defaultGroupOptions = {
   preDraw = noop,
   postDraw = noop
@@ -67,74 +137,8 @@ function M.newGroup(factoryDefaults, groupOptions)
   local componentsById = {}
   local count = 0
 
-  --[[
-    x[NUMBER]
-    y[NUMBER]
-    initialProps[table] - a key/value hash of properties
-  ]]
-  function C.createFactory(blueprint)
-    -- call the blueprint with the factory defaults
-    if type(blueprint) == 'function' then
-      return C.createFactory(
-        blueprint(factoryDefaults)
-      )
-    end
-
-    tc.validate(blueprint.getInitialProps, tc.FUNCTION, false)
-
-    function blueprint.create(props)
-      local c = blueprint.getInitialProps(props or {})
-
-      -- type check
-      if isDebug then
-        assert(type(c) == tc.TABLE, errorMsg.getInitialProps)
-        tc.validate(c.x, tc.NUMBER, false) -- x-axis position
-        tc.validate(c.y, tc.NUMBER, false) -- y-axis position
-        tc.validate(c.angle, tc.NUMBER, false)
-      end
-
-      local id = uid()
-      c._id = id
-      componentsById[id] = c
-      count = count + 1
-      setmetatable(c, blueprint)
-      blueprint.__index = blueprint
-      return c
-    end
-
-    function blueprint:getPosition()
-      return self.x, self.y
-    end
-
-    function blueprint:setPosition(x, y)
-      self.x = x
-      self.y = y
-      return self
-    end
-
-    -- sets the parent if a parent is provided, otherwise unsets it (when parent is `nil`)
-    function blueprint:setParent(parent)
-      self.parent = parent
-      return self
-    end
-
-    function blueprint:delete()
-      C.delete(self)
-      return self
-    end
-
-    function blueprint:getId()
-      return self._id
-    end
-
-    -- default methods
-    for k,v in pairs(baseProps) do
-      if not blueprint[k] then
-        blueprint[k] = factoryDefaults[k] or v
-      end
-    end
-
-    return blueprint
+  C.createFactory = function(blueprint)
+    return createFactory(blueprint, factoryDefaults, C)
   end
 
   function C.updateAll(dt)
@@ -164,6 +168,11 @@ function M.newGroup(factoryDefaults, groupOptions)
 
   function C.getStats()
     return count
+  end
+
+  function C.addComponent(component)
+    count = count + 1
+    componentsById[component:getId()] = component
   end
 
   function C.delete(component)
