@@ -407,4 +407,4 @@ function flowFieldTestBlueprint.draw(self)
   love.graphics.translate(-offX, -offY)
 end
 
-return groups.gui.createFactory(flowFieldTestBlueprint)
+return groups.system.createFactory(flowFieldTestBlueprint)

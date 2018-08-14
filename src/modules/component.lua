@@ -3,11 +3,12 @@ local tc = require 'utils.type-check'
 local uid = require 'utils.uid'
 local inspect = require 'utils.inspect'
 local noop = require 'utils.noop'
+local objectUtils = require 'utils.object-utils'
 local Q = require 'modules.queue'
+local typeCheck = require 'utils.type-check'
 
 local M = {}
 
-local drawQ = Q:new({development = isDebug})
 local errorMsg = {
   getInitialProps = "getInitialProps must return a table"
 }
@@ -18,6 +19,7 @@ local baseProps = {
   x = 0,
   y = 0,
   angle = 0,
+  scale = 1,
 
   getInitialProps = function(props)
     return props
@@ -34,13 +36,33 @@ local baseProps = {
   -- these methods will not be called until the component has been initialized
   update = noop,
   draw = noop,
-  final = noop
+  final = noop,
+  _update = function(self, dt)
+    if self.parent then
+      -- update position relative to its parent
+      local dx, dy =
+        self.prevParentX and (self.parent.x - self.prevParentX) or 0,
+        self.prevParentY and (self.parent.y - self.prevParentY) or 0
+      self:setPosition(self.x + dx, self.y + dy)
+      self.prevParentX = self.parent.x
+      self.prevParentY = self.parent.y
+    end
+    self:update(dt)
+  end
+}
+
+local defaultGroupOptions = {
+  preDraw = noop,
+  postDraw = noop
 }
 
 local pprint = require 'utils.pprint'
-function M.newGroup(factoryDefaults)
+function M.newGroup(factoryDefaults, groupOptions)
   factoryDefaults = factoryDefaults or {}
+  -- apply any default options to group options
+  groupOptions = objectUtils.immutableApply(defaultGroupOptions, groupOptions or {})
 
+  local drawQ = Q:new({development = isDebug})
   local C = {}
   local componentsById = {}
   local count = 0
@@ -68,7 +90,6 @@ function M.newGroup(factoryDefaults)
         assert(type(c) == tc.TABLE, errorMsg.getInitialProps)
         tc.validate(c.x, tc.NUMBER, false) -- x-axis position
         tc.validate(c.y, tc.NUMBER, false) -- y-axis position
-        tc.validate(c.z, tc.NUMBER, false) -- z-order
         tc.validate(c.angle, tc.NUMBER, false)
       end
 
@@ -88,6 +109,12 @@ function M.newGroup(factoryDefaults)
     function blueprint:setPosition(x, y)
       self.x = x
       self.y = y
+      return self
+    end
+
+    -- sets the parent if a parent is provided, otherwise unsets it (when parent is `nil`)
+    function blueprint:setParent(parent)
+      self.parent = parent
       return self
     end
 
@@ -116,11 +143,14 @@ function M.newGroup(factoryDefaults)
         c._initialized = true
         c:init()
       end
-      c:update(dt)
+      c:_update(dt)
     end
+    return C
   end
 
   function C.drawAll()
+    groupOptions.preDraw()
+
     for id,c in pairs(componentsById) do
       if c._initialized then
         drawQ:add(c:drawOrder(), c.draw, c)
@@ -128,6 +158,8 @@ function M.newGroup(factoryDefaults)
     end
 
     drawQ:flush()
+    groupOptions.postDraw()
+    return C
   end
 
   function C.getStats()
@@ -148,6 +180,14 @@ function M.newGroup(factoryDefaults)
       component:final()
     end
     component._deleted = true
+    return C
+  end
+
+  function C.deleteAll()
+    for id,c in pairs(componentsById) do
+      c:delete()
+    end
+    return C
   end
 
   return C

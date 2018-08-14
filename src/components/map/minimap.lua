@@ -58,4 +58,4 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   end
 })
 
-return groups.gui.createFactory(blueprint)
+return groups.hud.createFactory(blueprint)

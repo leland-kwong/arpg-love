@@ -5,6 +5,7 @@ local msgBus = require 'components.msg-bus'
 local collisionObject = require 'modules.collision'
 local scale = require 'config'.scaleFactor
 local noop = require 'utils.noop'
+local f = require 'utils.functional'
 local min, max = math.min, math.max
 
 local COLLISION_CROSS = 'cross'
@@ -12,12 +13,19 @@ local mouseCollisionFilter = function()
   return COLLISION_CROSS
 end
 
-msgBus.subscribe(function(msgType, enabled)
+local function toggleTextInput(msgType, enabled)
   if msgBus.SET_TEXT_INPUT == msgType then
     love.keyboard.setTextInput(enabled)
   end
-end)
+end
+msgBus.subscribe(toggleTextInput)
 msgBus.send(msgBus.SET_TEXT_INPUT, false)
+
+--[[
+  A generic node with no built-in functionality.
+  Currently used internally as a node for the parenting of childNodes to the LIST
+]]
+local GuiNode = groups.gui.createFactory({})
 
 local guiType = {
   BUTTON = 'BUTTON',
@@ -46,6 +54,8 @@ local Gui = {
   -- scroll limits. The value here represents how far you can scroll in each direction.
   scrollHeight = 0,
   scrollWidth = 0,
+  -- array of children for the LIST component
+  children = {},
 
   checked = false,
   text = '',
@@ -78,16 +88,22 @@ end
 local function handleScroll(self, dx, dy)
   self.scrollLeft = self.scrollableX and min(0, self.scrollLeft - dx) or 0
   local maxScrollLeft = -self.scrollWidth
-  if self.scrollLeft <= maxScrollLeft then
+  local maxScrollLeftReached = self.scrollLeft <= maxScrollLeft
+  if maxScrollLeftReached then
     self.scrollLeft = maxScrollLeft
   end
 
   self.scrollTop = self.scrollableY and min(0, self.scrollTop + dy) or 0
   local maxScrollTop = -self.scrollHeight
-  if self.scrollTop <= maxScrollTop then
+  local maxScrollTopReached = self.scrollTop <= maxScrollTop
+  if maxScrollTopReached then
     self.scrollTop = maxScrollTop
   end
 
+  self.scrollNode:setPosition(
+    self.scrollNode.initialX + self.scrollLeft,
+    self.scrollNode.initialY + self.scrollTop
+  )
   self.onScroll(self)
 end
 
@@ -96,6 +112,15 @@ function Gui.init(self)
 
   if guiType.LIST == self.type then
     assert(self.h <= love.graphics.getHeight() / self.scale, 'scrollable list height should not be greater than window height')
+    self.scrollNode = GuiNode.create({
+      x = self.x,
+      y = self.y,
+      initialX = self.x,
+      initialY = self.y
+    })
+    f.forEach(self.children, function(child)
+      child:setParent(self.scrollNode)
+    end)
   end
 
   if guiType.TEXT_INPUT == self.type then
@@ -182,6 +207,21 @@ end
 
 function Gui.final(self)
   msgBus.send(msgBus.GUI_NODE_CLEANUP, self:getId())
+
+  if guiType.LIST == self.type then
+    f.forEach(self.children, function(child)
+      -- unset the parent
+      child:setParent()
+    end)
+  end
+end
+
+local drawOrderByType = {
+  [guiType.LIST] = 1,
+  default = 2
+}
+function Gui.drawOrder(self)
+  return drawOrderByType[self.type] or drawOrderByType.default
 end
 
 return groups.gui.createFactory(Gui)

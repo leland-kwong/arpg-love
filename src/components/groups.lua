@@ -26,6 +26,7 @@ local Groups = {
 
   overlay = Component.newGroup(),
 
+  -- used for in-game debugging, including things like collision object shapes, sprite border-boxes, etc...
   debug = Component.newGroup(),
 
   gui = Component.newGroup({
@@ -36,6 +37,9 @@ local Groups = {
     end,
   }),
 
+  hud = Component.newGroup(),
+
+  -- used for handling system/os related functionality
   system = Component.newGroup()
 }
 

@@ -1,5 +1,14 @@
 # Thoughts - a place for quickly jotting down ideas
 
+## 2-d game engines
+
+- love2d (lua)
+- game maker studio 2 (gml)
+- godot (c#, gdnative)
+- pygame (python)
+- unity (c#)
+- monogame (c#)
+
 ## Ai movement
 
 If collision is detected, offset the endpoint by the collision normal.
@@ -44,5 +53,5 @@ Whenever an event occurs, it sends that information to the event bus. Each event
 
 ## GUI code architecture
 
-- gui component generates a hitbox with hover, click, onChange handlers
-- we do the rendering separately in the `render` method
+- [x] gui component generates a hitbox with hover, click, onChange handlers
+- [x] we do the rendering separately in the `render` method
