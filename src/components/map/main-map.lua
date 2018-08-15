@@ -1,5 +1,6 @@
 -- The main map that the player and ai interact with.
 
+local Component = require 'modules.component'
 local objectUtils = require 'utils.object-utils'
 local groups = require 'components.groups'
 local mapBlueprint = require 'components.map.map-blueprint'
@@ -33,6 +34,7 @@ local function addWallTileEntity(self, positionIndex, entityProps)
 end
 
 local blueprint = objectUtils.assign({}, mapBlueprint, {
+  group = groups.all,
   tileRenderDefinition = {},
 
   init = function(self)
@@ -98,4 +100,4 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   end
 })
 
-return groups.all.createFactory(blueprint)
+return Component.createFactory(blueprint)

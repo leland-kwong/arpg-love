@@ -1,3 +1,4 @@
+local Component = require 'modules.component'
 local objectUtils = require 'utils.object-utils'
 local groups = require 'components.groups'
 local mapBlueprint = require 'components.map.map-blueprint'
@@ -34,6 +35,7 @@ local minimapTileRenderers = {
 local minimapCanvas = love.graphics.newCanvas()
 -- minimap
 local blueprint = objectUtils.assign({}, mapBlueprint, {
+  group = groups.hud,
   x = 100,
   y = 100,
   offset = 10,
@@ -58,4 +60,4 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   end
 })
 
-return groups.hud.createFactory(blueprint)
+return Component.createFactory(blueprint)

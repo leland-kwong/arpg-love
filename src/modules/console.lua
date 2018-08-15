@@ -123,4 +123,8 @@ function Console.draw(self)
   gfx.setBlendMode('alpha')
 end
 
+function Console.drawOrder(self)
+  return 10
+end
+
 return Component.createFactory(Console)

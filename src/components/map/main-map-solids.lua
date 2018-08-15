@@ -1,9 +1,11 @@
+local Component = require 'modules.component'
 local groups = require 'components.groups'
 local collisionWorlds = require 'components.collision-worlds'
 local collisionObject = require 'modules.collision'
 local f = require 'utils.functional'
 
 local MainMapSolidsBlueprint = {
+  group = groups.all,
   animation = {},
   x = 0,
   y = 0,
@@ -41,7 +43,7 @@ function MainMapSolidsBlueprint.final(self)
 end
 
 function MainMapSolidsBlueprint.drawOrder(self)
-  return groups.all.drawOrder(self)
+  return self.group.drawOrder(self)
 end
 
-return groups.all.createFactory(MainMapSolidsBlueprint)
+return Component.createFactory(MainMapSolidsBlueprint)

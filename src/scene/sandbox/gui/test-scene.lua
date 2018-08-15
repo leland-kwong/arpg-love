@@ -1,3 +1,4 @@
+local Component = require 'modules.component'
 local groups = require 'components.groups'
 local Gui = require 'components.gui.gui'
 local GuiTextLayer = require 'components.gui.gui-text'
@@ -10,6 +11,7 @@ local scale = require 'config'.scaleFactor
 local guiText = GuiTextLayer.create()
 
 local GuiTestBlueprint = {
+  group = groups.gui,
   dx = 0,
   dy = 0
 }
@@ -281,4 +283,4 @@ function GuiTestBlueprint.init(self)
   local list = guiList(self, children)
 end
 
-return groups.gui.createFactory(GuiTestBlueprint)
+return Component.createFactory(GuiTestBlueprint)

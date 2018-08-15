@@ -10,10 +10,6 @@ local pprint = require 'utils.pprint'
 
 local M = {}
 
-local errorMsg = {
-  getInitialProps = "getInitialProps must return a table"
-}
-
 -- built-in defaults
 local floor = math.floor
 local baseProps = {
@@ -21,10 +17,6 @@ local baseProps = {
   y = 0,
   angle = 0,
   scale = 1,
-
-  getInitialProps = function(props)
-    return props
-  end,
 
   drawOrder = function(self)
     local o = floor(self.y)
@@ -61,7 +53,7 @@ function M.createFactory(blueprint)
   tc.validate(blueprint.getInitialProps, tc.FUNCTION, false)
 
   function blueprint.create(props)
-    local c = blueprint.getInitialProps(props or {})
+    local c = (props or {})
 
     local id = uid()
     c._id = id
@@ -71,7 +63,6 @@ function M.createFactory(blueprint)
     -- type check
     if isDebug then
       assert(c.group ~= nil, 'a default `group` must be provided')
-      assert(type(c) == tc.TABLE, errorMsg.getInitialProps)
       tc.validate(c.x, tc.NUMBER, false) -- x-axis position
       tc.validate(c.y, tc.NUMBER, false) -- y-axis position
       tc.validate(c.angle, tc.NUMBER, false)
@@ -144,12 +135,6 @@ function M.newGroup(factoryDefaults, groupDefinition)
   local Group = groupDefinition
   local componentsById = {}
   local count = 0
-
-  Group.createFactory = function(blueprint)
-    print('[DEPRECATED]: Group.createFactory has been deprecated. You should use Component.createFactory instead.')
-    blueprint.group = blueprint.group or Group
-    return M.createFactory(blueprint)
-  end
 
   function Group.updateAll(dt)
     for id,c in pairs(componentsById) do

@@ -1,10 +1,13 @@
+local Component = require 'modules.component'
 local Animation = require 'modules.animation'
 local json = require 'lua_modules.json'
 local bump = require 'modules.bump'
 local collisionObject = require 'modules.collision'
 local groups = require 'components.groups'
 
-local M = {}
+local M = {
+  group = groups.debug
+}
 
 local world = bump.newWorld(32)
 
@@ -258,4 +261,4 @@ function M.draw()
 
 end
 
-return groups.debug.createFactory(M)
+return Component.createFactory(M)

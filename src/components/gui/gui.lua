@@ -1,3 +1,4 @@
+local Component = require 'modules.component'
 local font = require 'components.font'
 local groups = require 'components.groups'
 local collisionWorlds = require 'components.collision-worlds'
@@ -25,7 +26,9 @@ msgBus.send(msgBus.SET_TEXT_INPUT, false)
   A generic node with no built-in functionality.
   Currently used internally as a node for the parenting of childNodes to the LIST
 ]]
-local GuiNode = groups.gui.createFactory({})
+local GuiNode = Component.createFactory({
+  group = groups.gui
+})
 
 local guiType = {
   BUTTON = 'BUTTON',
@@ -35,6 +38,7 @@ local guiType = {
 }
 
 local Gui = {
+  group = groups.gui,
   -- props
   x = 1,
   y = 1,
@@ -226,4 +230,4 @@ function Gui.drawOrder(self)
   return drawOrderByType[self.type] or drawOrderByType.default
 end
 
-return groups.gui.createFactory(Gui)
+return Component.createFactory(Gui)

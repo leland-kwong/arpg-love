@@ -1,3 +1,4 @@
+local Component = require 'modules.component'
 local Color = require 'modules.color'
 local groups = require 'components.groups'
 local M = {}
@@ -28,10 +29,6 @@ function M.boundingBox(mode, x, y, w, h, center)
 end
 
 local Debug = {
-  getInitialProps = function()
-    return {}
-  end,
-
   draw = function()
     for i=1, #queue do
       love.graphics.setColor(1,1,1,0.5)
@@ -42,6 +39,6 @@ local Debug = {
   end
 }
 
-groups.debug.createFactory(Debug).create()
+Component.createFactory(Debug).create()
 
 return M

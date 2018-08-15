@@ -35,13 +35,10 @@ local Fireball = {
   speed = 500,
   cooldown = 0.1,
 
-  getInitialProps = function(props)
-    local dx, dy = Position.getDirection(props.x, props.y, props.x2, props.y2)
-    props.direction = {x = dx, y = dy}
-    return props
-  end,
-
   init = function(self)
+    local dx, dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
+    self.direction = {x = dx, y = dy}
+
     self.damage = math.random(self.minDamage, self.maxDamage)
     self.animation = animationFactory:new({
       'fireball'

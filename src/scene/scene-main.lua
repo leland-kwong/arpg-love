@@ -1,3 +1,4 @@
+local Component = require 'modules.component'
 local groups = require 'components.groups'
 local Map = require 'modules.map-generator.index'
 local Player = require 'components.player'
@@ -29,7 +30,9 @@ local gridTileTypes = {
   }
 }
 
-local MainScene = {}
+local MainScene = {
+  group = groups.all
+}
 
 function MainScene.init(self)
   local map = Map.createAdjacentRooms(4, 20)
@@ -75,4 +78,4 @@ function MainScene.init(self)
   })
 end
 
-return groups.all.createFactory(MainScene)
+return Component.createFactory(MainScene)

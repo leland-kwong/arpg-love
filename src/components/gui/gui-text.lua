@@ -1,8 +1,9 @@
-local groups = require 'components.groups'
+local Component = require 'modules.component'local groups = require 'components.groups'
 local font = require 'components.font'
 local f = require 'utils.functional'
 
 local GuiTextLayer = {
+  group = groups.gui,
   font = font.secondary.font
 }
 
@@ -27,4 +28,4 @@ function GuiTextLayer.drawOrder()
   return 4
 end
 
-return groups.gui.createFactory(GuiTextLayer)
+return Component.createFactory(GuiTextLayer)
