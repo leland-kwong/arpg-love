@@ -35,7 +35,7 @@ local scenes = {
 }
 
 local globalState = {
-  activeScene = scenes.sandbox,
+  activeScene = scenes.main,
 }
 
 function love.load()
@@ -115,6 +115,11 @@ function love.draw()
   groups.debug.drawAll()
   camera:detach()
   groups.hud.drawAll()
+
+  love.graphics.push()
+  love.graphics.scale(config.scaleFactor)
   groups.gui.drawAll()
+  love.graphics.pop()
+
   groups.system.drawAll()
 end

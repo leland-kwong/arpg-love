@@ -4,6 +4,7 @@ local Map = require 'modules.map-generator.index'
 local Player = require 'components.player'
 local Minimap = require 'components.map.minimap'
 local MainMap = require 'components.map.main-map'
+local Inventory = require 'components.item-inventory.inventory'
 local SpawnerAi = require 'components.spawn.spawn-ai'
 local config = require 'config'
 local camera = require 'components.camera'
@@ -44,6 +45,8 @@ function MainScene.init(self)
   local player = Player.create({
     mapGrid = map.grid
   })
+
+  Inventory.create()
 
   local aiCount = 10
   local generated = 0
