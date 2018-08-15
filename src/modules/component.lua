@@ -58,26 +58,26 @@ local baseProps = {
   initialProps[table] - a key/value hash of properties
 ]]
 function M.createFactory(blueprint)
-  assert(blueprint.group ~= nil, 'a default `group` must be provided')
   tc.validate(blueprint.getInitialProps, tc.FUNCTION, false)
 
   function blueprint.create(props)
     local c = blueprint.getInitialProps(props or {})
-
-    -- type check
-    if isDebug then
-      assert(type(c) == tc.TABLE, errorMsg.getInitialProps)
-      tc.validate(c.x, tc.NUMBER, false) -- x-axis position
-      tc.validate(c.y, tc.NUMBER, false) -- y-axis position
-      tc.validate(c.angle, tc.NUMBER, false)
-    end
 
     local id = uid()
     c._id = id
     setmetatable(c, blueprint)
     blueprint.__index = blueprint
 
-    c.group.addComponent(c)
+    -- type check
+    if isDebug then
+      assert(c.group ~= nil, 'a default `group` must be provided')
+      assert(type(c) == tc.TABLE, errorMsg.getInitialProps)
+      tc.validate(c.x, tc.NUMBER, false) -- x-axis position
+      tc.validate(c.y, tc.NUMBER, false) -- y-axis position
+      tc.validate(c.angle, tc.NUMBER, false)
+    end
+
+    c:setGroup(c.group)
     return c
   end
 
@@ -94,6 +94,15 @@ function M.createFactory(blueprint)
   -- sets the parent if a parent is provided, otherwise unsets it (when parent is `nil`)
   function blueprint:setParent(parent)
     self.parent = parent
+    return self
+  end
+
+  function blueprint:setGroup(group)
+    if not group and self.group then
+      self.group.removeComponent(self)
+    else
+      group.addComponent(self)
+    end
     return self
   end
 

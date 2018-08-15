@@ -1,3 +1,4 @@
+local Component = require 'modules.component'
 local Color = require 'modules.color'
 local groups = require 'components.groups'
 local config = require 'config'
@@ -72,18 +73,15 @@ local skillHandlers = {
 }
 
 local Player = {
-  getInitialProps = function(props)
-    return {
-      x = startPos.x,
-      y = startPos.y,
+  group = groups.all,
+  x = startPos.x,
+  y = startPos.y,
 
-      -- collision properties
-      type = 'player',
-      h = 1,
-      w = 1,
-      mapGrid = props.mapGrid
-    }
-  end,
+  -- collision properties
+  type = 'player',
+  h = 1,
+  w = 1,
+  mapGrid = nil,
 
   init = function(self)
     self.dir = DIRECTION_RIGHT
@@ -263,9 +261,7 @@ function Player.draw(self)
 end
 
 Player.drawOrder = function(self)
-  return groups.all.drawOrder(self) + 1
+  return self.group.drawOrder(self) + 1
 end
 
-local playerFactory = groups.all.createFactory(Player)
-
-return playerFactory
+return Component.createFactory(Player)

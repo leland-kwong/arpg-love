@@ -1,3 +1,4 @@
+local Component = require 'modules.component'
 local config = require 'config'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
@@ -25,6 +26,7 @@ local function colFilter(item, other)
 end
 
 local Fireball = {
+  group = groups.all,
   -- DEFAULTS
   minDamage = 1,
   maxDamage = 3,
@@ -124,10 +126,8 @@ local Fireball = {
 }
 
 Fireball.drawOrder = function(self)
-  local order = groups.all.drawOrder(self) + 2
+  local order = self.group.drawOrder(self) + 2
   return order
 end
 
-local factory = groups.all.createFactory(Fireball)
-
-return factory
+return Component.createFactory(Fireball)
