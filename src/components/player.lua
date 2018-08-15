@@ -262,11 +262,10 @@ function Player.draw(self)
   love.graphics.setShader()
 end
 
-local playerFactory = groups.all.createFactory(function(defaults)
-  Player.drawOrder = function(self)
-    return defaults.drawOrder(self) + 1
-  end
-  return Player
-end)
+Player.drawOrder = function(self)
+  return groups.all.drawOrder(self) + 1
+end
+
+local playerFactory = groups.all.createFactory(Player)
 
 return playerFactory

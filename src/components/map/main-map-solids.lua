@@ -40,4 +40,8 @@ function MainMapSolidsBlueprint.final(self)
   self.colObj:removeFromWorld(collisionWorlds.map)
 end
 
+function MainMapSolidsBlueprint.drawOrder(self)
+  return groups.all.drawOrder(self)
+end
+
 return groups.all.createFactory(MainMapSolidsBlueprint)

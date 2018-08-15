@@ -6,6 +6,7 @@ local noop = require 'utils.noop'
 local objectUtils = require 'utils.object-utils'
 local Q = require 'modules.queue'
 local typeCheck = require 'utils.type-check'
+local pprint = require 'utils.pprint'
 
 local M = {}
 
@@ -56,7 +57,8 @@ local baseProps = {
   y[NUMBER]
   initialProps[table] - a key/value hash of properties
 ]]
-local function createFactory(blueprint, factoryDefaults)
+function M.createFactory(blueprint)
+  assert(blueprint.group ~= nil, 'a default `group` must be provided')
   tc.validate(blueprint.getInitialProps, tc.FUNCTION, false)
 
   function blueprint.create(props)
@@ -107,7 +109,7 @@ local function createFactory(blueprint, factoryDefaults)
   -- default methods
   for k,v in pairs(baseProps) do
     if not blueprint[k] then
-      blueprint[k] = factoryDefaults[k] or v
+      blueprint[k] = baseProps[k] or v
     end
   end
 
@@ -119,26 +121,25 @@ local defaultGroupOptions = {
   postDraw = noop
 }
 
-local pprint = require 'utils.pprint'
-function M.newGroup(factoryDefaults, groupOptions)
+function M.newGroup(factoryDefaults, groupDefinition)
   factoryDefaults = factoryDefaults or {}
   -- apply any default options to group options
-  groupOptions = objectUtils.immutableApply(defaultGroupOptions, groupOptions or {})
+  groupDefinition = objectUtils.assign(
+    {},
+    defaultGroupOptions,
+    factoryDefaults,
+    groupDefinition or {}
+  )
 
   local drawQ = Q:new({development = isDebug})
-  local Group = {}
+  local Group = groupDefinition
   local componentsById = {}
   local count = 0
 
   Group.createFactory = function(blueprint)
-    -- call the blueprint with the factory defaults
-    if type(blueprint) == 'function' then
-      return Group.createFactory(
-        blueprint(factoryDefaults)
-      )
-    end
+    print('[DEPRECATED]: Group.createFactory has been deprecated. You should use Component.createFactory instead.')
     blueprint.group = blueprint.group or Group
-    return createFactory(blueprint, factoryDefaults)
+    return M.createFactory(blueprint)
   end
 
   function Group.updateAll(dt)
@@ -153,7 +154,7 @@ function M.newGroup(factoryDefaults, groupOptions)
   end
 
   function Group.drawAll()
-    groupOptions.preDraw()
+    groupDefinition.preDraw()
 
     for id,c in pairs(componentsById) do
       if c._initialized then
@@ -162,7 +163,7 @@ function M.newGroup(factoryDefaults, groupOptions)
     end
 
     drawQ:flush()
-    groupOptions.postDraw()
+    groupDefinition.postDraw()
     return Group
   end
 

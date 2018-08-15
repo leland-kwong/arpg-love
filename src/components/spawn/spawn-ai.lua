@@ -85,9 +85,8 @@ function SpawnerAi.draw(self)
   self.ai:draw()
 end
 
-return groups.all.createFactory(function(defaults)
-  SpawnerAi.drawOrder = function(self)
-    return defaults.drawOrder(self) + 1
-  end
-  return SpawnerAi
-end)
+SpawnerAi.drawOrder = function(self)
+  return groups.all.drawOrder(self) + 1
+end
+
+return groups.all.createFactory(SpawnerAi)

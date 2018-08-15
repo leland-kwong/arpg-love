@@ -35,7 +35,7 @@ local scenes = {
 }
 
 local globalState = {
-  activeScene = scenes.sandbox,
+  activeScene = scenes.main,
 }
 
 function love.load()

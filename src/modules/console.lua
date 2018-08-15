@@ -1,3 +1,4 @@
+local Component = require 'modules.component'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local font = require 'components.font'
@@ -31,16 +32,14 @@ msgBus.subscribe(function(msgType, v)
 end)
 
 local Console = {
+  name = 'Console',
+  group = groups.system,
   stats = {
     accumulatedMemoryUsed = 0,
     currentMemoryUsed = 0,
     frameCount = 0
   }
 }
-
-function Console.getInitialProps()
-  return {}
-end
 
 local edgeOffset = 10
 
@@ -124,4 +123,4 @@ function Console.draw(self)
   gfx.setBlendMode('alpha')
 end
 
-return groups.system.createFactory(Console)
+return Component.createFactory(Console)

@@ -42,7 +42,7 @@ function MainScene.init(self)
     mapGrid = map.grid
   })
 
-  local aiCount = 0
+  local aiCount = 10
   local generated = 0
   while generated < aiCount do
     local posX, posY = math.random(3, 60), math.random(3, 60)
