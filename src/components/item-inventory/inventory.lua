@@ -1,7 +1,9 @@
 local Component = require 'modules.component'
 local Color = require 'modules.color'
+local GuiText = require 'components.gui.gui-text'
 local groups = require 'components.groups'
 local config = require 'config'
+local gameScale = config.scaleFactor
 
 local InventoryBlueprint = {
   group = groups.gui
@@ -43,19 +45,27 @@ function InventoryBlueprint.init(self)
   local w, h = calcInventorySize(slots, self.slotSize, self.slotMargin)
   self.w = w
   self.h = h
+
+  self.guiTextLayer = GuiText.create()
+end
+
+local function title(self, x, y)
+  self.guiTextLayer:add('Inventory', Color.WHITE, x, y)
 end
 
 function InventoryBlueprint.draw(self)
-  love.graphics.setColor(1,1,1)
-  love.graphics.print('Inventory', 100, 55)
-  love.graphics.setColor(0.2, 0.2, 0.2, 0.8)
-
   local w, h = self.w, self.h
   -- center to screen
   local posX = (config.resolution.w - w) / 2
   local posY = (config.resolution.h - h) / 2
+
+  title(self, posX, 20)
+
+  -- inventory background
+  love.graphics.setColor(0.2, 0.2, 0.2, 0.8)
   love.graphics.rectangle('fill', posX, posY, w, h)
 
+  -- inventory slots
   drawSlots(posX, posY, self.slots, self.slotSize, self.slotMargin)
 end
 

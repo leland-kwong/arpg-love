@@ -41,7 +41,7 @@ local baseProps = {
       self.prevParentY = self.parent.y
     end
     self:update(dt)
-  end
+  end,  
 }
 
 --[[
@@ -69,6 +69,7 @@ function M.createFactory(blueprint)
     end
 
     c:setGroup(c.group)
+    c:init()
     return c
   end
 
@@ -131,10 +132,6 @@ function M.newGroup(groupDefinition)
 
   function Group.updateAll(dt)
     for id,c in pairs(componentsById) do
-      if not c._initialized then
-        c._initialized = true
-        c:init()
-      end
       c:_update(dt)
     end
     return Group
@@ -142,9 +139,7 @@ function M.newGroup(groupDefinition)
 
   function Group.drawAll()
     for id,c in pairs(componentsById) do
-      if c._initialized then
-        drawQ:add(c:drawOrder(), c.draw, c)
-      end
+      drawQ:add(c:drawOrder(), c.draw, c)
     end
 
     drawQ:flush()
@@ -170,9 +165,8 @@ function M.newGroup(groupDefinition)
 
     componentsById[component._id] = nil
     count = count - 1
-    if component._initialized then
-      component:final()
-    end
+    component:final()
+    -- set deleted state. (this is for debugging purposes only)
     component._deleted = true
     return Group
   end
