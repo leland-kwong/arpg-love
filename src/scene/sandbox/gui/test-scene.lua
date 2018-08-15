@@ -131,6 +131,8 @@ local function guiTextInput(x, y, w, h, scale, placeholderText)
     end
   end
 
+  local CURSOR_TEXT = love.mouse.getSystemCursor('ibeam')
+
   return Gui.create({
     x = x,
     y = y,
@@ -145,6 +147,9 @@ local function guiTextInput(x, y, w, h, scale, placeholderText)
     end,
     render = function(self)
       love.graphics.push()
+
+      local cursorType = self.hovered and CURSOR_TEXT or nil
+      love.mouse.setCursor(cursorType)
 
       local posX, posY = self:getPosition()
       local ctrlColor = self.focused and COLOR_PRIMARY or Color.LIGHT_GRAY
