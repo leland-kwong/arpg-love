@@ -223,8 +223,8 @@ function Gui.final(self)
 end
 
 local drawOrderByType = {
-  [guiType.LIST] = 1,
-  default = 2
+  [guiType.LIST] = 2,
+  default = 3
 }
 function Gui.drawOrder(self)
   return drawOrderByType[self.type] or drawOrderByType.default

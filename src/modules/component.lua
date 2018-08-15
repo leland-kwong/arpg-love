@@ -116,18 +116,11 @@ function M.createFactory(blueprint)
   return blueprint
 end
 
-local defaultGroupOptions = {
-  preDraw = noop,
-  postDraw = noop
-}
-
-function M.newGroup(factoryDefaults, groupDefinition)
-  factoryDefaults = factoryDefaults or {}
-  -- apply any default options to group options
+function M.newGroup(groupDefinition)
+  -- apply any missing default options to group definition
   groupDefinition = objectUtils.assign(
     {},
     defaultGroupOptions,
-    factoryDefaults,
     groupDefinition or {}
   )
 
@@ -148,8 +141,6 @@ function M.newGroup(factoryDefaults, groupDefinition)
   end
 
   function Group.drawAll()
-    groupDefinition.preDraw()
-
     for id,c in pairs(componentsById) do
       if c._initialized then
         drawQ:add(c:drawOrder(), c.draw, c)
@@ -157,7 +148,6 @@ function M.newGroup(factoryDefaults, groupDefinition)
     end
 
     drawQ:flush()
-    groupDefinition.postDraw()
     return Group
   end
 

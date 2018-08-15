@@ -9,6 +9,9 @@ local pprint = require 'utils.pprint'
 local scale = require 'config'.scaleFactor
 
 local guiText = GuiTextLayer.create()
+local GuiNode = Component.createFactory({
+  group = groups.gui
+})
 
 local GuiTestBlueprint = {
   group = groups.gui,
@@ -39,7 +42,6 @@ local function guiButton(x, y, w, h, buttonText)
     y = y,
     w = w + buttonPadding,
     h = h + buttonPadding,
-    scale = scale,
     onClick = function(self)
       print('clicked!', self:getId())
     end,
@@ -71,7 +73,6 @@ local function guiToggle(x, y, toggleText)
     y = y,
     w = toggleBoxSize + toggleTextWidth,
     h = toggleBoxSize,
-    scale = scale,
     checked = true,
     onChange = function(self, checked)
       print('toggled!', checked)
@@ -265,7 +266,43 @@ local function guiList(parent, children)
       scrollbars(self)
     end,
     drawOrder = function(self)
+      return 2
+    end
+  })
+end
+
+local function guiStencil()
+  love.graphics.rectangle(
+    'fill',
+    180,
+    30,
+    240,
+    300
+  )
+end
+
+local function preDrawNode()
+  return GuiNode.create({
+    draw = function()
+      love.graphics.push()
+      love.graphics.scale(scale)
+      love.graphics.stencil(guiStencil, 'replace', 1)
+      love.graphics.setStencilTest('greater', 0)
+    end,
+    drawOrder = function()
       return 1
+    end
+  })
+end
+
+local function postDrawNode()
+  return GuiNode.create({
+    draw = function()
+      love.graphics.setStencilTest()
+      love.graphics.pop()
+    end,
+    drawOrder = function()
+      return 5
     end
   })
 end
@@ -286,6 +323,10 @@ function GuiTestBlueprint.init(self)
     )
   }
   local list = guiList(self, children)
+  -- pre-process step. Sets up stenciling to cull child nodes when they scroll outside of view
+  preDrawNode()
+  -- post-process step. Restore graphic state to original state
+  postDrawNode()
 end
 
 return Component.createFactory(GuiTestBlueprint)

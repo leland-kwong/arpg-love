@@ -35,23 +35,9 @@ local Groups = {
   }),
 
   overlay = Component.newGroup(),
-
   -- used for in-game debugging, including things like collision object shapes, sprite border-boxes, etc...
   debug = Component.newGroup(),
-
-  gui = Component.newGroup({}, {
-    preDraw = function()
-      love.graphics.push()
-      love.graphics.scale(config.scaleFactor)
-      love.graphics.stencil(guiStencil, 'replace', 1)
-      love.graphics.setStencilTest('greater', 0)
-    end,
-    postDraw = function()
-      love.graphics.setStencilTest()
-      love.graphics.pop()
-    end
-  }),
-
+  gui = Component.newGroup(),
   hud = Component.newGroup(),
 
   -- used for handling system/os related functionality
