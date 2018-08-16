@@ -200,9 +200,14 @@ local Player = {
     camera:setPosition(self.x, self.y)
 
     local gridX, gridY = Position.pixelsToGrid(self.x, self.y, config.gridSize)
-    msgBus.send(msgBus.NEW_FLOWFIELD, {
-      flowField = flowfield(self.mapGrid, gridX, gridY, self.isGridCellVisitable)
-    })
+    local hasChangedPosition = self.prevGridX ~= gridX or self.prevGridY ~= gridY
+    if hasChangedPosition then
+      msgBus.send(msgBus.NEW_FLOWFIELD, {
+        flowField = flowfield(self.mapGrid, gridX, gridY, self.isGridCellVisitable)
+      })
+    end
+    self.prevGridX = gridX
+    self.prevGridY = gridY
   end
 }
 
