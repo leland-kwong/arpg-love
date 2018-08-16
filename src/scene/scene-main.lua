@@ -9,6 +9,8 @@ local SpawnerAi = require 'components.spawn.spawn-ai'
 local config = require 'config'
 local camera = require 'components.camera'
 local cloneGrid = require 'utils.clone-grid'
+local CreateStore = require 'components.state.state'
+local rootState = CreateStore()
 
 local gridTileTypes = {
   -- unwalkable
@@ -46,7 +48,9 @@ function MainScene.init(self)
     mapGrid = map.grid
   })
 
-  Inventory.create()
+  Inventory.create({
+    slots = rootState:get().inventory
+  })
 
   local aiCount = 10
   local generated = 0

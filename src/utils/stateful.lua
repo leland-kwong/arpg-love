@@ -4,10 +4,12 @@ A simple, but fast observable state store with set, get, and onChange callback
 
 ]]--
 
-local Global = require("main.global")
+local isDebug = require'config'.isDebug
 local F = require("utils.functional")
 local objectUtils = require("utils.object-utils")
 local typeCheck = require("utils.type-check")
+local socket = require'socket'
+local io = require'io'
 
 local noop = function() end
 
@@ -25,19 +27,6 @@ local function dirLookup(dir)
 end
 
 local Stateful = {}
-
-function Stateful:getSavePath(__stateId)
-	local gameTitle = sys.get_config("project.title")
-
-	local returnRootDir = __stateId == nil or __stateId == ""
-	if returnRootDir then
-		local dir = sys.get_save_file(gameTitle, "")
-		return string.sub(dir, 1, -2)
-	end
-
-	-- return path to save file
-	return sys.get_save_file(gameTitle, __stateId.."."..self.fileExtension)
-end
 
 local TYPE_FUNCTION = 'function'
 local debugAction = {
@@ -67,7 +56,7 @@ local __state = {}
 local __prevState = {}
 
 function Stateful:new(initialState, options)
-	if not Global.isDebug then
+	if not isDebug then
 		-- remove debug-only options
 		options.debug = nil
 	end
@@ -181,8 +170,7 @@ function Stateful:get()
 end
 
 function Stateful:deleteSavedState(__stateId)
-	local file = self:getSavePath(__stateId)
-	os.remove(file)
+	print('[PORTING TO LOVE2D STILL NEEDED]')
 end
 
 function Stateful:saveState()
@@ -222,7 +210,7 @@ end
 
 function Stateful:replaceState(newState)
 	-- validate state shape to make sure its same as what it was initially
-	if Global.isDebug then
+	if isDebug then
 		for k,v in pairs(self.initialState) do
 			if newState[k] == nil then
 				error("[stateful.replaceState] state shape is incorrect. Missing key `"..k.."`")

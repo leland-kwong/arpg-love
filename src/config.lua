@@ -10,7 +10,8 @@ M.keyboard = {
   RIGHT = 'd',
   DOWN = 's',
   LEFT = 'a',
-  SKILL_1 = 'space'
+  SKILL_1 = 'space',
+  SKILL_2 = 'shift'
 }
 
 M.mouseInputMap = {

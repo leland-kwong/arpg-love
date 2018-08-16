@@ -4,15 +4,12 @@ local GuiText = require 'components.gui.gui-text'
 local groups = require 'components.groups'
 local config = require 'config'
 local gameScale = config.scaleFactor
+local floor = math.floor
 
 local InventoryBlueprint = {
+  slots = {},
   group = groups.gui
 }
-
-function InventoryBlueprint.init()
-end
-
-local floor = math.floor
 
 local function calcInventorySize(slots, slotSize, margin)
   local rows, cols = #slots, #slots[1]
@@ -38,11 +35,9 @@ local function drawSlots(inventoryX, inventoryY, slots, slotSize, margin)
 end
 
 function InventoryBlueprint.init(self)
-  local slots = require'utils.make-grid'(11, 9, Color.BLACK)
-  self.slots = slots
   self.slotSize = 30
   self.slotMargin = 2
-  local w, h = calcInventorySize(slots, self.slotSize, self.slotMargin)
+  local w, h = calcInventorySize(self.slots, self.slotSize, self.slotMargin)
   self.w = w
   self.h = h
 
