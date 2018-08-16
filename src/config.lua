@@ -11,7 +11,8 @@ M.keyboard = {
   DOWN = 's',
   LEFT = 'a',
   SKILL_1 = 'space',
-  SKILL_2 = 'shift'
+  SKILL_2 = 'shift',
+  INVENTORY_TOGGLE = 'i'
 }
 
 M.mouseInputMap = {

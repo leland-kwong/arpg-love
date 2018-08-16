@@ -10,6 +10,7 @@ local config = require 'config'
 local camera = require 'components.camera'
 local cloneGrid = require 'utils.clone-grid'
 local CreateStore = require 'components.state.state'
+local msgBus = require 'components.msg-bus'
 local rootState = CreateStore()
 
 local gridTileTypes = {
@@ -48,9 +49,21 @@ function MainScene.init(self)
     mapGrid = map.grid
   })
 
-  Inventory.create({
-    slots = rootState:get().inventory
-  })
+  msgBus.subscribe(function(msgType, msgValue)
+    if msgBus.KEY_RELEASED == msgType then
+      local key = msgValue.key
+      local isActive = rootState:get().activeMenu == 'INVENTORY'
+      if key == config.keyboard.INVENTORY_TOGGLE and (not isActive) then
+        local component = Inventory.create({
+          slots = rootState:get().inventory,
+          onDisableRequest = function()
+            rootState:set('activeMenu', false)
+          end
+        })
+        rootState:set('activeMenu', 'INVENTORY')
+      end
+    end
+  end)
 
   local aiCount = 5
   local generated = 0

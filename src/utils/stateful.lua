@@ -10,6 +10,7 @@ local objectUtils = require("utils.object-utils")
 local typeCheck = require("utils.type-check")
 local socket = require'socket'
 local io = require'io'
+local Timer = require'components.timer'
 
 local noop = function() end
 
@@ -60,7 +61,7 @@ function Stateful:new(initialState, options)
 		-- remove debug-only options
 		options.debug = nil
 	end
-	
+
 	initialState = initialState or {} -- create object if user does not provide one
 	initialState.__stateId = initialState.__stateId or make__stateId()
 	local o = {
@@ -78,7 +79,7 @@ function Stateful:new(initialState, options)
 
 	setmetatable(o, self)
 	self.__index = self
-	
+
 	function o.stateChangeCallback()
 		-- subscribers are keyed with unique token for easy unsubscribing
 		-- so we can't iterate over them like an array
@@ -104,17 +105,17 @@ Stateful.INITIAL_VALUE = 'INITIAL_VALUE'
 
 function Stateful:set(key, value, updateCompleteCallback, saveCompleteCallback)
 	typeCheck.validate(value, typeCheck.NON_NIL)
-	
+
 	self.debug(debugAction.SET_PENDING, key, value)
-	
+
 	local isValueFunction = type(value) == TYPE_FUNCTION
 	-- call the value function with current state
 	if isValueFunction then
 		value = value(self[__state])
-	end	
+	end
 
 	local isNewValue = not self.pure or (self.pure and self[__state][key] ~= value)
-	
+
 	-- no changes, so lets just do nothing
 	if not isNewValue then
 		self.debug(debugAction.SET_SUCCESS_NO_CHANGE, key, value)
@@ -127,8 +128,8 @@ function Stateful:set(key, value, updateCompleteCallback, saveCompleteCallback)
 
 	if saveCompleteCallback then
 		table.insert(self.saveCompleteCallbacks, saveCompleteCallback)
-	end	
-	
+	end
+
 	-- Only change the previous state if things have changed
 	-- This makes it easy for us to do state equality comparisons
 	if not self.pendingStateChangeUpdate then
@@ -136,12 +137,12 @@ function Stateful:set(key, value, updateCompleteCallback, saveCompleteCallback)
 		self[__prevState] = self[__state]
 		-- copy current state and set it as the new state
 		self[__state] = objectUtils.assign({}, self[__state])
-	end	
+	end
 
 	if Stateful.INITIAL_VALUE == value then
 		value = self.initialState[key]
 	end
-	
+
 	self[__state][key] = value
 
 	-- queue up subscriber update --
@@ -149,11 +150,14 @@ function Stateful:set(key, value, updateCompleteCallback, saveCompleteCallback)
 		self.pendingStateChangeUpdate = true
 		self.debug(debugAction.UPDATE_PENDING)
 		if self.debounceRate > 0 then
-			timer.delay(self.debounceRate, false, self.stateChangeCallback)
+			Timer.create({
+				fn = self.stateChangeCallback,
+				delay = self.debounceRate
+			})
 		else
 			self.stateChangeCallback()
 		end
-	end	
+	end
 
 	-- auto save state
 	if self.autoPersist then
@@ -161,7 +165,7 @@ function Stateful:set(key, value, updateCompleteCallback, saveCompleteCallback)
 	end
 
 	self.debug(debugAction.SET_SUCCESS, key, value)
-	
+
 	return self
 end
 
@@ -176,16 +180,16 @@ end
 function Stateful:saveState()
 	if self.savePending then
 		return
-	end	
-	
+	end
+
 	self.debug(debugAction.SAVE_REQUEST)
-	
+
 	self.savePending = true
 
 	self.saveCallback = self.saveCallback or function()
 		local curState = self:get()
 		local __stateId = curState.__stateId
-		
+
 		self.debug(debugAction.SAVE_PENDING)
 		local savePath = self:getSavePath(__stateId)
 		local saveSuccess = sys.save(savePath, curState)
@@ -199,10 +203,13 @@ function Stateful:saveState()
 	end
 
 	-- debouncing saves to batch it in one go
-	timer.delay(self.saveRate, false, self.saveCallback)
+	Timer.create({
+		fn = self.saveCallback,
+		delay = self.saveRate
+	})
 end
 
-function Stateful:loadSavedState(__stateId)	
+function Stateful:loadSavedState(__stateId)
 	local loadedState = sys.load(self:getSavePath(__stateId))
 	self:replaceState(loadedState)
 	return self
@@ -217,7 +224,7 @@ function Stateful:replaceState(newState)
 			end
 		end
 	end
-	
+
 	-- use the setter method so we can trigger subscribers
 	for k,v in pairs(newState) do
 		self:set(k, v)

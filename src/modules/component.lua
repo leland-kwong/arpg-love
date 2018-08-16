@@ -31,6 +31,11 @@ local baseProps = {
   final = noop,
   _update = function(self, dt)
     if self.parent then
+      if self.parent._deleted and self.parent._deleteRecursive then
+        self:delete()
+        return
+      end
+
       -- update position relative to its parent
       local dx, dy =
         self.prevParentX and (self.parent.x - self.prevParentX) or 0,
@@ -97,8 +102,9 @@ function M.createFactory(blueprint)
     return self
   end
 
-  function blueprint:delete()
+  function blueprint:delete(recursive)
     self.group.delete(self)
+    self._deleteRecursive = recursive
     return self
   end
 

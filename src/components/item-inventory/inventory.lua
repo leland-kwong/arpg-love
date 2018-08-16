@@ -3,6 +3,7 @@ local Color = require 'modules.color'
 local Gui = require 'components.gui.gui'
 local GuiText = require 'components.gui.gui-text'
 local groups = require 'components.groups'
+local msgBus = require 'components.msg-bus'
 local pprint = require 'utils.pprint'
 local config = require 'config'
 local gameScale = config.scaleFactor
@@ -20,6 +21,7 @@ local guiTextLayerBody = GuiText.create({
 local InventoryBlueprint = {
   slots = {},
   group = groups.gui,
+  onDisableRequest = require'utils.noop'
 }
 
 local function calcInventorySize(slots, slotSize, margin)
@@ -160,12 +162,25 @@ function InventoryBlueprint.setupSlotInteractions(self, slots, margin)
           end
         end
       end
-    })
+    }):setParent(self)
+  end)
+end
+
+local function setupCloseHotkey(self)
+  msgBus.subscribe(function(msgType, msgValue)
+    if msgBus.KEY_RELEASED == msgType then
+      local key = msgValue.key
+      if key == config.keyboard.INVENTORY_TOGGLE then
+        self:delete(true)
+        return msgBus.CLEANUP
+      end
+    end
   end)
 end
 
 function InventoryBlueprint.init(self)
   insertTestItem(self)
+  setupCloseHotkey(self)
 
   self.slotSize = 30
   self.slotMargin = 2
@@ -192,6 +207,10 @@ function InventoryBlueprint.draw(self)
   -- inventory background
   love.graphics.setColor(0.2, 0.2, 0.2, 0.8)
   love.graphics.rectangle('fill', self.x, self.y, w, h)
+end
+
+function InventoryBlueprint.final(self)
+  self.onDisableRequest()
 end
 
 return Component.createFactory(InventoryBlueprint)
