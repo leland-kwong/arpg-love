@@ -109,7 +109,9 @@ function Console.draw(self)
   gfx.setColor(Color.WHITE)
   printTable({
       memory = string.format('%0.2f', s.currentMemoryUsed / 1024),
-      memoryAvg = string.format('%0.2f', s.accumulatedMemoryUsed / s.frameCount / 1024)
+      memoryAvg = string.format('%0.2f', s.accumulatedMemoryUsed / s.frameCount / 1024),
+      delta = love.timer.getAverageDelta(),
+      fps = love.timer.getFPS()
     },
     lineHeight,
     edgeOffset,
