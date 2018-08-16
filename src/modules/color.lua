@@ -5,6 +5,7 @@ local Color = {
   MED_GRAY = {0.5,0.5,0.5},
   MED_DARK_GRAY = {0.3,0.3,0.3},
   DARK_GRAY = {0.1,0.1,0.1,1},
+  CYAN = {0.2,1,1},
   BLACK = {0,0,0},
 
   multiply = function(a, b)

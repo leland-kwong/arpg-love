@@ -1,7 +1,16 @@
-local config = require("main.components.items.config")
-local msgBus = require("main.state.msg-bus")
+local config = require("components.item-inventory.items.config")
+local msgBus = require("components.msg-bus")
 local functional = require("utils.functional")
-local itemDefs = require("main.components.items.item-definitions")
+local itemDefs = require("components.item-inventory.items.item-definitions")
+local Color = require('modules.color')
+
+local function concatTable(a, b)
+	for i=1, #b do
+		local elem = b[i]
+		table.insert(a, elem)
+	end
+	return a
+end
 
 return itemDefs.registerType({
 	type = "ICE_CLIMBERS",
@@ -17,7 +26,7 @@ return itemDefs.registerType({
 	end,
 
 	properties = {
-		sprite = "shoes-2",
+		sprite = "shoe_5",
 		title = 'Ice Climbers',
 		rarity = config.rarity.RARE,
 		category = config.category.SHOES,
@@ -25,20 +34,18 @@ return itemDefs.registerType({
 		tooltip = function(self)
 			local function statValue(stat, color, type)
 				local sign = stat >= 0 and "+" or "-"
-				return "<color="..color..">"..sign..stat.."</color> <color=white>"..type.."</color>"
+				return {
+					color, sign..stat..' ',
+					{1,1,1}, type..'\n'
+				}
 			end
 			local stats = {
-				"<font=body>"..statValue(self.armor, "cyan", "armor").."</font>",
-				"<font=body>"..statValue(self.moveSpeed, "cyan", "move speed").."</font>"
+				statValue(self.armor, Color.CYAN, "armor"),
+				statValue(self.moveSpeed, Color.CYAN, "move speed")
 			}
-			local concat = function(separator)
-				return function(seed, string, index)
-					seed = seed or ""
-					local separator = index > 1 and separator or ""
-					return seed..separator..string
-				end
-			end
-			return functional.reduce(stats, concat("\n"))
+			return functional.reduce(stats, function(combined, textObj)
+				return concatTable(combined, textObj)
+			end, {})
 		end,
 
 		onActivate = function(self)

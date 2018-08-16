@@ -285,7 +285,6 @@ local function preDrawNode()
   return GuiNode.create({
     draw = function()
       love.graphics.push()
-      love.graphics.scale(scale)
       love.graphics.stencil(guiStencil, 'replace', 1)
       love.graphics.setStencilTest('greater', 0)
     end,

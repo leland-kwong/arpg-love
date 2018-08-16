@@ -31,6 +31,7 @@ local GuiNode = Component.createFactory({
 })
 
 local guiType = {
+  INTERACT = 'INTERACT', -- a stateless gui node used only for event listening
   BUTTON = 'BUTTON',
   TOGGLE = 'TOGGLE',
   TEXT_INPUT = 'TEXT_INPUT',
@@ -49,6 +50,9 @@ local Gui = {
   onFocus = noop,
   onBlur = noop,
   onScroll = noop,
+  onPointerEnter = noop,
+  onPointerLeave = noop,
+  onPointerMove = noop,
   render = noop,
   type = 'button',
 
@@ -205,6 +209,25 @@ function Gui.update(self)
       end
     end
   end
+
+  local isPointerMove = self.hovered
+  local hasPointerPositionChanged = posX ~= self.prevColPosX or posY ~= self.prevColPosY
+  if isPointerMove then
+    self.onPointerMove(self)
+  end
+
+  local hoverStateChanged = self.hovered ~= self.prevHovered
+  if hoverStateChanged then
+    if self.hovered then
+      self.onPointerEnter(self)
+    else
+      self.onPointerLeave(self)
+    end
+  end
+
+  self.prevHovered = self.hovered
+  self.prevColPosX = posX
+  self.prevColPosY = posY
 end
 
 function Gui.draw(self)

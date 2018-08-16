@@ -1,5 +1,4 @@
-local function fontPrimary()
-  local fontSize = 16
+local function fontPrimary(fontSize)
   local lineHeight = fontSize * 1
   local font = love.graphics.newFont(
     'built/fonts/StarPerv.ttf',
@@ -28,6 +27,7 @@ local function fontSecondary()
 end
 
 return {
-  primary = fontPrimary(),
+  primary = fontPrimary(8),
+  primaryLarge = fontPrimary(16),
   secondary = fontSecondary()
 }

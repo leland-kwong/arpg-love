@@ -53,7 +53,7 @@ local initialState = {
 	--[[ buffs, debuffs, auras, ailments ]]
 	statusEffects = {},
 
-	inventory = require'utils.make-grid'(9, 11, EMPTY_SLOT),
+	inventory = require'utils.make-grid'(11, 9, EMPTY_SLOT),
 
 	--[[ equipped items ]]
 	equipment = require'utils.functional'.reduce(

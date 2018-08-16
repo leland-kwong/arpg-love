@@ -19,8 +19,7 @@ local baseProps = {
   scale = 1,
 
   drawOrder = function(self)
-    local o = floor(self.y)
-    return o < 1 and 1 or o
+    return 1
   end,
 
   -- gets called on the next `update` frame
@@ -41,7 +40,7 @@ local baseProps = {
       self.prevParentY = self.parent.y
     end
     self:update(dt)
-  end,  
+  end,
 }
 
 --[[

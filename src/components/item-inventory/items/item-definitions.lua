@@ -13,11 +13,10 @@ First function returns a table of the item data
 local tableUtils = require("utils.object-utils")
 
 local uid = require("utils.uid")
-local Global = require("main.global")
-local itemConfig = require("main.components.items.config")
-local msgBus = require("main.state.msg-bus")
+local itemConfig = require("components.item-inventory.items.config")
+local msgBus = require("components.msg-bus")
 
-local isDebug = Global.isDebug
+local isDebug = require'config'.isDebug
 
 local types = {}
 local items = {

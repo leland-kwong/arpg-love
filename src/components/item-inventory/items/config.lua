@@ -1,6 +1,7 @@
 --[[
 Item gui configuration
 ]]--
+local Color = require('modules.color')
 local objectUtils = require("utils.object-utils")
 local config = {}
 
@@ -12,12 +13,17 @@ config.rarity = {
 	LEGENDARY = 4
 }
 
+local COLOR_MAGICAL = {107, 171, 255} -- blueish-purple
+local COLOR_RARE = {1, 1, 0} -- yellow
+local COLOR_EPIC = {222, 73, 252} -- magenta
+local COLOR_LEGENDARY = {255, 155, 33} -- gold
+
 config.rarityColor = {
-	[config.rarity.NORMAL] = '#fff',
-	[config.rarity.MAGICAL] = '#6babff',
-	[config.rarity.RARE] = 'yellow',
-	[config.rarity.EPIC] = 'magenta',
-	[config.rarity.LEGENDARY] = 'orange'
+	[config.rarity.NORMAL] = Color.WHITE,
+	[config.rarity.MAGICAL] = COLOR_MAGICAL,
+	[config.rarity.RARE] = COLOR_RARE,
+	[config.rarity.EPIC] = COLOR_EPIC,
+	[config.rarity.LEGENDARY] = COLOR_LEGENDARY
 }
 
 config.rarityTitle = {
