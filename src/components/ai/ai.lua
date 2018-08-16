@@ -102,6 +102,13 @@ local function handleHits(self)
 end
 
 function Ai:update(grid, flowField, dt)
+  if self.pulseTime >= 0.4 then
+    self.pulseDirection = -1
+  elseif self.pulseTime <= 0 then
+    self.pulseDirection = 1
+  end
+  self.pulseTime = self.pulseTime + dt * self.pulseDirection
+
   handleHits(self)
 
   if self.deleted then
@@ -215,6 +222,8 @@ end
 
 function Ai:draw()
   local padding = 0
+  local sizeIncreaseX, sizeIncreaseY = (self.w * self.pulseTime), (self.h * self.pulseTime)
+  local drawWidth, drawHeight = self.w + sizeIncreaseX, self.h + sizeIncreaseY
 
   drawShadow(self)
 
@@ -227,8 +236,8 @@ function Ai:draw()
     self.x,
     self.y,
     0,
-    self.w,
-    self.h,
+    drawWidth,
+    drawHeight,
     1,
     1
   )
@@ -244,8 +253,8 @@ function Ai:draw()
     self.x + borderWidth/2,
     self.y + borderWidth/2,
     0,
-    self.w - borderWidth,
-    self.h - borderWidth,
+    drawWidth - borderWidth,
+    drawHeight - borderWidth,
     1,
     1
   )
@@ -290,6 +299,7 @@ function Ai.create(x, y, speed, scale, collisionWorld, pxToGridUnits, findNeares
     h = h,
     health = 10,
     id = uid(),
+    pulseTime = 0,
     hits = {},
     -- used for centering the agent during movement
     padding = math.ceil(padding / 2),
