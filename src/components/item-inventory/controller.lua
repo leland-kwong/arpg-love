@@ -201,39 +201,57 @@ return function(rootStore)
 		end
 	end
 
-	-- equips and drops the item into the slot
-	function rootStore:equipItem(item, toSlot)
+	--[[
+		equips and drops the item into the slot
+
+		returns:
+			[BOOLEAN] whether the item can be equipped or not
+			[TABLE] the current item in the slot
+	]]
+	function rootStore:equipItem(item, slotX, slotY)
 		local category = itemDefs.getDefinition(item).category
-		local canEquip = category == toSlot
+		local allowedSlotCategory = itemConfig.equipmentGuiSlotMap[slotY][slotX]
+		local canEquip = allowedSlotCategory == category
 		if not canEquip then
-			local errorMsg = "[EQUIP_ITEM] invalid category `"..category.."`, expecting `"..toSlot.."`"
-			return false, errorMsg
+			local errorMsg = "[EQUIP_ITEM] invalid category `"..category.."`, expecting `"..allowedSlotCategory.."`"
+			return canEquip, errorMsg
 		end
-		local currentItemInSlot = self:unequipItem(category)
+		local currentItemInSlot = self:unequipItem(slotX, slotY)
 		self:set("equipment", function(state)
-			return require'utils.table'.immutableApply(state.equipment, {
-				[category] = item
-			})
+			return require'utils.clone-grid'(state.equipment, function(v, x, y)
+				local isCurrentlyEquippedSlot = x == slotX and y == slotY
+				if isCurrentlyEquippedSlot then
+					return item
+				end
+				return v
+			end)
 		end)
-		return true, currentItemInSlot
+		return canEquip, currentItemInSlot
 	end
 
 	-- unequips and picks up the item from the slot
-	function rootStore:unequipItem(category)
-		local currentItem = self:getEquippedItem(category)
+	function rootStore:unequipItem(slotX, slotY)
+		local currentItem = self:getEquippedItem(slotX, slotY)
 		if not currentItem then
 			return EMPTY_SLOT
 		end
-		-- remove item from list
+		local categoryAtSlot = itemConfig.equipmentGuiSlotMap[slotY][slotX]
+		-- remove item from list by making an immutable copy of the equipment grid and setting the slot value to EMPTY_slot
 		self:set("equipment", function(state)
-			return utils.table.immutableApply(state.equipment, {
-				[category] = EMPTY_SLOT
-			})
+			return require'utils.clone-grid'(state.equipment, function(v, x, y)
+				local category = itemConfig.equipmentGuiSlotMap[y][x]
+				local isCategoryMatch = category == categoryAtSlot
+				if isCategoryMatch then
+					return EMPTY_SLOT
+				end
+				return v
+			end)
 		end)
 		return currentItem
 	end
 
-	function rootStore:getEquippedItem(category)
-		return self:get().equipment[category]
+	function rootStore:getEquippedItem(slotX, slotY)
+		local equipmentRow = self:get().equipment[slotY]
+		return equipmentRow and equipmentRow[slotX]
 	end
 end

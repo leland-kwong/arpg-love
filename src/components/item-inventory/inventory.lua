@@ -35,22 +35,23 @@ end
 local function insertTestItems(self)
   local item1 = require'components.item-inventory.items.definitions.mock-shoes'.create()
   local item2 = require'components.item-inventory.items.definitions.mock-shoes'.create()
-  local item3 = require'components.item-inventory.items.definitions.mock-armor'.create()
   self.rootStore:addItemToInventory(item1, {3, 1})
   self.rootStore:addItemToInventory(item2, {4, 1})
-  self.rootStore:addItemToInventory(item3, {5, 1})
+  self.rootStore:addItemToInventory(
+    require'components.item-inventory.items.definitions.mock-armor'.create()
+    , {5, 1})
+  self.rootStore:addItemToInventory(
+    require'components.item-inventory.items.definitions.gpow-armor'.create()
+    , {5, 2})
   self.rootStore:addItemToInventory(
     require'components.item-inventory.items.definitions.potion-health'.create(),
-    {1, 1}
-  )
+    {1, 1})
   self.rootStore:addItemToInventory(
     require'components.item-inventory.items.definitions.potion-health'.create(),
-    {2, 1}
-  )
+    {2, 1})
   self.rootStore:addItemToInventory(
     require'components.item-inventory.items.definitions.potion-health'.create(),
-    {2, 1}
-  )
+    {2, 1})
 end
 
 function InventoryBlueprint.init(self)

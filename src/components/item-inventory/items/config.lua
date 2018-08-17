@@ -42,12 +42,14 @@ config.consumableCategory = consumableCategory
 local equipmentCategory = {
 	BODY_ARMOR = 2,
 	WEAPON_1 = 3,
-	RING = 4,
+	WEAPON_2 = 4,
 	AMULET = 5,
 	SHOES = 6,
 	PANTS = 7,
 	GLOVES = 8,
-	ION_GENERATOR = 9
+	ION_GENERATOR = 9,
+	HELMET = 10,
+	RING = 11,
 }
 config.equipmentCategory = equipmentCategory
 
@@ -69,11 +71,22 @@ config.categoryTitle = {
 }
 
 -- defines what gui node that equipment may be dropped into
-config.equipmentGuiRenderNodeMap = {
-	-- [equipmentCategory.BODY_ARMOR] = guiNodes.equipment.bodyArmorIcon,
-	-- [equipmentCategory.SHOES] = guiNodes.equipment.shoesIcon,
-	-- [equipmentCategory.WEAPON_1] = guiNodes.equipment.weapon1Icon,
-	-- [equipmentCategory.ION_GENERATOR] = guiNodes.equipment.ionGeneratorIcon
+config.equipmentGuiSlotMap = {
+	{
+		equipmentCategory.HELMET,
+		equipmentCategory.BODY_ARMOR
+	},
+	{
+		equipmentCategory.ION_GENERATOR,
+		equipmentCategory.AMULET
+	},
+	{
+		equipmentCategory.WEAPON_1,
+		equipmentCategory.WEAPON_2
+	},
+	{
+		equipmentCategory.SHOES
+	}
 }
 
 return config

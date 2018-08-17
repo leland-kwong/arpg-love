@@ -179,9 +179,8 @@ local function setupSlotInteractions(self, getSlots, margin, onItemPickupFromSlo
       onClick = function(self)
         local x, y = gridX, gridY
         local curPickedUpItem = itemPickedUp
-        -- if an item is already picked up, then we want to drop it
-        -- itemPickedUp = (not itemPickedUp) and item or nil
-        local isPickingUp = itemPickedUp == nil
+        -- if an item hasn't already been picked up, then we're in pickup mode
+        local isPickingUp = (not itemPickedUp)
         if isPickingUp then
           itemPickedUp = onItemPickupFromSlot(x, y)
         -- drop picked up item to slot
