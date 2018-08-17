@@ -134,22 +134,9 @@ local function drawTooltip(item, x, y, w2, h2)
 end
 
 local itemPickedUp = nil
-local function itemSlotPickupAndDrop(item, x, y, rootStore)
-  local curPickedUpItem = itemPickedUp
-  -- if an item is already picked up, then we want to drop it
-  -- itemPickedUp = (not itemPickedUp) and item or nil
-  local isPickingUp = itemPickedUp == nil
-  if isPickingUp then
-    itemPickedUp = rootStore:pickupItem(x, y)
-  -- drop picked up item to slot
-  elseif curPickedUpItem then
-    local itemSwap = rootStore:dropItem(curPickedUpItem, x, y)
-    itemPickedUp = itemSwap
-  end
-end
 
 -- sets up interactable gui nodes and renders the contents in each slot
-local function setupSlotInteractions(self, getSlots, margin)
+local function setupSlotInteractions(self, getSlots, margin, onItemPickupFromSlot, onItemDropToSlot)
   local rootStore = self.rootStore
   local initialSlots = getSlots()
   -- setup the grid interaction
@@ -190,7 +177,18 @@ local function setupSlotInteractions(self, getSlots, margin)
         end
       end,
       onClick = function(self)
-        itemSlotPickupAndDrop(getItem(), gridX, gridY, rootStore)
+        local x, y = gridX, gridY
+        local curPickedUpItem = itemPickedUp
+        -- if an item is already picked up, then we want to drop it
+        -- itemPickedUp = (not itemPickedUp) and item or nil
+        local isPickingUp = itemPickedUp == nil
+        if isPickingUp then
+          itemPickedUp = onItemPickupFromSlot(x, y)
+        -- drop picked up item to slot
+        elseif curPickedUpItem then
+          local itemSwap = onItemDropToSlot(curPickedUpItem, x, y)
+          itemPickedUp = itemSwap
+        end
       end,
       drawOrder = function(self)
         return 3
@@ -221,7 +219,7 @@ local function setupSlotInteractions(self, getSlots, margin)
     drawOrder = function()
       return 4
     end
-  })
+  }):setParent(self)
 end
 
 return setupSlotInteractions

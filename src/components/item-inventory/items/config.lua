@@ -76,11 +76,4 @@ config.equipmentGuiRenderNodeMap = {
 	-- [equipmentCategory.ION_GENERATOR] = guiNodes.equipment.ionGeneratorIcon
 }
 
-config.equipmentGuiHitBoxNodeMap = {
-	-- [equipmentCategory.BODY_ARMOR] = guiNodes.equipment.bodyArmorRoot,
-	-- [equipmentCategory.SHOES] = guiNodes.equipment.shoesRoot,
-	-- [equipmentCategory.WEAPON_1] = guiNodes.equipment.weapon1Root,
-	-- [equipmentCategory.ION_GENERATOR] = guiNodes.equipment.ionGeneratorRoot,
-}
-
 return config

@@ -69,15 +69,31 @@ function InventoryBlueprint.init(self)
   self.x = (config.resolution.w - w) - offsetRight
   self.y = (config.resolution.h - h) / 2
 
-  setupSlotInteractions(self, self.slots, self.slotMargin)
+  local function inventoryOnItemPickupFromSlot(x, y)
+    return self.rootStore:pickupItem(x, y)
+  end
 
-  local equipmentW, equipmentH = 200, h
+  local function inventoryOnItemDropToSlot(curPickedUpItem, x, y)
+    return self.rootStore:dropItem(curPickedUpItem, x, y)
+  end
+
+  setupSlotInteractions(
+    self,
+    self.slots,
+    self.slotMargin,
+    inventoryOnItemPickupFromSlot,
+    inventoryOnItemDropToSlot
+  )
+
+  local equipmentW, equipmentH = 100, h
   local EquipmentPanel = require 'components.item-inventory.equipment-panel'
   EquipmentPanel.create({
+    rootStore = self.rootStore,
     x = self.x - equipmentW - 5,
     y = self.y,
     w = equipmentW,
-    h = h
+    h = h,
+    slotSize = self.slotSize
   }):setParent(self)
 end
 

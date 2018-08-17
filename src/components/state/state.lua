@@ -56,14 +56,7 @@ local initialState = {
 	inventory = require'utils.make-grid'(11, 9, EMPTY_SLOT),
 
 	--[[ equipped items ]]
-	equipment = require'utils.functional'.reduce(
-		require'utils.functional'.keys(itemConfig.equipmentGuiRenderNodeMap),
-		function(categories, cat)
-			categories[cat] = EMPTY_SLOT
-			return categories
-		end,
-		{}
-	),
+	equipment = require'utils.make-grid'(2, 4, EMPTY_SLOT),
 
 	--[[ game settings ]]
 	music = false,
