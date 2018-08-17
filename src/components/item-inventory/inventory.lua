@@ -52,9 +52,11 @@ local function insertTestItems(self)
   self.rootStore:addItemToInventory(
     require'components.item-inventory.items.definitions.potion-health'.create(),
     {2, 1})
-  self.rootStore:addItemToInventory(
-    require'components.item-inventory.items.definitions.potion-health'.create(),
-    {2, 2})
+  for i=1, 99 do
+    self.rootStore:addItemToInventory(
+      require'components.item-inventory.items.definitions.potion-health'.create(),
+      {2, 2})
+  end
 end
 
 function InventoryBlueprint.init(self)

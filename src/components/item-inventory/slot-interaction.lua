@@ -172,7 +172,15 @@ local function setupSlotInteractions(self, getSlots, margin, onItemPickupFromSlo
           self.tooltip = nil
         end
       end,
-      onClick = function(self)
+      onClick = function(self, rightClick)
+        if rightClick then
+          local item = getItem()
+          local d = itemDefinition.getDefinition(item)
+          if d then
+            d.onActivate(item, rootStore)
+          end
+          return
+        end
         local x, y = gridX, gridY
         local curPickedUpItem = itemPickedUp
         -- if an item hasn't already been picked up, then we're in pickup mode

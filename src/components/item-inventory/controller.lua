@@ -131,7 +131,7 @@ return function(rootStore)
 					local newStackSize = curItem.stackSize - count
 					local hasRemaining = newStackSize > 0
 					if hasRemaining then
-						return require'utils.table'.immutableApply(curItem, {
+						return require'utils.object-utils'.immutableApply(curItem, {
 							stackSize = newStackSize
 						})
 					end

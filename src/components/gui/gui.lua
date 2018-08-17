@@ -160,7 +160,8 @@ function Gui.init(self)
       handleFocusChange(self, origFocused)
 
       if self.hovered then
-        self.onClick(self)
+        local isRightClick = msgValue[3] == 2
+        self.onClick(self, isRightClick)
 
         if guiType.TOGGLE == self.type then
           self.checked = not self.checked

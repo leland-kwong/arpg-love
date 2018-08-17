@@ -3,6 +3,7 @@ local functional = require("utils.functional")
 local itemDefs = require("components.item-inventory.items.item-definitions")
 local Color = require('modules.color')
 local msgBus = require("components.msg-bus")
+local Sound = require 'components.sound'
 
 return itemDefs.registerType({
 	type = "HEALTH_POTION",
@@ -33,6 +34,8 @@ return itemDefs.registerType({
 			-- 	type = 1
 			-- })
 			mainState:removeItem(self)
+			love.audio.stop(Sound.drinkPotion)
+			love.audio.play(Sound.drinkPotion)
 		end,
 
 		tooltip = function(self)
