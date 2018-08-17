@@ -29,11 +29,6 @@ local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.f
 local outlineColor = {0,0,0,1}
 local shader = love.graphics.newShader(pixelOutlineShader)
 local w, h = 16, 16
-shader:send('sprite_size', {w, h})
-shader:send('outline_width', 2/w)
-shader:send('outline_color', outlineColor)
-shader:send('use_drawing_color', true)
-shader:send('include_corners', true)
 
 function GuiTextLayer.add(self, text, color, x, y)
   self.tablePool[1] = color
@@ -48,6 +43,11 @@ function GuiTextLayer.addTextGroup(self, textGroup, x, y)
 end
 
 function GuiTextLayer.init(self)
+  shader:send('sprite_size', {w, h})
+  shader:send('outline_width', 2/w)
+  shader:send('outline_color', outlineColor)
+  shader:send('use_drawing_color', true)
+  shader:send('include_corners', true)
   self.textGraphic = love.graphics.newText(self.font, '')
   self.tablePool = {}
 end
