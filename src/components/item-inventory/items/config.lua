@@ -62,12 +62,24 @@ config.categoryTitle = {
 	[consumableCategory.CONSUMABLE] = 'consumable',
 	[equipmentCategory.BODY_ARMOR] = 'chest armor',
 	[equipmentCategory.WEAPON_1] = 'weapon',
+	[equipmentCategory.WEAPON_2] = 'weapon',
 	[equipmentCategory.RING] = 'ring',
 	[equipmentCategory.AMULET] = 'amulet',
 	[equipmentCategory.SHOES] = 'shoes',
 	[equipmentCategory.PANTS] = 'pants',
 	[equipmentCategory.GLOVES] = 'gloves',
 	[equipmentCategory.ION_GENERATOR] = 'ion generator',
+}
+
+config.equipmentCategorySilhouette = {
+	[equipmentCategory.HELMET] = 'helmet_106',
+	[equipmentCategory.ION_GENERATOR] = 'book_25',
+	[equipmentCategory.RING] = 'ring_1',
+	[equipmentCategory.AMULET] = 'amulet_16',
+	[equipmentCategory.BODY_ARMOR] = 'armor_121',
+	[equipmentCategory.WEAPON_1] = 'sword_17',
+	[equipmentCategory.WEAPON_2] = 'sword_18',
+	[equipmentCategory.SHOES] = 'shoe_1'
 }
 
 -- defines what gui node that equipment may be dropped into
@@ -78,14 +90,15 @@ config.equipmentGuiSlotMap = {
 	},
 	{
 		equipmentCategory.ION_GENERATOR,
-		equipmentCategory.AMULET
+		equipmentCategory.RING
 	},
 	{
 		equipmentCategory.WEAPON_1,
 		equipmentCategory.WEAPON_2
 	},
 	{
-		equipmentCategory.SHOES
+		equipmentCategory.SHOES,
+		equipmentCategory.AMULET
 	}
 }
 

@@ -25,4 +25,11 @@ function Position.normalizeVector(a, b)
 		b == 0 and 0 or b/c
 end
 
+-- returns coordinate offsets so that the item is centered to the parent with origin at north-west
+function Position.boxCenterOffset(w, h, parentW, parentH)
+  local x = (parentW - w) / 2
+  local y = (parentH - h) / 2
+  return x, y
+end
+
 return Position

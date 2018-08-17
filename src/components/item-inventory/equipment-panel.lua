@@ -4,6 +4,8 @@ local guiTextLayers = require 'components.item-inventory.gui-text-layers'
 local Color = require 'modules.color'
 local setupSlotInteractions = require 'components.item-inventory.slot-interaction'
 local itemConfig = require 'components.item-inventory.items.config'
+local animationFactory = require'components.animation-factory'
+local Position = require 'utils.position'
 
 local EquipmentPanel = {
 	group = groups.gui,
@@ -15,7 +17,6 @@ function EquipmentPanel.init(self)
 	end
 
 	local function onItemPickupFromSlot(slotX, slotY)
-		print('pickup')
     return self.rootStore:unequipItem(slotX, slotY)
   end
 
@@ -23,18 +24,53 @@ function EquipmentPanel.init(self)
 		local canEquip, itemSwap = self.rootStore:equipItem(
 			curPickedUpItem, slotX, slotY
 		)
-		print('drop', canEquip, itemSwap)
 		if canEquip then
 			return itemSwap
 		end
-  end
+	end
+
+	local animationsCache = {}
+
+	local function slotRenderer(item, screenX, screenY, slotX, slotY, slotW, slotH)
+		local category = itemConfig.equipmentGuiSlotMap[slotY][slotX]
+		local silhouette = itemConfig.equipmentCategorySilhouette[category]
+
+		local showSilhouette = silhouette and (not item)
+		if not showSilhouette then
+			return
+		end
+
+		local animation = animationsCache[silhouette]
+		if not animation then
+			animation = animationFactory:new({ silhouette })
+			animationsCache[silhouette] = animation
+		end
+
+		local sx, sy, sw, sh = animation.sprite:getViewport()
+		local offX, offY = Position.boxCenterOffset(sw, sh, slotW, slotH)
+		love.graphics.setColor(0.5,0.5,0.5,0.4)
+		love.graphics.setBlendMode('add', 'premultiplied')
+		love.graphics.draw(
+			animationFactory.atlas,
+			animation.sprite,
+			screenX,
+			screenY,
+			0,
+			1,
+			1,
+			-offX,
+			-offY
+		)
+		love.graphics.setBlendMode('alpha')
+	end
 
 	setupSlotInteractions(
 		self,
 		getSlots,
 		10,
 		onItemPickupFromSlot,
-		onItemDropToSlot
+		onItemDropToSlot,
+		slotRenderer
 	)
 end
 

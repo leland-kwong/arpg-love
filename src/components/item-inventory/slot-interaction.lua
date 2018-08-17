@@ -6,6 +6,8 @@ local font = require 'components.font'
 local guiTextLayers = require 'components.item-inventory.gui-text-layers'
 local animationFactory = require'components.animation-factory'
 local itemDefinition = require'components.item-inventory.items.item-definitions'
+local Position = require 'utils.position'
+local boxCenterOffset = Position.boxCenterOffset
 local itemAnimationsCache = {}
 
 local guiStackSizeTextLayer = GuiText.create({
@@ -14,13 +16,6 @@ local guiStackSizeTextLayer = GuiText.create({
     return 5
   end
 })
-
--- centers the box to its parent with origin at north-west
-local function boxCenterOffset(w, h, parentW, parentH)
-  local x = (parentW - w) / 2
-  local y = (parentH - h) / 2
-  return x, y
-end
 
 local function drawItem(item, x, y, slotSize)
   local d = itemDefinition.getDefinition(item)
@@ -133,10 +128,11 @@ local function drawTooltip(item, x, y, w2, h2)
   )
 end
 
+-- currently picked up item. We can only have one item picked up at a time
 local itemPickedUp = nil
 
 -- sets up interactable gui nodes and renders the contents in each slot
-local function setupSlotInteractions(self, getSlots, margin, onItemPickupFromSlot, onItemDropToSlot)
+local function setupSlotInteractions(self, getSlots, margin, onItemPickupFromSlot, onItemDropToSlot, slotRenderer)
   local rootStore = self.rootStore
   local initialSlots = getSlots()
   -- setup the grid interaction
@@ -194,12 +190,17 @@ local function setupSlotInteractions(self, getSlots, margin, onItemPickupFromSlo
       end,
       render = function(self)
         if self.hovered then
-          love.graphics.setColor(0.7,0.7,0,1)
+          love.graphics.setColor(0.7,0.7,0,0.5)
         else
-          love.graphics.setColor(0,0,0,1)
+          love.graphics.setColor(0,0,0,0.5)
         end
         love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
+
         local item = getItem()
+        if slotRenderer then
+          slotRenderer(item, self.x, self.y, gridX, gridY, self.w, self.h)
+        end
+
         drawItem(item, self.x, self.y, self.w)
       end
     }):setParent(self)
