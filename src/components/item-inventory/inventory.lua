@@ -11,7 +11,7 @@ local floor = math.floor
 local font = require 'components.font'
 
 local guiTextLayerTitle = GuiText.create({
-  font = font.secondary.font,
+font = font.secondary.font,
   drawOrder = function()
     return 7
   end
@@ -116,28 +116,49 @@ local function insertTestItems(self)
 end
 
 local function drawTooltip(item, x, y, w2, h2)
-  local posX, posY = x + w2, y
+  local posX, posY = x, y
   local padding = 12
   local itemDef = itemDefinition.getDefinition(item)
   local tooltipContent = itemDef.tooltip(item)
 
-  -- title
-  guiTextLayerTitle:add(itemDef.title, Color.WHITE, posX + padding, posY + padding)
+  --[[
+    IMPORTANT: We must do the tooltip content dimension calculations first to see if the tooltip
+      will go out of view. And if it does, we'll call this function again with the adjust positions.
+  ]]
+
+  -- title text and dimensions
   local titleW, titleH = GuiText.getTextSize(itemDef.title, guiTextLayerTitle.font)
 
-  -- rarity
+  -- rarity text and dimensions
   local itemGuiConfig = require'components.item-inventory.items.config'
   local rarity = itemDef.rarity
   local rarityTitle = itemGuiConfig.rarityTitle[rarity]
   local rarityTextCopy = (rarityTitle and rarityTitle ..' ' or '').. itemGuiConfig.categoryTitle[itemDef.category]
   local rarityX, rarityY = posX + padding,
     posY + padding + titleH + titleH
+  local rarityW, rarityH = GuiText.getTextSize(rarityTextCopy, guiTextLayerBody.font)
+
+  -- body text and dimensions
+  local bodyCopyW, bodyCopyH = GuiText.getTextSize(tooltipContent, guiTextLayerBody.font)
+
+  -- total tooltip height
+  local totalHeight = (titleH + titleH) + (rarityH + rarityH) + bodyCopyH + (padding * 2)
+
+  local isBottomOutOfView = posY + totalHeight > config.resolution.h
+  if isBottomOutOfView then
+    -- flip the tooltip vertically so that its pivot is on the south side
+    return drawTooltip(item, x, y - totalHeight + h2, w2, h2)
+  end
+
+  -- title
+  guiTextLayerTitle:add(itemDef.title, Color.WHITE, posX + padding, posY + padding)
+
+  -- rarity
   guiTextLayerBody:add(
     rarityTextCopy,
     itemGuiConfig.rarityColor[rarity],
     rarityX, rarityY
   )
-  local rarityW, rarityH = GuiText.getTextSize(rarityTextCopy, guiTextLayerBody.font)
 
   -- stats
   local tooltipContentY = rarityY + (rarityH * 2)
@@ -148,9 +169,8 @@ local function drawTooltip(item, x, y, w2, h2)
   )
 
   -- background
-  local bodyCopyW, bodyCopyH = guiTextLayerBody.textGraphic:getDimensions()
   local maxWidth = math.max(titleW, rarityW, bodyCopyW) + (padding * 2) -- include side padding
-  local totalHeight = (titleH + titleH) + (rarityH + rarityH) + bodyCopyH + (padding * 2)
+
   local bgColor = 0.15
   love.graphics.setColor(bgColor, bgColor, bgColor)
   love.graphics.rectangle(
@@ -159,6 +179,7 @@ local function drawTooltip(item, x, y, w2, h2)
     maxWidth,
     totalHeight
   )
+
   local outlineColor = bgColor * 2
   love.graphics.setColor(outlineColor, outlineColor, outlineColor)
   love.graphics.rectangle(
@@ -196,30 +217,31 @@ function InventoryBlueprint.setupSlotInteractions(self, getSlots, margin)
       return getSlots()[gridY][gridX]
     end
 
+    local slotSize = self.slotSize
     Gui.create({
       x = posX,
       y = posY,
-      w = self.slotSize,
-      h = self.slotSize,
+      w = slotSize,
+      h = slotSize,
       type = Gui.types.INTERACT,
-      onPointerEnter = function(self)
+      onUpdate = function(self)
         -- create a tooltip
         local item = getItem()
-        if item then
+        if self.hovered and item and (not self.tooltip) then
           self.tooltip = Gui.create({
             x = posX + self.w,
             y = posY,
             draw = function(self)
-              drawTooltip(item, self.x, self.y, self.w, self.h)
+              drawTooltip(item, self.x, self.y, slotSize, slotSize)
             end,
             drawOrder = function()
               return 6
             end
           }):setParent(self)
         end
-      end,
-      onPointerLeave = function(self)
-        if self.tooltip then
+
+        -- cleanup tooltip
+        if (not self.hovered) and self.tooltip then
           self.tooltip:delete()
           self.tooltip = nil
         end

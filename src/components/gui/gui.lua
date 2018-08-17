@@ -52,6 +52,7 @@ local Gui = {
   onScroll = noop,
   onPointerEnter = noop,
   onPointerLeave = noop,
+  onUpdate = noop,
   onPointerMove = noop,
   render = noop,
   type = guiType.INTERACT,
@@ -191,7 +192,7 @@ function Gui.init(self)
   ):addToWorld(collisionWorlds.gui)
 end
 
-function Gui.update(self)
+function Gui.update(self, dt)
   local posX, posY = self:getPosition()
   self.colObj:update(posX, posY, self.w, self.h)
 
@@ -225,6 +226,7 @@ function Gui.update(self)
     end
   end
 
+  self.onUpdate(self, dt)
   self.prevHovered = self.hovered
   self.prevColPosX = posX
   self.prevColPosY = posY
