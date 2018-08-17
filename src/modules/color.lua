@@ -1,5 +1,6 @@
 local Color = {
   SKY_BLUE = {0.8,1,1,1},
+  LIME = {0,1,0},
   WHITE = {1,1,1,1},
   LIGHT_GRAY = {0.7,0.7,0.7,1},
   MED_GRAY = {0.5,0.5,0.5},

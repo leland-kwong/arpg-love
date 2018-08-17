@@ -58,7 +58,7 @@ return function(rootStore)
 						local newStackSize = curItem.stackSize + 1
 						remainingStackSize = remainingStackSize - 1
 						added = true
-						return require'utils.table'.immutableApply(curItem, {
+						return require'utils.object-utils'.immutableApply(curItem, {
 							stackSize = newStackSize
 						})
 					elseif isEmptySlot then

@@ -54,7 +54,7 @@ local Gui = {
   onPointerLeave = noop,
   onPointerMove = noop,
   render = noop,
-  type = 'button',
+  type = guiType.INTERACT,
 
   -- for LIST type to define what axis is scrollable
   scrollableX = false,

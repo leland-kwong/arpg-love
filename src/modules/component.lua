@@ -37,7 +37,7 @@ local baseProps = {
         self:setParent(nil)
 
         if parent._deleteRecursive then
-          self:delete()
+          self:delete(true)
           return
         end
       end

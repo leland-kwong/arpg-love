@@ -11,11 +11,24 @@ local floor = math.floor
 local font = require 'components.font'
 
 local guiTextLayerTitle = GuiText.create({
-  font = font.secondary.font
+  font = font.secondary.font,
+  drawOrder = function()
+    return 7
+  end
 })
 
 local guiTextLayerBody = GuiText.create({
-  font = font.primary.font
+  font = font.primary.font,
+  drawOrder = function()
+    return 7
+  end
+})
+
+local guiStackSizeTextLayer = GuiText.create({
+  font = font.primary.font,
+  drawOrder = function()
+    return 5
+  end
 })
 
 local InventoryBlueprint = {
@@ -65,6 +78,11 @@ local function drawItem(item, x, y, slotSize)
       animation.sprite,
       x + ox, y + oy
     )
+
+    local showStackSize = item.stackSize > 1
+    if showStackSize then
+      guiStackSizeTextLayer:add(item.stackSize, Color.WHITE, x + ox, y + oy)
+    end
   end
 end
 
@@ -83,6 +101,18 @@ local function insertTestItems(self)
   self.rootStore:addItemToInventory(item1, {3, 1})
   self.rootStore:addItemToInventory(item2, {4, 1})
   self.rootStore:addItemToInventory(item3, {5, 1})
+  self.rootStore:addItemToInventory(
+    require'components.item-inventory.items.definitions.potion-health'.create(),
+    {1, 1}
+  )
+  self.rootStore:addItemToInventory(
+    require'components.item-inventory.items.definitions.potion-health'.create(),
+    {2, 1}
+  )
+  self.rootStore:addItemToInventory(
+    require'components.item-inventory.items.definitions.potion-health'.create(),
+    {2, 1}
+  )
 end
 
 local function drawTooltip(item, x, y, w2, h2)
@@ -172,17 +202,33 @@ function InventoryBlueprint.setupSlotInteractions(self, getSlots, margin)
       w = self.slotSize,
       h = self.slotSize,
       type = Gui.types.INTERACT,
+      onPointerEnter = function(self)
+        -- create a tooltip
+        local item = getItem()
+        if item then
+          self.tooltip = Gui.create({
+            x = posX + self.w,
+            y = posY,
+            draw = function(self)
+              drawTooltip(item, self.x, self.y, self.w, self.h)
+            end,
+            drawOrder = function()
+              return 6
+            end
+          }):setParent(self)
+        end
+      end,
+      onPointerLeave = function(self)
+        if self.tooltip then
+          self.tooltip:delete()
+          self.tooltip = nil
+        end
+      end,
       onClick = function(self)
         itemSlotPickupAndDrop(getItem(), gridX, gridY, rootStore)
       end,
-      onPointerMove = function(self, mx, my)
-
-      end,
       drawOrder = function(self)
-        if self.hovered then
-          return 5
-        end
-        return 4
+        return 3
       end,
       render = function(self)
         if self.hovered then
@@ -193,12 +239,6 @@ function InventoryBlueprint.setupSlotInteractions(self, getSlots, margin)
         love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
         local item = getItem()
         drawItem(item, self.x, self.y, self.w)
-
-        if self.hovered then
-          if item then
-            drawTooltip(item, self.x, self.y, self.w, self.h)
-          end
-        end
       end
     }):setParent(self)
   end)
@@ -232,7 +272,7 @@ function InventoryBlueprint.init(self)
       end
     end,
     drawOrder = function()
-      return 6
+      return 4
     end
   })
   local w, h = calcInventorySize(self.slots(), self.slotSize, self.slotMargin)
