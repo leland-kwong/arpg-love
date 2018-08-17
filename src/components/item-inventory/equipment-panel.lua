@@ -26,6 +26,8 @@ function EquipmentPanel.init(self)
 		)
 		if canEquip then
 			return itemSwap
+		else
+			return curPickedUpItem
 		end
 	end
 

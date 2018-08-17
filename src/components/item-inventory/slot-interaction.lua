@@ -190,7 +190,7 @@ local function setupSlotInteractions(self, getSlots, margin, onItemPickupFromSlo
       end,
       render = function(self)
         if self.hovered then
-          love.graphics.setColor(0.7,0.7,0,0.5)
+          love.graphics.setColor(1,1,1,0.5)
         else
           love.graphics.setColor(0,0,0,0.5)
         end

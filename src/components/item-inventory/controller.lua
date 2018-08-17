@@ -104,7 +104,7 @@ return function(rootStore)
 
 		-- recursively add until we can't add anymore
 		if not isFull and remainingStackSize > 0 then
-			local nextItem = utils.table.immutableApply(item, {
+			local nextItem = require'utils.object-utils'.immutableApply(item, {
 				stackSize = remainingStackSize
 			})
 			return self:addItemToInventory(nextItem, position)
@@ -210,9 +210,9 @@ return function(rootStore)
 	]]
 	function rootStore:equipItem(item, slotX, slotY)
 		local category = itemDefs.getDefinition(item).category
-		local allowedSlotCategory = itemConfig.equipmentGuiSlotMap[slotY][slotX]
-		local canEquip = allowedSlotCategory == category
+		local canEquip = self:canEquiptToSlot(item, slotX, slotY)
 		if not canEquip then
+			local allowedSlotCategory = itemConfig.equipmentGuiSlotMap[slotY][slotX]
 			local errorMsg = "[EQUIP_ITEM] invalid category `"..category.."`, expecting `"..allowedSlotCategory.."`"
 			return canEquip, errorMsg
 		end
@@ -227,6 +227,16 @@ return function(rootStore)
 			end)
 		end)
 		return canEquip, currentItemInSlot
+	end
+
+	function rootStore:canEquiptToSlot(item, slotX, slotY)
+		if not item then
+			return false
+		end
+		local category = itemDefs.getDefinition(item).category
+		local allowedSlotCategory = itemConfig.equipmentGuiSlotMap[slotY][slotX]
+		local canEquip = allowedSlotCategory == category
+		return canEquip
 	end
 
 	-- unequips and picks up the item from the slot
