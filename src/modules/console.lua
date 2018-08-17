@@ -9,6 +9,19 @@ local modifier = false
 local keysPressed = {}
 local L_SUPER = 'lgui'
 local R_SUPER = 'rgui'
+local L_CTRL = 'lctrl'
+local R_CTRL = 'rctrl'
+
+local state = {
+  showConsole = false
+}
+
+local function hasModifier()
+  return keysPressed[L_SUPER]
+    or keysPressed[R_SUPER]
+    or keysPressed[L_CTRL]
+    or keysPressed[R_CTRL]
+end
 
 local function toggleCollisionDebug()
   config.collisionDebug = not config.collisionDebug
@@ -22,11 +35,19 @@ msgBus.subscribe(function(msgType, v)
   end
 
   -- toggle collision debugger
-  if (msgBus.KEY_PRESSED == msgType) and (keysPressed[L_SUPER] or keysPressed[R_SUPER])
+  if (msgBus.KEY_PRESSED == msgType) and hasModifier()
     and keysPressed.p
     and not v.isRepeated
   then
     toggleCollisionDebug()
+  end
+
+  -- toggle console
+  if (msgBus.KEY_PRESSED == msgType) and hasModifier()
+    and keysPressed.c
+    and not v.isRepeated
+  then
+    state.showConsole = not state.showConsole
   end
 end)
 
@@ -74,6 +95,9 @@ function Console.update(self)
 end
 
 function Console.draw(self)
+  if not state.showConsole then
+    return
+  end
   local lineHeight = font.primaryLarge.lineHeight
   love.graphics.setFont(font.primaryLarge.font)
   local gfx = love.graphics
