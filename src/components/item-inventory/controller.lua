@@ -1,8 +1,8 @@
 local config = require("config")
-local utils = require("utils")
-local itemDefs = require("components.items.item-definitions")
-local itemConfig = require("components.items.config")
+local itemDefs = require("components.item-inventory.items.item-definitions")
+local itemConfig = require("components.item-inventory.items.config")
 local sc = require("components.state.constants")
+local cloneGrid = require('utils.clone-grid')
 
 local EMPTY_SLOT = sc.inventory.EMPTY_SLOT
 
@@ -32,7 +32,7 @@ return function(rootStore)
 		local added = false
 		local remainingStackSize = item.stackSize
 		local function add(state)
-			local newItems = utils.cloneGrid(state.inventory, function(curItem, x, y)
+			local newItems = cloneGrid(state.inventory, function(curItem, x, y)
 				if added then
 					return curItem
 				end
@@ -58,7 +58,7 @@ return function(rootStore)
 						local newStackSize = curItem.stackSize + 1
 						remainingStackSize = remainingStackSize - 1
 						added = true
-						return utils.table.immutableApply(curItem, {
+						return require'utils.table'.immutableApply(curItem, {
 							stackSize = newStackSize
 						})
 					elseif isEmptySlot then
@@ -120,7 +120,7 @@ return function(rootStore)
 		count = count == nil and 1 or count
 		self:set('inventory', function(state)
 			local removed = false
-			local newState = utils.cloneGrid(state.inventory, function(curItem)
+			local newState = cloneGrid(state.inventory, function(curItem)
 				if removed then
 					return curItem
 				end
@@ -131,7 +131,7 @@ return function(rootStore)
 					local newStackSize = curItem.stackSize - count
 					local hasRemaining = newStackSize > 0
 					if hasRemaining then
-						return utils.table.immutableApply(curItem, {
+						return require'utils.table'.immutableApply(curItem, {
 							stackSize = newStackSize
 						})
 					end
@@ -153,7 +153,7 @@ return function(rootStore)
 		local foundItem = nil
 		local posX = nil
 		local posY = nil
-		utils.iterateGrid(self:get().inventory, function(v, x, y)
+		rqeuire'utils.iterateGrid'(self:get().inventory, function(v, x, y)
 			-- print(v, x, y)
 			if v and (v.__id == id) then
 				foundItem = v
@@ -209,7 +209,7 @@ return function(rootStore)
 		end
 		local currentItemInSlot = self:unequipItem(category)
 		self:set("equipment", function(state)
-			return utils.table.immutableApply(state.equipment, {
+			return require'utils.table'.immutableApply(state.equipment, {
 				[category] = item
 			})
 		end)

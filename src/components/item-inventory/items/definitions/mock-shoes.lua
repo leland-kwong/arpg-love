@@ -13,7 +13,7 @@ local function concatTable(a, b)
 end
 
 return itemDefs.registerType({
-	type = "ICE_CLIMBERS",
+	type = "MOCK_SHOES",
 
 	create = function()
 		return {
@@ -22,13 +22,15 @@ return itemDefs.registerType({
 
 			armor = 20,
 			moveSpeed = 100,
+			magicResist = 20,
+			fireResist = 20
 		}
 	end,
 
 	properties = {
 		sprite = "shoe_5",
-		title = 'Ice Climbers',
-		rarity = config.rarity.RARE,
+		title = 'Mock shoes',
+		rarity = config.rarity.NORMAL,
 		category = config.category.SHOES,
 
 		tooltip = function(self)
@@ -41,7 +43,9 @@ return itemDefs.registerType({
 			end
 			local stats = {
 				statValue(self.armor, Color.CYAN, "armor"),
-				statValue(self.moveSpeed, Color.CYAN, "move speed")
+				statValue(self.moveSpeed, Color.CYAN, "move speed"),
+				statValue(self.magicResist, Color.CYAN, "magic resist"),
+				statValue(self.fireResist, Color.CYAN, "fire resist")
 			}
 			return functional.reduce(stats, function(combined, textObj)
 				return concatTable(combined, textObj)

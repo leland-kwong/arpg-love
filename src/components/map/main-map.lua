@@ -60,7 +60,8 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     if value ~= Map.WALKABLE then
       local tileX, tileY = x * self.gridSize, y * self.gridSize
       local ox, oy = animation:getOffset()
-      if not getWallEntity(self, index) then
+      local cached = getWallEntity(self, index)
+      if not cached then
         addWallTileEntity(self, index, {
           animation = animation,
           x = tileX,

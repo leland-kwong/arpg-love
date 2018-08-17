@@ -30,19 +30,25 @@ local baseProps = {
   draw = noop,
   final = noop,
   _update = function(self, dt)
-    if self.parent then
-      if self.parent._deleted and self.parent._deleteRecursive then
-        self:delete()
-        return
+    local parent = self.parent
+    if parent then
+      if parent._deleted then
+        -- remove parent reference
+        self:setParent(nil)
+
+        if parent._deleteRecursive then
+          self:delete()
+          return
+        end
       end
 
       -- update position relative to its parent
       local dx, dy =
-        self.prevParentX and (self.parent.x - self.prevParentX) or 0,
-        self.prevParentY and (self.parent.y - self.prevParentY) or 0
+        self.prevParentX and (parent.x - self.prevParentX) or 0,
+        self.prevParentY and (parent.y - self.prevParentY) or 0
       self:setPosition(self.x + dx, self.y + dy)
-      self.prevParentX = self.parent.x
-      self.prevParentY = self.parent.y
+      self.prevParentX = parent.x
+      self.prevParentY = parent.y
     end
     self:update(dt)
   end,

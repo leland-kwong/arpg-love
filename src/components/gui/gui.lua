@@ -213,7 +213,7 @@ function Gui.update(self)
   local isPointerMove = self.hovered
   local hasPointerPositionChanged = posX ~= self.prevColPosX or posY ~= self.prevColPosY
   if isPointerMove then
-    self.onPointerMove(self)
+    self.onPointerMove(self, posX, posY)
   end
 
   local hoverStateChanged = self.hovered ~= self.prevHovered

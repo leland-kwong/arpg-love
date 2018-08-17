@@ -6,12 +6,15 @@ local Minimap = require 'components.map.minimap'
 local MainMap = require 'components.map.main-map'
 local Inventory = require 'components.item-inventory.inventory'
 local SpawnerAi = require 'components.spawn.spawn-ai'
+local InventoryController = require 'components.item-inventory.controller'
 local config = require 'config'
 local camera = require 'components.camera'
 local cloneGrid = require 'utils.clone-grid'
 local CreateStore = require 'components.state.state'
 local msgBus = require 'components.msg-bus'
+
 local rootState = CreateStore()
+local inventoryController = InventoryController(rootState)
 
 local gridTileTypes = {
   -- unwalkable
@@ -55,7 +58,10 @@ function MainScene.init(self)
       local isActive = rootState:get().activeMenu == 'INVENTORY'
       if key == config.keyboard.INVENTORY_TOGGLE and (not isActive) then
         local component = Inventory.create({
-          slots = rootState:get().inventory,
+          rootStore = rootState,
+          slots = function()
+            return rootState:get().inventory
+          end,
           onDisableRequest = function()
             rootState:set('activeMenu', false)
           end

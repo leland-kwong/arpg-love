@@ -19,6 +19,7 @@ local guiTextLayerBody = GuiText.create({
 })
 
 local InventoryBlueprint = {
+  rootStore = nil, -- game state
   slots = {},
   group = groups.gui,
   onDisableRequest = require'utils.noop'
@@ -54,7 +55,10 @@ local function drawItem(item, x, y, slotSize)
     end
 
     local sx, sy, sw, sh = animation.sprite:getViewport()
-    local ox, oy = boxCenterOffset(sw, sh, slotSize, slotSize)
+    local ox, oy = boxCenterOffset(
+      sw, sh,
+      slotSize or sw, slotSize or sh
+    )
     love.graphics.setColor(1,1,1)
     love.graphics.draw(
       animationFactory.atlas,
@@ -73,11 +77,13 @@ function InventoryBlueprint.getSlotPosition(self, x, y, margin)
 end
 
 local function insertTestItem(self)
-  self.slots[1][3] = require'components.item-inventory.items.definitions.mock-shoes'.create()
+  local item1 = require'components.item-inventory.items.definitions.mock-shoes'.create()
+  local item2 = require'components.item-inventory.items.definitions.mock-shoes'.create()
+  self.rootStore:addItemToInventory(item1, {3, 1})
+  self.rootStore:addItemToInventory(item2, {4, 1})
 end
 
 local function drawTooltip(item, x, y, w2, h2)
-  local w, h = 300, 200
   local posX, posY = x + w2, y
   local padding = 12
   local itemDef = itemDefinition.getDefinition(item)
@@ -90,7 +96,8 @@ local function drawTooltip(item, x, y, w2, h2)
   -- rarity
   local itemGuiConfig = require'components.item-inventory.items.config'
   local rarity = itemDef.rarity
-  local rarityTextCopy = itemGuiConfig.rarityTitle[rarity] ..' '.. itemGuiConfig.categoryTitle[itemDef.category]
+  local rarityTitle = itemGuiConfig.rarityTitle[rarity]
+  local rarityTextCopy = (rarityTitle and rarityTitle ..' ' or '').. itemGuiConfig.categoryTitle[itemDef.category]
   local rarityX, rarityY = posX + padding,
     posY + padding + titleH + titleH
   guiTextLayerBody:add(
@@ -111,14 +118,14 @@ local function drawTooltip(item, x, y, w2, h2)
   -- background
   local bodyCopyW, bodyCopyH = guiTextLayerBody.textGraphic:getDimensions()
   local maxWidth = math.max(titleW, rarityW, bodyCopyW) + (padding * 2) -- include side padding
-  local totalHeight = tooltipContentY
+  local totalHeight = (titleH + titleH) + (rarityH + rarityH) + bodyCopyH + (padding * 2)
   local bgColor = 0.15
   love.graphics.setColor(bgColor, bgColor, bgColor)
   love.graphics.rectangle(
     'fill',
     posX, posY,
     maxWidth,
-    totalHeight - padding
+    totalHeight
   )
   local outlineColor = bgColor * 2
   love.graphics.setColor(outlineColor, outlineColor, outlineColor)
@@ -126,14 +133,35 @@ local function drawTooltip(item, x, y, w2, h2)
     'line',
     posX, posY,
     maxWidth,
-    totalHeight - padding
+    totalHeight
   )
 end
 
+local itemPickedUp = nil
+local function itemSlotPickupAndDrop(item, x, y, rootStore)
+  local curItem = itemPickedUp
+  -- if an item is already picked up, then we want to drop it
+  itemPickedUp = (not itemPickedUp) and item or nil
+  local isPickingUp = itemPickedUp ~= nil
+  if isPickingUp then
+    rootStore:removeItem(itemPickedUp)
+  -- dropping item to slot
+  elseif curItem then
+    rootStore:addItemToInventory(curItem, {x, y})
+  end
+end
+
 -- sets up interactable gui nodes and renders the contents in each slot
-function InventoryBlueprint.setupSlotInteractions(self, slots, margin)
-  require'utils.iterate-grid'(slots, function(item, gridX, gridY)
+function InventoryBlueprint.setupSlotInteractions(self, getSlots, margin)
+  local rootStore = self.rootStore
+  local initialSlots = getSlots()
+  -- setup the grid interaction
+  require'utils.iterate-grid'(initialSlots, function(_, gridX, gridY)
     local posX, posY = self:getSlotPosition(gridX, gridY, margin)
+    -- we must get the item dynamically since the slots change when moving/deleting items around the inventory
+    local function getItem()
+      return getSlots()[gridY][gridX]
+    end
 
     Gui.create({
       x = posX,
@@ -141,6 +169,12 @@ function InventoryBlueprint.setupSlotInteractions(self, slots, margin)
       w = self.slotSize,
       h = self.slotSize,
       type = Gui.types.INTERACT,
+      onClick = function(self)
+        itemSlotPickupAndDrop(getItem(), gridX, gridY, rootStore)
+      end,
+      onPointerMove = function(self, mx, my)
+
+      end,
       drawOrder = function(self)
         if self.hovered then
           return 5
@@ -154,6 +188,7 @@ function InventoryBlueprint.setupSlotInteractions(self, slots, margin)
           love.graphics.setColor(0,0,0,1)
         end
         love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
+        local item = getItem()
         drawItem(item, self.x, self.y, self.w)
 
         if self.hovered then
@@ -184,7 +219,20 @@ function InventoryBlueprint.init(self)
 
   self.slotSize = 30
   self.slotMargin = 2
-  local w, h = calcInventorySize(self.slots, self.slotSize, self.slotMargin)
+  -- handles the picked up item and makes it follow the cursor
+  self.guiPickedUpItem = Gui.create({
+    type = Gui.types.INTERACT,
+    draw = function()
+      if itemPickedUp then
+        local mx, my = love.mouse.getX() / gameScale, love.mouse.getY() / gameScale
+        drawItem(itemPickedUp, mx - self.slotSize/4, my - self.slotSize/4)
+      end
+    end,
+    drawOrder = function()
+      return 6
+    end
+  })
+  local w, h = calcInventorySize(self.slots(), self.slotSize, self.slotMargin)
   self.w = w
   self.h = h
 
