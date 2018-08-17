@@ -1,14 +1,8 @@
 local Component = require 'modules.component'
 local Color = require 'modules.color'
-local Gui = require 'components.gui.gui'
-local GuiText = require 'components.gui.gui-text'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
-local pprint = require 'utils.pprint'
 local config = require 'config'
-local gameScale = config.scaleFactor
-local floor = math.floor
-local font = require 'components.font'
 local guiTextLayers = require 'components.item-inventory.gui-text-layers'
 local setupSlotInteractions = require 'components.item-inventory.slot-interaction'
 
