@@ -178,6 +178,7 @@ return function(rootStore)
 		return item
 	end
 
+	-- drops the item into the slot and handles swapping based on the item type
 	function rootStore:dropItem(item, x, y)
 		if not item then
 			return
@@ -187,7 +188,8 @@ return function(rootStore)
 		local curItem = self:getItemFromPosition(x, y)
 		local isSameType = curItem and (curItem.__type == item.__type)
 		-- add to stack
-		if isSameType or curItem == EMPTY_SLOT then
+		local isStackable = item.maxStackSize > 1
+		if (isStackable and isSameType) or (curItem == EMPTY_SLOT) then
 			local remaining = self:addItemToInventory(item, {x, y})
 			return remaining
 			-- swap item stacks since they're different types

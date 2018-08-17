@@ -76,11 +76,13 @@ function InventoryBlueprint.getSlotPosition(self, x, y, margin)
   return posX, posY
 end
 
-local function insertTestItem(self)
+local function insertTestItems(self)
   local item1 = require'components.item-inventory.items.definitions.mock-shoes'.create()
   local item2 = require'components.item-inventory.items.definitions.mock-shoes'.create()
+  local item3 = require'components.item-inventory.items.definitions.mock-armor'.create()
   self.rootStore:addItemToInventory(item1, {3, 1})
   self.rootStore:addItemToInventory(item2, {4, 1})
+  self.rootStore:addItemToInventory(item3, {5, 1})
 end
 
 local function drawTooltip(item, x, y, w2, h2)
@@ -139,15 +141,16 @@ end
 
 local itemPickedUp = nil
 local function itemSlotPickupAndDrop(item, x, y, rootStore)
-  local curItem = itemPickedUp
+  local curPickedUpItem = itemPickedUp
   -- if an item is already picked up, then we want to drop it
-  itemPickedUp = (not itemPickedUp) and item or nil
-  local isPickingUp = itemPickedUp ~= nil
+  -- itemPickedUp = (not itemPickedUp) and item or nil
+  local isPickingUp = itemPickedUp == nil
   if isPickingUp then
-    rootStore:removeItem(itemPickedUp)
-  -- dropping item to slot
-  elseif curItem then
-    rootStore:addItemToInventory(curItem, {x, y})
+    itemPickedUp = rootStore:pickupItem(x, y)
+  -- drop picked up item to slot
+  elseif curPickedUpItem then
+    local itemSwap = rootStore:dropItem(curPickedUpItem, x, y)
+    itemPickedUp = itemSwap
   end
 end
 
@@ -214,7 +217,7 @@ local function setupCloseHotkey(self)
 end
 
 function InventoryBlueprint.init(self)
-  insertTestItem(self)
+  insertTestItems(self)
   setupCloseHotkey(self)
 
   self.slotSize = 30
