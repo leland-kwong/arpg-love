@@ -72,6 +72,10 @@ function love.keypressed(key, scanCode, isRepeated)
     msgBus.KEY_PRESSED,
     inputMsg(key, scanCode, isRepeated)
   )
+
+  if config.keyboard.EXIT_GAME == key then
+    love.event.quit()
+  end
 end
 
 function love.keyreleased(key, scanCode)
