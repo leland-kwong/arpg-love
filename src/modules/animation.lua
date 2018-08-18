@@ -123,4 +123,10 @@ function meta:update(dt)
   return self
 end
 
+function meta:getSpriteSize(spriteName, includePadding)
+  local sourceSize = self.frameData[spriteName].sourceSize
+  local padding = includePadding and (self.pad * 2) or 0
+  return sourceSize.w + padding, sourceSize.h + padding
+end
+
 return createAnimationFactory

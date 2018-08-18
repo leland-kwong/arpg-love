@@ -1,9 +1,11 @@
+local Component = require 'modules.component'
 local groups = require 'components.groups'
 local collisionWorlds = require 'components.collision-worlds'
 local collisionObject = require 'modules.collision'
 local f = require 'utils.functional'
 
 local MainMapSolidsBlueprint = {
+  group = groups.all,
   animation = {},
   x = 0,
   y = 0,
@@ -40,4 +42,8 @@ function MainMapSolidsBlueprint.final(self)
   self.colObj:removeFromWorld(collisionWorlds.map)
 end
 
-return groups.all.createFactory(MainMapSolidsBlueprint)
+function MainMapSolidsBlueprint.drawOrder(self)
+  return self.group.drawOrder(self)
+end
+
+return Component.createFactory(MainMapSolidsBlueprint)

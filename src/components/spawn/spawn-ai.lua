@@ -1,3 +1,4 @@
+local Component = require 'modules.component'
 local Ai = require 'components.ai.ai'
 local msgBus = require 'components.msg-bus'
 local collisionWorlds = require 'components.collision-worlds'
@@ -9,6 +10,7 @@ local Math = require 'utils.math'
 local floor = math.floor
 
 local SpawnerAi = {
+  group = groups.all,
   x = 0,
   y = 0,
   speed = 0,
@@ -85,9 +87,8 @@ function SpawnerAi.draw(self)
   self.ai:draw()
 end
 
-return groups.all.createFactory(function(defaults)
-  SpawnerAi.drawOrder = function(self)
-    return defaults.drawOrder(self) + 1
-  end
-  return SpawnerAi
-end)
+SpawnerAi.drawOrder = function(self)
+  return self.group.drawOrder(self) + 1
+end
+
+return Component.createFactory(SpawnerAi)

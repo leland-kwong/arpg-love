@@ -39,6 +39,7 @@ local globalState = {
 }
 
 function love.load()
+  love.keyboard.setKeyRepeat(true)
   local resolution = config.resolution
   local vw, vh = resolution.w * scale, resolution.h * scale
   love.window.setMode(vw, vh)
@@ -54,7 +55,9 @@ function love.update(dt)
   groups.all.updateAll(dt)
   groups.overlay.updateAll(dt)
   groups.debug.updateAll(dt)
+  groups.hud.updateAll(dt)
   groups.gui.updateAll(dt)
+  groups.system.updateAll(dt)
 end
 
 local inputMsg = require 'utils.pooled-table'(function(t, key, scanCode, isRepeated)
@@ -69,12 +72,41 @@ function love.keypressed(key, scanCode, isRepeated)
     msgBus.KEY_PRESSED,
     inputMsg(key, scanCode, isRepeated)
   )
+
+  if config.keyboard.EXIT_GAME == key then
+    love.event.quit()
+  end
 end
 
 function love.keyreleased(key, scanCode)
   msgBus.send(
     msgBus.KEY_RELEASED,
     inputMsg(key, scanCode, false)
+  )
+end
+
+function love.mousepressed( x, y, button, istouch, presses )
+  msgBus.send(
+    msgBus.MOUSE_PRESSED,
+    { x, y, button, isTouch, presses }
+  )
+end
+
+function love.mousereleased( x, y, button, istouch, presses )
+  msgBus.send(
+    msgBus.MOUSE_RELEASED,
+    { x, y, button, isTouch, presses }
+  )
+end
+
+function love.wheelmoved(x, y)
+  msgBus.send(msgBus.MOUSE_WHEEL_MOVED, {x, y})
+end
+
+function love.textinput(t)
+  msgBus.send(
+    msgBus.GUI_TEXT_INPUT,
+    t
   )
 end
 
@@ -86,5 +118,12 @@ function love.draw()
   groups.overlay.drawAll()
   groups.debug.drawAll()
   camera:detach()
+  groups.hud.drawAll()
+
+  love.graphics.push()
+  love.graphics.scale(config.scaleFactor)
   groups.gui.drawAll()
+  love.graphics.pop()
+
+  groups.system.drawAll()
 end

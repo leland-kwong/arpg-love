@@ -1,3 +1,4 @@
+local Component = require 'modules.component'
 local socket = require 'socket'
 local pprint = require 'utils.pprint'
 local memoize = require 'utils.memoize'
@@ -16,6 +17,7 @@ local offX, offY = 100, 0
 local WALKABLE = 0
 
 local flowFieldTestBlueprint = {
+  group = groups.system,
   showFlowFieldText = false,
   showGridCoordinates = true,
   showAiPath = false,
@@ -407,4 +409,4 @@ function flowFieldTestBlueprint.draw(self)
   love.graphics.translate(-offX, -offY)
 end
 
-return groups.gui.createFactory(flowFieldTestBlueprint)
+return Component.createFactory(flowFieldTestBlueprint)

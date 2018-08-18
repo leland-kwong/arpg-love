@@ -1,3 +1,4 @@
+local Component = require 'modules.component'
 local Color = require 'modules.color'
 local groups = require 'components.groups'
 local config = require 'config'
@@ -72,18 +73,15 @@ local skillHandlers = {
 }
 
 local Player = {
-  getInitialProps = function(props)
-    return {
-      x = startPos.x,
-      y = startPos.y,
+  group = groups.all,
+  x = startPos.x,
+  y = startPos.y,
 
-      -- collision properties
-      type = 'player',
-      h = 1,
-      w = 1,
-      mapGrid = props.mapGrid
-    }
-  end,
+  -- collision properties
+  type = 'player',
+  h = 1,
+  w = 1,
+  mapGrid = nil,
 
   init = function(self)
     self.dir = DIRECTION_RIGHT
@@ -129,6 +127,16 @@ local Player = {
         grid[y][x] == Map.WALKABLE and
         dist < 20
     end
+
+    msgBus.subscribe(function(msgType, msg)
+      if msgBus.ITEM_HOVERED == msgType then
+        self.clickDisabled = msg
+      end
+
+      if msgBus.DROP_ITEM_ON_FLOOR == msgType then
+        msgBus.send(msgBus.GENERATE_LOOT, {self.x, self.y, msg})
+      end
+    end)
   end,
 
   update = function(self, dt)
@@ -168,7 +176,9 @@ local Player = {
     end
 
     -- SKILL_1
-    if love.keyboard.isDown(keyMap.SKILL_1) or love.mouse.isDown(mouseInputMap.SKILL_1) then
+    local isSkill1Activate = love.keyboard.isDown(keyMap.SKILL_1) or
+      love.mouse.isDown(mouseInputMap.SKILL_1)
+    if not self.clickDisabled and isSkill1Activate then
       skillHandlers.SKILL_1.use(self)
     end
     skillHandlers.SKILL_1.updateCooldown(dt)
@@ -202,9 +212,14 @@ local Player = {
     camera:setPosition(self.x, self.y)
 
     local gridX, gridY = Position.pixelsToGrid(self.x, self.y, config.gridSize)
-    msgBus.send(msgBus.NEW_FLOWFIELD, {
-      flowField = flowfield(self.mapGrid, gridX, gridY, self.isGridCellVisitable)
-    })
+    local hasChangedPosition = self.prevGridX ~= gridX or self.prevGridY ~= gridY
+    if hasChangedPosition then
+      msgBus.send(msgBus.NEW_FLOWFIELD, {
+        flowField = flowfield(self.mapGrid, gridX, gridY, self.isGridCellVisitable)
+      })
+    end
+    self.prevGridX = gridX
+    self.prevGridY = gridY
   end
 }
 
@@ -262,11 +277,8 @@ function Player.draw(self)
   love.graphics.setShader()
 end
 
-local playerFactory = groups.all.createFactory(function(defaults)
-  Player.drawOrder = function(self)
-    return defaults.drawOrder(self) + 1
-  end
-  return Player
-end)
+Player.drawOrder = function(self)
+  return self.group.drawOrder(self) + 1
+end
 
-return playerFactory
+return Component.createFactory(Player)

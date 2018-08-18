@@ -1,5 +1,6 @@
 -- The main map that the player and ai interact with.
 
+local Component = require 'modules.component'
 local objectUtils = require 'utils.object-utils'
 local groups = require 'components.groups'
 local mapBlueprint = require 'components.map.map-blueprint'
@@ -33,6 +34,7 @@ local function addWallTileEntity(self, positionIndex, entityProps)
 end
 
 local blueprint = objectUtils.assign({}, mapBlueprint, {
+  group = groups.all,
   tileRenderDefinition = {},
 
   init = function(self)
@@ -41,6 +43,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     end
     self.wallTileCache = lru.new(400, nil, wallTilePruneCallback)
     self.animationCache = lru.new(1400)
+
   end,
 
   onUpdateStart = function(self)
@@ -58,7 +61,8 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     if value ~= Map.WALKABLE then
       local tileX, tileY = x * self.gridSize, y * self.gridSize
       local ox, oy = animation:getOffset()
-      if not getWallEntity(self, index) then
+      local cached = getWallEntity(self, index)
+      if not cached then
         addWallTileEntity(self, index, {
           animation = animation,
           x = tileX,
@@ -69,9 +73,6 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
         })
       end
     end
-  end,
-
-  onUpdateEnd = function(self)
   end,
 
   render = function(self, value, x, y, originX, originY)
@@ -98,4 +99,4 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   end
 })
 
-return groups.all.createFactory(blueprint)
+return Component.createFactory(blueprint)

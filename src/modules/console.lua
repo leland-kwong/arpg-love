@@ -1,3 +1,4 @@
+local Component = require 'modules.component'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local font = require 'components.font'
@@ -8,8 +9,19 @@ local modifier = false
 local keysPressed = {}
 local L_SUPER = 'lgui'
 local R_SUPER = 'rgui'
-local lineHeight = font.primary.lineHeight
-love.graphics.setFont(font.primary.font)
+local L_CTRL = 'lctrl'
+local R_CTRL = 'rctrl'
+
+local state = {
+  showConsole = false
+}
+
+local function hasModifier()
+  return keysPressed[L_SUPER]
+    or keysPressed[R_SUPER]
+    or keysPressed[L_CTRL]
+    or keysPressed[R_CTRL]
+end
 
 local function toggleCollisionDebug()
   config.collisionDebug = not config.collisionDebug
@@ -23,25 +35,31 @@ msgBus.subscribe(function(msgType, v)
   end
 
   -- toggle collision debugger
-  if (msgBus.KEY_PRESSED == msgType) and (keysPressed[L_SUPER] or keysPressed[R_SUPER])
+  if (msgBus.KEY_PRESSED == msgType) and hasModifier()
     and keysPressed.p
     and not v.isRepeated
   then
     toggleCollisionDebug()
   end
+
+  -- toggle console
+  if (msgBus.KEY_PRESSED == msgType) and hasModifier()
+    and keysPressed.c
+    and not v.isRepeated
+  then
+    state.showConsole = not state.showConsole
+  end
 end)
 
 local Console = {
+  name = 'Console',
+  group = groups.system,
   stats = {
     accumulatedMemoryUsed = 0,
     currentMemoryUsed = 0,
     frameCount = 0
   }
 }
-
-function Console.getInitialProps()
-  return {}
-end
 
 local edgeOffset = 10
 
@@ -77,12 +95,18 @@ function Console.update(self)
 end
 
 function Console.draw(self)
+  if not state.showConsole then
+    return
+  end
+  local lineHeight = font.primaryLarge.lineHeight
+  love.graphics.setFont(font.primaryLarge.font)
   local gfx = love.graphics
   local s = self.stats
 
   gfx.push()
   gfx.setCanvas(canvas)
   gfx.clear(0,0,0,0)
+
   gfx.setColor(Color.MED_GRAY)
   gfx.print('COMPONENTS', edgeOffset, edgeOffset)
   gfx.setColor(Color.WHITE)
@@ -109,22 +133,24 @@ function Console.draw(self)
   gfx.setColor(Color.WHITE)
   printTable({
       memory = string.format('%0.2f', s.currentMemoryUsed / 1024),
-      memoryAvg = string.format('%0.2f', s.accumulatedMemoryUsed / s.frameCount / 1024)
+      memoryAvg = string.format('%0.2f', s.accumulatedMemoryUsed / s.frameCount / 1024),
+      delta = love.timer.getAverageDelta(),
+      fps = love.timer.getFPS()
     },
     lineHeight,
     edgeOffset,
     startY + 11 * lineHeight
   )
 
-  gfx.setBlendMode('alpha', 'premultiplied')
   gfx.setCanvas()
+  gfx.setBlendMode('alpha', 'premultiplied')
   gfx.draw(canvas)
   gfx.pop()
   gfx.setBlendMode('alpha')
 end
 
-function Console.drawOrder()
-  return 2
+function Console.drawOrder(self)
+  return 10
 end
 
-return groups.gui.createFactory(Console)
+return Component.createFactory(Console)

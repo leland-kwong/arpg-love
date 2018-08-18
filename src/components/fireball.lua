@@ -1,3 +1,4 @@
+local Component = require 'modules.component'
 local config = require 'config'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
@@ -25,6 +26,7 @@ local function colFilter(item, other)
 end
 
 local Fireball = {
+  group = groups.all,
   -- DEFAULTS
   minDamage = 1,
   maxDamage = 3,
@@ -33,13 +35,10 @@ local Fireball = {
   speed = 500,
   cooldown = 0.1,
 
-  getInitialProps = function(props)
-    local dx, dy = Position.getDirection(props.x, props.y, props.x2, props.y2)
-    props.direction = {x = dx, y = dy}
-    return props
-  end,
-
   init = function(self)
+    local dx, dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
+    self.direction = {x = dx, y = dy}
+
     self.damage = math.random(self.minDamage, self.maxDamage)
     self.animation = animationFactory:new({
       'fireball'
@@ -123,13 +122,9 @@ local Fireball = {
   end
 }
 
-local factory = groups.all.createFactory(function(defaults)
-  -- set order a little above default
-  Fireball.drawOrder = function(self)
-    local order = defaults.drawOrder(self) + 2
-    return order
-  end
-  return Fireball
-end)
+Fireball.drawOrder = function(self)
+  local order = self.group.drawOrder(self) + 2
+  return order
+end
 
-return factory
+return Component.createFactory(Fireball)

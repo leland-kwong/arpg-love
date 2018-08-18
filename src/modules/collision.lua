@@ -28,16 +28,16 @@ function CollisionObject:new(group, x, y, w, h, offsetX, offsetY)
   return obj
 end
 
-function CollisionObject:setParent(object)
-  self.parent = object
-  return self
+function CollisionObject:getPositionWithOffset()
+  return self.x - self.ox, self.y - self.oy
 end
 
 function CollisionObject:addToWorld(collisionWorld)
+  local x, y = self:getPositionWithOffset()
   collisionWorld:add(
     self,
-    self.x - self.ox,
-    self.y - self.oy,
+    x,
+    y,
     self.w,
     self.h
   )
@@ -66,6 +66,15 @@ function CollisionObject:move(goalX, goalY, filter)
     len
 end
 
+--[[
+  used for referencing in the collision filter
+  to know what object this collision object is related to
+]]
+function CollisionObject:setParent(parent)
+  self.parent = parent
+  return self
+end
+
 function CollisionObject:delete()
   self.world:remove(self)
   return self
@@ -82,19 +91,18 @@ function CollisionObject:update(x, y, w, h, offsetX, offsetY)
     return self
   end
 
-  -- offsetX = offsetX or 0
-  -- offsetY = offsetY or 0
-
   self.x = x or self.x
   self.y = y or self.y
   self.w = w or self.w
   self.h = h or self.h
   self.ox = offsetX or self.ox
   self.oy = offsetY or self.oy
+
+  local x, y = self:getPositionWithOffset()
   self.world:update(
     self,
-    self.x - self.ox,
-    self.y - self.ox,
+    x,
+    y,
     self.w,
     self.h
   )

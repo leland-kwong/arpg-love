@@ -4,17 +4,9 @@ local group = Component.newGroup()
 local calls = {}
 
 local blueprint = {
-  getInitialProps = function()
-    local props = {
-      x = 0,
-      y = 0,
-      foo = 'foo',
-    }
-    calls.initialProps = {
-      {props}
-    }
-    return props
-  end,
+  x = 0,
+  y = 0,
+  foo = 'foo',
 
   init = function(self)
     calls.init = {
@@ -40,8 +32,11 @@ local blueprint = {
     }
   end
 }
-local factory = group.createFactory(blueprint)
-local component = factory:create()
+local factory = Component.createFactory(blueprint)
+local props = {
+  group = group
+}
+local component = factory.create(props)
 
 local dt = 1
 group.updateAll(dt)
@@ -50,19 +45,15 @@ group.drawAll()
 group.delete(component)
 group.updateAll(dt)
 
-assert(#calls.initialProps == 1)
-assert(type(calls.initialProps[1][1]) == 'table')
-
-local initialProps = calls.initialProps[1][1]
 assert(#calls.init == 1)
-assert(calls.init[1][1] == initialProps)
+assert(calls.init[1][1] == props)
 
 assert(#calls.update == 1)
-assert(calls.update[1][1] == initialProps)
+assert(calls.update[1][1] == props)
 assert(calls.update[1][2] == dt)
 
 assert(#calls.draw == 1)
-assert(calls.draw[1][1] == initialProps)
+assert(calls.draw[1][1] == props)
 
 assert(#calls.final == 1)
-assert(calls.final[1][1] == initialProps)
+assert(calls.final[1][1] == props)

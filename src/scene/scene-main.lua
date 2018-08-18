@@ -1,12 +1,20 @@
+local Component = require 'modules.component'
 local groups = require 'components.groups'
 local Map = require 'modules.map-generator.index'
 local Player = require 'components.player'
 local Minimap = require 'components.map.minimap'
 local MainMap = require 'components.map.main-map'
+local Inventory = require 'components.item-inventory.inventory'
 local SpawnerAi = require 'components.spawn.spawn-ai'
+local InventoryController = require 'components.item-inventory.controller'
 local config = require 'config'
 local camera = require 'components.camera'
 local cloneGrid = require 'utils.clone-grid'
+local CreateStore = require 'components.state.state'
+local msgBus = require 'components.msg-bus'
+
+local rootState = CreateStore()
+local inventoryController = InventoryController(rootState)
 
 local gridTileTypes = {
   -- unwalkable
@@ -29,7 +37,37 @@ local gridTileTypes = {
   }
 }
 
-local MainScene = {}
+local MainScene = {
+  group = groups.all
+}
+
+local function insertTestItems(rootStore)
+  local item1 = require'components.item-inventory.items.definitions.mock-shoes'.create()
+  local item2 = require'components.item-inventory.items.definitions.mock-shoes'.create()
+  rootStore:addItemToInventory(item1, {3, 1})
+  rootStore:addItemToInventory(item2, {4, 1})
+  rootStore:addItemToInventory(
+    require'components.item-inventory.items.definitions.mock-armor'.create()
+    , {5, 1})
+  rootStore:addItemToInventory(
+    require'components.item-inventory.items.definitions.gpow-armor'.create()
+    , {5, 2})
+  rootStore:addItemToInventory(
+    require'components.item-inventory.items.definitions.potion-health'.create(),
+    {1, 1})
+  rootStore:addItemToInventory(
+    require'components.item-inventory.items.definitions.potion-health'.create(),
+    {2, 1})
+  rootStore:addItemToInventory(
+    require'components.item-inventory.items.definitions.potion-health'.create(),
+    {2, 1})
+  for i=1, 99 do
+    rootStore:addItemToInventory(
+      require'components.item-inventory.items.definitions.potion-health'.create(),
+      {2, 2})
+  end
+end
+insertTestItems(rootState)
 
 function MainScene.init(self)
   local map = Map.createAdjacentRooms(4, 20)
@@ -42,7 +80,37 @@ function MainScene.init(self)
     mapGrid = map.grid
   })
 
-  local aiCount = 50
+  msgBus.subscribe(function(msgType, msgValue)
+    if msgBus.KEY_RELEASED == msgType then
+      local key = msgValue.key
+      local isActive = rootState:get().activeMenu == 'INVENTORY'
+      if key == config.keyboard.INVENTORY_TOGGLE and (not isActive) then
+        local component = Inventory.create({
+          rootStore = rootState,
+          slots = function()
+            return rootState:get().inventory
+          end,
+          onDisableRequest = function()
+            rootState:set('activeMenu', false)
+          end
+        })
+        rootState:set('activeMenu', 'INVENTORY')
+      end
+    end
+
+    if msgBus.GENERATE_LOOT == msgType then
+      local LootGenerator = require'components.item-inventory.loot-generator'
+      local x, y, item = unpack(msgValue)
+      LootGenerator.create({
+        x = x,
+        y = y,
+        item = item,
+        rootStore = rootState
+      })
+    end
+  end)
+
+  local aiCount = 5
   local generated = 0
   while generated < aiCount do
     local posX, posY = math.random(3, 60), math.random(3, 60)
@@ -75,4 +143,4 @@ function MainScene.init(self)
   })
 end
 
-return groups.all.createFactory(MainScene)
+return Component.createFactory(MainScene)

@@ -1,9 +1,11 @@
+local Component = require 'modules.component'
 local font = require 'components.font'
 local groups = require 'components.groups'
 local tween = require 'modules.tween'
 local f = require 'utils.functional'
 
 local PopupTextBlueprint = {
+  group = groups.overlay,
   x = 0,
   y = 0,
 }
@@ -72,4 +74,4 @@ function PopupTextBlueprint.draw(self)
   love.graphics.setShader()
 end
 
-return groups.overlay.createFactory(PopupTextBlueprint)
+return Component.createFactory(PopupTextBlueprint)

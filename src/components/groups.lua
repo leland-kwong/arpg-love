@@ -10,6 +10,16 @@ local gridSize = config.gridSize
 local floor = math.floor
 local max = math.max
 
+local function guiStencil()
+  love.graphics.rectangle(
+    'fill',
+    180,
+    30,
+    240,
+    300
+  )
+end
+
 local Groups = {
   all = Component.newGroup({
     -- automatic draw-ordering based on y position
@@ -25,16 +35,13 @@ local Groups = {
   }),
 
   overlay = Component.newGroup(),
-
+  -- used for in-game debugging, including things like collision object shapes, sprite border-boxes, etc...
   debug = Component.newGroup(),
+  gui = Component.newGroup(),
+  hud = Component.newGroup(),
 
-  gui = Component.newGroup({
-    -- automatic draw-ordering based on y position
-    drawOrder = function(self)
-      local order = floor(self.y / gridSize)
-      return max(1, order)
-    end,
-  })
+  -- used for handling system/os related functionality
+  system = Component.newGroup()
 }
 
 return Groups
