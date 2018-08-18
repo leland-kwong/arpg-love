@@ -4,6 +4,7 @@ local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local Color = require 'modules.color'
 local Position = require 'utils.position'
+local config = require 'config'
 
 local ExperienceIndicator = {
   group = groups.gui,
@@ -13,29 +14,44 @@ local ExperienceIndicator = {
 
 local hudTextLayer = GuiText.create()
 
-local function getExperienceInfo(self)
-  return self.rootStore:get().experience,
-    self.rootStore:get().experienceToNextLevel,
-    self.rootStore:get().totalExperience
+local function getExpInfo(self)
+  local curState = self.rootStore:get()
+  local currentLevel = curState.level
+  local currentLevelRequirement = config.levelExperienceRequirements[currentLevel]
+  local nextLevelRequirement = config.levelExperienceRequirements[currentLevel + 1]
+  local totalExp = curState.totalExperience
+  local currentLevelExp = totalExp - currentLevelRequirement
+  local expRequiredForLevelUp = nextLevelRequirement - currentLevelRequirement
+  local progress = currentLevelExp / expRequiredForLevelUp
+
+  return totalExp, progress
 end
 
 function ExperienceIndicator.init(self)
-  local exp, experienceToNextLevel = getExperienceInfo(self)
-  self.experience = exp
-  self.experienceToNextLevel = experienceToNextLevel
   msgBus.subscribe(function(msgType, msgValue)
+    if self._deleted then
+      return msgBus.CLEANUP
+    end
+
     if msgBus.EXPERIENCE_GAIN == msgType then
-      self.rootStore:set('experience', function(state)
-        -- TODO
-        -- if experience surpasses experience needed for next level, then we've leveled up
-        -- so we should get the new experience requirements
-        return state.experience + msgValue
+      self.rootStore:set('totalExperience', function(state)
+        return state.totalExperience + msgValue
       end)
-      local exp, experienceToNextLevel = getExperienceInfo(self)
-      self.experience = exp
-      self.experienceToNextLevel = experienceToNextLevel
+      local totalExp, progress = getExpInfo(self)
+      local isLevelUp = progress >= 1
+      if isLevelUp then
+        self.rootStore:set('level', function(state)
+          return state.level + 1
+        end)
+      end
     end
   end)
+end
+
+function ExperienceIndicator.update(self)
+  local totalExp, progress = getExpInfo(self)
+  self.experience = totalExp
+  self.progress = progress
 end
 
 local function drawSegments(self, i, segmentCount, startX, totalWidth)
@@ -51,9 +67,8 @@ function ExperienceIndicator.draw(self)
   love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
 
   -- experience gained for this level
-  local r, g, b = 0, 0.6, 0
-  local indicatorWidth = self.experience / self.experienceToNextLevel * self.w
-  love.graphics.setColor(r, g, b)
+  local indicatorWidth = self.progress * self.w
+  love.graphics.setColor(Color.rgba255(243, 156, 18, 1))
   love.graphics.rectangle('fill', self.x, self.y, indicatorWidth, self.h)
 
   -- segment outlines

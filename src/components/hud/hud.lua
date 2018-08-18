@@ -11,20 +11,20 @@ local Hud = {
 }
 
 local function setupHealthIndicator(self)
-  local w, h = 180, 20
+  local w, h = 180, 18
   local winWidth, winHeight = love.graphics.getWidth() / scale, love.graphics.getHeight() / scale
   local offX, offY = Position.boxCenterOffset(w, h, winWidth, winHeight)
   HealthIndicator.create({
     rootStore = self.rootStore,
     x = offX,
-    y = winHeight - h - 20,
+    y = winHeight - h - 13,
     w = w,
     h = h
   }):setParent(self)
 end
 
 local function setupExperienceIndicator(self)
-  local w, h = 180, 10
+  local w, h = 180, 6
   local winWidth, winHeight = love.graphics.getWidth() / scale, love.graphics.getHeight() / scale
   local offX, offY = Position.boxCenterOffset(w, h, winWidth, winHeight)
   ExperienceIndicator.create({

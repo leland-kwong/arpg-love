@@ -22,25 +22,12 @@ local baseStatModifiers = require("components.state.base-stat-modifiers")
 
 local EMPTY_SLOT = sc.inventory.EMPTY_SLOT
 
-local base = 4
-local levelExperienceRequirements = {
-	base * 1,
-	base * 2,
-	base * 3.5,
-	base * 6,
-	base * 9,
-	base * 14,
-	base * 20,
-	base * 300,
-	base * 1000,
-}
+
 
 -- NOTE: This state is immutable, so we should keep the structure as flat as possible to avoid deep updates
 local initialState = {
 	level = 1,
-	experience = 0,
 	totalExperience = 0,
-	experienceToNextLevel = levelExperienceRequirements[4],
 	enemyKillCount = 0,
 
 	--[[ base player stats ]]

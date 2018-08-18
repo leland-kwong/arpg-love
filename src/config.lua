@@ -21,6 +21,20 @@ M.mouseInputMap = {
   SKILL_2 = 2
 }
 
+local base = 2
+M.levelExperienceRequirements = {
+  0,
+	base * 1,
+	base * 2,
+	base * 3.5,
+	base * 6,
+	base * 9,
+	base * 14,
+	base * 20,
+	base * 300,
+	base * 1000,
+}
+
 M.gridSize = 16
 M.scaleFactor = 2
 M.resolution = {
