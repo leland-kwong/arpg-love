@@ -51,9 +51,9 @@ function LootGenerator.init(self)
     onClick = function()
       rootStore:addItemToInventory(item)
       _self:delete(true)
-      msgBus.send(msgBus.ITEM_HOVERED, false)
     end,
-    onFinal = function()            
+    onFinal = function()
+      msgBus.send(msgBus.ITEM_HOVERED, false)
     end,
     draw = function(self)
       -- draw item shadow
