@@ -34,35 +34,7 @@ local function setupCloseHotkey(self)
   end)
 end
 
-local function insertTestItems(self)
-  local item1 = require'components.item-inventory.items.definitions.mock-shoes'.create()
-  local item2 = require'components.item-inventory.items.definitions.mock-shoes'.create()
-  self.rootStore:addItemToInventory(item1, {3, 1})
-  self.rootStore:addItemToInventory(item2, {4, 1})
-  self.rootStore:addItemToInventory(
-    require'components.item-inventory.items.definitions.mock-armor'.create()
-    , {5, 1})
-  self.rootStore:addItemToInventory(
-    require'components.item-inventory.items.definitions.gpow-armor'.create()
-    , {5, 2})
-  self.rootStore:addItemToInventory(
-    require'components.item-inventory.items.definitions.potion-health'.create(),
-    {1, 1})
-  self.rootStore:addItemToInventory(
-    require'components.item-inventory.items.definitions.potion-health'.create(),
-    {2, 1})
-  self.rootStore:addItemToInventory(
-    require'components.item-inventory.items.definitions.potion-health'.create(),
-    {2, 1})
-  for i=1, 99 do
-    self.rootStore:addItemToInventory(
-      require'components.item-inventory.items.definitions.potion-health'.create(),
-      {2, 2})
-  end
-end
-
 function InventoryBlueprint.init(self)
-  insertTestItems(self)
   setupCloseHotkey(self)
 
   msgBus.subscribe(function(msgType, msg)

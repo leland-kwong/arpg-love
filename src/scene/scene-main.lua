@@ -41,6 +41,34 @@ local MainScene = {
   group = groups.all
 }
 
+local function insertTestItems(rootStore)
+  local item1 = require'components.item-inventory.items.definitions.mock-shoes'.create()
+  local item2 = require'components.item-inventory.items.definitions.mock-shoes'.create()
+  rootStore:addItemToInventory(item1, {3, 1})
+  rootStore:addItemToInventory(item2, {4, 1})
+  rootStore:addItemToInventory(
+    require'components.item-inventory.items.definitions.mock-armor'.create()
+    , {5, 1})
+  rootStore:addItemToInventory(
+    require'components.item-inventory.items.definitions.gpow-armor'.create()
+    , {5, 2})
+  rootStore:addItemToInventory(
+    require'components.item-inventory.items.definitions.potion-health'.create(),
+    {1, 1})
+  rootStore:addItemToInventory(
+    require'components.item-inventory.items.definitions.potion-health'.create(),
+    {2, 1})
+  rootStore:addItemToInventory(
+    require'components.item-inventory.items.definitions.potion-health'.create(),
+    {2, 1})
+  for i=1, 99 do
+    rootStore:addItemToInventory(
+      require'components.item-inventory.items.definitions.potion-health'.create(),
+      {2, 2})
+  end
+end
+insertTestItems(rootState)
+
 function MainScene.init(self)
   local map = Map.createAdjacentRooms(4, 20)
   local gridTileDefinitions = cloneGrid(map.grid, function(v, x, y)
@@ -68,6 +96,16 @@ function MainScene.init(self)
         })
         rootState:set('activeMenu', 'INVENTORY')
       end
+    end
+
+    if msgBus.GENERATE_LOOT == msgType then
+      local LootGenerator = require'components.item-inventory.loot-generator'
+      local x, y = unpack(msgValue)
+      LootGenerator.create({
+        x = x,
+        y = y,
+        rootStore = rootState
+      })
     end
   end)
 

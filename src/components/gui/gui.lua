@@ -54,6 +54,10 @@ local Gui = {
   onPointerLeave = noop,
   onUpdate = noop,
   onPointerMove = noop,
+  onFinal = noop,
+  getMousePosition = function()
+    return love.mouse.getX() / scale, love.mouse.getY() / scale
+  end,
   render = noop,
   type = guiType.INTERACT,
 
@@ -197,9 +201,8 @@ function Gui.update(self, dt)
   local posX, posY = self:getPosition()
   self.colObj:update(posX, posY, self.w, self.h)
 
-  local items, len = collisionWorlds.gui:queryPoint(
-    love.mouse.getX() / scale, love.mouse.getY() / scale, mouseCollisionFilter
-  )
+  local mx, my = self.getMousePosition()
+  local items, len = collisionWorlds.gui:queryPoint(mx, my, mouseCollisionFilter)
 
   self.hovered = false
 
@@ -246,6 +249,8 @@ function Gui.final(self)
       child:setParent()
     end)
   end
+
+  self.onFinal(self)
 end
 
 local drawOrderByType = {

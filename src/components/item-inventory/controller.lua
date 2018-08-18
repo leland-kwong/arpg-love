@@ -41,6 +41,7 @@ return function(rootStore)
 				local isSameType = not isEmptySlot and (item.__type == curItem.__type)
 				local isFullStack = isSameType and (curItem.stackSize == curItem.maxStackSize)
 
+				-- if a position is provided, then lets add it to that position
 				if position then
 					local correctPosition = position[1] == x and position[2] == y
 					if not correctPosition then
@@ -75,9 +76,10 @@ return function(rootStore)
 				else
 					return curItem
 				end
-			end, false, true)
+			end, false)
 
-			if (not position) and stackable and (not added) and emptyPosition then
+			local canBeAddedToSlot = emptyPosition and (not position) and stackable and (not added)
+			if canBeAddedToSlot then
 				-- add to empty slot
 				remainingStackSize = 0
 				newItems[emptyPosition.y][emptyPosition.x] = item

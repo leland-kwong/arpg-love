@@ -265,6 +265,7 @@ end
 function Ai:final()
   self.deleted = true
   self.collision:delete()
+  msgBus.send(msgBus.GENERATE_LOOT, {self.x, self.y})
 end
 
 function Ai.create(x, y, speed, scale, collisionWorld, pxToGridUnits, findNearestTarget, grid, gridSize, WALKABLE, showAiPath)

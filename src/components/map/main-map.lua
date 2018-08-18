@@ -43,6 +43,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     end
     self.wallTileCache = lru.new(400, nil, wallTilePruneCallback)
     self.animationCache = lru.new(1400)
+
   end,
 
   onUpdateStart = function(self)
@@ -72,9 +73,6 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
         })
       end
     end
-  end,
-
-  onUpdateEnd = function(self)
   end,
 
   render = function(self, value, x, y, originX, originY)

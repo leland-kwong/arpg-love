@@ -127,6 +127,12 @@ local Player = {
         grid[y][x] == Map.WALKABLE and
         dist < 20
     end
+
+    msgBus.subscribe(function(msgType, hovered)
+      if msgBus.ITEM_HOVERED == msgType then
+        self.clickDisabled = hovered
+      end
+    end)
   end,
 
   update = function(self, dt)
@@ -166,7 +172,9 @@ local Player = {
     end
 
     -- SKILL_1
-    if love.keyboard.isDown(keyMap.SKILL_1) or love.mouse.isDown(mouseInputMap.SKILL_1) then
+    local isSkill1Activate = love.keyboard.isDown(keyMap.SKILL_1) or
+      love.mouse.isDown(mouseInputMap.SKILL_1)
+    if not self.clickDisabled and isSkill1Activate then
       skillHandlers.SKILL_1.use(self)
     end
     skillHandlers.SKILL_1.updateCooldown(dt)
