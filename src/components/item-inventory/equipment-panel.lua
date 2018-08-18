@@ -48,9 +48,10 @@ function EquipmentPanel.init(self)
 			animationsCache[silhouette] = animation
 		end
 
+		-- dark silhouette of item type that is allowed in slot
 		local sx, sy, sw, sh = animation.sprite:getViewport()
 		local offX, offY = Position.boxCenterOffset(sw, sh, slotW, slotH)
-		love.graphics.setColor(0.5,0.5,0.5,0.4)
+		love.graphics.setColor(0.35,0.35,0.35)
 		love.graphics.setBlendMode('add', 'premultiplied')
 		love.graphics.draw(
 			animationFactory.atlas,

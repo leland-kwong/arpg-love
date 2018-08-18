@@ -2,6 +2,7 @@ local config = require("components.item-inventory.items.config")
 local functional = require("utils.functional")
 local itemDefs = require("components.item-inventory.items.item-definitions")
 local Color = require('modules.color')
+local msgBus = require 'components.msg-bus'
 
 local function concatTable(a, b)
 	for i=1, #b do
@@ -31,6 +32,10 @@ return itemDefs.registerType({
 		title = 'Mock ARMOR',
 		rarity = config.rarity.NORMAL,
 		category = config.category.BODY_ARMOR,
+
+		onActivate = function(self, rootStore)
+			msgBus.send(msgBus.EQUIPMENT_SWAP, self)
+		end,
 
 		tooltip = function(self)
 			local function statValue(stat, color, type)

@@ -42,10 +42,7 @@ return itemDefs.registerType({
 		category = category,
 
 		onActivate = function(self)
-			msgBus.send(msgBus.EQUIPMENT_SWAP, {
-				self,
-				category,
-			})
+			msgBus.send(msgBus.EQUIPMENT_SWAP, self)
 		end,
 
 		tooltip = function(self)

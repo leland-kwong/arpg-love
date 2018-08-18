@@ -102,4 +102,16 @@ config.equipmentGuiSlotMap = {
 	}
 }
 
+function config.findEquipmentSlotByCategory(category)
+	assert(type(category) == 'number', 'invalid category '..category..' should be of type number')
+
+	local slotX, slotY
+	require'utils.iterate-grid'(config.equipmentGuiSlotMap, function(v, x, y)
+		if v == category then
+			slotX, slotY = x, y
+		end
+	end)
+	return slotX, slotY
+end
+
 return config

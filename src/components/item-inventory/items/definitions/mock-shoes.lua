@@ -54,10 +54,7 @@ return itemDefs.registerType({
 
 		onActivate = function(self)
 			local toSlot = itemDefs.getDefinition(self).category
-			msgBus.send(msgBus.EQUIPMENT_SWAP, {
-				self,
-				toSlot,
-			})
+			msgBus.send(msgBus.EQUIPMENT_SWAP, self)
 		end,
 	}
 })

@@ -5,6 +5,8 @@ local msgBus = require 'components.msg-bus'
 local config = require 'config'
 local guiTextLayers = require 'components.item-inventory.gui-text-layers'
 local setupSlotInteractions = require 'components.item-inventory.slot-interaction'
+local itemConfig = require 'components.item-inventory.items.config'
+local itemDefs = require("components.item-inventory.items.item-definitions")
 
 local InventoryBlueprint = {
   rootStore = nil, -- game state
@@ -62,6 +64,32 @@ end
 function InventoryBlueprint.init(self)
   insertTestItems(self)
   setupCloseHotkey(self)
+
+  msgBus.subscribe(function(msgType, msg)
+    local rootStore = self.rootStore
+
+    if self.__deleted then
+      return msgBus.CLEANUP
+    end
+
+    if msgBus.EQUIPMENT_SWAP == msgType then
+      local item = msg
+      local category = itemDefs.getDefinition(item).category
+      local slotX, slotY = itemConfig.findEquipmentSlotByCategory(category)
+      local currentlyEquipped = rootStore:getEquippedItem(slotX, slotY)
+      local isAlreadyEquipped = currentlyEquipped == item
+
+      if isAlreadyEquipped then
+        return
+      end
+
+      local _, x, y = rootStore:findItemById(item)
+      local equippedItem = rootStore:unequipItem(slotX, slotY)
+      rootStore:removeItem(item)
+      rootStore:equipItem(item, slotX, slotY)
+      rootStore:addItemToInventory(equippedItem, {x, y})
+    end
+	end)
 
   self.slotSize = 30
   self.slotMargin = 2

@@ -153,8 +153,7 @@ return function(rootStore)
 		local foundItem = nil
 		local posX = nil
 		local posY = nil
-		rqeuire'utils.iterateGrid'(self:get().inventory, function(v, x, y)
-			-- print(v, x, y)
+		require'utils.iterate-grid'(self:get().inventory, function(v, x, y)
 			if v and (v.__id == id) then
 				foundItem = v
 				posX = x
