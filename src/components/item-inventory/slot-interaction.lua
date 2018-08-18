@@ -1,3 +1,4 @@
+local Component = require 'modules.component'
 local Gui = require 'components.gui.gui'
 local Color = require 'modules.color'
 local GuiText = require 'components.gui.gui-text'
@@ -8,6 +9,7 @@ local animationFactory = require'components.animation-factory'
 local itemDefinition = require'components.item-inventory.items.item-definitions'
 local Position = require 'utils.position'
 local msgBus = require 'components.msg-bus'
+local groups = require 'components.groups'
 local boxCenterOffset = Position.boxCenterOffset
 local itemAnimationsCache = {}
 
@@ -29,16 +31,20 @@ msgBus.subscribe(function(msgType, message)
   end
 end)
 
-Gui.create({
-  w = love.graphics.getWidth(),
-  h = love.graphics.getWidth(),
-  onClick = function()
-    if isDropModeFloor and itemPickedUp then
-      msgBus.send(msgBus.DROP_ITEM_ON_FLOOR, itemPickedUp)
-      itemPickedUp = nil
-    end
+Component.createFactory({
+  group = groups.gui,
+  init = function(self)
+    msgBus.subscribe(function(msgType, msgValue)
+      if isDropModeFloor and
+        msgBus.MOUSE_PRESSED == msgType and
+        itemPickedUp
+      then
+        msgBus.send(msgBus.DROP_ITEM_ON_FLOOR, itemPickedUp)
+        itemPickedUp = nil
+      end
+    end)
   end
-})
+}).create()
 
 local function drawItem(item, x, y, slotSize)
   local d = itemDefinition.getDefinition(item)

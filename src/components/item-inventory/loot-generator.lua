@@ -23,6 +23,14 @@ shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
 shader:send('outline_width', 1)
 shader:send('outline_color', outlineColor)
 
+local COLLISION_FLOOR_ITEM_TYPE = 'floorItem'
+local function collisionFilter(item, other)
+  if other.group == COLLISION_FLOOR_ITEM_TYPE or other.group == 'wall' then
+    return 'slide'
+  end
+  return false
+end
+
 function LootGenerator.init(self)
   local _self = self
   local rootStore = self.rootStore
@@ -37,10 +45,12 @@ function LootGenerator.init(self)
 
   Gui.create({
     group = groups.all,
-    x = screenX,
-    y = screenY,
+    x = screenX + math.random(0, 10),
+    y = screenY + math.random(0, 10),
     w = sw,
     h = sh,
+    collisionGroup = COLLISION_FLOOR_ITEM_TYPE,
+    isNewlyGenerated = true,
     getMousePosition = function()
       return camera:getMousePosition()
     end,
@@ -53,6 +63,16 @@ function LootGenerator.init(self)
     onClick = function()
       rootStore:addItemToInventory(item)
       _self:delete(true)
+    end,
+    onUpdate = function(self)
+      if self.isNewlyGenerated then
+        local actualX, actualY, cols, len = self.colObj:move(self.x, self.y, collisionFilter)
+        if len > 0 then
+          self.x = actualX
+          self.y = actualY
+          self.isNewlyGenerated = false
+        end
+      end
     end,
     onFinal = function()
       msgBus.send(msgBus.ITEM_HOVERED, false)

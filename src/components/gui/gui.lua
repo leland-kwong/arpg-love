@@ -55,6 +55,8 @@ local Gui = {
   onUpdate = noop,
   onPointerMove = noop,
   onFinal = noop,
+  collision = true,
+  collisionGroup = nil,
   getMousePosition = function()
     return love.mouse.getX() / scale, love.mouse.getY() / scale
   end,
@@ -157,7 +159,7 @@ function Gui.init(self)
       handleScroll(self, msgValue[1], msgValue[2])
     end
 
-    if msgBus.MOUSE_RELEASED == msgType then
+    if msgBus.MOUSE_PRESSED == msgType then
       local origFocused = self.focused
       self.focused = self.hovered
 
@@ -191,7 +193,7 @@ function Gui.init(self)
 
   local posX, posY = self:getPosition()
   self.colObj = collisionObject:new(
-    'button',
+    self.collisionGroup or self.type,
     posX, posY,
     self.w, self.h
   ):addToWorld(collisionWorlds.gui)
