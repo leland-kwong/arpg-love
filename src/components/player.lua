@@ -203,11 +203,23 @@ local Player = {
       oY - sizeOffset
     )
 
-    local actualX, actualY = self.colObj:move(nextX, nextY, collisionFilter)
+    local actualX, actualY, cols, len = self.colObj:move(nextX, nextY, collisionFilter)
     self.x = actualX
     self.y = actualY
     self.h = h
     self.w = w
+
+    -- FIXME: this was only for testing, so we should remove
+    local hasCollisions = len > 0
+    if hasCollisions then
+      for i=1, len do
+        if cols[i].other.group == 'ai' then
+          msgBus.send(msgBus.PLAYER_HIT, {
+            damage = 1
+          })
+        end
+      end
+    end
 
     camera:setPosition(self.x, self.y)
 

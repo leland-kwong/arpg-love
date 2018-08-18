@@ -38,9 +38,9 @@ local levelExperienceRequirements = {
 -- NOTE: This state is immutable, so we should keep the structure as flat as possible to avoid deep updates
 local initialState = {
 	level = 1,
-	exp = 0,
-	totalExp = 0,
-	expToNextLevel = levelExperienceRequirements[1],
+	experience = 0,
+	totalExperience = 0,
+	experienceToNextLevel = levelExperienceRequirements[4],
 	enemyKillCount = 0,
 
 	--[[ base player stats ]]

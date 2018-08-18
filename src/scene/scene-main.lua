@@ -11,6 +11,7 @@ local config = require 'config'
 local camera = require 'components.camera'
 local cloneGrid = require 'utils.clone-grid'
 local CreateStore = require 'components.state.state'
+local Hud = require 'components.hud.hud'
 local msgBus = require 'components.msg-bus'
 
 local rootState = CreateStore()
@@ -78,6 +79,10 @@ function MainScene.init(self)
 
   local player = Player.create({
     mapGrid = map.grid
+  })
+
+  Hud.create({
+    rootStore = rootState
   })
 
   msgBus.subscribe(function(msgType, msgValue)
