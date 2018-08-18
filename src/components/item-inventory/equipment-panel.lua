@@ -32,6 +32,7 @@ function EquipmentPanel.init(self)
 	end
 
 	local function onItemPickupFromSlot(slotX, slotY)
+		msgBus.send(msgBus.INVENTORY_PICKUP)
     return self.rootStore:unequipItem(slotX, slotY)
   end
 
@@ -40,6 +41,7 @@ function EquipmentPanel.init(self)
 			curPickedUpItem, slotX, slotY
 		)
 		if canEquip then
+			msgBus.send(msgBus.INVENTORY_DROP)
 			return itemSwap
 		else
 			return curPickedUpItem

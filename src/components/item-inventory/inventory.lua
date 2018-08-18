@@ -8,6 +8,7 @@ local guiTextLayers = require 'components.item-inventory.gui-text-layers'
 local setupSlotInteractions = require 'components.item-inventory.slot-interaction'
 local itemConfig = require 'components.item-inventory.items.config'
 local itemDefs = require("components.item-inventory.items.item-definitions")
+local Sound = require 'components.sound'
 
 local InventoryBlueprint = {
   rootStore = nil, -- game state
@@ -77,6 +78,18 @@ function InventoryBlueprint.init(self)
       rootStore:equipItem(item, slotX, slotY)
       rootStore:addItemToInventory(equippedItem, {x, y})
     end
+
+    if msgBus.INVENTORY_PICKUP == msgType or 
+      msgBus.EQUIPMENT_SWAP == msgType 
+    then
+      love.audio.stop(Sound.INVENTORY_PICKUP)
+      love.audio.play(Sound.INVENTORY_PICKUP)
+    end
+
+    if msgBus.INVENTORY_DROP == msgType then
+      love.audio.stop(Sound.INVENTORY_DROP)
+      love.audio.play(Sound.INVENTORY_DROP)
+    end
 	end)
 
   self.slotSize = 30
@@ -94,10 +107,12 @@ function InventoryBlueprint.init(self)
   InteractArea(self):setParent(self)
 
   local function inventoryOnItemPickupFromSlot(x, y)
+    msgBus.send(msgBus.INVENTORY_PICKUP)
     return self.rootStore:pickupItem(x, y)
   end
 
   local function inventoryOnItemDropToSlot(curPickedUpItem, x, y)
+    msgBus.send(msgBus.INVENTORY_DROP)
     return self.rootStore:dropItem(curPickedUpItem, x, y)
   end
 

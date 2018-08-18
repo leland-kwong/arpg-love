@@ -56,5 +56,8 @@ Whenever an event occurs, it sends that information to the event bus. Each event
 - [x] gui component generates a hitbox with hover, click, onChange handlers
 - [x] we do the rendering separately in the `render` method
 
-## Inventory Grid calculation
+## Experience calculation
 
+currentLevelExp = (totalExp - currentLevelRequirement)
+expRequiredForLevelUp = nextLevelRequirement - currentLevelRequirement
+progress = currentLevelExp / expRequiredForLevelUp
