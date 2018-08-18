@@ -1,4 +1,5 @@
 local Component = require 'modules.component'
+local Gui = require 'components.gui.gui'
 local Color = require 'modules.color'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
@@ -32,6 +33,21 @@ local function setupCloseHotkey(self)
       end
     end
   end)
+end
+
+local function InteractArea(self)
+  return Gui.create({
+		x = self.x,
+		y = self.y,
+		w = self.w,
+		h = self.h,
+    onPointerMove = function()
+			msgBus.send(msgBus.INVENTORY_DROP_MODE_INVENTORY)
+		end,
+		onPointerLeave = function()
+			msgBus.send(msgBus.INVENTORY_DROP_MODE_FLOOR)
+		end
+	})
 end
 
 function InventoryBlueprint.init(self)
@@ -74,6 +90,8 @@ function InventoryBlueprint.init(self)
   local offsetRight = 20
   self.x = (config.resolution.w - w) - offsetRight
   self.y = (config.resolution.h - h) / 2
+
+  InteractArea(self):setParent(self)
 
   local function inventoryOnItemPickupFromSlot(x, y)
     return self.rootStore:pickupItem(x, y)
@@ -119,6 +137,7 @@ end
 
 function InventoryBlueprint.final(self)
   self.onDisableRequest()
+  msgBus.send(msgBus.INVENTORY_DROP_MODE_FLOOR)
 end
 
 return Component.createFactory(InventoryBlueprint)

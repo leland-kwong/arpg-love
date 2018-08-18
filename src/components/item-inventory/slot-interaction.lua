@@ -7,6 +7,7 @@ local guiTextLayers = require 'components.item-inventory.gui-text-layers'
 local animationFactory = require'components.animation-factory'
 local itemDefinition = require'components.item-inventory.items.item-definitions'
 local Position = require 'utils.position'
+local msgBus = require 'components.msg-bus'
 local boxCenterOffset = Position.boxCenterOffset
 local itemAnimationsCache = {}
 
@@ -14,6 +15,28 @@ local guiStackSizeTextLayer = GuiText.create({
   font = font.primary.font,
   drawOrder = function()
     return 5
+  end
+})
+
+-- currently picked up item. We can only have one item picked up at a time
+local itemPickedUp = nil
+local isDropModeFloor = false
+
+msgBus.subscribe(function(msgType, message)
+  if msgBus.INVENTORY_DROP_MODE_INVENTORY == msgType or
+    msgBus.INVENTORY_DROP_MODE_FLOOR == msgType then
+      isDropModeFloor = msgBus.INVENTORY_DROP_MODE_FLOOR == msgType
+  end
+end)
+
+Gui.create({
+  w = love.graphics.getWidth(),
+  h = love.graphics.getWidth(),
+  onClick = function()
+    if isDropModeFloor and itemPickedUp then
+      msgBus.send(msgBus.DROP_ITEM_ON_FLOOR, itemPickedUp)
+      itemPickedUp = nil
+    end
   end
 })
 
@@ -128,8 +151,22 @@ local function drawTooltip(item, x, y, w2, h2)
   )
 end
 
--- currently picked up item. We can only have one item picked up at a time
-local itemPickedUp = nil
+-- handles the picked up item and makes it follow the cursor
+Gui.create({
+  type = Gui.types.INTERACT,
+  draw = function()
+    if itemPickedUp then
+      local gameScale = config.scaleFactor
+      local mx, my = love.mouse.getX() / gameScale, love.mouse.getY() / gameScale
+      local sprite = itemDefinition.getDefinition(itemPickedUp).sprite
+      local sw, sh = animationFactory:getSpriteSize(sprite, true)
+      drawItem(itemPickedUp, mx - sw/2, my - sh/2)
+    end
+  end,
+  drawOrder = function()
+    return 4
+  end
+})
 
 -- sets up interactable gui nodes and renders the contents in each slot
 local function setupSlotInteractions(self, getSlots, margin, onItemPickupFromSlot, onItemDropToSlot, slotRenderer)
@@ -213,21 +250,6 @@ local function setupSlotInteractions(self, getSlots, margin, onItemPickupFromSlo
       end
     }):setParent(self)
   end)
-
-  -- handles the picked up item and makes it follow the cursor
-  Gui.create({
-    type = Gui.types.INTERACT,
-    draw = function()
-      if itemPickedUp then
-        local gameScale = config.scaleFactor
-        local mx, my = love.mouse.getX() / gameScale, love.mouse.getY() / gameScale
-        drawItem(itemPickedUp, mx - self.slotSize/4, my - self.slotSize/4)
-      end
-    end,
-    drawOrder = function()
-      return 4
-    end
-  }):setParent(self)
 end
 
 return setupSlotInteractions

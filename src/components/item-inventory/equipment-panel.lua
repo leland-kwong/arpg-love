@@ -1,4 +1,5 @@
 local Component = require 'modules.component'
+local Gui = require 'components.gui.gui'
 local groups = require 'components.groups'
 local guiTextLayers = require 'components.item-inventory.gui-text-layers'
 local Color = require 'modules.color'
@@ -6,12 +7,26 @@ local setupSlotInteractions = require 'components.item-inventory.slot-interactio
 local itemConfig = require 'components.item-inventory.items.config'
 local animationFactory = require'components.animation-factory'
 local Position = require 'utils.position'
+local msgBus = require 'components.msg-bus'
 
 local EquipmentPanel = {
 	group = groups.gui,
 }
 
 function EquipmentPanel.init(self)
+	self.guiInteractArea = Gui.create({
+		x = self.x,
+		y = self.y,
+		w = self.w,
+		h = self.h,
+		onPointerMove = function()
+			msgBus.send(msgBus.INVENTORY_DROP_MODE_INVENTORY)
+		end,
+		onPointerLeave = function()
+			msgBus.send(msgBus.INVENTORY_DROP_MODE_FLOOR)
+		end
+	}):setParent(self)
+
 	local function getSlots()
 		return self.rootStore:get().equipment
 	end

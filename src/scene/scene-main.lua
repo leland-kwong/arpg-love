@@ -100,10 +100,11 @@ function MainScene.init(self)
 
     if msgBus.GENERATE_LOOT == msgType then
       local LootGenerator = require'components.item-inventory.loot-generator'
-      local x, y = unpack(msgValue)
+      local x, y, item = unpack(msgValue)
       LootGenerator.create({
         x = x,
         y = y,
+        item = item,
         rootStore = rootState
       })
     end

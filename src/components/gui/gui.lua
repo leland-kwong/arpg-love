@@ -250,6 +250,7 @@ function Gui.final(self)
     end)
   end
 
+  self.colObj:delete()
   self.onFinal(self)
 end
 

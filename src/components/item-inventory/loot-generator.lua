@@ -10,7 +10,9 @@ local msgBus = require 'components.msg-bus'
 
 local LootGenerator = {
   group = groups.gui,
-  rootStore = CreateStore
+  rootStore = CreateStore,
+  -- item to generate
+  item = nil
 }
 
 local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
@@ -25,7 +27,7 @@ function LootGenerator.init(self)
   local _self = self
   local rootStore = self.rootStore
   local screenX, screenY = self.x, self.y
-  local item = ItemPotion.create()
+  local item = self.item or ItemPotion.create()
 
   local animation = AnimationFactory:new({
     itemDefs.getDefinition(item).sprite

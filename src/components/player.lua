@@ -128,9 +128,13 @@ local Player = {
         dist < 20
     end
 
-    msgBus.subscribe(function(msgType, hovered)
+    msgBus.subscribe(function(msgType, msg)
       if msgBus.ITEM_HOVERED == msgType then
-        self.clickDisabled = hovered
+        self.clickDisabled = msg
+      end
+
+      if msgBus.DROP_ITEM_ON_FLOOR == msgType then
+        msgBus.send(msgBus.GENERATE_LOOT, {self.x, self.y, msg})
       end
     end)
   end,
