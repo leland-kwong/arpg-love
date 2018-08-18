@@ -3,6 +3,7 @@ local GuiText = require 'components.gui.gui-text'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local Color = require 'modules.color'
+local Sound = require 'components.sound'
 local Position = require 'utils.position'
 local config = require 'config'
 
@@ -43,6 +44,8 @@ function ExperienceIndicator.init(self)
         self.rootStore:set('level', function(state)
           return state.level + 1
         end)
+        love.audio.stop(Sound.levelUp)
+        love.audio.play(Sound.levelUp)
       end
     end
   end)

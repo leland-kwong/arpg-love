@@ -1,5 +1,6 @@
-local Sounds = {
-  drinkPotion = love.audio.newSource('built/sounds/drink-potion.wav', 'static')
+local Sound = {
+  drinkPotion = love.audio.newSource('built/sounds/drink-potion.wav', 'static'),
+  levelUp = love.audio.newSource('built/sounds/level-up.wav', 'static')
 }
 
-return Sounds
+return Sound
