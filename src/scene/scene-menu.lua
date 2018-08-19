@@ -3,12 +3,9 @@ local GuiText = require 'components.gui.gui-text'
 local Component = require 'modules.component'
 local groups = require 'components.groups'
 local f = require 'utils.functional'
-local objectUtils = require 'utils.object-utils'
 local font = require 'components.font'
 local Color = require 'modules.color'
 local Position = require 'utils.position'
-local config = require 'config'
-local bitser = require 'modules.bitser'
 
 local SandboxSceneSelection = {
   x = 200,
@@ -17,7 +14,8 @@ local SandboxSceneSelection = {
   -- table of scene paths that we can require
   scenes = {
     sceneName = 'scene_path'
-  }
+  },
+  onSelect = nil
 }
 
 local itemFont = font.primary.font
@@ -29,33 +27,10 @@ local guiTextTitleLayer = GuiText.create({
   font = titleFont
 })
 
-local stateFile = 'debug_scene_state'
-local state = {
-  activeScene = nil
-}
-
-local function setState(nextState)
-  objectUtils.assign(state, nextState)
-  bitser.dumpLoveFile(stateFile, state)
-end
-
-local function loadScene(name, path)
-  if not path then
-    print('no scene to load')
-    return
-  end
-  local scene = require(path)
-  scene.create()
-  setState({ activeScene = name })
-end
-
 function SandboxSceneSelection.init(self)
-  local errorFree, loadedState = pcall(function() return bitser.loadLoveFile(stateFile) end)
-  state = (errorFree and loadedState) or state
+  assert(type(self.onSelect) == 'function', 'onSelect method required')
 
-  local scenePath = self.scenes[state.activeScene]
-  loadScene(state.activeScene, scenePath)
-
+  local onSelect = self.onSelect
   local menuX = self.x
   local menuY = self.y
   local sceneNames = f.keys(self.scenes)
@@ -80,8 +55,8 @@ function SandboxSceneSelection.init(self)
       w = menuWidth,
       h = h,
       type = Gui.types.BUTTON,
-      onClick = function()
-        loadScene(name, scenePath)
+      onClick = function(self)
+        onSelect(name, scenePath)
       end,
       draw = function(self)
         if self.hovered then
@@ -92,7 +67,7 @@ function SandboxSceneSelection.init(self)
         end
         guiTextBodyLayer:add(name, Color.WHITE, self.x, self.y)
       end
-    })
+    }):setParent(self)
   end)
 end
 
