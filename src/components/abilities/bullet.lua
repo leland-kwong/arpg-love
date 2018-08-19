@@ -54,7 +54,6 @@ local Bullet = {
 
     local w,h = select(3, self.animation.sprite:getViewport())
     local ox, oy = self.animation:getOffset()
-    print(ox, oy)
     self.w = w
     self.h = h
     self.colObj = collisionObject

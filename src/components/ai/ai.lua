@@ -171,13 +171,17 @@ function Ai:update(grid, flowField, dt)
   local targetX, targetY = self.findNearestTarget(self.x, self.y, self.sightRadius)
   local canSeeTarget = self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY)
   local shouldGetNewPath = flowField and canSeeTarget
+  local isInAttackRange = canSeeTarget and (distOfLine(self.x, self.y, targetX, targetY) <= self.attackRange)
+
   self:autoUnstuckFromWallIfNeeded(grid, gridX, gridY)
 
   self.canSeeTarget = canSeeTarget
 
-  if canSeeTarget then
+  if canSeeTarget and isInAttackRange then
     ability1.use(self, targetX, targetY)
     ability1.updateCooldown(dt)
+    -- we're already in attack range, so we don't need to move
+    return
   end
 
   if shouldGetNewPath then
@@ -346,7 +350,7 @@ function Ai.create(x, y, speed, scale, collisionWorld, pxToGridUnits, findNeares
     h = h,
     health = 10,
     id = uid(),
-    pulseTime = 0,
+    pulseTime = 0, -- animation pulse time
     hits = {},
     -- used for centering the agent during movement
     padding = math.ceil(padding / 2),
@@ -354,7 +358,8 @@ function Ai.create(x, y, speed, scale, collisionWorld, pxToGridUnits, findNeares
     dy = 0,
     scale = scale,
     speed = speed or 100,
-    sightRadius = 10 * gridSize, -- pixel units
+    attackRange = 8 * gridSize,
+    sightRadius = 11 * gridSize, -- pixel units
     collision = colObj,
     grid = grid,
     gridSize = gridSize,
