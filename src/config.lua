@@ -1,5 +1,6 @@
 -- global game configuration
 
+local f = require 'utils.functional'
 local M = {}
 
 M.isDebug = true
@@ -21,19 +22,18 @@ M.mouseInputMap = {
   SKILL_2 = 2
 }
 
-local base = 2
-M.levelExperienceRequirements = {
-  0,
-	base * 1,
-	base * 2,
-	base * 3.5,
-	base * 6,
-	base * 9,
-	base * 14,
-	base * 20,
-	base * 300,
-	base * 1000,
-}
+local xpDiff = 20
+M.levelExperienceRequirements = {}
+-- setup level experience requirements
+(function()
+  local req = M.levelExperienceRequirements
+  for level=1, 3 do    
+    table.insert(
+      req,
+      (level^2+level)/2*xpDiff-(level*xpDiff)
+    )
+  end
+end)()
 
 M.gridSize = 16
 M.scaleFactor = 2
