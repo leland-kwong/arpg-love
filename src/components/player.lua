@@ -11,6 +11,8 @@ local Position = require 'utils.position'
 local Map = require 'modules.map-generator.index'
 local flowfield = require 'modules.flow-field.flow-field'
 local Color = require 'modules.color'
+local memoize = require 'utils.memoize'
+local LineOfSight = memoize(require'modules.line-of-sight')
 
 local colMap = collisionWorlds.map
 local keyMap = config.keyboard
@@ -77,7 +79,7 @@ local Player = {
   group = groups.all,
   x = startPos.x,
   y = startPos.y,
-  pickupRadius = 5 * config.gridSize,
+  pickupRadius = 10 * config.gridSize,
 
   -- collision properties
   type = 'player',
@@ -133,15 +135,19 @@ local Player = {
     local calcDist = require'utils.math'.dist
     msgBus.subscribe(function(msgType, msg)
       if msgBus.ITEM_PICKUP == msgType then
-        local dist = calcDist(self.x, self.y, msg.x, msg.y)
+        local item = msg
+        local dist = calcDist(self.x, self.y, item.x, item.y)
         local outOfRange = dist > self.pickupRadius
-        if outOfRange then
+        local gridX1, gridY1 = Position.pixelsToGrid(self.x, self.y, config.gridSize)
+        local gridX2, gridY2 = Position.pixelsToGrid(item.x, item.y, config.gridSize)
+        local canWalkToItem = LineOfSight(self.mapGrid, Map.WALKABLE)(gridX1, gridY1, gridX2, gridY2)
+        if outOfRange or (not canWalkToItem) then
           self.clickDisabled = true
           -- move towards item
           self.forceMove = true
-        else
+        elseif canWalkToItem then
           self.forceMove = false
-          msg:pickup()
+          item:pickup()
         end
       elseif (msgBus.ITEM_PICKUP_CANCEL == msgType) or (msgBus.ITEM_PICKUP_SUCCESS == msgType) then
         self.forceMove = false
