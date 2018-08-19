@@ -69,10 +69,12 @@ local Fireball = {
       if hasCollisions then
         for i=1, len do
           local col = cols[i]
-          msgBus.send(msgBus.CHARACTER_HIT, {
-            parent = col.other.parent,
-            damage = self.damage
-          })
+          if col.other.group == 'ai' then
+            msgBus.send(msgBus.CHARACTER_HIT, {
+              parent = col.other.parent,
+              damage = self.damage
+            })
+          end
         end
       end
 
