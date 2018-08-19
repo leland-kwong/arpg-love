@@ -22,7 +22,7 @@ function HealthIndicator.init(self)
 
     if msgBus.PLAYER_HIT == msgType then
       self.rootStore:set('health', function(state)
-        return state.health - msgValue.damage
+        return state.health - msgValue
       end)
       self.health = self.rootStore:get().health
     end

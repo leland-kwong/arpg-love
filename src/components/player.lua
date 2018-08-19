@@ -122,6 +122,7 @@ local Player = {
       self.w,
       self.h
     ):addToWorld(colMap)
+     :setParent(self)
 
     local function isOutOfBounds(grid, x, y)
       return y < 1 or x < 1 or y > #grid or x > #grid[1]
@@ -175,6 +176,10 @@ local Player = {
           duration = 1,
           width = 4
         }):setParent(self)
+      end
+
+      if msgBus.CHARACTER_HIT == msgType and msg.parent == self then
+        msgBus.send(msgBus.PLAYER_HIT, msg.damage)
       end
     end)
   end,
@@ -233,7 +238,6 @@ local Player = {
     local w,h = sw, sh
     -- true center taking into account pivot
     local oX, oY = self.animation:getSourceOffset()
-    local col = self.collisionObj
 
     -- COLLISION UPDATES
     local colOrigX, colOrigY = self.colObj.x, self.colObj.y
@@ -253,18 +257,6 @@ local Player = {
     self.y = actualY
     self.h = h
     self.w = w
-
-    -- FIXME: this was only for testing, so we should remove
-    local hasCollisions = len > 0
-    if hasCollisions then
-      for i=1, len do
-        if cols[i].other.group == 'ai' then
-          msgBus.send(msgBus.PLAYER_HIT, {
-            damage = 1
-          })
-        end
-      end
-    end
 
     camera:setPosition(self.x, self.y)
 

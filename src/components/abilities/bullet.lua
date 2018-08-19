@@ -34,9 +34,9 @@ local Bullet = {
   group = groups.all,
   -- DEFAULTS
   minDamage = 1,
-  maxDamage = 100,
+  maxDamage = 2,
   scale = 1,
-  maxLifeTime = 10,
+  maxLifeTime = 2,
   speed = 250,
   cooldown = 0.1,
   targetGroup = nil,
