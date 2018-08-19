@@ -1,8 +1,10 @@
+local GuiText = require 'components.gui.gui-text'
 local Component = require 'modules.component'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local font = require 'components.font'
 local Color = require 'modules.color'
+local CollisionObject = require 'modules.collision'
 local config = require 'config'
 
 local modifier = false
@@ -110,13 +112,16 @@ function Console.draw(self)
   gfx.setColor(Color.MED_GRAY)
   gfx.print('COMPONENTS', edgeOffset, edgeOffset)
   gfx.setColor(Color.WHITE)
-  gfx.print(
-    'objects: '..getAllGameObjectStats().count,
+  printTable({
+    objects = getAllGameObjectStats().count,
+    collisionObjects = CollisionObject.getStats()
+  },
+    lineHeight,
     edgeOffset,
     edgeOffset + lineHeight
   )
 
-  local startY = edgeOffset + (lineHeight * 3)
+  local startY = edgeOffset + (lineHeight * 4)
   gfx.setColor(Color.MED_GRAY)
   gfx.print('GRAPHICS', edgeOffset, startY)
   gfx.setColor(Color.WHITE)
@@ -129,7 +134,7 @@ function Console.draw(self)
   )
 
   gfx.setColor(Color.MED_GRAY)
-  gfx.print('SYSTEM', edgeOffset, startY + 10 * lineHeight)
+  gfx.print('SYSTEM', edgeOffset, startY + 11 * lineHeight)
   gfx.setColor(Color.WHITE)
   printTable({
       memory = string.format('%0.2f', s.currentMemoryUsed / 1024),
@@ -139,7 +144,7 @@ function Console.draw(self)
     },
     lineHeight,
     edgeOffset,
-    startY + 11 * lineHeight
+    startY + 12 * lineHeight
   )
 
   gfx.setCanvas()

@@ -4,13 +4,16 @@ local uid = require 'utils.uid'
 
 bump.TOUCH = 'touch'
 
+local objectCount = 0
+
 local CollisionObject = {}
 
 function CollisionObject:new(group, x, y, w, h, offsetX, offsetY)
   typeCheck.validate(group, typeCheck.STRING)
 
+  local id = uid()
   local obj = {
-    _id = uid(),
+    _id = id,
 
     group = group,
     x = x,
@@ -22,6 +25,7 @@ function CollisionObject:new(group, x, y, w, h, offsetX, offsetY)
     world = nil
   }
 
+  objectCount = objectCount + 1
   setmetatable(obj, self)
   self.__index = self
 
@@ -77,7 +81,12 @@ end
 
 function CollisionObject:delete()
   self.world:remove(self)
+  objectCount = objectCount - 1
   return self
+end
+
+function CollisionObject:getId()
+  return self._id
 end
 
 function CollisionObject:removeFromWorld(collisionWorld)
@@ -111,6 +120,10 @@ end
 
 function CollisionObject:check(goalX, goalY, filter)
   return self.world:check(self, goalX, goalY, filter)
+end
+
+function CollisionObject.getStats()
+  return objectCount
 end
 
 return CollisionObject
