@@ -13,6 +13,7 @@ local groups = require 'components.groups'
 local config = require 'config'
 local camera = require 'components.camera'
 local SceneMain = require 'scene.scene-main'
+local tick = require 'utils.tick'
 
 -- run tests
 if config.isDebug then
@@ -35,7 +36,7 @@ local scenes = {
 }
 
 local globalState = {
-  activeScene = scenes.main,
+  activeScene = scenes.sandbox,
 }
 
 function love.load()
@@ -52,6 +53,8 @@ function love.load()
 end
 
 function love.update(dt)
+  tick.update(dt)
+
   groups.all.updateAll(dt)
   groups.overlay.updateAll(dt)
   groups.debug.updateAll(dt)

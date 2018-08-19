@@ -1,6 +1,7 @@
 local Component = require 'modules.component'
-local Color = require 'modules.color'
 local groups = require 'components.groups'
+local msgBus = require 'components.msg-bus'
+local ParticleFx = require 'components.particle.particle'
 local config = require 'config'
 local animationFactory = require 'components.animation-factory'
 local collisionWorlds = require 'components.collision-worlds'
@@ -9,7 +10,7 @@ local camera = require 'components.camera'
 local Position = require 'utils.position'
 local Map = require 'modules.map-generator.index'
 local flowfield = require 'modules.flow-field.flow-field'
-local msgBus = require 'components.msg-bus'
+local Color = require 'modules.color'
 
 local colMap = collisionWorlds.map
 local keyMap = config.keyboard
@@ -136,6 +137,16 @@ local Player = {
       if msgBus.DROP_ITEM_ON_FLOOR == msgType then
         msgBus.send(msgBus.GENERATE_LOOT, {self.x, self.y, msg})
       end
+
+      if msgBus.PLAYER_LEVEL_UP == msgType then
+        local tick = require 'utils.tick'
+        local fx = ParticleFx.Basic.create({
+          x = self.x,
+          y = self.y + 10,
+          duration = 1,
+          width = 4
+        }):setParent(self)
+      end
     end)
   end,
 
@@ -226,9 +237,9 @@ local Player = {
     local gridX, gridY = Position.pixelsToGrid(self.x, self.y, config.gridSize)
     local hasChangedPosition = self.prevGridX ~= gridX or self.prevGridY ~= gridY
     if hasChangedPosition then
-      msgBus.send(msgBus.NEW_FLOWFIELD, {
-        flowField = flowfield(self.mapGrid, gridX, gridY, self.isGridCellVisitable)
-      })
+      -- msgBus.send(msgBus.NEW_FLOWFIELD, {
+      --   flowField = flowfield(self.mapGrid, gridX, gridY, self.isGridCellVisitable)
+      -- })
     end
     self.prevGridX = gridX
     self.prevGridY = gridY

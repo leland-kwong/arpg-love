@@ -12,7 +12,6 @@ local timerFactory = Component.createFactory({
 	end,
 	update = function(self, dt)
 		self.timeElapsed = self.timeElapsed + dt
-		tick.update(dt)
 		if self.timeElapsed == self.delay then
 			return self:delete()
 		end

@@ -46,6 +46,7 @@ function ExperienceIndicator.init(self)
         end)
         love.audio.stop(Sound.levelUp)
         love.audio.play(Sound.levelUp)
+        msgBus.send(msgBus.PLAYER_LEVEL_UP)
       end
     end
   end)
@@ -71,7 +72,7 @@ function ExperienceIndicator.draw(self)
 
   -- experience gained for this level
   local indicatorWidth = self.progress * self.w
-  love.graphics.setColor(Color.rgba255(243, 156, 18, 1))
+  love.graphics.setColor(Color.GOLDEN_PALE)
   love.graphics.rectangle('fill', self.x, self.y, indicatorWidth, self.h)
 
   -- segment outlines

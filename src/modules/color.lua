@@ -1,3 +1,7 @@
+local function rgba255(r, g, b, a)
+  return r/255, g/255, b/255, a
+end
+
 local Color = {
   SKY_BLUE = {0.8,1,1,1},
   LIME = {0,1,0},
@@ -8,6 +12,7 @@ local Color = {
   DARK_GRAY = {0.1,0.1,0.1,1},
   CYAN = {0.2,1,1},
   BLACK = {0,0,0},
+  GOLDEN_PALE = {rgba255(243, 156, 18)},
 
   multiply = function(a, b)
     return {
@@ -19,8 +24,6 @@ local Color = {
   end
 }
 
-function Color.rgba255(r, g, b, a)
-  return r/255, g/255, b/255, a
-end
+Color.rgba255 = rgba255
 
 return Color

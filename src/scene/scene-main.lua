@@ -115,7 +115,7 @@ function MainScene.init(self)
     end
   end)
 
-  local aiCount = 5
+  local aiCount = 40
   local generated = 0
   while generated < aiCount do
     local posX, posY = math.random(3, 60), math.random(3, 60)

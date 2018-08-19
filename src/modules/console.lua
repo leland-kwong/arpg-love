@@ -13,7 +13,7 @@ local L_CTRL = 'lctrl'
 local R_CTRL = 'rctrl'
 
 local state = {
-  showConsole = false
+  showConsole = true
 }
 
 local function hasModifier()
