@@ -242,9 +242,9 @@ local Player = {
     local gridX, gridY = Position.pixelsToGrid(self.x, self.y, config.gridSize)
     local hasChangedPosition = self.prevGridX ~= gridX or self.prevGridY ~= gridY
     if hasChangedPosition then
-      -- msgBus.send(msgBus.NEW_FLOWFIELD, {
-      --   flowField = flowfield(self.mapGrid, gridX, gridY, self.isGridCellVisitable)
-      -- })
+      msgBus.send(msgBus.NEW_FLOWFIELD, {
+        flowField = flowfield(self.mapGrid, gridX, gridY, self.isGridCellVisitable)
+      })
     end
     self.prevGridX = gridX
     self.prevGridY = gridY

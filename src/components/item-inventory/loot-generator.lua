@@ -46,8 +46,8 @@ function LootGenerator.init(self)
 
   Gui.create({
     group = groups.all,
-    x = screenX + math.random(0, 10),
-    y = screenY + math.random(0, 10),
+    x = screenX,
+    y = screenY,
     w = sw,
     h = sh,
     collisionGroup = COLLISION_FLOOR_ITEM_TYPE,
