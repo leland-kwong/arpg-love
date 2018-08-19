@@ -7,6 +7,7 @@ local Gui = require 'components.gui.gui'
 local camera = require 'components.camera'
 local CreateStore = require 'components.state.state'
 local msgBus = require 'components.msg-bus'
+local tick = require 'utils.tick'
 
 local LootGenerator = {
   group = groups.gui,
@@ -62,9 +63,15 @@ function LootGenerator.init(self)
     end,
     onClick = function()
       rootStore:addItemToInventory(item)
-      _self:delete(true)
+      --[[
+        Add a slight delay to the deletion since we disable the player's click events
+        after pickup to prevent attack on pickup.
+      ]]
+      tick.delay(function()
+        self:delete(true)
+      end, 0.1)
     end,
-    onUpdate = function(self)
+    onUpdate = function(self, dt)
       if self.isNewlyGenerated then
         local actualX, actualY, cols, len = self.colObj:move(self.x, self.y, collisionFilter)
         if len > 0 then
