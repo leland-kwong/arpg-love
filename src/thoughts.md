@@ -61,3 +61,11 @@ Whenever an event occurs, it sends that information to the event bus. Each event
 currentLevelExp = (totalExp - currentLevelRequirement)
 expRequiredForLevelUp = nextLevelRequirement - currentLevelRequirement
 progress = currentLevelExp / expRequiredForLevelUp
+
+## Scene selection menu
+
+- [x] load previously selected scene from disk
+- [x] persist selected scene to disk so we can reload last selected scene
+- [ ] if no scene is selected, show menu
+- [ ] gui button to open up scene selection menu
+- [ ] cleanup scene before loading a new scene

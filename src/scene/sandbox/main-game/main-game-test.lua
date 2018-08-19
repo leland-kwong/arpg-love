@@ -8,7 +8,7 @@ local MainGameTest = {
 }
 
 local function modifyLevelRequirements()
-  local base = 3
+  local base = 10
   for i=0, 1000 do
     config.levelExperienceRequirements[i + 1] = i * base
   end
