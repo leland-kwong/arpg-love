@@ -29,6 +29,7 @@ function M.boundingBox(mode, x, y, w, h, center)
 end
 
 local Debug = {
+  group = groups.debug,
   draw = function()
     for i=1, #queue do
       love.graphics.setColor(1,1,1,0.5)

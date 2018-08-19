@@ -61,8 +61,16 @@ function Ai:autoUnstuckFromWallIfNeeded(grid, gridX, gridY)
 end
 
 local COLLISION_SLIDE = 'slide'
-local function collisionFilter()
-  return COLLISION_SLIDE
+local collisionFilters = {
+  player = true,
+  ai = true,
+  wall = true
+}
+local function collisionFilter(item, other)
+  if collisionFilters[other.group] then
+    return COLLISION_SLIDE
+  end
+  return false
 end
 
 local function hitAnimation()
@@ -101,6 +109,38 @@ local function handleHits(self)
   end
 end
 
+local ability1 = (function()
+  local curCooldown = 0
+  local skill = {}
+
+  function skill.use(self, targetX, targetY)
+    if curCooldown > 0 then
+      return skill
+    else
+      local Attack = require 'components.abilities.bullet'
+      local projectile = Attack.create({
+          debug = false
+        , x = self.x
+        , y = self.y
+        , x2 = targetX
+        , y2 = targetY
+        , speed = 125
+        , cooldown = 0.3
+        , targetGroup = 'player'
+      })
+      curCooldown = projectile.cooldown
+      return skill
+    end
+  end
+
+  function skill.updateCooldown(dt)
+    curCooldown = curCooldown - dt
+    return skill
+  end
+
+  return skill
+end)()
+
 function Ai:update(grid, flowField, dt)
   if self.pulseTime >= 0.4 then
     self.pulseDirection = -1
@@ -134,6 +174,11 @@ function Ai:update(grid, flowField, dt)
   self:autoUnstuckFromWallIfNeeded(grid, gridX, gridY)
 
   self.canSeeTarget = canSeeTarget
+
+  if canSeeTarget then
+    ability1.use(self, targetX, targetY)
+    ability1.updateCooldown(dt)
+  end
 
   if shouldGetNewPath then
     self.pathComplete = false

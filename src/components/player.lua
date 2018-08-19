@@ -79,7 +79,7 @@ local Player = {
   group = groups.all,
   x = startPos.x,
   y = startPos.y,
-  pickupRadius = 10 * config.gridSize,
+  pickupRadius = 5 * config.gridSize,
 
   -- collision properties
   type = 'player',
