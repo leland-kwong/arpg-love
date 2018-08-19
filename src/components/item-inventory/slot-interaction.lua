@@ -31,6 +31,7 @@ msgBus.subscribe(function(msgType, message)
   end
 end)
 
+-- handles dropping items on the floor when its in the floor drop mode
 Component.createFactory({
   group = groups.gui,
   init = function(self)
