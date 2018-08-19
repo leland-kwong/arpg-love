@@ -51,7 +51,19 @@ return function(grid, WALKABLE, debugFn)
   end
 
   -- return [BOOLEAN] - true if line of sight is valid
+  local gridCoordinateAssertionErrorMsg = 'coordinates must be grid positions'
   local function checkLineOfSight(x1, y1, x2, y2)
+    -- if any values are not integers, we can assume that they're not grid positions
+    local isGridCoordinates =
+      grid[y1]      ~= nil and
+      grid[y1][x1]  ~= nil and
+      grid[y2]      ~= nil and
+      grid[y2][x2]  ~= nil
+    assert(
+      isGridCoordinates,
+      gridCoordinateAssertionErrorMsg
+    )
+
     prevX, prevY = x1, y1
     return bresenhamLine(x1, y1, x2, y2, callback)
   end
