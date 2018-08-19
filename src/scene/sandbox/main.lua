@@ -22,6 +22,8 @@ local state = {
   activeScene = nil,
   menuOpened = false
 }
+-- reference to the loaded scene so we can cleanup when loading a new one
+local loadedScene = nil
 
 local function setState(nextState)
   objectUtils.assign(state, nextState)
@@ -34,7 +36,10 @@ local function loadScene(name, path)
     return
   end
   local scene = require(path)
-  scene.create()
+  if loadedScene then
+    loadedScene:delete(true)
+  end
+  loadedScene = scene.create()
   setState({ activeScene = name })
 end
 
