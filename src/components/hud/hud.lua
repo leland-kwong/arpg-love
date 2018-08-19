@@ -2,6 +2,7 @@ local Component = require 'modules.component'
 local groups = require 'components.groups'
 local HealthIndicator = require 'components.hud.health-indicator'
 local ExperienceIndicator = require 'components.hud.experience-indicator'
+local ScreenFx = require 'components.hud.screen-fx'
 local Position = require 'utils.position'
 local scale = require 'config'.scaleFactor
 
@@ -39,6 +40,7 @@ end
 function Hud.init(self)
   setupHealthIndicator(self)
   setupExperienceIndicator(self)
+  ScreenFx.create(self):setParent(self)
 end
 
 return Component.createFactory(Hud)
