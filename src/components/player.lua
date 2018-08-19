@@ -135,7 +135,12 @@ local Player = {
       end
 
       if msgBus.DROP_ITEM_ON_FLOOR == msgType then
-        msgBus.send(msgBus.GENERATE_LOOT, {self.x, self.y, msg})
+        local dropX, dropY = self.x + math.random(0, 16),
+          self.y + math.random(0, 16)
+        msgBus.send(
+          msgBus.GENERATE_LOOT,
+          {dropX, dropY, msg}
+        )
       end
 
       if msgBus.PLAYER_LEVEL_UP == msgType then
