@@ -77,6 +77,7 @@ local Player = {
   group = groups.all,
   x = startPos.x,
   y = startPos.y,
+  pickupRadius = 5 * config.gridSize,
 
   -- collision properties
   type = 'player',
@@ -129,7 +130,24 @@ local Player = {
         dist < 20
     end
 
+    local calcDist = require'utils.math'.dist
     msgBus.subscribe(function(msgType, msg)
+      if msgBus.ITEM_PICKUP == msgType then
+        local dist = calcDist(self.x, self.y, msg.x, msg.y)
+        local outOfRange = dist > self.pickupRadius
+        if outOfRange then
+          self.clickDisabled = true
+          -- move towards item
+          self.forceMove = true
+        else
+          self.forceMove = false
+          msg:pickup()
+        end
+      elseif (msgBus.ITEM_PICKUP_CANCEL == msgType) or (msgBus.ITEM_PICKUP_SUCCESS == msgType) then
+        self.forceMove = false
+        self.clickDisabled = false
+      end
+
       if msgBus.ITEM_HOVERED == msgType then
         self.clickDisabled = msg
       end
@@ -159,9 +177,14 @@ local Player = {
     local moveAmount = speed * dt
     local origx, origy = self.x, self.y
     local mx, my = camera:getMousePosition()
-    local dx = Position.getDirection(self.x, self.y, mx, my)
+    local dx, dy = Position.getDirection(self.x, self.y, mx, my)
     local nextX, nextY = self.x, self.y
     self.dir = dx > 0 and DIRECTION_RIGHT or DIRECTION_LEFT
+
+    if self.forceMove then
+      nextX = nextX + moveAmount * dx
+      nextY = nextY + moveAmount * dy
+    end
 
     -- MOVEMENT
     if love.keyboard.isDown(keyMap.RIGHT) then

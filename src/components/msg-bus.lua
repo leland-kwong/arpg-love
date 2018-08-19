@@ -12,7 +12,7 @@ if config.isDebug then
     ]]
     __index = function(_, name)
       if not proxy[name] then
-        error('[msgBus] property `'..name..'` not found')
+        error('[msgBus] property `'..name..'` not defined')
       end
       return proxy[name]
     end,
@@ -40,6 +40,9 @@ M.GUI_NODE_CLEANUP = 'GUI_NODE_CLEANUP'
 M.EQUIPMENT_SWAP = 'EQUIPMENT_SWAP'
 M.GENERATE_LOOT = 'GENERATE_LOOT'
 M.ITEM_HOVERED = 'ITEM_HOVERED'
+M.ITEM_PICKUP = 'ITEM_PICKUP'
+M.ITEM_PICKUP_SUCCESS = 'ITEM_PICKUP_SUCCESS'
+M.ITEM_PICKUP_CANCEL = 'ITEM_PICKUP_CANCEL'
 M.DROP_ITEM_ON_FLOOR = 'DROP_ITEM_ON_FLOOR'
 M.INVENTORY_PICKUP = 'INVENTORY_PICKUP'
 M.INVENTORY_DROP = 'INVENTORY_DROP'

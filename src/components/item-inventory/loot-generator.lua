@@ -61,15 +61,22 @@ function LootGenerator.init(self)
     onPointerLeave = function()
       msgBus.send(msgBus.ITEM_HOVERED, false)
     end,
-    onClick = function()
+    pickup = function()
+      if self.pickupPending then
+        return
+      end
       rootStore:addItemToInventory(item)
-      --[[
-        Add a slight delay to the deletion since we disable the player's click events
-        after pickup to prevent attack on pickup.
-      ]]
-      tick.delay(function()
-        self:delete(true)
-      end, 0.1)
+      self:delete(true)
+      -- --[[
+      --   Add a slight delay for ITEM_PICKUP_SUCCESS since we disable the player's click events
+      --   after pickup to prevent attack on pickup.
+      -- ]]
+      self.pickupPending = tick.delay(function()
+        msgBus.send(msgBus.ITEM_PICKUP_SUCCESS)
+      end, 0.2)
+    end,
+    onClick = function(self)
+      self.selected = true
     end,
     onUpdate = function(self, dt)
       if self.isNewlyGenerated then
@@ -80,9 +87,16 @@ function LootGenerator.init(self)
           self.isNewlyGenerated = false
         end
       end
-    end,
-    onFinal = function()
-      msgBus.send(msgBus.ITEM_HOVERED, false)
+
+      if self.selected then
+        if love.mouse.isDown(1) then
+          -- self.selected = true
+          msgBus.send(msgBus.ITEM_PICKUP, self)
+        elseif not self.pickupPending then
+          msgBus.send(msgBus.ITEM_PICKUP_CANCEL)
+          self.selected = false
+        end
+      end
     end,
     draw = function(self)
       -- draw item shadow
