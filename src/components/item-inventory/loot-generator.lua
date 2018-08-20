@@ -26,7 +26,7 @@ shader:send('outline_color', outlineColor)
 
 local COLLISION_FLOOR_ITEM_TYPE = 'floorItem'
 local function collisionFilter(item, other)
-  if other.group == COLLISION_FLOOR_ITEM_TYPE or other.group == 'wall' then
+  if other.group == COLLISION_FLOOR_ITEM_TYPE or other.group == 'obstacle' then
     return 'slide'
   end
   return false
