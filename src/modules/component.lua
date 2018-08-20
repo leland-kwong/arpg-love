@@ -34,12 +34,14 @@ local baseProps = {
     local parent = self.parent
     if parent then
       if parent._deleted then
-        -- remove parent reference
-        self:setParent(nil)
-
         if parent._deleteRecursive then
           self:delete(true)
+          -- remove parent reference after deletion since the component may
+          -- be accessing its parent in the `final` method
+          self:setParent(nil)
           return
+        else
+          self:setParent(nil)
         end
       end
 
@@ -136,6 +138,10 @@ function M.createFactory(blueprint)
 
   function blueprint:getId()
     return self._id
+  end
+
+  function blueprint:isDeleted()
+    return self._deleted
   end
 
   -- default methods
