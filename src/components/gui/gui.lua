@@ -148,7 +148,8 @@ function Gui.init(self)
 
   msgBus.subscribe(function(msgType, msgValue)
     -- cleanup
-    if msgBus.GUI_NODE_CLEANUP == msgType and msgValue == self:getId() then
+    local shouldCleanup = self._deleted
+    if shouldCleanup then
       return msgBus.CLEANUP
     end
 
@@ -243,8 +244,6 @@ function Gui.draw(self)
 end
 
 function Gui.final(self)
-  msgBus.send(msgBus.GUI_NODE_CLEANUP, self:getId())
-
   if guiType.LIST == self.type then
     f.forEach(self.children, function(child)
       -- unset the parent

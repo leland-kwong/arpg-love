@@ -24,18 +24,6 @@ local function calcInventorySize(slots, slotSize, margin)
   return width, height
 end
 
-local function setupCloseHotkey(self)
-  msgBus.subscribe(function(msgType, msgValue)
-    if msgBus.KEY_RELEASED == msgType then
-      local key = msgValue.key
-      if key == config.keyboard.INVENTORY_TOGGLE then
-        self:delete(true)
-        return msgBus.CLEANUP
-      end
-    end
-  end)
-end
-
 local function InteractArea(self)
   return Gui.create({
 		x = self.x,
@@ -52,12 +40,11 @@ local function InteractArea(self)
 end
 
 function InventoryBlueprint.init(self)
-  setupCloseHotkey(self)
 
   msgBus.subscribe(function(msgType, msg)
     local rootStore = self.rootStore
 
-    if self.__deleted then
+    if self._deleted then
       return msgBus.CLEANUP
     end
 
@@ -79,8 +66,8 @@ function InventoryBlueprint.init(self)
       rootStore:addItemToInventory(equippedItem, {x, y})
     end
 
-    if msgBus.INVENTORY_PICKUP == msgType or 
-      msgBus.EQUIPMENT_SWAP == msgType 
+    if msgBus.INVENTORY_PICKUP == msgType or
+      msgBus.EQUIPMENT_SWAP == msgType
     then
       love.audio.stop(Sound.INVENTORY_PICKUP)
       love.audio.play(Sound.INVENTORY_PICKUP)
@@ -151,7 +138,6 @@ function InventoryBlueprint.draw(self)
 end
 
 function InventoryBlueprint.final(self)
-  self.onDisableRequest()
   msgBus.send(msgBus.INVENTORY_DROP_MODE_FLOOR)
 end
 

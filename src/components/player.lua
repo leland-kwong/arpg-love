@@ -134,6 +134,10 @@ local Player = {
 
     local calcDist = require'utils.math'.dist
     msgBus.subscribe(function(msgType, msg)
+      if self._deleted then
+        return msgBus.CLEANUP
+      end
+
       if msgBus.ITEM_PICKUP == msgType then
         local item = msg
         local dist = calcDist(self.x, self.y, item.x, item.y)
