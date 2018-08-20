@@ -8,7 +8,9 @@ local f = require 'utils.functional'
 local pprint = require 'utils.pprint'
 local scale = require 'config'.scaleFactor
 
-local guiText = GuiTextLayer.create()
+local guiText = GuiTextLayer.create({
+  group = groups.gui
+})
 local GuiNode = Component.createFactory({
   group = groups.gui
 })
@@ -55,7 +57,7 @@ local function guiButton(x, y, w, h, buttonText)
       )
       guiText:add(
         buttonText,
-        Color.BLACK,
+        Color.WHITE,
         x + buttonPadding / 2,
         y + buttonPadding / 2
       )
@@ -250,6 +252,7 @@ local function guiList(parent, children)
     type = Gui.types.LIST,
     children = children,
     scrollHeight = 50,
+    scrollSpeed = 8,
     onScroll = function(self)
     end,
     render = function(self)
@@ -301,7 +304,7 @@ local function postDrawNode()
       love.graphics.pop()
     end,
     drawOrder = function()
-      return 5
+      return 7
     end
   })
 end
@@ -321,11 +324,11 @@ function GuiTestBlueprint.init(self)
       'player name'
     )
   }
-  local list = guiList(self, children)
+  local list = guiList(self, children):setParent(self)
   -- pre-process step. Sets up stenciling to cull child nodes when they scroll outside of view
-  preDrawNode()
+  preDrawNode():setParent(self)
   -- post-process step. Restore graphic state to original state
-  postDrawNode()
+  postDrawNode():setParent(self)
 end
 
 return Component.createFactory(GuiTestBlueprint)

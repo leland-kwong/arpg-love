@@ -17,7 +17,7 @@ local offX, offY = 100, 0
 local WALKABLE = 0
 
 local flowFieldTestBlueprint = {
-  group = groups.system,
+  group = groups.hud,
   showFlowFieldText = false,
   showGridCoordinates = true,
   showAiPath = false,
@@ -163,10 +163,10 @@ function flowFieldTestBlueprint.init(self)
   end
 
   self.ai = {
-    AiFactory(2, 2, 240, 1.5),
-    AiFactory(4, 2, 300, 1.2),
+    AiFactory(2, 2, 240, 1.5):setParent(self),
+    AiFactory(4, 2, 300, 1.2):setParent(self),
     -- put one that is stuck inside a wall to test automatic wall unstuck
-    AiFactory(1, 6, 320, 1.1)
+    AiFactory(1, 6, 320, 1.1):setParent(self)
   }
 
   -- generate random ai agents
@@ -180,7 +180,7 @@ function flowFieldTestBlueprint.init(self)
       positionsFilled[positionId] = true
       table.insert(
         self.ai,
-        AiFactory(gridX, gridY, 360, 0.5)
+        AiFactory(gridX, gridY, 360, 0.5):setParent(self)
       )
     end
   end

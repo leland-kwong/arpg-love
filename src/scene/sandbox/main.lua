@@ -14,7 +14,7 @@ local guiTextBodyLayer = GuiText.create({
 })
 
 local Sandbox = {
-  group = groups.debug
+  group = groups.gui
 }
 
 local stateFile = 'debug_scene_state'
@@ -43,6 +43,10 @@ local function loadScene(name, path)
   setState({ activeScene = name })
 end
 
+local function drawOrder(self)
+  return 10
+end
+
 local function DebugMenuToggleButton(onToggle)
   local buttonText = 'debug'
   local buttonWidth, buttonHeight = GuiText.getTextSize(buttonText, guiTextBodyLayer.font)
@@ -60,7 +64,8 @@ local function DebugMenuToggleButton(onToggle)
     end,
     draw = function(self)
       guiTextBodyLayer:add(buttonText, Color.WHITE, self.x, self.y)
-    end
+    end,
+    drawOrder = drawOrder
   })
 end
 
@@ -82,7 +87,8 @@ function Sandbox.init()
         onSelect = function(name, path)
           loadScene(name, path)
           DebugMenu(false)
-        end
+        end,
+        drawOrder = drawOrder
       })
     elseif activeSceneMenu then
       activeSceneMenu:delete(true)
