@@ -40,7 +40,7 @@ local function perf(func, options)
 			local prefix = #title > 0 and '['..title..']' or ''
 			print('[PERF WARNING]'..prefix..' - '..executionTimeMs..'(ms) exceeds maxAvgTime of '..maxTime..'(ms)')
 		end
-		options.done(executionTimeMs, title)
+		options.done(executionTimeMs, a, b, c, d, e, f, g, h)
 
 		return out1, out2, out3
 	end

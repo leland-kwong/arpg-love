@@ -25,6 +25,12 @@ local function hasModifier()
     or keysPressed[R_CTRL]
 end
 
+local guiText = GuiText.create({
+  font = font.primaryLarge.font,
+  group = groups.system,
+  outline = false
+})
+
 local function toggleCollisionDebug()
   config.collisionDebug = not config.collisionDebug
 end
@@ -89,6 +95,22 @@ end
 
 local canvas = love.graphics.newCanvas()
 
+function Console.debug(self, ...)
+  local args = {...}
+  local output = table.concat(args)
+  self.debugOutput[#self.debugOutput + 1] = output..'\n'
+end
+
+function Console.init(self)
+  self.debugOutput = {
+    clear = function(self)
+      for i=1, #self do
+        self[i] = nil
+      end
+    end
+  }
+end
+
 function Console.update(self)
   local s = self.stats
   s.currentMemoryUsed = collectgarbage('count')
@@ -147,6 +169,12 @@ function Console.draw(self)
     edgeOffset,
     startY + 12 * lineHeight
   )
+
+  for i=1, #self.debugOutput do
+    local output = self.debugOutput[i]
+    guiText:add(output, Color.WHITE, edgeOffset, 400 + (lineHeight * i))
+  end
+  self.debugOutput:clear()
 
   gfx.setCanvas()
   gfx.setBlendMode('alpha', 'premultiplied')
