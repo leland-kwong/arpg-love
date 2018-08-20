@@ -132,7 +132,7 @@ function Gui.init(self)
       y = self.y,
       initialX = self.x,
       initialY = self.y
-    })
+    }):setParent(self)
     f.forEach(self.children, function(child)
       child:setParent(self.scrollNode)
     end)
@@ -192,7 +192,7 @@ function Gui.init(self)
   end)
 
   local posX, posY = self:getPosition()
-  self.colObj = collisionObject:new(
+  self.colObj = self:addCollisionObject(
     self.collisionGroup or self.type,
     posX, posY,
     self.w, self.h
@@ -252,7 +252,6 @@ function Gui.final(self)
     end)
   end
 
-  self.colObj:delete()
   self.onFinal(self)
 end
 

@@ -10,9 +10,9 @@ local HealthIndicator = {
   health = 0
 }
 
-local hudTextLayer = GuiText.create()
-
 function HealthIndicator.init(self)
+  self.hudTextLayer = GuiText.create():setParent(self)
+
   self.health = self.rootStore:get().health
   self.maxHealth = self.rootStore:get().maxHealth
   msgBus.subscribe(function(msgType, msgValue)
@@ -30,6 +30,7 @@ function HealthIndicator.init(self)
 end
 
 function HealthIndicator.draw(self)
+  local hudTextLayer = self.hudTextLayer
   local healthText = self.health .. '/' .. self.maxHealth
   local textW, textH = hudTextLayer.getTextSize(healthText, hudTextLayer.font)
   local textOffX, textOffY = Position.boxCenterOffset(textW, textH, self.w, self.h)

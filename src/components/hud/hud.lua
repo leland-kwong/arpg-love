@@ -40,7 +40,7 @@ end
 function Hud.init(self)
   setupHealthIndicator(self)
   setupExperienceIndicator(self)
-  ScreenFx.create(self):setParent(self)
+  ScreenFx.create():setParent(self)
 end
 
 return Component.createFactory(Hud)
