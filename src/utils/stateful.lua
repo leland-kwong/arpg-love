@@ -10,6 +10,7 @@ local objectUtils = require("utils.object-utils")
 local typeCheck = require("utils.type-check")
 local socket = require'socket'
 local io = require'io'
+local tick = require 'utils.tick'
 local Timer = require'components.timer'
 
 local noop = function() end
@@ -150,10 +151,7 @@ function Stateful:set(key, value, updateCompleteCallback, saveCompleteCallback)
 		self.pendingStateChangeUpdate = true
 		self.debug(debugAction.UPDATE_PENDING)
 		if self.debounceRate > 0 then
-			Timer.create({
-				fn = self.stateChangeCallback,
-				delay = self.debounceRate
-			})
+			tick.delay(self.stateChangeCallback, self.debounceRate)
 		else
 			self.stateChangeCallback()
 		end
@@ -203,10 +201,7 @@ function Stateful:saveState()
 	end
 
 	-- debouncing saves to batch it in one go
-	Timer.create({
-		fn = self.saveCallback,
-		delay = self.saveRate
-	})
+	tick.delay(self.saveCallback, self.saveRate)
 end
 
 function Stateful:loadSavedState(__stateId)
