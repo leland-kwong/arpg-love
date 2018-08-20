@@ -6,7 +6,7 @@ require 'components.run'
 -- NOTE: this is necessary for crisp pixel rendering
 love.graphics.setDefaultFilter('nearest', 'nearest')
 
-local console = require 'modules.console'
+local Console = require 'modules.console.console'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local groups = require 'components.groups'
@@ -22,7 +22,6 @@ if config.isDebug then
 end
 
 local scale = config.scaleFactor
-console.create()
 
 local scenes = {
   main = SceneMain,
@@ -50,6 +49,10 @@ function love.load()
   msgBus.send(msgBus.GAME_LOADED)
 
   globalState.activeScene.create()
+
+  -- console debugging
+  local console = Console.create()
+  require 'components.profiler.component-groups'(console)
 end
 
 function love.update(dt)
