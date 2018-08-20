@@ -53,6 +53,7 @@ local baseProps = {
     end
     self:update(dt)
   end,
+  _isComponent = true
 }
 
 local function cleanupCollisionObjects(self)
@@ -68,11 +69,17 @@ end
   y[NUMBER]
   initialProps[table] - a key/value hash of properties
 ]]
+local invalidPropsErrorMsg = 'props cannot be a component object'
+
 function M.createFactory(blueprint)
   tc.validate(blueprint.getInitialProps, tc.FUNCTION, false)
 
   function blueprint.create(props)
     local c = (props or {})
+    assert(
+      not c._isComponent,
+      invalidPropsErrorMsg
+    )
 
     local id = uid()
     c._id = id
