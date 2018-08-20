@@ -61,11 +61,14 @@ function SandboxSceneSelection.init(self)
       draw = function(self)
         if self.hovered then
           local sidePadding = 5
-          love.graphics.setColor(1,1,1,0.5)
+          love.graphics.setColor(1,1,0,0.5)
           local w = self.w + (sidePadding * 2)
           love.graphics.rectangle('fill', self.x - sidePadding, self.y - self.h/4, w, self.h)
         end
         guiTextBodyLayer:add(name, Color.WHITE, self.x, self.y)
+      end,
+      drawOrder = function()
+        return 5
       end
     }):setParent(self)
   end)

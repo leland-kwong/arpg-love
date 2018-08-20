@@ -14,7 +14,10 @@ local guiTextBodyLayer = GuiText.create({
 })
 
 local Sandbox = {
-  group = groups.gui
+  group = groups.gui,
+  drawOrder = function()
+    return 4
+  end
 }
 
 local stateFile = 'debug_scene_state'
@@ -44,7 +47,7 @@ local function loadScene(name, path)
 end
 
 local function drawOrder(self)
-  return 10
+  return 11
 end
 
 local function DebugMenuToggleButton(onToggle)
@@ -101,6 +104,8 @@ function Sandbox.init()
   local errorFree, loadedState = pcall(function() return bitser.loadLoveFile(stateFile) end)
   state = (errorFree and loadedState) or state
 
+  DebugMenu(state.menuOpened)
+
   local scenePath = scenes[state.activeScene]
   loadScene(state.activeScene, scenePath)
 
@@ -112,6 +117,17 @@ function Sandbox.init()
   DebugMenuToggleButton(function()
     DebugMenu(not state.menuOpened)
   end)
+
+  print(state.menuOpened)
+end
+
+function Sandbox.draw()
+  if state.menuOpened then
+    -- background
+    local w, h = love.graphics.getWidth() / config.scaleFactor, love.graphics.getHeight() / config.scaleFactor
+    love.graphics.setColor(0,0,0,0.7)
+    love.graphics.rectangle('fill', 0, 0, w, h)
+  end
 end
 
 return Component.createFactory(Sandbox)

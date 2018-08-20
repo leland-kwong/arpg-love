@@ -11,7 +11,11 @@ local HealthIndicator = {
 }
 
 function HealthIndicator.init(self)
-  self.hudTextLayer = GuiText.create():setParent(self)
+  self.hudTextLayer = GuiText.create({
+    drawOrder = function()
+      return 4
+    end
+  }):setParent(self)
 
   self.health = self.rootStore:get().health
   self.maxHealth = self.rootStore:get().maxHealth
