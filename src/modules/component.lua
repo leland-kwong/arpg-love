@@ -7,6 +7,7 @@ local objectUtils = require 'utils.object-utils'
 local Q = require 'modules.queue'
 local typeCheck = require 'utils.type-check'
 local pprint = require 'utils.pprint'
+local collisionObject = require 'modules.collision'
 
 local M = {}
 
@@ -53,6 +54,14 @@ local baseProps = {
     self:update(dt)
   end,
 }
+
+local function cleanupCollisionObjects(self)
+  if self.collisionObjects then
+    for i=1, #self.collisionObjects do
+      self.collisionObjects[i]:delete()
+    end
+  end
+end
 
 --[[
   x[NUMBER]
@@ -111,6 +120,7 @@ function M.createFactory(blueprint)
   function blueprint:delete(recursive)
     self.group.delete(self)
     self._deleteRecursive = recursive
+    cleanupCollisionObjects(self)
     return self
   end
 
@@ -123,6 +133,14 @@ function M.createFactory(blueprint)
     if not blueprint[k] then
       blueprint[k] = baseProps[k] or v
     end
+  end
+
+  function blueprint:addCollisionObject(group, x, y, w, h, ox, oy)
+    self.collisionObjects = self.collisionObjects or {}
+    local colObj = collisionObject:new(group, x, y, w, h, ox, oy)
+      :setParent(self)
+    table.insert(self.collisionObjects, colObj)
+    return colObj
   end
 
   return blueprint
