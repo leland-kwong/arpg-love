@@ -53,11 +53,17 @@ function GuiTextLayer.init(self)
 end
 
 function GuiTextLayer.draw(self)
-  love.graphics.setShader(shader)
+  if self.outline then
+    love.graphics.setShader(shader)
+  end
+
   love.graphics.setColor(1,1,1)
   love.graphics.draw(self.textGraphic, x, y)
   self.textGraphic:clear()
-  love.graphics.setShader()
+
+  if self.outline then
+    love.graphics.setShader()
+  end
 end
 
 function GuiTextLayer.drawOrder()
