@@ -41,12 +41,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     local function wallTilePruneCallback(key, entity)
       entity:delete()
     end
-    self.wallTileCache = lru.new(1500, nil, wallTilePruneCallback)
-  end,
-
-  onUpdateStart = function(self)
-    self.itemsAddedByIndex = self.itemsAddedByIndex or {}
-    self.itemsToPruneByIndex = self.itemsToPruneByIndex or {}
+    self.wallTileCache = lru.new(400, nil, wallTilePruneCallback)
   end,
 
   onUpdate = function(self, value, x, y, originX, originY, isInViewport, dt)
