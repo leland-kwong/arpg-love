@@ -9,10 +9,11 @@ local collisionObject = require 'modules.collision'
 local camera = require 'components.camera'
 local Position = require 'utils.position'
 local Map = require 'modules.map-generator.index'
-local flowfield = require 'modules.flow-field.flow-field'
+local Flowfield = require 'modules.flow-field.flow-field'
 local Color = require 'modules.color'
 local memoize = require 'utils.memoize'
 local LineOfSight = memoize(require'modules.line-of-sight')
+local getDist = memoize(require('utils.math').dist)
 
 local colMap = collisionWorlds.map
 local keyMap = config.keyboard
@@ -268,14 +269,16 @@ local Player = {
     camera:setPosition(self.x, self.y)
 
     local gridX, gridY = Position.pixelsToGrid(self.x, self.y, config.gridSize)
-    local hasChangedPosition = self.prevGridX ~= gridX or self.prevGridY ~= gridY
-    if hasChangedPosition and self.mapGrid then
+    local dist = getDist(self.prevGridX or 0, self.prevGridY or 0, gridX, gridY)
+    local shouldUpdateFlowField = dist >= 2
+    if shouldUpdateFlowField and self.mapGrid then
+      local flowField, callCount = Flowfield(self.mapGrid, gridX, gridY, self.isGridCellVisitable)
       msgBus.send(msgBus.NEW_FLOWFIELD, {
-        flowField = flowfield(self.mapGrid, gridX, gridY, self.isGridCellVisitable)
+        flowField = flowField
       })
+      self.prevGridX = gridX
+      self.prevGridY = gridY
     end
-    self.prevGridX = gridX
-    self.prevGridY = gridY
   end
 }
 

@@ -1,6 +1,35 @@
 -- https://www.geeksforgeeks.org/flood-fill-algorithm-implement-fill-paint/
 
+local TablePool = require 'utils.table-pool'
+local memoize = require 'utils.memoize'
 local sqrt, pow = math.sqrt, math.pow
+
+local function getIndexByCoordinate(x, y, maxCols)
+  return (y * maxCols) + x
+end
+
+local gridRowsCols = memoize(function(grid)
+  return #grid, #grid[1]
+end)
+
+local flowCellTablePool = TablePool.new()
+local frontierTablePool = TablePool.new()
+
+local function flowCellData(x, y, dist, id)
+  local obj = flowCellTablePool.get(id)
+  obj.x = x
+  obj.y = y
+  obj.dist = dist
+  return obj
+end
+
+local function toVisitData(x, y, dist, id)
+  local obj = frontierTablePool.get(id)
+  obj.x = x
+  obj.y = y
+  obj.dist = dist
+  return obj
+end
 
 local function addCellData(grid, x, y, from, frontier, cameFromList, canVisit)
   cameFromList[y] = cameFromList[y] or {}
@@ -10,19 +39,15 @@ local function addCellData(grid, x, y, from, frontier, cameFromList, canVisit)
     return
   else
     -- insert cell to unvisited list
-    frontier[#frontier + 1] = {x = x, y = y, dist = dist + 1}
+    frontier[#frontier + 1] = toVisitData(x, y, dist + 1, cameFromList._cellCount)
   end
 
   -- directions
   -- we multiply by -1 because we want the direction to where it came from
   local dirX = (x - from.x) * -1
   local dirY = (y - from.y) * -1
-
-  cameFromList[y][x] = {
-    x = dirX,
-    y = dirY,
-    dist = dist
-  }
+  cameFromList[y][x] = flowCellData(dirX, dirY, dist, cameFromList._cellCount)
+  cameFromList._cellCount = cameFromList._cellCount + 1
 end
 
 --[[
@@ -84,7 +109,10 @@ local function flowField(grid, startX, startY, canVisitCallback)
   local frontier = {
     start
   }
-  local cameFromList = {}
+  local cameFromList = {
+    -- gets incremented each time a flow field cell is generated. Also used as the id for the table pool
+    _cellCount = 0
+  }
   cameFromList[startY] = cameFromList[startY] or {}
   -- {directionX, directionY, distance}
   cameFromList[startY][startX] = {
@@ -100,7 +128,7 @@ local function flowField(grid, startX, startY, canVisitCallback)
     visitNeighbors(grid, current, frontier, cameFromList, canVisitCallback)
   end
 
-	return cameFromList, callCount
+	return cameFromList, i
 end
 
 return flowField
