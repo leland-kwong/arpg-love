@@ -93,12 +93,14 @@ local function flowField(grid, startX, startY, canVisitCallback)
     dist = 0
   }
 
-  while #frontier > 0 do
-    local current = table.remove(frontier, 1)
+  local i = 1
+  while i <= #frontier do
+    local current = frontier[i]
+    i = i + 1
     visitNeighbors(grid, current, frontier, cameFromList, canVisitCallback)
   end
 
-	return cameFromList
+	return cameFromList, callCount
 end
 
 return flowField
