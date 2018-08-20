@@ -7,6 +7,7 @@ local collisionObject = require 'modules.collision'
 local scale = require 'config'.scaleFactor
 local noop = require 'utils.noop'
 local f = require 'utils.functional'
+local Enum = require 'utils.enum-util'
 local min, max = math.min, math.max
 
 local COLLISION_CROSS = 'cross'
@@ -30,13 +31,14 @@ local GuiNode = Component.createFactory({
   group = groups.gui
 })
 
-local guiType = {
-  INTERACT = 'INTERACT', -- a stateless gui node used only for event listening
-  BUTTON = 'BUTTON',
-  TOGGLE = 'TOGGLE',
-  TEXT_INPUT = 'TEXT_INPUT',
-  LIST = 'LIST',
-}
+
+local guiType = Enum({
+  'INTERACT', -- a stateless gui node used only for event listening
+  'BUTTON',
+  'TOGGLE',
+  'TEXT_INPUT',
+  'LIST',
+})
 
 local Gui = {
   group = groups.gui,

@@ -11,6 +11,7 @@ local typeCheck = require("utils.type-check")
 local socket = require'socket'
 local io = require'io'
 local Timer = require'components.timer'
+local Enum = require 'utils.enum-util'
 
 local noop = function() end
 
@@ -30,17 +31,17 @@ end
 local Stateful = {}
 
 local TYPE_FUNCTION = 'function'
-local debugAction = {
-	SET_PENDING = 'SET_PENDING',
-	SET_SUCCESS = 'SET_SUCCESS',
-	SET_SUCCESS_NO_CHANGE = 'SET_SUCCESS_NO_CHANGE',
-	SAVE_REQUEST = 'SAVE_REQUEST',
-	SAVE_PENDING = 'SAVE_PENDING', -- save has executed
-	SAVE_SUCCESS = 'SAVE_SUCCESS',
-	SAVE_ERROR = 'SAVE_ERROR',
-	UPDATE_PENDING = 'UPDATE_PENDING',
-	UPDATE_SUCCESS = 'UPDATE_SUCCESS'
-}
+local debugAction = Enum({
+  'SET_PENDING',
+  'SET_SUCCESS',
+  'SET_SUCCESS_NO_CHANGE',
+  'SAVE_REQUEST',
+  'SAVE_PENDING', -- save has executed
+  'SAVE_SUCCESS',
+  'SAVE_ERROR',
+	'UPDATE_PENDING',
+	'UPDATE_SUCCESS'
+})
 Stateful.debugAction = debugAction
 
 local defaultOptions = {

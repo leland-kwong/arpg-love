@@ -1,5 +1,6 @@
 local config = require 'config'
 local messageBus = require 'utils.message-bus'
+local Enum = require 'utils.enum'
 
 local M = messageBus.new()
 
