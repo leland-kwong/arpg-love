@@ -123,8 +123,12 @@ local Player = {
       self.h
     ):addToWorld(colMap)
 
+    local gridRowsCols = memoize(function(grid)
+      return #grid, #grid[1]
+    end)
     local function isOutOfBounds(grid, x, y)
-      return y < 1 or x < 1 or y > #grid or x > #grid[1]
+      local rows, cols = gridRowsCols(grid)
+      return y < 1 or x < 1 or y > rows or x > cols
     end
     self.isGridCellVisitable = function(grid, x, y, dist)
       return not isOutOfBounds(grid, x, y) and

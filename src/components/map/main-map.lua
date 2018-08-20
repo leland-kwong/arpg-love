@@ -8,16 +8,16 @@ local Map = require 'modules.map-generator.index'
 local MainMapSolidsFactory = require 'components.map.main-map-solids'
 local animationFactory = require 'components.animation-factory'
 local lru = require 'utils.lru'
+local memoize = require'utils.memoize'
+
+local animationTypes = {}
+local gridRowsCols = memoize(function(grid)
+  return #grid, #grid[1]
+end)
 
 local function getAnimation(animationCache, position, name)
-  local fromCache = animationCache:get(position)
-
-  if not fromCache then
-    animationCache:set(position, animationFactory:new({name}))
-    return animationCache:get(position)
-  end
-
-  return fromCache
+  animationTypes[name] = animationTypes[name] or animationFactory:new({name})
+  return animationTypes[name]
 end
 
 local function getIndexByCoordinate(x, y, maxCols)
@@ -41,8 +41,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     local function wallTilePruneCallback(key, entity)
       entity:delete()
     end
-    self.wallTileCache = lru.new(400, nil, wallTilePruneCallback)
-    self.animationCache = lru.new(1400)
+    self.wallTileCache = lru.new(1500, nil, wallTilePruneCallback)
   end,
 
   onUpdateStart = function(self)
@@ -51,7 +50,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   end,
 
   onUpdate = function(self, value, x, y, originX, originY, isInViewport, dt)
-    local maxCols = #self.grid[1]
+    local maxRows, maxCols = gridRowsCols(self.grid)
     local index = getIndexByCoordinate(x, y, maxCols)
     local animationName = self.tileRenderDefinition[y][x]
     local animation = getAnimation(self.animationCache, index, animationName)
@@ -75,7 +74,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   end,
 
   render = function(self, value, x, y, originX, originY)
-    local maxCols = #self.grid[1]
+    local maxRows, maxCols = gridRowsCols(self.grid)
     local index = getIndexByCoordinate(x, y, maxCols)
     local animationName = self.tileRenderDefinition[y][x]
     local animation = getAnimation(self.animationCache, index, animationName)
