@@ -11,7 +11,6 @@ local typeCheck = require("utils.type-check")
 local socket = require'socket'
 local io = require'io'
 local tick = require 'utils.tick'
-local Timer = require'components.timer'
 
 local noop = function() end
 
