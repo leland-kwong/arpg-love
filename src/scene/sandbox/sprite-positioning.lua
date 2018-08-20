@@ -79,12 +79,12 @@ shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
 shader:send('outline_width', 1)
 shader:send('outline_color', outlineColor)
 
-function M.init()
+function M.init(self)
   love.window.setTitle('sprite and collision detection demo')
   love.keyboard.setKeyRepeat(true)
 
   local playerOffX, playerOffY = idleAnimation:getSourceOffset()
-  state.player.collisionObject = collisionObject:new(
+  state.player.collisionObject = self:addCollisionObject(
     'player',
     state.player.x,
     state.player.y,
@@ -95,7 +95,7 @@ function M.init()
   ):addToWorld(world)
 
   local tileOffX, tileOffY = tileAnimation:getSourceOffset()
-  state.wall.collisionObject = collisionObject:new(
+  state.wall.collisionObject = self:addCollisionObject(
     'wall',
     state.wall.x,
     state.wall.y,
