@@ -130,7 +130,7 @@ function MainScene.init(self)
     end
   end)
 
-  local aiCount = 20
+  local aiCount = 50
   local generated = 0
   local minPos, maxPos = 3, 60
   while generated < aiCount do
