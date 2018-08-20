@@ -1,3 +1,5 @@
+local Component = require 'modules.component'
+local groups = require 'components.groups'
 local animationFactory = require 'components.animation-factory'
 local msgBus = require 'components.msg-bus'
 local PopupTextController = require 'components.popup-text'
@@ -12,8 +14,21 @@ local LineOfSight = memoize(require'modules.line-of-sight')
 local Perf = require'utils.perf'
 local dynamic = require'modules.dynamic-module'
 
-local Ai = {}
-local Ai_mt = {__index = Ai}
+local Ai = {
+  group = groups.all,
+  health = 10,
+  pulseTime = 0,
+  speed = 100,
+  attackRange = 8,
+  sightRadius = 11,
+  animation = animationFactory:new({
+    'pixel-white-1x1'
+  }),
+  COLOR_FILL = {0,0.9,0.3,1},
+  drawOrder = function(self)
+    return self.group.drawOrder(self) + 1
+  end
+}
 
 local popupText = PopupTextController.create()
 
@@ -99,7 +114,7 @@ local function handleHits(self)
 
       local isDestroyed = self.health <= 0
       if isDestroyed then
-        self:final()
+        self:delete()
         return
       end
     end
@@ -141,7 +156,7 @@ local ability1 = (function()
   return skill
 end)()
 
-function Ai:update(grid, flowField, dt)
+function Ai._update2(self, grid, flowField, dt)
   if self.pulseTime >= 0.4 then
     self.pulseDirection = -1
   elseif self.pulseTime <= 0 then
@@ -151,7 +166,7 @@ function Ai:update(grid, flowField, dt)
 
   handleHits(self)
 
-  if self.deleted then
+  if self._deleted then
     return
   end
 
@@ -269,7 +284,7 @@ local function drawShadow(self)
   )
 end
 
-function Ai:draw()
+function Ai.draw(self)
   local padding = 0
   local sizeIncreaseX, sizeIncreaseY = (self.w * self.pulseTime), (self.h * self.pulseTime)
   local drawWidth, drawHeight = self.w + sizeIncreaseX, self.h + sizeIncreaseY
@@ -311,19 +326,20 @@ function Ai:draw()
   -- self:debugLineOfSight()
 end
 
-function Ai:final()
-  self.deleted = true
-  self.collision:delete()
+function Ai.final(self)
   msgBus.send(msgBus.GENERATE_LOOT, {self.x, self.y})
   msgBus.send(msgBus.EXPERIENCE_GAIN, 1)
 end
 
-function Ai.create(x, y, speed, scale, collisionWorld, pxToGridUnits, findNearestTarget, grid, gridSize, WALKABLE, showAiPath)
-  assert(WALKABLE ~= nil)
-  assert(type(pxToGridUnits) == 'function')
-  assert(collisionWorld ~= nil)
-  assert(type(grid) == 'table')
-  assert(type(gridSize) == 'number')
+function Ai.init(self)
+  assert(self.WALKABLE ~= nil)
+  assert(type(self.pxToGridUnits) == 'function')
+  assert(self.collisionWorld ~= nil)
+  assert(type(self.grid) == 'table')
+  assert(type(self.gridSize) == 'number')
+  local scale = self.scale
+  local gridSize = self.gridSize
+  self.hits = {}
 
   if scale % 1 == 0 then
     -- to prevent wall collision from getting stuck when pathing around corners, we'll adjust
@@ -338,53 +354,25 @@ function Ai.create(x, y, speed, scale, collisionWorld, pxToGridUnits, findNeares
     Ie: if scale is 1.5, then the difference is (2 - 1.5) * gridSize
   ]]
   local padding = math.ceil(scale) * gridSize - size
+  self.padding = padding
+
   local w, h = size, size
-  local colObj = collisionObject
-    :new('ai', x, y, w, h)
-    :addToWorld(collisionWorld)
+  self.w, self.h = w, h
+  self.collision = self:addCollisionObject('ai', self.x, self.y, size, size)
+    :addToWorld(self.collisionWorld)
 
-  local entity = setmetatable({
-    x = x,
-    y = y,
-    w = w,
-    h = h,
-    health = 10,
-    id = uid(),
-    pulseTime = 0, -- animation pulse time
-    hits = {},
-    -- used for centering the agent during movement
-    padding = math.ceil(padding / 2),
-    dx = 0,
-    dy = 0,
-    scale = scale,
-    speed = speed or 100,
-    attackRange = 8 * gridSize,
-    sightRadius = 11 * gridSize, -- pixel units
-    collision = colObj,
-    grid = grid,
-    gridSize = gridSize,
-    showAiPath = showAiPath,
-    pxToGridUnits = pxToGridUnits,
-    findNearestTarget = findNearestTarget,
-    WALKABLE = WALKABLE,
-
-    animation = animationFactory:new({
-      'pixel-white-1x1'
-    }),
-    COLOR_FILL = {0,0.9,0.3,1}
-  }, Ai_mt)
-
-  local self = entity
+  self.attackRange = self.attackRange * self.gridSize
+  self.sightRadius = self.sightRadius * self.gridSize
 
   msgBus.subscribe(function(msgType, msgValue)
+    if self._deleted then
+      return msgBus.CLEANUP
+    end
+
     if msgBus.CHARACTER_HIT == msgType and msgValue.parent == self then
       table.insert(self.hits, msgValue)
     end
   end)
-
-  colObj:setParent(self)
-
-  return self
 end
 
-return Ai
+return Component.createFactory(Ai)
