@@ -64,8 +64,8 @@ progress = currentLevelExp / expRequiredForLevelUp
 
 ## Scene selection menu
 
+- [x] gui button to open up scene selection menu
 - [x] load previously selected scene from disk
 - [x] persist selected scene to disk so we can reload last selected scene
-- [ ] if no scene is selected, show menu
-- [ ] gui button to open up scene selection menu
-- [ ] cleanup scene before loading a new scene
+- [x] if no scene is selected, show menu
+- [x] cleanup scene before loading a new scene
