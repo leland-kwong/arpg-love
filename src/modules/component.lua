@@ -102,7 +102,10 @@ function M.createFactory(blueprint)
     return self
   end
 
-  -- sets the parent if a parent is provided, otherwise unsets it (when parent is `nil`)
+  --[[
+    Sets the parent if a parent is provided, otherwise unsets it (when parent is `nil`).
+    We don't want an `addChild` method so we can avoid coupling between child and parent.
+  ]]
   function blueprint:setParent(parent)
     self.parent = parent
     return self
