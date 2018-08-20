@@ -8,10 +8,6 @@ local Camera = require 'modules.camera'
 
 local floor, max = math.floor, math.max
 
-local function adjust(v)
-  return floor(v)
-end
-
 local function getGridBounds(gridSize, camera)
   local w, e, n, s = camera:getBounds(false)
   local scale = config.scaleFactor
@@ -44,8 +40,8 @@ local function iterateActiveGrid(self, cb, a, b, c)
     local endX = e + self.offset + thresholdEast
     for x=startX, endX do
       -- adjust coordinates to be integer values since grid coordinates are integers
-      local _x = adjust(x)
-      local _y = adjust(y)
+      local _x = floor(x)
+      local _y = floor(y)
       local row = self.grid[_y]
       local value = row and row[_x]
       local isInColViewport = x >= w and x <= e

@@ -14,7 +14,6 @@ local minimapTileRenderers = {
     local actualX = x - originX
     local actualY = y - originY
 
-    local _r, _g, _b, _a = love.graphics.getColor()
     love.graphics.setColor(isInViewport and COLOR_TILE_IN_VIEW or COLOR_TILE_OUT_OF_VIEW)
 
     local rectSize = 1
@@ -24,8 +23,6 @@ local minimapTileRenderers = {
       FILL_STYLE,
       x, y, rectSize, rectSize
     )
-
-    love.graphics.setColor(_r, _g, _b, _a)
   end,
   -- walkable
   [1] = function(x, y)
