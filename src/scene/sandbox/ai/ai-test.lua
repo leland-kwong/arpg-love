@@ -147,18 +147,19 @@ function flowFieldTestBlueprint.init(self)
   end
 
   local function AiFactory(x, y, speed, scale)
-    return Ai.create(
-      x * gridSize, y * gridSize,
-      speed,
-      scale,
-      colWorld,
-      pxToGridUnits,
-      findNearestTarget,
-      grid,
-      gridSize,
-      WALKABLE,
-      self.showAiPath
-    )
+    return Ai.create({
+      x = x * gridSize,
+      y = y * gridSize,
+      speed= speed,
+      scale = scale,
+      collisionWorld = colWorld,
+      pxToGridUnits = pxToGridUnits,
+      findNearestTarget = findNearestTarget,
+      grid = grid,
+      gridSize = gridSize,
+      WALKABLE = WALKABLE,
+      showAiPath = self.showAiPath
+    })
   end
 
   self.ai = {
@@ -206,7 +207,7 @@ function flowFieldTestBlueprint.update(self, dt)
   end
 
   f.forEach(self.ai, function(ai)
-    ai:update(grid, self.flowField, dt)
+    ai._update2(ai, grid, self.flowField, dt)
   end)
 end
 
