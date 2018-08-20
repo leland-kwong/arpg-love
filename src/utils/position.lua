@@ -15,14 +15,8 @@ local sqrt, pow = math.sqrt, math.pow
 Position.getDirection = function(x1, y1, x2, y2)
   local a = y2 - y1
   local b = x2 - x1
-  local c = sqrt(pow(a, 2) + pow(b, 2))
+  local c = sqrt(a*a + b*b)
 	return b/c, a/c
-end
-
-function Position.normalizeVector(a, b)
-	local c = sqrt(pow(a, 2) + pow(b, 2))
-	return a == 0 and 0 or a/c,
-		b == 0 and 0 or b/c
 end
 
 -- returns coordinate offsets so that the item is centered to the parent with origin at north-west
