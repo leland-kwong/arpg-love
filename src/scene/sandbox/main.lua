@@ -117,8 +117,6 @@ function Sandbox.init()
   DebugMenuToggleButton(function()
     DebugMenu(not state.menuOpened)
   end)
-
-  print(state.menuOpened)
 end
 
 function Sandbox.draw()
