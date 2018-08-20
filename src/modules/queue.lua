@@ -71,8 +71,9 @@ end
 function Q:flush()
   for i=self.minOrder, self.maxOrder do
     local row = self.list[i]
-    if row and #row > 0 then
-      for j=1, #row do
+    local rowLen = row and #row or 0
+    if rowLen > 0 then
+      for j=1, rowLen do
         local item = row[j]
         -- execute callback
         item[1](item[2], item[3])
