@@ -115,14 +115,13 @@ local Player = {
     self.shader:send('outline_width', 1)
     self.shader:send('outline_color', self.outlineColor)
 
-    self.colObj = collisionObject:new(
+    self.colObj = self:addCollisionObject(
       'player',
       self.x,
       self.y,
       self.w,
       self.h
     ):addToWorld(colMap)
-     :setParent(self)
 
     local function isOutOfBounds(grid, x, y)
       return y < 1 or x < 1 or y > #grid or x > #grid[1]

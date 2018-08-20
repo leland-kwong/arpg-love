@@ -71,6 +71,8 @@ end
 insertTestItems(rootState)
 
 function MainScene.init(self)
+  local parent = self
+
   local map = Map.createAdjacentRooms(4, 20)
   local gridTileDefinitions = cloneGrid(map.grid, function(v, x, y)
     local tileGroup = gridTileTypes[v]
@@ -79,11 +81,11 @@ function MainScene.init(self)
 
   local player = Player.create({
     mapGrid = map.grid
-  })
+  }):setParent(parent)
 
   Hud.create({
     rootStore = rootState
-  })
+  }):setParent(parent)
 
   msgBus.subscribe(function(msgType, msgValue)
     if msgBus.KEY_RELEASED == msgType then
@@ -111,41 +113,41 @@ function MainScene.init(self)
         y = y,
         item = item,
         rootStore = rootState
-      })
+      }):setParent(parent)
     end
   end)
 
-  local aiCount = 40
-  local generated = 0
-  while generated < aiCount do
-    local posX, posY = math.random(3, 60), math.random(3, 60)
-    local isValidPosition = map.grid[posY][posX] == Map.WALKABLE
-    if isValidPosition then
-      generated = generated + 1
-      SpawnerAi.create({
-        grid = map.grid,
-        WALKABLE = Map.WALKABLE,
-        target = player,
-        x = posX,
-        y = posY,
-        speed = 80,
-        scale = 0.5 + (math.random(1, 7) / 10)
-      })
-    end
-  end
+  -- local aiCount = 40
+  -- local generated = 0
+  -- while generated < aiCount do
+  --   local posX, posY = math.random(3, 60), math.random(3, 60)
+  --   local isValidPosition = map.grid[posY][posX] == Map.WALKABLE
+  --   if isValidPosition then
+  --     generated = generated + 1
+  --     SpawnerAi.create({
+  --       grid = map.grid,
+  --       WALKABLE = Map.WALKABLE,
+  --       target = player,
+  --       x = posX,
+  --       y = posY,
+  --       speed = 80,
+  --       scale = 0.5 + (math.random(1, 7) / 10)
+  --     }):setParent(parent)
+  --   end
+  -- end
 
   Minimap.create({
     camera = camera,
     grid = map.grid,
     scale = config.scaleFactor
-  })
+  }):setParent(parent)
 
   MainMap.create({
     camera = camera,
     grid = map.grid,
     tileRenderDefinition = gridTileDefinitions,
     walkable = Map.WALKABLE
-  })
+  }):setParent(parent)
 end
 
 return Component.createFactory(MainScene)

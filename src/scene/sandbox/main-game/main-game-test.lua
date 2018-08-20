@@ -14,9 +14,9 @@ local function modifyLevelRequirements()
   end
 end
 
-function MainGameTest.init()
+function MainGameTest.init(self)
   modifyLevelRequirements()
-  SceneMain.create()
+  SceneMain.create():setParent(self)
 end
 
 return Component.createFactory(MainGameTest)

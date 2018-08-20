@@ -29,7 +29,7 @@ local function getWallEntity(self, positionIndex)
 end
 
 local function addWallTileEntity(self, positionIndex, entityProps)
-  local wallTileEntity = MainMapSolidsFactory.create(entityProps)
+  local wallTileEntity = MainMapSolidsFactory.create(entityProps):setParent(self)
   self.wallTileCache:set(positionIndex, wallTileEntity)
 end
 
@@ -43,7 +43,6 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     end
     self.wallTileCache = lru.new(400, nil, wallTilePruneCallback)
     self.animationCache = lru.new(1400)
-
   end,
 
   onUpdateStart = function(self)
