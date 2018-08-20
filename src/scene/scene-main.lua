@@ -80,7 +80,7 @@ function MainScene.init(self)
   end)
 
   local player = Player.create({
-    mapGrid = map.grid
+    mapGrid = map.grid,
   }):setParent(parent)
 
   Hud.create({
@@ -88,21 +88,34 @@ function MainScene.init(self)
   }):setParent(parent)
 
   msgBus.subscribe(function(msgType, msgValue)
-    if msgBus.KEY_RELEASED == msgType then
+    if self._deleted then
+      return msgBus.CLEANUP
+    end
+
+    if msgBus.KEY_PRESSED == msgType then
       local key = msgValue.key
       local isActive = rootState:get().activeMenu == 'INVENTORY'
-      if key == config.keyboard.INVENTORY_TOGGLE and (not isActive) then
-        local component = Inventory.create({
-          rootStore = rootState,
-          slots = function()
-            return rootState:get().inventory
-          end,
-          onDisableRequest = function()
-            rootState:set('activeMenu', false)
-          end
-        })
-        rootState:set('activeMenu', 'INVENTORY')
+      if key == config.keyboard.INVENTORY_TOGGLE then
+        if not self.inventory then
+          self.inventory = Inventory.create({
+            rootStore = rootState,
+            slots = function()
+              return rootState:get().inventory
+            end
+          })
+          rootState:set('activeMenu', 'INVENTORY')
+        else
+          self.inventory:delete(true)
+          self.inventory = nil
+          rootState:set('activeMenu', false)
+        end
       end
+    end
+
+    if msgBus.ENEMY_DESTROYED == msgType then
+      local ItemPotion = require 'components.item-inventory.items.definitions.potion-health'
+      msgBus.send(msgBus.GENERATE_LOOT, {msgValue.x, msgValue.y, ItemPotion.create()})
+      msgBus.send(msgBus.EXPERIENCE_GAIN, msgValue.experience)
     end
 
     if msgBus.GENERATE_LOOT == msgType then
@@ -117,24 +130,25 @@ function MainScene.init(self)
     end
   end)
 
-  -- local aiCount = 40
-  -- local generated = 0
-  -- while generated < aiCount do
-  --   local posX, posY = math.random(3, 60), math.random(3, 60)
-  --   local isValidPosition = map.grid[posY][posX] == Map.WALKABLE
-  --   if isValidPosition then
-  --     generated = generated + 1
-  --     SpawnerAi.create({
-  --       grid = map.grid,
-  --       WALKABLE = Map.WALKABLE,
-  --       target = player,
-  --       x = posX,
-  --       y = posY,
-  --       speed = 80,
-  --       scale = 0.5 + (math.random(1, 7) / 10)
-  --     }):setParent(parent)
-  --   end
-  -- end
+  local aiCount = 20
+  local generated = 0
+  local minPos, maxPos = 3, 60
+  while generated < aiCount do
+    local posX, posY = math.random(minPos, maxPos), math.random(minPos, maxPos)
+    local isValidPosition = map.grid[posY][posX] == Map.WALKABLE
+    if isValidPosition then
+      generated = generated + 1
+      SpawnerAi.create({
+        grid = map.grid,
+        WALKABLE = Map.WALKABLE,
+        target = player,
+        x = posX,
+        y = posY,
+        speed = 80,
+        scale = 0.5 + (math.random(1, 7) / 10)
+      }):setParent(parent)
+    end
+  end
 
   Minimap.create({
     camera = camera,

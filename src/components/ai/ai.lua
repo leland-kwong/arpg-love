@@ -114,6 +114,11 @@ local function handleHits(self)
 
       local isDestroyed = self.health <= 0
       if isDestroyed then
+        msgBus.send(msgBus.ENEMY_DESTROYED, {
+          x = self.x,
+          y = self.y,
+          experience = 1
+        })
         self:delete()
         return
       end
@@ -324,11 +329,6 @@ function Ai.draw(self)
   )
 
   -- self:debugLineOfSight()
-end
-
-function Ai.final(self)
-  msgBus.send(msgBus.GENERATE_LOOT, {self.x, self.y})
-  msgBus.send(msgBus.EXPERIENCE_GAIN, 1)
 end
 
 function Ai.init(self)

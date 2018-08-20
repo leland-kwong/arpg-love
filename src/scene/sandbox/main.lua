@@ -86,6 +86,7 @@ function Sandbox.init()
       })
     elseif activeSceneMenu then
       activeSceneMenu:delete(true)
+      activeSceneMenu = nil
     end
     setState({ menuOpened = enabled })
   end
@@ -97,7 +98,7 @@ function Sandbox.init()
   local scenePath = scenes[state.activeScene]
   loadScene(state.activeScene, scenePath)
 
-  -- load menu if no active scene exists
+  -- -- load menu if no active scene exists
   if not state.activeScene then
     DebugMenu(true)
   end
