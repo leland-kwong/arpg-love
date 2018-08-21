@@ -3,8 +3,11 @@ local objectUtils = require("utils.object-utils")
 
 local defaultOptions = {
 	onCacheHit = noop,
-	resolver = function(lastArgs, input1, input2, input3)
-		return (input1 ~= lastArgs[1]) or (input2 ~= lastArgs[2]) or (input3 ~= lastArgs[3])
+	resolver = function(lastArgs, input1, input2, input3, input4)
+		return (input1 ~= lastArgs[1])
+			or (input2 ~= lastArgs[2])
+			or (input3 ~= lastArgs[3])
+			or (input4 ~= lastArgs[4])
 	end
 }
 
