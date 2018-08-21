@@ -19,7 +19,7 @@ function logger:add(entry)
 	table.insert(self.entries, 1, entry)
 	-- remove oldest entry
 	if #self.entries > self.size then
-		table.remove(self.entries, #self.entries)
+		self.entries[#self.entries] = nil
 	end
 end
 

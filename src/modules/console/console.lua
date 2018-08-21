@@ -95,20 +95,13 @@ end
 
 local canvas = love.graphics.newCanvas()
 
-function Console.debug(self, ...)
-  local args = {...}
-  local output = table.concat(args)
-  self.debugOutput[#self.debugOutput + 1] = output..'\n'
-end
+local Logger = require'utils.logger'
+local logger = Logger:new(10)
 
-function Console.init(self)
-  self.debugOutput = {
-    clear = function(self)
-      for i=1, #self do
-        self[i] = nil
-      end
-    end
-  }
+function Console.debug(...)
+  local args = {...}
+  local output = table.concat(args, ' ')
+  logger:add(output)
 end
 
 function Console.update(self)
@@ -120,7 +113,6 @@ end
 
 function Console.draw(self)
   if not state.showConsole then
-    self.debugOutput:clear()
     return
   end
   local lineHeight = font.primaryLarge.lineHeight
@@ -171,11 +163,15 @@ function Console.draw(self)
     startY + 12 * lineHeight
   )
 
-  for i=1, #self.debugOutput do
-    local output = self.debugOutput[i]
-    guiText:add(output, Color.WHITE, edgeOffset, 400 + (lineHeight * i))
+  local logEntries = logger:get()
+  gfx.setColor(Color.MED_GRAY)
+  local loggerYPosition = 700
+  gfx.print('LOG', edgeOffset, loggerYPosition)
+  gfx.setColor(Color.WHITE)
+  for i=1, #logEntries do
+    local output = logEntries[i]
+    guiText:add(output, Color.WHITE, edgeOffset, loggerYPosition + (lineHeight * i))
   end
-  self.debugOutput:clear()
 
   gfx.setCanvas()
   gfx.setBlendMode('alpha', 'premultiplied')
