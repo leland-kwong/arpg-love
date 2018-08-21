@@ -27,7 +27,7 @@ return itemDefs.registerType({
 
 		onEquip = function(self)
 			local duration = math.pow(10, 10)
-			msgBus.send(msgBus.PLAYER_ADD_HEAL_SOURCE, {
+			msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
 				amount = self.regeneration * duration,
 				duration = duration,
 				source = healSource,

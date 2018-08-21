@@ -8,7 +8,7 @@ if config.isDebug then
   setmetatable(M, {
     --[[
       If property doesn't exist, throw an error. This is to alert us about accessing properties that don't
-      exist. The main use case is when trying to access message type constants, ie `msgBus.PLAYER_ADD_HEAL_SOURCE` should not be a `nil` value.
+      exist. The main use case is when trying to access message type constants, ie `msgBus.PLAYER_HEAL_SOURCE_ADD` should not be a `nil` value.
     ]]
     __index = function(_, name)
       if not proxy[name] then
@@ -48,5 +48,8 @@ M.INVENTORY_PICKUP = 'INVENTORY_PICKUP'
 M.INVENTORY_DROP = 'INVENTORY_DROP'
 M.INVENTORY_DROP_MODE_FLOOR = 'INVENTORY_DROP_MODE_FLOOR'
 M.INVENTORY_DROP_MODE_INVENTORY = 'INVENTORY_DROP_MODE_INVENTORY'
+
+M.PLAYER_HEAL_SOURCE_ADD = 'PLAYER_HEAL_SOURCE_ADD'
+M.PLAYER_HEAL_SOURCE_REMOVE = 'PLAYER_HEAL_SOURCE_REMOVE'
 
 return M
