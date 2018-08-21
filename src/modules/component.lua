@@ -33,7 +33,7 @@ local baseProps = {
   _update = function(self, dt)
     local parent = self.parent
     if parent then
-      if parent._deleted then
+      if parent:isDeleted() then
         if parent._deleteRecursive then
           self:delete(true)
           -- remove parent reference after deletion since the component may
@@ -136,12 +136,21 @@ function M.createFactory(blueprint)
     return self
   end
 
+  --[[
+    Revives the game object, which is effectively recreating the component, except we're reusing it.
+    This allows gives us to save memory by not having to recreate objects
+  ]]
+  function blueprint:revive()
+    self:setGroup(self.group)
+    self:init()
+  end
+
   function blueprint:getId()
     return self._id
   end
 
   function blueprint:isDeleted()
-    return self._deleted
+    return not self.group.hasComponent(self)
   end
 
   -- default methods
@@ -201,26 +210,19 @@ function M.newGroup(groupDefinition)
   end
 
   function Group.delete(component)
-    if component._deleted then
-      if isDebug then
-        print('[WARNING] component already deleted:', component._id)
-      end
+    if not Group.hasComponent(component) then
+      print('[WARNING] component already deleted:', component._id)
       return
     end
 
     componentsById[component._id] = nil
     count = count - 1
     component:final()
-    -- set deleted state. (this is for debugging purposes only)
-    component._deleted = true
     return Group
   end
 
-  function Group.deleteAll()
-    for id,c in pairs(componentsById) do
-      c:delete()
-    end
-    return Group
+  function Group.hasComponent(component)
+    return componentsById[component._id]
   end
 
   return Group

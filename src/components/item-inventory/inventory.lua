@@ -44,7 +44,7 @@ function InventoryBlueprint.init(self)
   msgBus.subscribe(function(msgType, msg)
     local rootStore = self.rootStore
 
-    if self._deleted then
+    if self:isDeleted() then
       return msgBus.CLEANUP
     end
 

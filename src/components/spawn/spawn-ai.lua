@@ -66,7 +66,7 @@ end
 
 function SpawnerAi.init(self)
   msgBus.subscribe(function(msgType, msgValue)
-    if self._deleted then
+    if self:isDeleted() then
       return msgBus.CLEANUP
     end
 
@@ -79,7 +79,7 @@ function SpawnerAi.init(self)
 end
 
 function SpawnerAi.update(self, dt)
-  if self.ai._deleted then
+  if self.ai:isDeleted() then
     self:delete()
     return
   end

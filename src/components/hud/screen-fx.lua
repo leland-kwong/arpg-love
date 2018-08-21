@@ -15,7 +15,7 @@ local ScreenFx = {
 function ScreenFx.init(self)
   self.tween = tween.new(2, self, {opacity = 0}, tween.easing.outExpo)
   msgBus.subscribe(function(msgType, msgValue)
-    if self._deleted then
+    if self:isDeleted() then
       return msgBus.CLEANUP
     end
 

@@ -20,7 +20,7 @@ function HealthIndicator.init(self)
   self.health = self.rootStore:get().health
   self.maxHealth = self.rootStore:get().maxHealth
   msgBus.subscribe(function(msgType, msgValue)
-    if self._deleted then
+    if self:isDeleted() then
       return msgBus.CLEANUP
     end
 

@@ -149,7 +149,7 @@ function Gui.init(self)
 
   msgBus.subscribe(function(msgType, msgValue)
     -- cleanup
-    local shouldCleanup = self._deleted
+    local shouldCleanup = self:isDeleted()
     if shouldCleanup then
       return msgBus.CLEANUP
     end

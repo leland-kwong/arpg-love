@@ -139,7 +139,7 @@ local Player = {
 
     local calcDist = require'utils.math'.dist
     msgBus.subscribe(function(msgType, msg)
-      if self._deleted then
+      if self:isDeleted() then
         return msgBus.CLEANUP
       end
 

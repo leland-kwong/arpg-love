@@ -171,7 +171,7 @@ function Ai._update2(self, grid, flowField, dt)
 
   handleHits(self)
 
-  if self._deleted then
+  if self:isDeleted() then
     return
   end
 
@@ -365,7 +365,7 @@ function Ai.init(self)
   self.sightRadius = self.sightRadius * self.gridSize
 
   msgBus.subscribe(function(msgType, msgValue)
-    if self._deleted then
+    if self:isDeleted() then
       return msgBus.CLEANUP
     end
 

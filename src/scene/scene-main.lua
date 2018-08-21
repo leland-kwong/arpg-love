@@ -88,7 +88,7 @@ function MainScene.init(self)
   }):setParent(parent)
 
   msgBus.subscribe(function(msgType, msgValue)
-    if self._deleted then
+    if self:isDeleted() then
       return msgBus.CLEANUP
     end
 
