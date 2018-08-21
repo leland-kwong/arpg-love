@@ -18,8 +18,8 @@ local WALKABLE = 0
 
 local flowFieldTestBlueprint = {
   group = groups.hud,
-  showFlowFieldText = false,
-  showGridCoordinates = true,
+  showFlowFieldText = true,
+  showGridCoordinates = false,
   showAiPath = false,
   showAi = true
 }
@@ -32,7 +32,8 @@ end
 
 local function isGridCellVisitable(grid, x, y, dist)
   return not isOutOfBounds(grid, x, y) and
-    grid[y][x] == WALKABLE
+    grid[y][x] == WALKABLE and
+    dist < 15
 end
 
 -- returns grid units relative to the ui
@@ -344,20 +345,20 @@ local function drawScene(self)
         if self.showFlowFieldText then
           textDrawQueue[#textDrawQueue + 1] = function()
             love.graphics.scale(0.5)
-            love.graphics.setColor(0.6,0.6,0.6,1)
+            love.graphics.setColor(0,1,0.6,1)
 
             -- direction vectors
             love.graphics.print(
               row[x].x..' '..row[x].y,
               (drawX + 5) * 2,
-              (drawY + 5) * 2
+              (drawY + 4) * 2
             )
 
             -- distance
             love.graphics.print(
               row[x].dist,
               (drawX + gridSize/2) * 2,
-              (drawY + gridSize - 6) * 2
+              (drawY + gridSize - 7) * 2
             )
 
             love.graphics.scale(2)
