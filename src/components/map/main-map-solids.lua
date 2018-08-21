@@ -15,6 +15,8 @@ local MainMapSolidsBlueprint = {
 }
 
 function MainMapSolidsBlueprint.init(self)
+  assert(type(self.gridSize) == 'number', 'invalid grid size')
+
   local w = self.animation:getSourceSize()
   local ox, oy = self.animation:getSourceOffset()
   self.colObj = self:addCollisionObject(
