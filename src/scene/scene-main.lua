@@ -73,7 +73,7 @@ insertTestItems(rootState)
 function MainScene.init(self)
   local parent = self
 
-  local map = Map.createAdjacentRooms(4, 20)
+  local map = Map.createAdjacentRooms(6, 25)
   local gridTileDefinitions = cloneGrid(map.grid, function(v, x, y)
     local tileGroup = gridTileTypes[v]
     return tileGroup[math.random(1, #tileGroup)]
