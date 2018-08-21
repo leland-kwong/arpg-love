@@ -2,7 +2,6 @@
 
 local TablePool = require 'utils.table-pool'
 local memoize = require 'utils.memoize'
-local sqrt, pow = math.sqrt, math.pow
 
 local function getIndexByCoordinate(x, y, maxCols)
   return (y * maxCols) + x

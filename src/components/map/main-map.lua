@@ -9,19 +9,14 @@ local MainMapSolidsFactory = require 'components.map.main-map-solids'
 local animationFactory = require 'components.animation-factory'
 local lru = require 'utils.lru'
 local memoize = require'utils.memoize'
+local GetIndexByCoordinate = memoize(require 'utils.get-index-by-coordinate')
+local config = require'config'
 
 local animationTypes = {}
-local gridRowsCols = memoize(function(grid)
-  return #grid, #grid[1]
-end)
 
 local function getAnimation(animationCache, position, name)
   animationTypes[name] = animationTypes[name] or animationFactory:new({name})
   return animationTypes[name]
-end
-
-local function getIndexByCoordinate(x, y, maxCols)
-  return (y * maxCols) + x
 end
 
 local function getWallEntity(self, positionIndex)
@@ -42,16 +37,16 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
       entity:delete()
     end
     self.wallTileCache = lru.new(400, nil, wallTilePruneCallback)
+    self.renderFloorCache = {}
   end,
 
   onUpdate = function(self, value, x, y, originX, originY, isInViewport, dt)
-    local maxRows, maxCols = gridRowsCols(self.grid)
-    local index = getIndexByCoordinate(x, y, maxCols)
-    local animationName = self.tileRenderDefinition[y][x]
-    local animation = getAnimation(self.animationCache, index, animationName)
-      :update(dt)
     -- if its unwalkable, add a collision object and create wall tile
     if value ~= Map.WALKABLE then
+      local index = GetIndexByCoordinate(self.grid)(x, y)
+      local animationName = self.tileRenderDefinition[y][x]
+      local animation = getAnimation(self.animationCache, index, animationName)
+        :update(dt)
       local tileX, tileY = x * self.gridSize, y * self.gridSize
       local ox, oy = animation:getOffset()
       local cached = getWallEntity(self, index)
@@ -69,14 +64,13 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   end,
 
   render = function(self, value, x, y, originX, originY)
-    local maxRows, maxCols = gridRowsCols(self.grid)
-    local index = getIndexByCoordinate(x, y, maxCols)
-    local animationName = self.tileRenderDefinition[y][x]
-    local animation = getAnimation(self.animationCache, index, animationName)
-    local ox, oy = animation:getOffset()
-    local tileX, tileY = x * self.gridSize, y * self.gridSize
-
     if value == Map.WALKABLE then
+      local index = GetIndexByCoordinate(self.grid)(x, y)
+      local animationName = self.tileRenderDefinition[y][x]
+      local animation = getAnimation(self.animationCache, index, animationName)
+      local ox, oy = animation:getOffset()
+      local tileX, tileY = x * self.gridSize, y * self.gridSize
+
       love.graphics.draw(
         animation.atlas,
         animation.sprite,
@@ -89,7 +83,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
         oy
       )
     end
-  end
+  end,
 })
 
 return Component.createFactory(blueprint)

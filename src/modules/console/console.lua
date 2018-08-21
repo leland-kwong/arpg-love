@@ -120,6 +120,7 @@ end
 
 function Console.draw(self)
   if not state.showConsole then
+    self.debugOutput:clear()
     return
   end
   local lineHeight = font.primaryLarge.lineHeight

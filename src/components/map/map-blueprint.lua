@@ -34,15 +34,15 @@ local function iterateActiveGrid(self, cb, a, b, c)
   local thresholdEast = 1
 
   local y = n - self.offset
-  while y < s + self.offset + thresholdSouth do
+  while y < (s + self.offset + thresholdSouth) do
     local isInRowViewport = y >= n and y <= s
     local startX = w - self.offset - thresholdWest
     local endX = e + self.offset + thresholdEast
+    local _y = floor(y)
+    local row = self.grid[_y]
     for x=startX, endX do
       -- adjust coordinates to be integer values since grid coordinates are integers
       local _x = floor(x)
-      local _y = floor(y)
-      local row = self.grid[_y]
       local value = row and row[_x]
       local isInColViewport = x >= w and x <= e
       local isInViewport = isInRowViewport and isInColViewport
@@ -64,21 +64,27 @@ local mapBlueprint = {
     {}
   },
   onUpdateStart = noop,
-  onUpdate = noop,
+  onUpdate = nil,
   onUpdateEnd = noop,
   renderStart = noop,
-  render = noop,
+  render = nil,
   renderEnd = noop,
+
+  getGridBounds = getGridBounds,
 
   update = function(self, dt)
     self.onUpdateStart(self)
-    iterateActiveGrid(self, self.onUpdate, dt)
+    if self.onUpdate then
+      iterateActiveGrid(self, self.onUpdate, dt)
+    end
     self.onUpdateEnd(self)
   end,
 
   draw = function(self)
     self.renderStart(self)
-    iterateActiveGrid(self, self.render)
+    if self.render then
+      iterateActiveGrid(self, self.render)
+    end
     self.renderEnd(self)
   end
 }
