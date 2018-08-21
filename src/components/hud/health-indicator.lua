@@ -17,8 +17,6 @@ function HealthIndicator.init(self)
     end
   }):setParent(self)
 
-  self.health = self.rootStore:get().health
-  self.maxHealth = self.rootStore:get().maxHealth
   msgBus.subscribe(function(msgType, msgValue)
     if self:isDeleted() then
       return msgBus.CLEANUP
@@ -31,6 +29,11 @@ function HealthIndicator.init(self)
       self.health = self.rootStore:get().health
     end
   end)
+end
+
+function HealthIndicator.update(self)
+  self.health = self.rootStore:get().health
+  self.maxHealth = self.rootStore:get().maxHealth
 end
 
 function HealthIndicator.draw(self)

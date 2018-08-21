@@ -128,6 +128,14 @@ function MainScene.init(self)
         rootStore = rootState
       }):setParent(parent)
     end
+
+    if msgBus.PLAYER_HEAL_SOURCE_ADD == msgType then
+      require'components.heal-source'.add(self, msgValue, rootState)
+    end
+
+    if msgBus.PLAYER_HEAL_SOURCE_REMOVE == msgType then
+      require'components.heal-source'.remove(self, msgValue)
+    end
   end)
 
   local aiCount = 50
