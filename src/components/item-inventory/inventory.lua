@@ -83,12 +83,16 @@ function InventoryBlueprint.init(self)
   self.slotMargin = 2
 
   local w, h = calcInventorySize(self.slots(), self.slotSize, self.slotMargin)
+  local equipmentW, equipmentH, equipmentMargin = 100, h, 5
   self.w = w
   self.h = h
 
   -- center to screen
-  local offsetRight = 20
-  self.x = (config.resolution.w - w) - offsetRight
+  local inventoryX = require'utils.position'.boxCenterOffset(
+    w + equipmentW + equipmentMargin, h,
+    love.graphics.getWidth() / config.scaleFactor, love.graphics.getHeight() / config.scaleFactor
+  )
+  self.x = inventoryX + equipmentW + equipmentMargin
   self.y = (config.resolution.h - h) / 2
 
   InteractArea(self):setParent(self)
@@ -111,11 +115,10 @@ function InventoryBlueprint.init(self)
     inventoryOnItemDropToSlot
   )
 
-  local equipmentW, equipmentH = 100, h
   local EquipmentPanel = require 'components.item-inventory.equipment-panel'
   EquipmentPanel.create({
     rootStore = self.rootStore,
-    x = self.x - equipmentW - 5,
+    x = self.x - equipmentW - equipmentMargin,
     y = self.y,
     w = equipmentW,
     h = h,
@@ -130,7 +133,7 @@ end
 function InventoryBlueprint.draw(self)
   local w, h = self.w, self.h
 
-  drawTitle(self, self.x, 20)
+  drawTitle(self, self.x, self.y - 15)
 
   -- inventory background
   love.graphics.setColor(0.2, 0.2, 0.2, 0.8)
