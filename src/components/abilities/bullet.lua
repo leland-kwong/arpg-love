@@ -13,9 +13,6 @@ local typeCheck = require 'utils.type-check'
 
 local colMap = collisionWorlds.map
 
-local scale = 1
-local maxLifeTime = 2
-
 local defaultFilters = {
   obstacle = true,
   obstacle2 = true,
@@ -36,7 +33,7 @@ local Bullet = {
   minDamage = 1,
   maxDamage = 2,
   scale = 1,
-  maxLifeTime = 2,
+  lifeTime = 2,
   speed = 250,
   cooldown = 0.1,
   targetGroup = nil,
@@ -62,7 +59,7 @@ local Bullet = {
   end,
 
   update = function(self, dt)
-    self.maxLifeTime = self.maxLifeTime - dt
+    self.lifeTime = self.lifeTime - dt
 
     local dx = self.direction.x * dt * self.speed
     local dy = self.direction.y * dt * self.speed
@@ -71,7 +68,7 @@ local Bullet = {
     self.animation:update(dt)
     local cols, len = select(3, self.colObj:move(self.x, self.y, ColFilter(self.targetGroup)))
     local hasCollisions = len > 0
-    local isExpired = self.maxLifeTime <= 0
+    local isExpired = self.lifeTime <= 0
 
     if hasCollisions or isExpired then
       if hasCollisions then
@@ -93,6 +90,7 @@ local Bullet = {
   draw = function(self)
     local angle = 0
     local ox, oy = self.animation:getOffset()
+    local scale = self.scale
 
     -- shadow
     love.graphics.setColor(0,0,0,0.15)

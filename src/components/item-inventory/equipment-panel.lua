@@ -96,7 +96,7 @@ end
 
 function EquipmentPanel.draw(self)
 	local x, y, w, h = self.x, self.y, self.w, self.h
-	guiTextLayers.title:add('Equipment', Color.WHITE, x, 20)
+	guiTextLayers.title:add('Equipment', Color.WHITE, x, self.y - 15)
 	love.graphics.setColor(0.2,0.2,0.2, 0.8)
 	love.graphics.rectangle('fill', x, y, w, h)
 end

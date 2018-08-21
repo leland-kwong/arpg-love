@@ -15,9 +15,11 @@ local MainMapSolidsBlueprint = {
 }
 
 function MainMapSolidsBlueprint.init(self)
+  assert(type(self.gridSize) == 'number', 'invalid grid size')
+
   local w = self.animation:getSourceSize()
   local ox, oy = self.animation:getSourceOffset()
-  self.colObj = collisionObject:new(
+  self.colObj = self:addCollisionObject(
     'obstacle',
     self.x, self.y, w, self.gridSize, ox, oy - (self.gridSize / 2)
   ):addToWorld(collisionWorlds.map)
@@ -36,10 +38,6 @@ function MainMapSolidsBlueprint.draw(self)
     self.ox,
     self.oy
   )
-end
-
-function MainMapSolidsBlueprint.final(self)
-  self.colObj:removeFromWorld(collisionWorlds.map)
 end
 
 function MainMapSolidsBlueprint.drawOrder(self)

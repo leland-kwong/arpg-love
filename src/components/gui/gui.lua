@@ -69,6 +69,7 @@ local Gui = {
   -- scroll limits. The value here represents how far you can scroll in each direction.
   scrollHeight = 0,
   scrollWidth = 0,
+  scrollSpeed = 1,
   -- array of children for the LIST component
   children = {},
 
@@ -101,14 +102,14 @@ local function handleFocusChange(self, origFocused)
 end
 
 local function handleScroll(self, dx, dy)
-  self.scrollLeft = self.scrollableX and min(0, self.scrollLeft - dx) or 0
+  self.scrollLeft = self.scrollableX and min(0, self.scrollLeft - dx * self.scrollSpeed) or 0
   local maxScrollLeft = -self.scrollWidth
   local maxScrollLeftReached = self.scrollLeft <= maxScrollLeft
   if maxScrollLeftReached then
     self.scrollLeft = maxScrollLeft
   end
 
-  self.scrollTop = self.scrollableY and min(0, self.scrollTop + dy) or 0
+  self.scrollTop = self.scrollableY and min(0, self.scrollTop + dy * self.scrollSpeed) or 0
   local maxScrollTop = -self.scrollHeight
   local maxScrollTopReached = self.scrollTop <= maxScrollTop
   if maxScrollTopReached then
@@ -132,7 +133,7 @@ function Gui.init(self)
       y = self.y,
       initialX = self.x,
       initialY = self.y
-    })
+    }):setParent(self)
     f.forEach(self.children, function(child)
       child:setParent(self.scrollNode)
     end)
@@ -148,7 +149,8 @@ function Gui.init(self)
 
   msgBus.subscribe(function(msgType, msgValue)
     -- cleanup
-    if msgBus.GUI_NODE_CLEANUP == msgType and msgValue == self:getId() then
+    local shouldCleanup = self:isDeleted()
+    if shouldCleanup then
       return msgBus.CLEANUP
     end
 
@@ -192,7 +194,7 @@ function Gui.init(self)
   end)
 
   local posX, posY = self:getPosition()
-  self.colObj = collisionObject:new(
+  self.colObj = self:addCollisionObject(
     self.collisionGroup or self.type,
     posX, posY,
     self.w, self.h
@@ -243,16 +245,6 @@ function Gui.draw(self)
 end
 
 function Gui.final(self)
-  msgBus.send(msgBus.GUI_NODE_CLEANUP, self:getId())
-
-  if guiType.LIST == self.type then
-    f.forEach(self.children, function(child)
-      -- unset the parent
-      child:setParent()
-    end)
-  end
-
-  self.colObj:delete()
   self.onFinal(self)
 end
 

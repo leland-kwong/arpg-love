@@ -49,46 +49,41 @@ local function AiFactory(self, x, y, speed, scale)
     return nil
   end
 
-  return Ai.create(
-    self.x * self.gridSize,
-    self.y * self.gridSize,
-    self.speed,
-    self.scale,
-    self.colWorld,
-    self.pxToGridUnits,
-    findNearestTarget,
-    self.grid,
-    self.gridSize,
-    self.WALKABLE,
-    self.showAiPath
-  )
+  return Ai.create({
+    x = self.x * self.gridSize,
+    y = self.y * self.gridSize,
+    speed = self.speed,
+    scale = self.scale,
+    collisionWorld = self.colWorld,
+    pxToGridUnits = self.pxToGridUnits,
+    findNearestTarget = findNearestTarget,
+    grid = self.grid,
+    gridSize = self.gridSize,
+    WALKABLE = self.WALKABLE,
+    showAiPath = self.showAiPath
+  })
 end
 
 function SpawnerAi.init(self)
   msgBus.subscribe(function(msgType, msgValue)
+    if self:isDeleted() then
+      return msgBus.CLEANUP
+    end
+
     if msgBus.NEW_FLOWFIELD == msgType then
       self.flowField = msgValue.flowField
     end
   end)
 
-  self.ai = AiFactory(self)
+  self.ai = AiFactory(self):setParent(self)
 end
 
 function SpawnerAi.update(self, dt)
-  self.ai:update(self.grid, self.flowField, dt)
-  self:setPosition(self.ai.x, self.ai.y)
-
-  if self.ai.deleted then
+  if self.ai:isDeleted() then
     self:delete()
+    return
   end
-end
-
-function SpawnerAi.draw(self)
-  self.ai:draw()
-end
-
-SpawnerAi.drawOrder = function(self)
-  return self.group.drawOrder(self) + 1
+  self.ai._update2(self.ai, self.grid, self.flowField, dt)
 end
 
 return Component.createFactory(SpawnerAi)

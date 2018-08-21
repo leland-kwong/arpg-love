@@ -17,9 +17,9 @@ local offX, offY = 100, 0
 local WALKABLE = 0
 
 local flowFieldTestBlueprint = {
-  group = groups.system,
-  showFlowFieldText = false,
-  showGridCoordinates = true,
+  group = groups.hud,
+  showFlowFieldText = true,
+  showGridCoordinates = false,
   showAiPath = false,
   showAi = true
 }
@@ -32,7 +32,8 @@ end
 
 local function isGridCellVisitable(grid, x, y, dist)
   return not isOutOfBounds(grid, x, y) and
-    grid[y][x] == WALKABLE
+    grid[y][x] == WALKABLE and
+    dist < 15
 end
 
 -- returns grid units relative to the ui
@@ -147,25 +148,26 @@ function flowFieldTestBlueprint.init(self)
   end
 
   local function AiFactory(x, y, speed, scale)
-    return Ai.create(
-      x * gridSize, y * gridSize,
-      speed,
-      scale,
-      colWorld,
-      pxToGridUnits,
-      findNearestTarget,
-      grid,
-      gridSize,
-      WALKABLE,
-      self.showAiPath
-    )
+    return Ai.create({
+      x = x * gridSize,
+      y = y * gridSize,
+      speed= speed,
+      scale = scale,
+      collisionWorld = colWorld,
+      pxToGridUnits = pxToGridUnits,
+      findNearestTarget = findNearestTarget,
+      grid = grid,
+      gridSize = gridSize,
+      WALKABLE = WALKABLE,
+      showAiPath = self.showAiPath
+    })
   end
 
   self.ai = {
-    AiFactory(2, 2, 240, 1.5),
-    AiFactory(4, 2, 300, 1.2),
+    AiFactory(2, 2, 240, 1.5):setParent(self),
+    AiFactory(4, 2, 300, 1.2):setParent(self),
     -- put one that is stuck inside a wall to test automatic wall unstuck
-    AiFactory(1, 6, 320, 1.1)
+    AiFactory(1, 6, 320, 1.1):setParent(self)
   }
 
   -- generate random ai agents
@@ -179,7 +181,7 @@ function flowFieldTestBlueprint.init(self)
       positionsFilled[positionId] = true
       table.insert(
         self.ai,
-        AiFactory(gridX, gridY, 360, 0.5)
+        AiFactory(gridX, gridY, 360, 0.5):setParent(self)
       )
     end
   end
@@ -206,7 +208,7 @@ function flowFieldTestBlueprint.update(self, dt)
   end
 
   f.forEach(self.ai, function(ai)
-    ai:update(grid, self.flowField, dt)
+    ai._update2(ai, grid, self.flowField, dt)
   end)
 end
 
@@ -343,20 +345,20 @@ local function drawScene(self)
         if self.showFlowFieldText then
           textDrawQueue[#textDrawQueue + 1] = function()
             love.graphics.scale(0.5)
-            love.graphics.setColor(0.6,0.6,0.6,1)
+            love.graphics.setColor(0,1,0.6,1)
 
             -- direction vectors
             love.graphics.print(
               row[x].x..' '..row[x].y,
               (drawX + 5) * 2,
-              (drawY + 5) * 2
+              (drawY + 4) * 2
             )
 
             -- distance
             love.graphics.print(
               row[x].dist,
               (drawX + gridSize/2) * 2,
-              (drawY + gridSize - 6) * 2
+              (drawY + gridSize - 7) * 2
             )
 
             love.graphics.scale(2)

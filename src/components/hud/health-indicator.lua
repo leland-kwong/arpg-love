@@ -10,13 +10,15 @@ local HealthIndicator = {
   health = 0
 }
 
-local hudTextLayer = GuiText.create()
-
 function HealthIndicator.init(self)
-  self.health = self.rootStore:get().health
-  self.maxHealth = self.rootStore:get().maxHealth
+  self.hudTextLayer = GuiText.create({
+    drawOrder = function()
+      return 4
+    end
+  }):setParent(self)
+
   msgBus.subscribe(function(msgType, msgValue)
-    if self._deleted then
+    if self:isDeleted() then
       return msgBus.CLEANUP
     end
 
@@ -29,7 +31,13 @@ function HealthIndicator.init(self)
   end)
 end
 
+function HealthIndicator.update(self)
+  self.health = self.rootStore:get().health
+  self.maxHealth = self.rootStore:get().maxHealth
+end
+
 function HealthIndicator.draw(self)
+  local hudTextLayer = self.hudTextLayer
   local healthText = self.health .. '/' .. self.maxHealth
   local textW, textH = hudTextLayer.getTextSize(healthText, hudTextLayer.font)
   local textOffX, textOffY = Position.boxCenterOffset(textW, textH, self.w, self.h)

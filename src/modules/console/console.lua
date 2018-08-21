@@ -1,8 +1,10 @@
+local GuiText = require 'components.gui.gui-text'
 local Component = require 'modules.component'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local font = require 'components.font'
 local Color = require 'modules.color'
+local CollisionObject = require 'modules.collision'
 local config = require 'config'
 
 local modifier = false
@@ -22,6 +24,12 @@ local function hasModifier()
     or keysPressed[L_CTRL]
     or keysPressed[R_CTRL]
 end
+
+local guiText = GuiText.create({
+  font = font.primaryLarge.font,
+  group = groups.system,
+  outline = false
+})
 
 local function toggleCollisionDebug()
   config.collisionDebug = not config.collisionDebug
@@ -87,6 +95,15 @@ end
 
 local canvas = love.graphics.newCanvas()
 
+local Logger = require'utils.logger'
+local logger = Logger:new(10)
+
+function Console.debug(...)
+  local args = {...}
+  local output = table.concat(args, ' ')
+  logger:add(output)
+end
+
 function Console.update(self)
   local s = self.stats
   s.currentMemoryUsed = collectgarbage('count')
@@ -110,13 +127,16 @@ function Console.draw(self)
   gfx.setColor(Color.MED_GRAY)
   gfx.print('COMPONENTS', edgeOffset, edgeOffset)
   gfx.setColor(Color.WHITE)
-  gfx.print(
-    'objects: '..getAllGameObjectStats().count,
+  printTable({
+    objects = getAllGameObjectStats().count,
+    collisionObjects = CollisionObject.getStats()
+  },
+    lineHeight,
     edgeOffset,
     edgeOffset + lineHeight
   )
 
-  local startY = edgeOffset + (lineHeight * 3)
+  local startY = edgeOffset + (lineHeight * 4)
   gfx.setColor(Color.MED_GRAY)
   gfx.print('GRAPHICS', edgeOffset, startY)
   gfx.setColor(Color.WHITE)
@@ -129,18 +149,29 @@ function Console.draw(self)
   )
 
   gfx.setColor(Color.MED_GRAY)
-  gfx.print('SYSTEM', edgeOffset, startY + 10 * lineHeight)
+  gfx.print('SYSTEM', edgeOffset, startY + 11 * lineHeight)
   gfx.setColor(Color.WHITE)
   printTable({
       memory = string.format('%0.2f', s.currentMemoryUsed / 1024),
       memoryAvg = string.format('%0.2f', s.accumulatedMemoryUsed / s.frameCount / 1024),
       delta = love.timer.getAverageDelta(),
-      fps = love.timer.getFPS()
+      fps = love.timer.getFPS(),
+      eventHandlers = #select(2, msgBus.getStats())
     },
     lineHeight,
     edgeOffset,
-    startY + 11 * lineHeight
+    startY + 12 * lineHeight
   )
+
+  local logEntries = logger:get()
+  gfx.setColor(Color.MED_GRAY)
+  local loggerYPosition = 700
+  gfx.print('LOG', edgeOffset, loggerYPosition)
+  gfx.setColor(Color.WHITE)
+  for i=1, #logEntries do
+    local output = logEntries[i]
+    guiText:add(output, Color.WHITE, edgeOffset, loggerYPosition + (lineHeight * i))
+  end
 
   gfx.setCanvas()
   gfx.setBlendMode('alpha', 'premultiplied')

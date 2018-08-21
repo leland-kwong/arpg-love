@@ -15,6 +15,10 @@ local ScreenFx = {
 function ScreenFx.init(self)
   self.tween = tween.new(2, self, {opacity = 0}, tween.easing.outExpo)
   msgBus.subscribe(function(msgType, msgValue)
+    if self:isDeleted() then
+      return msgBus.CLEANUP
+    end
+
     if msgBus.PLAYER_HIT == msgType then
       self.opacity = 0.7
       self.tween:reset()

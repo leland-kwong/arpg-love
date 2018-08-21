@@ -27,12 +27,12 @@ return itemDefs.registerType({
 		category = config.category.CONSUMABLE,
 
 		onActivate = function(self, mainState)
-			-- msgBus.send(msgBus.PLAYER_ADD_HEAL_SOURCE, {
-			-- 	amount = math.random(self.minHeal, self.maxHeal),
-			-- 	source = self.source,
-			-- 	duration = self.duration,
-			-- 	type = 1
-			-- })
+			msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
+				amount = math.random(self.minHeal, self.maxHeal),
+				source = self.source,
+				duration = self.duration,
+				type = 1
+			})
 			mainState:removeItem(self)
 			love.audio.stop(Sound.drinkPotion)
 			love.audio.play(Sound.drinkPotion)

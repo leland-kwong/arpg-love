@@ -1,7 +1,6 @@
 local Component = require 'modules.component'
 local AnimationFactory = require 'components.animation-factory'
 local groups = require 'components.groups'
-local ItemPotion = require 'components.item-inventory.items.definitions.potion-health'
 local itemDefs = require 'components.item-inventory.items.item-definitions'
 local Gui = require 'components.gui.gui'
 local camera = require 'components.camera'
@@ -26,17 +25,19 @@ shader:send('outline_color', outlineColor)
 
 local COLLISION_FLOOR_ITEM_TYPE = 'floorItem'
 local function collisionFilter(item, other)
-  if other.group == COLLISION_FLOOR_ITEM_TYPE or other.group == 'wall' then
+  if other.group == COLLISION_FLOOR_ITEM_TYPE or other.group == 'obstacle' then
     return 'slide'
   end
   return false
 end
 
 function LootGenerator.init(self)
+  assert(self.item ~= nil, 'item must be provided')
+
   local _self = self
   local rootStore = self.rootStore
   local screenX, screenY = self.x, self.y
-  local item = self.item or ItemPotion.create()
+  local item = self.item
 
   local animation = AnimationFactory:new({
     itemDefs.getDefinition(item).sprite

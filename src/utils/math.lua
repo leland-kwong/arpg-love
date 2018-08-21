@@ -8,9 +8,9 @@ function math_utils.round(num, numDecimalPlaces)
 end
 
 function math_utils.dist(x1, y1, x2, y2)
-	local a = pow(x2 - x1, 2)
-	local b = pow(y2 - y1, 2)
-	return sqrt(a + b)
+	local a = x2 - x1
+	local b = y2 - y1
+	return sqrt(a*a + b*b)
 end
 
 return math_utils

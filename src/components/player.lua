@@ -9,10 +9,11 @@ local collisionObject = require 'modules.collision'
 local camera = require 'components.camera'
 local Position = require 'utils.position'
 local Map = require 'modules.map-generator.index'
-local flowfield = require 'modules.flow-field.flow-field'
+local Flowfield = require 'modules.flow-field.flow-field'
 local Color = require 'modules.color'
 local memoize = require 'utils.memoize'
 local LineOfSight = memoize(require'modules.line-of-sight')
+local getDist = memoize(require('utils.math').dist)
 
 local colMap = collisionWorlds.map
 local keyMap = config.keyboard
@@ -115,17 +116,20 @@ local Player = {
     self.shader:send('outline_width', 1)
     self.shader:send('outline_color', self.outlineColor)
 
-    self.colObj = collisionObject:new(
+    self.colObj = self:addCollisionObject(
       'player',
       self.x,
       self.y,
       self.w,
       self.h
     ):addToWorld(colMap)
-     :setParent(self)
 
+    local gridRowsCols = memoize(function(grid)
+      return #grid, #grid[1]
+    end)
     local function isOutOfBounds(grid, x, y)
-      return y < 1 or x < 1 or y > #grid or x > #grid[1]
+      local rows, cols = gridRowsCols(grid)
+      return y < 1 or x < 1 or y > rows or x > cols
     end
     self.isGridCellVisitable = function(grid, x, y, dist)
       return not isOutOfBounds(grid, x, y) and
@@ -135,6 +139,10 @@ local Player = {
 
     local calcDist = require'utils.math'.dist
     msgBus.subscribe(function(msgType, msg)
+      if self:isDeleted() then
+        return msgBus.CLEANUP
+      end
+
       if msgBus.ITEM_PICKUP == msgType then
         local item = msg
         local dist = calcDist(self.x, self.y, item.x, item.y)
@@ -261,14 +269,16 @@ local Player = {
     camera:setPosition(self.x, self.y)
 
     local gridX, gridY = Position.pixelsToGrid(self.x, self.y, config.gridSize)
-    local hasChangedPosition = self.prevGridX ~= gridX or self.prevGridY ~= gridY
-    if hasChangedPosition then
+    local dist = getDist(self.prevGridX or 0, self.prevGridY or 0, gridX, gridY)
+    local shouldUpdateFlowField = dist >= 2
+    if shouldUpdateFlowField and self.mapGrid then
+      local flowField, callCount = Flowfield(self.mapGrid, gridX, gridY, self.isGridCellVisitable)
       msgBus.send(msgBus.NEW_FLOWFIELD, {
-        flowField = flowfield(self.mapGrid, gridX, gridY, self.isGridCellVisitable)
+        flowField = flowField
       })
+      self.prevGridX = gridX
+      self.prevGridY = gridY
     end
-    self.prevGridX = gridX
-    self.prevGridY = gridY
   end
 }
 

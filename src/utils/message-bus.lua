@@ -17,8 +17,7 @@ local function reduceValueAndHandleCleanup(allReducers, msgType, msgValue)
 	local i = 1
 	local t = allReducers
 	-- this is cached to prevent length counting on every iteration even if it hasn't changed
-	local len = #t
-	while (i <= len) do
+	while (i <= #t) do
 		local reducer = t[i]
 		local ret = nil
 		local shouldRemove = false
@@ -28,27 +27,9 @@ local function reduceValueAndHandleCleanup(allReducers, msgType, msgValue)
 			nextValue = shouldRemove and nextValue or ret
 		end
 		if shouldRemove then
-			j = j + 1
+			table.remove(t, i)
 		else
 			i = i + 1
-		end
-
-		--[[
-			Compacting the table
-
-			If we removed an item, then we'll shift it over to the nearest empty slot.
-			And set the original position to nil to remove it.
-		]]
-		local hasDeleted = j > 0
-		if (hasDeleted) then
-			local ij = i + j
-			if (ij > len) then
-				t[i] = nil
-				-- update table size
-				len = len - 1
-			else
-				t[i] = t[ij]
-			end
 		end
 	end
 
@@ -59,8 +40,7 @@ local function callSubscribersAndHandleCleanup(msgHandlers, msgType, nextValue)
 	local j = 0
 	local i = 1
 	local t = msgHandlers
-	local len = #t
-	while (i <= len) do
+	while (i <= #t) do
 		local subscriber = t[i]
 		local ret = nil
 		local shouldRemove = false
@@ -68,21 +48,11 @@ local function callSubscribersAndHandleCleanup(msgHandlers, msgType, nextValue)
 			ret = subscriber(msgType, nextValue)
 			shouldRemove = ret == CLEANUP
 		end
+
 		if shouldRemove then
-			j = j + 1
+			table.remove(t, i)
 		else
 			i = i + 1
-		end
-
-		local hasDeleted = j > 0
-		if (hasDeleted) then
-			local ij = i + j
-			if (ij > len) then
-				t[i] = nil
-				len = len - 1
-			else
-				t[i] = t[ij]
-			end
 		end
 	end
 end

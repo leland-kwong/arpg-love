@@ -7,6 +7,7 @@ local objectUtils = require 'utils.object-utils'
 local Q = require 'modules.queue'
 local typeCheck = require 'utils.type-check'
 local pprint = require 'utils.pprint'
+local collisionObject = require 'modules.collision'
 
 local M = {}
 
@@ -32,13 +33,15 @@ local baseProps = {
   _update = function(self, dt)
     local parent = self.parent
     if parent then
-      if parent._deleted then
-        -- remove parent reference
-        self:setParent(nil)
-
+      if parent:isDeleted() then
         if parent._deleteRecursive then
           self:delete(true)
+          -- remove parent reference after deletion since the component may
+          -- be accessing its parent in the `final` method
+          self:setParent(nil)
           return
+        else
+          self:setParent(nil)
         end
       end
 
@@ -52,18 +55,33 @@ local baseProps = {
     end
     self:update(dt)
   end,
+  _isComponent = true
 }
+
+local function cleanupCollisionObjects(self)
+  if self.collisionObjects then
+    for i=1, #self.collisionObjects do
+      self.collisionObjects[i]:delete()
+    end
+  end
+end
 
 --[[
   x[NUMBER]
   y[NUMBER]
   initialProps[table] - a key/value hash of properties
 ]]
+local invalidPropsErrorMsg = 'props cannot be a component object'
+
 function M.createFactory(blueprint)
   tc.validate(blueprint.getInitialProps, tc.FUNCTION, false)
 
   function blueprint.create(props)
     local c = (props or {})
+    assert(
+      not c._isComponent,
+      invalidPropsErrorMsg
+    )
 
     local id = uid()
     c._id = id
@@ -93,7 +111,10 @@ function M.createFactory(blueprint)
     return self
   end
 
-  -- sets the parent if a parent is provided, otherwise unsets it (when parent is `nil`)
+  --[[
+    Sets the parent if a parent is provided, otherwise unsets it (when parent is `nil`).
+    We don't want an `addChild` method so we can avoid coupling between child and parent.
+  ]]
   function blueprint:setParent(parent)
     self.parent = parent
     return self
@@ -111,11 +132,25 @@ function M.createFactory(blueprint)
   function blueprint:delete(recursive)
     self.group.delete(self)
     self._deleteRecursive = recursive
+    cleanupCollisionObjects(self)
     return self
+  end
+
+  --[[
+    Revives the game object, which is effectively recreating the component, except we're reusing it.
+    This allows gives us to save memory by not having to recreate objects
+  ]]
+  function blueprint:revive()
+    self:setGroup(self.group)
+    self:init()
   end
 
   function blueprint:getId()
     return self._id
+  end
+
+  function blueprint:isDeleted()
+    return not self.group.hasComponent(self)
   end
 
   -- default methods
@@ -123,6 +158,14 @@ function M.createFactory(blueprint)
     if not blueprint[k] then
       blueprint[k] = baseProps[k] or v
     end
+  end
+
+  function blueprint:addCollisionObject(group, x, y, w, h, ox, oy)
+    self.collisionObjects = self.collisionObjects or {}
+    local colObj = collisionObject:new(group, x, y, w, h, ox, oy)
+      :setParent(self)
+    table.insert(self.collisionObjects, colObj)
+    return colObj
   end
 
   return blueprint
@@ -167,26 +210,19 @@ function M.newGroup(groupDefinition)
   end
 
   function Group.delete(component)
-    if component._deleted then
-      if isDebug then
-        print('[WARNING] component already deleted:', component._id)
-      end
+    if not Group.hasComponent(component) then
+      print('[WARNING] component already deleted:', component._id)
       return
     end
 
     componentsById[component._id] = nil
     count = count - 1
     component:final()
-    -- set deleted state. (this is for debugging purposes only)
-    component._deleted = true
     return Group
   end
 
-  function Group.deleteAll()
-    for id,c in pairs(componentsById) do
-      c:delete()
-    end
-    return Group
+  function Group.hasComponent(component)
+    return componentsById[component._id]
   end
 
   return Group

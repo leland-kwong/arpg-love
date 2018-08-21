@@ -110,6 +110,13 @@ function meta:update(dt)
       end
     end
   end
+
+  self.time = self.time + dt
+  local isSameFrame = self.index == self.lastIndex
+  if isSameFrame then
+    return self
+  end
+
   local frameKey = self.aniFrames[self.index]
   self.frame = self.frameData[frameKey]
   local pad = self.pad
@@ -119,7 +126,7 @@ function meta:update(dt)
     self.frame.sourceSize.w + (pad * 2),
     self.frame.spriteSourceSize.h + (pad * 2)
   )
-  self.time = self.time + dt
+  self.lastIndex = self.index
   return self
 end
 

@@ -28,8 +28,8 @@ end
 local Fireball = {
   group = groups.all,
   -- DEFAULTS
-  minDamage = 1,
-  maxDamage = 100,
+  minDamage = 4,
+  maxDamage = 8,
   scale = 1,
   maxLifeTime = 2,
   speed = 500,
