@@ -38,6 +38,8 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     end
     self.wallTileCache = lru.new(400, nil, wallTilePruneCallback)
     self.renderFloorCache = {}
+    local rows, cols = #self.grid, #self.grid[1]
+    self.floorCanvas = love.graphics.newCanvas(cols * self.gridSize, rows * self.gridSize)
   end,
 
   onUpdate = function(self, value, x, y, originX, originY, isInViewport, dt)
@@ -63,9 +65,21 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     end
   end,
 
+  renderStart = function(self)
+    love.graphics.setCanvas(self.floorCanvas)
+    love.graphics.push()
+    love.graphics.origin()
+  end,
+
   render = function(self, value, x, y, originX, originY)
     if value == Map.WALKABLE then
       local index = GetIndexByCoordinate(self.grid)(x, y)
+      if self.renderFloorCache[index] then
+        return
+      else
+        self.renderFloorCache[index] = true
+      end
+
       local animationName = self.tileRenderDefinition[y][x]
       local animation = getAnimation(self.animationCache, index, animationName)
       local ox, oy = animation:getOffset()
@@ -84,6 +98,13 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
       )
     end
   end,
+
+  renderEnd = function(self)
+    love.graphics.pop()
+    love.graphics.setCanvas()
+    love.graphics.setColor(1,1,1)
+    love.graphics.draw(self.floorCanvas)
+  end
 })
 
 return Component.createFactory(blueprint)
