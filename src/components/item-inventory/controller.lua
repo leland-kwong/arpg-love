@@ -251,8 +251,9 @@ return function(rootStore)
 		self:set("equipment", function(state)
 			return require'utils.clone-grid'(state.equipment, function(v, x, y)
 				local category = itemConfig.equipmentGuiSlotMap[y][x]
+				local isPositionMatch = y == slotY and x == slotX
 				local isCategoryMatch = category == categoryAtSlot
-				if isCategoryMatch then
+				if (isCategoryMatch and isPositionMatch) then
 					return EMPTY_SLOT
 				end
 				return v
