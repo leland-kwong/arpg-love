@@ -13,10 +13,10 @@ config.rarity = {
 	LEGENDARY = 4
 }
 
-local COLOR_MAGICAL = {107, 171, 255} -- blueish-purple
+local COLOR_MAGICAL = {Color.rgba255(107, 171, 255)} -- blueish-purple
 local COLOR_RARE = {1, 1, 0} -- yellow
-local COLOR_EPIC = {222, 73, 252} -- magenta
-local COLOR_LEGENDARY = {255, 155, 33} -- gold
+local COLOR_EPIC = {Color.rgba255(228, 96, 255)} -- magenta
+local COLOR_LEGENDARY = {Color.rgba255(255, 155, 33)} -- gold
 
 config.rarityColor = {
 	[config.rarity.NORMAL] = Color.WHITE,

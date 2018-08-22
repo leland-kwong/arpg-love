@@ -91,7 +91,7 @@ local function drawTooltip(item, x, y, w2, h2)
 
   --[[
     IMPORTANT: We must do the tooltip content dimension calculations first to see if the tooltip
-      will go out of view. And if it does, we'll call this function again with the adjust positions.
+      will go out of view. And if it does, we'll call this function again with the adjusted positions.
   ]]
 
   -- title text and dimensions
