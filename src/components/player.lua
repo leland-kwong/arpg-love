@@ -49,18 +49,17 @@ local skillHandlers = {
     local function modifyAbility(instance, modifiers)
       local v = instance
       local m = modifiers
-      local percentDamage = m.percentDamage
 			local energyCost = v.energyCost
 			local baseWeapon = m.weaponDamage
-			local totalWeaponDmg = (1 + v.weaponDamageScaling) * baseWeapon
-			local multiplier = 1 + m.percentDamage
-			local min = floor((v.minDamage * multiplier) + m.flatDamage + totalWeaponDmg)
-      local max = floor((v.maxDamage * multiplier) + m.flatDamage + totalWeaponDmg)
+			local totalWeaponDmg = v.weaponDamageScaling * baseWeapon
+			local dmgMultiplier = m.percentDamage
+			local min = floor((v.minDamage * dmgMultiplier) + m.flatDamage + totalWeaponDmg)
+      local max = floor((v.maxDamage * dmgMultiplier) + m.flatDamage + totalWeaponDmg)
 
       -- update instance properties
       v:setProp('minDamage', min)
        :setProp('maxDamage', max)
-       :setProp('cooldown', v.cooldown - (v.cooldown * m.cooldownReduction))
+       :setProp('cooldown', v.cooldown * m.cooldownReduction)
 
       return v
     end
@@ -100,6 +99,7 @@ local Player = {
   x = startPos.x,
   y = startPos.y,
   pickupRadius = 5 * config.gridSize,
+  speed = 100,
 
   -- collision properties
   type = 'player',
@@ -215,7 +215,8 @@ local Player = {
 }
 
 local function handleMovement(self, dt)
-  local moveAmount = speed * dt
+  local totalMoveSpeed = self.speed + self.rootStore:get().statModifiers.moveSpeed
+  local moveAmount = totalMoveSpeed * dt
   local origx, origy = self.x, self.y
   local mx, my = camera:getMousePosition()
   local mDx, mDy = Position.getDirection(self.x, self.y, mx, my)
@@ -250,16 +251,16 @@ local function handleMovement(self, dt)
   nextX = nextX + (dx * moveAmount)
   nextY = nextY + (dy * moveAmount)
 
-  return nextX, nextY
+  return nextX, nextY, totalMoveSpeed
 end
 
-local function handleAnimation(self, dt, nextX, nextY)
+local function handleAnimation(self, dt, nextX, nextY, moveSpeed)
   local moving = self.x ~= nextX or self.y ~= nextY
 
   -- ANIMATION STATES
   if moving then
     self.animation = self.animations.run
-      :update(dt/2)
+      :update(moveSpeed/(moveSpeed*2.5)*dt)
   else
     self.animation = self.animations.idle
       :update(dt/12)
@@ -267,8 +268,8 @@ local function handleAnimation(self, dt, nextX, nextY)
 end
 
 function Player.update(self, dt)
-  local nextX, nextY = handleMovement(self, dt)
-  handleAnimation(self, dt, nextX, nextY)
+  local nextX, nextY, totalMoveSpeed = handleMovement(self, dt)
+  handleAnimation(self, dt, nextX, nextY, totalMoveSpeed)
 
   -- SKILL_1
   local isSkill1Activate = love.keyboard.isDown(keyMap.SKILL_1) or

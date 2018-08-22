@@ -31,7 +31,7 @@ shader:send('outline_width', 1)
 
 local function drawShadow(self)
   local r,g,b,a = love.graphics.getColor()
-  love.graphics.setColor(0,0,0,0.15)
+  love.graphics.setColor(0,0,0,0.2)
   love.graphics.draw(
     AnimationFactory.atlas,
     animation.sprite,
