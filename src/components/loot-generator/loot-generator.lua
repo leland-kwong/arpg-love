@@ -9,7 +9,7 @@ local msgBus = require 'components.msg-bus'
 local tick = require 'utils.tick'
 
 local LootGenerator = {
-  group = groups.gui,
+  group = groups.all,
   rootStore = CreateStore,
   -- item to generate
   item = nil
