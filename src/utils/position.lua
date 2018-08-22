@@ -16,7 +16,9 @@ Position.getDirection = function(x1, y1, x2, y2)
   local a = y2 - y1
   local b = x2 - x1
   local c = sqrt(a*a + b*b)
-	return b/c, a/c
+  -- dividing by zero returns a NAN value, so we should coerce to zero
+  return c == 0 and 0 or (b/c),
+    c == 0 and 0 or (a/c)
 end
 
 -- returns coordinate offsets so that the item is centered to the parent with origin at north-west

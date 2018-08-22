@@ -19,16 +19,12 @@ local colMap = collisionWorlds.map
 local keyMap = config.keyboard
 local mouseInputMap = config.mouseInputMap
 
-local width, height = love.window.getMode()
 local startPos = {
   x = config.gridSize * 3,
   y = config.gridSize * 3,
 }
 
 local frameRate = 60
-local speed = 400 -- per frame
-
-local activeAnimation
 local DIRECTION_RIGHT = 1
 local DIRECTION_LEFT = -1
 
@@ -215,97 +211,113 @@ local Player = {
         msgBus.send(msgBus.PLAYER_HIT_RECEIVED, msg.damage)
       end
     end)
-  end,
-
-  update = function(self, dt)
-    local moveAmount = speed * dt
-    local origx, origy = self.x, self.y
-    local mx, my = camera:getMousePosition()
-    local dx, dy = Position.getDirection(self.x, self.y, mx, my)
-    local nextX, nextY = self.x, self.y
-    self.dir = dx > 0 and DIRECTION_RIGHT or DIRECTION_LEFT
-
-    if self.forceMove then
-      nextX = nextX + moveAmount * dx
-      nextY = nextY + moveAmount * dy
-    end
-
-    -- MOVEMENT
-    if love.keyboard.isDown(keyMap.RIGHT) then
-      nextX = nextX + moveAmount
-    end
-
-    if love.keyboard.isDown(keyMap.LEFT) then
-      nextX = nextX - moveAmount
-    end
-
-    if love.keyboard.isDown(keyMap.UP) then
-      nextY = nextY - moveAmount
-    end
-
-    if love.keyboard.isDown(keyMap.DOWN) then
-      nextY = nextY + moveAmount
-    end
-
-    local moving = self.x ~= nextX or self.y ~= nextY
-
-    -- ANIMATION STATES
-    if moving then
-      self.animation = self.animations.run
-        :update(dt/2)
-    else
-      self.animation = self.animations.idle
-        :update(dt/12)
-    end
-
-    -- SKILL_1
-    local isSkill1Activate = love.keyboard.isDown(keyMap.SKILL_1) or
-      love.mouse.isDown(mouseInputMap.SKILL_1)
-    if not self.clickDisabled and isSkill1Activate then
-      skillHandlers.SKILL_1.use(self)
-    end
-    skillHandlers.SKILL_1.updateCooldown(dt)
-
-    -- dynamically get the current animation frame's height
-    local sx, sy, sw, sh = self.animation.sprite:getViewport()
-    local w,h = sw, sh
-    -- true center taking into account pivot
-    local oX, oY = self.animation:getSourceOffset()
-
-    -- COLLISION UPDATES
-    local colOrigX, colOrigY = self.colObj.x, self.colObj.y
-    local sizeOffset = 10
-    self.colObj:update(
-      -- use current coordinates because we only want to update size
-      colOrigX,
-      colOrigY,
-      w,
-      h - sizeOffset,
-      oX,
-      oY - sizeOffset
-    )
-
-    local actualX, actualY, cols, len = self.colObj:move(nextX, nextY, collisionFilter)
-    self.x = actualX
-    self.y = actualY
-    self.h = h
-    self.w = w
-
-    camera:setPosition(self.x, self.y)
-
-    local gridX, gridY = Position.pixelsToGrid(self.x, self.y, config.gridSize)
-    local dist = getDist(self.prevGridX or 0, self.prevGridY or 0, gridX, gridY)
-    local shouldUpdateFlowField = dist >= 2
-    if shouldUpdateFlowField and self.mapGrid then
-      local flowField, callCount = Flowfield(self.mapGrid, gridX, gridY, self.isGridCellVisitable)
-      msgBus.send(msgBus.NEW_FLOWFIELD, {
-        flowField = flowField
-      })
-      self.prevGridX = gridX
-      self.prevGridY = gridY
-    end
   end
 }
+
+local function handleMovement(self, dt)
+  local moveAmount = speed * dt
+  local origx, origy = self.x, self.y
+  local mx, my = camera:getMousePosition()
+  local mDx, mDy = Position.getDirection(self.x, self.y, mx, my)
+
+  local nextX, nextY = self.x, self.y
+  self.dir = mDx > 0 and DIRECTION_RIGHT or DIRECTION_LEFT
+
+  if self.forceMove then
+    nextX = nextX + moveAmount * mDx
+    nextY = nextY + moveAmount * mDy
+  end
+
+  -- MOVEMENT
+  local inputX, inputY = 0, 0
+  if love.keyboard.isDown(keyMap.RIGHT) then
+    inputX = 1
+  end
+
+  if love.keyboard.isDown(keyMap.LEFT) then
+    inputX = -1
+  end
+
+  if love.keyboard.isDown(keyMap.UP) then
+    inputY = -1
+  end
+
+  if love.keyboard.isDown(keyMap.DOWN) then
+    inputY= 1
+  end
+
+  local dx, dy = Position.getDirection(0, 0, inputX, inputY)
+  nextX = nextX + (dx * moveAmount)
+  nextY = nextY + (dy * moveAmount)
+
+  return nextX, nextY
+end
+
+local function handleAnimation(self, dt, nextX, nextY)
+  local moving = self.x ~= nextX or self.y ~= nextY
+
+  -- ANIMATION STATES
+  if moving then
+    self.animation = self.animations.run
+      :update(dt/2)
+  else
+    self.animation = self.animations.idle
+      :update(dt/12)
+  end
+end
+
+function Player.update(self, dt)
+  local nextX, nextY = handleMovement(self, dt)
+  handleAnimation(self, dt, nextX, nextY)
+
+  -- SKILL_1
+  local isSkill1Activate = love.keyboard.isDown(keyMap.SKILL_1) or
+    love.mouse.isDown(mouseInputMap.SKILL_1)
+  if not self.clickDisabled and isSkill1Activate then
+    skillHandlers.SKILL_1.use(self)
+  end
+  skillHandlers.SKILL_1.updateCooldown(dt)
+
+  -- dynamically get the current animation frame's height
+  local sx, sy, sw, sh = self.animation.sprite:getViewport()
+  local w,h = sw, sh
+  -- true center taking into account pivot
+  local oX, oY = self.animation:getSourceOffset()
+
+  -- COLLISION UPDATES
+  local colOrigX, colOrigY = self.colObj.x, self.colObj.y
+  local sizeOffset = 10
+  self.colObj:update(
+    -- use current coordinates because we only want to update size
+    colOrigX,
+    colOrigY,
+    w,
+    h - sizeOffset,
+    oX,
+    oY - sizeOffset
+  )
+
+  local actualX, actualY, cols, len = self.colObj:move(nextX, nextY, collisionFilter)
+  self.x = actualX
+  self.y = actualY
+  self.h = h
+  self.w = w
+
+  -- update camera to follow player
+  camera:setPosition(self.x, self.y)
+
+  local gridX, gridY = Position.pixelsToGrid(self.x, self.y, config.gridSize)
+  local dist = getDist(self.prevGridX or 0, self.prevGridY or 0, gridX, gridY)
+  local shouldUpdateFlowField = dist >= 2
+  if shouldUpdateFlowField and self.mapGrid then
+    local flowField, callCount = Flowfield(self.mapGrid, gridX, gridY, self.isGridCellVisitable)
+    msgBus.send(msgBus.NEW_FLOWFIELD, {
+      flowField = flowField
+    })
+    self.prevGridX = gridX
+    self.prevGridY = gridY
+  end
+end
 
 local function drawShadow(self, sx, sy, ox, oy)
   -- SHADOW
