@@ -43,34 +43,6 @@ local MainScene = {
   rootStore = rootState
 }
 
-local function insertTestItems(rootStore)
-  local item1 = require'components.item-inventory.items.definitions.poison-blade'.create()
-  local item2 = require'components.item-inventory.items.definitions.mock-shoes'.create()
-  rootStore:addItemToInventory(item1, {3, 1})
-  rootStore:addItemToInventory(item2, {4, 1})
-  rootStore:addItemToInventory(
-    require'components.item-inventory.items.definitions.mock-armor'.create()
-    , {5, 1})
-  rootStore:addItemToInventory(
-    require'components.item-inventory.items.definitions.gpow-armor'.create()
-    , {5, 2})
-  rootStore:addItemToInventory(
-    require'components.item-inventory.items.definitions.potion-health'.create(),
-    {1, 1})
-  rootStore:addItemToInventory(
-    require'components.item-inventory.items.definitions.potion-health'.create(),
-    {2, 1})
-  rootStore:addItemToInventory(
-    require'components.item-inventory.items.definitions.potion-health'.create(),
-    {2, 1})
-  for i=1, 99 do
-    rootStore:addItemToInventory(
-      require'components.item-inventory.items.definitions.potion-health'.create(),
-      {2, 2})
-  end
-end
-insertTestItems(rootState)
-
 function MainScene.init(self)
   local parent = self
 
