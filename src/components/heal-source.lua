@@ -62,7 +62,6 @@ function HealSource.add(self, healSource, rootStore)
 
 	local tickRate = 0.05 -- seconds
 
-	require'modules.console.console'.debug('add heal source')
 	self.handle = self.handle or tick.recur(
 		function()
 			local heal = 0
@@ -72,7 +71,6 @@ function HealSource.add(self, healSource, rootStore)
 				if not hasMore then
 					HealSource.remove(self, source)
 				else
-					require'modules.console.console'.debug('tick', require'socket'.gettime())
 					heal = heal + amount
 				end
 			end
