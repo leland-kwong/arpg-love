@@ -39,11 +39,12 @@ local gridTileTypes = {
 }
 
 local MainScene = {
-  group = groups.all
+  group = groups.all,
+  rootStore = rootState
 }
 
 local function insertTestItems(rootStore)
-  local item1 = require'components.item-inventory.items.definitions.mock-shoes'.create()
+  local item1 = require'components.item-inventory.items.definitions.poison-blade'.create()
   local item2 = require'components.item-inventory.items.definitions.mock-shoes'.create()
   rootStore:addItemToInventory(item1, {3, 1})
   rootStore:addItemToInventory(item2, {4, 1})
@@ -136,11 +137,16 @@ function MainScene.init(self)
     if msgBus.PLAYER_HEAL_SOURCE_REMOVE == msgType then
       require'components.heal-source'.remove(self, msgValue)
     end
+
+    if msgBus.PLAYER_STATS_NEW_MODIFIERS == msgType then
+      local newModifiers = msgValue
+      rootState:set('statModifiers', newModifiers)
+    end
   end)
 
   local aiCount = 50
   local generated = 0
-  local minPos, maxPos = 3, 60
+  local minPos, maxPos = 10, 60
   while generated < aiCount do
     local posX, posY = math.random(minPos, maxPos), math.random(minPos, maxPos)
     local isValidPosition = map.grid[posY][posX] == Map.WALKABLE

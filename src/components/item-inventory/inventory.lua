@@ -64,6 +64,7 @@ function InventoryBlueprint.init(self)
       rootStore:removeItem(item)
       rootStore:equipItem(item, slotX, slotY)
       rootStore:addItemToInventory(equippedItem, {x, y})
+      msgBus.send(msgBus.EQUIPMENT_CHANGE)
     end
 
     if msgBus.INVENTORY_PICKUP == msgType or
@@ -76,6 +77,11 @@ function InventoryBlueprint.init(self)
     if msgBus.INVENTORY_DROP == msgType then
       love.audio.stop(Sound.INVENTORY_DROP)
       love.audio.play(Sound.INVENTORY_DROP)
+    end
+
+    if msgBus.EQUIPMENT_CHANGE == msgType then
+      local equipmentChangeHandler = require'components.item-inventory.equipment-change-handler'
+      equipmentChangeHandler(rootStore)
     end
 	end)
 

@@ -32,8 +32,11 @@ function EquipmentPanel.init(self)
 	end
 
 	local function onItemPickupFromSlot(slotX, slotY)
+		-- IMPORTANT: make sure we unequip the item before triggering the messages
+		local unequippedItem = self.rootStore:unequipItem(slotX, slotY)
 		msgBus.send(msgBus.INVENTORY_PICKUP)
-    return self.rootStore:unequipItem(slotX, slotY)
+		msgBus.send(msgBus.EQUIPMENT_CHANGE)
+		return unequippedItem
   end
 
 	local function onItemDropToSlot(curPickedUpItem, slotX, slotY)
@@ -42,6 +45,7 @@ function EquipmentPanel.init(self)
 		)
 		if canEquip then
 			msgBus.send(msgBus.INVENTORY_DROP)
+			msgBus.send(msgBus.EQUIPMENT_CHANGE)
 			return itemSwap
 		else
 			return curPickedUpItem
