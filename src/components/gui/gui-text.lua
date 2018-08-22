@@ -52,6 +52,10 @@ function GuiTextLayer.init(self)
   self.tablePool = {}
 end
 
+function GuiTextLayer.getSize(self)
+  return self.textGraphic:getWidth(), self.textGraphic:getHeight()
+end
+
 function GuiTextLayer.draw(self)
   if self.outline then
     love.graphics.setShader(shader)

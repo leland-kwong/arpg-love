@@ -89,16 +89,18 @@ function InventoryBlueprint.init(self)
   self.slotMargin = 2
 
   local w, h = calcInventorySize(self.slots(), self.slotSize, self.slotMargin)
-  local equipmentW, equipmentH, equipmentMargin = 100, h, 5
+  local panelMargin = 5
+  local statsWidth, statsHeight = 125, h
+  local equipmentWidth, equipmentHeight = 100, h
   self.w = w
   self.h = h
 
   -- center to screen
   local inventoryX = require'utils.position'.boxCenterOffset(
-    w + equipmentW + equipmentMargin, h,
+    w + (equipmentWidth + panelMargin) + (statsWidth + panelMargin), h,
     love.graphics.getWidth() / config.scaleFactor, love.graphics.getHeight() / config.scaleFactor
   )
-  self.x = inventoryX + equipmentW + equipmentMargin
+  self.x = inventoryX + equipmentWidth + panelMargin + statsWidth + panelMargin
   self.y = (config.resolution.h - h) / 2
 
   InteractArea(self):setParent(self)
@@ -124,11 +126,20 @@ function InventoryBlueprint.init(self)
   local EquipmentPanel = require 'components.item-inventory.equipment-panel'
   EquipmentPanel.create({
     rootStore = self.rootStore,
-    x = self.x - equipmentW - equipmentMargin,
+    x = self.x - equipmentWidth - panelMargin,
     y = self.y,
-    w = equipmentW,
+    w = equipmentWidth,
     h = h,
     slotSize = self.slotSize
+  }):setParent(self)
+
+  local PlayerStatsPanel = require'components.item-inventory.player-stats-panel'
+  PlayerStatsPanel.create({
+    x = self.x - equipmentWidth - panelMargin - statsWidth - panelMargin,
+    y = self.y,
+    w = statsWidth,
+    h = statsHeight,
+    rootStore = self.rootStore
   }):setParent(self)
 end
 
