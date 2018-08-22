@@ -15,12 +15,6 @@ local camera = require 'components.camera'
 local SceneMain = require 'scene.scene-main'
 local tick = require 'utils.tick'
 
--- run tests
-if config.isDebug then
-  require 'modules.test.index'
-  require 'utils.test.index'
-end
-
 local scale = config.scaleFactor
 
 local scenes = {
@@ -132,4 +126,10 @@ function love.draw()
   love.graphics.pop()
 
   groups.system.drawAll()
+end
+
+-- run tests
+if config.isDebug then
+  require 'modules.test.index'
+  require 'utils.test.index'
 end
