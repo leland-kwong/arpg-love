@@ -49,19 +49,42 @@ local skillHandlers = {
     local curCooldown = 0
     local skill = {}
 
+    local floor = math.floor
+    local function modifyAbility(instance, modifiers)
+      local v = instance
+      local m = modifiers
+      local percentDamage = m.percentDamage
+			local energyCost = v.energyCost
+			local baseWeapon = m.weaponDamage
+			local totalWeaponDmg = (1 + v.weaponDamageScaling) * baseWeapon
+			local multiplier = 1 + m.percentDamage
+			local min = floor((v.minDamage * multiplier) + m.flatDamage + totalWeaponDmg)
+      local max = floor((v.maxDamage * multiplier) + m.flatDamage + totalWeaponDmg)
+
+      -- update instance properties
+      v:setProp('minDamage', min)
+       :setProp('maxDamage', max)
+       :setProp('cooldown', v.cooldown - (v.cooldown * m.cooldownReduction))
+
+      return v
+    end
+
     function skill.use(self)
       if curCooldown > 0 then
         return skill
       else
         local Fireball = require 'components.fireball'
         local mx, my = camera:getMousePosition()
-        local projectile = Fireball.create({
-            debug = false
-          , x = self.x
-          , y = self.y
-          , x2 = mx
-          , y2 = my
-        })
+        local projectile = modifyAbility(
+          Fireball.create({
+              debug = false
+            , x = self.x
+            , y = self.y
+            , x2 = mx
+            , y2 = my
+          }),
+          self.rootStore:get().statModifiers
+        )
         curCooldown = projectile.cooldown
         return skill
       end

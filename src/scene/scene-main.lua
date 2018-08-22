@@ -13,6 +13,7 @@ local cloneGrid = require 'utils.clone-grid'
 local CreateStore = require 'components.state.state'
 local Hud = require 'components.hud.hud'
 local msgBus = require 'components.msg-bus'
+local HealSource = require'components.heal-source'
 
 local rootState = CreateStore()
 local inventoryController = InventoryController(rootState)
@@ -54,6 +55,7 @@ function MainScene.init(self)
 
   local player = Player.create({
     mapGrid = map.grid,
+    rootStore = rootState
   }):setParent(parent)
 
   Hud.create({
@@ -103,11 +105,11 @@ function MainScene.init(self)
     end
 
     if msgBus.PLAYER_HEAL_SOURCE_ADD == msgType then
-      require'components.heal-source'.add(self, msgValue, rootState)
+      HealSource.add(self, msgValue, rootState)
     end
 
     if msgBus.PLAYER_HEAL_SOURCE_REMOVE == msgType then
-      require'components.heal-source'.remove(self, msgValue)
+      HealSource.remove(self, msgValue)
     end
 
     if msgBus.PLAYER_STATS_NEW_MODIFIERS == msgType then

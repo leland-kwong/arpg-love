@@ -5,6 +5,7 @@ return function()
 		weaponDamage = 0,
 		energyCostReduced = 0,
 		maxHealth = 0,
+		healthRegeneration = 0,
 		armor = 0,
 		cooldownReduction = 0,
 		moveSpeed = 0,

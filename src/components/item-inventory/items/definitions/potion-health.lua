@@ -31,7 +31,6 @@ return itemDefs.registerType({
 				amount = math.random(self.minHeal, self.maxHeal),
 				source = self.source,
 				duration = self.duration,
-				type = 1
 			})
 			mainState:removeItem(self)
 			love.audio.stop(Sound.drinkPotion)

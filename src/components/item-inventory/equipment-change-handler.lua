@@ -24,6 +24,7 @@ local equipmentSubscribers = {
 			if shouldCleanup then
 				return msgBus.CLEANUP
 			end
+
 			-- add the item's stats the list of modifiers
 			if msgBus.PLAYER_STATS_NEW_MODIFIERS == msgType then
 				-- merge item properties into the new modifiers list

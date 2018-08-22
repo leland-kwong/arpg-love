@@ -32,8 +32,9 @@ function HealthIndicator.init(self)
 end
 
 function HealthIndicator.update(self)
-  self.health = self.rootStore:get().health
-  self.maxHealth = self.rootStore:get().maxHealth
+  local state = self.rootStore:get()
+  self.health = state.health
+  self.maxHealth = state.maxHealth + state.statModifiers.maxHealth
 end
 
 function HealthIndicator.draw(self)
