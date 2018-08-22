@@ -104,6 +104,9 @@ function Console.debug(...)
   logger:add(output)
 end
 
+-- GLOBAL console logger
+consoleLog = Console.debug
+
 function Console.update(self)
   local s = self.stats
   s.currentMemoryUsed = collectgarbage('count')
