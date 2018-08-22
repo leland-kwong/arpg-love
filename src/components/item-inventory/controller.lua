@@ -214,7 +214,7 @@ return function(rootStore)
 		local canEquip = self:canEquiptToSlot(item, slotX, slotY)
 		if not canEquip then
 			local allowedSlotCategory = itemConfig.equipmentGuiSlotMap[slotY][slotX]
-			local errorMsg = "[EQUIP_ITEM] invalid category `"..category.."`, expecting `"..allowedSlotCategory.."`"
+			local errorMsg = "[EQUIP_ITEM] invalid category `"..category
 			return canEquip, errorMsg
 		end
 		local currentItemInSlot = self:unequipItem(slotX, slotY)

@@ -41,7 +41,7 @@ function PlayerStatsPanel.draw(self)
     self.guiText:add(statType, Color.WHITE, xPos, yPos)
     local statValue = val..'\n'
     local statValueColor = val > 0 and Color.LIME or Color.WHITE
-    self.guiText:add(statValue, statValueColor, xPos + 100, yPos)
+    self.guiText:add(statValue, statValueColor, xPos + 125, yPos)
     i = i + 1
   end
 end

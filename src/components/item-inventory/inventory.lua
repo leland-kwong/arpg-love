@@ -90,7 +90,7 @@ function InventoryBlueprint.init(self)
 
   local w, h = calcInventorySize(self.slots(), self.slotSize, self.slotMargin)
   local panelMargin = 5
-  local statsWidth, statsHeight = 125, h
+  local statsWidth, statsHeight = 150, h
   local equipmentWidth, equipmentHeight = 100, h
   self.w = w
   self.h = h
@@ -115,12 +115,18 @@ function InventoryBlueprint.init(self)
     return self.rootStore:dropItem(curPickedUpItem, x, y)
   end
 
+  local function inventoryOnItemActivate(item)
+    local d = itemDefs.getDefinition(item)
+    d.onActivate(item)
+  end
+
   setupSlotInteractions(
     self,
     self.slots,
     self.slotMargin,
     inventoryOnItemPickupFromSlot,
-    inventoryOnItemDropToSlot
+    inventoryOnItemDropToSlot,
+    inventoryOnItemActivate
   )
 
   local EquipmentPanel = require 'components.item-inventory.equipment-panel'
@@ -130,7 +136,8 @@ function InventoryBlueprint.init(self)
     y = self.y,
     w = equipmentWidth,
     h = h,
-    slotSize = self.slotSize
+    slotSize = self.slotSize,
+    rootStore = self.rootStore
   }):setParent(self)
 
   local PlayerStatsPanel = require'components.item-inventory.player-stats-panel'

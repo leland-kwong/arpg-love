@@ -1,13 +1,13 @@
 return function()
 	return {
 		flatDamage = 0,
-		percentDamage = 1, -- multiplier
+		percentDamage = 0, -- multiplier
 		weaponDamage = 0,
 		energyCostReduced = 0,
 		maxHealth = 0,
 		healthRegeneration = 0,
 		armor = 0,
-		cooldownReduction = 1, -- multiplier
+		cooldownReduction = 0, -- multiplier
 		moveSpeed = 0, -- flat increase
 		resistFire = 0,
 		resistCold = 0,

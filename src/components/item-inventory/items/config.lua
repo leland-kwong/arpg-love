@@ -35,20 +35,20 @@ config.rarityTitle = {
 }
 
 local consumableCategory = {
-	CONSUMABLE = 1
+	CONSUMABLE = 'CONSUMABLE'
 }
 config.consumableCategory = consumableCategory
 
 local equipmentCategory = {
-	BODY_ARMOR = 2,
-	WEAPON_1 = 3,
-	AMULET = 4,
-	SHOES = 5,
-	PANTS = 6,
-	GLOVES = 7,
-	ION_GENERATOR = 8,
-	HELMET = 9,
-	RING = 10,
+	BODY_ARMOR = 'BODY_ARMOR',
+	WEAPON_1 = 'WEAPON_1',
+	AMULET = 'AMULET',
+	SHOES = 'SHOES',
+	PANTS = 'PANTS',
+	GLOVES = 'GLOVES',
+	ION_GENERATOR = 'ION_GENERATOR',
+	HELMET = 'HELMET',
+	RING = 'RING',
 }
 config.equipmentCategory = equipmentCategory
 
@@ -76,7 +76,8 @@ config.equipmentCategorySilhouette = {
 	[equipmentCategory.AMULET] = 'amulet_16',
 	[equipmentCategory.BODY_ARMOR] = 'armor_121',
 	[equipmentCategory.WEAPON_1] = 'sword_17',
-	[equipmentCategory.SHOES] = 'shoe_1'
+	[equipmentCategory.SHOES] = 'shoe_1',
+	[consumableCategory.CONSUMABLE] = 'potion_48'
 }
 
 -- defines what gui node that equipment may be dropped into
@@ -96,11 +97,15 @@ config.equipmentGuiSlotMap = {
 	{
 		equipmentCategory.SHOES,
 		equipmentCategory.AMULET
+	},
+	{
+		consumableCategory.CONSUMABLE,
+		consumableCategory.CONSUMABLE
 	}
 }
 
 function config.findEquipmentSlotByCategory(category)
-	assert(type(category) == 'number', 'invalid category '..category..' should be of type number')
+	assert(config.category[category] ~= nil, 'invalid category '..category)
 
 	local slotX, slotY
 	require'utils.iterate-grid'(config.equipmentGuiSlotMap, function(v, x, y)

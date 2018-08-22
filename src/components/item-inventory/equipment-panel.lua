@@ -7,6 +7,8 @@ local setupSlotInteractions = require 'components.item-inventory.slot-interactio
 local itemConfig = require 'components.item-inventory.items.config'
 local animationFactory = require'components.animation-factory'
 local Position = require 'utils.position'
+local itemDefinitions = require'components.item-inventory.items.item-definitions'
+local itemConfig = require 'components.item-inventory.items.config'
 local msgBus = require 'components.msg-bus'
 
 local EquipmentPanel = {
@@ -94,6 +96,7 @@ function EquipmentPanel.init(self)
 		10,
 		onItemPickupFromSlot,
 		onItemDropToSlot,
+		nil,
 		slotRenderer
 	)
 end

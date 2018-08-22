@@ -36,8 +36,8 @@ local function healRoutine(healSource, tickRate)
 	end
 end
 
-function HealSource.remove(self, healSource)
-	self.healSources[healSource.source] = nil
+function HealSource.remove(self, source)
+	self.healSources[source] = nil
 end
 
 local function updateHealth(rootStore, changeAmount)

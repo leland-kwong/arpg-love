@@ -37,9 +37,7 @@ return itemDefs.registerType({
 		rarity = config.rarity.NORMAL,
 		category = category,
 
-		onActivate = function(self, rootStore)
-			msgBus.send(msgBus.EQUIPMENT_SWAP, self)
-
+		onEquip = function(self)
 			local duration = math.pow(10, 10)
 			local amount = self.healthRegeneration * duration
 			msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
@@ -47,6 +45,10 @@ return itemDefs.registerType({
 				source = self.source,
 				duration = duration,
 			})
+		end,
+
+		onActivate = function(self, rootStore)
+			msgBus.send(msgBus.EQUIPMENT_SWAP, self)
 		end,
 
 		tooltip = function(self)

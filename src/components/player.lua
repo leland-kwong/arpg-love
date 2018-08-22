@@ -52,14 +52,14 @@ local skillHandlers = {
 			local energyCost = v.energyCost
 			local baseWeapon = m.weaponDamage
 			local totalWeaponDmg = v.weaponDamageScaling * baseWeapon
-			local dmgMultiplier = m.percentDamage
+			local dmgMultiplier = 1 + m.percentDamage
 			local min = floor((v.minDamage * dmgMultiplier) + m.flatDamage + totalWeaponDmg)
       local max = floor((v.maxDamage * dmgMultiplier) + m.flatDamage + totalWeaponDmg)
 
       -- update instance properties
       v:setProp('minDamage', min)
        :setProp('maxDamage', max)
-       :setProp('cooldown', v.cooldown * m.cooldownReduction)
+       :setProp('cooldown', v.cooldown - (v.cooldown * m.cooldownReduction))
 
       return v
     end

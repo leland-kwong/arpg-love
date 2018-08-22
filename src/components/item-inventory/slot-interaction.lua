@@ -176,7 +176,11 @@ Gui.create({
 })
 
 -- sets up interactable gui nodes and renders the contents in each slot
-local function setupSlotInteractions(self, getSlots, margin, onItemPickupFromSlot, onItemDropToSlot, slotRenderer)
+local function setupSlotInteractions(
+  self, getSlots, margin,
+  onItemPickupFromSlot, onItemDropToSlot, onItemActivate,
+  slotRenderer
+)
   local rootStore = self.rootStore
   local initialSlots = getSlots()
   -- setup the grid interaction
@@ -220,8 +224,8 @@ local function setupSlotInteractions(self, getSlots, margin, onItemPickupFromSlo
         if rightClick then
           local item = getItem()
           local d = itemDefinition.getDefinition(item)
-          if d then
-            d.onActivate(item, rootStore)
+          if d and onItemActivate then
+            onItemActivate(item)
           end
           return
         end

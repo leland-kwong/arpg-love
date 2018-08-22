@@ -109,7 +109,7 @@ function MainScene.init(self)
     end
 
     if msgBus.PLAYER_HEAL_SOURCE_REMOVE == msgType then
-      HealSource.remove(self, msgValue)
+      HealSource.remove(self, msgValue.source)
     end
 
     if msgBus.PLAYER_STATS_NEW_MODIFIERS == msgType then
