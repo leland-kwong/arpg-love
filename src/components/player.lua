@@ -112,6 +112,8 @@ local Player = {
   mapGrid = nil,
 
   init = function(self)
+    local CreateStore = require'components.state.state'
+    self.rootStore = self.rootStore or CreateStore()
     self.dir = DIRECTION_RIGHT
     colMap:add(self, self.x, self.y, self.w, self.h)
 

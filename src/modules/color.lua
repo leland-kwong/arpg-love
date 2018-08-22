@@ -12,7 +12,7 @@ local Color = {
   MED_DARK_GRAY = {0.3,0.3,0.3},
   DARK_GRAY = {0.1,0.1,0.1,1},
   CYAN = {0.2,1,1},
-  BLACK = {0,0,0},
+  BLACK = {0,0,0,1},
   YELLOW = {1,1,0},
   GOLDEN_PALE = {rgba255(243, 156, 18)},
 

@@ -56,7 +56,7 @@
         <key>jxrCompressionLevel</key>
         <uint>0</uint>
         <key>ditherType</key>
-        <enum type="SettingsBase::DitherType">NearestNeighbour</enum>
+        <enum type="SettingsBase::DitherType">PngQuantLow</enum>
         <key>backgroundColor</key>
         <uint>0</uint>
         <key>libGdx</key>
@@ -181,6 +181,46 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_1.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_10.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_11.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_12.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_13.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_14.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_15.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_16.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_17.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_18.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_19.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_2.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_20.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_21.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_22.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_23.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_24.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_25.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_26.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_27.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_28.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_29.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_3.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_30.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_31.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_32.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_33.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_34.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_35.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_36.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_37.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_38.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_39.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_4.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_40.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_5.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_6.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_7.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_8.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets/amulet_9.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_1.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_10.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_100.png</key>
@@ -331,6 +371,31 @@
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_97.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_98.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_99.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_1.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_10.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_11.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_12.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_13.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_14.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_15.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_16.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_17.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_18.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_19.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_2.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_20.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_21.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_22.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_23.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_24.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_25.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_3.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_4.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_5.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_6.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_7.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_8.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books/book_9.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_1.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_10.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_100.png</key>
@@ -525,6 +590,18 @@
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/vial_6.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/vial_7.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/vial_8.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_1.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_10.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_11.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_12.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_2.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_3.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_4.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_5.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_6.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_7.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_8.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_9.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_1.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_10.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_11.png</key>
@@ -699,6 +776,7 @@
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_97.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_98.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_99.png</key>
+            <key type="filename">custom-art/bullet-1.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.266667</point_f>
@@ -807,6 +885,19 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/treasure-chest.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.266667</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>12,11,24,22</rect>
+                <key>scale9Paddings</key>
+                <rect>12,11,24,22</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
         </map>
         <key>fileList</key>
         <array>
@@ -820,6 +911,11 @@
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets</filename>
+            <filename>custom-art/treasure-chest.png</filename>
+            <filename>custom-art/bullet-1.png</filename>
+            <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books</filename>
+            <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings</filename>
+            <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

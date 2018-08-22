@@ -79,7 +79,7 @@ local COLLISION_SLIDE = 'slide'
 local collisionFilters = {
   player = true,
   ai = true,
-  wall = true
+  obstacle = true
 }
 local function collisionFilter(item, other)
   if collisionFilters[other.group] then

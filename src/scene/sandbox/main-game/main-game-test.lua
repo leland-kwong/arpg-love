@@ -1,6 +1,7 @@
 local Component = require 'modules.component'
 local groups = require 'components.groups'
 local SceneMain = require 'scene.scene-main'
+local TreasureChest = require 'components.treasure-chest'
 local config = require 'config'
 
 local MainGameTest = {
@@ -39,8 +40,23 @@ end
 
 function MainGameTest.init(self)
   modifyLevelRequirements()
+
+  TreasureChest.create({
+    x = 10 * 16,
+    y = 6 * 16
+  })
+
+  TreasureChest.create({
+    x = 15 * 16,
+    y = 6 * 16
+  })
+
   local scene = SceneMain.create():setParent(self)
   insertTestItems(scene.rootStore)
+  TreasureChest.create({
+    x = 5 * 16,
+    y = 5 * 16
+  })
 end
 
 return Component.createFactory(MainGameTest)
