@@ -28,18 +28,18 @@ end
 local Fireball = {
   group = groups.all,
   -- DEFAULTS
-  minDamage = 4,
-  maxDamage = 8,
+  minDamage = 2,
+  maxDamage = 3,
   scale = 1,
   maxLifeTime = 2,
   speed = 500,
-  cooldown = 0.1,
+  weaponDamageScaling = 1.2,
+  cooldown = 0.15,
 
   init = function(self)
     local dx, dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
     self.direction = {x = dx, y = dy}
 
-    self.damage = math.random(self.minDamage, self.maxDamage)
     self.animation = animationFactory:new({
       'fireball'
     })
@@ -72,7 +72,7 @@ local Fireball = {
           if col.other.group == 'ai' then
             msgBus.send(msgBus.CHARACTER_HIT, {
               parent = col.other.parent,
-              damage = self.damage
+              damage = math.random(self.minDamage, self.maxDamage)
             })
           end
         end

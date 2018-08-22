@@ -120,6 +120,12 @@ function M.createFactory(blueprint)
     return self
   end
 
+  function blueprint:setProp(prop, value)
+    assert(self[prop] ~= nil, 'property '..prop..' not defined')
+    self[prop] = value
+    return self
+  end
+
   function blueprint:setGroup(group)
     if not group and self.group then
       self.group.removeComponent(self)
