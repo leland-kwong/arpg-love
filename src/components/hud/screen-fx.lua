@@ -19,7 +19,7 @@ function ScreenFx.init(self)
       return msgBus.CLEANUP
     end
 
-    if msgBus.PLAYER_HIT == msgType then
+    if msgBus.PLAYER_HIT_RECEIVED == msgType then
       self.opacity = 0.7
       self.tween:reset()
       self.currentTween = self.tween

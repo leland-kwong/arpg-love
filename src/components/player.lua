@@ -187,7 +187,7 @@ local Player = {
       end
 
       if msgBus.CHARACTER_HIT == msgType and msg.parent == self then
-        msgBus.send(msgBus.PLAYER_HIT, msg.damage)
+        msgBus.send(msgBus.PLAYER_HIT_RECEIVED, msg.damage)
       end
     end)
   end,
