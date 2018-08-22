@@ -86,13 +86,13 @@ function MainScene.init(self)
     end
 
     if msgBus.ENEMY_DESTROYED == msgType then
-      local ItemPotion = require 'components.item-inventory.items.definitions.potion-health'
-      msgBus.send(msgBus.GENERATE_LOOT, {msgValue.x, msgValue.y, ItemPotion.create()})
+      local lootAlgorithm = require 'components.loot-generator.algorithm-1'
+      msgBus.send(msgBus.GENERATE_LOOT, {msgValue.x, msgValue.y, lootAlgorithm()})
       msgBus.send(msgBus.EXPERIENCE_GAIN, msgValue.experience)
     end
 
     if msgBus.GENERATE_LOOT == msgType then
-      local LootGenerator = require'components.item-inventory.loot-generator'
+      local LootGenerator = require'components.loot-generator.loot-generator'
       local x, y, item = unpack(msgValue)
       LootGenerator.create({
         x = x,
