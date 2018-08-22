@@ -61,7 +61,6 @@ config.categoryTitle = {
 	[consumableCategory.CONSUMABLE] = 'consumable',
 	[equipmentCategory.BODY_ARMOR] = 'chest armor',
 	[equipmentCategory.WEAPON_1] = 'weapon',
-	[equipmentCategory.WEAPON_2] = 'weapon',
 	[equipmentCategory.RING] = 'ring',
 	[equipmentCategory.AMULET] = 'amulet',
 	[equipmentCategory.SHOES] = 'shoes',
