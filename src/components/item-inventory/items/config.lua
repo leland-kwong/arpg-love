@@ -108,8 +108,15 @@ function config.findEquipmentSlotByCategory(category)
 	assert(config.category[category] ~= nil, 'invalid category '..category)
 
 	local slotX, slotY
+	local hasMatch = false
 	require'utils.iterate-grid'(config.equipmentGuiSlotMap, function(v, x, y)
-		if v == category then
+		-- return the first slot that matches the category
+		if hasMatch then
+			return
+		end
+
+		hasMatch = v == category
+		if hasMatch then
 			slotX, slotY = x, y
 		end
 	end)

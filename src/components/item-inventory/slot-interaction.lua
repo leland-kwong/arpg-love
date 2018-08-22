@@ -11,14 +11,7 @@ local Position = require 'utils.position'
 local msgBus = require 'components.msg-bus'
 local groups = require 'components.groups'
 local boxCenterOffset = Position.boxCenterOffset
-local itemAnimationsCache = {}
-
-local guiStackSizeTextLayer = GuiText.create({
-  font = font.primary.font,
-  drawOrder = function()
-    return 5
-  end
-})
+local drawItem = require 'components.item-inventory.draw-item'
 
 -- currently picked up item. We can only have one item picked up at a time
 local itemPickedUp = nil
@@ -46,36 +39,6 @@ Component.createFactory({
     end)
   end
 }).create()
-
-local function drawItem(item, x, y, slotSize)
-  local d = itemDefinition.getDefinition(item)
-  if d then
-    local animation = itemAnimationsCache[def]
-    if not animation then
-      animation = animationFactory:new({
-        d.sprite
-      })
-      itemAnimationsCache[d] = animation
-    end
-
-    local sx, sy, sw, sh = animation.sprite:getViewport()
-    local ox, oy = boxCenterOffset(
-      sw, sh,
-      slotSize or sw, slotSize or sh
-    )
-    love.graphics.setColor(1,1,1)
-    love.graphics.draw(
-      animationFactory.atlas,
-      animation.sprite,
-      x + ox, y + oy
-    )
-
-    local showStackSize = item.stackSize > 1
-    if showStackSize then
-      guiStackSizeTextLayer:add(item.stackSize, Color.WHITE, x + ox, y + oy)
-    end
-  end
-end
 
 local function getSlotPosition(gridX, gridY, offsetX, offsetY, slotSize, margin)
   local posX, posY = ((gridX - 1) * slotSize) + (gridX * margin) + offsetX,

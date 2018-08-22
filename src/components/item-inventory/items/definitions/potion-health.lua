@@ -38,6 +38,9 @@ return itemDefs.registerType({
 			})
 			love.audio.stop(Sound.drinkPotion)
 			love.audio.play(Sound.drinkPotion)
+			return {
+				cooldown = self.duration
+			}
 		end,
 
 		tooltip = function(self)

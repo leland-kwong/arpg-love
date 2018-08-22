@@ -91,6 +91,42 @@ local skillHandlers = {
     end
 
     return skill
+  end)(),
+
+  ACTIVE_ITEM_1 = (function()
+    local curCooldown = 0
+    local activeItem = nil
+    local max = math.max
+    local itemDefinitions = require("components.item-inventory.items.item-definitions")
+
+    local skill = {}
+
+    function skill.set(item)
+      local isDifferentSkill = item ~= activeItem
+      -- reset cooldown
+      if isDifferentSkill then
+        curCooldown = 0
+      end
+      activeItem = item
+    end
+
+    function skill.use(self)
+      if (not activeItem) or (curCooldown > 0) then
+        return skill
+      else
+        local activateFn = itemDefinitions.getDefinition(activeItem).onActivateWhenEquipped
+        local instance = activateFn(activeItem)
+        curCooldown = instance.cooldown
+        return skill
+      end
+    end
+
+    function skill.updateCooldown(dt)
+      curCooldown = max(0, curCooldown - dt)
+      return skill
+    end
+
+    return skill
   end)()
 }
 
@@ -267,10 +303,7 @@ local function handleAnimation(self, dt, nextX, nextY, moveSpeed)
   end
 end
 
-function Player.update(self, dt)
-  local nextX, nextY, totalMoveSpeed = handleMovement(self, dt)
-  handleAnimation(self, dt, nextX, nextY, totalMoveSpeed)
-
+local function handleAbilities(self, dt)
   -- SKILL_1
   local isSkill1Activate = love.keyboard.isDown(keyMap.SKILL_1) or
     love.mouse.isDown(mouseInputMap.SKILL_1)
@@ -278,6 +311,21 @@ function Player.update(self, dt)
     skillHandlers.SKILL_1.use(self)
   end
   skillHandlers.SKILL_1.updateCooldown(dt)
+
+  -- ACTIVE_ITEM_1
+  local isItem1Activate = love.keyboard.isDown(keyMap.ACTIVE_ITEM_1)
+  local item = self.rootStore:get().equipment[5][1]
+  skillHandlers.ACTIVE_ITEM_1.set(item)
+  if not self.clickDisabled and isItem1Activate then
+    skillHandlers.ACTIVE_ITEM_1.use(self)
+  end
+  skillHandlers.ACTIVE_ITEM_1.updateCooldown(dt)
+end
+
+function Player.update(self, dt)
+  local nextX, nextY, totalMoveSpeed = handleMovement(self, dt)
+  handleAnimation(self, dt, nextX, nextY, totalMoveSpeed)
+  handleAbilities(self, dt)
 
   -- dynamically get the current animation frame's height
   local sx, sy, sw, sh = self.animation.sprite:getViewport()
