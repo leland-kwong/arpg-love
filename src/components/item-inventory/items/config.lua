@@ -42,14 +42,13 @@ config.consumableCategory = consumableCategory
 local equipmentCategory = {
 	BODY_ARMOR = 2,
 	WEAPON_1 = 3,
-	WEAPON_2 = 4,
-	AMULET = 5,
-	SHOES = 6,
-	PANTS = 7,
-	GLOVES = 8,
-	ION_GENERATOR = 9,
-	HELMET = 10,
-	RING = 11,
+	AMULET = 4,
+	SHOES = 5,
+	PANTS = 6,
+	GLOVES = 7,
+	ION_GENERATOR = 8,
+	HELMET = 9,
+	RING = 10,
 }
 config.equipmentCategory = equipmentCategory
 
@@ -78,7 +77,6 @@ config.equipmentCategorySilhouette = {
 	[equipmentCategory.AMULET] = 'amulet_16',
 	[equipmentCategory.BODY_ARMOR] = 'armor_121',
 	[equipmentCategory.WEAPON_1] = 'sword_17',
-	[equipmentCategory.WEAPON_2] = 'sword_18',
 	[equipmentCategory.SHOES] = 'shoe_1'
 }
 
@@ -94,7 +92,7 @@ config.equipmentGuiSlotMap = {
 	},
 	{
 		equipmentCategory.WEAPON_1,
-		equipmentCategory.WEAPON_2
+		equipmentCategory.WEAPON_1
 	},
 	{
 		equipmentCategory.SHOES,
