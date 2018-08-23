@@ -53,7 +53,7 @@ end
 local function DebugMenuToggleButton(onToggle)
   local buttonText = 'debug'
   local buttonWidth, buttonHeight = GuiText.getTextSize(buttonText, guiTextBodyLayer.font)
-  local screenOffset = 10
+  local screenOffset = 5
   local screenEastEdge = love.graphics.getWidth() / config.scaleFactor
   local screenSouthEdge = love.graphics.getHeight() / config.scaleFactor
   return Gui.create({
