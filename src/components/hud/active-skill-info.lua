@@ -9,7 +9,7 @@ local config = require 'config'
 local keyMap = config.keyboard
 local mouseInputMap = config.mouseInputMap
 
-local function ActiveItemHandler()
+local function ActiveConsumableHandler()
   local curCooldown = 0
   local skillCooldown = 0
   local activeItem = nil
@@ -50,72 +50,82 @@ local function ActiveItemHandler()
   return skill
 end
 
-local skillHandlers = {
-  SKILL_1 = (function()
-    local max = math.max
-    local curCooldown = 0
-    local skillCooldown = 0
-    local skill = {}
+local function ActiveEquipmentHandler()
+  local max = math.max
+  local curCooldown = 0
+  local skillCooldown = 0
+  local activeItem = nil
+  local skill = {}
 
-    local floor = math.floor
-    local function modifyAbility(instance, modifiers)
-      local v = instance
-      local m = modifiers
-			local energyCost = v.energyCost
-			local baseWeapon = m.weaponDamage
-			local totalWeaponDmg = v.weaponDamageScaling * baseWeapon
-			local dmgMultiplier = 1 + m.percentDamage
-			local min = floor((v.minDamage * dmgMultiplier) + m.flatDamage + totalWeaponDmg)
-      local max = floor((v.maxDamage * dmgMultiplier) + m.flatDamage + totalWeaponDmg)
+  local floor = math.floor
+  local function modifyAbility(instance, modifiers)
+    local v = instance
+    local m = modifiers
+    local energyCost = v.energyCost
+    local baseWeapon = m.weaponDamage
+    local totalWeaponDmg = v.weaponDamageScaling * baseWeapon
+    local dmgMultiplier = 1 + m.percentDamage
+    local min = floor((v.minDamage * dmgMultiplier) + m.flatDamage + totalWeaponDmg)
+    local max = floor((v.maxDamage * dmgMultiplier) + m.flatDamage + totalWeaponDmg)
 
-      -- update instance properties
-      v:setProp('minDamage', min)
-       :setProp('maxDamage', max)
-       :setProp('cooldown', v.cooldown - (v.cooldown * m.cooldownReduction))
+    -- update instance properties
+    v:setProp('minDamage', min)
+      :setProp('maxDamage', max)
+      :setProp('cooldown', v.cooldown - (v.cooldown * m.cooldownReduction))
 
-      return v
+    return v
+  end
+
+  function skill.set(item)
+    local isDifferentSkill = item ~= activeItem
+    -- reset cooldown
+    if isDifferentSkill then
+      curCooldown = 0
     end
+    activeItem = item
+  end
 
-    function skill.set(self)
-    end
-
-    function skill.use(self)
-      if curCooldown > 0 then
-        return skill
-      else
-        local Fireball = require 'components.fireball'
-        local mx, my = camera:getMousePosition()
-        local playerX, playerY = self.player:getPosition()
-        local projectile = modifyAbility(
-          Fireball.create({
-              debug = false
-            , x = playerX
-            , y = playerY
-            , x2 = mx
-            , y2 = my
-          }),
-          self.rootStore:get().statModifiers
-        )
-        curCooldown = projectile.cooldown
-        skillCooldown = projectile.cooldown
-        return skill
-      end
-    end
-
-    function skill.updateCooldown(dt)
-      curCooldown = max(0, curCooldown - dt)
+  function skill.use(self)
+    if (not activeItem) or curCooldown > 0 then
+      return skill
+    else
+      local mx, my = camera:getMousePosition()
+      local playerX, playerY = self.player:getPosition()
+      local itemDefinitions = require("components.item-inventory.items.item-definitions")
+      local activateFn = itemDefinitions.getDefinition(activeItem).onActivateWhenEquipped
+      local instance = modifyAbility(
+        activateFn(activeItem, {
+            x = playerX
+          , y = playerY
+          , x2 = mx
+          , y2 = my
+        }),
+        self.rootStore:get().statModifiers
+      )
+      curCooldown = instance.cooldown
+      skillCooldown = instance.cooldown
       return skill
     end
+  end
 
-    function skill.getStats()
-      return curCooldown, skillCooldown
-    end
-
+  function skill.updateCooldown(dt)
+    curCooldown = max(0, curCooldown - dt)
     return skill
-  end)(),
+  end
 
-  ACTIVE_ITEM_1 = ActiveItemHandler(),
-  ACTIVE_ITEM_2 = ActiveItemHandler()
+  function skill.getStats()
+    return curCooldown, skillCooldown
+  end
+
+  return skill
+end
+
+local skillHandlers = {
+  SKILL_1 = ActiveEquipmentHandler(),
+  SKILL_2 = ActiveEquipmentHandler(),
+
+  ACTIVE_ITEM_1 = ActiveConsumableHandler(),
+  ACTIVE_ITEM_2 = ActiveConsumableHandler()
 }
 
 -- sets the new ability if it has changed and also updates the cooldown

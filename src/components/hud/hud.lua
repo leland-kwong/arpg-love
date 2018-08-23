@@ -86,9 +86,20 @@ function Hud.init(self)
     skillId = 'SKILL_1',
     player = self.player,
     rootStore = self.rootStore,
-    x = 260,
+    x = 220,
     y = (love.graphics.getHeight() / scale) - 32 - 5,
     slotX = 1,
+    slotY = 3,
+    hudTextLayer = self.hudTextSmallLayer
+  }):setParent(self)
+
+  ActiveSkillInfo.create({
+    skillId = 'SKILL_2',
+    player = self.player,
+    rootStore = self.rootStore,
+    x = 260,
+    y = (love.graphics.getHeight() / scale) - 32 - 5,
+    slotX = 2,
     slotY = 3,
     hudTextLayer = self.hudTextSmallLayer
   }):setParent(self)

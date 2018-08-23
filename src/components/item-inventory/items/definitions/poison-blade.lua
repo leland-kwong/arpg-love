@@ -80,6 +80,11 @@ return itemDefs.registerType({
 			msgBus.send(msgBus.EQUIPMENT_SWAP, self)
 		end,
 
+		onActivateWhenEquipped = function(self, props)
+			local Fireball = require 'components.fireball'
+			return Fireball.create(props)
+		end,
+
 		onMessage = function(self, msgType)
 			if msgBus.ENEMY_DESTROYED == msgType then
 				onEnemyDestroyedIncreaseDamage(self)

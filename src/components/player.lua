@@ -225,12 +225,20 @@ local function handleAbilities(self, dt)
     msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_1')
   end
 
+  -- SKILL_2
+  local isSkill2Activate = love.keyboard.isDown(keyMap.SKILL_2) or
+    love.mouse.isDown(mouseInputMap.SKILL_2)
+  if not self.clickDisabled and isSkill2Activate then
+    msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_2')
+  end
+
   -- ACTIVE_ITEM_1
   local isItem1Activate = love.keyboard.isDown(keyMap.ACTIVE_ITEM_1)
   if not self.clickDisabled and isItem1Activate then
     msgBus.send(msgBus.PLAYER_USE_SKILL, 'ACTIVE_ITEM_1')
   end
 
+  -- ACTIVE_ITEM_2
   local isItem2Activate = love.keyboard.isDown(keyMap.ACTIVE_ITEM_2)
   if not self.clickDisabled and isItem2Activate then
     msgBus.send(msgBus.PLAYER_USE_SKILL, 'ACTIVE_ITEM_2')
