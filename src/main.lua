@@ -118,10 +118,10 @@ function love.draw()
   groups.overlay.drawAll()
   groups.debug.drawAll()
   camera:detach()
-  groups.hud.drawAll()
 
   love.graphics.push()
   love.graphics.scale(config.scaleFactor)
+  groups.hud.drawAll()
   groups.gui.drawAll()
   love.graphics.pop()
 

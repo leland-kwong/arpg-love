@@ -6,17 +6,12 @@ local Color = require 'modules.color'
 local Position = require 'utils.position'
 
 local HealthIndicator = {
-  group = groups.gui,
-  health = 0
+  group = groups.hud,
+  health = 0,
+  hudTextLayer = nil
 }
 
 function HealthIndicator.init(self)
-  self.hudTextLayer = GuiText.create({
-    drawOrder = function()
-      return 4
-    end
-  }):setParent(self)
-
   msgBus.subscribe(function(msgType, msgValue)
     if self:isDeleted() then
       return msgBus.CLEANUP

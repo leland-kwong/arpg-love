@@ -8,7 +8,7 @@ local Position = require 'utils.position'
 local config = require 'config'
 
 local ExperienceIndicator = {
-  group = groups.gui,
+  group = groups.hud,
   experience = 0,
   totalExperience = 0,
 }
@@ -60,14 +60,14 @@ end
 
 local function drawSegments(self, i, segmentCount, startX, totalWidth)
   local width = totalWidth / segmentCount
-  local x = startX + (i * width)  
+  local x = startX + (i * width)
   love.graphics.setColor(1,1,1)
   love.graphics.rectangle('line', x, self.y, width, self.h)
 end
 
 function ExperienceIndicator.draw(self)
   love.graphics.setLineWidth(1)
-  
+
   -- background
   love.graphics.setColor(0, 0, 0, 0.4)
   love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)

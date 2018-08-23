@@ -3,7 +3,8 @@ local groups = require 'components.groups'
 local HealthIndicator = require 'components.hud.health-indicator'
 local ExperienceIndicator = require 'components.hud.experience-indicator'
 local ScreenFx = require 'components.hud.screen-fx'
-local ActiveItemInfo = require 'components.hud.active-skill-info'
+local ActiveSkillInfo = require 'components.hud.active-skill-info'
+local GuiText = require 'components.gui.gui-text'
 local Position = require 'utils.position'
 local scale = require 'config'.scaleFactor
 
@@ -21,7 +22,8 @@ local function setupHealthIndicator(self)
     x = offX,
     y = winHeight - h - 13,
     w = w,
-    h = h
+    h = h,
+    hudTextLayer = self.hudTextLayer
   }):setParent(self)
 end
 
@@ -39,16 +41,32 @@ local function setupExperienceIndicator(self)
 end
 
 function Hud.init(self)
+  self.hudTextLayer = GuiText.create({
+    group = groups.hud,
+    drawOrder = function()
+      return 4
+    end
+  }):setParent(self)
+
+  self.hudTextSmallLayer = GuiText.create({
+    group = groups.hud,
+    font = require 'components.font'.primary.font,
+    drawOrder = function()
+      return 10
+    end
+  }):setParent(self)
+
   setupHealthIndicator(self)
   setupExperienceIndicator(self)
   ScreenFx.create():setParent(self)
-  ActiveItemInfo.create({
+  ActiveSkillInfo.create({
     player = self.player,
     rootStore = self.rootStore,
     x = 300,
     y = (love.graphics.getHeight() / scale) - 32 - 5,
     slotX = 1,
-    slotY = 5
+    slotY = 5,
+    hudTextLayer = self.hudTextSmallLayer
   })
 end
 

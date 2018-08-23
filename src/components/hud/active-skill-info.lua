@@ -1,5 +1,4 @@
 local Component = require 'modules.component'
-local GuiText = require 'components.gui.gui-text'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local camera = require 'components.camera'
@@ -148,8 +147,6 @@ function ActiveItemInfo.update(self, dt)
 end
 
 function ActiveItemInfo.draw(self)
-  love.graphics.push()
-  love.graphics.scale(config.scaleFactor)
   local boxSize = self.size
 
   love.graphics.setColor(0,0,0,0.8)
@@ -168,13 +165,15 @@ function ActiveItemInfo.draw(self)
     love.graphics.rectangle('fill', self.x, self.y + offsetY, boxSize, boxSize - offsetY)
 
     if cooldown > 0 then
-      love.graphics.scale(0.5)
-      love.graphics.setColor(1,1,1)
-      local p = 10 -- padding
-      love.graphics.print(string.format('%.1f', cooldown), (self.x * config.scaleFactor) + p, (self.y * config.scaleFactor) + p)
+      local p = 5 -- padding
+      self.hudTextLayer:add(
+        string.format('%.1f', cooldown),
+        Color.WHITE,
+        self.x + p,
+        self.y + p
+      )
     end
   end
-  love.graphics.pop()
 end
 
 return Component.createFactory(ActiveItemInfo)
