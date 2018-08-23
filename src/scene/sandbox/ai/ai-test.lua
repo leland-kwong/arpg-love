@@ -406,9 +406,10 @@ local function drawScene(self)
 end
 
 function flowFieldTestBlueprint.draw(self)
-  love.graphics.translate(offX, offY)
+  love.graphics.push()
+  love.graphics.origin()
   drawScene(self)
-  love.graphics.translate(-offX, -offY)
+  love.graphics.pop()
 end
 
 return Component.createFactory(flowFieldTestBlueprint)
