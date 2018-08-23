@@ -16,7 +16,7 @@ M.keyboard = {
   ACTIVE_ITEM_1 = '1',
   ACTIVE_ITEM_2 = '2',
   INVENTORY_TOGGLE = 'i',
-  EXIT_GAME = 'escape'
+  MAIN_MENU = 'escape'
 }
 
 M.mouseInputMap = {

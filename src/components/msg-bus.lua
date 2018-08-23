@@ -91,4 +91,6 @@ M.PLAYER_DISABLE_ABILITIES = 'PLAYER_DISABLE_ABILITIES'
   the player is trying to pick up an item and it shouldn't attack while picking it up.
 ]]
 
+M.TOGGLE_MAIN_MENU = 'TOGGLE_MAIN_MENU'
+
 return M

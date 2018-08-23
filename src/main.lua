@@ -72,8 +72,8 @@ function love.keypressed(key, scanCode, isRepeated)
     inputMsg(key, scanCode, isRepeated)
   )
 
-  if config.keyboard.EXIT_GAME == key then
-    love.event.quit()
+  if config.keyboard.MAIN_MENU == key then
+    msgBus.send(msgBus.TOGGLE_MAIN_MENU)
   end
 end
 

@@ -11,10 +11,8 @@ local SandboxSceneSelection = {
   x = 200,
   y = 20,
   group = groups.gui,
-  -- table of scene paths that we can require
-  scenes = {
-    sceneName = 'scene_path'
-  },
+  -- table of menu options
+  options = {},
   onSelect = nil
 }
 
@@ -33,20 +31,20 @@ function SandboxSceneSelection.init(self)
   local onSelect = self.onSelect
   local menuX = self.x
   local menuY = self.y
-  local sceneNames = f.keys(self.scenes)
   local startYOffset = 10
   local menuWidth = math.max(
     unpack(
-      f.map(sceneNames, function(name)
-        return GuiText.getTextSize(name, itemFont)
+      f.map(self.options, function(option)
+        return GuiText.getTextSize(option.name, itemFont)
       end)
     )
   )
 
   -- menu option gui nodes
-  local menuOptions = f.map(sceneNames, function(name, i)
-    local scenePath = self.scenes[name]
-    local textW, textH = GuiText.getTextSize(scenePath, itemFont)
+  local menuOptions = f.map(self.options, function(option, i)
+    local name = option.name
+    local optionValue = option.value
+    local textW, textH = GuiText.getTextSize(name, itemFont)
     local lineHeight = 1.8
     local h = (textH * lineHeight)
     return Gui.create({
@@ -56,7 +54,7 @@ function SandboxSceneSelection.init(self)
       h = h,
       type = Gui.types.BUTTON,
       onClick = function(self)
-        onSelect(name, scenePath)
+        onSelect(name, optionValue)
       end,
       draw = function(self)
         if self.hovered then
