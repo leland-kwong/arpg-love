@@ -3,6 +3,7 @@ local animationFactory = require'components.animation-factory'
 local itemDefinition = require'components.item-inventory.items.item-definitions'
 local font = require 'components.font'
 local Position = require 'utils.position'
+local Color = require 'modules.color'
 
 local itemAnimationsCache = {}
 

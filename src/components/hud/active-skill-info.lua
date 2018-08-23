@@ -89,10 +89,13 @@ local function ActiveEquipmentHandler()
     if (not activeItem) or curCooldown > 0 then
       return skill
     else
-      local mx, my = camera:getMousePosition()
-      local playerX, playerY = self.player:getPosition()
       local itemDefinitions = require("components.item-inventory.items.item-definitions")
       local activateFn = itemDefinitions.getDefinition(activeItem).onActivateWhenEquipped
+      if (not activateFn) then
+        return skill
+      end
+      local mx, my = camera:getMousePosition()
+      local playerX, playerY = self.player:getPosition()
       local instance = modifyAbility(
         activateFn(activeItem, {
             x = playerX
@@ -123,6 +126,8 @@ end
 local skillHandlers = {
   SKILL_1 = ActiveEquipmentHandler(),
   SKILL_2 = ActiveEquipmentHandler(),
+  SKILL_3 = ActiveEquipmentHandler(),
+  SKILL_4 = ActiveEquipmentHandler(),
 
   ACTIVE_ITEM_1 = ActiveConsumableHandler(),
   ACTIVE_ITEM_2 = ActiveConsumableHandler()
@@ -148,7 +153,8 @@ local ActiveSkillInfo = {
 }
 
 function ActiveSkillInfo.init(self)
-  assert(skillHandlers[self.skillId] ~= nil, '[HUD activeItem] property `skillId` is required')
+  assert(self.skillId ~= nil, '[HUD activeItem] skillId is required')
+  assert(skillHandlers[self.skillId] ~= nil, '[HUD activeItem] `skillId`'..self.skillId..' is not defined')
   assert(self.player ~= nil, '[HUD activeItem] property `player` is required')
   assert(self.rootStore ~= nil, '[HUD activeItem] property `rootStore` is required')
 

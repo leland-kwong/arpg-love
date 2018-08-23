@@ -11,8 +11,10 @@ M.keyboard = {
   RIGHT = 'd',
   DOWN = 's',
   LEFT = 'a',
-  SKILL_1 = 'space',
-  SKILL_2 = 'lshift',
+  SKILL_1 = '3',
+  SKILL_2 = '4',
+  SKILL_3 = 'e',
+  SKILL_4 = 'r',
   ACTIVE_ITEM_1 = '1',
   ACTIVE_ITEM_2 = '2',
   INVENTORY_TOGGLE = 'i',
@@ -21,7 +23,9 @@ M.keyboard = {
 
 M.mouseInputMap = {
   SKILL_1 = 1,
-  SKILL_2 = 2
+  SKILL_2 = 2,
+  SKILL_3 = 3,
+  SKILL4 = 4
 }
 
 local xpDiff = 20

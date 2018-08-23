@@ -246,6 +246,20 @@ local function handleAbilities(self, dt)
   if not self.clickDisabled and isSkill2Activate then
     msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_2')
   end
+
+  -- SKILL_3
+  local isSkill3Activate = love.keyboard.isDown(keyMap.SKILL_3) or
+    (mouseInputMap.SKILL_3 and love.mouse.isDown(mouseInputMap.SKILL_3))
+  if not self.clickDisabled and isSkill3Activate then
+    msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_3')
+  end
+
+  -- SKILL_4
+  local isSkill4Activate = love.keyboard.isDown(keyMap.SKILL_4) or
+    (mouseInputMap.SKILL_4 and love.mouse.isDown(mouseInputMap.SKILL_4))
+  if not self.clickDisabled and isSkill4Activate then
+    msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_4')
+  end
 end
 
 function Player.update(self, dt)

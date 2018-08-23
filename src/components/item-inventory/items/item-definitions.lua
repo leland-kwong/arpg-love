@@ -38,10 +38,6 @@ end
 
 local noop = function() end
 local defaultProperties = {
-	onActivate = function(self)
-
-	end,
-
 	onEquip = noop,
 
 	-- tooltip content to render
@@ -55,6 +51,12 @@ local defaultProperties = {
 
 	-- item dropped into inventory cell
 	onInventoryDrop = noop,
+
+	-- item is right-clicked in inventory
+	onActivate = noop,
+
+	-- item is equipped and item is in active skill slot
+	onActivateWhenEquipped = nil,
 
 	onRender = noop,
 

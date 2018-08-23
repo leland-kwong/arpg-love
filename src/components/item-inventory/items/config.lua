@@ -46,7 +46,7 @@ local equipmentCategory = {
 	SHOES = 'SHOES',
 	PANTS = 'PANTS',
 	GLOVES = 'GLOVES',
-	ION_GENERATOR = 'ION_GENERATOR',
+	SIDE_ARM = 'SIDE_ARM',
 	HELMET = 'HELMET',
 	RING = 'RING',
 }
@@ -66,12 +66,12 @@ config.categoryTitle = {
 	[equipmentCategory.SHOES] = 'shoes',
 	[equipmentCategory.PANTS] = 'pants',
 	[equipmentCategory.GLOVES] = 'gloves',
-	[equipmentCategory.ION_GENERATOR] = 'ion generator',
+	[equipmentCategory.SIDE_ARM] = 'ion generator',
 }
 
 config.equipmentCategorySilhouette = {
 	[equipmentCategory.HELMET] = 'helmet_106',
-	[equipmentCategory.ION_GENERATOR] = 'book_25',
+	[equipmentCategory.SIDE_ARM] = 'book_25',
 	[equipmentCategory.RING] = 'ring_1',
 	[equipmentCategory.AMULET] = 'amulet_16',
 	[equipmentCategory.BODY_ARMOR] = 'armor_121',
@@ -87,8 +87,8 @@ config.equipmentGuiSlotMap = {
 		equipmentCategory.BODY_ARMOR
 	},
 	{
-		equipmentCategory.ION_GENERATOR,
-		equipmentCategory.RING
+		equipmentCategory.SIDE_ARM,
+		equipmentCategory.SIDE_ARM
 	},
 	{
 		equipmentCategory.WEAPON_1,
