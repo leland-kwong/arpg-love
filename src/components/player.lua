@@ -111,7 +111,6 @@ local Player = {
       end
 
       if msgBus.PLAYER_DISABLE_ABILITIES == msgType then
-        consoleLog('disabled', tostring(msg))
         self.clickDisabled = msg
       end
 
@@ -230,6 +229,11 @@ local function handleAbilities(self, dt)
   local isItem1Activate = love.keyboard.isDown(keyMap.ACTIVE_ITEM_1)
   if not self.clickDisabled and isItem1Activate then
     msgBus.send(msgBus.PLAYER_USE_SKILL, 'ACTIVE_ITEM_1')
+  end
+
+  local isItem2Activate = love.keyboard.isDown(keyMap.ACTIVE_ITEM_2)
+  if not self.clickDisabled and isItem2Activate then
+    msgBus.send(msgBus.PLAYER_USE_SKILL, 'ACTIVE_ITEM_2')
   end
 end
 

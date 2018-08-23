@@ -9,9 +9,52 @@ local config = require 'config'
 local keyMap = config.keyboard
 local mouseInputMap = config.mouseInputMap
 
+local function ActiveItemHandler()
+  local curCooldown = 0
+  local skillCooldown = 0
+  local activeItem = nil
+  local max = math.max
+  local itemDefinitions = require("components.item-inventory.items.item-definitions")
+  local skill = {}
+
+  function skill.set(item)
+    local isDifferentSkill = item ~= activeItem
+    -- reset cooldown
+    if isDifferentSkill then
+      curCooldown = 0
+    end
+    activeItem = item
+  end
+
+  function skill.use(self)
+    if (not activeItem) or (curCooldown > 0) then
+      return skill
+    else
+      local activateFn = itemDefinitions.getDefinition(activeItem).onActivateWhenEquipped
+      local instance = activateFn(activeItem)
+      curCooldown = instance.cooldown
+      skillCooldown = instance.cooldown
+      return skill
+    end
+  end
+
+  function skill.updateCooldown(dt)
+    curCooldown = max(0, curCooldown - dt)
+    return skill
+  end
+
+  function skill.getStats()
+    return curCooldown, skillCooldown
+  end
+
+  return skill
+end
+
 local skillHandlers = {
   SKILL_1 = (function()
+    local max = math.max
     local curCooldown = 0
+    local skillCooldown = 0
     local skill = {}
 
     local floor = math.floor
@@ -33,6 +76,9 @@ local skillHandlers = {
       return v
     end
 
+    function skill.set(self)
+    end
+
     function skill.use(self)
       if curCooldown > 0 then
         return skill
@@ -51,44 +97,7 @@ local skillHandlers = {
           self.rootStore:get().statModifiers
         )
         curCooldown = projectile.cooldown
-        return skill
-      end
-    end
-
-    function skill.updateCooldown(dt)
-      curCooldown = curCooldown - dt
-      return cooldown
-    end
-
-    return skill
-  end)(),
-
-  ACTIVE_ITEM_1 = (function()
-    local curCooldown = 0
-    local skillCooldown = 0
-    local activeItem = nil
-    local max = math.max
-    local itemDefinitions = require("components.item-inventory.items.item-definitions")
-
-    local skill = {}
-
-    function skill.set(item)
-      local isDifferentSkill = item ~= activeItem
-      -- reset cooldown
-      if isDifferentSkill then
-        curCooldown = 0
-      end
-      activeItem = item
-    end
-
-    function skill.use(self)
-      if (not activeItem) or (curCooldown > 0) then
-        return skill
-      else
-        local activateFn = itemDefinitions.getDefinition(activeItem).onActivateWhenEquipped
-        local instance = activateFn(activeItem)
-        curCooldown = instance.cooldown
-        skillCooldown = instance.cooldown
+        skillCooldown = projectile.cooldown
         return skill
       end
     end
@@ -103,23 +112,27 @@ local skillHandlers = {
     end
 
     return skill
-  end)()
+  end)(),
+
+  ACTIVE_ITEM_1 = ActiveItemHandler(),
+  ACTIVE_ITEM_2 = ActiveItemHandler()
 }
 
 local function updateAbilities(self, dt)
-  -- SKILL_1
-  skillHandlers.SKILL_1.updateCooldown(dt)
+  -- -- SKILL_1
+  -- skillHandlers.SKILL_1.updateCooldown(dt)
 
   -- ACTIVE_ITEM_1
-  local item = self.rootStore:get().equipment[5][1]
-  skillHandlers.ACTIVE_ITEM_1.set(item)
-  skillHandlers.ACTIVE_ITEM_1.updateCooldown(dt)
+  local item = self.rootStore:get().equipment[self.slotY][self.slotX]
+  skillHandlers[self.skillId].set(item)
+  skillHandlers[self.skillId].updateCooldown(dt)
 end
 
-local ActiveItemInfo = {
+local ActiveSkillInfo = {
   group = groups.hud,
   x = 0,
   y = 0,
+  skillId = nil,
   slotX = 1,
   slotY = 1,
   size = 32,
@@ -127,7 +140,8 @@ local ActiveItemInfo = {
   rootStore = nil
 }
 
-function ActiveItemInfo.init(self)
+function ActiveSkillInfo.init(self)
+  assert(skillHandlers[self.skillId] ~= nil, '[HUD activeItem] property `skillId` is required')
   assert(self.player ~= nil, '[HUD activeItem] property `player` is required')
   assert(self.rootStore ~= nil, '[HUD activeItem] property `rootStore` is required')
 
@@ -136,17 +150,17 @@ function ActiveItemInfo.init(self)
       return msgBus.CLEANUP
     end
 
-    if msgBus.PLAYER_USE_SKILL == msgType then
-      skillHandlers[value].use(self)
+    if msgBus.PLAYER_USE_SKILL == msgType and value == self.skillId then
+      skillHandlers[self.skillId].use(self)
     end
   end)
 end
 
-function ActiveItemInfo.update(self, dt)
+function ActiveSkillInfo.update(self, dt)
   updateAbilities(self, dt)
 end
 
-function ActiveItemInfo.draw(self)
+function ActiveSkillInfo.draw(self)
   local boxSize = self.size
 
   love.graphics.setColor(0,0,0,0.8)
@@ -158,7 +172,7 @@ function ActiveItemInfo.draw(self)
   if activeItem then
     drawItem(activeItem, self.x, self.y, boxSize)
 
-    local cooldown, skillCooldown = skillHandlers.ACTIVE_ITEM_1.getStats()
+    local cooldown, skillCooldown = skillHandlers[self.skillId].getStats()
     local progress = (skillCooldown - cooldown) / skillCooldown
     local offsetY = progress * boxSize
     love.graphics.setColor(1,1,1,0.2)
@@ -176,4 +190,4 @@ function ActiveItemInfo.draw(self)
   end
 end
 
-return Component.createFactory(ActiveItemInfo)
+return Component.createFactory(ActiveSkillInfo)

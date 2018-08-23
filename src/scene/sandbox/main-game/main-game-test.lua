@@ -31,6 +31,9 @@ local function insertTestItems(rootStore)
   rootStore:addItemToInventory(
     require(itemsPath..'.potion-health').create(),
     {1, 1})
+  rootStore:addItemToInventory(
+    require(itemsPath..'.potion-health').create(),
+    {2, 1})
 end
 
 function MainGameTest.init(self)
