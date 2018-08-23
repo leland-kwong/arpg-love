@@ -95,6 +95,11 @@ function M.new()
 		return allReducers, msgHandlers
 	end
 
+	function msgBus.clearAll()
+		allReducers = {}
+		msgHandlers = {}
+	end
+
 	return msgBus
 end
 

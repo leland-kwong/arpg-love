@@ -1,7 +1,7 @@
 local config = require 'config'
-local messageBus = require 'utils.message-bus'
+local MessageBus = require 'utils.message-bus'
 
-local M = messageBus.new()
+local M = MessageBus.new()
 
 if config.isDebug then
   local proxy = {}

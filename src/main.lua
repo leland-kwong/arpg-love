@@ -9,6 +9,7 @@ love.graphics.setDefaultFilter('nearest', 'nearest')
 local Console = require 'modules.console.console'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
+local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local groups = require 'components.groups'
 local config = require 'config'
 local camera = require 'components.camera'
@@ -73,7 +74,9 @@ function love.keypressed(key, scanCode, isRepeated)
   )
 
   if config.keyboard.MAIN_MENU == key then
-    msgBus.send(msgBus.TOGGLE_MAIN_MENU)
+    msgBusMainMenu.send(
+      msgBusMainMenu.TOGGLE_MAIN_MENU
+    )
   end
 end
 

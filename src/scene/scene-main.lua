@@ -15,9 +15,6 @@ local Hud = require 'components.hud.hud'
 local msgBus = require 'components.msg-bus'
 local HealSource = require'components.heal-source'
 
-local rootState = CreateStore()
-local inventoryController = InventoryController(rootState)
-
 local gridTileTypes = {
   -- unwalkable
   [0] = {
@@ -41,10 +38,12 @@ local gridTileTypes = {
 
 local MainScene = {
   group = groups.all,
-  rootStore = rootState
 }
 
 function MainScene.init(self)
+  local rootState = CreateStore()
+  self.rootStore = rootState
+  local inventoryController = InventoryController(rootState)
   local parent = self
 
   local map = Map.createAdjacentRooms(6, 20)
@@ -119,7 +118,7 @@ function MainScene.init(self)
     end
   end)
 
-  local aiCount = 50
+  local aiCount = 60
   local generated = 0
   local minPos, maxPos = 10, 60
   while generated < aiCount do

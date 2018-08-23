@@ -6,6 +6,7 @@ local SceneMenu = require 'scene.scene-menu'
 local Component = require 'modules.component'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
+local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local config = require 'config'
 local objectUtils = require 'utils.object-utils'
 local bitser = require 'modules.bitser'
@@ -115,7 +116,7 @@ local sceneOptions = {
   }
 }
 
-function Sandbox.init()
+function Sandbox.init(self)
   local activeSceneMenu = nil
 
   local function DebugMenu(enabled)
@@ -123,8 +124,9 @@ function Sandbox.init()
       activeSceneMenu = SceneMenu.create({
         options = sceneOptions,
         onSelect = function(name, value)
-          value()
+          msgBus.clearAll()
           DebugMenu(false)
+          value()
         end,
         drawOrder = drawOrder
       })
@@ -153,12 +155,12 @@ function Sandbox.init()
     DebugMenu(not state.menuOpened)
   end)
 
-  msgBus.subscribe(function(msgType, msgValue)
+  msgBusMainMenu.subscribe(function(msgType, msgValue)
     if self:isDeleted() then
-      return msgBus.CLEANUP
+      return msgBusMainMenu.CLEANUP
     end
 
-    if msgBus.TOGGLE_MAIN_MENU == msgType then
+    if msgBusMainMenu.TOGGLE_MAIN_MENU == msgType then
       DebugMenu(not state.menuOpened)
     end
   end)
