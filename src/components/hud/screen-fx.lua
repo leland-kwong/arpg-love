@@ -39,6 +39,7 @@ end
 
 function ScreenFx.draw(self)
   if self.currentTween then
+    local originalLineWidth = love.graphics.getLineWidth()
     love.graphics.setColor(Color.rgba255(242, 51, 26, self.opacity))
     local thickness = 20
     love.graphics.setLineWidth(thickness)
@@ -48,6 +49,8 @@ function ScreenFx.draw(self)
       love.graphics.getWidth() / screenScale,
       love.graphics.getHeight() / screenScale
     )
+    -- reset line width
+    love.graphics.setLineWidth(originalLineWidth)
   end
 end
 

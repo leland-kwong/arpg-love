@@ -118,11 +118,8 @@ local skillHandlers = {
   ACTIVE_ITEM_2 = ActiveItemHandler()
 }
 
+-- sets the new ability if it has changed and also updates the cooldown
 local function updateAbilities(self, dt)
-  -- -- SKILL_1
-  -- skillHandlers.SKILL_1.updateCooldown(dt)
-
-  -- ACTIVE_ITEM_1
   local item = self.rootStore:get().equipment[self.slotY][self.slotX]
   skillHandlers[self.skillId].set(item)
   skillHandlers[self.skillId].updateCooldown(dt)
@@ -160,8 +157,27 @@ function ActiveSkillInfo.update(self, dt)
   updateAbilities(self, dt)
 end
 
+local mouseBtnToString = {
+  [1] = 'lm',
+  [2] = 'rm'
+}
+
+local function drawHotkEy(self)
+  local mouseBtn = config.mouseInputMap[self.skillId]
+  local keyboardKey = config.keyboard[self.skillId]
+  local hotKeyToShow = mouseBtn and mouseBtnToString[mouseBtn] or keyboardKey
+  self.hudTextLayer:add(
+    hotKeyToShow,
+    Color.WHITE,
+    self.x,
+    self.y - 5
+  )
+end
+
 function ActiveSkillInfo.draw(self)
   local boxSize = self.size
+
+  drawHotkEy(self)
 
   love.graphics.setColor(0,0,0,0.8)
   love.graphics.rectangle('fill', self.x, self.y, boxSize, boxSize)
