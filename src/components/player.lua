@@ -40,96 +40,6 @@ local function collisionFilter(item, other)
   return 'slide'
 end
 
-local skillHandlers = {
-  SKILL_1 = (function()
-    local curCooldown = 0
-    local skill = {}
-
-    local floor = math.floor
-    local function modifyAbility(instance, modifiers)
-      local v = instance
-      local m = modifiers
-			local energyCost = v.energyCost
-			local baseWeapon = m.weaponDamage
-			local totalWeaponDmg = v.weaponDamageScaling * baseWeapon
-			local dmgMultiplier = 1 + m.percentDamage
-			local min = floor((v.minDamage * dmgMultiplier) + m.flatDamage + totalWeaponDmg)
-      local max = floor((v.maxDamage * dmgMultiplier) + m.flatDamage + totalWeaponDmg)
-
-      -- update instance properties
-      v:setProp('minDamage', min)
-       :setProp('maxDamage', max)
-       :setProp('cooldown', v.cooldown - (v.cooldown * m.cooldownReduction))
-
-      return v
-    end
-
-    function skill.use(self)
-      if curCooldown > 0 then
-        return skill
-      else
-        local Fireball = require 'components.fireball'
-        local mx, my = camera:getMousePosition()
-        local projectile = modifyAbility(
-          Fireball.create({
-              debug = false
-            , x = self.x
-            , y = self.y
-            , x2 = mx
-            , y2 = my
-          }),
-          self.rootStore:get().statModifiers
-        )
-        curCooldown = projectile.cooldown
-        return skill
-      end
-    end
-
-    function skill.updateCooldown(dt)
-      curCooldown = curCooldown - dt
-      return skill
-    end
-
-    return skill
-  end)(),
-
-  ACTIVE_ITEM_1 = (function()
-    local curCooldown = 0
-    local activeItem = nil
-    local max = math.max
-    local itemDefinitions = require("components.item-inventory.items.item-definitions")
-
-    local skill = {}
-
-    function skill.set(item)
-      local isDifferentSkill = item ~= activeItem
-      -- reset cooldown
-      if isDifferentSkill then
-        curCooldown = 0
-      end
-      activeItem = item
-    end
-
-    function skill.use(self)
-      if (not activeItem) or (curCooldown > 0) then
-        return skill
-      else
-        local activateFn = itemDefinitions.getDefinition(activeItem).onActivateWhenEquipped
-        local instance = activateFn(activeItem)
-        curCooldown = instance.cooldown
-        return skill
-      end
-    end
-
-    function skill.updateCooldown(dt)
-      curCooldown = max(0, curCooldown - dt)
-      return skill
-    end
-
-    return skill
-  end)()
-}
-
 local Player = {
   group = groups.all,
   x = startPos.x,
@@ -200,6 +110,11 @@ local Player = {
         return msgBus.CLEANUP
       end
 
+      if msgBus.PLAYER_DISABLE_ABILITIES == msgType then
+        consoleLog('disabled', tostring(msg))
+        self.clickDisabled = msg
+      end
+
       if msgBus.ITEM_PICKUP == msgType then
         local item = msg
         local dist = calcDist(self.x, self.y, item.x, item.y)
@@ -208,7 +123,7 @@ local Player = {
         local gridX2, gridY2 = Position.pixelsToGrid(item.x, item.y, config.gridSize)
         local canWalkToItem = LineOfSight(self.mapGrid, Map.WALKABLE)(gridX1, gridY1, gridX2, gridY2)
         if outOfRange or (not canWalkToItem) then
-          self.clickDisabled = true
+          msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, true)
           -- move towards item
           self.forceMove = true
         elseif canWalkToItem then
@@ -217,11 +132,11 @@ local Player = {
         end
       elseif (msgBus.ITEM_PICKUP_CANCEL == msgType) or (msgBus.ITEM_PICKUP_SUCCESS == msgType) then
         self.forceMove = false
-        self.clickDisabled = false
+        msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
       end
 
       if msgBus.ITEM_HOVERED == msgType then
-        self.clickDisabled = msg
+        msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, msg)
       end
 
       if msgBus.DROP_ITEM_ON_FLOOR == msgType then
@@ -308,18 +223,14 @@ local function handleAbilities(self, dt)
   local isSkill1Activate = love.keyboard.isDown(keyMap.SKILL_1) or
     love.mouse.isDown(mouseInputMap.SKILL_1)
   if not self.clickDisabled and isSkill1Activate then
-    skillHandlers.SKILL_1.use(self)
+    msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_1')
   end
-  skillHandlers.SKILL_1.updateCooldown(dt)
 
   -- ACTIVE_ITEM_1
   local isItem1Activate = love.keyboard.isDown(keyMap.ACTIVE_ITEM_1)
-  local item = self.rootStore:get().equipment[5][1]
-  skillHandlers.ACTIVE_ITEM_1.set(item)
   if not self.clickDisabled and isItem1Activate then
-    skillHandlers.ACTIVE_ITEM_1.use(self)
+    msgBus.send(msgBus.PLAYER_USE_SKILL, 'ACTIVE_ITEM_1')
   end
-  skillHandlers.ACTIVE_ITEM_1.updateCooldown(dt)
 end
 
 function Player.update(self, dt)

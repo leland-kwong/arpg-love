@@ -3,6 +3,7 @@ local groups = require 'components.groups'
 local HealthIndicator = require 'components.hud.health-indicator'
 local ExperienceIndicator = require 'components.hud.experience-indicator'
 local ScreenFx = require 'components.hud.screen-fx'
+local ActiveItemInfo = require 'components.hud.active-skill-info'
 local Position = require 'utils.position'
 local scale = require 'config'.scaleFactor
 
@@ -41,6 +42,14 @@ function Hud.init(self)
   setupHealthIndicator(self)
   setupExperienceIndicator(self)
   ScreenFx.create():setParent(self)
+  ActiveItemInfo.create({
+    player = self.player,
+    rootStore = self.rootStore,
+    x = 300,
+    y = (love.graphics.getHeight() / scale) - 32 - 5,
+    slotX = 1,
+    slotY = 5
+  })
 end
 
 return Component.createFactory(Hud)

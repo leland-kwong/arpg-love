@@ -78,10 +78,17 @@ M.PLAYER_HEAL_SOURCE_ADD = 'PLAYER_HEAL_SOURCE_ADD'
 ]]
 
 M.PLAYER_HEAL_SOURCE_REMOVE = 'PLAYER_HEAL_SOURCE_REMOVE'
+--[[ STRING ]]
+
+M.PLAYER_USE_SKILL = 'PLAYER_USE_SKILL'
+--[[ STRING ]]
+
+M.PLAYER_DISABLE_ABILITIES = 'PLAYER_DISABLE_ABILITIES'
 --[[
-  {
-    source = STRING
-  }
+  BOOLEAN
+
+  Disables/enables clicks for the player. This is used for situations where
+  the player is trying to pick up an item and it shouldn't attack while picking it up.
 ]]
 
 return M

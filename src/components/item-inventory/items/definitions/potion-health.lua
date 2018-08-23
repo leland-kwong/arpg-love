@@ -15,7 +15,7 @@ return itemDefs.registerType({
 
 			minHeal = 80,
 			maxHeal = 100,
-			duration = 3,
+			duration = 2,
 			source = 'HEALTH_POTION'
 		}
 	end,

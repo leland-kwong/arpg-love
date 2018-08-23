@@ -31,32 +31,28 @@ local function insertTestItems(rootStore)
   rootStore:addItemToInventory(
     require(itemsPath..'.potion-health').create(),
     {1, 1})
-  for i=1, 99 do
-    rootStore:addItemToInventory(
-      require(itemsPath..'.potion-health').create(),
-      {2, 2})
-  end
 end
 
 function MainGameTest.init(self)
   modifyLevelRequirements()
 
+  local scene = SceneMain.create():setParent(self)
+  insertTestItems(scene.rootStore)
+
+  TreasureChest.create({
+    x = 5 * 16,
+    y = 5 * 16
+  }):setParent(self)
+
   TreasureChest.create({
     x = 10 * 16,
     y = 6 * 16
-  })
+  }):setParent(self)
 
   TreasureChest.create({
     x = 15 * 16,
     y = 6 * 16
-  })
-
-  local scene = SceneMain.create():setParent(self)
-  insertTestItems(scene.rootStore)
-  TreasureChest.create({
-    x = 5 * 16,
-    y = 5 * 16
-  })
+  }):setParent(self)
 end
 
 return Component.createFactory(MainGameTest)

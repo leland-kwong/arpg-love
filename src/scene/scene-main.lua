@@ -59,6 +59,7 @@ function MainScene.init(self)
   }):setParent(parent)
 
   Hud.create({
+    player = player,
     rootStore = rootState
   }):setParent(parent)
 
@@ -77,7 +78,7 @@ function MainScene.init(self)
             slots = function()
               return rootState:get().inventory
             end
-          })
+          }):setParent(self)
           rootState:set('activeMenu', 'INVENTORY')
         else
           self.inventory:delete(true)
