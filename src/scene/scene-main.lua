@@ -40,6 +40,18 @@ local MainScene = {
   group = groups.all,
 }
 
+local random = math.random
+local Position = require 'utils.position'
+local function getDroppablePosition(posX, posY, mapGrid)
+  local dropX, dropY = posX + random(0, 16), posY + random(0, 16)
+  local gridX, gridY = Position.pixelsToGrid(dropX, dropY, config.gridSize)
+  local isWalkable = mapGrid[gridX][gridY] == Map.WALKABLE
+  if not isWalkable then
+    return getDroppablePosition(posX, posY, mapGrid)
+  end
+  return dropX, dropY
+end
+
 function MainScene.init(self)
   local rootState = CreateStore()
   self.rootStore = rootState
@@ -96,9 +108,10 @@ function MainScene.init(self)
     if msgBus.GENERATE_LOOT == msgType then
       local LootGenerator = require'components.loot-generator.loot-generator'
       local x, y, item = unpack(msgValue)
+      local dropX, dropY = getDroppablePosition(x, y, map.grid)
       LootGenerator.create({
-        x = x,
-        y = y,
+        x = dropX,
+        y = dropY,
         item = item,
         rootStore = rootState
       }):setParent(parent)

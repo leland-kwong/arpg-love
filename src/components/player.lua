@@ -139,11 +139,9 @@ local Player = {
       end
 
       if msgBus.DROP_ITEM_ON_FLOOR == msgType then
-        local dropX, dropY = self.x + math.random(0, 16),
-          self.y + math.random(0, 16)
         msgBus.send(
           msgBus.GENERATE_LOOT,
-          {dropX, dropY, msg}
+          {self.x, self.y, msg}
         )
       end
 
@@ -218,6 +216,23 @@ local function handleAnimation(self, dt, nextX, nextY, moveSpeed)
 end
 
 local function handleAbilities(self, dt)
+  -- ACTIVE_ITEM_1
+  local isItem1Activate = love.keyboard.isDown(keyMap.ACTIVE_ITEM_1)
+  if not self.clickDisabled and isItem1Activate then
+    msgBus.send(msgBus.PLAYER_USE_SKILL, 'ACTIVE_ITEM_1')
+  end
+
+  -- ACTIVE_ITEM_2
+  local isItem2Activate = love.keyboard.isDown(keyMap.ACTIVE_ITEM_2)
+  if not self.clickDisabled and isItem2Activate then
+    msgBus.send(msgBus.PLAYER_USE_SKILL, 'ACTIVE_ITEM_2')
+  end
+
+  -- only disable equipment skills since we want to allow potions to still be used
+  if self.clickDisabled or self.rootStore:get().activeMenu then
+    return
+  end
+
   -- SKILL_1
   local isSkill1Activate = love.keyboard.isDown(keyMap.SKILL_1) or
     love.mouse.isDown(mouseInputMap.SKILL_1)
@@ -230,18 +245,6 @@ local function handleAbilities(self, dt)
     love.mouse.isDown(mouseInputMap.SKILL_2)
   if not self.clickDisabled and isSkill2Activate then
     msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_2')
-  end
-
-  -- ACTIVE_ITEM_1
-  local isItem1Activate = love.keyboard.isDown(keyMap.ACTIVE_ITEM_1)
-  if not self.clickDisabled and isItem1Activate then
-    msgBus.send(msgBus.PLAYER_USE_SKILL, 'ACTIVE_ITEM_1')
-  end
-
-  -- ACTIVE_ITEM_2
-  local isItem2Activate = love.keyboard.isDown(keyMap.ACTIVE_ITEM_2)
-  if not self.clickDisabled and isItem2Activate then
-    msgBus.send(msgBus.PLAYER_USE_SKILL, 'ACTIVE_ITEM_2')
   end
 end
 
