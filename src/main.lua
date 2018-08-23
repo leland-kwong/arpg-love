@@ -33,6 +33,7 @@ local globalState = {
 }
 
 function love.load()
+  msgBus.send(msgBus.GAME_LOADED)
   love.keyboard.setKeyRepeat(true)
   local resolution = config.resolution
   local vw, vh = resolution.w * scale, resolution.h * scale
@@ -40,8 +41,6 @@ function love.load()
   camera
     :setSize(vw, vh)
     :setScale(scale)
-  msgBus.send(msgBus.GAME_LOADED)
-
   globalState.activeScene.create()
 
   -- console debugging
