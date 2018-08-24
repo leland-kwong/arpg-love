@@ -41,7 +41,7 @@ Additional mechanics
   - missle launchers
   - laser swords
   - jack hammers
-  -
+  - boots with inherent **boost** mechanic. The boost mechanic could be either an instantaneous **jump** or a small increase in movement speed for a duration.
 
 ## Currency system
 Everything is traded with **scrap metal**. You can also break down items for **scrap metal**.
