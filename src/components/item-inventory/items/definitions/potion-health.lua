@@ -6,7 +6,7 @@ local msgBus = require("components.msg-bus")
 local Sound = require 'components.sound'
 
 return itemDefs.registerType({
-	type = "HEALTH_POTION",
+	type = "potion-health",
 
 	create = function()
 		return {

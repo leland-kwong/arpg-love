@@ -14,7 +14,7 @@ local function concatTable(a, b)
 end
 
 return itemDefs.registerType({
-	type = "MOCK_ARMOR",
+	type = "mock-armor",
 
 	create = function()
 		return {

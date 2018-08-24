@@ -36,7 +36,7 @@ local function concatTable(a, b)
 end
 
 return itemDefs.registerType({
-	type = "POISON_BLADE",
+	type = "poison-blade",
 
 	create = function()
 		return {

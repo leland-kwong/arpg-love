@@ -27,7 +27,7 @@ local function concatTable(a, b)
 end
 
 return itemDefs.registerType({
-	type = "POD_ONE",
+	type = "pod-one",
 
 	create = function()
 		return {
