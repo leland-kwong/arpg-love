@@ -40,6 +40,9 @@ local function insertTestItems(rootStore)
   rootStore:addItemToInventory(
     require(itemsPath..'.ion-generator-2').create()
   )
+  rootStore:addItemToInventory(
+    require(itemsPath..'.pod-one').create()
+  )
 end
 
 function MainGameTest.init(self)

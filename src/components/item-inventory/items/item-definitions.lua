@@ -58,7 +58,7 @@ local defaultProperties = {
 	-- item is equipped and item is in active skill slot
 	onActivateWhenEquipped = nil,
 
-	onRender = noop,
+	render = noop,
 
 	modifier = function(self, msgType, msgValue)
 		return msgValue

@@ -63,8 +63,12 @@ local blueprint2 = {
   group = group
 }
 local factory = Component.createFactory(blueprint2)
-local c1 = factory.create()
+local c1 = factory.create({
+  id = 'foobar'
+})
 local c2 = factory.create():setParent(c1)
+
+assert(Component.get('foobar') ~= nil, 'failed to find by component by id')
 
 c1:delete(true)
 --[[

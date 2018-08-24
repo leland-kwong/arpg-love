@@ -47,6 +47,17 @@ local function ActiveConsumableHandler()
     return curCooldown, skillCooldown
   end
 
+  function skill.draw(self)
+    if (not activeItem) then
+      return
+    end
+    local itemDefinitions = require("components.item-inventory.items.item-definitions")
+    local renderFn = itemDefinitions.getDefinition(activeItem).render
+    if renderFn then
+      renderFn(activeItem)
+    end
+  end
+
   return skill
 end
 
@@ -120,6 +131,17 @@ local function ActiveEquipmentHandler()
     return curCooldown, skillCooldown
   end
 
+  function skill.draw(self)
+    if (not activeItem) then
+      return
+    end
+    local itemDefinitions = require("components.item-inventory.items.item-definitions")
+    local renderFn = itemDefinitions.getDefinition(activeItem).render
+    if renderFn then
+      renderFn(activeItem)
+    end
+  end
+
   return skill
 end
 
@@ -152,7 +174,13 @@ local ActiveSkillInfo = {
   rootStore = nil
 }
 
+local ItemRender = {
+  group = groups.all
+}
+Component.createFactory(ItemRender)
+
 function ActiveSkillInfo.init(self)
+  local parent = self
   assert(self.skillId ~= nil, '[HUD activeItem] skillId is required')
   assert(skillHandlers[self.skillId] ~= nil, '[HUD activeItem] `skillId`'..self.skillId..' is not defined')
   assert(self.player ~= nil, '[HUD activeItem] property `player` is required')
@@ -167,6 +195,18 @@ function ActiveSkillInfo.init(self)
       skillHandlers[self.skillId].use(self)
     end
   end)
+
+  local playerRef = Component.get('PLAYER')
+  self.itemRender = ItemRender.create({
+    draw = function()
+      love.graphics.setColor(1,1,1)
+      skillHandlers[parent.skillId].draw(parent)
+    end,
+    drawOrder = function(self)
+      return self.group.drawOrder(self) + 3
+    end
+  }):setPosition(playerRef:getPosition())
+    :setParent(playerRef)
 end
 
 function ActiveSkillInfo.update(self, dt)

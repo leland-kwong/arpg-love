@@ -75,6 +75,7 @@ local invalidPropsErrorMsg = 'props cannot be a component object'
 
 function M.createFactory(blueprint)
   tc.validate(blueprint.getInitialProps, tc.FUNCTION, false)
+  assert(blueprint.id == nil, 'blueprints should not have an id. Instead, pass the id in as a prop, or let the system automatically generate an id')
 
   function blueprint.create(props)
     local c = (props or {})
@@ -83,7 +84,7 @@ function M.createFactory(blueprint)
       invalidPropsErrorMsg
     )
 
-    local id = uid()
+    local id = c.id or uid()
     c._id = id
     setmetatable(c, blueprint)
     blueprint.__index = blueprint
@@ -124,6 +125,10 @@ function M.createFactory(blueprint)
     assert(self[prop] ~= nil, 'property '..prop..' not defined')
     self[prop] = value
     return self
+  end
+
+  function blueprint:getProp(prop)
+    return self[prop]
   end
 
   function blueprint:setGroup(group)
@@ -177,6 +182,8 @@ function M.createFactory(blueprint)
   return blueprint
 end
 
+local allComponentsById = {}
+
 function M.newGroup(groupDefinition)
   -- apply any missing default options to group definition
   groupDefinition = objectUtils.assign(
@@ -212,7 +219,13 @@ function M.newGroup(groupDefinition)
 
   function Group.addComponent(component)
     count = count + 1
-    componentsById[component:getId()] = component
+    local id = component:getId()
+
+    local isUnique = allComponentsById[id] == nil
+    assert(isUnique, 'duplicate component id')
+
+    allComponentsById[id] = component
+    componentsById[id] = component
   end
 
   function Group.delete(component)
@@ -221,7 +234,9 @@ function M.newGroup(groupDefinition)
       return
     end
 
-    componentsById[component._id] = nil
+    local id = component:getId()
+    componentsById[id] = nil
+    allComponentsById[id] = nil
     count = count - 1
     component:final()
     return Group
@@ -232,6 +247,10 @@ function M.newGroup(groupDefinition)
   end
 
   return Group
+end
+
+function M.get(id)
+  return allComponentsById[id]
 end
 
 return M

@@ -175,7 +175,7 @@
             <key>heuristicMask</key>
             <false/>
             <key>defaultPivotPoint</key>
-            <point_f>0.5,0.266667</point_f>
+            <point_f>0.5,0.5</point_f>
             <key>writePivotPoints</key>
             <true/>
         </struct>
@@ -857,6 +857,19 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/items/weapons/pods/pod-one.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.380952,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,5,11,10</rect>
+                <key>scale9Paddings</key>
+                <rect>5,5,11,10</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/primitives/pixel-white-1x1.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -916,6 +929,7 @@
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets</filename>
+            <filename>custom-art/items/weapons/pods</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

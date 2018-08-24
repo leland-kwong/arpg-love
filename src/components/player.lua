@@ -199,6 +199,11 @@ local function handleMovement(self, dt)
   nextX = nextX + (dx * moveAmount)
   nextY = nextY + (dy * moveAmount)
 
+  self.facingDirectionX = mDx
+  self.facingDirectionY = mDy
+  self.moveDirectionX = dx
+  self.moveDirectionY = dy
+
   return nextX, nextY, totalMoveSpeed
 end
 
