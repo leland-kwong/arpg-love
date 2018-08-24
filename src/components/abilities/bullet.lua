@@ -10,6 +10,7 @@ local Position = require 'utils.position'
 local Color = require 'modules.color'
 local memoize = require 'utils.memoize'
 local typeCheck = require 'utils.type-check'
+local random = math.random
 
 local colMap = collisionWorlds.map
 
@@ -29,22 +30,35 @@ end)
 
 local Bullet = {
   group = groups.all,
-  -- DEFAULTS
+
+  -- [DEFAULTS]
+
+  -- start position
+  x = 0,
+  y = 0,
+
+  -- target position
+  x2 = 0,
+  y2 = 0,
   minDamage = 1,
   maxDamage = 2,
+  weaponDamageScaling = 1,
   scale = 1,
   lifeTime = 2,
   speed = 250,
   cooldown = 0.1,
   targetGroup = nil,
+  color = {Color.rgba255(244, 220, 66, 1)},
 
   init = function(self)
-    typeCheck.validate(self.targetGroup, typeCheck.STRING)
+    assert(
+      type(self.targetGroup) == 'string' and self.targetGroup ~= nil,
+      '[Bullet] `targetGroup` is required'
+    )
 
     local dx, dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
     self.direction = {x = dx, y = dy}
 
-    self.damage = math.random(self.minDamage, self.maxDamage)
     self.animation = animationFactory:new({
       'bullet-1'
     })
@@ -77,7 +91,7 @@ local Bullet = {
           if col.other.group == self.targetGroup then
             msgBus.send(msgBus.CHARACTER_HIT, {
               parent = col.other.parent,
-              damage = self.damage
+              damage = random(self.minDamage, self.maxDamage)
             })
           end
         end
@@ -106,7 +120,7 @@ local Bullet = {
       , oy
     )
 
-    love.graphics.setColor(Color.rgba255(244, 220, 66, 1))
+    love.graphics.setColor(self.color)
     love.graphics.draw(
         animationFactory.atlas
       , self.animation.sprite

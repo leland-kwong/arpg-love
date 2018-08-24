@@ -1,8 +1,8 @@
 return function()
 	return {
 		flatDamage = 0,
-		percentDamage = 0, -- multiplier
-		weaponDamage = 0,
+		percentDamage = 0,
+		weaponDamage = 0, -- total weapon damage from items
 		energyCostReduced = 0,
 		maxHealth = 0,
 		healthRegeneration = 0,

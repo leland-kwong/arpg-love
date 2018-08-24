@@ -5,8 +5,10 @@ local itemDefs = require("components.item-inventory.items.item-definitions")
 local Color = require 'modules.color'
 local functional = require("utils.functional")
 local AnimationFactory = require 'components.animation-factory'
+local setProp = require 'utils.set-prop'
 
 local baseDamage = 2
+local bulletColor = {Color.rgba255(252, 122, 255)}
 
 local function statValue(stat, color, type)
 	local sign = stat >= 0 and "+" or "-"
@@ -63,8 +65,13 @@ return itemDefs.registerType({
 		end,
 
 		onActivateWhenEquipped = function(self, props)
-			local Fireball = require 'components.fireball'
-			return Fireball.create(props)
+			local Projectile = require 'components.abilities.bullet'
+			return Projectile.create(
+				setProp(props)
+					:set('color', bulletColor)
+					:set('targetGroup', 'ai')
+					:set('speed', 400)
+			)
 		end,
 
 		modifier = function(self, msgType, msgValue)

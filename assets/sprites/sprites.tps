@@ -776,10 +776,22 @@
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_97.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_98.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_99.png</key>
-            <key type="filename">custom-art/bullet-1.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.266667</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9Paddings</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/bullet-1.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>

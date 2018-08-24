@@ -73,8 +73,8 @@ local function ActiveEquipmentHandler()
     local v = instance
     local m = modifiers
     local energyCost = v.energyCost
-    local baseWeapon = m.weaponDamage
-    local totalWeaponDmg = v.weaponDamageScaling * baseWeapon
+    local totalFlatWeaponDamage = m.weaponDamage
+    local totalWeaponDmg = v.weaponDamageScaling * totalFlatWeaponDamage
     local dmgMultiplier = 1 + m.percentDamage
     local min = floor((v.minDamage * dmgMultiplier) + m.flatDamage + totalWeaponDmg)
     local max = floor((v.maxDamage * dmgMultiplier) + m.flatDamage + totalWeaponDmg)
