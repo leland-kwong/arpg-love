@@ -9,22 +9,12 @@ local F = require("utils.functional")
 local objectUtils = require("utils.object-utils")
 local typeCheck = require("utils.type-check")
 local socket = require'socket'
-local io = require'io'
 local tick = require 'utils.tick'
 
 local noop = function() end
 
 local function make__stateId()
 	return string.sub(socket.gettime(), 1, 10)
-end
-
-local function dirLookup(dir)
-	local p = io.popen('find "'..dir..'" -type f')  --Open directory look for files, save data in p. By giving '-type f' as parameter, it returns all files.
-	local filenames = {}
-	for file in p:lines() do                         --Loop through all files
-		table.insert(filenames, file)
-	end
-	return filenames
 end
 
 local Stateful = {}
@@ -34,21 +24,14 @@ local debugAction = {
 	SET_PENDING = 'SET_PENDING',
 	SET_SUCCESS = 'SET_SUCCESS',
 	SET_SUCCESS_NO_CHANGE = 'SET_SUCCESS_NO_CHANGE',
-	SAVE_REQUEST = 'SAVE_REQUEST',
-	SAVE_PENDING = 'SAVE_PENDING', -- save has executed
-	SAVE_SUCCESS = 'SAVE_SUCCESS',
-	SAVE_ERROR = 'SAVE_ERROR',
 	UPDATE_PENDING = 'UPDATE_PENDING',
 	UPDATE_SUCCESS = 'UPDATE_SUCCESS'
 }
 Stateful.debugAction = debugAction
 
 local defaultOptions = {
-	autoPersist = false,
-	fileExtension = "save", -- file extension when state is saved to disk
 	debounceRate = 0.016, -- seconds after a `set` call to trigger a callback
-	saveRate = 0.05,
-	debug = noop, -- debug function that gets called after each action (set, save, load, etc...)
+	debug = noop, -- debug function that gets called after each action (SET_PENDING, SET_SUCCESS, etc...)
 	pure = true, -- if `set` call has no change in value, then no update will be triggered
 }
 
@@ -71,8 +54,6 @@ function Stateful:new(initialState, options)
 		subscribers = {},
 		pendingStateChangeUpdate = false,
 		updateCompleteCallbacks = {}, -- table of callbacks to execute when update is complete
-		saveCompleteCallbacks = {},
-		savePending = false,
 	}
 	-- apply options
 	objectUtils.assign(o, defaultOptions, options)
@@ -103,7 +84,7 @@ end
 
 Stateful.INITIAL_VALUE = 'INITIAL_VALUE'
 
-function Stateful:set(key, value, updateCompleteCallback, saveCompleteCallback)
+function Stateful:set(key, value, updateCompleteCallback)
 	typeCheck.validate(value, typeCheck.NON_NIL)
 
 	self.debug(debugAction.SET_PENDING, key, value)
@@ -124,10 +105,6 @@ function Stateful:set(key, value, updateCompleteCallback, saveCompleteCallback)
 
 	if updateCompleteCallback then
 		table.insert(self.updateCompleteCallbacks, updateCompleteCallback)
-	end
-
-	if saveCompleteCallback then
-		table.insert(self.saveCompleteCallbacks, saveCompleteCallback)
 	end
 
 	-- Only change the previous state if things have changed
@@ -156,11 +133,6 @@ function Stateful:set(key, value, updateCompleteCallback, saveCompleteCallback)
 		end
 	end
 
-	-- auto save state
-	if self.autoPersist then
-		self:saveState()
-	end
-
 	self.debug(debugAction.SET_SUCCESS, key, value)
 
 	return self
@@ -168,45 +140,6 @@ end
 
 function Stateful:get()
 	return self[__state], self[__prevState]
-end
-
-function Stateful:deleteSavedState(__stateId)
-	print('[PORTING TO LOVE2D STILL NEEDED]')
-end
-
-function Stateful:saveState()
-	if self.savePending then
-		return
-	end
-
-	self.debug(debugAction.SAVE_REQUEST)
-
-	self.savePending = true
-
-	self.saveCallback = self.saveCallback or function()
-		local curState = self:get()
-		local __stateId = curState.__stateId
-
-		self.debug(debugAction.SAVE_PENDING)
-		local savePath = self:getSavePath(__stateId)
-		local saveSuccess = sys.save(savePath, curState)
-		self.execCallbacks(self.saveCompleteCallbacks)
-		self.savePending = false
-		if saveSuccess then
-			self.debug(debugAction.SAVE_SUCCESS)
-		else
-			self.debug(debugAction.SAVE_ERROR)
-		end
-	end
-
-	-- debouncing saves to batch it in one go
-	tick.delay(self.saveCallback, self.saveRate)
-end
-
-function Stateful:loadSavedState(__stateId)
-	local loadedState = sys.load(self:getSavePath(__stateId))
-	self:replaceState(loadedState)
-	return self
 end
 
 function Stateful:replaceState(newState)
@@ -226,14 +159,6 @@ function Stateful:replaceState(newState)
 	return self
 end
 
-function Stateful:createNewGame()
-	-- generate a unique __stateId
-	local __stateId = "game-"..make__stateId()
-	local newState = objectUtils.assign({}, self.initialState, {__stateId = __stateId})
-	self:replaceState(newState)
-	return self
-end
-
 local subscribeId = 0
 function Stateful:subscribe(func)
 	if not func then
@@ -247,15 +172,6 @@ end
 
 function Stateful:unsubscribe(token)
 	self.subscribers[token] = nil
-end
-
-function Stateful:listSavedStates()
-	local rootDir = self:getSavePath()
-	local fileList = dirLookup(rootDir)
-	return F.map(fileList, function(file)
-		local __stateId = string.sub(file, #rootDir + 2, -#self.fileExtension - 2)
-		return __stateId
-	end)
 end
 
 return Stateful
