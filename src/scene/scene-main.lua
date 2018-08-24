@@ -60,6 +60,10 @@ local function getDroppablePosition(posX, posY, mapGrid, callCount)
   return dropX, dropY
 end
 
+-- custom cursor
+local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', 64, 64)
+love.mouse.setCursor(cursor)
+
 function MainScene.init(self)
   local rootState = CreateStore()
   self.rootStore = rootState

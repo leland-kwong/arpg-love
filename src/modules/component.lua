@@ -10,6 +10,7 @@ local pprint = require 'utils.pprint'
 local collisionObject = require 'modules.collision'
 
 local M = {}
+local allComponentsById = {}
 
 -- built-in defaults
 local floor = math.floor
@@ -85,6 +86,10 @@ function M.createFactory(blueprint)
     )
 
     local id = c.id or uid()
+
+    local isUnique = allComponentsById[id] == nil
+    assert(isUnique, 'duplicate component id')
+
     c._id = id
     setmetatable(c, blueprint)
     blueprint.__index = blueprint
@@ -182,8 +187,6 @@ function M.createFactory(blueprint)
   return blueprint
 end
 
-local allComponentsById = {}
-
 function M.newGroup(groupDefinition)
   -- apply any missing default options to group definition
   groupDefinition = objectUtils.assign(
@@ -220,10 +223,6 @@ function M.newGroup(groupDefinition)
   function Group.addComponent(component)
     count = count + 1
     local id = component:getId()
-
-    local isUnique = allComponentsById[id] == nil
-    assert(isUnique, 'duplicate component id')
-
     allComponentsById[id] = component
     componentsById[id] = component
   end
