@@ -13,9 +13,7 @@ local cloneGrid = require 'utils.clone-grid'
 local CreateStore = require 'components.state.state'
 local Hud = require 'components.hud.hud'
 local msgBus = require 'components.msg-bus'
-
-local rootState = CreateStore()
-local inventoryController = InventoryController(rootState)
+local HealSource = require'components.heal-source'
 
 local gridTileTypes = {
   -- unwalkable
@@ -39,38 +37,37 @@ local gridTileTypes = {
 }
 
 local MainScene = {
-  group = groups.all
+  group = groups.all,
 }
 
-local function insertTestItems(rootStore)
-  local item1 = require'components.item-inventory.items.definitions.mock-shoes'.create()
-  local item2 = require'components.item-inventory.items.definitions.mock-shoes'.create()
-  rootStore:addItemToInventory(item1, {3, 1})
-  rootStore:addItemToInventory(item2, {4, 1})
-  rootStore:addItemToInventory(
-    require'components.item-inventory.items.definitions.mock-armor'.create()
-    , {5, 1})
-  rootStore:addItemToInventory(
-    require'components.item-inventory.items.definitions.gpow-armor'.create()
-    , {5, 2})
-  rootStore:addItemToInventory(
-    require'components.item-inventory.items.definitions.potion-health'.create(),
-    {1, 1})
-  rootStore:addItemToInventory(
-    require'components.item-inventory.items.definitions.potion-health'.create(),
-    {2, 1})
-  rootStore:addItemToInventory(
-    require'components.item-inventory.items.definitions.potion-health'.create(),
-    {2, 1})
-  for i=1, 99 do
-    rootStore:addItemToInventory(
-      require'components.item-inventory.items.definitions.potion-health'.create(),
-      {2, 2})
+local random = math.random
+local Position = require 'utils.position'
+local function getDroppablePosition(posX, posY, mapGrid, callCount)
+  -- FIXME: prevent infinite recursion from freezing the game. This is a temporary fix.
+  callCount = (callCount or 0)
+
+  local dropX, dropY = posX + random(0, 16), posY + random(0, 16)
+  local gridX, gridY = Position.pixelsToGrid(dropX, dropY, config.gridSize)
+  local isWalkable = mapGrid[gridX][gridY] == Map.WALKABLE
+  if (not isWalkable) and (callCount < 10) then
+    return getDroppablePosition(
+      posX,
+      posY,
+      mapGrid,
+      (callCount + 1)
+    )
   end
+  return dropX, dropY
 end
-insertTestItems(rootState)
+
+-- custom cursor
+local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', 64, 64)
+love.mouse.setCursor(cursor)
 
 function MainScene.init(self)
+  local rootState = CreateStore()
+  self.rootStore = rootState
+  local inventoryController = InventoryController(rootState)
   local parent = self
 
   local map = Map.createAdjacentRooms(6, 20)
@@ -80,10 +77,13 @@ function MainScene.init(self)
   end)
 
   local player = Player.create({
+    id = 'PLAYER',
     mapGrid = map.grid,
+    rootStore = rootState
   }):setParent(parent)
 
   Hud.create({
+    player = player,
     rootStore = rootState
   }):setParent(parent)
 
@@ -102,7 +102,7 @@ function MainScene.init(self)
             slots = function()
               return rootState:get().inventory
             end
-          })
+          }):setParent(self)
           rootState:set('activeMenu', 'INVENTORY')
         else
           self.inventory:delete(true)
@@ -113,34 +113,40 @@ function MainScene.init(self)
     end
 
     if msgBus.ENEMY_DESTROYED == msgType then
-      local ItemPotion = require 'components.item-inventory.items.definitions.potion-health'
-      msgBus.send(msgBus.GENERATE_LOOT, {msgValue.x, msgValue.y, ItemPotion.create()})
+      local lootAlgorithm = require 'components.loot-generator.algorithm-1'
+      msgBus.send(msgBus.GENERATE_LOOT, {msgValue.x, msgValue.y, lootAlgorithm()})
       msgBus.send(msgBus.EXPERIENCE_GAIN, msgValue.experience)
     end
 
     if msgBus.GENERATE_LOOT == msgType then
-      local LootGenerator = require'components.item-inventory.loot-generator'
+      local LootGenerator = require'components.loot-generator.loot-generator'
       local x, y, item = unpack(msgValue)
+      local dropX, dropY = getDroppablePosition(x, y, map.grid)
       LootGenerator.create({
-        x = x,
-        y = y,
+        x = dropX,
+        y = dropY,
         item = item,
         rootStore = rootState
       }):setParent(parent)
     end
 
     if msgBus.PLAYER_HEAL_SOURCE_ADD == msgType then
-      require'components.heal-source'.add(self, msgValue, rootState)
+      HealSource.add(self, msgValue, rootState)
     end
 
     if msgBus.PLAYER_HEAL_SOURCE_REMOVE == msgType then
-      require'components.heal-source'.remove(self, msgValue)
+      HealSource.remove(self, msgValue.source)
+    end
+
+    if msgBus.PLAYER_STATS_NEW_MODIFIERS == msgType then
+      local newModifiers = msgValue
+      rootState:set('statModifiers', newModifiers)
     end
   end)
 
-  local aiCount = 50
+  local aiCount = 60
   local generated = 0
-  local minPos, maxPos = 3, 60
+  local minPos, maxPos = 10, 60
   while generated < aiCount do
     local posX, posY = math.random(minPos, maxPos), math.random(minPos, maxPos)
     local isValidPosition = map.grid[posY][posX] == Map.WALKABLE

@@ -1,8 +1,8 @@
-local utils = require("main.utils")
-local Audio = require("main.audio.audio")
-local config = require("main.components.items.config")
-local msgBus = require("main.state.msg-bus")
-local itemDefs = require("main.components.items.item-definitions")
+local config = require("components.item-inventory.items.config")
+local msgBus = require("components.msg-bus")
+local itemDefs = require("components.item-inventory.items.item-definitions")
+local Color = require 'modules.color'
+local functional = require("utils.functional")
 
 local mathFloor = math.floor
 
@@ -17,6 +17,22 @@ local function onEnemyDestroyedIncreaseDamage(self)
 	if s.bonusDamage > maxBonusDamage then
 		s.bonusDamage = maxBonusDamage
 	end
+end
+
+local function statValue(stat, color, type)
+	local sign = stat >= 0 and "+" or "-"
+	return {
+		color, sign..stat..' ',
+		{1,1,1}, type
+	}
+end
+
+local function concatTable(a, b)
+	for i=1, #b do
+		local elem = b[i]
+		table.insert(a, elem)
+	end
+	return a
 end
 
 return itemDefs.registerType({
@@ -39,34 +55,34 @@ return itemDefs.registerType({
 	end,
 
 	properties = {
-		sprite = "poison-blade",
+		sprite = "sword_18",
 		title = 'Blade of the plague bearer',
 		rarity = config.rarity.LEGENDARY,
 		category = config.category.WEAPON_1,
 
 		tooltip = function(self)
-			local function statValue(stat, color, type)
-				local sign = stat >= 0 and "+" or "-"
-				local typeText = #type > 0 and " <color=white>"..type.."</color>" or ""
-				return "<color="..color..">"..sign..stat.."</color>"..typeText
-			end
 			local _state = self.state
 			local stats = {
-				"<font=body>"..statValue(_state.baseDamage, "cyan", "").." ("..statValue(_state.bonusDamage, "cyan", "")..") damage</font>",
-				"<font=body>"..statValue(self.poisonDamage, "cyan", "poison damage").."</font>",
-				"\n<font=body>While equipped: \nPermanently gain +1 damage for every 10 enemies killed. \n<color=cyan>".._state.enemiesKilled.."</color> enemies killed".."</font>"
+				statValue(_state.baseDamage, Color.CYAN, ""), statValue(_state.bonusDamage, Color.CYAN, "damage \n"),
+				statValue(self.weaponDamage, Color.CYAN, "poison damage\n"),
+				{
+					Color.WHITE, '\nWhile equipped: \nPermanently gain +1 damage for every 10 enemies killed.\n',
+					Color.CYAN, _state.enemiesKilled, Color.WHITE, ' enemies killed'
+				}
 			}
-			local concat = function(separator)
-				return function(seed, string, index)
-					seed = seed or ""
-					if index > 1 then
-						return seed..separator..string
-					else
-						return seed..string
-					end
-				end
-			end
-			return utils.functional.reduce(stats, concat("\n"))
+			return functional.reduce(stats, function(combined, textObj)
+				return concatTable(combined, textObj)
+			end, {})
+		end,
+
+		onActivate = function(self)
+			local toSlot = itemDefs.getDefinition(self).category
+			msgBus.send(msgBus.EQUIPMENT_SWAP, self)
+		end,
+
+		onActivateWhenEquipped = function(self, props)
+			local Fireball = require 'components.fireball'
+			return Fireball.create(props)
 		end,
 
 		onMessage = function(self, msgType)

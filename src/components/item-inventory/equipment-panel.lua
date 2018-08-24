@@ -7,6 +7,8 @@ local setupSlotInteractions = require 'components.item-inventory.slot-interactio
 local itemConfig = require 'components.item-inventory.items.config'
 local animationFactory = require'components.animation-factory'
 local Position = require 'utils.position'
+local itemDefinitions = require'components.item-inventory.items.item-definitions'
+local itemConfig = require 'components.item-inventory.items.config'
 local msgBus = require 'components.msg-bus'
 
 local EquipmentPanel = {
@@ -32,8 +34,11 @@ function EquipmentPanel.init(self)
 	end
 
 	local function onItemPickupFromSlot(slotX, slotY)
+		-- IMPORTANT: make sure we unequip the item before triggering the messages
+		local unequippedItem = self.rootStore:unequipItem(slotX, slotY)
 		msgBus.send(msgBus.INVENTORY_PICKUP)
-    return self.rootStore:unequipItem(slotX, slotY)
+		msgBus.send(msgBus.EQUIPMENT_CHANGE)
+		return unequippedItem
   end
 
 	local function onItemDropToSlot(curPickedUpItem, slotX, slotY)
@@ -42,6 +47,7 @@ function EquipmentPanel.init(self)
 		)
 		if canEquip then
 			msgBus.send(msgBus.INVENTORY_DROP)
+			msgBus.send(msgBus.EQUIPMENT_CHANGE)
 			return itemSwap
 		else
 			return curPickedUpItem
@@ -87,9 +93,10 @@ function EquipmentPanel.init(self)
 	setupSlotInteractions(
 		self,
 		getSlots,
-		10,
+		5,
 		onItemPickupFromSlot,
 		onItemDropToSlot,
+		nil,
 		slotRenderer
 	)
 end

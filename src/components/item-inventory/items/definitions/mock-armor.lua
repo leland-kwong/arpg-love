@@ -3,6 +3,7 @@ local functional = require("utils.functional")
 local itemDefs = require("components.item-inventory.items.item-definitions")
 local Color = require('modules.color')
 local msgBus = require 'components.msg-bus'
+local category = config.category.BODY_ARMOR
 
 local function concatTable(a, b)
 	for i=1, #b do
@@ -23,7 +24,10 @@ return itemDefs.registerType({
 			armor = 100,
 			maxHealth = 200,
 			moveSpeed = 10,
-			damage = 5
+			damage = 5,
+			cooldownReduction = 0.25,
+			healthRegeneration = 4,
+			source = category
 		}
 	end,
 
@@ -31,7 +35,17 @@ return itemDefs.registerType({
 		sprite = "armor_62",
 		title = 'Mock ARMOR',
 		rarity = config.rarity.NORMAL,
-		category = config.category.BODY_ARMOR,
+		category = category,
+
+		onEquip = function(self)
+			local duration = math.pow(10, 10)
+			local amount = self.healthRegeneration * duration
+			msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
+				amount = amount,
+				source = self.source,
+				duration = duration,
+			})
+		end,
 
 		onActivate = function(self, rootStore)
 			msgBus.send(msgBus.EQUIPMENT_SWAP, self)
@@ -58,6 +72,12 @@ return itemDefs.registerType({
 
 		getCalculatedProps = function(self)
 			return self
+		end,
+
+		final = function(self)
+			msgBus.send(msgBus.PLAYER_HEAL_SOURCE_REMOVE, {
+				source = self.source
+			})
 		end
 	}
 })

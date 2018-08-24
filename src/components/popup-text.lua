@@ -32,11 +32,6 @@ local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.f
 local outlineColor = {0,0,0,1}
 local shader = love.graphics.newShader(pixelOutlineShader)
 local w, h = 16, 16
-shader:send('sprite_size', {w, h})
-shader:send('outline_width', 2/16)
-shader:send('outline_color', outlineColor)
-shader:send('use_drawing_color', true)
-shader:send('include_corners', true)
 
 local textObj = love.graphics.newText(font.secondary.font, '')
 
@@ -64,6 +59,12 @@ function PopupTextBlueprint.update(self)
 end
 
 function PopupTextBlueprint.draw(self)
+  shader:send('sprite_size', {w, h})
+  shader:send('outline_width', 2/16)
+  shader:send('outline_color', outlineColor)
+  shader:send('use_drawing_color', true)
+  shader:send('include_corners', true)
+
   love.graphics.setShader(shader)
   love.graphics.setColor(1,1,1,1)
   love.graphics.draw(

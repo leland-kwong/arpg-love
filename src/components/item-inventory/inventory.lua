@@ -64,6 +64,7 @@ function InventoryBlueprint.init(self)
       rootStore:removeItem(item)
       rootStore:equipItem(item, slotX, slotY)
       rootStore:addItemToInventory(equippedItem, {x, y})
+      msgBus.send(msgBus.EQUIPMENT_CHANGE)
     end
 
     if msgBus.INVENTORY_PICKUP == msgType or
@@ -77,22 +78,29 @@ function InventoryBlueprint.init(self)
       love.audio.stop(Sound.INVENTORY_DROP)
       love.audio.play(Sound.INVENTORY_DROP)
     end
+
+    if msgBus.EQUIPMENT_CHANGE == msgType then
+      local equipmentChangeHandler = require'components.item-inventory.equipment-change-handler'
+      equipmentChangeHandler(rootStore)
+    end
 	end)
 
   self.slotSize = 30
   self.slotMargin = 2
 
   local w, h = calcInventorySize(self.slots(), self.slotSize, self.slotMargin)
-  local equipmentW, equipmentH, equipmentMargin = 100, h, 5
+  local panelMargin = 5
+  local statsWidth, statsHeight = 165, h
+  local equipmentWidth, equipmentHeight = 80, h
   self.w = w
   self.h = h
 
   -- center to screen
   local inventoryX = require'utils.position'.boxCenterOffset(
-    w + equipmentW + equipmentMargin, h,
+    w + (equipmentWidth + panelMargin) + (statsWidth + panelMargin), h,
     love.graphics.getWidth() / config.scaleFactor, love.graphics.getHeight() / config.scaleFactor
   )
-  self.x = inventoryX + equipmentW + equipmentMargin
+  self.x = inventoryX + equipmentWidth + panelMargin + statsWidth + panelMargin
   self.y = (config.resolution.h - h) / 2
 
   InteractArea(self):setParent(self)
@@ -107,22 +115,38 @@ function InventoryBlueprint.init(self)
     return self.rootStore:dropItem(curPickedUpItem, x, y)
   end
 
+  local function inventoryOnItemActivate(item)
+    local d = itemDefs.getDefinition(item)
+    d.onActivate(item)
+  end
+
   setupSlotInteractions(
     self,
     self.slots,
     self.slotMargin,
     inventoryOnItemPickupFromSlot,
-    inventoryOnItemDropToSlot
+    inventoryOnItemDropToSlot,
+    inventoryOnItemActivate
   )
 
   local EquipmentPanel = require 'components.item-inventory.equipment-panel'
   EquipmentPanel.create({
     rootStore = self.rootStore,
-    x = self.x - equipmentW - equipmentMargin,
+    x = self.x - equipmentWidth - panelMargin,
     y = self.y,
-    w = equipmentW,
+    w = equipmentWidth,
     h = h,
-    slotSize = self.slotSize
+    slotSize = self.slotSize,
+    rootStore = self.rootStore
+  }):setParent(self)
+
+  local PlayerStatsPanel = require'components.item-inventory.player-stats-panel'
+  PlayerStatsPanel.create({
+    x = self.x - equipmentWidth - panelMargin - statsWidth - panelMargin,
+    y = self.y,
+    w = statsWidth,
+    h = statsHeight,
+    rootStore = self.rootStore
   }):setParent(self)
 end
 

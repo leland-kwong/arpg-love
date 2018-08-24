@@ -9,7 +9,7 @@ local guiTextLayer = GuiText.create({
 
 return function(console)
   local i = 0
-  local yStart = 200
+  local yStart = 210
 
   for k,v in pairs(groups) do
     i = i + 1

@@ -5,6 +5,8 @@ local font = require 'components.font'
 local SceneMenu = require 'scene.scene-menu'
 local Component = require 'modules.component'
 local groups = require 'components.groups'
+local msgBus = require 'components.msg-bus'
+local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local config = require 'config'
 local objectUtils = require 'utils.object-utils'
 local bitser = require 'modules.bitser'
@@ -23,6 +25,7 @@ local Sandbox = {
 local stateFile = 'debug_scene_state'
 local state = {
   activeScene = nil,
+  activeScenePath = nil,
   menuOpened = false
 }
 -- reference to the loaded scene so we can cleanup when loading a new one
@@ -43,7 +46,10 @@ local function loadScene(name, path)
     loadedScene:delete(true)
   end
   loadedScene = scene.create()
-  setState({ activeScene = name })
+  setState({
+    activeScene = name,
+    activeScenePath = path
+  })
 end
 
 local function drawOrder(self)
@@ -53,7 +59,7 @@ end
 local function DebugMenuToggleButton(onToggle)
   local buttonText = 'debug'
   local buttonWidth, buttonHeight = GuiText.getTextSize(buttonText, guiTextBodyLayer.font)
-  local screenOffset = 10
+  local screenOffset = 5
   local screenEastEdge = love.graphics.getWidth() / config.scaleFactor
   local screenSouthEdge = love.graphics.getHeight() / config.scaleFactor
   return Gui.create({
@@ -72,24 +78,56 @@ local function DebugMenuToggleButton(onToggle)
   })
 end
 
-local scenes = {
-  ['main game'] = 'scene.sandbox.main-game.main-game-test',
-  ['sprite positioning'] = 'scene.sandbox.sprite-positioning',
-  ai = 'scene.sandbox.ai.test-scene',
-  gui = 'scene.sandbox.gui.test-scene',
-  ['particle fx'] = 'scene.sandbox.particle-fx.particle-test',
+local function menuOptionSceneLoad(name, path)
+  return {
+    name = name,
+    value = function()
+      loadScene(name, path)
+    end
+  }
+end
+
+local sceneOptions = {
+  menuOptionSceneLoad(
+    'main game',
+    'scene.sandbox.main-game.main-game-test'
+  ),
+  menuOptionSceneLoad(
+    'sprite positioning',
+    'scene.sandbox.sprite-positioning'
+  ),
+  menuOptionSceneLoad(
+    'ai',
+    'scene.sandbox.ai.test-scene'
+  ),
+  menuOptionSceneLoad(
+    'gui',
+    'scene.sandbox.gui.test-scene'
+  ),
+  menuOptionSceneLoad(
+    'particle fx',
+    'scene.sandbox.particle-fx.particle-test'
+  ),
+  {
+    name = 'exit game',
+    value = function()
+      love.event.quit()
+    end
+  }
 }
 
-function Sandbox.init()
+function Sandbox.init(self)
   local activeSceneMenu = nil
 
   local function DebugMenu(enabled)
     if enabled then
       activeSceneMenu = SceneMenu.create({
-        scenes = scenes,
-        onSelect = function(name, path)
-          loadScene(name, path)
+        title = 'Sandbox scenes',
+        options = sceneOptions,
+        onSelect = function(name, value)
+          msgBus.clearAll()
           DebugMenu(false)
+          value()
         end,
         drawOrder = drawOrder
       })
@@ -106,8 +144,8 @@ function Sandbox.init()
 
   DebugMenu(state.menuOpened)
 
-  local scenePath = scenes[state.activeScene]
-  loadScene(state.activeScene, scenePath)
+  -- load last active scene
+  loadScene(state.activeScene, state.activeScenePath)
 
   -- -- load menu if no active scene exists
   if not state.activeScene then
@@ -116,6 +154,16 @@ function Sandbox.init()
 
   DebugMenuToggleButton(function()
     DebugMenu(not state.menuOpened)
+  end)
+
+  msgBusMainMenu.subscribe(function(msgType, msgValue)
+    if self:isDeleted() then
+      return msgBusMainMenu.CLEANUP
+    end
+
+    if msgBusMainMenu.TOGGLE_MAIN_MENU == msgType then
+      DebugMenu(not state.menuOpened)
+    end
   end)
 end
 

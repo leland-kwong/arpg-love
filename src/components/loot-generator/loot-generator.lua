@@ -1,5 +1,6 @@
 local Component = require 'modules.component'
 local AnimationFactory = require 'components.animation-factory'
+local collisionWorlds = require 'components.collision-worlds'
 local groups = require 'components.groups'
 local itemDefs = require 'components.item-inventory.items.item-definitions'
 local Gui = require 'components.gui.gui'
@@ -9,7 +10,7 @@ local msgBus = require 'components.msg-bus'
 local tick = require 'utils.tick'
 
 local LootGenerator = {
-  group = groups.gui,
+  group = groups.all,
   rootStore = CreateStore,
   -- item to generate
   item = nil
@@ -45,14 +46,20 @@ function LootGenerator.init(self)
 
   local sx, sy, sw, sh = animation.sprite:getViewport()
 
+  local colObj = self:addCollisionObject(COLLISION_FLOOR_ITEM_TYPE, self.x, self.y, sw, sh)
+    :addToWorld(collisionWorlds.map)
+  local actualX, actualY, cols, len = colObj:move(self.x, self.y, collisionFilter)
+  if len > 0 then
+    self.x = actualX
+    self.y = actualY
+  end
+
   Gui.create({
     group = groups.all,
-    x = screenX,
-    y = screenY,
+    x = self.x,
+    y = self.y,
     w = sw,
     h = sh,
-    collisionGroup = COLLISION_FLOOR_ITEM_TYPE,
-    isNewlyGenerated = true,
     getMousePosition = function()
       return camera:getMousePosition()
     end,
@@ -80,15 +87,6 @@ function LootGenerator.init(self)
       self.selected = true
     end,
     onUpdate = function(self, dt)
-      if self.isNewlyGenerated then
-        local actualX, actualY, cols, len = self.colObj:move(self.x, self.y, collisionFilter)
-        if len > 0 then
-          self.x = actualX
-          self.y = actualY
-          self.isNewlyGenerated = false
-        end
-      end
-
       if self.selected then
         if love.mouse.isDown(1) then
           -- self.selected = true

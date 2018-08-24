@@ -43,7 +43,7 @@ local initialState = {
 	inventory = require'utils.make-grid'(11, 9, EMPTY_SLOT),
 
 	--[[ equipped items ]]
-	equipment = require'utils.make-grid'(2, 4, EMPTY_SLOT),
+	equipment = require'utils.make-grid'(2, 5, EMPTY_SLOT),
 
 	--[[ game settings ]]
 	music = false,

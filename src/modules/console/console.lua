@@ -104,6 +104,9 @@ function Console.debug(...)
   logger:add(output)
 end
 
+-- GLOBAL console logger
+consoleLog = Console.debug
+
 function Console.update(self)
   local s = self.stats
   s.currentMemoryUsed = collectgarbage('count')
@@ -115,8 +118,9 @@ function Console.draw(self)
   if not state.showConsole then
     return
   end
-  local lineHeight = font.primaryLarge.lineHeight
-  love.graphics.setFont(font.primaryLarge.font)
+  local primaryFont = font.primaryLarge
+  local lineHeight = primaryFont.lineHeight * primaryFont.fontSize
+  love.graphics.setFont(primaryFont.font)
   local gfx = love.graphics
   local s = self.stats
 

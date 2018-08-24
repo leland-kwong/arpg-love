@@ -214,7 +214,7 @@ return function(rootStore)
 		local canEquip = self:canEquiptToSlot(item, slotX, slotY)
 		if not canEquip then
 			local allowedSlotCategory = itemConfig.equipmentGuiSlotMap[slotY][slotX]
-			local errorMsg = "[EQUIP_ITEM] invalid category `"..category.."`, expecting `"..allowedSlotCategory.."`"
+			local errorMsg = "[EQUIP_ITEM] invalid category `"..category
 			return canEquip, errorMsg
 		end
 		local currentItemInSlot = self:unequipItem(slotX, slotY)
@@ -251,8 +251,9 @@ return function(rootStore)
 		self:set("equipment", function(state)
 			return require'utils.clone-grid'(state.equipment, function(v, x, y)
 				local category = itemConfig.equipmentGuiSlotMap[y][x]
+				local isPositionMatch = y == slotY and x == slotX
 				local isCategoryMatch = category == categoryAtSlot
-				if isCategoryMatch then
+				if (isCategoryMatch and isPositionMatch) then
 					return EMPTY_SLOT
 				end
 				return v

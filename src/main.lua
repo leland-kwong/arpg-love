@@ -9,17 +9,12 @@ love.graphics.setDefaultFilter('nearest', 'nearest')
 local Console = require 'modules.console.console'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
+local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local groups = require 'components.groups'
 local config = require 'config'
 local camera = require 'components.camera'
 local SceneMain = require 'scene.scene-main'
 local tick = require 'utils.tick'
-
--- run tests
-if config.isDebug then
-  require 'modules.test.index'
-  require 'utils.test.index'
-end
 
 local scale = config.scaleFactor
 
@@ -39,6 +34,7 @@ local globalState = {
 }
 
 function love.load()
+  msgBus.send(msgBus.GAME_LOADED)
   love.keyboard.setKeyRepeat(true)
   local resolution = config.resolution
   local vw, vh = resolution.w * scale, resolution.h * scale
@@ -46,8 +42,6 @@ function love.load()
   camera
     :setSize(vw, vh)
     :setScale(scale)
-  msgBus.send(msgBus.GAME_LOADED)
-
   globalState.activeScene.create()
 
   -- console debugging
@@ -79,8 +73,10 @@ function love.keypressed(key, scanCode, isRepeated)
     inputMsg(key, scanCode, isRepeated)
   )
 
-  if config.keyboard.EXIT_GAME == key then
-    love.event.quit()
+  if config.keyboard.MAIN_MENU == key then
+    msgBusMainMenu.send(
+      msgBusMainMenu.TOGGLE_MAIN_MENU
+    )
   end
 end
 
@@ -124,12 +120,21 @@ function love.draw()
   groups.overlay.drawAll()
   groups.debug.drawAll()
   camera:detach()
-  groups.hud.drawAll()
 
   love.graphics.push()
   love.graphics.scale(config.scaleFactor)
+  groups.hud.drawAll()
   groups.gui.drawAll()
   love.graphics.pop()
 
   groups.system.drawAll()
+end
+
+--[[
+  run tests after everything is loaded since some tests
+  since some of the tests rely on the game loop
+]]
+if config.isDebug then
+  require 'modules.test.index'
+  require 'utils.test.index'
 end

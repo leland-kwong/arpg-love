@@ -19,16 +19,12 @@ local colMap = collisionWorlds.map
 local keyMap = config.keyboard
 local mouseInputMap = config.mouseInputMap
 
-local width, height = love.window.getMode()
 local startPos = {
   x = config.gridSize * 3,
   y = config.gridSize * 3,
 }
 
 local frameRate = 60
-local speed = 400 -- per frame
-
-local activeAnimation
 local DIRECTION_RIGHT = 1
 local DIRECTION_LEFT = -1
 
@@ -44,43 +40,12 @@ local function collisionFilter(item, other)
   return 'slide'
 end
 
-local skillHandlers = {
-  SKILL_1 = (function()
-    local curCooldown = 0
-    local skill = {}
-
-    function skill.use(self)
-      if curCooldown > 0 then
-        return skill
-      else
-        local Fireball = require 'components.fireball'
-        local mx, my = camera:getMousePosition()
-        local projectile = Fireball.create({
-            debug = false
-          , x = self.x
-          , y = self.y
-          , x2 = mx
-          , y2 = my
-        })
-        curCooldown = projectile.cooldown
-        return skill
-      end
-    end
-
-    function skill.updateCooldown(dt)
-      curCooldown = curCooldown - dt
-      return skill
-    end
-
-    return skill
-  end)()
-}
-
 local Player = {
   group = groups.all,
   x = startPos.x,
   y = startPos.y,
   pickupRadius = 5 * config.gridSize,
+  speed = 100,
 
   -- collision properties
   type = 'player',
@@ -89,6 +54,8 @@ local Player = {
   mapGrid = nil,
 
   init = function(self)
+    local CreateStore = require'components.state.state'
+    self.rootStore = self.rootStore or CreateStore()
     self.dir = DIRECTION_RIGHT
     colMap:add(self, self.x, self.y, self.w, self.h)
 
@@ -143,6 +110,10 @@ local Player = {
         return msgBus.CLEANUP
       end
 
+      if msgBus.PLAYER_DISABLE_ABILITIES == msgType then
+        self.clickDisabled = msg
+      end
+
       if msgBus.ITEM_PICKUP == msgType then
         local item = msg
         local dist = calcDist(self.x, self.y, item.x, item.y)
@@ -151,7 +122,7 @@ local Player = {
         local gridX2, gridY2 = Position.pixelsToGrid(item.x, item.y, config.gridSize)
         local canWalkToItem = LineOfSight(self.mapGrid, Map.WALKABLE)(gridX1, gridY1, gridX2, gridY2)
         if outOfRange or (not canWalkToItem) then
-          self.clickDisabled = true
+          msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, true)
           -- move towards item
           self.forceMove = true
         elseif canWalkToItem then
@@ -160,19 +131,17 @@ local Player = {
         end
       elseif (msgBus.ITEM_PICKUP_CANCEL == msgType) or (msgBus.ITEM_PICKUP_SUCCESS == msgType) then
         self.forceMove = false
-        self.clickDisabled = false
+        msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
       end
 
       if msgBus.ITEM_HOVERED == msgType then
-        self.clickDisabled = msg
+        msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, msg)
       end
 
       if msgBus.DROP_ITEM_ON_FLOOR == msgType then
-        local dropX, dropY = self.x + math.random(0, 16),
-          self.y + math.random(0, 16)
         msgBus.send(
           msgBus.GENERATE_LOOT,
-          {dropX, dropY, msg}
+          {self.x, self.y, msg}
         )
       end
 
@@ -187,100 +156,162 @@ local Player = {
       end
 
       if msgBus.CHARACTER_HIT == msgType and msg.parent == self then
-        msgBus.send(msgBus.PLAYER_HIT, msg.damage)
+        msgBus.send(msgBus.PLAYER_HIT_RECEIVED, msg.damage)
       end
     end)
-  end,
-
-  update = function(self, dt)
-    local moveAmount = speed * dt
-    local origx, origy = self.x, self.y
-    local mx, my = camera:getMousePosition()
-    local dx, dy = Position.getDirection(self.x, self.y, mx, my)
-    local nextX, nextY = self.x, self.y
-    self.dir = dx > 0 and DIRECTION_RIGHT or DIRECTION_LEFT
-
-    if self.forceMove then
-      nextX = nextX + moveAmount * dx
-      nextY = nextY + moveAmount * dy
-    end
-
-    -- MOVEMENT
-    if love.keyboard.isDown(keyMap.RIGHT) then
-      nextX = nextX + moveAmount
-    end
-
-    if love.keyboard.isDown(keyMap.LEFT) then
-      nextX = nextX - moveAmount
-    end
-
-    if love.keyboard.isDown(keyMap.UP) then
-      nextY = nextY - moveAmount
-    end
-
-    if love.keyboard.isDown(keyMap.DOWN) then
-      nextY = nextY + moveAmount
-    end
-
-    local moving = self.x ~= nextX or self.y ~= nextY
-
-    -- ANIMATION STATES
-    if moving then
-      self.animation = self.animations.run
-        :update(dt/2)
-    else
-      self.animation = self.animations.idle
-        :update(dt/12)
-    end
-
-    -- SKILL_1
-    local isSkill1Activate = love.keyboard.isDown(keyMap.SKILL_1) or
-      love.mouse.isDown(mouseInputMap.SKILL_1)
-    if not self.clickDisabled and isSkill1Activate then
-      skillHandlers.SKILL_1.use(self)
-    end
-    skillHandlers.SKILL_1.updateCooldown(dt)
-
-    -- dynamically get the current animation frame's height
-    local sx, sy, sw, sh = self.animation.sprite:getViewport()
-    local w,h = sw, sh
-    -- true center taking into account pivot
-    local oX, oY = self.animation:getSourceOffset()
-
-    -- COLLISION UPDATES
-    local colOrigX, colOrigY = self.colObj.x, self.colObj.y
-    local sizeOffset = 10
-    self.colObj:update(
-      -- use current coordinates because we only want to update size
-      colOrigX,
-      colOrigY,
-      w,
-      h - sizeOffset,
-      oX,
-      oY - sizeOffset
-    )
-
-    local actualX, actualY, cols, len = self.colObj:move(nextX, nextY, collisionFilter)
-    self.x = actualX
-    self.y = actualY
-    self.h = h
-    self.w = w
-
-    camera:setPosition(self.x, self.y)
-
-    local gridX, gridY = Position.pixelsToGrid(self.x, self.y, config.gridSize)
-    local dist = getDist(self.prevGridX or 0, self.prevGridY or 0, gridX, gridY)
-    local shouldUpdateFlowField = dist >= 2
-    if shouldUpdateFlowField and self.mapGrid then
-      local flowField, callCount = Flowfield(self.mapGrid, gridX, gridY, self.isGridCellVisitable)
-      msgBus.send(msgBus.NEW_FLOWFIELD, {
-        flowField = flowField
-      })
-      self.prevGridX = gridX
-      self.prevGridY = gridY
-    end
   end
 }
+
+local function handleMovement(self, dt)
+  local totalMoveSpeed = self.speed + self.rootStore:get().statModifiers.moveSpeed
+  local moveAmount = totalMoveSpeed * dt
+  local origx, origy = self.x, self.y
+  local mx, my = camera:getMousePosition()
+  local mDx, mDy = Position.getDirection(self.x, self.y, mx, my)
+
+  local nextX, nextY = self.x, self.y
+  self.dir = mDx > 0 and DIRECTION_RIGHT or DIRECTION_LEFT
+
+  if self.forceMove then
+    nextX = nextX + moveAmount * mDx
+    nextY = nextY + moveAmount * mDy
+  end
+
+  -- MOVEMENT
+  local inputX, inputY = 0, 0
+  if love.keyboard.isDown(keyMap.RIGHT) then
+    inputX = 1
+  end
+
+  if love.keyboard.isDown(keyMap.LEFT) then
+    inputX = -1
+  end
+
+  if love.keyboard.isDown(keyMap.UP) then
+    inputY = -1
+  end
+
+  if love.keyboard.isDown(keyMap.DOWN) then
+    inputY= 1
+  end
+
+  local dx, dy = Position.getDirection(0, 0, inputX, inputY)
+  nextX = nextX + (dx * moveAmount)
+  nextY = nextY + (dy * moveAmount)
+
+  self.facingDirectionX = mDx
+  self.facingDirectionY = mDy
+  self.moveDirectionX = dx
+  self.moveDirectionY = dy
+
+  return nextX, nextY, totalMoveSpeed
+end
+
+local function handleAnimation(self, dt, nextX, nextY, moveSpeed)
+  local moving = self.x ~= nextX or self.y ~= nextY
+
+  -- ANIMATION STATES
+  if moving then
+    self.animation = self.animations.run
+      :update(moveSpeed/(moveSpeed*2.5)*dt)
+  else
+    self.animation = self.animations.idle
+      :update(dt/12)
+  end
+end
+
+local function handleAbilities(self, dt)
+  -- ACTIVE_ITEM_1
+  local isItem1Activate = love.keyboard.isDown(keyMap.ACTIVE_ITEM_1)
+  if not self.clickDisabled and isItem1Activate then
+    msgBus.send(msgBus.PLAYER_USE_SKILL, 'ACTIVE_ITEM_1')
+  end
+
+  -- ACTIVE_ITEM_2
+  local isItem2Activate = love.keyboard.isDown(keyMap.ACTIVE_ITEM_2)
+  if not self.clickDisabled and isItem2Activate then
+    msgBus.send(msgBus.PLAYER_USE_SKILL, 'ACTIVE_ITEM_2')
+  end
+
+  -- only disable equipment skills since we want to allow potions to still be used
+  if self.clickDisabled or self.rootStore:get().activeMenu then
+    return
+  end
+
+  -- SKILL_1
+  local isSkill1Activate = love.keyboard.isDown(keyMap.SKILL_1) or
+    love.mouse.isDown(mouseInputMap.SKILL_1)
+  if not self.clickDisabled and isSkill1Activate then
+    msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_1')
+  end
+
+  -- SKILL_2
+  local isSkill2Activate = love.keyboard.isDown(keyMap.SKILL_2) or
+    love.mouse.isDown(mouseInputMap.SKILL_2)
+  if not self.clickDisabled and isSkill2Activate then
+    msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_2')
+  end
+
+  -- SKILL_3
+  local isSkill3Activate = love.keyboard.isDown(keyMap.SKILL_3) or
+    (mouseInputMap.SKILL_3 and love.mouse.isDown(mouseInputMap.SKILL_3))
+  if not self.clickDisabled and isSkill3Activate then
+    msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_3')
+  end
+
+  -- SKILL_4
+  local isSkill4Activate = love.keyboard.isDown(keyMap.SKILL_4) or
+    (mouseInputMap.SKILL_4 and love.mouse.isDown(mouseInputMap.SKILL_4))
+  if not self.clickDisabled and isSkill4Activate then
+    msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_4')
+  end
+end
+
+function Player.update(self, dt)
+  local nextX, nextY, totalMoveSpeed = handleMovement(self, dt)
+  handleAnimation(self, dt, nextX, nextY, totalMoveSpeed)
+  handleAbilities(self, dt)
+
+  -- dynamically get the current animation frame's height
+  local sx, sy, sw, sh = self.animation.sprite:getViewport()
+  local w,h = sw, sh
+  -- true center taking into account pivot
+  local oX, oY = self.animation:getSourceOffset()
+
+  -- COLLISION UPDATES
+  local colOrigX, colOrigY = self.colObj.x, self.colObj.y
+  local sizeOffset = 10
+  self.colObj:update(
+    -- use current coordinates because we only want to update size
+    colOrigX,
+    colOrigY,
+    w,
+    h - sizeOffset,
+    oX,
+    oY - sizeOffset
+  )
+
+  local actualX, actualY, cols, len = self.colObj:move(nextX, nextY, collisionFilter)
+  self.x = actualX
+  self.y = actualY
+  self.h = h
+  self.w = w
+
+  -- update camera to follow player
+  camera:setPosition(self.x, self.y)
+
+  local gridX, gridY = Position.pixelsToGrid(self.x, self.y, config.gridSize)
+  local dist = getDist(self.prevGridX or 0, self.prevGridY or 0, gridX, gridY)
+  local shouldUpdateFlowField = dist >= 2
+  if shouldUpdateFlowField and self.mapGrid then
+    local flowField, callCount = Flowfield(self.mapGrid, gridX, gridY, self.isGridCellVisitable)
+    msgBus.send(msgBus.NEW_FLOWFIELD, {
+      flowField = flowField
+    })
+    self.prevGridX = gridX
+    self.prevGridY = gridY
+  end
+end
 
 local function drawShadow(self, sx, sy, ox, oy)
   -- SHADOW

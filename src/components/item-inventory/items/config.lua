@@ -13,10 +13,10 @@ config.rarity = {
 	LEGENDARY = 4
 }
 
-local COLOR_MAGICAL = {107, 171, 255} -- blueish-purple
+local COLOR_MAGICAL = {Color.rgba255(107, 171, 255)} -- blueish-purple
 local COLOR_RARE = {1, 1, 0} -- yellow
-local COLOR_EPIC = {222, 73, 252} -- magenta
-local COLOR_LEGENDARY = {255, 155, 33} -- gold
+local COLOR_EPIC = {Color.rgba255(228, 96, 255)} -- magenta
+local COLOR_LEGENDARY = {Color.rgba255(255, 155, 33)} -- gold
 
 config.rarityColor = {
 	[config.rarity.NORMAL] = Color.WHITE,
@@ -35,21 +35,20 @@ config.rarityTitle = {
 }
 
 local consumableCategory = {
-	CONSUMABLE = 1
+	CONSUMABLE = 'CONSUMABLE'
 }
 config.consumableCategory = consumableCategory
 
 local equipmentCategory = {
-	BODY_ARMOR = 2,
-	WEAPON_1 = 3,
-	WEAPON_2 = 4,
-	AMULET = 5,
-	SHOES = 6,
-	PANTS = 7,
-	GLOVES = 8,
-	ION_GENERATOR = 9,
-	HELMET = 10,
-	RING = 11,
+	BODY_ARMOR = 'BODY_ARMOR',
+	WEAPON_1 = 'WEAPON_1',
+	AMULET = 'AMULET',
+	SHOES = 'SHOES',
+	PANTS = 'PANTS',
+	GLOVES = 'GLOVES',
+	SIDE_ARM = 'SIDE_ARM',
+	HELMET = 'HELMET',
+	RING = 'RING',
 }
 config.equipmentCategory = equipmentCategory
 
@@ -62,24 +61,23 @@ config.categoryTitle = {
 	[consumableCategory.CONSUMABLE] = 'consumable',
 	[equipmentCategory.BODY_ARMOR] = 'chest armor',
 	[equipmentCategory.WEAPON_1] = 'weapon',
-	[equipmentCategory.WEAPON_2] = 'weapon',
 	[equipmentCategory.RING] = 'ring',
 	[equipmentCategory.AMULET] = 'amulet',
 	[equipmentCategory.SHOES] = 'shoes',
 	[equipmentCategory.PANTS] = 'pants',
 	[equipmentCategory.GLOVES] = 'gloves',
-	[equipmentCategory.ION_GENERATOR] = 'ion generator',
+	[equipmentCategory.SIDE_ARM] = 'ion generator',
 }
 
 config.equipmentCategorySilhouette = {
 	[equipmentCategory.HELMET] = 'helmet_106',
-	[equipmentCategory.ION_GENERATOR] = 'book_25',
+	[equipmentCategory.SIDE_ARM] = 'book_25',
 	[equipmentCategory.RING] = 'ring_1',
 	[equipmentCategory.AMULET] = 'amulet_16',
 	[equipmentCategory.BODY_ARMOR] = 'armor_121',
 	[equipmentCategory.WEAPON_1] = 'sword_17',
-	[equipmentCategory.WEAPON_2] = 'sword_18',
-	[equipmentCategory.SHOES] = 'shoe_1'
+	[equipmentCategory.SHOES] = 'shoe_1',
+	[consumableCategory.CONSUMABLE] = 'potion_48'
 }
 
 -- defines what gui node that equipment may be dropped into
@@ -89,25 +87,36 @@ config.equipmentGuiSlotMap = {
 		equipmentCategory.BODY_ARMOR
 	},
 	{
-		equipmentCategory.ION_GENERATOR,
-		equipmentCategory.RING
+		equipmentCategory.SIDE_ARM,
+		equipmentCategory.SIDE_ARM
 	},
 	{
 		equipmentCategory.WEAPON_1,
-		equipmentCategory.WEAPON_2
+		equipmentCategory.WEAPON_1
 	},
 	{
 		equipmentCategory.SHOES,
 		equipmentCategory.AMULET
+	},
+	{
+		consumableCategory.CONSUMABLE,
+		consumableCategory.CONSUMABLE
 	}
 }
 
 function config.findEquipmentSlotByCategory(category)
-	assert(type(category) == 'number', 'invalid category '..category..' should be of type number')
+	assert(config.category[category] ~= nil, 'invalid category '..category)
 
 	local slotX, slotY
+	local hasMatch = false
 	require'utils.iterate-grid'(config.equipmentGuiSlotMap, function(v, x, y)
-		if v == category then
+		-- return the first slot that matches the category
+		if hasMatch then
+			return
+		end
+
+		hasMatch = v == category
+		if hasMatch then
 			slotX, slotY = x, y
 		end
 	end)

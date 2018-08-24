@@ -50,12 +50,12 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   end,
 
   renderStart = function(self)
+    love.graphics.push()
+    love.graphics.origin()
     -- draw background
     love.graphics.setColor(0,0,0,0.3)
     local scale = self.scale
     love.graphics.rectangle('fill', self.x * scale, self.y * scale, self.w * scale, self.h * scale)
-
-    love.graphics.push()
     love.graphics.setCanvas(minimapCanvas)
   end,
 

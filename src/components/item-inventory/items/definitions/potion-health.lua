@@ -11,11 +11,11 @@ return itemDefs.registerType({
 	create = function()
 		return {
 			stackSize = 1,
-			maxStackSize = 99,
+			maxStackSize = 1,
 
 			minHeal = 80,
 			maxHeal = 100,
-			duration = 3,
+			duration = 2,
 			source = 'HEALTH_POTION'
 		}
 	end,
@@ -27,15 +27,20 @@ return itemDefs.registerType({
 		category = config.category.CONSUMABLE,
 
 		onActivate = function(self, mainState)
+			msgBus.send(msgBus.EQUIPMENT_SWAP, self)
+		end,
+
+		onActivateWhenEquipped = function(self)
 			msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
 				amount = math.random(self.minHeal, self.maxHeal),
 				source = self.source,
 				duration = self.duration,
-				type = 1
 			})
-			mainState:removeItem(self)
 			love.audio.stop(Sound.drinkPotion)
 			love.audio.play(Sound.drinkPotion)
+			return {
+				cooldown = self.duration
+			}
 		end,
 
 		tooltip = function(self)

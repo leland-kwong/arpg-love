@@ -6,23 +6,18 @@ local Color = require 'modules.color'
 local Position = require 'utils.position'
 
 local HealthIndicator = {
-  group = groups.gui,
-  health = 0
+  group = groups.hud,
+  health = 0,
+  hudTextLayer = nil
 }
 
 function HealthIndicator.init(self)
-  self.hudTextLayer = GuiText.create({
-    drawOrder = function()
-      return 4
-    end
-  }):setParent(self)
-
   msgBus.subscribe(function(msgType, msgValue)
     if self:isDeleted() then
       return msgBus.CLEANUP
     end
 
-    if msgBus.PLAYER_HIT == msgType then
+    if msgBus.PLAYER_HIT_RECEIVED == msgType then
       self.rootStore:set('health', function(state)
         return state.health - msgValue
       end)
@@ -32,8 +27,9 @@ function HealthIndicator.init(self)
 end
 
 function HealthIndicator.update(self)
-  self.health = self.rootStore:get().health
-  self.maxHealth = self.rootStore:get().maxHealth
+  local state = self.rootStore:get()
+  self.health = state.health
+  self.maxHealth = state.maxHealth + state.statModifiers.maxHealth
 end
 
 function HealthIndicator.draw(self)

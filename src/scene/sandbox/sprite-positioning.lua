@@ -111,10 +111,6 @@ function M.update(self, dt)
   local dx, dy = 0, 0
   local isDown = love.keyboard.isDown
 
-  if isDown('escape') then
-    love.event.quit()
-  end
-
   if isDown('w') then
     dy = -1
     moving = true

@@ -36,7 +36,7 @@ Whenever an event occurs, it sends that information to the event bus. Each event
 ## Message types
 
 - EQUIPMENT_CHANGE
-- UNEQUIP_ITEM
+- EQUIPMENT_UNEQUIP
 - PLAYER_MOVE
 - PLAYER_IDLE
 - PLAYER_ATTACK

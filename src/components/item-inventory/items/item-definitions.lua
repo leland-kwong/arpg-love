@@ -38,10 +38,6 @@ end
 
 local noop = function() end
 local defaultProperties = {
-	onActivate = function(self)
-
-	end,
-
 	onEquip = noop,
 
 	-- tooltip content to render
@@ -56,7 +52,13 @@ local defaultProperties = {
 	-- item dropped into inventory cell
 	onInventoryDrop = noop,
 
-	onRender = noop,
+	-- item is right-clicked in inventory
+	onActivate = noop,
+
+	-- item is equipped and item is in active skill slot
+	onActivateWhenEquipped = nil,
+
+	render = noop,
 
 	modifier = function(self, msgType, msgValue)
 		return msgValue
@@ -170,6 +172,20 @@ function items.registerType(itemDefinition)
 	}, defaultProperties, def.properties)
 
 	return types[def.type]
+end
+
+local Lru = require 'utils.lru'
+local setProp = require 'utils.set-prop'
+local statesById = Lru.new(100)
+
+function items.getState(item)
+	local id = item.__id
+	local state = statesById:get(id)
+	if (not state) then
+		state = setProp({})
+		statesById:set(id, state)
+	end
+	return state
 end
 
 return items
