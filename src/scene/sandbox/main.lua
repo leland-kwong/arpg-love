@@ -2,7 +2,7 @@ local Gui = require 'components.gui.gui'
 local GuiText = require 'components.gui.gui-text'
 local Color = require 'modules.color'
 local font = require 'components.font'
-local SceneMenu = require 'scene.scene-menu'
+local MenuList = require 'components.menu-list'
 local Component = require 'modules.component'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
@@ -13,6 +13,11 @@ local bitser = require 'modules.bitser'
 
 local guiTextBodyLayer = GuiText.create({
   font = font.primary.font
+})
+
+local titleFont = font.secondary.font
+local guiTextTitleLayer = GuiText.create({
+  font = titleFont
 })
 
 local Sandbox = {
@@ -116,13 +121,16 @@ local sceneOptions = {
   }
 }
 
+local menuX, menuY = 200, 20
+
 function Sandbox.init(self)
   local activeSceneMenu = nil
 
   local function DebugMenu(enabled)
     if enabled then
-      activeSceneMenu = SceneMenu.create({
-        title = 'Sandbox scenes',
+      activeSceneMenu = MenuList.create({
+        x = menuX,
+        y = menuY,
         options = sceneOptions,
         onSelect = function(name, value)
           msgBus.clearAll()
@@ -137,7 +145,6 @@ function Sandbox.init(self)
     end
     setState({ menuOpened = enabled })
   end
-
 
   local errorFree, loadedState = pcall(function() return bitser.loadLoveFile(stateFile) end)
   state = (errorFree and loadedState) or state
@@ -169,6 +176,7 @@ end
 
 function Sandbox.draw()
   if state.menuOpened then
+    guiTextTitleLayer:add('Sandbox scenes', Color.WHITE, menuX, menuY)
     -- background
     local w, h = love.graphics.getWidth() / config.scaleFactor, love.graphics.getHeight() / config.scaleFactor
     love.graphics.setColor(0,0,0,0.7)
