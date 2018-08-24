@@ -33,7 +33,7 @@ M.levelExperienceRequirements = {}
 -- setup level experience requirements
 (function()
   local req = M.levelExperienceRequirements
-  for level=1, 3 do
+  for level=1, 99 do
     table.insert(
       req,
       (level^2+level)/2*xpDiff-(level*xpDiff)
