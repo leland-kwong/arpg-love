@@ -35,14 +35,7 @@ return itemDefs.registerType({
 			maxStackSize = 1,
 
 			-- static properties
-			weaponDamage = baseDamage,
-
-			state = {
-				animation = AnimationFactory:new({
-					'pod-one'
-				}),
-				isAttacking = false
-			}
+			weaponDamage = baseDamage
 		}
 	end,
 
@@ -51,6 +44,17 @@ return itemDefs.registerType({
 		title = 'Pod One',
 		rarity = config.rarity.LEGENDARY,
 		category = config.category.WEAPON_1,
+
+		onEquip = function(self)
+			itemDefs.getState(self)
+				:set(
+					'animation',
+					AnimationFactory:new({
+						'pod-one'
+					})
+				)
+				:set('isAttacking', false)
+		end,
 
 		tooltip = function(self)
 			local stats = {
@@ -82,11 +86,12 @@ return itemDefs.registerType({
 		end,
 
 		update = function(self)
-			self.state.isAttacking = false
+			itemDefs.getState(self)
+				:set('isAttacking', false)
 		end,
 
 		render = function(self)
-			local state = self.state
+			local state = itemDefs.getState(self)
 			local playerRef = Component.get('PLAYER')
 			local posX, posY = playerRef:getPosition()
 			local centerOffsetX, centerOffsetY = state.animation:getOffset()

@@ -175,13 +175,14 @@ function items.registerType(itemDefinition)
 end
 
 local Lru = require 'utils.lru'
+local setProp = require 'utils.set-prop'
 local statesById = Lru.new(100)
 
 function items.getState(item)
 	local id = item.__id
 	local state = statesById:get(id)
 	if (not state) then
-		state = {}
+		state = setProp({})
 		statesById:set(id, state)
 	end
 	return state
