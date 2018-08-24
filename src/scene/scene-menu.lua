@@ -13,6 +13,7 @@ local SandboxSceneSelection = {
   group = groups.gui,
   -- table of menu options
   options = {},
+  title = '',
   onSelect = nil
 }
 
@@ -26,6 +27,10 @@ local guiTextTitleLayer = GuiText.create({
 })
 
 function SandboxSceneSelection.init(self)
+  assert(
+    type(self.title) == 'string' and #self.title > 0,
+    'title must be a string and have at least one character'
+  )
   assert(type(self.onSelect) == 'function', 'onSelect method required')
 
   local onSelect = self.onSelect
@@ -73,7 +78,7 @@ function SandboxSceneSelection.init(self)
 end
 
 function SandboxSceneSelection.draw(self)
-  guiTextTitleLayer:add('Sandbox scenes', Color.WHITE, self.x, self.y)
+  guiTextTitleLayer:add(self.title, Color.WHITE, self.x, self.y)
 end
 
 return Component.createFactory(SandboxSceneSelection)

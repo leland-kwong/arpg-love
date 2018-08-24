@@ -122,6 +122,7 @@ function Sandbox.init(self)
   local function DebugMenu(enabled)
     if enabled then
       activeSceneMenu = SceneMenu.create({
+        title = 'Sandbox scenes',
         options = sceneOptions,
         onSelect = function(name, value)
           msgBus.clearAll()
