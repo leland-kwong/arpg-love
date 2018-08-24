@@ -63,18 +63,21 @@ local blueprint2 = {
   group = group
 }
 local factory = Component.createFactory(blueprint2)
-local c1 = factory.create({
-  id = 'foobar'
-})
+local c1 = factory.create()
 local c2 = factory.create():setParent(c1)
-
-assert(Component.get('foobar') ~= nil, 'failed to find by component by id')
-
 c1:delete(true)
 --[[
   run an update since parented components won't clean themselves up until
   the next frame
 ]]
 group.updateAll(dt)
-
 assert(c2:isDeleted(), 'child object should be deleted')
+
+
+-- [[ test unique ids ]]
+local foobarFactory = Component.createFactory({
+  group = group,
+  id = 'foobar'
+})
+foobarFactory.create()
+assert(Component.get('foobar') ~= nil, 'failed to find by component by id')

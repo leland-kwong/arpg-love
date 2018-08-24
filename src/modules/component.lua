@@ -74,9 +74,18 @@ end
 ]]
 local invalidPropsErrorMsg = 'props cannot be a component object'
 
+local uniqueIds = {}
+
 function M.createFactory(blueprint)
-  tc.validate(blueprint.getInitialProps, tc.FUNCTION, false)
-  assert(blueprint.id == nil, 'blueprints should not have an id. Instead, pass the id in as a prop, or let the system automatically generate an id')
+  if blueprint.id then
+    local isUniqueId = not uniqueIds[blueprint.id]
+    assert(
+      isUniqueId,
+      'Duplicate id '..blueprint.id..'. Fixed ids must be unique amongst all factories'
+    )
+    -- add id to list of unique ids
+    uniqueIds[blueprint.id] = true
+  end
 
   function blueprint.create(props)
     local c = (props or {})
@@ -85,17 +94,17 @@ function M.createFactory(blueprint)
       invalidPropsErrorMsg
     )
 
-    local id = c.id or uid()
-
-    local isUnique = allComponentsById[id] == nil
-    assert(isUnique, 'duplicate component id')
-
+    local id = blueprint.id or uid()
     c._id = id
+
     setmetatable(c, blueprint)
     blueprint.__index = blueprint
 
     -- type check
     if isDebug then
+      if (props and props.id) then
+        assert(uniqueIds[props.id], 'unique ids must be registered in the factory')
+      end
       assert(c.group ~= nil, 'a default `group` must be provided')
       tc.validate(c.x, tc.NUMBER, false) -- x-axis position
       tc.validate(c.y, tc.NUMBER, false) -- y-axis position
@@ -204,6 +213,7 @@ function M.newGroup(groupDefinition)
     for id,c in pairs(componentsById) do
       c:_update(dt)
     end
+
     return Group
   end
 

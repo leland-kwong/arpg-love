@@ -41,6 +41,7 @@ local function collisionFilter(item, other)
 end
 
 local Player = {
+  id = 'PLAYER',
   group = groups.all,
   x = startPos.x,
   y = startPos.y,
