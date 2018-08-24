@@ -21,7 +21,7 @@ return itemDefs.registerType({
 			maxStackSize = 1,
 
 			armor = 20,
-			moveSpeed = 200,
+			moveSpeed = 150,
 			magicResist = 20,
 			fireResist = 20
 		}
