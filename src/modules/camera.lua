@@ -1,6 +1,7 @@
 -- [based on](https://github.com/SSYGEN/STALKER-X/blob/master/Camera.lua)
 local tween = require 'modules.tween'
 local mergeProps = require 'utils.object-utils'.assign
+local round = require 'utils.math'.round
 
 local defaultOptions = {
   lerp = function()
@@ -37,6 +38,10 @@ local Camera = function(options)
   end
 
   function camera:setPosition(x, y)
+    -- force positions to be on full pixels to prevent artifacting due to sub-pixel rendering
+    x = round(x)
+    y = round(y)
+
     if (lerpDuration > 0) then
       targetPosition.x = x
       targetPosition.y = y
