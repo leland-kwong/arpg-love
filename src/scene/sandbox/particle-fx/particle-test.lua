@@ -1,5 +1,5 @@
 local Component = require 'modules.component'
-local scale = require 'config'.scaleFactor
+local scale = require 'config.config'.scaleFactor
 local groups = require 'components.groups'
 local Player = require 'components.player'
 local ParticleFx = require 'components.particle.particle'

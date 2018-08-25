@@ -4,7 +4,7 @@ A simple, but fast observable state store with set, get, and onChange callback
 
 ]]--
 
-local isDebug = require'config'.isDebug
+local isDebug = require'config.config'.isDebug
 local F = require("utils.functional")
 local objectUtils = require("utils.object-utils")
 local typeCheck = require("utils.type-check")

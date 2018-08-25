@@ -16,7 +16,7 @@ local uid = require("utils.uid")
 local itemConfig = require("components.item-inventory.items.config")
 local msgBus = require("components.msg-bus")
 
-local isDebug = require'config'.isDebug
+local isDebug = require'config.config'.isDebug
 
 local types = {}
 local items = {

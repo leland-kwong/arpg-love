@@ -7,7 +7,7 @@ local MainMap = require 'components.map.main-map'
 local Inventory = require 'components.item-inventory.inventory'
 local SpawnerAi = require 'components.spawn.spawn-ai'
 local InventoryController = require 'components.item-inventory.controller'
-local config = require 'config'
+local config = require 'config.config'
 local camera = require 'components.camera'
 local cloneGrid = require 'utils.clone-grid'
 local CreateStore = require 'components.state.state'
@@ -66,7 +66,8 @@ local function getDroppablePosition(posX, posY, mapGrid, callCount)
 end
 
 -- custom cursor
-local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', 64, 64)
+local cursorSize = 64
+local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', cursorSize/2, cursorSize/2)
 love.mouse.setCursor(cursor)
 
 local function generateAi(parent, player, map)

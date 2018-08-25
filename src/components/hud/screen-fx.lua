@@ -1,7 +1,7 @@
 local Component = require 'modules.component'
 local groups = require 'components.groups'
 local Color = require 'modules.color'
-local screenScale = require 'config'.scaleFactor
+local screenScale = require 'config.config'.scaleFactor
 local tween = require 'modules.tween'
 local msgBus = require 'components.msg-bus'
 

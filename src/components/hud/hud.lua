@@ -6,7 +6,7 @@ local ScreenFx = require 'components.hud.screen-fx'
 local ActiveSkillInfo = require 'components.hud.active-skill-info'
 local GuiText = require 'components.gui.gui-text'
 local Position = require 'utils.position'
-local scale = require 'config'.scaleFactor
+local scale = require 'config.config'.scaleFactor
 
 local Hud = {
   group = groups.gui,

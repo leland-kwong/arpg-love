@@ -8,7 +8,7 @@ local MenuList = require 'components.menu-list'
 local groups = require 'components.groups'
 local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local SceneMain = require 'scene.scene-main'
-local config = require 'config'
+local config = require 'config.config'
 local tick = require 'utils.tick'
 
 local MainGameHomeScene = {

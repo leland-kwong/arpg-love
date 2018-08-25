@@ -2,7 +2,7 @@ local Component = require 'modules.component'
 local objectUtils = require 'utils.object-utils'
 local groups = require 'components.groups'
 local mapBlueprint = require 'components.map.map-blueprint'
-local config = require 'config'
+local config = require 'config.config'
 local memoize = require 'utils.memoize'
 local GetIndexByCoordinate = memoize(require 'utils.get-index-by-coordinate')
 

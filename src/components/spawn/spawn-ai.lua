@@ -3,7 +3,7 @@ local Ai = require 'components.ai.ai'
 local msgBus = require 'components.msg-bus'
 local collisionWorlds = require 'components.collision-worlds'
 local groups = require 'components.groups'
-local config = require 'config'
+local config = require 'config.config'
 local typeCheck = require 'utils.type-check'
 local Math = require 'utils.math'
 

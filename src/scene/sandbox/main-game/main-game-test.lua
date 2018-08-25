@@ -2,7 +2,7 @@ local Component = require 'modules.component'
 local groups = require 'components.groups'
 local SceneMain = require 'scene.scene-main'
 local TreasureChest = require 'components.treasure-chest'
-local config = require 'config'
+local config = require 'config.config'
 
 local MainGameTest = {
   group = groups.all

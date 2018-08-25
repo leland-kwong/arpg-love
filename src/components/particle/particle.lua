@@ -2,7 +2,7 @@ local Component = require 'modules.component'
 local groups = require 'components.groups'
 local Color = require 'modules.color'
 local Tween = require 'modules.tween'
-local scale = require 'config'.scaleFactor
+local scale = require 'config.config'.scaleFactor
 
 local image = love.graphics.newImage('built/images/pixel-1x1-white.png')
 

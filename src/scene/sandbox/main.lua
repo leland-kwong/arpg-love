@@ -6,7 +6,7 @@ local MenuList = require 'components.menu-list'
 local Component = require 'modules.component'
 local groups = require 'components.groups'
 local msgBusMainMenu = require 'components.msg-bus-main-menu'
-local config = require 'config'
+local config = require 'config.config'
 local objectUtils = require 'utils.object-utils'
 local bitser = require 'modules.bitser'
 

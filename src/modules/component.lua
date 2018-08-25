@@ -1,4 +1,4 @@
-local isDebug = require 'config'.isDebug
+local isDebug = require 'config.config'.isDebug
 local tc = require 'utils.type-check'
 local uid = require 'utils.uid'
 local inspect = require 'utils.inspect'

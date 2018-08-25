@@ -1,5 +1,5 @@
 local Component = require 'modules.component'
-local config = require 'config'
+local config = require 'config.config'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local animationFactory = require 'components.animation-factory'

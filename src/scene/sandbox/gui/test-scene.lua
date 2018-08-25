@@ -6,7 +6,7 @@ local Color = require 'modules.color'
 local font = require 'components.font'
 local f = require 'utils.functional'
 local pprint = require 'utils.pprint'
-local scale = require 'config'.scaleFactor
+local scale = require 'config.config'.scaleFactor
 
 local guiText = GuiTextLayer.create({
   group = groups.gui
