@@ -21,6 +21,8 @@ local Ai = {
   speed = 100,
   attackRange = 8,
   sightRadius = 11,
+  isAggravated = false,
+  gridSize = 1,
   animation = animationFactory:new({
     'pixel-white-1x1'
   }),
@@ -53,6 +55,12 @@ function Ai:checkLineOfSight(grid, WALKABLE, targetX, targetY, debug)
   return LineOfSight(grid, WALKABLE, debug)(
     gridX, gridY, gridTargetX, gridTargetY
   )
+end
+
+function Ai:aggravatedRadius()
+  local playerFlowFieldDistance = Component.get('PLAYER')
+    :getProp('flowFieldDistance')
+  return (playerFlowFieldDistance - 3) * self.gridSize
 end
 
 function Ai:autoUnstuckFromWallIfNeeded(grid, gridX, gridY)
@@ -99,6 +107,7 @@ local function hitAnimation()
 end
 
 local function handleHits(self)
+  self.isAggravated = false
   local hitCount = #self.hits
   if hitCount > 0 then
     for i=1, hitCount do
@@ -122,10 +131,12 @@ local function handleHits(self)
         self:delete()
         return
       end
+
+      self.hits[i] = nil
     end
 
     self.hitAnimation = coroutine.wrap(hitAnimation)
-    self.hits = {}
+    self.isAggravated = true
   end
 end
 
@@ -188,7 +199,14 @@ function Ai._update2(self, grid, flowField, dt)
   -- we can use this detect whether the agent is stuck if the grid position has remained the same for several frames and was trying to move
   local isNewGridPosition = prevGridX ~= gridX or prevGridY ~= gridY
   local isNewFlowField = self.lastFlowField ~= flowField
-  local targetX, targetY = self.findNearestTarget(self.x, self.y, self.sightRadius)
+  local actualSightRadius = self.isAggravated and
+      self:aggravatedRadius() or
+      self.sightRadius
+  local targetX, targetY = self.findNearestTarget(
+    self.x,
+    self.y,
+    actualSightRadius
+  )
   local canSeeTarget = self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY)
   local shouldGetNewPath = flowField and canSeeTarget
   local isInAttackRange = canSeeTarget and (distOfLine(self.x, self.y, targetX, targetY) <= self.attackRange)
@@ -197,7 +215,7 @@ function Ai._update2(self, grid, flowField, dt)
 
   self.canSeeTarget = canSeeTarget
 
-  if canSeeTarget and isInAttackRange then
+  if (canSeeTarget and isInAttackRange) then
     ability1.use(self, targetX, targetY)
     ability1.updateCooldown(dt)
     -- we're already in attack range, so we don't need to move
@@ -206,7 +224,7 @@ function Ai._update2(self, grid, flowField, dt)
 
   if shouldGetNewPath then
     self.pathComplete = false
-    local distanceToPlanAhead = self.sightRadius / self.gridSize
+    local distanceToPlanAhead = actualSightRadius / self.gridSize
     self.pathWithAstar = getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
 
     local index = 1

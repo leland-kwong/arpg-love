@@ -47,6 +47,7 @@ local Player = {
   y = startPos.y,
   pickupRadius = 5 * config.gridSize,
   speed = 100,
+  flowFieldDistance = 40,
 
   -- collision properties
   type = 'player',
@@ -98,7 +99,7 @@ local Player = {
     self.isGridCellVisitable = function(grid, x, y, dist)
       local row = grid[y]
       local cell = row and row[x]
-      return (cell == Map.WALKABLE) and (dist < 40)
+      return (cell == Map.WALKABLE) and (dist < self.flowFieldDistance)
     end
 
     local calcDist = require'utils.math'.dist
