@@ -66,7 +66,8 @@ local function getDroppablePosition(posX, posY, mapGrid, callCount)
 end
 
 -- custom cursor
-local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', 64, 64)
+local cursorSize = 64
+local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', cursorSize/2, cursorSize/2)
 love.mouse.setCursor(cursor)
 
 local function generateAi(parent, player, map)
