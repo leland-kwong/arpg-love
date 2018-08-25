@@ -1,4 +1,4 @@
-local config = require 'config'
+local config = require 'config.config'
 local iterateGrid = require 'utils.iterate-grid'
 local bump = require 'modules.bump'
 local pprint = require 'utils.pprint'
@@ -59,7 +59,7 @@ local mapBlueprint = {
   offset = 0,
   gridSize = 16,
   walkable = 1,
-  camera = Camera(),
+  camera = Camera,
   grid = {
     {}
   },

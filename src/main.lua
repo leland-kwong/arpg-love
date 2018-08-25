@@ -11,7 +11,7 @@ local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local groups = require 'components.groups'
-local config = require 'config'
+local config = require 'config.config'
 local camera = require 'components.camera'
 local SceneMain = require 'scene.scene-main'
 local RootScene = require 'scene.sandbox.main'
@@ -52,6 +52,7 @@ end
 function love.update(dt)
   tick.update(dt)
 
+  camera:update(dt)
   groups.all.updateAll(dt)
   groups.overlay.updateAll(dt)
   groups.debug.updateAll(dt)

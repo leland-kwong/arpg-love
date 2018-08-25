@@ -4,7 +4,7 @@
 
 local Component = require 'modules.component'
 local msgBus = require 'components.msg-bus'
-local config = require 'config'
+local config = require 'config.config'
 
 local gridSize = config.gridSize
 local floor = math.floor

@@ -1,13 +1,34 @@
 -- [based on](https://github.com/SSYGEN/STALKER-X/blob/master/Camera.lua)
+local tween = require 'modules.tween'
+local mergeProps = require 'utils.object-utils'.assign
 
-local Camera = function()
+local defaultOptions = {
+  lerp = function()
+    return 0
+  end
+}
+
+local Camera = function(options)
+  options = mergeProps({}, defaultOptions, options)
+
   local camera = {
     x = 0,
     y = 0,
     w = love.graphics.getWidth(),
     h = love.graphics.getHeight(),
-    scale = 1,
+    scale = 1
   }
+
+  local targetPosition = {x = 0, y = 0}
+  local lerpDuration = 0
+  local lerpTween = nil
+
+  local function lerp(dt, reset)
+    if reset then
+      lerpTween = tween.new(lerpDuration, camera, targetPosition, tween.easing.outQuint)
+    end
+    lerpTween:update(dt)
+  end
 
   function camera:setSize(w, h)
     self.w = w
@@ -16,9 +37,27 @@ local Camera = function()
   end
 
   function camera:setPosition(x, y)
+    if (lerpDuration > 0) then
+      targetPosition.x = x
+      targetPosition.y = y
+      return
+    end
     self.x = x
     self.y = y
     return self
+  end
+
+  function camera:update(dt)
+    lerpDuration = options.lerp()
+    if (lerpDuration > 0) then
+      local lastTargetPositionX = self.lastTargetPositionX
+      local lastTargetPositionY = self.lastTargetPositionY
+      local hasChangedPosition = (lastTargetPositionX ~= targetPosition.x) or
+        (lastTargetPositionY ~= targetPosition.y)
+      self.lastTargetPositionX = targetPosition.x
+      self.lastTargetPositionY = targetPosition.y
+      lerp(dt, hasChangedPosition)
+    end
   end
 
   function camera:getBounds()

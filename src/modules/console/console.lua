@@ -5,7 +5,7 @@ local msgBus = require 'components.msg-bus'
 local font = require 'components.font'
 local Color = require 'modules.color'
 local CollisionObject = require 'modules.collision'
-local config = require 'config'
+local config = require 'config.config'
 
 local modifier = false
 local keysPressed = {}

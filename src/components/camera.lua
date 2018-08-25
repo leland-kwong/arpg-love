@@ -1,2 +1,8 @@
 local Camera = require 'modules.camera'
-return Camera()
+local userSettings = require 'config.user-settings'
+
+return Camera({
+  lerp = function()
+    return userSettings.camera.speed
+  end
+})

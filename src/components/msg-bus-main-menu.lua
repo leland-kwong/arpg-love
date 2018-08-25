@@ -1,5 +1,5 @@
 local MessageBus = require 'utils.message-bus'
-local config = require 'config'
+local config = require 'config.config'
 
 local M = MessageBus.new()
 

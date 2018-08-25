@@ -5,7 +5,7 @@ local msgBus = require 'components.msg-bus'
 local Color = require 'modules.color'
 local Sound = require 'components.sound'
 local Position = require 'utils.position'
-local config = require 'config'
+local config = require 'config.config'
 
 local ExperienceIndicator = {
   group = groups.hud,

@@ -4,7 +4,7 @@ local msgBus = require 'components.msg-bus'
 local camera = require 'components.camera'
 local Color = require 'modules.color'
 local drawItem = require 'components.item-inventory.draw-item'
-local config = require 'config'
+local config = require 'config.config'
 
 local keyMap = config.keyboard
 local mouseInputMap = config.mouseInputMap

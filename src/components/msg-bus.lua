@@ -1,4 +1,4 @@
-local config = require 'config'
+local config = require 'config.config'
 local MessageBus = require 'utils.message-bus'
 
 local M = MessageBus.new()

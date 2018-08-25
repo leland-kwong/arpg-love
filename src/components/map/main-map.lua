@@ -10,7 +10,7 @@ local animationFactory = require 'components.animation-factory'
 local lru = require 'utils.lru'
 local memoize = require'utils.memoize'
 local GetIndexByCoordinate = memoize(require 'utils.get-index-by-coordinate')
-local config = require'config'
+local config = require'config.config'
 
 local animationTypes = {}
 

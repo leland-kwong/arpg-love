@@ -1,4 +1,4 @@
-local config = require'config'
+local config = require'config.config'
 local msgBus = require'components.msg-bus'
 local windowFocused = true
 

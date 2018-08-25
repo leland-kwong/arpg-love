@@ -1,4 +1,4 @@
-local config = require("config")
+local config = require('config.config')
 local itemDefs = require("components.item-inventory.items.item-definitions")
 local itemConfig = require("components.item-inventory.items.config")
 local sc = require("components.state.constants")
