@@ -12,8 +12,10 @@ local camera = require 'components.camera'
 local cloneGrid = require 'utils.clone-grid'
 local CreateStore = require 'components.state.state'
 local Hud = require 'components.hud.hud'
+local fileSystem = require 'modules.file-system'
 local msgBus = require 'components.msg-bus'
-local HealSource = require'components.heal-source'
+local HealSource = require 'components.heal-source'
+local tick = require 'utils.tick'
 
 local gridTileTypes = {
   -- unwalkable
@@ -38,6 +40,9 @@ local gridTileTypes = {
 
 local MainScene = {
   group = groups.all,
+
+  -- options
+  initialGameState = nil,
 }
 
 local random = math.random
@@ -64,8 +69,36 @@ end
 local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', 64, 64)
 love.mouse.setCursor(cursor)
 
+local function generateAi(parent, player, map)
+  local aiCount = 60
+  local generated = 0
+  local minPos, maxPos = 10, 60
+  while generated < aiCount do
+    local posX, posY = math.random(minPos, maxPos), math.random(minPos, maxPos)
+    local isValidPosition = map.grid[posY][posX] == Map.WALKABLE
+    if isValidPosition then
+      generated = generated + 1
+      SpawnerAi.create({
+        grid = map.grid,
+        WALKABLE = Map.WALKABLE,
+        target = player,
+        x = posX,
+        y = posY,
+        speed = 80,
+        scale = 0.5 + (math.random(1, 7) / 10)
+      }):setParent(parent)
+    end
+  end
+end
+
 function MainScene.init(self)
   local rootState = CreateStore()
+  if self.initialGameState then
+    for k,v in pairs(self.initialGameState) do
+      rootState:set(k, v)
+    end
+  end
+
   self.rootStore = rootState
   local inventoryController = InventoryController(rootState)
   local parent = self
@@ -77,7 +110,6 @@ function MainScene.init(self)
   end)
 
   local player = Player.create({
-    id = 'PLAYER',
     mapGrid = map.grid,
     rootStore = rootState
   }):setParent(parent)
@@ -87,9 +119,16 @@ function MainScene.init(self)
     rootStore = rootState
   }):setParent(parent)
 
+  generateAi(parent, player, map)
+
   msgBus.subscribe(function(msgType, msgValue)
     if self:isDeleted() then
       return msgBus.CLEANUP
+    end
+
+    if msgBus.EQUIPMENT_CHANGE == msgType then
+      local equipmentChangeHandler = require'components.item-inventory.equipment-change-handler'
+      equipmentChangeHandler(rootState)
     end
 
     if msgBus.KEY_PRESSED == msgType then
@@ -144,26 +183,6 @@ function MainScene.init(self)
     end
   end)
 
-  local aiCount = 60
-  local generated = 0
-  local minPos, maxPos = 10, 60
-  while generated < aiCount do
-    local posX, posY = math.random(minPos, maxPos), math.random(minPos, maxPos)
-    local isValidPosition = map.grid[posY][posX] == Map.WALKABLE
-    if isValidPosition then
-      generated = generated + 1
-      SpawnerAi.create({
-        grid = map.grid,
-        WALKABLE = Map.WALKABLE,
-        target = player,
-        x = posX,
-        y = posY,
-        speed = 80,
-        scale = 0.5 + (math.random(1, 7) / 10)
-      }):setParent(parent)
-    end
-  end
-
   Minimap.create({
     camera = camera,
     grid = map.grid,
@@ -176,6 +195,21 @@ function MainScene.init(self)
     tileRenderDefinition = gridTileDefinitions,
     walkable = Map.WALKABLE
   }):setParent(parent)
+
+  -- trigger equipment change for items that were previously equipped from loading the state
+  msgBus.send(msgBus.EQUIPMENT_CHANGE)
+
+  self.autoSave = tick.recur(function()
+    fileSystem.saveFile(
+      rootState:getId(),
+      rootState:get()
+    )
+  end, 0.2)
+end
+
+function MainScene.final(self)
+  self.autoSave:stop()
+  msgBus.clearAll()
 end
 
 return Component.createFactory(MainScene)

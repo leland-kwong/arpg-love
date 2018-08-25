@@ -93,6 +93,9 @@ return itemDefs.registerType({
 		render = function(self)
 			local state = itemDefs.getState(self)
 			local playerRef = Component.get('PLAYER')
+			if not playerRef then
+				return
+			end
 			local posX, posY = playerRef:getPosition()
 			local centerOffsetX, centerOffsetY = state.animation:getOffset()
 			local facingX, facingY = playerRef:getProp('facingDirectionX'),

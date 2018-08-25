@@ -29,11 +29,28 @@ function items.isItem(value)
 		and types[value.__type] ~= nil
 end
 
+local loadedTypes = {}
+local function requireIfNecessary(item)
+	local iType = item.__type
+	if (not loadedTypes[iType]) then
+		local errorFree, loadedItem = pcall(function()
+			local requirePath = 'components.item-inventory.items.definitions.'..iType
+			local module = require(requirePath)
+			return module
+		end)
+		loadedTypes[iType] = true
+		if (errorFree and loadedItem) then
+			return items.types[iType]
+		end
+	end
+	return nil
+end
+
 function items.getDefinition(item)
 	if not item then
 		return nil
 	end
-	return items.types[item.__type]
+	return items.types[item.__type] or requireIfNecessary(item)
 end
 
 local noop = function() end

@@ -17,15 +17,12 @@ retrieved in this module.
 local Stateful = require("utils.stateful")
 local config = require('config')
 local sc = require("components.state.constants")
-local itemConfig = require("components.item-inventory.items.config")
 local baseStatModifiers = require("components.state.base-stat-modifiers")
 
 local EMPTY_SLOT = sc.inventory.EMPTY_SLOT
 
-
-
 -- NOTE: This state is immutable, so we should keep the structure as flat as possible to avoid deep updates
-local initialState = {
+local defaultState = {
 	level = 1,
 	totalExperience = 0,
 	enemyKillCount = 0,
@@ -51,9 +48,9 @@ local initialState = {
 	activeMenu = false,
 }
 
-local function createStore(options)
+local function createStore(initialState, options)
 	return Stateful:new(
-		initialState,
+		(initialState or defaultState),
 		options
 	)
 end

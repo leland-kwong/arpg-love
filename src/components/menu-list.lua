@@ -12,7 +12,12 @@ local MenuList = {
   y = 0,
   group = groups.gui,
   -- table of menu options
-  options = {},
+  options = {
+    {
+      name = '', -- [STRING]
+      value = {} -- [ANY]
+    }
+  },
   onSelect = nil
 }
 
@@ -28,7 +33,7 @@ function MenuList.init(self)
   local menuX = self.x
   local menuY = self.y
   local startYOffset = 10
-  local menuWidth = math.max(
+  local menuWidth = self.width or math.max(
     unpack(
       f.map(self.options, function(option)
         return GuiText.getTextSize(option.name, itemFont)
