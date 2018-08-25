@@ -73,11 +73,14 @@ c1:delete(true)
 group.updateAll(dt)
 assert(c2:isDeleted(), 'child object should be deleted')
 
-
--- [[ test unique ids ]]
-local foobarFactory = Component.createFactory({
-  group = group,
-  id = 'foobar'
-})
-foobarFactory.create()
-assert(Component.get('foobar') ~= nil, 'failed to find by component by id')
+local testUniqueIds = (function()
+  -- [[ test unique ids ]]
+  local foobarFactory = Component.createFactory({
+    group = group,
+    id = 'foobar'
+  })
+  local foobar1 = foobarFactory.create()
+  local foobar2 = foobarFactory.create()
+  assert(foobar1:isDeleted(), 'first unique instance should be deleted since it has a duplicated id')
+  assert(Component.get('foobar') ~= nil, 'failed to find by component by id')
+end)()

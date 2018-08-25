@@ -37,8 +37,8 @@ local baseProps = {
       if parent:isDeleted() then
         if parent._deleteRecursive then
           self:delete(true)
-          -- remove parent reference after deletion since the component may
-          -- be accessing its parent in the `final` method
+        --   -- remove parent reference after deletion since the component may
+        --   -- be accessing its parent in the `final` method
           self:setParent(nil)
           return
         else
@@ -156,8 +156,10 @@ function M.createFactory(blueprint)
 
   function blueprint:delete(recursive)
     self.group.delete(self)
-    self._deleteRecursive = recursive
+    self._deleteRecursive = recursive or
+      (self.parent and self.parent.__deleteRecursive)
     cleanupCollisionObjects(self)
+    self._deleted = true
     return self
   end
 
@@ -175,7 +177,7 @@ function M.createFactory(blueprint)
   end
 
   function blueprint:isDeleted()
-    return not self.group.hasComponent(self)
+    return self._deleted
   end
 
   -- default methods
@@ -233,6 +235,15 @@ function M.newGroup(groupDefinition)
   function Group.addComponent(component)
     count = count + 1
     local id = component:getId()
+
+    local currentComponent = allComponentsById[id]
+    -- its a duplicate component if they share the same id
+    local isDuplicateComponent = currentComponent ~= nil
+    -- dereference the current instance by deleting it
+    if isDuplicateComponent then
+      currentComponent:delete()
+    end
+
     allComponentsById[id] = component
     componentsById[id] = component
   end
