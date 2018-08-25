@@ -18,6 +18,7 @@ function M.boundingBox(mode, x, y, w, h, center)
       w,
       h
     )
+    love.graphics.setColor(1,1,0)
     love.graphics.circle(
       'fill',
       x,
