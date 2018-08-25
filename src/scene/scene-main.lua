@@ -92,6 +92,7 @@ local function generateAi(parent, player, map)
 end
 
 function MainScene.init(self)
+  msgBus.send(msgBus.NEW_GAME)
   local rootState = CreateStore()
   if self.initialGameState then
     for k,v in pairs(self.initialGameState) do
@@ -124,6 +125,10 @@ function MainScene.init(self)
   msgBus.subscribe(function(msgType, msgValue)
     if self:isDeleted() then
       return msgBus.CLEANUP
+    end
+
+    if msgBus.NEW_GAME == msgType then
+      self:delete(true)
     end
 
     if msgBus.EQUIPMENT_CHANGE == msgType then

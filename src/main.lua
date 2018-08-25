@@ -14,23 +14,13 @@ local groups = require 'components.groups'
 local config = require 'config'
 local camera = require 'components.camera'
 local SceneMain = require 'scene.scene-main'
+local RootScene = require 'scene.sandbox.main'
 local tick = require 'utils.tick'
 
 local scale = config.scaleFactor
 
-local scenes = {
-  main = SceneMain,
-  -- When in production, this module will not get loaded since it will not exist
-  sandbox = (function()
-    local scene = love.filesystem.load('scene/sandbox/main.lua')
-    if scene then
-      return scene()
-    end
-  end)()
-}
-
 local globalState = {
-  activeScene = scenes.sandbox,
+  activeScene = nil,
 }
 
 function love.load()
@@ -42,11 +32,21 @@ function love.load()
   camera
     :setSize(vw, vh)
     :setScale(scale)
-  globalState.activeScene.create()
+
+  RootScene.create()
 
   -- console debugging
   local console = Console.create()
   require 'components.profiler.component-groups'(console)
+
+  msgBusMainMenu.subscribe(function(msgType, nextScene)
+    if msgBusMainMenu.SCENE_SWITCH == msgType then
+      if globalState.activeScene then
+        globalState.activeScene:delete(true)
+      end
+      globalState.activeScene = nextScene.scene.create(nextScene.props)
+    end
+  end)
 end
 
 function love.update(dt)

@@ -76,6 +76,9 @@ local Player = {
       })
     }
 
+    -- set default animation since its needed in the draw method
+    self.animation = self.animations.idle
+
     local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
     self.outlineColor = {1,1,1,1}
     self.shader = love.graphics.newShader(pixelOutlineShader)

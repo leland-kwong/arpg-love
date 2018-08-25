@@ -5,7 +5,6 @@ local font = require 'components.font'
 local MenuList = require 'components.menu-list'
 local Component = require 'modules.component'
 local groups = require 'components.groups'
-local msgBus = require 'components.msg-bus'
 local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local config = require 'config'
 local objectUtils = require 'utils.object-utils'
@@ -47,10 +46,7 @@ local function loadScene(name, path)
     return
   end
   local scene = require(path)
-  if loadedScene then
-    loadedScene:delete(true)
-  end
-  loadedScene = scene.create()
+  msgBusMainMenu.send(msgBusMainMenu.SCENE_SWITCH, { scene = scene })
   setState({
     activeScene = name,
     activeScenePath = path
@@ -94,6 +90,10 @@ end
 
 local sceneOptions = {
   menuOptionSceneLoad(
+    'main game home screen',
+    'scene.sandbox.main-game.main-game-home'
+  ),
+  menuOptionSceneLoad(
     'main game',
     'scene.sandbox.main-game.main-game-test'
   ),
@@ -133,7 +133,6 @@ function Sandbox.init(self)
         y = menuY,
         options = sceneOptions,
         onSelect = function(name, value)
-          msgBus.clearAll()
           DebugMenu(false)
           value()
         end,
