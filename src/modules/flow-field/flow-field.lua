@@ -69,27 +69,32 @@ local function visitNeighbors(grid, start, frontier, cameFromList, canVisit)
   addCellData(grid, x, y-1, start, frontier, cameFromList, canVisit)
 
 
+  local canWalkNorth = canVisit(grid, x, y-1, dist)
+  local canWalkEast = canVisit(grid, x, y-1, dist)
+  local canWalkSouth = canVisit(grid, x, y+1, dist)
+  local canWalkWest = canVisit(grid, x-1, y, dist)
+
   --[[
     NOTE: these `canVisit` checks are here to prevent diagonal movements from
     cutting into corner walls.
   ]]
   -- north-east
-  if canVisit(grid, x, y-1, dist) and canVisit(grid, x+1, y, dist) then
+  if (canWalkNorth and canWalkEast) then
     addCellData(grid, x+1, y-1, start, frontier, cameFromList, canVisit)
   end
 
   -- south-west
-  if canVisit(grid, x, y+1, dist) and canVisit(grid, x-1, y, dist) then
+  if (canWalkSouth and canWalkWest) then
     addCellData(grid, x-1, y+1, start, frontier, cameFromList, canVisit)
   end
 
   -- south-east
-  if canVisit(grid, x, y+1, dist) and canVisit(grid, x+1, y, dist) then
+  if (canWalkSouth and canWalkEast) then
     addCellData(grid, x+1, y+1, start, frontier, cameFromList, canVisit)
   end
 
   -- north-west
-  if canVisit(grid, x, y-1, dist) and canVisit(grid, x-1, y, dist) then
+  if (canWalkNorth and canWalkWest) then
     addCellData(grid, x-1, y-1, start, frontier, cameFromList, canVisit)
   end
 end

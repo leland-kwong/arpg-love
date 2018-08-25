@@ -7,37 +7,33 @@ local font = require 'components.font'
 local Color = require 'modules.color'
 local Position = require 'utils.position'
 
-local SandboxSceneSelection = {
-  x = 200,
-  y = 20,
+local MenuList = {
+  x = 0,
+  y = 0,
   group = groups.gui,
   -- table of menu options
-  options = {},
-  title = '',
+  options = {
+    {
+      name = '', -- [STRING]
+      value = {} -- [ANY]
+    }
+  },
   onSelect = nil
 }
 
 local itemFont = font.primary.font
-local titleFont = font.secondary.font
 local guiTextBodyLayer = GuiText.create({
   font = itemFont
 })
-local guiTextTitleLayer = GuiText.create({
-  font = titleFont
-})
 
-function SandboxSceneSelection.init(self)
-  assert(
-    type(self.title) == 'string' and #self.title > 0,
-    'title must be a string and have at least one character'
-  )
+function MenuList.init(self)
   assert(type(self.onSelect) == 'function', 'onSelect method required')
 
   local onSelect = self.onSelect
   local menuX = self.x
   local menuY = self.y
   local startYOffset = 10
-  local menuWidth = math.max(
+  local menuWidth = self.width or math.max(
     unpack(
       f.map(self.options, function(option)
         return GuiText.getTextSize(option.name, itemFont)
@@ -77,8 +73,4 @@ function SandboxSceneSelection.init(self)
   end)
 end
 
-function SandboxSceneSelection.draw(self)
-  guiTextTitleLayer:add(self.title, Color.WHITE, self.x, self.y)
-end
-
-return Component.createFactory(SandboxSceneSelection)
+return Component.createFactory(MenuList)

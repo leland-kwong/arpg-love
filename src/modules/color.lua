@@ -3,6 +3,7 @@ local function rgba255(r, g, b, a)
 end
 
 local Color = {
+  PRIMARY = {rgba255(81, 234, 241)},
   SKY_BLUE = {0.8,1,1,1},
   LIME = {0,1,0},
   WHITE = {1,1,1,1},

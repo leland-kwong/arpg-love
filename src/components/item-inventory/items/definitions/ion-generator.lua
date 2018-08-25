@@ -24,7 +24,7 @@ local function statValue(stat, color, type)
 end
 
 return itemDefs.registerType({
-	type = "ION_GENERATOR",
+	type = "ion-generator",
 
 	create = function()
 		return {

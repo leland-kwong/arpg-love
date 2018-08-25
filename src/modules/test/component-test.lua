@@ -1,5 +1,22 @@
 local Component = require 'modules.component'
 
+local Test = {
+  tests = {}
+}
+
+function Test.suite(name, fn)
+  table.insert(Test.tests, {name, fn})
+end
+
+function Test.run()
+  local tests = Test.tests
+  for i=1, #tests do
+    local name, testFn = unpack(tests[i])
+    print('test '..name)
+    testFn()
+  end
+end
+
 local group = Component.newGroup()
 local calls = {}
 
@@ -58,23 +75,37 @@ assert(calls.draw[1][1] == props)
 assert(#calls.final == 1)
 assert(calls.final[1][1] == props)
 
--- new test group
-local blueprint2 = {
-  group = group
-}
-local factory = Component.createFactory(blueprint2)
-local c1 = factory.create({
-  id = 'foobar'
-})
-local c2 = factory.create():setParent(c1)
+Test.suite('recursiveDeleteTest', function()
+  -- new test group
+  local blueprint2 = {
+    group = group
+  }
+  local factory = Component.createFactory(blueprint2)
+  local c1 = factory.create()
+  local c2 = factory.create():setParent(c1)
+  c1:delete(true)
+  assert(c2:isDeleted(), 'child object should be deleted')
+end)
 
-assert(Component.get('foobar') ~= nil, 'failed to find by component by id')
+Test.suite('nonRecursiveDeleteTest', function()
+  local blueprint2 = {
+    group = group
+  }
+  local factory = Component.createFactory(blueprint2)
+  local c1 = factory.create()
+  local c2 = factory.create():setParent(c1)
+  c1:delete()
+  assert(not c2:isDeleted(), 'non-recursive deletes should not delete their children')
+end)
 
-c1:delete(true)
---[[
-  run an update since parented components won't clean themselves up until
-  the next frame
-]]
-group.updateAll(dt)
+Test.suite('testUniqueIds', function()
+  -- [[ test unique ids ]]
+  local foobarFactory = Component.createFactory({
+    group = group,
+    id = 'foobar'
+  })
+  local foobar1 = foobarFactory.create()
+  assert(Component.get('foobar') ~= nil, 'failed to find by component by id')
+end)
 
-assert(c2:isDeleted(), 'child object should be deleted')
+Test.run()

@@ -23,7 +23,7 @@ local function statValue(stat, color, type)
 end
 
 return itemDefs.registerType({
-	type = "GPOW",
+	type = "gpow-armor",
 
 	create = function()
 		return {

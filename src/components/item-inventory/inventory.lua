@@ -78,11 +78,6 @@ function InventoryBlueprint.init(self)
       love.audio.stop(Sound.INVENTORY_DROP)
       love.audio.play(Sound.INVENTORY_DROP)
     end
-
-    if msgBus.EQUIPMENT_CHANGE == msgType then
-      local equipmentChangeHandler = require'components.item-inventory.equipment-change-handler'
-      equipmentChangeHandler(rootStore)
-    end
 	end)
 
   self.slotSize = 30

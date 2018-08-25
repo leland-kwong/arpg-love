@@ -174,4 +174,8 @@ function Stateful:unsubscribe(token)
 	self.subscribers[token] = nil
 end
 
+function Stateful:getId()
+	return self[__state].__stateId
+end
+
 return Stateful

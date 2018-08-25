@@ -23,5 +23,6 @@ if config.isDebug then
 end
 
 M.TOGGLE_MAIN_MENU = 'TOGGLE_MAIN_MENU'
+M.SCENE_SWITCH = 'SCENE_SWITCH'
 
 return M

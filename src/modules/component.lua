@@ -34,18 +34,6 @@ local baseProps = {
   _update = function(self, dt)
     local parent = self.parent
     if parent then
-      if parent:isDeleted() then
-        if parent._deleteRecursive then
-          self:delete(true)
-          -- remove parent reference after deletion since the component may
-          -- be accessing its parent in the `final` method
-          self:setParent(nil)
-          return
-        else
-          self:setParent(nil)
-        end
-      end
-
       -- update position relative to its parent
       local dx, dy =
         self.prevParentX and (parent.x - self.prevParentX) or 0,
@@ -56,7 +44,7 @@ local baseProps = {
     end
     self:update(dt)
   end,
-  _isComponent = true
+  _isComponent = true,
 }
 
 local function cleanupCollisionObjects(self)
@@ -74,9 +62,18 @@ end
 ]]
 local invalidPropsErrorMsg = 'props cannot be a component object'
 
+local uniqueIds = {}
+
 function M.createFactory(blueprint)
-  tc.validate(blueprint.getInitialProps, tc.FUNCTION, false)
-  assert(blueprint.id == nil, 'blueprints should not have an id. Instead, pass the id in as a prop, or let the system automatically generate an id')
+  if blueprint.id then
+    local isUniqueId = not uniqueIds[blueprint.id]
+    assert(
+      isUniqueId,
+      'Duplicate id '..blueprint.id..'. Fixed ids must be unique amongst all factories'
+    )
+    -- add id to list of unique ids
+    uniqueIds[blueprint.id] = true
+  end
 
   function blueprint.create(props)
     local c = (props or {})
@@ -85,17 +82,17 @@ function M.createFactory(blueprint)
       invalidPropsErrorMsg
     )
 
-    local id = c.id or uid()
-
-    local isUnique = allComponentsById[id] == nil
-    assert(isUnique, 'duplicate component id')
-
+    local id = blueprint.id or uid()
     c._id = id
+
     setmetatable(c, blueprint)
     blueprint.__index = blueprint
 
     -- type check
     if isDebug then
+      if (props and props.id) then
+        assert(uniqueIds[props.id], 'unique ids must be registered in the factory')
+      end
       assert(c.group ~= nil, 'a default `group` must be provided')
       tc.validate(c.x, tc.NUMBER, false) -- x-axis position
       tc.validate(c.y, tc.NUMBER, false) -- y-axis position
@@ -123,6 +120,10 @@ function M.createFactory(blueprint)
   ]]
   function blueprint:setParent(parent)
     self.parent = parent
+
+    parent._children = parent._children or {}
+    -- add self as child to its parent
+    parent._children[#parent._children + 1] = self
     return self
   end
 
@@ -146,9 +147,21 @@ function M.createFactory(blueprint)
   end
 
   function blueprint:delete(recursive)
+    if self._deleted then
+      return
+    end
+
+    local children = self._children
+    if (recursive and children) then
+      for i=1, #children do
+        children[i]:delete(true)
+      end
+      self._children = nil
+    end
+
     self.group.delete(self)
-    self._deleteRecursive = recursive
     cleanupCollisionObjects(self)
+    self._deleted = true
     return self
   end
 
@@ -166,7 +179,7 @@ function M.createFactory(blueprint)
   end
 
   function blueprint:isDeleted()
-    return not self.group.hasComponent(self)
+    return self._deleted
   end
 
   -- default methods
@@ -204,6 +217,7 @@ function M.newGroup(groupDefinition)
     for id,c in pairs(componentsById) do
       c:_update(dt)
     end
+
     return Group
   end
 
@@ -223,6 +237,7 @@ function M.newGroup(groupDefinition)
   function Group.addComponent(component)
     count = count + 1
     local id = component:getId()
+
     allComponentsById[id] = component
     componentsById[id] = component
   end

@@ -41,11 +41,13 @@ local function collisionFilter(item, other)
 end
 
 local Player = {
+  id = 'PLAYER',
   group = groups.all,
   x = startPos.x,
   y = startPos.y,
   pickupRadius = 5 * config.gridSize,
   speed = 100,
+  flowFieldDistance = 40,
 
   -- collision properties
   type = 'player',
@@ -75,6 +77,9 @@ local Player = {
       })
     }
 
+    -- set default animation since its needed in the draw method
+    self.animation = self.animations.idle
+
     local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
     self.outlineColor = {1,1,1,1}
     self.shader = love.graphics.newShader(pixelOutlineShader)
@@ -91,17 +96,10 @@ local Player = {
       self.h
     ):addToWorld(colMap)
 
-    local gridRowsCols = memoize(function(grid)
-      return #grid, #grid[1]
-    end)
-    local function isOutOfBounds(grid, x, y)
-      local rows, cols = gridRowsCols(grid)
-      return y < 1 or x < 1 or y > rows or x > cols
-    end
     self.isGridCellVisitable = function(grid, x, y, dist)
-      return not isOutOfBounds(grid, x, y) and
-        grid[y][x] == Map.WALKABLE and
-        dist < 20
+      local row = grid[y]
+      local cell = row and row[x]
+      return (cell == Map.WALKABLE) and (dist < self.flowFieldDistance)
     end
 
     local calcDist = require'utils.math'.dist
@@ -302,12 +300,12 @@ function Player.update(self, dt)
 
   local gridX, gridY = Position.pixelsToGrid(self.x, self.y, config.gridSize)
   local dist = getDist(self.prevGridX or 0, self.prevGridY or 0, gridX, gridY)
-  local shouldUpdateFlowField = dist >= 2
+  local shouldUpdateFlowField = dist >= 4
   if shouldUpdateFlowField and self.mapGrid then
     local flowField, callCount = Flowfield(self.mapGrid, gridX, gridY, self.isGridCellVisitable)
-    msgBus.send(msgBus.NEW_FLOWFIELD, {
-      flowField = flowField
-    })
+    self.flowFieldMessage = self.flowFieldMessage or {}
+    self.flowFieldMessage.flowField = flowField
+    msgBus.send(msgBus.NEW_FLOWFIELD, self.flowFieldMessage)
     self.prevGridX = gridX
     self.prevGridY = gridY
   end

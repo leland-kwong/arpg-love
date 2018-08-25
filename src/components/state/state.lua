@@ -15,45 +15,48 @@ retrieved in this module.
 ]]--
 
 local Stateful = require("utils.stateful")
+local uid = require 'utils.uid'
 local config = require('config')
 local sc = require("components.state.constants")
-local itemConfig = require("components.item-inventory.items.config")
 local baseStatModifiers = require("components.state.base-stat-modifiers")
 
 local EMPTY_SLOT = sc.inventory.EMPTY_SLOT
 
-
-
 -- NOTE: This state is immutable, so we should keep the structure as flat as possible to avoid deep updates
-local initialState = {
-	level = 1,
-	totalExperience = 0,
-	enemyKillCount = 0,
+local function defaultState()
+	return {
+		__stateId = 'game-'..uid(),
+		playerName = '',
 
-	--[[ base player stats ]]
-	health = 200,
-	maxHealth = 200,
+		level = 1,
+		totalExperience = 0,
+		enemyKillCount = 0,
 
-	--[[ static modifiers ]]
-	statModifiers = baseStatModifiers(),
+		--[[ base player stats ]]
+		health = 200,
+		maxHealth = 200,
 
-	--[[ buffs, debuffs, auras, ailments ]]
-	statusEffects = {},
+		--[[ static modifiers ]]
+		statModifiers = baseStatModifiers(),
 
-	inventory = require'utils.make-grid'(11, 9, EMPTY_SLOT),
+		--[[ buffs, debuffs, auras, ailments ]]
+		statusEffects = {},
 
-	--[[ equipped items ]]
-	equipment = require'utils.make-grid'(2, 5, EMPTY_SLOT),
+		inventory = require'utils.make-grid'(11, 9, EMPTY_SLOT),
 
-	--[[ game settings ]]
-	music = false,
-	-- curently active menu panel
-	activeMenu = false,
-}
+		--[[ equipped items ]]
+		equipment = require'utils.make-grid'(2, 5, EMPTY_SLOT),
 
-local function createStore(options)
+		--[[ game settings ]]
+		music = false,
+		-- curently active menu panel
+		activeMenu = false,
+	}
+end
+
+local function createStore(initialState, options)
 	return Stateful:new(
-		initialState,
+		(initialState or defaultState()),
 		options
 	)
 end

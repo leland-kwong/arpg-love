@@ -7,6 +7,8 @@ local collisionWorlds = require 'components.collision-worlds'
 local collisionObject = require 'modules.collision'
 local gameWorld = require 'components.game-world'
 local Position = require 'utils.position'
+local Gui = require 'components.gui.gui'
+local tween = require 'modules.tween'
 
 local colMap = collisionWorlds.map
 
@@ -25,6 +27,71 @@ local function colFilter(item, other)
   return 'touch'
 end
 
+local function impactCollisionFilter(item)
+  return item.group == 'ai'
+end
+
+local ImpactAnimation = Component.createFactory({
+  x = 0,
+  y = 0,
+  w = 0,
+  h = 0,
+  endState = {w = 0},
+  color = {1,0.7,0,0.15},
+  group = groups.all,
+  init = function(self)
+    -- shrinks the impact animation over time
+    self.tween = tween.new(0.2, self, self.endState, tween.easing.inExpo)
+  end,
+  update = function(self, dt)
+    local done = self.tween:update(dt)
+
+    if done then
+      self:delete()
+    end
+  end,
+  draw = function(self)
+    love.graphics.setColor(self.color)
+    love.graphics.circle(
+      'fill',
+      self.x,
+      self.y,
+      self.w
+    )
+  end,
+  drawOrder = function(self)
+    return self.group.drawOrder(self) + 30
+  end
+})
+
+local function handleImpact(self)
+  local width, height = self.w * 4, self.h * 4
+  local collisionX, collisionY = self.x - width/2, self.y - height/2
+  local parentX, parentY = self.x, self.y
+  local items, len = collisionWorlds.map:queryRect(
+    collisionX,
+    collisionY,
+    width,
+    height,
+    impactCollisionFilter
+  )
+
+  for i=1, len do
+    local it = items[i]
+    msgBus.send(msgBus.CHARACTER_HIT, {
+      parent = it.parent,
+      damage = math.random(self.minDamage, self.maxDamage)
+    })
+  end
+
+  ImpactAnimation.create({
+    x = parentX,
+    y = parentY,
+    w = width/2,
+    h = height/2
+  })
+end
+
 local Fireball = {
   group = groups.all,
   -- DEFAULTS
@@ -32,7 +99,7 @@ local Fireball = {
   maxDamage = 3,
   scale = 1,
   maxLifeTime = 2,
-  speed = 500,
+  speed = 400,
   weaponDamageScaling = 1.2,
   cooldown = 0.15,
   animation = { 'fireball' },
@@ -68,10 +135,7 @@ local Fireball = {
         for i=1, len do
           local col = cols[i]
           if col.other.group == 'ai' then
-            msgBus.send(msgBus.CHARACTER_HIT, {
-              parent = col.other.parent,
-              damage = math.random(self.minDamage, self.maxDamage)
-            })
+            handleImpact(self)
           end
         end
       end
@@ -113,7 +177,15 @@ local Fireball = {
 
     if config.collisionDebug then
       local debug = require 'modules.debug'
-      debug.boundingBox('fill', self.x, self.y, self.w, self.h)
+      local c = self.aoeCollision
+      debug.boundingBox(
+        'fill',
+        c.x - c.ox,
+        c.y - c.oy,
+        c.w,
+        c.h,
+        false
+      )
     end
   end,
 

@@ -31,9 +31,8 @@ local function isOutOfBounds(grid, x, y)
 end
 
 local function isGridCellVisitable(grid, x, y, dist)
-  return not isOutOfBounds(grid, x, y) and
-    grid[y][x] == WALKABLE and
-    dist < 15
+  return grid[y][x] == WALKABLE and
+    dist < 40
 end
 
 -- returns grid units relative to the ui

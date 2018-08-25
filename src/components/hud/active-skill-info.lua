@@ -20,7 +20,7 @@ local function ActiveConsumableHandler()
   function skill.set(item)
     local isDifferentSkill = item ~= activeItem
     -- reset cooldown
-    if isDifferentSkill then
+    if (item and isDifferentSkill) then
       curCooldown = 0
     end
     activeItem = item
@@ -31,6 +31,9 @@ local function ActiveConsumableHandler()
       return skill
     else
       local activateFn = itemDefinitions.getDefinition(activeItem).onActivateWhenEquipped
+      if not activateFn then
+        return skill
+      end
       local instance = activateFn(activeItem)
       curCooldown = instance.cooldown
       skillCooldown = instance.cooldown
@@ -67,6 +70,7 @@ local function ActiveEquipmentHandler()
   local skillCooldown = 0
   local activeItem = nil
   local skill = {}
+  local itemDefinitions = require("components.item-inventory.items.item-definitions")
 
   local floor = math.floor
   local function modifyAbility(instance, modifiers)
@@ -90,7 +94,7 @@ local function ActiveEquipmentHandler()
   function skill.set(item)
     local isDifferentSkill = item ~= activeItem
     -- reset cooldown
-    if isDifferentSkill then
+    if (item and isDifferentSkill) then
       curCooldown = 0
     end
     activeItem = item
@@ -100,7 +104,6 @@ local function ActiveEquipmentHandler()
     if (not activeItem) or curCooldown > 0 then
       return skill
     else
-      local itemDefinitions = require("components.item-inventory.items.item-definitions")
       local activateFn = itemDefinitions.getDefinition(activeItem).onActivateWhenEquipped
       if (not activateFn) then
         return skill
@@ -133,7 +136,7 @@ local function ActiveEquipmentHandler()
 
   function skill.draw(self)
     if (not activeItem) then
-      return
+      return skill
     end
     local itemDefinitions = require("components.item-inventory.items.item-definitions")
     local renderFn = itemDefinitions.getDefinition(activeItem).render
@@ -145,21 +148,11 @@ local function ActiveEquipmentHandler()
   return skill
 end
 
-local skillHandlers = {
-  SKILL_1 = ActiveEquipmentHandler(),
-  SKILL_2 = ActiveEquipmentHandler(),
-  SKILL_3 = ActiveEquipmentHandler(),
-  SKILL_4 = ActiveEquipmentHandler(),
-
-  ACTIVE_ITEM_1 = ActiveConsumableHandler(),
-  ACTIVE_ITEM_2 = ActiveConsumableHandler()
-}
-
 -- sets the new ability if it has changed and also updates the cooldown
 local function updateAbilities(self, dt)
   local item = self.rootStore:get().equipment[self.slotY][self.slotX]
-  skillHandlers[self.skillId].set(item)
-  skillHandlers[self.skillId].updateCooldown(dt)
+  self.skillHandlers[self.skillId].set(item)
+  self.skillHandlers[self.skillId].updateCooldown(dt)
 end
 
 local ActiveSkillInfo = {
@@ -180,9 +173,19 @@ local ItemRender = {
 Component.createFactory(ItemRender)
 
 function ActiveSkillInfo.init(self)
+  self.skillHandlers = {
+    SKILL_1 = ActiveEquipmentHandler(),
+    SKILL_2 = ActiveEquipmentHandler(),
+    SKILL_3 = ActiveEquipmentHandler(),
+    SKILL_4 = ActiveEquipmentHandler(),
+
+    ACTIVE_ITEM_1 = ActiveConsumableHandler(),
+    ACTIVE_ITEM_2 = ActiveConsumableHandler()
+  }
+
   local parent = self
   assert(self.skillId ~= nil, '[HUD activeItem] skillId is required')
-  assert(skillHandlers[self.skillId] ~= nil, '[HUD activeItem] `skillId`'..self.skillId..' is not defined')
+  assert(self.skillHandlers[self.skillId] ~= nil, '[HUD activeItem] `skillId`'..self.skillId..' is not defined')
   assert(self.player ~= nil, '[HUD activeItem] property `player` is required')
   assert(self.rootStore ~= nil, '[HUD activeItem] property `rootStore` is required')
 
@@ -192,7 +195,7 @@ function ActiveSkillInfo.init(self)
     end
 
     if msgBus.PLAYER_USE_SKILL == msgType and value == self.skillId then
-      skillHandlers[self.skillId].use(self)
+      self.skillHandlers[self.skillId].use(self)
     end
   end)
 
@@ -200,10 +203,13 @@ function ActiveSkillInfo.init(self)
   self.itemRender = ItemRender.create({
     draw = function()
       love.graphics.setColor(1,1,1)
-      skillHandlers[parent.skillId].draw(parent)
+      self.skillHandlers[parent.skillId].draw(parent)
     end,
     drawOrder = function(self)
       return self.group.drawOrder(self) + 3
+    end,
+    final = function()
+      consoleLog('item render deleted')
     end
   }):setPosition(playerRef:getPosition())
     :setParent(playerRef)
@@ -244,7 +250,7 @@ function ActiveSkillInfo.draw(self)
   if activeItem then
     drawItem(activeItem, self.x, self.y, boxSize)
 
-    local cooldown, skillCooldown = skillHandlers[self.skillId].getStats()
+    local cooldown, skillCooldown = self.skillHandlers[self.skillId].getStats()
     local progress = (skillCooldown - cooldown) / skillCooldown
     local offsetY = progress * boxSize
     love.graphics.setColor(1,1,1,0.2)
