@@ -7,7 +7,6 @@ local functional = require("utils.functional")
 local AnimationFactory = require 'components.animation-factory'
 local setProp = require 'utils.set-prop'
 
-local baseDamage = 2
 local bulletColor = {Color.rgba255(252, 122, 255)}
 
 local function statValue(stat, color, type)
@@ -35,14 +34,14 @@ return itemDefs.registerType({
 			maxStackSize = 1,
 
 			-- static properties
-			weaponDamage = baseDamage
+			weaponDamage = 1
 		}
 	end,
 
 	properties = {
 		sprite = "pod-one",
 		title = 'Pod One',
-		rarity = config.rarity.LEGENDARY,
+		rarity = config.rarity.NORMAL,
 		category = config.category.WEAPON_1,
 
 		onEquip = function(self)
@@ -72,6 +71,8 @@ return itemDefs.registerType({
 			local Projectile = require 'components.abilities.bullet'
 			return Projectile.create(
 				setProp(props)
+					:set('minDamage', 1)
+					:set('maxDamage', 3)
 					:set('color', bulletColor)
 					:set('targetGroup', 'ai')
 					:set('speed', 400)
@@ -93,7 +94,7 @@ return itemDefs.registerType({
 		render = function(self)
 			local state = itemDefs.getState(self)
 			local playerRef = Component.get('PLAYER')
-			if not playerRef then
+			if (not playerRef) then
 				return
 			end
 			local posX, posY = playerRef:getPosition()

@@ -94,14 +94,21 @@ end
 function MainScene.init(self)
   msgBus.send(msgBus.NEW_GAME)
   local rootState = CreateStore()
+  local inventoryController = InventoryController(rootState)
   if self.initialGameState then
     for k,v in pairs(self.initialGameState) do
       rootState:set(k, v)
     end
+    -- setup defaults
+  else
+    local defaultWeapon = require'components.item-inventory.items.definitions.pod-one'
+    local canEquip, errorMsg = rootState:equipItem(defaultWeapon.create(), 1, 3)
+    if not canEquip then
+      error(errorMsg)
+    end
   end
 
   self.rootStore = rootState
-  local inventoryController = InventoryController(rootState)
   local parent = self
 
   local map = Map.createAdjacentRooms(6, 20)
@@ -114,13 +121,6 @@ function MainScene.init(self)
     mapGrid = map.grid,
     rootStore = rootState
   }):setParent(parent)
-
-  Hud.create({
-    player = player,
-    rootStore = rootState
-  }):setParent(parent)
-
-  generateAi(parent, player, map)
 
   msgBus.subscribe(function(msgType, msgValue)
     if self:isDeleted() then
@@ -203,6 +203,13 @@ function MainScene.init(self)
 
   -- trigger equipment change for items that were previously equipped from loading the state
   msgBus.send(msgBus.EQUIPMENT_CHANGE)
+
+  Hud.create({
+    player = player,
+    rootStore = rootState
+  }):setParent(parent)
+
+  generateAi(parent, player, map)
 
   self.autoSave = tick.recur(function()
     fileSystem.saveFile(

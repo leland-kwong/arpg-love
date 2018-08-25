@@ -94,7 +94,7 @@ local sceneOptions = {
     'scene.sandbox.main-game.main-game-home'
   ),
   menuOptionSceneLoad(
-    'main game',
+    'main game sandbox',
     'scene.sandbox.main-game.main-game-test'
   ),
   menuOptionSceneLoad(

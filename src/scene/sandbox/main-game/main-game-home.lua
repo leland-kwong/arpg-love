@@ -2,6 +2,7 @@ local Component = require 'modules.component'
 local fileSystem = require 'modules.file-system'
 local Color = require 'modules.color'
 local f = require 'utils.functional'
+local Gui = require 'components.gui.gui'
 local GuiText = require 'components.gui.gui-text'
 local MenuList = require 'components.menu-list'
 local groups = require 'components.groups'
@@ -16,10 +17,46 @@ local MainGameHomeScene = {
   menuY = 40
 }
 
+local function NewGameButton(parent)
+  local w, h = GuiText.getTextSize('New Game', parent.guiTextButtonLayer.font)
+  local padding = 10
+  local actualW, actualH = w + padding, h + padding
+  return Gui.create({
+    x = parent.menuX,
+    y = parent.menuY + 150,
+    w = actualW,
+    h = actualH,
+    type = Gui.types.BUTTON,
+    onClick = function(self)
+      msgBusMainMenu.send(
+        msgBusMainMenu.SCENE_SWITCH,
+        {
+          scene = SceneMain
+        }
+      )
+      parent:delete(true)
+    end,
+    draw = function(self)
+      love.graphics.setColor(Color.PRIMARY)
+      love.graphics.rectangle(
+        'fill',
+        self.x,
+        self.y,
+        self.w,
+        self.h
+      )
+      parent.guiTextButtonLayer:add('New game', Color.WHITE, self.x + padding/2, self.y + padding/2)
+    end
+  }):setParent(parent)
+end
+
 function MainGameHomeScene.init(self)
   local parent = self
   self.guiTextTitleLayer = GuiText.create({
     font = require 'components.font'.secondaryLarge.font
+  }):setParent(self)
+  self.guiTextButtonLayer = GuiText.create({
+    font = require 'components.font'.secondary.font
   }):setParent(self)
 
   MenuList.create({
@@ -47,6 +84,8 @@ function MainGameHomeScene.init(self)
       value()
     end
   }):setParent(parent)
+
+  NewGameButton(parent)
 end
 
 function MainGameHomeScene.draw(self)

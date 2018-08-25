@@ -15,6 +15,7 @@ retrieved in this module.
 ]]--
 
 local Stateful = require("utils.stateful")
+local uid = require 'utils.uid'
 local config = require('config')
 local sc = require("components.state.constants")
 local baseStatModifiers = require("components.state.base-stat-modifiers")
@@ -24,6 +25,7 @@ local EMPTY_SLOT = sc.inventory.EMPTY_SLOT
 -- NOTE: This state is immutable, so we should keep the structure as flat as possible to avoid deep updates
 local function defaultState()
 	return {
+		__stateId = 'game-'..uid(),
 		playerName = '',
 
 		level = 1,
