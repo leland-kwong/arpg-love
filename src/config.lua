@@ -48,4 +48,6 @@ M.resolution = {
   h = 360 * 1.5
 }
 
+M.gameTitle = 'Citizen of Nowhere'
+
 return M
