@@ -20,21 +20,26 @@ local tick = require 'utils.tick'
 local gridTileTypes = {
   -- unwalkable
   [0] = {
-    'wall',
+    'wall-1',
     'wall-2',
-    'wall-3'
+    'wall-3',
+    'wall-3',
+    'wall-4',
+    'wall-4',
+    'wall-4',
+    'wall-4',
+    'wall-5',
+    'wall-6'
   },
   -- walkable
   [1] = {
     'floor-1',
     'floor-1',
-    'floor-1',
-    'floor-1',
-    'floor-1',
-    'floor-1',
-    'floor-1',
     'floor-2',
-    'floor-3'
+    'floor-3',
+    'floor-4',
+    'floor-4',
+    'floor-4'
   }
 }
 
@@ -73,14 +78,16 @@ love.mouse.setCursor(cursor)
 local function generateAi(parent, player, map)
   local aiCount = 60
   local generated = 0
-  local minPos, maxPos = 10, 60
+  local grid = map.grid
+  local rows, cols = #grid, #grid[1]
+  local minPos, maxPos = 10, cols
   while generated < aiCount do
     local posX, posY = math.random(minPos, maxPos), math.random(minPos, maxPos)
-    local isValidPosition = map.grid[posY][posX] == Map.WALKABLE
+    local isValidPosition = grid[posY][posX] == Map.WALKABLE
     if isValidPosition then
       generated = generated + 1
       SpawnerAi.create({
-        grid = map.grid,
+        grid = grid,
         WALKABLE = Map.WALKABLE,
         target = player,
         x = posX,
