@@ -101,24 +101,19 @@ function Hud.init(self)
 
   local skillSetup = {
     {
-      skillId = 'ACTIVE_ITEM_1',
-      slotX = 1,
-      slotY = 5
-    },
-    {
       skillId = 'ACTIVE_ITEM_2',
       slotX = 2,
       slotY = 5
     },
     {
-      skillId = 'SKILL_1',
+      skillId = 'ACTIVE_ITEM_1',
       slotX = 1,
-      slotY = 3
+      slotY = 5
     },
     {
-      skillId = 'SKILL_2',
+      skillId = 'SKILL_4',
       slotX = 2,
-      slotY = 3
+      slotY = 2
     },
     {
       skillId = 'SKILL_3',
@@ -126,10 +121,15 @@ function Hud.init(self)
       slotY = 2
     },
     {
-      skillId = 'SKILL_4',
+      skillId = 'SKILL_2',
       slotX = 2,
-      slotY = 2
-    }
+      slotY = 3
+    },
+    {
+      skillId = 'SKILL_1',
+      slotX = 1,
+      slotY = 3
+    },
   }
 
   for i=1, #skillSetup do
