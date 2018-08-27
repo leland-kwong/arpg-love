@@ -29,19 +29,10 @@ local function insertTestItems(rootStore)
     require(itemsPath..'.gpow-armor').create()
     , {5, 2})
   rootStore:addItemToInventory(
-    require(itemsPath..'.potion-health').create(),
-    {1, 1})
-  rootStore:addItemToInventory(
-    require(itemsPath..'.potion-health').create(),
-    {2, 1})
-  rootStore:addItemToInventory(
     require(itemsPath..'.ion-generator').create()
   )
   rootStore:addItemToInventory(
     require(itemsPath..'.ion-generator-2').create()
-  )
-  rootStore:addItemToInventory(
-    require(itemsPath..'.pod-one').create()
   )
 end
 

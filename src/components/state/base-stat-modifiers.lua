@@ -1,5 +1,5 @@
 local base = {
-	energyRegeneration = 2
+	energyRegeneration = 1
 }
 
 return function()

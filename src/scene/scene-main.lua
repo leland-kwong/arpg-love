@@ -169,6 +169,18 @@ function MainScene.init(self)
     if not canEquip then
       error(errorMsg)
     end
+
+    local defaultHealthPotion = require'components.item-inventory.items.definitions.potion-health'
+    local canEquip, errorMsg = rootState:equipItem(defaultHealthPotion.create(), 1, 5)
+    if not canEquip then
+      error(errorMsg)
+    end
+
+    local defaultEnergyPotion = require'components.item-inventory.items.definitions.potion-energy'
+    local canEquip, errorMsg = rootState:equipItem(defaultEnergyPotion.create(), 2, 5)
+    if not canEquip then
+      error(errorMsg)
+    end
   end
 
   self.rootStore = rootState
