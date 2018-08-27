@@ -60,6 +60,10 @@ return itemDefs.registerType({
 		rarity = config.rarity.LEGENDARY,
 		category = config.category.WEAPON_1,
 
+		energyCost = function(self)
+			return 2
+		end,
+
 		tooltip = function(self)
 			local _state = self.state
 			local stats = {

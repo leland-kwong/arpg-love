@@ -63,6 +63,16 @@ local Player = {
     self.dir = DIRECTION_RIGHT
     colMap:add(self, self.x, self.y, self.w, self.h)
 
+    local energyRegenerationDuration = 99999999
+    msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
+      source = 'BASE_ENERGY_REGENERATION',
+      amount = energyRegenerationDuration *
+        self.rootStore:get().statModifiers.energyRegeneration,
+      duration = energyRegenerationDuration,
+      property = 'energy',
+      maxProperty = 'maxEnergy'
+    })
+
     self.animations = {
       idle = animationFactory:new({
         'character-1',
@@ -267,10 +277,20 @@ local function handleAbilities(self, dt)
   end
 end
 
+local min = math.min
+
+local function updateStats(rootStore)
+  local state = rootStore:get()
+  local mods = state.statModifiers
+  rootStore:set('health', min(state.health, state.maxHealth + mods.maxHealth))
+  rootStore:set('energy', min(state.energy, state.maxEnergy + mods.maxEnergy))
+end
+
 function Player.update(self, dt)
   local nextX, nextY, totalMoveSpeed = handleMovement(self, dt)
   handleAnimation(self, dt, nextX, nextY, totalMoveSpeed)
   handleAbilities(self, dt)
+  updateStats(self.rootStore)
 
   -- dynamically get the current animation frame's height
   local sx, sy, sw, sh = self.animation.sprite:getViewport()

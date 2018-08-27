@@ -76,7 +76,6 @@ local function ActiveEquipmentHandler()
   local function modifyAbility(instance, modifiers)
     local v = instance
     local m = modifiers
-    local energyCost = v.energyCost
     local totalFlatWeaponDamage = m.weaponDamage
     local totalWeaponDmg = v.weaponDamageScaling * totalFlatWeaponDamage
     local dmgMultiplier = 1 + m.percentDamage
@@ -104,7 +103,16 @@ local function ActiveEquipmentHandler()
     if (not activeItem) or curCooldown > 0 then
       return skill
     else
-      local activateFn = itemDefinitions.getDefinition(activeItem).onActivateWhenEquipped
+      local definition = itemDefinitions.getDefinition(activeItem)
+      local activateFn = definition.onActivateWhenEquipped
+      local energyCost = definition.energyCost(activeItem)
+      local curState = self.rootStore:get()
+      local enoughEnergy = (energyCost == nil) or
+        (energyCost <= curState.energy)
+      if (not enoughEnergy) then
+        return skill
+      end
+
       if (not activateFn) then
         return skill
       end
@@ -117,10 +125,17 @@ local function ActiveEquipmentHandler()
           , x2 = mx
           , y2 = my
         }),
-        self.rootStore:get().statModifiers
+        curState.statModifiers
       )
       curCooldown = instance.cooldown
       skillCooldown = instance.cooldown
+
+      local actualEnergyCost = energyCost -
+        (energyCost * curState.statModifiers.energyCostReduction)
+      self.rootStore:set(
+        'energy',
+        curState.energy - actualEnergyCost
+      )
       return skill
     end
   end

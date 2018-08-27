@@ -83,6 +83,10 @@ local defaultProperties = {
 
 	-- item is unequipped, sold, or destroyed
 	final = noop,
+
+	energyCost = function()
+		return 0
+	end
 }
 
 -- setup methods so we can call them with the item

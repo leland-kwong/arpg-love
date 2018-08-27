@@ -155,6 +155,7 @@ end
 
 function MainScene.init(self)
   msgBus.send(msgBus.NEW_GAME)
+
   local rootState = CreateStore()
   local inventoryController = InventoryController(rootState)
   if self.initialGameState then
@@ -172,17 +173,11 @@ function MainScene.init(self)
 
   self.rootStore = rootState
   local parent = self
-
   local map = Map.createAdjacentRooms(6, 20)
   local gridTileDefinitions = cloneGrid(map.grid, function(v, x, y)
     local tileGroup = gridTileTypes[v]
     return tileGroup[math.random(1, #tileGroup)]
   end)
-
-  local player = Player.create({
-    mapGrid = map.grid,
-    rootStore = rootState
-  }):setParent(parent)
 
   msgBus.subscribe(function(msgType, msgValue)
     if self:isDeleted() then
@@ -249,6 +244,11 @@ function MainScene.init(self)
       rootState:set('statModifiers', newModifiers)
     end
   end)
+
+  local player = Player.create({
+    mapGrid = map.grid,
+    rootStore = rootState
+  }):setParent(parent)
 
   Minimap.create({
     camera = camera,

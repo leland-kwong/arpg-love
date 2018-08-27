@@ -44,6 +44,8 @@ return itemDefs.registerType({
 				amount = amount,
 				source = self.source,
 				duration = duration,
+				property = 'health',
+				maxProperty = 'maxHealth'
 			})
 		end,
 

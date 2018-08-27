@@ -74,7 +74,9 @@ M.PLAYER_HEAL_SOURCE_ADD = 'PLAYER_HEAL_SOURCE_ADD'
   {
     amount = NUMBER,
     source = STRING,
-    duration = NUMBER
+    duration = NUMBER,
+    property = STRING,
+    maxProperty = STRING
   }
 ]]
 

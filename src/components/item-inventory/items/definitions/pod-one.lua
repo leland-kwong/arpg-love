@@ -34,7 +34,7 @@ return itemDefs.registerType({
 			maxStackSize = 1,
 
 			-- static properties
-			weaponDamage = 1
+			weaponDamage = 1,
 		}
 	end,
 
@@ -43,6 +43,10 @@ return itemDefs.registerType({
 		title = 'Pod One',
 		rarity = config.rarity.NORMAL,
 		category = config.category.WEAPON_1,
+
+		energyCost = function(self)
+			return 1
+		end,
 
 		onEquip = function(self)
 			itemDefs.getState(self)

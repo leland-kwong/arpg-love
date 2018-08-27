@@ -4,6 +4,7 @@ local itemDefs = require("components.item-inventory.items.item-definitions")
 local Color = require('modules.color')
 local msgBus = require("components.msg-bus")
 local Sound = require 'components.sound'
+local socket = require 'socket'
 
 return itemDefs.registerType({
 	type = "potion-health",
@@ -16,7 +17,7 @@ return itemDefs.registerType({
 			minHeal = 80,
 			maxHeal = 100,
 			duration = 2,
-			source = 'HEALTH_POTION'
+			source = 'HEALTH_POTION_'..socket.gettime()
 		}
 	end,
 
@@ -35,6 +36,8 @@ return itemDefs.registerType({
 				amount = math.random(self.minHeal, self.maxHeal),
 				source = self.source,
 				duration = self.duration,
+				property = 'health',
+				maxProperty = 'maxHealth'
 			})
 			love.audio.stop(Sound.drinkPotion)
 			love.audio.play(Sound.drinkPotion)

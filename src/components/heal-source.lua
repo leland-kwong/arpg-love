@@ -26,12 +26,12 @@ local function healRoutine(healSource, tickRate)
 
 		if amount < amountThisTick then
 			if amount <= 0 then
-				return 0
+				return 0, healSource.property, healSource.maxProperty
 			end
 			-- return remaining amount
-			coroutine.yield(amount)
+			coroutine.yield(amount, healSource.property, healSource.maxProperty)
 		else
-			coroutine.yield(amountThisTick)
+			coroutine.yield(amountThisTick, healSource.property, healSource.maxProperty)
 		end
 	end
 end
@@ -40,15 +40,13 @@ function HealSource.remove(self, source)
 	self.healSources[source] = nil
 end
 
-local function updateHealth(rootStore, changeAmount)
+local min, max = math.min, math.max
+local function updateProperty(rootStore, changeAmount, property, maxProperty)
   local state = rootStore:get()
-  local curHealth = state.health
-  local maxHealth = state.maxHealth + state.statModifiers.maxHealth
-  local newHealth = curHealth + changeAmount
-  if newHealth > maxHealth then
-    newHealth = maxHealth
-  end
-  rootStore:set('health', newHealth)
+  local curProp = state[property]
+  local maxProp = state[maxProperty] + state.statModifiers[maxProperty]
+	local newProp = max(0, min(maxProp, curProp + changeAmount))
+  rootStore:set(property, newProp)
 end
 
 function HealSource.add(self, healSource, rootStore)
@@ -57,24 +55,27 @@ function HealSource.add(self, healSource, rootStore)
 
 	local instantHeal = healSource.duration == 0
 	if instantHeal then
-		return updateHealth(rootStore, healSource.amount)
+		return updateProperty(
+			rootStore,
+			healSource.amount,
+			healSource.property,
+			healSource.maxProperty
+		)
 	end
 
 	local tickRate = 0.05 -- seconds
 
 	self.handle = self.handle or tick.recur(
 		function()
-			local heal = 0
 			-- iterate over all sources and accumulate total heal amount for this tick
 			for source,healRoutine in pairs(self.healSources) do
-				hasMore, amount = coroutine.resume(healRoutine)
-				if not hasMore then
+				local hasMore, healAmount, property, maxProperty = coroutine.resume(healRoutine)
+				if (not hasMore) then
 					HealSource.remove(self, source)
 				else
-					heal = heal + amount
+					updateProperty(rootStore, healAmount, property, maxProperty)
 				end
 			end
-			updateHealth(rootStore, heal)
 		end,
 		tickRate
 	)

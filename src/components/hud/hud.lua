@@ -59,8 +59,8 @@ function Hud.init(self)
     color = {Color.rgba255(209, 27, 27)},
     fillPercentage = function()
       local state = self.rootStore:get()
-      local health = state.health
       local maxHealth = state.maxHealth + state.statModifiers.maxHealth
+      local health = state.health
       return health / maxHealth
     end
   })
@@ -75,8 +75,8 @@ function Hud.init(self)
     color = {Color.rgba255(33, 89, 186)},
     fillPercentage = function()
       local state = self.rootStore:get()
-      local energy = state.energy
       local maxEnergy = state.maxEnergy + state.statModifiers.maxEnergy
+      local energy = state.energy
       return energy / maxEnergy
     end
   })
