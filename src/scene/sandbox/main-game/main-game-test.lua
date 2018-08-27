@@ -47,14 +47,17 @@ function MainGameTest.init(self)
     y = 5 * 16
   }):setParent(self)
 
+  local function randomTreasurePosition()
+    return math.random(10 * 30) * config.gridSize
+  end
   TreasureChest.create({
-    x = 10 * 16,
-    y = 6 * 16
+    x = randomTreasurePosition(),
+    y = randomTreasurePosition()
   }):setParent(self)
 
   TreasureChest.create({
-    x = 15 * 16,
-    y = 6 * 16
+    x = randomTreasurePosition(),
+    y = randomTreasurePosition()
   }):setParent(self)
 end
 

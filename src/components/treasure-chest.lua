@@ -31,15 +31,15 @@ shader:send('outline_width', 1)
 
 local function drawShadow(self)
   local r,g,b,a = love.graphics.getColor()
-  love.graphics.setColor(0,0,0,0.2)
+  love.graphics.setColor(0,0,0,0.3)
   love.graphics.draw(
     AnimationFactory.atlas,
     animation.sprite,
     self.x,
-    self.y + self.h/2.5,
+    self.y + 2 + (self.h * 1.3),
     0,
     1,
-    1
+    -1
   )
   -- set back to original color
   love.graphics.setColor(r,g,b,a)
@@ -47,7 +47,7 @@ end
 
 function TreasureChest.init(self)
   local parent = self
-  self:addCollisionObject('obstacle', self.x, self.y, self.w, self.h)
+  self:addCollisionObject('obstacle', self.x, self.y, self.w, self.h - 6, 0, -6)
     :addToWorld(collisionWorlds.map)
 
   Gui.create({
@@ -60,8 +60,6 @@ function TreasureChest.init(self)
       return camera:getMousePosition()
     end,
     onClick = function(self)
-      consoleLog('open sesame!')
-
       local lootAlgorithm = require'components.loot-generator.algorithm-1'
       for i=1, 5 do
         local offsetX, offsetY = math.random(0, 10), math.random(0, 10)
@@ -78,9 +76,12 @@ function TreasureChest.init(self)
     draw = function(self)
       drawShadow(self)
 
-      love.graphics.setShader(shader)
-      shader:send('outline_color', self.hovered and outlineColor or Color.BLACK)
+      if self.hovered then
+        love.graphics.setShader(shader)
+        shader:send('outline_color', self.hovered and outlineColor or Color.BLACK)
+      end
 
+      love.graphics.setColor(1,1,1)
       love.graphics.draw(
         AnimationFactory.atlas,
         animation.sprite,
@@ -88,7 +89,12 @@ function TreasureChest.init(self)
         self.y
       )
 
-      love.graphics.setShader()
+      if self.hovered then
+        love.graphics.setShader()
+      end
+    end,
+    drawOrder = function(self)
+      return self.group.drawOrder(self) + 2
     end
   }):setParent(self)
 end

@@ -789,6 +789,8 @@
                 <false/>
             </struct>
             <key type="filename">custom-art/bullet-1.png</key>
+            <key type="filename">custom-art/tiles/floor-11.png</key>
+            <key type="filename">custom-art/tiles/floor-12.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -855,18 +857,6 @@
                 <false/>
             </struct>
             <key type="filename">custom-art/items/weapons/pods/pod-one1.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>5,5,11,10</rect>
-                <key>scale9Paddings</key>
-                <rect>5,5,11,10</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
             <key type="filename">custom-art/items/weapons/pods/pod-one10.png</key>
             <key type="filename">custom-art/items/weapons/pods/pod-one11.png</key>
             <key type="filename">custom-art/items/weapons/pods/pod-one12.png</key>
@@ -884,7 +874,7 @@
             <key type="filename">custom-art/items/weapons/pods/pod-one9.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
+                <point_f>0,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -929,6 +919,19 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/tiles/treasure-chest.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>9,7,17,13</rect>
+                <key>scale9Paddings</key>
+                <rect>9,7,17,13</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/tiles/wall-1.png</key>
             <key type="filename">custom-art/tiles/wall-2.png</key>
             <key type="filename">custom-art/tiles/wall-3.png</key>
@@ -959,19 +962,6 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/treasure-chest.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.266667</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>12,11,24,22</rect>
-                <key>scale9Paddings</key>
-                <rect>12,11,24,22</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
         </map>
         <key>fileList</key>
         <array>
@@ -984,7 +974,6 @@
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets</filename>
-            <filename>custom-art/treasure-chest.png</filename>
             <filename>custom-art/bullet-1.png</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings</filename>
