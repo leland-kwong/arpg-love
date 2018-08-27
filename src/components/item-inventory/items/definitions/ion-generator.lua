@@ -48,7 +48,9 @@ return itemDefs.registerType({
 				amount = self.regeneration * duration,
 				duration = duration,
 				source = healSource,
-				type = healType
+				type = healType,
+				property = 'health',
+				maxProperty = 'maxHealth'
 			})
 		end,
 
