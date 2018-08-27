@@ -162,7 +162,7 @@ local ActiveSkillInfo = {
   skillId = nil,
   slotX = 1,
   slotY = 1,
-  size = 32,
+  size = 28,
   player = nil,
   rootStore = nil
 }

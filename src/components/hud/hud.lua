@@ -60,71 +60,55 @@ function Hud.init(self)
   setupExperienceIndicator(self)
   ScreenFx.create():setParent(self)
 
-  ActiveSkillInfo.create({
-    skillId = 'ACTIVE_ITEM_1',
-    player = self.player,
-    rootStore = self.rootStore,
-    x = 300,
-    y = (love.graphics.getHeight() / scale) - 32 - 5,
-    slotX = 1,
-    slotY = 5,
-    hudTextLayer = self.hudTextSmallLayer
-  }):setParent(self)
+  local spacing = 32
+  local endXPos = 340
 
-  ActiveSkillInfo.create({
-    skillId = 'ACTIVE_ITEM_2',
-    player = self.player,
-    rootStore = self.rootStore,
-    x = 340,
-    y = (love.graphics.getHeight() / scale) - 32 - 5,
-    slotX = 2,
-    slotY = 5,
-    hudTextLayer = self.hudTextSmallLayer
-  }):setParent(self)
+  local skillSetup = {
+    {
+      skillId = 'ACTIVE_ITEM_1',
+      slotX = 1,
+      slotY = 5
+    },
+    {
+      skillId = 'ACTIVE_ITEM_2',
+      slotX = 2,
+      slotY = 5
+    },
+    {
+      skillId = 'SKILL_1',
+      slotX = 1,
+      slotY = 3
+    },
+    {
+      skillId = 'SKILL_2',
+      slotX = 2,
+      slotY = 3
+    },
+    {
+      skillId = 'SKILL_3',
+      slotX = 1,
+      slotY = 2
+    },
+    {
+      skillId = 'SKILL_4',
+      slotX = 2,
+      slotY = 2
+    }
+  }
 
-  ActiveSkillInfo.create({
-    skillId = 'SKILL_1',
-    player = self.player,
-    rootStore = self.rootStore,
-    x = 140,
-    y = (love.graphics.getHeight() / scale) - 32 - 5,
-    slotX = 1,
-    slotY = 3,
-    hudTextLayer = self.hudTextSmallLayer
-  }):setParent(self)
-
-  ActiveSkillInfo.create({
-    skillId = 'SKILL_2',
-    player = self.player,
-    rootStore = self.rootStore,
-    x = 180,
-    y = (love.graphics.getHeight() / scale) - 32 - 5,
-    slotX = 2,
-    slotY = 3,
-    hudTextLayer = self.hudTextSmallLayer
-  }):setParent(self)
-
-  ActiveSkillInfo.create({
-    skillId = 'SKILL_3',
-    player = self.player,
-    rootStore = self.rootStore,
-    x = 220,
-    y = (love.graphics.getHeight() / scale) - 32 - 5,
-    slotX = 1,
-    slotY = 2,
-    hudTextLayer = self.hudTextSmallLayer
-  }):setParent(self)
-
-  ActiveSkillInfo.create({
-    skillId = 'SKILL_4',
-    player = self.player,
-    rootStore = self.rootStore,
-    x = 260,
-    y = (love.graphics.getHeight() / scale) - 32 - 5,
-    slotX = 2,
-    slotY = 2,
-    hudTextLayer = self.hudTextSmallLayer
-  }):setParent(self)
+  for i=1, #skillSetup do
+    local skill = skillSetup[i]
+    ActiveSkillInfo.create({
+      skillId = skill.skillId,
+      player = self.player,
+      rootStore = self.rootStore,
+      x = endXPos - (spacing * (i - 1)),
+      y = (love.graphics.getHeight() / scale) - 32 - 1,
+      slotX = skill.slotX,
+      slotY = skill.slotY,
+      hudTextLayer = self.hudTextSmallLayer
+    }):setParent(self)
+  end
 end
 
 return Component.createFactory(Hud)
