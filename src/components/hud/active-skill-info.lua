@@ -190,9 +190,6 @@ local ActiveSkillInfo = {
 
 local ItemRender = {
   group = groups.all,
-  drawOrder = function(self)
-    return self.group.drawOrder(self) + 1
-  end
 }
 Component.createFactory(ItemRender)
 
@@ -230,7 +227,7 @@ function ActiveSkillInfo.init(self)
       self.skillHandlers[parent.skillId].draw(parent)
     end,
     drawOrder = function(self)
-      return self.group.drawOrder(self) + 3
+      return self.group.drawOrder(self) + 6
     end,
     final = function()
       consoleLog('item render deleted')

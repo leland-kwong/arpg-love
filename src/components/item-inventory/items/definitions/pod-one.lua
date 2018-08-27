@@ -81,7 +81,8 @@ return itemDefs.registerType({
 					:set('maxDamage', 3)
 					:set('color', bulletColor)
 					:set('targetGroup', 'ai')
-					:set('speed', 20)
+					:set('startOffset', 26)
+					:set('speed', 400)
 			)
 		end,
 
