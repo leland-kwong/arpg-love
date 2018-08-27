@@ -142,6 +142,12 @@ local function ActiveEquipmentHandler()
 
   function skill.updateCooldown(dt)
     curCooldown = max(0, curCooldown - dt)
+    if activeItem then
+      local itemUpdateFn = itemDefinitions.getDefinition(activeItem).update
+      if itemUpdateFn then
+        itemUpdateFn(activeItem, dt)
+      end
+    end
     return skill
   end
 

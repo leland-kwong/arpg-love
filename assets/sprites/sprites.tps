@@ -854,10 +854,37 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/items/weapons/pods/pod-one.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one1.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,5,11,10</rect>
+                <key>scale9Paddings</key>
+                <rect>5,5,11,10</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/items/weapons/pods/pod-one10.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one11.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one12.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one13.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one14.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one15.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one16.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one2.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one3.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one4.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one5.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one6.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one7.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one8.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one9.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>

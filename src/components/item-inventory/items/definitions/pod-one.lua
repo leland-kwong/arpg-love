@@ -39,7 +39,7 @@ return itemDefs.registerType({
 	end,
 
 	properties = {
-		sprite = "pod-one",
+		sprite = "pod-one16",
 		title = 'Pod One',
 		rarity = config.rarity.NORMAL,
 		category = config.category.WEAPON_1,
@@ -49,13 +49,15 @@ return itemDefs.registerType({
 		end,
 
 		onEquip = function(self)
+			local frames = {}
+			for i=1, 16 do
+				table.insert(frames, 'pod-one'..i)
+			end
+			for i=16, 1, -1 do
+				table.insert(frames, 'pod-one'..i)
+			end
 			itemDefs.getState(self)
-				:set(
-					'animation',
-					AnimationFactory:new({
-						'pod-one'
-					})
-				)
+				:set('animation', AnimationFactory:new(frames))
 				:set('isAttacking', false)
 		end,
 
@@ -79,7 +81,7 @@ return itemDefs.registerType({
 					:set('maxDamage', 3)
 					:set('color', bulletColor)
 					:set('targetGroup', 'ai')
-					:set('speed', 400)
+					:set('speed', 20)
 			)
 		end,
 
@@ -90,9 +92,10 @@ return itemDefs.registerType({
 			return msgValue
 		end,
 
-		update = function(self)
-			itemDefs.getState(self)
-				:set('isAttacking', false)
+		update = function(self, dt)
+			local state = itemDefs.getState(self)
+			state:set('isAttacking', false)
+			state.animation:update(dt / 5)
 		end,
 
 		render = function(self)
