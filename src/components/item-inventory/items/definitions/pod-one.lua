@@ -6,6 +6,7 @@ local Color = require 'modules.color'
 local functional = require("utils.functional")
 local AnimationFactory = require 'components.animation-factory'
 local setProp = require 'utils.set-prop'
+local Sound = require 'components.sound'
 
 local bulletColor = {Color.rgba255(252, 122, 255)}
 
@@ -75,6 +76,8 @@ return itemDefs.registerType({
 
 		onActivateWhenEquipped = function(self, props)
 			local Projectile = require 'components.abilities.bullet'
+			love.audio.stop(Sound.PLASMA_SHOT)
+			love.audio.play(Sound.PLASMA_SHOT)
 			return Projectile.create(
 				setProp(props)
 					:set('minDamage', 1)
