@@ -11,6 +11,7 @@ local MainMapSolidsBlueprint = {
   y = 0,
   ox = 0,
   oy = 0,
+  opacity = 1,
   gridSize = 0,
 }
 
@@ -26,7 +27,7 @@ function MainMapSolidsBlueprint.init(self)
 end
 
 function MainMapSolidsBlueprint.draw(self)
-  love.graphics.setColor(1,1,1,1)
+  love.graphics.setColor(1,1,1,self.opacity)
   love.graphics.draw(
     self.animation.atlas,
     self.animation.sprite,

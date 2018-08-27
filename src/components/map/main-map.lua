@@ -28,6 +28,10 @@ local function addWallTileEntity(self, positionIndex, entityProps)
   self.wallTileCache:set(positionIndex, wallTileEntity)
 end
 
+local function getTile(grid, x, y)
+  return grid[y] and grid[y][x]
+end
+
 local blueprint = objectUtils.assign({}, mapBlueprint, {
   group = groups.all,
   tileRenderDefinition = {},
@@ -53,12 +57,14 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
       local ox, oy = animation:getOffset()
       local cached = getWallEntity(self, index)
       if not cached then
+        local tileAbove = getTile(self.grid, x, y - 1)
         addWallTileEntity(self, index, {
           animation = animation,
           x = tileX,
           y = tileY,
           ox = ox,
           oy = oy,
+          opacity = tileAbove == Map.WALKABLE and 0.75 or 1,
           gridSize = self.gridSize
         })
       end

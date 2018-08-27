@@ -64,22 +64,34 @@ local gridTileTypes = {
     },
     {
       type = 'floor-2',
-      chance = 30 -- number out of 100
+      chance = 20 -- number out of 100
     },
     {
       type = 'floor-3',
-      chance = 30 -- number out of 100
+      chance = 45 -- number out of 100
     },
     {
       type = 'floor-4',
-      chance = 30 -- number out of 100
+      chance = 45 -- number out of 100
     },
     {
       type = 'floor-5',
-      chance = 12
+      chance = 25
     },
     {
       type = 'floor-6',
+      chance = 1
+    },
+    {
+      type = 'floor-7',
+      chance = 1
+    },
+    {
+      type = 'floor-8',
+      chance = 1
+    },
+    {
+      type = 'floor-9',
       chance = 1
     }
   })
