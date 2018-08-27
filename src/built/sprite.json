@@ -3445,7 +3445,7 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":21,"h":20},
 	"sourceSize": {"w":21,"h":20},
-	"pivot": {"x":0.380952,"y":0.5}
+	"pivot": {"x":0,"y":0.5}
 },
 "potion_1":
 {
@@ -5803,6 +5803,6 @@
 	"format": "RGBA8888",
 	"size": {"w":128,"h":1696},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:f23796b17dd4c0987abf449a013c7bff:c19d3208beea23bc9f4da67c9cc080ef:68d88b3cf7eafc9b5accfffdfb2fda91$"
+	"smartupdate": "$TexturePacker:SmartUpdate:d9758de7443029e1807e14b6a4a9f240:c19d3208beea23bc9f4da67c9cc080ef:68d88b3cf7eafc9b5accfffdfb2fda91$"
 }
 }

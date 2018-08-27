@@ -183,7 +183,10 @@ local ActiveSkillInfo = {
 }
 
 local ItemRender = {
-  group = groups.all
+  group = groups.all,
+  drawOrder = function(self)
+    return self.group.drawOrder(self) + 1
+  end
 }
 Component.createFactory(ItemRender)
 

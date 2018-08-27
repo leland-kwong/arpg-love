@@ -857,7 +857,7 @@
             <key type="filename">custom-art/items/weapons/pods/pod-one.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.380952,0.5</point_f>
+                <point_f>0,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
