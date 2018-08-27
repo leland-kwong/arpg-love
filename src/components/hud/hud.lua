@@ -1,31 +1,21 @@
 local Component = require 'modules.component'
 local groups = require 'components.groups'
-local HealthIndicator = require 'components.hud.health-indicator'
+local StatusBar = require 'components.hud.status-bar'
 local ExperienceIndicator = require 'components.hud.experience-indicator'
 local ScreenFx = require 'components.hud.screen-fx'
 local ActiveSkillInfo = require 'components.hud.active-skill-info'
 local GuiText = require 'components.gui.gui-text'
+local msgBus = require 'components.msg-bus'
 local Position = require 'utils.position'
 local scale = require 'config.config'.scaleFactor
+local Color = require 'modules.color'
 
 local Hud = {
   group = groups.gui,
   rootStore = {}
 }
 
-local function setupHealthIndicator(self)
-  local w, h = 180, 18
-  local winWidth, winHeight = love.graphics.getWidth() / scale, love.graphics.getHeight() / scale
-  local offX, offY = Position.boxCenterOffset(w, h, winWidth, winHeight)
-  HealthIndicator.create({
-    rootStore = self.rootStore,
-    x = offX,
-    y = winHeight - h - 13,
-    w = w,
-    h = h,
-    hudTextLayer = self.hudTextLayer
-  }):setParent(self)
-end
+local healthManaWidth = 180
 
 local function setupExperienceIndicator(self)
   local w, h = 180, 6
@@ -56,7 +46,53 @@ function Hud.init(self)
     end
   }):setParent(self)
 
-  setupHealthIndicator(self)
+  local winWidth, winHeight = love.graphics.getWidth() / scale, love.graphics.getHeight() / scale
+  local barHeight = 18
+  local offX, offY = Position.boxCenterOffset(healthManaWidth, barHeight, winWidth, winHeight)
+
+  -- health bar
+  StatusBar.create({
+    x = offX,
+    y = winHeight - barHeight - 13,
+    w = healthManaWidth / 2,
+    h = barHeight,
+    color = {Color.rgba255(209, 27, 27)},
+    fillPercentage = function()
+      local state = self.rootStore:get()
+      local health = state.health
+      local maxHealth = state.maxHealth + state.statModifiers.maxHealth
+      return health / maxHealth
+    end
+  })
+
+  -- mana bar
+  StatusBar.create({
+    x = offX + healthManaWidth / 2,
+    y = winHeight - barHeight - 13,
+    w = healthManaWidth / 2,
+    h = barHeight,
+    fillDirection = -1,
+    color = {Color.rgba255(33, 89, 186)},
+    fillPercentage = function()
+      local state = self.rootStore:get()
+      local energy = state.energy
+      local maxEnergy = state.maxEnergy + state.statModifiers.maxEnergy
+      return energy / maxEnergy
+    end
+  })
+
+  msgBus.subscribe(function(msgType, msgValue)
+    if self:isDeleted() then
+      return msgBus.CLEANUP
+    end
+
+    if msgBus.PLAYER_HIT_RECEIVED == msgType then
+      self.rootStore:set('health', function(state)
+        return state.health - msgValue
+      end)
+    end
+  end)
+
   setupExperienceIndicator(self)
   ScreenFx.create():setParent(self)
 
