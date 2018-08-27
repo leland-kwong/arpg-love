@@ -21,7 +21,7 @@ function MainMapSolidsBlueprint.init(self)
   local ox, oy = self.animation:getSourceOffset()
   self.colObj = self:addCollisionObject(
     'obstacle',
-    self.x, self.y, w, self.gridSize, ox, oy - (self.gridSize / 2)
+    self.x, self.y, w, self.gridSize, ox, self.gridSize
   ):addToWorld(collisionWorlds.map)
 end
 

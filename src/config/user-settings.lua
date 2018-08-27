@@ -28,7 +28,7 @@ M.mouseInputMap = {
 }
 
 M.camera = {
-  speed = 0.3 -- lerp duration (larger value means slower movement)
+  speed = 0.4 -- lerp duration (larger value means slower movement)
 }
 
 return M

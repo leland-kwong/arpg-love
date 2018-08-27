@@ -2,6 +2,8 @@
 local tween = require 'modules.tween'
 local mergeProps = require 'utils.object-utils'.assign
 local round = require 'utils.math'.round
+local mathUtils = require 'utils.math'
+local config = require 'config.config'
 
 local defaultOptions = {
   lerp = function()
@@ -25,8 +27,15 @@ local Camera = function(options)
   local lerpTween = nil
 
   local function lerp(dt, reset)
+    local dist = mathUtils.dist(camera.x, camera.y, targetPosition.x, targetPosition.y)
+    local actualDuration = lerpDuration
+    local isFarTransition = (dist / config.gridSize) > 50
+    if isFarTransition then
+      -- increase duration so that the screen doesn't scroll too fast, otherwise it looks too jarring
+      actualDuration = 2
+    end
     if reset then
-      lerpTween = tween.new(lerpDuration, camera, targetPosition, tween.easing.outQuint)
+      lerpTween = tween.new(actualDuration, camera, targetPosition, tween.easing.outExpo)
     end
     lerpTween:update(dt)
   end
