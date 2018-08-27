@@ -17,30 +17,72 @@ local msgBus = require 'components.msg-bus'
 local HealSource = require 'components.heal-source'
 local tick = require 'utils.tick'
 
+local function setupTileTypes(types)
+  local list = {}
+  for i=1, #types do
+    local t = types[i]
+    for j=1, t.chance do
+      table.insert(list, t.type)
+    end
+  end
+  return list
+end
+
 local gridTileTypes = {
   -- unwalkable
-  [0] = {
-    'wall-1',
-    'wall-2',
-    'wall-3',
-    'wall-3',
-    'wall-4',
-    'wall-4',
-    'wall-4',
-    'wall-4',
-    'wall-5',
-    'wall-6'
-  },
+  [0] = setupTileTypes({
+    {
+      type = 'wall-1',
+      chance = 10
+    },
+    {
+      type = 'wall-2',
+      chance = 10
+    },
+    {
+      type = 'wall-3',
+      chance = 20
+    },
+    {
+      type = 'wall-4',
+      chance = 40
+    },
+    {
+      type = 'wall-5',
+      chance = 2
+    },
+    {
+      type = 'wall-6',
+      chance = 2
+    }
+  }),
   -- walkable
-  [1] = {
-    'floor-1',
-    'floor-1',
-    'floor-2',
-    'floor-3',
-    'floor-4',
-    'floor-4',
-    'floor-4'
-  }
+  [1] = setupTileTypes({
+    {
+      type = 'floor-1',
+      chance = 30 -- number out of 100
+    },
+    {
+      type = 'floor-2',
+      chance = 30 -- number out of 100
+    },
+    {
+      type = 'floor-3',
+      chance = 30 -- number out of 100
+    },
+    {
+      type = 'floor-4',
+      chance = 30 -- number out of 100
+    },
+    {
+      type = 'floor-5',
+      chance = 12
+    },
+    {
+      type = 'floor-6',
+      chance = 1
+    }
+  })
 }
 
 local MainScene = {

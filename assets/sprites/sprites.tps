@@ -884,6 +884,8 @@
             <key type="filename">custom-art/tiles/floor-2.png</key>
             <key type="filename">custom-art/tiles/floor-3.png</key>
             <key type="filename">custom-art/tiles/floor-4.png</key>
+            <key type="filename">custom-art/tiles/floor-5.png</key>
+            <key type="filename">custom-art/tiles/floor-6.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,1</point_f>
