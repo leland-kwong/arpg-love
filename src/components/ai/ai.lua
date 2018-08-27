@@ -292,7 +292,7 @@ function Ai._update2(self, grid, flowField, dt)
   self.lastFlowField = flowField
 end
 
-local function drawShadow(self)
+local function drawShadow(self, ox, oy)
   love.graphics.setColor(0,0,0,0.15)
   love.graphics.draw(
     animationFactory.atlas,
@@ -302,8 +302,8 @@ local function drawShadow(self)
     0,
     self.w - 2,
     self.h,
-    1,
-    1
+    ox,
+    oy
   )
 end
 
@@ -311,8 +311,9 @@ function Ai.draw(self)
   local padding = 0
   local sizeIncreaseX, sizeIncreaseY = (self.w * self.pulseTime), (self.h * self.pulseTime)
   local drawWidth, drawHeight = self.w + sizeIncreaseX, self.h + sizeIncreaseY
+  local ox, oy = 1 + self.pulseTime/2, 1 + self.pulseTime/2
 
-  drawShadow(self)
+  drawShadow(self, ox, oy)
 
   -- border
   local borderWidth = 2
@@ -325,8 +326,8 @@ function Ai.draw(self)
     0,
     drawWidth,
     drawHeight,
-    1,
-    1
+    ox,
+    oy
   )
 
   if self.hitAnimation then
@@ -342,8 +343,8 @@ function Ai.draw(self)
     0,
     drawWidth - borderWidth,
     drawHeight - borderWidth,
-    1,
-    1
+    ox,
+    oy
   )
 
   -- self:debugLineOfSight()

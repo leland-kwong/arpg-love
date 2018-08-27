@@ -112,6 +112,23 @@ return itemDefs.registerType({
 			local facingSide = facingX > 0 and 1 or -1
 			local offsetX = (facingSide * -1) * 30
 			local angle = (math.atan2(facingX, facingY) * -1) + (math.pi/2)
+
+			--shadow
+			love.graphics.setColor(0,0,0,0.17)
+			love.graphics.draw(
+				AnimationFactory.atlas,
+				state.animation.sprite,
+				posX,
+				posY + 15,
+				angle,
+				1,
+				-- vertically flip when facing other side so the shadow is in the right position
+				(1 * facingSide) / 2,
+				centerOffsetX, centerOffsetY
+			)
+
+			love.graphics.setColor(1,1,1)
+			-- actual graphic
 			love.graphics.draw(
 				AnimationFactory.atlas,
 				state.animation.sprite,

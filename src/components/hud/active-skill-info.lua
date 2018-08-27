@@ -227,7 +227,7 @@ function ActiveSkillInfo.init(self)
       self.skillHandlers[parent.skillId].draw(parent)
     end,
     drawOrder = function(self)
-      return self.group.drawOrder(self) + 6
+      return self.group.drawOrder(self) + 3
     end,
     final = function()
       consoleLog('item render deleted')
