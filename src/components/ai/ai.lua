@@ -233,7 +233,7 @@ function Ai._update2(self, grid, flowField, dt)
     self.y,
     actualSightRadius
   )
-  local canSeeTarget = self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY)
+  local canSeeTarget = self.isInViewOfPlayer and self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY)
   local shouldGetNewPath = flowField and canSeeTarget
   local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or math.huge
   local isInAttackRange = canSeeTarget and (distFromTarget <= self.attackRange)
@@ -328,6 +328,17 @@ function Ai._update2(self, grid, flowField, dt)
   self.y = actualY
   self.lastFlowField = flowField
 end
+
+local perf = require'utils.perf'
+Ai._update2 = perf({
+  enabled = false,
+  done = function(_, totalTime, callCount)
+    local avgTime = totalTime / callCount
+    if (callCount % 100) == 0 then
+      consoleLog('ai update -', avgTime)
+    end
+  end
+})(Ai._update2)
 
 local function drawShadow(self, ox, oy)
   love.graphics.setColor(0,0,0,0.15)

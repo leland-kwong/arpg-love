@@ -166,7 +166,7 @@ local function aiPath()
       local nextPosition = {x = px + vxActual, y = py + vyActual}
 
       -- table insert
-      tbl[#tbl + 1] = nextPosition
+      path[#path + 1] = nextPosition
       curPosition = nextPosition
     end
 

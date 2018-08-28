@@ -27,12 +27,16 @@ local function perf(func, options)
 		end
 	end
 
+	local callCount = 0
+	local totalExecutionTime = 0
 	return function(a, b, c, d, e, f, g, h)
 		local ts = getTime()
 
 		local out1, out2, out3 = func(a, b, c, d, e, f, g, h)
 
 		local executionTimeMs = (getTime() - ts) * 1000
+		totalExecutionTime = totalExecutionTime + executionTimeMs
+		callCount = callCount + 1
 
 		local maxTime = options.maxTime
 		local title = options.title
@@ -40,7 +44,7 @@ local function perf(func, options)
 			local prefix = #title > 0 and '['..title..']' or ''
 			print('[PERF WARNING]'..prefix..' - '..executionTimeMs..'(ms) exceeds maxAvgTime of '..maxTime..'(ms)')
 		end
-		options.done(executionTimeMs, a, b, c, d, e, f, g, h)
+		options.done(executionTimeMs, totalExecutionTime, callCount, a, b, c, d, e, f, g, h)
 
 		return out1, out2, out3
 	end
