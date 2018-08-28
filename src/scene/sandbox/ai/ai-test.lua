@@ -203,7 +203,10 @@ function flowFieldTestBlueprint.update(self, dt)
     local ts = socket.gettime()
     self.targetPosition = {x = mx, y = my}
     self.flowField = flowField(grid, gridX, gridY, isGridCellVisitable)
-    self.executionTimeMs = (socket.gettime() - ts) * 1000
+    local executionTimeMs = (socket.gettime() - ts) * 1000
+    self.callCount = (self.callCount or 0) + 1
+    self.totalExecutionTime = (self.totalExecutionTime or 0) + executionTimeMs
+    self.executionTimeMs = self.totalExecutionTime / self.callCount
   end
 
   f.forEach(self.ai, function(ai)
