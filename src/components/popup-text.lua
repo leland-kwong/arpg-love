@@ -3,6 +3,8 @@ local font = require 'components.font'
 local groups = require 'components.groups'
 local tween = require 'modules.tween'
 local f = require 'utils.functional'
+local TablePool = require 'utils.table-pool'
+local setProp = require 'utils.set-prop'
 
 local PopupTextBlueprint = {
   group = groups.overlay,
@@ -10,10 +12,13 @@ local PopupTextBlueprint = {
   y = 0,
 }
 
+local subjectPool = TablePool.newAuto()
+
 local tweenEndState = {offset = -10}
 local function animationCo()
   local frame = 0
-  local subject = {offset = 0}
+  local subject = setProp(subjectPool.get())
+    :set('offset', 0)
   local posTween = tween.new(0.2, subject, tweenEndState, tween.easing.outCubic)
   local complete = false
 
@@ -21,6 +26,7 @@ local function animationCo()
     complete = posTween:update(1/60)
     coroutine.yield(subject.offset)
   end
+  subjectPool.release(subject)
 end
 
 function PopupTextBlueprint:new(text, x, y)
