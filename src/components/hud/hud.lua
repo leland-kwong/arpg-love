@@ -63,7 +63,7 @@ function Hud.init(self)
       local health = state.health
       return health / maxHealth
     end
-  })
+  }):setParent(self)
 
   -- mana bar
   StatusBar.create({
@@ -79,7 +79,7 @@ function Hud.init(self)
       local energy = state.energy
       return energy / maxEnergy
     end
-  })
+  }):setParent(self)
 
   msgBus.subscribe(function(msgType, msgValue)
     if self:isDeleted() then
