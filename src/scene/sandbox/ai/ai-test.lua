@@ -38,7 +38,7 @@ end
 -- returns grid units relative to the ui
 local floor = math.floor
 local function pxToGridUnits(screenX, screenY, gridSize, offX, offY)
-  local gridPixelX, gridPixelY = screenX - (offX or 0), screenY - (offY or 0)
+  local gridPixelX, gridPixelY = screenX, screenY
   local gridX, gridY =
     floor(gridPixelX / gridSize),
     floor(gridPixelY / gridSize)
