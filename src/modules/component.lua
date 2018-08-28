@@ -12,6 +12,24 @@ local collisionObject = require 'modules.collision'
 local M = {}
 local allComponentsById = {}
 
+-- we want to reuse ids when possible. This makes it easier for us to do things
+-- like table pooling because the pool will have a cached object by id readily available.
+local reusableIds = {
+  get = function(self)
+    local idFromList = self[#self]
+    if not idFromList then
+      return uid()
+    end
+    -- remove id from list
+    self[#self] = nil
+    return idFromList
+  end,
+  add = function(self, id)
+    self[#self + 1] = id
+    return id
+  end
+}
+
 -- built-in defaults
 local floor = math.floor
 local baseProps = {
@@ -82,7 +100,7 @@ function M.createFactory(blueprint)
       invalidPropsErrorMsg
     )
 
-    local id = blueprint.id or uid()
+    local id = blueprint.id or reusableIds:get()
     c._id = id
 
     setmetatable(c, blueprint)
@@ -162,6 +180,7 @@ function M.createFactory(blueprint)
     self.group.delete(self)
     cleanupCollisionObjects(self)
     self._deleted = true
+    reusableIds:add(self._id)
     return self
   end
 
