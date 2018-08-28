@@ -49,7 +49,7 @@ local Player = {
   facingDirectionY = 1,
   pickupRadius = 5 * config.gridSize,
   speed = 100,
-  flowFieldDistance = 40,
+  flowFieldDistance = 30,
 
   -- collision properties
   type = 'player',
