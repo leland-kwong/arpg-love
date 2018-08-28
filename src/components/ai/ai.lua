@@ -13,6 +13,7 @@ local memoize = require'utils.memoize'
 local LineOfSight = memoize(require'modules.line-of-sight')
 local Perf = require'utils.perf'
 local dynamic = require'modules.dynamic-module'
+local Math = require 'utils.math'
 
 local Ai = {
   group = groups.all,
@@ -36,12 +37,6 @@ local popupText = PopupTextController.create()
 
 -- gets directions from grid position, adjusting vectors to handle wall collisions as needed
 local aiPathWithAstar = require'modules.flow-field.pathing-with-astar'
-local getPathWithAstar = Perf({
-  enabled = false,
-  done = function(t)
-    print('ai path:', t)
-  end
-})(aiPathWithAstar)
 
 Ai.debugLineOfSight = dynamic('components/ai/line-of-sight.debug.lua')
 
@@ -199,6 +194,11 @@ local abilityDash = (function()
 end)()
 
 function Ai._update2(self, grid, flowField, dt)
+  local playerRef = Component.get('PLAYER')
+  local playerX, playerY = playerRef:getPosition()
+  local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
+  self.isInViewOfPlayer = gridDistFromPlayer <= 40
+
   if self.pulseTime >= 0.4 then
     self.pulseDirection = -1
   elseif self.pulseTime <= 0 then
@@ -262,7 +262,7 @@ function Ai._update2(self, grid, flowField, dt)
   if shouldGetNewPath then
     self.pathComplete = false
     local distanceToPlanAhead = actualSightRadius / self.gridSize
-    self.pathWithAstar = getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
+    self.pathWithAstar = self.getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
 
     local index = 1
     local path = self.pathWithAstar
@@ -345,6 +345,10 @@ local function drawShadow(self, ox, oy)
 end
 
 function Ai.draw(self)
+  if (not self.isInViewOfPlayer) then
+    return
+  end
+
   local padding = 0
   local sizeIncreaseX, sizeIncreaseY = (self.w * self.pulseTime), (self.h * self.pulseTime)
   local drawWidth, drawHeight = self.w + sizeIncreaseX, self.h + sizeIncreaseY
@@ -419,6 +423,12 @@ function Ai.init(self)
 
   self.attackRange = self.attackRange * self.gridSize
   self.sightRadius = self.sightRadius * self.gridSize
+  self.getPathWithAstar = Perf({
+    enabled = false,
+    done = function(t)
+      consoleLog('ai path:', t)
+    end
+  })(aiPathWithAstar())
 
   msgBus.subscribe(function(msgType, msgValue)
     if self:isDeleted() then
