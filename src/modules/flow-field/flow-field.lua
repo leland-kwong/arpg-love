@@ -1,18 +1,10 @@
 -- https://www.geeksforgeeks.org/flood-fill-algorithm-implement-fill-paint/
 
 local TablePool = require 'utils.table-pool'
-local memoize = require 'utils.memoize'
-
-local function getIndexByCoordinate(x, y, maxCols)
-  return (y * maxCols) + x
-end
-
-local gridRowsCols = memoize(function(grid)
-  return #grid, #grid[1]
-end)
 
 local flowCellTablePool = TablePool.new()
 local frontierTablePool = TablePool.new()
+local cameFromRowTablePool = TablePool.new()
 
 local function flowCellData(x, y, dist, id)
   local obj = flowCellTablePool.get(id)
@@ -30,8 +22,18 @@ local function toVisitData(x, y, dist, id)
   return obj
 end
 
+local function cameFromRowPool(id)
+  local obj = cameFromRowTablePool.get(id)
+  -- clear out table
+  for k,v in pairs(obj) do
+    obj[k] = nil
+  end
+  return obj
+end
+
 local function addCellData(grid, x, y, from, frontier, cameFromList, canVisit)
-  cameFromList[y] = cameFromList[y] or {}
+  -- cameFromList[y] = cameFromList[y] or {}
+  cameFromList[y] = cameFromList[y] or cameFromRowPool(cameFromList._cellCount)
   local hasVisited = cameFromList[y][x] ~= nil
   local dist = from.dist
   if hasVisited or not canVisit(grid, x, y, dist) then
@@ -117,7 +119,7 @@ local function flowField(grid, startX, startY, canVisitCallback)
     -- gets incremented each time a flow field cell is generated. Also used as the id for the table pool
     _cellCount = 0
   }
-  cameFromList[startY] = cameFromList[startY] or {}
+  cameFromList[startY] = cameFromRowPool(cameFromList._cellCount)
   -- {directionX, directionY, distance}
   cameFromList[startY][startX] = {
     x = 0,
