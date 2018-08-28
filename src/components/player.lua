@@ -275,6 +275,13 @@ local function handleAbilities(self, dt)
   if not self.clickDisabled and isSkill4Activate then
     msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_4')
   end
+
+  -- MOVE_BOOST
+  local isMoveBoostActivate = love.keyboard.isDown(keyMap.MOVE_BOOST) or
+    (mouseInputMap.MOVE_BOOST and love.mouse.isDown(mouseInputMap.MOVE_BOOST))
+  if not self.clickDisabled and isMoveBoostActivate then
+    msgBus.send(msgBus.PLAYER_USE_SKILL, 'MOVE_BOOST')
+  end
 end
 
 local min = math.min

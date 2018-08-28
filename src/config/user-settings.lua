@@ -16,6 +16,7 @@ M.keyboard = {
   SKILL_4 = 'r',
   ACTIVE_ITEM_1 = '1',
   ACTIVE_ITEM_2 = '2',
+  MOVE_BOOST = 'space',
   INVENTORY_TOGGLE = 'i',
   MAIN_MENU = 'escape'
 }

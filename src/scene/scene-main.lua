@@ -255,6 +255,19 @@ function MainScene.init(self)
       local newModifiers = msgValue
       rootState:set('statModifiers', newModifiers)
     end
+
+    if msgBus.PLAYER_STATS_ADD_MODIFIERS == msgType then
+      local curState = rootState:get()
+      local curMods = curState.statModifiers
+      local nextModifiers = msgValue
+      for k,v in pairs(curMods) do
+        nextModifiers[k] = v + (nextModifiers[k] or 0)
+      end
+      rootState:set(
+        'statModifiers',
+        nextModifiers
+      )
+    end
   end)
 
   local player = Player.create({

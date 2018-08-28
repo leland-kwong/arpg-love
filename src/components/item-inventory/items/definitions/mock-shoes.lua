@@ -3,6 +3,7 @@ local msgBus = require("components.msg-bus")
 local functional = require("utils.functional")
 local itemDefs = require("components.item-inventory.items.item-definitions")
 local Color = require('modules.color')
+local tick = require('utils.tick')
 
 local function concatTable(a, b)
 	for i=1, #b do
@@ -56,5 +57,21 @@ return itemDefs.registerType({
 			local toSlot = itemDefs.getDefinition(self).category
 			msgBus.send(msgBus.EQUIPMENT_SWAP, self)
 		end,
+
+		onActivateWhenEquipped = function(self)
+			local speedBoost = 500
+			msgBus.send(msgBus.PLAYER_STATS_ADD_MODIFIERS, {
+				moveSpeed = speedBoost
+			})
+			local buffDuration = 3/60
+			tick.delay(function()
+				msgBus.send(msgBus.PLAYER_STATS_ADD_MODIFIERS, {
+					moveSpeed = -speedBoost
+				})
+			end, buffDuration)
+			return {
+				cooldown = 0.5
+			}
+		end
 	}
 })

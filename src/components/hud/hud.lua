@@ -130,6 +130,11 @@ function Hud.init(self)
       slotX = 1,
       slotY = 3
     },
+    {
+      skillId = 'MOVE_BOOST',
+      slotX = 1,
+      slotY = 4
+    }
   }
 
   for i=1, #skillSetup do

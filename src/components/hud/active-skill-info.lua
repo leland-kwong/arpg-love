@@ -195,6 +195,8 @@ Component.createFactory(ItemRender)
 
 function ActiveSkillInfo.init(self)
   self.skillHandlers = {
+    MOVE_BOOST = ActiveConsumableHandler(),
+
     SKILL_1 = ActiveEquipmentHandler(),
     SKILL_2 = ActiveEquipmentHandler(),
     SKILL_3 = ActiveEquipmentHandler(),
