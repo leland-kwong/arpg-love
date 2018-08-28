@@ -70,7 +70,7 @@ local function visitNeighbors(grid, start, frontier, cameFromList, canVisit)
 
 
   local canWalkNorth = canVisit(grid, x, y-1, dist)
-  local canWalkEast = canVisit(grid, x, y-1, dist)
+  local canWalkEast = canVisit(grid, x+1, y, dist)
   local canWalkSouth = canVisit(grid, x, y+1, dist)
   local canWalkWest = canVisit(grid, x-1, y, dist)
 
