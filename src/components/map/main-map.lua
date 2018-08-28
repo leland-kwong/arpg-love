@@ -40,7 +40,9 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     local function wallTilePruneCallback(key, entity)
       entity:delete()
     end
-    self.wallTileCache = lru.new(400, nil, wallTilePruneCallback)
+    -- IMPORTANT: the cache size should be large enough to contain all the wall tiles on the screen
+    -- otherwise we will get significant cache trashing
+    self.wallTileCache = lru.new(600, nil, wallTilePruneCallback)
     self.renderFloorCache = {}
     local rows, cols = #self.grid, #self.grid[1]
     self.floorCanvas = love.graphics.newCanvas(cols * self.gridSize, rows * self.gridSize)
