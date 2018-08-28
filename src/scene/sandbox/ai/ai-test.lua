@@ -32,7 +32,7 @@ end
 
 local function isGridCellVisitable(grid, x, y, dist)
   return grid[y][x] == WALKABLE and
-    dist < 40
+    dist < 30
 end
 
 -- returns grid units relative to the ui
@@ -171,19 +171,19 @@ function flowFieldTestBlueprint.init(self)
 
   -- generate random ai agents
   local positionsFilled = {}
-  while #self.ai <= 50 do
-    local gridX = math.random(6, 20)
-    local gridY = math.random(2, 20)
-    local positionId = gridY * 20 + gridX
+  -- while #self.ai <= 50 do
+  --   local gridX = math.random(6, 20)
+  --   local gridY = math.random(2, 20)
+  --   local positionId = gridY * 20 + gridX
 
-    if grid[gridY][gridX] == WALKABLE and not positionsFilled[positionId] then
-      positionsFilled[positionId] = true
-      table.insert(
-        self.ai,
-        AiFactory(gridX, gridY, 360, 0.5):setParent(self)
-      )
-    end
-  end
+  --   if grid[gridY][gridX] == WALKABLE and not positionsFilled[positionId] then
+  --     positionsFilled[positionId] = true
+  --     table.insert(
+  --       self.ai,
+  --       AiFactory(gridX, gridY, 360, 0.5):setParent(self)
+  --     )
+  --   end
+  -- end
 end
 
 function flowFieldTestBlueprint.update(self, dt)
@@ -201,7 +201,7 @@ function flowFieldTestBlueprint.update(self, dt)
     end
 
     local ts = socket.gettime()
-    self.targetPosition = {x = mx - offX, y = my - offY}
+    self.targetPosition = {x = mx, y = my}
     self.flowField = flowField(grid, gridX, gridY, isGridCellVisitable)
     self.executionTimeMs = (socket.gettime() - ts) * 1000
   end
