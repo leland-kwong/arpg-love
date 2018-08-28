@@ -172,6 +172,32 @@ local ability1 = (function()
   return skill
 end)()
 
+local abilityDash = (function()
+  local curCooldown = 0
+  local skill = {}
+
+  function skill.use(self)
+    if curCooldown > 0 then
+      return skill
+    else
+      local Dash = require 'components.abilities.dash'
+      local projectile = Dash.create({
+          fromCaster = self
+        , cooldown = 0.5
+      })
+      curCooldown = projectile.cooldown
+      return skill
+    end
+  end
+
+  function skill.updateCooldown(dt)
+    curCooldown = curCooldown - dt
+    return skill
+  end
+
+  return skill
+end)()
+
 function Ai._update2(self, grid, flowField, dt)
   if self.pulseTime >= 0.4 then
     self.pulseDirection = -1
@@ -209,17 +235,28 @@ function Ai._update2(self, grid, flowField, dt)
   )
   local canSeeTarget = self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY)
   local shouldGetNewPath = flowField and canSeeTarget
-  local isInAttackRange = canSeeTarget and (distOfLine(self.x, self.y, targetX, targetY) <= self.attackRange)
+  local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or math.huge
+  local isInAttackRange = canSeeTarget and (distFromTarget <= self.attackRange)
 
   self:autoUnstuckFromWallIfNeeded(grid, gridX, gridY)
 
   self.canSeeTarget = canSeeTarget
 
-  if (canSeeTarget and isInAttackRange) then
-    ability1.use(self, targetX, targetY)
-    ability1.updateCooldown(dt)
-    -- we're already in attack range, so we don't need to move
-    return
+  if canSeeTarget then
+    local Dash = require 'components.abilities.dash'
+    if self.attackRange <= Dash.range then
+      if (distFromTarget <= Dash.range) then
+        abilityDash.use(self)
+        abilityDash.updateCooldown(dt)
+      end
+    end
+
+    if isInAttackRange then
+      ability1.use(self, targetX, targetY)
+      ability1.updateCooldown(dt)
+      -- we're already in attack range, so we don't need to move
+      return
+    end
   end
 
   if shouldGetNewPath then

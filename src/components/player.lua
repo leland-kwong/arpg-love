@@ -327,9 +327,10 @@ function Player.update(self, dt)
   -- update camera to follow player
   camera:setPosition(self.x, self.y)
 
-  local gridX, gridY = Position.pixelsToGrid(self.x, self.y, config.gridSize)
+  local gridX, gridY = Position.
+  pixelsToGrid(self.x, self.y, config.gridSize)
   local dist = getDist(self.prevGridX or 0, self.prevGridY or 0, gridX, gridY)
-  local shouldUpdateFlowField = dist >= 4
+  local shouldUpdateFlowField = dist >= 1
   if shouldUpdateFlowField and self.mapGrid then
     local flowField, callCount = Flowfield(self.mapGrid, gridX, gridY, self.isGridCellVisitable)
     self.flowFieldMessage = self.flowFieldMessage or {}

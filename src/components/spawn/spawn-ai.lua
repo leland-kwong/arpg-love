@@ -60,7 +60,9 @@ local function AiFactory(self, x, y, speed, scale)
     grid = self.grid,
     gridSize = self.gridSize,
     WALKABLE = self.WALKABLE,
-    showAiPath = self.showAiPath
+    showAiPath = self.showAiPath,
+    attackRange = self.attackRange,
+    COLOR_FILL = self.COLOR_FILL
   })
 end
 

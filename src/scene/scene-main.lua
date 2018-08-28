@@ -140,14 +140,18 @@ local function generateAi(parent, player, map)
     local isValidPosition = grid[posY][posX] == Map.WALKABLE
     if isValidPosition then
       generated = generated + 1
+      local isMeleeType = math.random(0, 1) == 0
       SpawnerAi.create({
         grid = grid,
         WALKABLE = Map.WALKABLE,
         target = player,
         x = posX,
         y = posY,
-        speed = 80,
-        scale = 0.5 + (math.random(1, 7) / 10)
+        speed = isMeleeType and 110 or 80,
+        scale = 0.5 + (math.random(1, 7) / 10),
+        -- make some enemies with very close attack range
+        attackRange = isMeleeType and 2 or nil,
+        COLOR_FILL = isMeleeType and {1,0.6,0} or nil
       }):setParent(parent)
     end
   end
