@@ -815,7 +815,7 @@
             <key type="filename">custom-art/characters/ai-1/ai-9.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
+                <point_f>0.5,0.45</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -883,7 +883,7 @@
             <key type="filename">custom-art/characters/slime/slime9.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
+                <point_f>0.203125,0.555556</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>

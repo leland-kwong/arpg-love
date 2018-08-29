@@ -159,7 +159,7 @@ local abilityDash = (function()
     end
   end
 
-  function skill.updateCooldown(dt)
+  function skill.updateCooldown(self, dt)
     curCooldown = curCooldown - dt
     return skill
   end
@@ -221,13 +221,13 @@ function Ai._update2(self, grid, flowField, dt)
     if self.attackRange <= Dash.range then
       if (distFromTarget <= Dash.range) then
         abilityDash.use(self)
-        abilityDash.updateCooldown(dt)
+        abilityDash.updateCooldown(self, dt)
       end
     end
 
     if isInAttackRange then
       self.ability1.use(self, targetX, targetY)
-      self.ability1.updateCooldown(dt)
+      self.ability1.updateCooldown(self, dt)
       -- we're already in attack range, so we don't need to move
       return
     end
@@ -391,7 +391,16 @@ function Ai.init(self)
   local padding = math.ceil(scale) * gridSize - size
   self.padding = padding
 
-  self.collision = self:addCollisionObject('ai', self.x, self.y, self.w, self.h)
+  local ox, oy = self.animation:getOffset()
+  self.collision = self:addCollisionObject(
+      'ai',
+      self.x,
+      self.y,
+      self.w * self.scale,
+      self.h * self.scale,
+      ox * self.scale,
+      oy * self.scale
+    )
     :addToWorld(self.collisionWorld)
 
   self.attackRange = self.attackRange * self.gridSize

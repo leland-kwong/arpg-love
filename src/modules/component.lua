@@ -44,6 +44,29 @@ local baseProps = {
     end
     self:update(dt)
   end,
+  _drawDebug = function(self)
+    self.draw(self)
+    local colObjects = self.collisionObjects
+    love.graphics.setColor(1,1,0,0.2)
+    if colObjects then
+      for i=1, #colObjects do
+        local c = colObjects[i]
+        local x, y = c:getPositionWithOffset()
+        love.graphics.rectangle(
+          'fill',
+          x, y,
+          c.w, c.h
+        )
+      end
+    end
+    love.graphics.setColor(0,1,0,0.2)
+    love.graphics.circle(
+      'fill',
+      self.x,
+      self.y,
+      2
+    )
+  end,
   _isComponent = true,
 }
 
@@ -235,7 +258,8 @@ function M.newGroup(groupDefinition)
 
   function Group.drawAll()
     for id,c in pairs(componentsById) do
-      drawQ:add(c:drawOrder(), c.draw, c)
+      local drawFunc = (c.debug == true) and c._drawDebug or c.draw
+      drawQ:add(c:drawOrder(), drawFunc, c)
     end
 
     drawQ:flush()

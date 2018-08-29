@@ -2,6 +2,8 @@ local Component = require 'modules.component'
 local objectUtils = require 'utils.object-utils'
 local groups = require 'components.groups'
 local MapBlueprint = require 'components.map.map-blueprint'
+local Map = require 'modules.map-generator.index'
+local config = require 'config.config'
 
 return Component.createFactory(
   objectUtils.assign({}, MapBlueprint, {

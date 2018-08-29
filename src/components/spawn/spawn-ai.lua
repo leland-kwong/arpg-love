@@ -7,13 +7,19 @@ local config = require 'config.config'
 local typeCheck = require 'utils.type-check'
 local Math = require 'utils.math'
 local animationFactory = require 'components.animation-factory'
-
+local Enum = require 'utils.enum'
 local floor = math.floor
+
+local aiType = Enum({
+  'MELEE',
+  'RANGE'
+})
 
 local SpawnerAi = {
   group = groups.all,
   x = 0,
   y = 0,
+  types = aiType,
   speed = 0,
   scale = 1,
   -- these need to be passed in
@@ -34,16 +40,10 @@ local SpawnerAi = {
 }
 
 local function AiFactory(self, x, y, speed, scale)
-  local Enum = require 'utils.enum'
-
-  local aiType = Enum({
-    'MELEE',
-    'RANGE'
-  })
 
   local function getAiType(type)
     if type == aiType.MELEE then
-      local animation = {
+      local animations = {
         attacking = animationFactory:new({
           'slime1',
           'slime2',
@@ -73,7 +73,87 @@ local function AiFactory(self, x, y, speed, scale)
         })
       }
 
-      return 64, 36, animation
+      local function slimeAttackCollisionFilter(item)
+        return item.group == 'player'
+      end
+
+      local SlimeAttack = Component.createFactory({
+        group = groups.all,
+        minDamage = 5,
+        maxDamage = 10,
+        init = function(self)
+          local items, len = collisionWorlds.map:queryRect(
+            self.x2 - self.w/2,
+            self.y2,
+            self.w,
+            self.h,
+            slimeAttackCollisionFilter
+          )
+
+          for i=1, len do
+            local it = items[i]
+            msgBus.send(msgBus.CHARACTER_HIT, {
+              parent = it.parent,
+              damage = math.random(self.minDamage, self.maxDamage)
+            })
+          end
+
+          self:delete(true)
+        end
+      })
+
+      local ability1 = (function()
+        local curCooldown = 0
+        local initialCooldown = 0
+        local skill = {}
+        local isAnimationComplete = false
+
+        function skill.use(self, targetX, targetY)
+          if curCooldown > 0 then
+            return skill
+          else
+            local attack = SlimeAttack.create({
+                x = self.x
+              , y = self.y
+              , x2 = targetX
+              , y2 = targetY
+              , w = 64
+              , h = 36
+              , cooldown = 0.5
+              , targetGroup = 'player'
+            })
+            curCooldown = attack.cooldown
+            initialCooldown = attack.cooldown
+            return skill
+          end
+        end
+
+        function skill.updateCooldown(self, dt)
+          local isNewAttack = curCooldown == initialCooldown
+          local attackAnimation = animations.attacking
+          if isNewAttack then
+            -- attackAnimation:setFrame(1)
+            isAnimationComplete = false
+          end
+          self:setProp(
+            'animation',
+            attackAnimation
+          )
+          if not isAnimationComplete then
+            local animation, isLastFrame = attackAnimation:update(dt)
+            isAnimationComplete = isLastFrame
+          end
+
+          curCooldown = curCooldown - dt
+          return skill
+        end
+
+        return skill
+      end)()
+
+      local attackRange = 2
+
+      return 26, 36, animations, ability1, attackRange
     end
 
     if type == aiType.RANGE then
@@ -118,7 +198,7 @@ local function AiFactory(self, x, y, speed, scale)
           end
         end
 
-        function skill.updateCooldown(dt)
+        function skill.updateCooldown(self, dt)
           curCooldown = curCooldown - dt
           return skill
         end
@@ -126,7 +206,9 @@ local function AiFactory(self, x, y, speed, scale)
         return skill
       end)()
 
-      return 24, 20, animations, ability1
+      local attackRange = 8
+
+      return 24, 20, animations, ability1, attackRange
     end
   end
 
@@ -146,17 +228,17 @@ local function AiFactory(self, x, y, speed, scale)
     return nil
   end
 
-  local type = aiType.RANGE
   -- local type = math.random(0, 1) == 1 and aiType.MELEE or aiType.RANGE
-  local w, h, animations, ability1 = getAiType(type)
+  local w, h, animations, ability1, attackRange = getAiType(self.type)
 
   return Ai.create({
+    debug = self.debug,
     x = self.x * self.gridSize,
     y = self.y * self.gridSize,
     w = w,
     h = h,
     speed = self.speed,
-    scale = self.scale,
+    scale = 1,
     collisionWorld = self.colWorld,
     pxToGridUnits = self.pxToGridUnits,
     findNearestTarget = findNearestTarget,
@@ -164,7 +246,7 @@ local function AiFactory(self, x, y, speed, scale)
     gridSize = self.gridSize,
     WALKABLE = self.WALKABLE,
     showAiPath = self.showAiPath,
-    attackRange = self.attackRange,
+    attackRange = attackRange,
     COLOR_FILL = self.COLOR_FILL,
     animations = animations,
     ability1 = ability1

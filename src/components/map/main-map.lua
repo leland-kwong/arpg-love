@@ -126,6 +126,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
       local ox, oy = animation:getOffset()
       local tileX, tileY = x * self.gridSize, y * self.gridSize
 
+      love.graphics.setColor(1,1,1)
       love.graphics.draw(
         animation.atlas,
         animation.sprite,

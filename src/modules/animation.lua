@@ -127,7 +127,8 @@ function meta:update(dt)
     self.frame.spriteSourceSize.h + (pad * 2)
   )
   self.lastIndex = self.index
-  return self
+  local isLastFrame = frameKey == self.aniFrames[#self.aniFrames]
+  return self, isLastFrame
 end
 
 function meta:getSpriteSize(spriteName, includePadding)
