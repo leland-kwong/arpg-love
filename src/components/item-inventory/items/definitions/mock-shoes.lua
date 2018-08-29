@@ -59,18 +59,18 @@ return itemDefs.registerType({
 		end,
 
 		onActivateWhenEquipped = function(self)
-			local speedBoost = 500
+			local speedBoost = 100
 			msgBus.send(msgBus.PLAYER_STATS_ADD_MODIFIERS, {
 				moveSpeed = speedBoost
 			})
-			local buffDuration = 3/60
+			local buffDuration = 1
 			tick.delay(function()
 				msgBus.send(msgBus.PLAYER_STATS_ADD_MODIFIERS, {
 					moveSpeed = -speedBoost
 				})
 			end, buffDuration)
 			return {
-				cooldown = 0.5
+				cooldown = buffDuration
 			}
 		end
 	}
