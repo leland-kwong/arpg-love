@@ -147,6 +147,7 @@ function flowFieldTestBlueprint.init(self)
   end
 
   local function AiFactory(x, y, speed, scale)
+    local AnimationFactory = require 'components.animation-factory'
     return Ai.create({
       x = x * gridSize,
       y = y * gridSize,
@@ -158,7 +159,26 @@ function flowFieldTestBlueprint.init(self)
       grid = grid,
       gridSize = gridSize,
       WALKABLE = WALKABLE,
-      showAiPath = self.showAiPath
+      showAiPath = self.showAiPath,
+      animations = {
+        idle = AnimationFactory:new({'pixel-white-1x1'}),
+        moving = AnimationFactory:new({'pixel-white-1x1'})
+      },
+      w = 32,
+      h = 32,
+      getPlayerRef = function() 
+        return self.dummyPlayer
+      end,
+      sightRadius = 20,
+      draw = function(self)
+        local scale = self.scale
+        local w, h = self.w * scale, self.h * scale
+        love.graphics.setColor(1,1,0,1)
+        love.graphics.rectangle('fill', self.x, self.y, w, h)
+        love.graphics.setColor(0,0,0)
+        love.graphics.setLineWidth(1)
+        love.graphics.rectangle('line', self.x, self.y, w, h)
+      end
     })
   end
 
@@ -171,19 +191,28 @@ function flowFieldTestBlueprint.init(self)
 
   -- generate random ai agents
   local positionsFilled = {}
-  -- while #self.ai <= 50 do
-  --   local gridX = math.random(6, 20)
-  --   local gridY = math.random(2, 20)
-  --   local positionId = gridY * 20 + gridX
+  while #self.ai <= 5 do
+    local gridX = math.random(6, 20)
+    local gridY = math.random(2, 20)
+    local positionId = gridY * 20 + gridX
 
-  --   if grid[gridY][gridX] == WALKABLE and not positionsFilled[positionId] then
-  --     positionsFilled[positionId] = true
-  --     table.insert(
-  --       self.ai,
-  --       AiFactory(gridX, gridY, 360, 0.5):setParent(self)
-  --     )
-  --   end
-  -- end
+    if grid[gridY][gridX] == WALKABLE and not positionsFilled[positionId] then
+      positionsFilled[positionId] = true
+      table.insert(
+        self.ai,
+        AiFactory(gridX, gridY, 360, 4 / math.random(2, 4)):setParent(self)
+      )
+    end
+  end
+
+  self.dummyPlayer = Component.createFactory({
+    group = groups.hud,
+    x = 0,
+    y = 0,
+    w = 16,
+    h = 16,
+    id = 'TEST_PLAYER',
+  }).create()
 end
 
 function flowFieldTestBlueprint.update(self, dt)
@@ -201,7 +230,11 @@ function flowFieldTestBlueprint.update(self, dt)
     end
 
     local ts = socket.gettime()
-    self.targetPosition = {x = mx, y = my}
+    self.dummyPlayer:setPosition(mx, my)
+    self.targetPosition = {
+      x = self.dummyPlayer:getProp('x'),
+      y = self.dummyPlayer:getProp('y')
+    }
     self.flowField = flowField(grid, gridX, gridY, isGridCellVisitable)
     local executionTimeMs = (socket.gettime() - ts) * 1000
     self.callCount = (self.callCount or 0) + 1
