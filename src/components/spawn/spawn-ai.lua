@@ -132,7 +132,6 @@ local function AiFactory(self, x, y, speed, scale)
           local isNewAttack = curCooldown == initialCooldown
           local attackAnimation = animations.attacking
           if isNewAttack then
-            -- attackAnimation:setFrame(1)
             isAnimationComplete = false
           end
           self:setProp(
@@ -140,7 +139,7 @@ local function AiFactory(self, x, y, speed, scale)
             attackAnimation
           )
           if not isAnimationComplete then
-            local animation, isLastFrame = attackAnimation:update(dt)
+            local animation, isLastFrame = attackAnimation:update(dt/2)
             isAnimationComplete = isLastFrame
           end
 
@@ -152,8 +151,9 @@ local function AiFactory(self, x, y, speed, scale)
       end)()
 
       local attackRange = 2
+      local fillColor = {0,1,0.2}
 
-      return 26, 36, animations, ability1, attackRange
+      return 26, 36, animations, ability1, attackRange, fillColor
     end
 
     if type == aiType.RANGE then
@@ -229,7 +229,7 @@ local function AiFactory(self, x, y, speed, scale)
   end
 
   -- local type = math.random(0, 1) == 1 and aiType.MELEE or aiType.RANGE
-  local w, h, animations, ability1, attackRange = getAiType(self.type)
+  local w, h, animations, ability1, attackRange, fillColor = getAiType(self.type)
 
   return Ai.create({
     debug = self.debug,
@@ -247,7 +247,7 @@ local function AiFactory(self, x, y, speed, scale)
     WALKABLE = self.WALKABLE,
     showAiPath = self.showAiPath,
     attackRange = attackRange,
-    COLOR_FILL = self.COLOR_FILL,
+    COLOR_FILL = fillColor,
     animations = animations,
     ability1 = ability1
   })

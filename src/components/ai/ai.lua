@@ -32,7 +32,7 @@ local Ai = {
   sightRadius = 11,
   isAggravated = false,
   gridSize = 1,
-  COLOR_FILL = {0,0.9,0.3,1},
+  COLOR_FILL = {1,1,1,1},
   facingDirectionX = 1,
   drawOrder = function(self)
     return self.group.drawOrder(self) + 1
@@ -277,7 +277,9 @@ function Ai._update2(self, grid, flowField, dt)
     end
   end
 
-  self.animation:update(dt / 12)
+  if self.isInViewOfPlayer then
+    self.animation:update(dt / 12)
+  end
 
   if not self.positionTweener then
     return
@@ -346,7 +348,7 @@ function Ai.draw(self)
     love.graphics.setShader(shader)
     shader:send('fill_color', Color.WHITE)
   else
-    love.graphics.setColor(Color.WHITE)
+    love.graphics.setColor(self.COLOR_FILL)
   end
   love.graphics.draw(
     animationFactory.atlas,

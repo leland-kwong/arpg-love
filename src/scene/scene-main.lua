@@ -142,7 +142,6 @@ local function generateAi(parent, player, map)
       generated = generated + 1
       local isMeleeType = math.random(0, 1) == 0
       SpawnerAi.create({
-        debug = true,
         grid = grid,
         WALKABLE = Map.WALKABLE,
         target = player,
