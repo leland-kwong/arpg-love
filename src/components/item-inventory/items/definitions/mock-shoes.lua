@@ -4,6 +4,7 @@ local functional = require("utils.functional")
 local itemDefs = require("components.item-inventory.items.item-definitions")
 local Color = require('modules.color')
 local tick = require('utils.tick')
+local Sound = require 'components.sound'
 
 local function concatTable(a, b)
 	for i=1, #b do
@@ -24,7 +25,10 @@ return itemDefs.registerType({
 			armor = 20,
 			moveSpeed = 100,
 			magicResist = 20,
-			fireResist = 20
+			fireResist = 20,
+
+			speedBoost = 100,
+			speedBoostDuration = 1
 		}
 	end,
 
@@ -46,7 +50,15 @@ return itemDefs.registerType({
 				statValue(self.armor, Color.CYAN, "armor"),
 				statValue(self.moveSpeed, Color.CYAN, "move speed"),
 				statValue(self.magicResist, Color.CYAN, "magic resist"),
-				statValue(self.fireResist, Color.CYAN, "fire resist")
+				statValue(self.fireResist, Color.CYAN, "fire resist"),
+
+				{
+					Color.YELLOW, '\nactive skill:\n\n',
+					Color.WHITE, 'Gain ',
+					Color.LIME, self.speedBoost..' extra move speed',
+					Color.WHITE, ' for ',
+					Color.CYAN, self.speedBoostDuration..' seconds'
+				}
 			}
 			return functional.reduce(stats, function(combined, textObj)
 				return concatTable(combined, textObj)
@@ -59,14 +71,15 @@ return itemDefs.registerType({
 		end,
 
 		onActivateWhenEquipped = function(self)
-			local speedBoost = 100
+			love.audio.stop(Sound.MOVE_SPEED_BOOST)
+			love.audio.play(Sound.MOVE_SPEED_BOOST)
 			msgBus.send(msgBus.PLAYER_STATS_ADD_MODIFIERS, {
-				moveSpeed = speedBoost
+				moveSpeed = self.speedBoost
 			})
-			local buffDuration = 1
+			local buffDuration = self.speedBoostDuration
 			tick.delay(function()
 				msgBus.send(msgBus.PLAYER_STATS_ADD_MODIFIERS, {
-					moveSpeed = -speedBoost
+					moveSpeed = -self.speedBoost
 				})
 			end, buffDuration)
 			return {
