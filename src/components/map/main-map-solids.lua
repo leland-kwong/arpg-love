@@ -6,7 +6,7 @@ local f = require 'utils.functional'
 
 local MainMapSolidsBlueprint = {
   group = groups.all,
-  animation = {},
+  animation = nil,
   x = 0,
   y = 0,
   ox = 0,
@@ -15,18 +15,24 @@ local MainMapSolidsBlueprint = {
   gridSize = 0,
 }
 
-function MainMapSolidsBlueprint.init(self)
-  assert(type(self.gridSize) == 'number', 'invalid grid size')
+function MainMapSolidsBlueprint.changeTile(self, animation, x, y, opacity)
+  local tileX, tileY = x * self.gridSize, y * self.gridSize
+  local ox, oy = animation:getSourceOffset()
 
-  local w = self.animation:getSourceSize()
-  local ox, oy = self.animation:getSourceOffset()
-  self.colObj = self:addCollisionObject(
-    'obstacle',
-    self.x, self.y, w, self.gridSize, ox, self.gridSize
-  ):addToWorld(collisionWorlds.map)
+  self.ox, self.oy = ox, oy
+  self.animation = animation
+  self.x = tileX
+  self.y = tileY
+  self.opacity = opacity
+
+  return self
 end
 
 function MainMapSolidsBlueprint.draw(self)
+  if not self.animation then
+    return
+  end
+
   love.graphics.setColor(1,1,1,self.opacity)
   love.graphics.draw(
     self.animation.atlas,
