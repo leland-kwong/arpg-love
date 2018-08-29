@@ -47,13 +47,18 @@ local baseProps = {
   _drawDebug = function(self)
     self.draw(self)
     local colObjects = self.collisionObjects
-    love.graphics.setColor(1,1,0,0.2)
+    love.graphics.setColor(1,1,0,0.3)
     if colObjects then
       for i=1, #colObjects do
         local c = colObjects[i]
         local x, y = c:getPositionWithOffset()
         love.graphics.rectangle(
           'fill',
+          x, y,
+          c.w, c.h
+        )
+        love.graphics.rectangle(
+          'line',
           x, y,
           c.w, c.h
         )
