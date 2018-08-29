@@ -169,7 +169,7 @@
             <key>trimMargin</key>
             <uint>1</uint>
             <key>trimMode</key>
-            <enum type="SpriteSettings::TrimMode">None</enum>
+            <enum type="SpriteSettings::TrimMode">Trim</enum>
             <key>tracerTolerance</key>
             <int>200</int>
             <key>heuristicMask</key>
@@ -803,6 +803,28 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/characters/ai-1/ai-1.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-10.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-2.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-3.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-4.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-5.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-6.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-7.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-8.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-9.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>6,6,12,11</rect>
+                <key>scale9Paddings</key>
+                <rect>6,6,12,11</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/characters/player/character-1.png</key>
             <key type="filename">custom-art/characters/player/character-10.png</key>
             <key type="filename">custom-art/characters/player/character-11.png</key>
@@ -840,6 +862,34 @@
                 <rect>4,6,8,12</rect>
                 <key>scale9Paddings</key>
                 <rect>4,6,8,12</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/characters/slime/slime1.png</key>
+            <key type="filename">custom-art/characters/slime/slime10.png</key>
+            <key type="filename">custom-art/characters/slime/slime11.png</key>
+            <key type="filename">custom-art/characters/slime/slime12.png</key>
+            <key type="filename">custom-art/characters/slime/slime13.png</key>
+            <key type="filename">custom-art/characters/slime/slime14.png</key>
+            <key type="filename">custom-art/characters/slime/slime15.png</key>
+            <key type="filename">custom-art/characters/slime/slime16.png</key>
+            <key type="filename">custom-art/characters/slime/slime2.png</key>
+            <key type="filename">custom-art/characters/slime/slime3.png</key>
+            <key type="filename">custom-art/characters/slime/slime4.png</key>
+            <key type="filename">custom-art/characters/slime/slime5.png</key>
+            <key type="filename">custom-art/characters/slime/slime6.png</key>
+            <key type="filename">custom-art/characters/slime/slime7.png</key>
+            <key type="filename">custom-art/characters/slime/slime8.png</key>
+            <key type="filename">custom-art/characters/slime/slime9.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>18,10,35,20</rect>
+                <key>scale9Paddings</key>
+                <rect>18,10,35,20</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -979,6 +1029,8 @@
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets</filename>
             <filename>custom-art/items/weapons/pods</filename>
+            <filename>custom-art/characters/ai-1</filename>
+            <filename>custom-art/characters/slime</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
