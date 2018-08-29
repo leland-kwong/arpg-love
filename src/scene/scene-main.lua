@@ -130,7 +130,7 @@ local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', 
 love.mouse.setCursor(cursor)
 
 local function generateAi(parent, player, map)
-  local aiCount = 60
+  local aiCount = 500
   local generated = 0
   local grid = map.grid
   local rows, cols = #grid, #grid[1]

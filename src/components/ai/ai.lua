@@ -15,6 +15,13 @@ local Perf = require'utils.perf'
 local dynamic = require'modules.dynamic-module'
 local Math = require 'utils.math'
 local Enum = require 'utils.enum'
+local Color = require 'modules.color'
+
+local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
+local outlineColor = {1,1,1,1}
+local shader = love.graphics.newShader(pixelOutlineShader)
+local atlasData = animationFactory.atlasData
+shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
 
 local Ai = {
   group = groups.all,
@@ -302,7 +309,7 @@ function Ai._update2(self, grid, flowField, dt)
     end
   end
 
-  self.animation:update(dt / 10)
+  self.animation:update(dt / 12)
 
   if not self.positionTweener then
     return
@@ -343,16 +350,16 @@ Ai._update2 = perf({
   end
 })(Ai._update2)
 
-local function drawShadow(self, ox, oy)
-  love.graphics.setColor(0,0,0,0.15)
+local function drawShadow(self, h, w, ox, oy)
+  love.graphics.setColor(0,0,0,0.4)
   love.graphics.draw(
     animationFactory.atlas,
     self.animation.sprite,
-    self.x + 1,
-    self.y + 10,
+    self.x,
+    self.y + (h * self.scale / 1.75),
     0,
     self.scale * self.facingDirectionX,
-    self.scale,
+    -self.scale/2,
     ox,
     oy
   )
@@ -364,12 +371,14 @@ function Ai.draw(self)
   end
 
   local ox, oy = self.animation:getOffset()
-  drawShadow(self, ox, oy)
+  local w, h = self.animation:getSourceSize()
+  drawShadow(self, h, w, ox, oy)
 
   if self.hitAnimation then
-    love.graphics.setColor(1,1,1,3)
+    love.graphics.setShader(shader)
+    shader:send('fill_color', Color.WHITE)
   else
-    love.graphics.setColor(self.COLOR_FILL)
+    love.graphics.setColor(Color.WHITE)
   end
   love.graphics.draw(
     animationFactory.atlas,
@@ -382,6 +391,8 @@ function Ai.draw(self)
     ox,
     oy
   )
+
+  love.graphics.setShader()
 
   -- self:debugLineOfSight()
 end
@@ -411,7 +422,7 @@ function Ai.init(self)
       'ai-10'
     })
   }
-  self.animation = self.animations.idle
+  self.animation = self.animations.idle:update(math.random(0, 20) * 1/60)
 
   if scale % 1 == 0 then
     -- to prevent wall collision from getting stuck when pathing around corners, we'll adjust

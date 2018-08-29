@@ -86,6 +86,8 @@ return itemDefs.registerType({
 
 		onActivateWhenEquipped = function(self, props)
 			local Fireball = require 'components.fireball'
+			Fireball.minDamage = 0
+			Fireball.maxDamage = 0
 			return Fireball.create(props)
 		end,
 
