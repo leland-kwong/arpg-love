@@ -14,6 +14,7 @@ local LineOfSight = memoize(require'modules.line-of-sight')
 local Perf = require'utils.perf'
 local dynamic = require'modules.dynamic-module'
 local Math = require 'utils.math'
+local Enum = require 'utils.enum'
 
 local Ai = {
   group = groups.all,
@@ -24,10 +25,8 @@ local Ai = {
   sightRadius = 11,
   isAggravated = false,
   gridSize = 1,
-  animation = animationFactory:new({
-    'pixel-white-1x1'
-  }),
   COLOR_FILL = {0,0.9,0.3,1},
+  facingDirectionX = 1,
   drawOrder = function(self)
     return self.group.drawOrder(self) + 1
   end
@@ -303,6 +302,8 @@ function Ai._update2(self, grid, flowField, dt)
     end
   end
 
+  self.animation:update(dt / 10)
+
   if not self.positionTweener then
     return
   end
@@ -312,6 +313,7 @@ function Ai._update2(self, grid, flowField, dt)
   local nextX, nextY = self.x, self.y
 
   local isMoving = originalX ~= nextX or originalY ~= nextY
+  self.animation = isMoving and self.animations.moving or self.animations.idle
   if not isMoving then
     return
   end
@@ -326,6 +328,7 @@ function Ai._update2(self, grid, flowField, dt)
   self.prevY = self.y
   self.x = actualX
   self.y = actualY
+  self.facingDirectionX = (originalX - self.x) > 0 and -1 or 1
   self.lastFlowField = flowField
 end
 
@@ -348,8 +351,8 @@ local function drawShadow(self, ox, oy)
     self.x + 1,
     self.y + 10,
     0,
-    self.w - 2,
-    self.h,
+    self.scale * self.facingDirectionX,
+    self.scale,
     ox,
     oy
   )
@@ -360,41 +363,22 @@ function Ai.draw(self)
     return
   end
 
-  local padding = 0
-  local sizeIncreaseX, sizeIncreaseY = (self.w * self.pulseTime), (self.h * self.pulseTime)
-  local drawWidth, drawHeight = self.w + sizeIncreaseX, self.h + sizeIncreaseY
-  local ox, oy = 1 + self.pulseTime/2, 1 + self.pulseTime/2
-
+  local ox, oy = self.animation:getOffset()
   drawShadow(self, ox, oy)
 
-  -- border
-  local borderWidth = 2
-  love.graphics.setColor(0,0,0)
-  love.graphics.draw(
-    animationFactory.atlas,
-    self.animation.sprite,
-    self.x,
-    self.y,
-    0,
-    drawWidth,
-    drawHeight,
-    ox,
-    oy
-  )
-
   if self.hitAnimation then
-    love.graphics.setColor(1,1,1,1)
+    love.graphics.setColor(1,1,1,3)
   else
     love.graphics.setColor(self.COLOR_FILL)
   end
   love.graphics.draw(
     animationFactory.atlas,
     self.animation.sprite,
-    self.x + borderWidth/2,
-    self.y + borderWidth/2,
+    self.x,
+    self.y,
     0,
-    drawWidth - borderWidth,
-    drawHeight - borderWidth,
+    self.scale * self.facingDirectionX,
+    self.scale,
     ox,
     oy
   )
@@ -411,6 +395,23 @@ function Ai.init(self)
   local scale = self.scale
   local gridSize = self.gridSize
   self.hits = {}
+  self.animations = {
+    moving = animationFactory:new({
+      'ai-1',
+      'ai-2',
+      'ai-3',
+      'ai-4',
+      'ai-5',
+      'ai-6',
+    }),
+    idle = animationFactory:new({
+      'ai-7',
+      'ai-8',
+      'ai-9',
+      'ai-10'
+    })
+  }
+  self.animation = self.animations.idle
 
   if scale % 1 == 0 then
     -- to prevent wall collision from getting stuck when pathing around corners, we'll adjust
