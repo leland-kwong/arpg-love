@@ -32,6 +32,7 @@ local function cameFromRowPool(id)
 end
 
 local function addCellData(grid, x, y, from, frontier, cameFromList, canVisit)
+  cameFromList._cellCount = cameFromList._cellCount + 1
   -- cameFromList[y] = cameFromList[y] or {}
   cameFromList[y] = cameFromList[y] or cameFromRowPool(cameFromList._cellCount)
   local hasVisited = cameFromList[y][x] ~= nil
@@ -48,7 +49,6 @@ local function addCellData(grid, x, y, from, frontier, cameFromList, canVisit)
   local dirX = (x - from.x) * -1
   local dirY = (y - from.y) * -1
   cameFromList[y][x] = flowCellData(dirX, dirY, dist, cameFromList._cellCount)
-  cameFromList._cellCount = cameFromList._cellCount + 1
 end
 
 --[[
