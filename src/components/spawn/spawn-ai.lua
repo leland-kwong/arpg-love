@@ -152,8 +152,14 @@ local function AiFactory(self, x, y, speed, scale)
 
       local attackRange = 2
       local fillColor = {0,1,0.2}
+      local spriteWidth, spriteHeight = animations.idle:getSourceSize()
 
-      return 26, 36, animations, ability1, attackRange, fillColor
+      return spriteWidth,
+        spriteHeight,
+        animations,
+        ability1,
+        attackRange,
+        fillColor
     end
 
     if type == aiType.RANGE then
@@ -207,8 +213,9 @@ local function AiFactory(self, x, y, speed, scale)
       end)()
 
       local attackRange = 8
+      local spriteWidth, spriteHeight = animations.idle:getSourceSize()
 
-      return 24, 20, animations, ability1, attackRange
+      return spriteWidth, spriteHeight, animations, ability1, attackRange
     end
   end
 

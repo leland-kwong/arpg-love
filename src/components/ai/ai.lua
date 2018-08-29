@@ -153,6 +153,7 @@ local abilityDash = (function()
       local projectile = Dash.create({
           fromCaster = self
         , cooldown = 0.5
+        , duration = 7/60
       })
       curCooldown = projectile.cooldown
       return skill
