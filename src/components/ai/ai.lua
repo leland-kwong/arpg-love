@@ -152,8 +152,9 @@ local abilityDash = (function()
       local Dash = require 'components.abilities.dash'
       local projectile = Dash.create({
           fromCaster = self
-        , cooldown = 0.5
+        , cooldown = 1
         , duration = 7/60
+        , range = require 'config.config'.gridSize * 6
       })
       curCooldown = projectile.cooldown
       return skill

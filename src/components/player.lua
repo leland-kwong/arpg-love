@@ -100,12 +100,18 @@ local Player = {
     self.shader:send('outline_width', 1)
     self.shader:send('outline_color', self.outlineColor)
 
+    local collisionW, collisionH = self.animations.idle:getSourceSize()
+    local collisionOffX, collisionOffY = self.animations.idle:getOffset()
     self.colObj = self:addCollisionObject(
       'player',
       self.x,
       self.y,
-      self.w,
-      self.h
+      collisionW,
+      14,
+      collisionOffX,
+      5
+      -- (collisionH / 1.5)
+      -- collisionOffY / 2
     ):addToWorld(colMap)
 
     self.isGridCellVisitable = function(grid, x, y, dist)
@@ -306,17 +312,17 @@ function Player.update(self, dt)
   local oX, oY = self.animation:getSourceOffset()
 
   -- COLLISION UPDATES
-  local colOrigX, colOrigY = self.colObj.x, self.colObj.y
-  local sizeOffset = 10
-  self.colObj:update(
-    -- use current coordinates because we only want to update size
-    colOrigX,
-    colOrigY,
-    w,
-    h - sizeOffset,
-    oX,
-    oY - sizeOffset
-  )
+  -- local colOrigX, colOrigY = self.colObj.x, self.colObj.y
+  -- local sizeOffset = 10
+  -- self.colObj:update(
+  --   -- use current coordinates because we only want to update size
+  --   colOrigX,
+  --   colOrigY,
+  --   w,
+  --   h - sizeOffset,
+  --   oX,
+  --   oY - sizeOffset
+  -- )
 
   local actualX, actualY, cols, len = self.colObj:move(nextX, nextY, collisionFilter)
   self.x = actualX

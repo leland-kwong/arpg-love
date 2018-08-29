@@ -8,8 +8,6 @@ local Dash = {
   fromCaster = nil, -- object thats casted it
   speed = 1000,
   duration = 3/60,
-
-  -- static props
   range = config.gridSize * 5
 }
 
