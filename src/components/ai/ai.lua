@@ -141,38 +141,6 @@ local function handleHits(self)
   end
 end
 
-local ability1 = (function()
-  local curCooldown = 0
-  local skill = {}
-
-  function skill.use(self, targetX, targetY)
-    if curCooldown > 0 then
-      return skill
-    else
-      local Attack = require 'components.abilities.bullet'
-      local projectile = Attack.create({
-          debug = false
-        , x = self.x
-        , y = self.y
-        , x2 = targetX
-        , y2 = targetY
-        , speed = 125
-        , cooldown = 0.3
-        , targetGroup = 'player'
-      })
-      curCooldown = projectile.cooldown
-      return skill
-    end
-  end
-
-  function skill.updateCooldown(dt)
-    curCooldown = curCooldown - dt
-    return skill
-  end
-
-  return skill
-end)()
-
 local abilityDash = (function()
   local curCooldown = 0
   local skill = {}
@@ -258,8 +226,8 @@ function Ai._update2(self, grid, flowField, dt)
     end
 
     if isInAttackRange then
-      ability1.use(self, targetX, targetY)
-      ability1.updateCooldown(dt)
+      self.ability1.use(self, targetX, targetY)
+      self.ability1.updateCooldown(dt)
       -- we're already in attack range, so we don't need to move
       return
     end
@@ -406,22 +374,6 @@ function Ai.init(self)
   local scale = self.scale
   local gridSize = self.gridSize
   self.hits = {}
-  self.animations = {
-    moving = animationFactory:new({
-      'ai-1',
-      'ai-2',
-      'ai-3',
-      'ai-4',
-      'ai-5',
-      'ai-6',
-    }),
-    idle = animationFactory:new({
-      'ai-7',
-      'ai-8',
-      'ai-9',
-      'ai-10'
-    })
-  }
   self.animation = self.animations.idle:update(math.random(0, 20) * 1/60)
 
   if scale % 1 == 0 then
@@ -439,9 +391,7 @@ function Ai.init(self)
   local padding = math.ceil(scale) * gridSize - size
   self.padding = padding
 
-  local w, h = size, size
-  self.w, self.h = w, h
-  self.collision = self:addCollisionObject('ai', self.x, self.y, size, size)
+  self.collision = self:addCollisionObject('ai', self.x, self.y, self.w, self.h)
     :addToWorld(self.collisionWorld)
 
   self.attackRange = self.attackRange * self.gridSize
