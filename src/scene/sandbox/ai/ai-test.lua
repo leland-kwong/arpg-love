@@ -15,6 +15,7 @@ local Math = require'utils.math'
 local gridSize = 32
 local offX, offY = 100, 0
 local WALKABLE = 0
+local agentCount = 20
 local aiTestGroup = groups.hud
 
 local function arrowRotationFromDirection(dx, dy)
@@ -46,7 +47,7 @@ local flowFieldTestBlueprint = {
   group = aiTestGroup,
   -- debug = true,
   showFlowFieldText = false,
-  showGridCoordinates = false,
+  -- showGridCoordinates = true,
   showAiPath = false,
   showAi = true,
   drawOrder = function()
@@ -251,7 +252,7 @@ function flowFieldTestBlueprint.init(self)
     end
     return scale
   end
-  while #self.ai <= 50 do
+  while #self.ai <= agentCount do
     local gridX = math.random(10, 20)
     local gridY = math.random(10, 20)
     local positionId = gridY * 20 + gridX
@@ -322,6 +323,8 @@ function flowFieldTestBlueprint.update(self, dt)
     self.callCount = (self.callCount or 0) + 1
     self.totalExecutionTime = (self.totalExecutionTime or 0) + executionTimeMs
     self.executionTimeMs = self.totalExecutionTime / self.callCount
+
+
   end
 
   f.forEach(self.ai, function(ai)
