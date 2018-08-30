@@ -3544,7 +3544,7 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":1},
 	"sourceSize": {"w":1,"h":1},
-	"pivot": {"x":0.5,"y":0.266667}
+	"pivot": {"x":0,"y":0}
 },
 "pod-one1":
 {
@@ -6190,6 +6190,6 @@
 	"format": "RGBA8888",
 	"size": {"w":1733,"h":127},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:2cff556b5ac5e2189ec3d59d430103d8:e3328bd71a3e110f72ffddbe32c1294e:68d88b3cf7eafc9b5accfffdfb2fda91$"
+	"smartupdate": "$TexturePacker:SmartUpdate:6beb569649ba27e0fbb5dba96ffce04f:e3328bd71a3e110f72ffddbe32c1294e:68d88b3cf7eafc9b5accfffdfb2fda91$"
 }
 }

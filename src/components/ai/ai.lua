@@ -170,7 +170,7 @@ local abilityDash = (function()
 end)()
 
 function Ai._update2(self, grid, flowField, dt)
-  local playerRef = Component.get('PLAYER')
+  local playerRef = self.getPlayerRef and self.getPlayerRef() or Component.get('PLAYER')
   local playerX, playerY = playerRef:getPosition()
   local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
   self.isInViewOfPlayer = gridDistFromPlayer <= 40

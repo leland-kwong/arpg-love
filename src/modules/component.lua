@@ -47,7 +47,7 @@ local baseProps = {
   _drawDebug = function(self)
     self.draw(self)
     local colObjects = self.collisionObjects
-    love.graphics.setColor(1,1,0,0.3)
+    love.graphics.setColor(1,1,0,0.4)
     if colObjects then
       for i=1, #colObjects do
         local c = colObjects[i]

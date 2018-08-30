@@ -15,13 +15,18 @@ local Math = require'utils.math'
 local gridSize = 32
 local offX, offY = 100, 0
 local WALKABLE = 0
+local aiTestGroup = groups.hud
 
 local flowFieldTestBlueprint = {
-  group = groups.hud,
+  group = aiTestGroup,
+  -- debug = true,
   showFlowFieldText = true,
   showGridCoordinates = false,
   showAiPath = false,
-  showAi = true
+  showAi = true,
+  drawOrder = function()
+    return 2
+  end
 }
 
 local colWorld = bump.newWorld(gridSize)
@@ -122,8 +127,8 @@ function flowFieldTestBlueprint.init(self)
   iterateGrid(grid, function(v, x, y)
     if v ~= WALKABLE then
       self.wallCollisions[y] = self.wallCollisions[y] or {}
-      self.wallCollisions[y][x] = collisionObject:new(
-        'wall',
+      self.wallCollisions[y][x] = self:addCollisionObject(
+        'obstacle',
         (x * gridSize),
         (y * gridSize),
         gridSize, gridSize
@@ -149,6 +154,8 @@ function flowFieldTestBlueprint.init(self)
   local function AiFactory(x, y, speed, scale)
     local AnimationFactory = require 'components.animation-factory'
     return Ai.create({
+      group = aiTestGroup,
+      debug = true,
       x = x * gridSize,
       y = y * gridSize,
       speed= speed,
@@ -166,53 +173,88 @@ function flowFieldTestBlueprint.init(self)
       },
       w = 32,
       h = 32,
-      getPlayerRef = function() 
+      getPlayerRef = function()
         return self.dummyPlayer
       end,
       sightRadius = 20,
       draw = function(self)
         local scale = self.scale
         local w, h = self.w * scale, self.h * scale
-        love.graphics.setColor(1,1,0,1)
+        love.graphics.setColor(1,0.2,1,1)
         love.graphics.rectangle('fill', self.x, self.y, w, h)
         love.graphics.setColor(0,0,0)
         love.graphics.setLineWidth(1)
         love.graphics.rectangle('line', self.x, self.y, w, h)
+      end,
+      drawOrder = function(self)
+        return 5
       end
     })
   end
 
   self.ai = {
-    AiFactory(2, 2, 240, 1.5):setParent(self),
-    AiFactory(4, 2, 300, 1.2):setParent(self),
-    -- put one that is stuck inside a wall to test automatic wall unstuck
-    AiFactory(1, 6, 320, 1.1):setParent(self)
+    -- AiFactory(2, 2, 240, 1.5):setParent(self),
+    -- AiFactory(4, 2, 300, 1.2):setParent(self),
+    -- -- put one that is stuck inside a wall to test automatic wall unstuck
+    -- AiFactory(1, 6, 320, 1.1):setParent(self)
   }
 
   -- generate random ai agents
   local positionsFilled = {}
+  local function getRandomScale()
+    local scale = (2 / math.random(1, 2))
+    local isScaleInteger = scale % 1 == 0
+    if (isScaleInteger) then
+      -- prevent agents of scale that are on whole integers since that will cause the
+      -- collision detection to get stuck on walls for larger agents.
+      return scale - 0.1
+    end
+    return scale
+  end
   while #self.ai <= 5 do
     local gridX = math.random(6, 20)
-    local gridY = math.random(2, 20)
+    local gridY = math.random(3, 20)
     local positionId = gridY * 20 + gridX
 
     if grid[gridY][gridX] == WALKABLE and not positionsFilled[positionId] then
       positionsFilled[positionId] = true
       table.insert(
         self.ai,
-        AiFactory(gridX, gridY, 360, 4 / math.random(2, 4)):setParent(self)
+        AiFactory(gridX, gridY, 360, getRandomScale()):setParent(self)
       )
     end
   end
 
   self.dummyPlayer = Component.createFactory({
-    group = groups.hud,
+    group = aiTestGroup,
     x = 0,
     y = 0,
     w = 16,
     h = 16,
     id = 'TEST_PLAYER',
   }).create()
+
+  local genericNode = Component.createFactory({
+    group = aiTestGroup
+  })
+  genericNode.create({
+    draw = function()
+      love.graphics.push()
+      love.graphics.origin()
+    end,
+    drawOrder = function()
+      return 1
+    end
+  })
+
+  genericNode.create({
+    draw = function()
+      love.graphics.pop()
+    end,
+    drawOrder = function()
+      return 1000
+    end
+  })
 end
 
 function flowFieldTestBlueprint.update(self, dt)
@@ -430,7 +472,7 @@ local function drawScene(self)
 
   if self.showAi then
     f.forEach(self.ai, function(ai)
-      ai:draw(self.flowField, dt)
+      -- ai:draw(self.flowField, dt)
       if ai.showAiPath then
         drawPathWithAstar(ai)
       end
@@ -441,10 +483,13 @@ local function drawScene(self)
 end
 
 function flowFieldTestBlueprint.draw(self)
-  love.graphics.push()
-  love.graphics.origin()
   drawScene(self)
-  love.graphics.pop()
+
+  love.graphics.print(
+    'mousePosition: '..self.targetPosition.x..','..self.targetPosition.y,
+    love.graphics.getWidth() - 300,
+    5
+  )
 end
 
 return Component.createFactory(flowFieldTestBlueprint)
