@@ -169,7 +169,29 @@ local abilityDash = (function()
   return skill
 end)()
 
+local function neighborQueryFilter(item)
+  return item.group == 'ai'
+end
+local function findNearestNeighbors(self, x, y, w, h)
+  self.collisionWorld:queryRect(
+    x, y, w, h, neighborQueryFilter
+  )
+end
+
+findNearestNeighbors = Perf({
+  done = function(_, totalTime, callCount)
+    consoleLog(totalTime / callCount)
+  end
+})(findNearestNeighbors)
+
 function Ai._update2(self, grid, flowField, dt)
+  findNearestNeighbors(
+    self,
+    20 * self.gridSize,
+    20 * self.gridSize,
+    10 * self.gridSize,
+    10 * self.gridSize
+  )
   local playerRef = self.getPlayerRef and self.getPlayerRef() or Component.get('PLAYER')
   local playerX, playerY = playerRef:getPosition()
   local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
@@ -218,26 +240,26 @@ function Ai._update2(self, grid, flowField, dt)
 
   self.canSeeTarget = canSeeTarget
 
-  if canSeeTarget then
-    local Dash = require 'components.abilities.dash'
-    if self.attackRange <= Dash.range then
-      if (distFromTarget <= Dash.range) then
-        abilityDash.use(self)
-        abilityDash.updateCooldown(self, dt)
-      end
-    end
+  -- if canSeeTarget then
+  --   local Dash = require 'components.abilities.dash'
+  --   if self.attackRange <= Dash.range then
+  --     if (distFromTarget <= Dash.range) then
+  --       abilityDash.use(self)
+  --       abilityDash.updateCooldown(self, dt)
+  --     end
+  --   end
 
-    if isInAttackRange then
-      self.ability1.use(self, targetX, targetY)
-      self.ability1.updateCooldown(self, dt)
-      -- we're already in attack range, so we don't need to move
-      return
-    end
-  end
+  --   if isInAttackRange then
+  --     self.ability1.use(self, targetX, targetY)
+  --     self.ability1.updateCooldown(self, dt)
+  --     -- we're already in attack range, so we don't need to move
+  --     return
+  --   end
+  -- end
 
   if shouldGetNewPath then
     self.pathComplete = false
-    local distanceToPlanAhead = actualSightRadius / self.gridSize
+    local distanceToPlanAhead = 1
     self.pathWithAstar = self.getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
 
     local index = 1
@@ -263,6 +285,16 @@ function Ai._update2(self, grid, flowField, dt)
           x = pos.x * self.gridSize + centerOffset,
           y = pos.y * self.gridSize + centerOffset
         }
+
+        local flowFieldValue = flowField[pos.y][pos.x]
+        if flowFieldValue then
+          self.direction.x = flowFieldValue.x
+          self.direction.y = flowFieldValue.y
+        else
+          self.direction.x = 0
+          self.direction.y = 0
+        end
+
         local dist = distOfLine(self.x, self.y, nextPos.x, nextPos.y)
 
         if dist == 0 then
@@ -302,6 +334,9 @@ function Ai._update2(self, grid, flowField, dt)
 
   self.hasDeviatedPosition = hasCollisions and
     (originalX ~= actualX or originalY ~= actualY)
+
+  local isStuck = (actualX == originalX) and (actualY == originalY)
+  self.isStuck = self.prevX == actualX and self.prevY == actualY
 
   self.prevX = self.x
   self.prevY = self.y
@@ -378,6 +413,10 @@ function Ai.init(self)
   local scale = self.scale
   local gridSize = self.gridSize
   self.hits = {}
+  self.direction = {
+    x = 0,
+    y = 0
+  }
   self.animation = self.animations.idle:update(math.random(0, 20) * 1/60)
 
   if scale % 1 == 0 then

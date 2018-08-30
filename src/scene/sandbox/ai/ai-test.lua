@@ -17,10 +17,35 @@ local offX, offY = 100, 0
 local WALKABLE = 0
 local aiTestGroup = groups.hud
 
+local function arrowRotationFromDirection(dx, dy)
+  if dx < 0 then
+    if dy < 0 then
+      return math.rad(-45)
+    end
+    if dy > 0 then
+      return math.rad(225)
+    end
+    return math.rad(-90)
+  end
+  if dx > 0 then
+    if dy < 0 then
+      return math.rad(-315)
+    end
+    if dy > 0 then
+      return math.rad(135)
+    end
+    return math.rad(90)
+  end
+  if dy < 0 then
+    return math.rad(0)
+  end
+  return math.rad(180)
+end
+
 local flowFieldTestBlueprint = {
   group = aiTestGroup,
   -- debug = true,
-  showFlowFieldText = true,
+  showFlowFieldText = false,
   showGridCoordinates = false,
   showAiPath = false,
   showAi = true,
@@ -176,15 +201,30 @@ function flowFieldTestBlueprint.init(self)
       getPlayerRef = function()
         return self.dummyPlayer
       end,
-      sightRadius = 20,
+      sightRadius = 40,
       draw = function(self)
         local scale = self.scale
         local w, h = self.w * scale, self.h * scale
-        love.graphics.setColor(1,0.2,1,1)
-        love.graphics.rectangle('fill', self.x, self.y, w, h)
+        if self.isStuck then
+          love.graphics.setColor(1,0.2,1,1)
+          love.graphics.rectangle('fill', self.x, self.y, w, h)
+        end
         love.graphics.setColor(0,0,0)
         love.graphics.setLineWidth(1)
         love.graphics.rectangle('line', self.x, self.y, w, h)
+
+        local arrowRotation = arrowRotationFromDirection(self.direction.x, self.direction.y)
+        love.graphics.setColor(1,1,1)
+        love.graphics.draw(
+          arrow,
+          self.x + w/2,
+          self.y + h/2,
+          arrowRotation,
+          1,
+          1,
+          8,
+          8
+        )
       end,
       drawOrder = function(self)
         return 5
@@ -211,9 +251,9 @@ function flowFieldTestBlueprint.init(self)
     end
     return scale
   end
-  while #self.ai <= 5 do
-    local gridX = math.random(6, 20)
-    local gridY = math.random(3, 20)
+  while #self.ai <= 50 do
+    local gridX = math.random(10, 20)
+    local gridY = math.random(10, 20)
     local positionId = gridY * 20 + gridX
 
     if grid[gridY][gridX] == WALKABLE and not positionsFilled[positionId] then
@@ -289,34 +329,9 @@ function flowFieldTestBlueprint.update(self, dt)
   end)
 end
 
-local function arrowRotationFromDirection(dx, dy)
-  if dx < 0 then
-    if dy < 0 then
-      return math.rad(-45)
-    end
-    if dy > 0 then
-      return math.rad(225)
-    end
-    return math.rad(-90)
-  end
-  if dx > 0 then
-    if dy < 0 then
-      return math.rad(-315)
-    end
-    if dy > 0 then
-      return math.rad(135)
-    end
-    return math.rad(90)
-  end
-  if dy < 0 then
-    return math.rad(0)
-  end
-  return math.rad(180)
-end
-
 local COLOR_UNWALKABLE = {0.2,0.2,0.2,1}
 local COLOR_WALKABLE = {0.2,0.35,0.55,1}
-local COLOR_ARROW = {0.7,0.7,0.7}
+local COLOR_ARROW = {1,1,1,0.3}
 local COLOR_START_POINT = {0,1,0}
 
 local function drawMousePosition()
@@ -485,10 +500,22 @@ end
 function flowFieldTestBlueprint.draw(self)
   drawScene(self)
 
-  love.graphics.print(
-    'mousePosition: '..self.targetPosition.x..','..self.targetPosition.y,
-    love.graphics.getWidth() - 300,
-    5
+  if self.targetPosition then
+    love.graphics.print(
+      'mousePosition: '..self.targetPosition.x..','..self.targetPosition.y,
+      love.graphics.getWidth() - 300,
+      5
+    )
+  end
+
+  love.graphics.setLineWidth(2)
+  love.graphics.setColor(1,1,1,1)
+  love.graphics.rectangle(
+    'line',
+    20 * gridSize,
+    20 * gridSize,
+    10 * gridSize,
+    10 * gridSize
   )
 end
 

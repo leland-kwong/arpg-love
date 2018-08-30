@@ -69,3 +69,10 @@ progress = currentLevelExp / expRequiredForLevelUp
 - [x] persist selected scene to disk so we can reload last selected scene
 - [x] if no scene is selected, show menu
 - [x] cleanup scene before loading a new scene
+
+## Ai flocking behavior
+
+```lua
+-- follow flow field
+-- if nearby agents are detected, adjust position to avoid them by taking the mean of all their direction vectors. (Sum then normalize)
+```
