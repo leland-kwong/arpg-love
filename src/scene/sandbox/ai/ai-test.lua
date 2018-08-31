@@ -13,10 +13,10 @@ local Ai = require'components.ai.ai'
 local Math = require'utils.math'
 
 local gridSize = 32
-local offX, offY = 100, 0
 local WALKABLE = 0
-local agentCount = 20
+local agentCount = 50
 local maxFlowFieldDistance = 30
+local colWorld = bump.newWorld(gridSize)
 local aiTestGroup = groups.hud
 local function isGridCellVisitable(grid, x, y, dist)
   return grid[y][x] == WALKABLE and
@@ -61,19 +61,17 @@ local flowFieldTestBlueprint = {
   end
 }
 
-local colWorld = bump.newWorld(gridSize)
 
 local function isOutOfBounds(grid, x, y)
   return y < 1 or x < 1 or y > #grid or x > #grid[1]
 end
 
 -- returns grid units relative to the ui
-local floor = math.floor
-local function pxToGridUnits(screenX, screenY, gridSize, offX, offY)
-  local gridPixelX, gridPixelY = screenX, screenY
+local round = Math.round
+local function pxToGridUnits(pixelX, pixelY, gridSize)
   local gridX, gridY =
-    floor(gridPixelX / gridSize),
-    floor(gridPixelY / gridSize)
+    round(pixelX / gridSize),
+    round(pixelY / gridSize)
   return gridX, gridY
 end
 
@@ -86,80 +84,45 @@ local function getFlowFieldValue(flowField, gridX, gridY)
   return v[1], v[2], v[3]
 end
 
-local function drawPathWithAstar(ai)
-  local self = ai
-  local p = self.pathWithAstar
-  local agentSilhouetteDrawQueue = {}
-  local agentPathDrawQueue = {}
+local function blockedAiCollisionFilter(item)
+  return item.group == 'ai'
+end
 
-  for i=1, #p do
-    local point = p[i]
-    local x, y = (point.x) * gridSize,
-      (point.y) * gridSize
-
-    -- agent silhouette
-    table.insert(
-      agentSilhouetteDrawQueue,
-      function()
-        love.graphics.setColor(1,1,1,1)
-        love.graphics.setLineWidth(2)
-        love.graphics.rectangle(
-          'fill',
-          x, y,
-          gridSize * 2,
-          gridSize * 2
-        )
-      end
-    )
-
-    -- agent path
-    table.insert(
-      agentPathDrawQueue,
-      function()
-        love.graphics.setColor(0.6,0.7,0.0,0.5)
-        love.graphics.rectangle(
-          'fill',
-          x, y,
-          gridSize,
-          gridSize
-        )
-
-        love.graphics.setColor(1,1,1,1)
-        love.graphics.print(i, x + 5, y + 5)
-      end
-    )
-  end
-
-  self.canvasAgentSilhouette = self.canvasAgentSilhouette or love.graphics.newCanvas()
-  love.graphics.setCanvas(self.canvasAgentSilhouette)
-  love.graphics.clear()
-  for i=1, #agentSilhouetteDrawQueue do
-    agentSilhouetteDrawQueue[i]()
-  end
-  love.graphics.setCanvas()
-  love.graphics.setColor(1,1,1,0.3)
-  -- need to translate canvas because parent scene is translated
-  love.graphics.translate(-offX, 0)
-  love.graphics.draw(self.canvasAgentSilhouette)
-  love.graphics.translate(offX, 0)
-
-  for i=1, #agentPathDrawQueue do
-    agentPathDrawQueue[i]()
-  end
+local function isBlockedByAi(collisionWorld, x, y, w, h)
+  local items, len = collisionWorld:queryRect(x, y, w, h, blockedAiCollisionFilter)
+  return len > 0
 end
 
 function flowFieldTestBlueprint.init(self)
-  local function flowFieldIsWalkableCheck(grid, x, y, dist)
+  self.getMainFlowField = FlowField(function (grid, x, y, dist)
     local row = grid[y]
     local cell = row and row[x]
+    local isBlocked = false
+    local targetGridX, targetGridY = pxToGridUnits(self.targetPosition.x, self.targetPosition.y, gridSize)
+    local distFromTarget = Math.dist(targetGridX, targetGridY, x, y)
+    local radiusFromTarget = 4
+    if (distFromTarget <= radiusFromTarget) then
+      isBlocked = isBlockedByAi(colWorld, x * gridSize, y * gridSize, gridSize * 1, gridSize * 1)
+    end
     return
+      not isBlocked and
       (cell == WALKABLE) and
       (dist < maxFlowFieldDistance)
+  end)
+  local function miniFlowFieldVisitableCheck(grid, x, y, dist)
+    local row = grid[y]
+    local cell = row and row[x]
+    -- local mGridX, mGridY =
+    --   pxToGridUnits(self.targetPosition.x, self.targetPosition.y, gridSize)
+    return
+      -- Math.dist(mGridX, mGridY, x, y) > 4 and
+      (cell == WALKABLE) and
+      (dist < 8)
   end
-  self.getFlowField1 = FlowField(flowFieldIsWalkableCheck)
-  self.getFlowField2 = FlowField(flowFieldIsWalkableCheck)
-  self.getFlowField3 = FlowField(flowFieldIsWalkableCheck)
-  self.getFlowField4 = FlowField(flowFieldIsWalkableCheck)
+  self.getFlowField1 = FlowField(miniFlowFieldVisitableCheck)
+  self.getFlowField2 = FlowField(miniFlowFieldVisitableCheck)
+  self.getFlowField3 = FlowField(miniFlowFieldVisitableCheck)
+  self.getFlowField4 = FlowField(miniFlowFieldVisitableCheck)
 
   local iterateGrid = require 'utils.iterate-grid'
   self.wallCollisions = {}
@@ -189,18 +152,19 @@ function flowFieldTestBlueprint.init(self)
     return nil
   end
 
-  local function AiFactory(x, y, speed, scale)
+  local function AiFactory(x, y, speed, scale, attackRange)
     local AnimationFactory = require 'components.animation-factory'
     return Ai.create({
       group = aiTestGroup,
-      debug = true,
+      -- debug = true,
       x = x * gridSize,
       y = y * gridSize,
-      speed= speed,
+      speed = speed,
       scale = scale,
       collisionWorld = colWorld,
       pxToGridUnits = pxToGridUnits,
       findNearestTarget = findNearestTarget,
+      attackRange = attackRange,
       grid = grid,
       gridSize = gridSize,
       WALKABLE = WALKABLE,
@@ -218,26 +182,47 @@ function flowFieldTestBlueprint.init(self)
       draw = function(self)
         local scale = self.scale
         local w, h = self.w * scale, self.h * scale
-        if self.isStuck then
-          love.graphics.setColor(1,0.2,1,1)
-          love.graphics.rectangle('fill', self.x, self.y, w, h)
+        local alpha = 0.6
+        if not self.isFinishedMoving then
+          love.graphics.setColor(1,0.2,1,alpha)
+        else
+          love.graphics.setColor(0.8,0.8,0, alpha)
         end
+        love.graphics.rectangle('fill', self.x, self.y, w, h)
+
+        -- border
         love.graphics.setColor(0,0,0)
         love.graphics.setLineWidth(1)
         love.graphics.rectangle('line', self.x, self.y, w, h)
 
-        local arrowRotation = arrowRotationFromDirection(self.direction.x, self.direction.y)
-        love.graphics.setColor(1,1,1)
-        love.graphics.draw(
-          arrow,
-          self.x + w/2,
-          self.y + h/2,
-          arrowRotation,
-          1,
-          1,
-          8,
-          8
-        )
+        -- local arrowRotation = arrowRotationFromDirection(self.direction.x, self.direction.y)
+        -- love.graphics.setColor(1,1,1)
+        -- love.graphics.draw(
+        --   arrow,
+        --   self.x + w/2,
+        --   self.y + h/2,
+        --   arrowRotation,
+        --   1,
+        --   1,
+        --   8,
+        --   8
+        -- )
+
+        -- local path = self.pathWithAstar
+        -- if path then
+        --   for i=1, #path do
+        --     local position = path[i]
+        --     love.graphics.setLineWidth(2)
+        --     love.graphics.setColor(1,1,1)
+        --     love.graphics.rectangle(
+        --       'line',
+        --       position.x * gridSize,
+        --       position.y * gridSize,
+        --       gridSize,
+        --       gridSize
+        --     )
+        --   end
+        -- end
       end,
       drawOrder = function(self)
         return 5
@@ -254,8 +239,8 @@ function flowFieldTestBlueprint.init(self)
 
   -- generate random ai agents
   local positionsFilled = {}
-  local function getRandomScale()
-    local scale = (2 / math.random(1, 2))
+  local function generateScale(scale)
+    scale = scale or (2 / math.random(1, 2))
     local isScaleInteger = scale % 1 == 0
     if (isScaleInteger) then
       -- prevent agents of scale that are on whole integers since that will cause the
@@ -264,16 +249,19 @@ function flowFieldTestBlueprint.init(self)
     end
     return scale
   end
-  while #self.ai <= agentCount do
+  while #self.ai < agentCount do
     local gridX = math.random(10, 20)
     local gridY = math.random(10, 20)
     local positionId = gridY * 20 + gridX
 
     if grid[gridY][gridX] == WALKABLE and not positionsFilled[positionId] then
       positionsFilled[positionId] = true
+      local scale = generateScale()
+      local attackRange = math.random(1, 6)
+      local speed = 350/scale
       table.insert(
         self.ai,
-        AiFactory(gridX, gridY, 360, getRandomScale()):setParent(self)
+        AiFactory(gridX, gridY, speed, scale, attackRange):setParent(self)
       )
     end
   end
@@ -310,10 +298,9 @@ function flowFieldTestBlueprint.init(self)
   })
 end
 
-function flowFieldTestBlueprint.update(self, dt)
-  if love.mouse.isDown(1) or love.keyboard.isDown('space') then
-    local mx, my = love.mouse.getX(), love.mouse.getY()
-    local gridX, gridY = pxToGridUnits(mx, my, gridSize, offX, offY)
+local function generateFlowField(self, dt)
+  local mx, my = love.mouse.getX(), love.mouse.getY()
+    local gridX, gridY = pxToGridUnits(mx, my, gridSize)
 
     if isOutOfBounds(grid, gridX, gridY) then
       return
@@ -331,31 +318,30 @@ function flowFieldTestBlueprint.update(self, dt)
       y = self.dummyPlayer:getProp('y')
     }
 
-    local beaconOffset = 2
-    self.flowFields = {
-      self.getFlowField1(grid, gridX - beaconOffset, gridY - beaconOffset),
-      self.getFlowField2(grid, gridX + beaconOffset, gridY - beaconOffset),
-      self.getFlowField3(grid, gridX - beaconOffset, gridY + beaconOffset),
-      self.getFlowField4(grid, gridX + beaconOffset, gridY + beaconOffset)
-    }
+    local beaconOffset = 4
+    self.mainFlowField = self.getMainFlowField(grid, gridX, gridY)
+    self.secondaryFlowField = self.getFlowField1(
+      grid, gridX - beaconOffset, gridY - beaconOffset
+    )
 
     local executionTimeMs = (socket.gettime() - ts) * 1000
     self.callCount = (self.callCount or 0) + 1
     self.totalExecutionTime = (self.totalExecutionTime or 0) + executionTimeMs
     self.executionTimeMs = self.totalExecutionTime / self.callCount
-  end
+end
 
-  if self.flowFields then
-    local index = 1
-    f.forEach(self.ai, function(ai)
-      local flowFieldToUse = self.flowFields[index]
-      ai._update2(ai, grid, flowFieldToUse, dt)
-      index = index + 1
-      if index > 4 then
-        index = 1
-      end
-    end)
+function flowFieldTestBlueprint.update(self, dt)
+  -- if love.mouse.isDown(1) or love.keyboard.isDown('space') then
+  self.frameCount = (self.frameCount or 0) + 1
+  if self.frameCount % 10 == 0 then
+    generateFlowField(self, dt)
   end
+  -- end
+
+  f.forEach(self.ai, function(ai)
+    local flowFieldToUse = self.mainFlowField
+    ai._update2(ai, grid, flowFieldToUse, dt)
+  end)
 end
 
 local COLOR_UNWALKABLE = {0.2,0.2,0.2,1}
@@ -367,9 +353,7 @@ local function drawMousePosition()
   local gridX, gridY = pxToGridUnits(
     love.mouse.getX(),
     love.mouse.getY(),
-    gridSize,
-    offX,
-    offY
+    gridSize
   )
   love.graphics.setColor(1,1,0,1)
   love.graphics.setLineWidth(2)
@@ -383,6 +367,9 @@ local function drawMousePosition()
 end
 
 local function drawBeacons(self)
+  if not self.flowFields then
+    return
+  end
   love.graphics.setColor(0.8,1,0.2,0.8)
   for i=1, #self.flowFields do
     local start = self.flowFields[i].start
@@ -395,14 +382,12 @@ local function drawBeacons(self)
   end
 end
 
-local function drawScene(self)
-  love.graphics.clear(0.1,0.1,0.1,1)
-
-  local textDrawQueue = {}
-  local arrowDrawQueue = {}
-
+local function drawMainFlowField(self, arrowDrawQueue)
+  if not self.mainFlowField then
+    return
+  end
   for y=1, #grid do
-    local row = self.flowFields[1][y] or {}
+    local row = self.mainFlowField[y] or {}
     for x=1, #grid[1] do
       local cell = row[x]
       local drawX, drawY =
@@ -496,7 +481,15 @@ local function drawScene(self)
       end
     end
   end
+end
 
+local function drawScene(self)
+  love.graphics.clear(0.1,0.1,0.1,1)
+
+  local textDrawQueue = {}
+  local arrowDrawQueue = {}
+
+  drawMainFlowField(self, arrowDrawQueue)
   drawBeacons(self)
 
   local function drawTitle()
@@ -546,16 +539,6 @@ function flowFieldTestBlueprint.draw(self)
       5
     )
   end
-
-  love.graphics.setLineWidth(2)
-  love.graphics.setColor(1,1,1,1)
-  love.graphics.rectangle(
-    'line',
-    20 * gridSize,
-    20 * gridSize,
-    10 * gridSize,
-    10 * gridSize
-  )
 end
 
 return Component.createFactory(flowFieldTestBlueprint)

@@ -211,7 +211,7 @@ function Ai._update2(self, grid, flowField, dt)
   )
   local canSeeTarget = self.isInViewOfPlayer and self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY)
   local shouldGetNewPath = flowField and canSeeTarget
-  local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or math.huge
+  local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or 99999
   local isInAttackRange = canSeeTarget and (distFromTarget <= self.attackRange)
 
   self:autoUnstuckFromWallIfNeeded(grid, gridX, gridY)
@@ -236,33 +236,32 @@ function Ai._update2(self, grid, flowField, dt)
   -- end
 
   if shouldGetNewPath then
-    self.pathComplete = false
-    local distanceToPlanAhead = 1
+    local distanceToPlanAhead = 2
     self.pathWithAstar = self.getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
 
     local index = 1
     local path = self.pathWithAstar
-    local pathLen = #path
     local posTween
     local done = true
-    local isEmptyPath = pathLen == 0
+    local isEmptyPath = #path == 0
 
     if isEmptyPath then
       return
     end
 
     self.positionTweener = function(dt)
-      if index > pathLen then
-        self.pathComplete = true
+      if index >= #path then
+        self.pathWithAstar = nil
         return
       end
 
       if done then
         local pos = path[index]
         local nextPos = {
-          x = pos.x * self.gridSize + centerOffset,
-          y = pos.y * self.gridSize + centerOffset
+          x = pos.x * self.gridSize,
+          y = pos.y * self.gridSize
         }
+        self.nextPos = nextPos
 
         local flowFieldValue = flowField[pos.y][pos.x]
         if flowFieldValue then
@@ -274,12 +273,7 @@ function Ai._update2(self, grid, flowField, dt)
         end
 
         local dist = distOfLine(self.x, self.y, nextPos.x, nextPos.y)
-
-        if dist == 0 then
-          print(self.x, self.y, nextPos.x, nextPos.y)
-        end
-
-          local duration = dist / self.speed
+        local duration = dist / self.speed
 
         local easing = tween.easing.linear
         posTween = tween.new(duration, self, nextPos, easing)
@@ -303,18 +297,15 @@ function Ai._update2(self, grid, flowField, dt)
 
   local isMoving = originalX ~= nextX or originalY ~= nextY
   self.animation = isMoving and self.animations.moving or self.animations.idle
-  if not isMoving then
-    return
-  end
 
   local actualX, actualY, cols, len = self.collision:move(nextX, nextY, collisionFilter)
   local hasCollisions = len > 0
 
+  self.isFinishedMoving = (not canSeeTarget)
+    or (canSeeTarget and isInAttackRange)
+
   self.hasDeviatedPosition = hasCollisions and
     (originalX ~= actualX or originalY ~= actualY)
-
-  local isStuck = (actualX == originalX) and (actualY == originalY)
-  self.isStuck = self.prevX == actualX and self.prevY == actualY
 
   self.prevX = self.x
   self.prevY = self.y
@@ -405,12 +396,6 @@ function Ai.init(self)
 
   local scale = scale or 1
   local size = gridSize * scale
-  --[[
-    Padding is the difference between the full grid size and the actual rectangle size.
-    Ie: if scale is 1.5, then the difference is (2 - 1.5) * gridSize
-  ]]
-  local padding = math.ceil(scale) * gridSize - size
-  self.padding = padding
 
   local ox, oy = self.animation:getOffset()
   self.collision = self:addCollisionObject(
