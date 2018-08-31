@@ -85,7 +85,8 @@ local function getFlowFieldValue(flowField, gridX, gridY)
 end
 
 local function blockedAiCollisionFilter(item)
-  return item.group == 'ai'
+  return item.parent.isFinishedMoving
+  -- return item.group == 'ai'
 end
 
 local function isBlockedByAi(collisionWorld, x, y, w, h)
@@ -100,7 +101,7 @@ function flowFieldTestBlueprint.init(self)
     local isBlocked = false
     local targetGridX, targetGridY = pxToGridUnits(self.targetPosition.x, self.targetPosition.y, gridSize)
     local distFromTarget = Math.dist(targetGridX, targetGridY, x, y)
-    local radiusFromTarget = 4
+    local radiusFromTarget = 3
     if (distFromTarget <= radiusFromTarget) then
       isBlocked = isBlockedByAi(colWorld, x * gridSize, y * gridSize, gridSize * 1, gridSize * 1)
     end
@@ -186,7 +187,7 @@ function flowFieldTestBlueprint.init(self)
         if not self.isFinishedMoving then
           love.graphics.setColor(1,0.2,1,alpha)
         else
-          love.graphics.setColor(0.8,0.8,0, alpha)
+          love.graphics.setColor(0,0.8,0, alpha)
         end
         love.graphics.rectangle('fill', self.x, self.y, w, h)
 
@@ -257,7 +258,7 @@ function flowFieldTestBlueprint.init(self)
     if grid[gridY][gridX] == WALKABLE and not positionsFilled[positionId] then
       positionsFilled[positionId] = true
       local scale = generateScale()
-      local attackRange = math.random(1, 6)
+      local attackRange = math.random(2, 6)
       local speed = 350/scale
       table.insert(
         self.ai,

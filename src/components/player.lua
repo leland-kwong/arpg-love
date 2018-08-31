@@ -62,7 +62,6 @@ local Player = {
     local function blockedAiCollisionFilter(item)
       return item.group == 'ai'
       -- return item.parent and item.parent.isFinishedMoving
-      -- return item.group == 'ai'
     end
 
     local function isBlockedByAi(collisionWorld, x, y, w, h)
