@@ -170,6 +170,7 @@ local abilityDash = (function()
 end)()
 
 function Ai._update2(self, grid, flowField, dt)
+  self.isFinishedMoving = true
   local playerRef = self.getPlayerRef and self.getPlayerRef() or Component.get('PLAYER')
   local playerX, playerY = playerRef:getPosition()
   local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
@@ -218,25 +219,25 @@ function Ai._update2(self, grid, flowField, dt)
 
   self.canSeeTarget = canSeeTarget
 
-  -- if canSeeTarget then
-  --   local Dash = require 'components.abilities.dash'
-  --   if self.attackRange <= Dash.range then
-  --     if (distFromTarget <= Dash.range) then
-  --       abilityDash.use(self)
-  --       abilityDash.updateCooldown(self, dt)
-  --     end
-  --   end
+  if canSeeTarget then
+    local Dash = require 'components.abilities.dash'
+    if self.attackRange <= Dash.range then
+      if (distFromTarget <= Dash.range) then
+        abilityDash.use(self)
+        abilityDash.updateCooldown(self, dt)
+      end
+    end
 
-  --   if isInAttackRange then
-  --     self.ability1.use(self, targetX, targetY)
-  --     self.ability1.updateCooldown(self, dt)
-  --     -- we're already in attack range, so we don't need to move
-  --     return
-  --   end
-  -- end
+    if isInAttackRange then
+      self.ability1.use(self, targetX, targetY)
+      self.ability1.updateCooldown(self, dt)
+      -- we're already in attack range, so we don't need to move
+      return
+    end
+  end
 
   if shouldGetNewPath then
-    local distanceToPlanAhead = 2
+    local distanceToPlanAhead = actualSightRadius / self.gridSize
     self.pathWithAstar = self.getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
 
     local index = 1
@@ -250,8 +251,8 @@ function Ai._update2(self, grid, flowField, dt)
     end
 
     self.positionTweener = function(dt)
-      if index >= #path then
-        self.pathWithAstar = nil
+      if index > #path then
+        -- self.pathWithAstar = nil
         return
       end
 
@@ -297,6 +298,9 @@ function Ai._update2(self, grid, flowField, dt)
 
   local isMoving = originalX ~= nextX or originalY ~= nextY
   self.animation = isMoving and self.animations.moving or self.animations.idle
+  if not isMoving then
+    return
+  end
 
   local actualX, actualY, cols, len = self.collision:move(nextX, nextY, collisionFilter)
   local hasCollisions = len > 0
@@ -396,6 +400,9 @@ function Ai.init(self)
 
   local scale = scale or 1
   local size = gridSize * scale
+  if self.scale % 1 == 0 then
+    self.scale = self.scale - 0.1
+  end
 
   local ox, oy = self.animation:getOffset()
   self.collision = self:addCollisionObject(

@@ -13,6 +13,7 @@ local FlowField = require 'modules.flow-field.flow-field'
 local Color = require 'modules.color'
 local memoize = require 'utils.memoize'
 local LineOfSight = memoize(require'modules.line-of-sight')
+local Math = require 'utils.math'
 local getDist = memoize(require('utils.math').dist)
 
 local colMap = collisionWorlds.map
@@ -49,7 +50,7 @@ local Player = {
   facingDirectionY = 1,
   pickupRadius = 5 * config.gridSize,
   speed = 100,
-  flowFieldDistance = 30,
+  flowFieldDistance = 40,
 
   -- collision properties
   type = 'player',
@@ -58,20 +59,32 @@ local Player = {
   mapGrid = nil,
 
   init = function(self)
-    self.getFlowField = FlowField(function(grid, x, y, dist)
+    local function blockedAiCollisionFilter(item)
+      return item.group == 'ai'
+      -- return item.parent and item.parent.isFinishedMoving
+      -- return item.group == 'ai'
+    end
+
+    local function isBlockedByAi(collisionWorld, x, y, w, h)
+      local items, len = collisionWorld:queryRect(x, y, w, h, blockedAiCollisionFilter)
+      return len > 0
+    end
+
+    self.getFlowField = FlowField(function (grid, x, y, dist)
       local row = grid[y]
       local cell = row and row[x]
-      return (cell == Map.WALKABLE) and (dist < self.flowFieldDistance)
-    end)
-    self.getFlowFieldEastOnly = FlowField(function(grid, x, y, dist)
-      local row = grid[y]
-      local cell = row and row[x]
+      local isBlocked = false
+      local radiusFromTarget = 3
+      if dist <= radiusFromTarget then
+        local gridSize = config.gridSize
+        local targetGridX, targetGridY = Position.pixelsToGrid(self.x, self.y, gridSize)
+        isBlocked = isBlockedByAi(colMap, x * gridSize, y * gridSize, gridSize * 1, gridSize * 1)
+      end
       return
-        (x > self.x * config.gridSize) and
+        (not isBlocked) and
         (cell == Map.WALKABLE) and
         (dist < self.flowFieldDistance)
     end)
-    local getFlowFieldCorner2 = FlowField()
 
     local CreateStore = require'components.state.state'
     self.rootStore = self.rootStore or CreateStore()
@@ -342,10 +355,11 @@ function Player.update(self, dt)
   -- update camera to follow player
   camera:setPosition(self.x, self.y)
 
-  local gridX, gridY = Position.
-  pixelsToGrid(self.x, self.y, config.gridSize)
-  local dist = getDist(self.prevGridX or 0, self.prevGridY or 0, gridX, gridY)
-  local shouldUpdateFlowField = dist >= 1
+  local gridX, gridY = Position.pixelsToGrid(self.x, self.y, config.gridSize)
+  self.updateCount = (self.updateCount or 0) + 1
+  -- update flowfield every x frames since it also considers ai in the way
+  -- as blocked positions, so we need to keep this fresh
+  local shouldUpdateFlowField = (self.updateCount % 10) == 0
   if shouldUpdateFlowField and self.mapGrid then
     local flowField, callCount = self.getFlowField(self.mapGrid, gridX, gridY)
     self.flowFieldMessage = self.flowFieldMessage or {}

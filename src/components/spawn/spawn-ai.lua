@@ -8,7 +8,6 @@ local typeCheck = require 'utils.type-check'
 local Math = require 'utils.math'
 local animationFactory = require 'components.animation-factory'
 local Enum = require 'utils.enum'
-local floor = math.floor
 
 local aiType = Enum({
   'MELEE',
@@ -32,8 +31,8 @@ local SpawnerAi = {
 
     local gridPixelX, gridPixelY = screenX, screenY
     local gridX, gridY =
-      floor(gridPixelX / gridSize),
-      floor(gridPixelY / gridSize)
+      Math.round(gridPixelX / gridSize),
+      Math.round(gridPixelY / gridSize)
     return gridX, gridY
   end,
   gridSize = config.gridSize,
