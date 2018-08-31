@@ -2,7 +2,7 @@ local Component = require 'modules.component'
 local socket = require 'socket'
 local pprint = require 'utils.pprint'
 local memoize = require 'utils.memoize'
-local flowField = require 'modules.flow-field.flow-field'
+local FlowField = require 'modules.flow-field.flow-field'
 local grid = require 'scene.sandbox.ai.grid'
 local groups = require 'components.groups'
 local collisionObject = require 'modules.collision'
@@ -16,7 +16,13 @@ local gridSize = 32
 local offX, offY = 100, 0
 local WALKABLE = 0
 local agentCount = 20
+local maxFlowFieldDistance = 30
 local aiTestGroup = groups.hud
+local function isGridCellVisitable(grid, x, y, dist)
+  return grid[y][x] == WALKABLE and
+    dist < maxFlowFieldDistance
+end
+local flowField = FlowField(isGridCellVisitable)
 
 local function arrowRotationFromDirection(dx, dy)
   if dx < 0 then
@@ -46,7 +52,7 @@ end
 local flowFieldTestBlueprint = {
   group = aiTestGroup,
   -- debug = true,
-  showFlowFieldText = false,
+  -- showFlowFieldText = true,
   -- showGridCoordinates = true,
   showAiPath = false,
   showAi = true,
@@ -59,11 +65,6 @@ local colWorld = bump.newWorld(gridSize)
 
 local function isOutOfBounds(grid, x, y)
   return y < 1 or x < 1 or y > #grid or x > #grid[1]
-end
-
-local function isGridCellVisitable(grid, x, y, dist)
-  return grid[y][x] == WALKABLE and
-    dist < 30
 end
 
 -- returns grid units relative to the ui
@@ -148,6 +149,18 @@ local function drawPathWithAstar(ai)
 end
 
 function flowFieldTestBlueprint.init(self)
+  local function flowFieldIsWalkableCheck(grid, x, y, dist)
+    local row = grid[y]
+    local cell = row and row[x]
+    return
+      (cell == WALKABLE) and
+      (dist < maxFlowFieldDistance)
+  end
+  self.getFlowField1 = FlowField(flowFieldIsWalkableCheck)
+  self.getFlowField2 = FlowField(flowFieldIsWalkableCheck)
+  self.getFlowField3 = FlowField(flowFieldIsWalkableCheck)
+  self.getFlowField4 = FlowField(flowFieldIsWalkableCheck)
+
   local iterateGrid = require 'utils.iterate-grid'
   self.wallCollisions = {}
   iterateGrid(grid, function(v, x, y)
@@ -162,7 +175,6 @@ function flowFieldTestBlueprint.init(self)
     end
   end)
 
-  self.flowField = flowField(grid, 8, 5, isGridCellVisitable)
   local function findNearestTarget(otherX, otherY, otherSightRadius)
     if not self.targetPosition then
       return nil
@@ -318,18 +330,32 @@ function flowFieldTestBlueprint.update(self, dt)
       x = self.dummyPlayer:getProp('x'),
       y = self.dummyPlayer:getProp('y')
     }
-    self.flowField = flowField(grid, gridX, gridY, isGridCellVisitable)
+
+    local beaconOffset = 2
+    self.flowFields = {
+      self.getFlowField1(grid, gridX - beaconOffset, gridY - beaconOffset),
+      self.getFlowField2(grid, gridX + beaconOffset, gridY - beaconOffset),
+      self.getFlowField3(grid, gridX - beaconOffset, gridY + beaconOffset),
+      self.getFlowField4(grid, gridX + beaconOffset, gridY + beaconOffset)
+    }
+
     local executionTimeMs = (socket.gettime() - ts) * 1000
     self.callCount = (self.callCount or 0) + 1
     self.totalExecutionTime = (self.totalExecutionTime or 0) + executionTimeMs
     self.executionTimeMs = self.totalExecutionTime / self.callCount
-
-
   end
 
-  f.forEach(self.ai, function(ai)
-    ai._update2(ai, grid, self.flowField, dt)
-  end)
+  if self.flowFields then
+    local index = 1
+    f.forEach(self.ai, function(ai)
+      local flowFieldToUse = self.flowFields[index]
+      ai._update2(ai, grid, flowFieldToUse, dt)
+      index = index + 1
+      if index > 4 then
+        index = 1
+      end
+    end)
+  end
 end
 
 local COLOR_UNWALKABLE = {0.2,0.2,0.2,1}
@@ -356,6 +382,19 @@ local function drawMousePosition()
   )
 end
 
+local function drawBeacons(self)
+  love.graphics.setColor(0.8,1,0.2,0.8)
+  for i=1, #self.flowFields do
+    local start = self.flowFields[i].start
+    love.graphics.circle(
+      'line',
+      start.x * gridSize,
+      start.y * gridSize,
+      10
+    )
+  end
+end
+
 local function drawScene(self)
   love.graphics.clear(0.1,0.1,0.1,1)
 
@@ -363,7 +402,7 @@ local function drawScene(self)
   local arrowDrawQueue = {}
 
   for y=1, #grid do
-    local row = self.flowField[y] or {}
+    local row = self.flowFields[1][y] or {}
     for x=1, #grid[1] do
       local cell = row[x]
       local drawX, drawY =
@@ -372,16 +411,11 @@ local function drawScene(self)
 
       local oData = grid[y][x]
       local ffd = row[x] -- flow field cell data
-      local isStartPoint = ffd and (ffd.x == 0 and ffd.y == 0)
-      if isStartPoint then
-        love.graphics.setColor(COLOR_START_POINT)
-      else
-        love.graphics.setColor(
-          oData == WALKABLE and
-            COLOR_WALKABLE or
-            COLOR_UNWALKABLE
-        )
-      end
+      love.graphics.setColor(
+        oData == WALKABLE and
+          COLOR_WALKABLE or
+          COLOR_UNWALKABLE
+      )
 
       love.graphics.rectangle(
         'fill',
@@ -462,6 +496,8 @@ local function drawScene(self)
       end
     end
   end
+
+  drawBeacons(self)
 
   local function drawTitle()
     local offsetX = 50

@@ -169,29 +169,7 @@ local abilityDash = (function()
   return skill
 end)()
 
-local function neighborQueryFilter(item)
-  return item.group == 'ai'
-end
-local function findNearestNeighbors(self, x, y, w, h)
-  self.collisionWorld:queryRect(
-    x, y, w, h, neighborQueryFilter
-  )
-end
-
-findNearestNeighbors = Perf({
-  done = function(_, totalTime, callCount)
-    consoleLog(totalTime / callCount)
-  end
-})(findNearestNeighbors)
-
 function Ai._update2(self, grid, flowField, dt)
-  findNearestNeighbors(
-    self,
-    20 * self.gridSize,
-    20 * self.gridSize,
-    10 * self.gridSize,
-    10 * self.gridSize
-  )
   local playerRef = self.getPlayerRef and self.getPlayerRef() or Component.get('PLAYER')
   local playerX, playerY = playerRef:getPosition()
   local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize

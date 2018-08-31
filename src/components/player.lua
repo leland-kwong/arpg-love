@@ -9,7 +9,7 @@ local collisionObject = require 'modules.collision'
 local camera = require 'components.camera'
 local Position = require 'utils.position'
 local Map = require 'modules.map-generator.index'
-local Flowfield = require 'modules.flow-field.flow-field'
+local FlowField = require 'modules.flow-field.flow-field'
 local Color = require 'modules.color'
 local memoize = require 'utils.memoize'
 local LineOfSight = memoize(require'modules.line-of-sight')
@@ -58,6 +58,21 @@ local Player = {
   mapGrid = nil,
 
   init = function(self)
+    self.getFlowField = FlowField(function(grid, x, y, dist)
+      local row = grid[y]
+      local cell = row and row[x]
+      return (cell == Map.WALKABLE) and (dist < self.flowFieldDistance)
+    end)
+    self.getFlowFieldEastOnly = FlowField(function(grid, x, y, dist)
+      local row = grid[y]
+      local cell = row and row[x]
+      return
+        (x > self.x * config.gridSize) and
+        (cell == Map.WALKABLE) and
+        (dist < self.flowFieldDistance)
+    end)
+    local getFlowFieldCorner2 = FlowField()
+
     local CreateStore = require'components.state.state'
     self.rootStore = self.rootStore or CreateStore()
     self.dir = DIRECTION_RIGHT
@@ -113,12 +128,6 @@ local Player = {
       -- (collisionH / 1.5)
       -- collisionOffY / 2
     ):addToWorld(colMap)
-
-    self.isGridCellVisitable = function(grid, x, y, dist)
-      local row = grid[y]
-      local cell = row and row[x]
-      return (cell == Map.WALKABLE) and (dist < self.flowFieldDistance)
-    end
 
     local calcDist = require'utils.math'.dist
     msgBus.subscribe(function(msgType, msg)
@@ -338,7 +347,7 @@ function Player.update(self, dt)
   local dist = getDist(self.prevGridX or 0, self.prevGridY or 0, gridX, gridY)
   local shouldUpdateFlowField = dist >= 1
   if shouldUpdateFlowField and self.mapGrid then
-    local flowField, callCount = Flowfield(self.mapGrid, gridX, gridY, self.isGridCellVisitable)
+    local flowField, callCount = self.getFlowField(self.mapGrid, gridX, gridY)
     self.flowFieldMessage = self.flowFieldMessage or {}
     self.flowFieldMessage.flowField = flowField
     msgBus.send(msgBus.NEW_FLOWFIELD, self.flowFieldMessage)
