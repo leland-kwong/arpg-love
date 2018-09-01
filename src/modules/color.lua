@@ -5,7 +5,7 @@ end
 local Color = {
   PRIMARY = {rgba255(81, 234, 241)},
   SKY_BLUE = {0.8,1,1,1},
-  LIME = {0,1,0},
+  LIME = {0,1,0,1},
   WHITE = {1,1,1,1},
   LIME = {rgba255(35, 219, 93)},
   LIGHT_GRAY = {0.7,0.7,0.7,1},
@@ -14,8 +14,9 @@ local Color = {
   DARK_GRAY = {0.1,0.1,0.1,1},
   CYAN = {0.2,1,1},
   BLACK = {0,0,0,1},
-  YELLOW = {1,1,0},
+  YELLOW = {1,1,0,1},
   GOLDEN_PALE = {rgba255(243, 156, 18)},
+  RED = {1,0,0,1},
 
   multiply = function(a, b)
     return {
