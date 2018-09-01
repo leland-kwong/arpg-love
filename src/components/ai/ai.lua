@@ -126,8 +126,30 @@ local function hitAnimation()
   coroutine.yield(true)
 end
 
+local function spreadAggroToAllies(self)
+  local c = self.collision
+  local areaMultiplier = 2
+  local function aggravationCollisionFilter(item)
+    return item.group == 'ai' and item ~= c
+  end
+  local items, len = self.collisionWorld:queryRect(
+    c.x - c.ox * areaMultiplier,
+    c.y - c.oy * areaMultiplier,
+    c.w * areaMultiplier,
+    c.h * areaMultiplier,
+    aggravationCollisionFilter
+  )
+
+  for i=1, len do
+    local ai = items[i].parent
+    local canSee = self:checkLineOfSight(self.grid, Map.WALKABLE, ai:getProp('x'), ai:getProp('y'))
+    if canSee then
+      ai:setProp('isAggravated', true)
+    end
+  end
+end
+
 local function handleHits(self)
-  self.isAggravated = false
   local hitCount = #self.hits
   if hitCount > 0 then
     for i=1, hitCount do
@@ -157,6 +179,10 @@ local function handleHits(self)
 
     self.hitAnimation = coroutine.wrap(hitAnimation)
     self.isAggravated = true
+
+    if self.isAggravated then
+      spreadAggroToAllies(self)
+    end
   end
 end
 
@@ -251,7 +277,7 @@ function Ai._update2(self, grid, flowField, dt)
 
   if shouldGetNewPath then
     local distanceToPlanAhead = actualSightRadius / self.gridSize
-    local flowFieldToUse = self.gridDistFromPlayer <= 8 and self.subFlowField or flowField
+    local flowFieldToUse = self.gridDistFromPlayer <= 6 and self.subFlowField or flowField
     self.pathWithAstar = self.getPathWithAstar(flowFieldToUse, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
 
     local index = 1
@@ -374,6 +400,7 @@ function Ai.draw(self)
   else
     love.graphics.setColor(self.COLOR_FILL)
   end
+
   love.graphics.draw(
     animationFactory.atlas,
     self.animation.sprite,
