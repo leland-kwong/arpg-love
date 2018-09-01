@@ -111,7 +111,7 @@ local function getDroppablePosition(posX, posY, mapGrid, callCount)
   callCount = (callCount or 0)
 
   local dropX, dropY = posX + random(0, 16), posY + random(0, 16)
-  local gridX, gridY = Position.pixelsToGrid(dropX, dropY, config.gridSize)
+  local gridX, gridY = Position.pixelsToGridUnits(dropX, dropY, config.gridSize)
   local isWalkable = mapGrid[gridX][gridY] == Map.WALKABLE
   if (not isWalkable) and (callCount < 10) then
     return getDroppablePosition(
@@ -130,11 +130,11 @@ local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', 
 love.mouse.setCursor(cursor)
 
 local function generateAi(parent, player, map)
-  local aiCount = 60
+  local aiCount = 100
   local generated = 0
   local grid = map.grid
   local rows, cols = #grid, #grid[1]
-  local minPos, maxPos = 10, cols
+  local minPos, maxPos = 10, 30
   while generated < aiCount do
     local posX, posY = math.random(minPos, maxPos), math.random(minPos, maxPos)
     local isValidPosition = grid[posY][posX] == Map.WALKABLE

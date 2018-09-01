@@ -149,7 +149,7 @@ local function AiFactory(self, x, y, speed, scale)
         return skill
       end)()
 
-      local attackRange = 2
+      local attackRange = 3
       local fillColor = {0,1,0.2}
       local spriteWidth, spriteHeight = animations.idle:getSourceSize()
 
