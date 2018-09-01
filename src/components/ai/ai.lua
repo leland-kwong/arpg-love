@@ -45,7 +45,6 @@ end)()
 local Ai = {
   group = groups.all,
   health = 10,
-  pulseTime = 0,
   silenced = false,
   speed = 100,
   attackRange = 8,
@@ -196,13 +195,6 @@ function Ai._update2(self, grid, flowField, dt)
   local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
   self.isInViewOfPlayer = gridDistFromPlayer <= 40
   self.gridDistFromPlayer = gridDistFromPlayer
-
-  if self.pulseTime >= 0.4 then
-    self.pulseDirection = -1
-  elseif self.pulseTime <= 0 then
-    self.pulseDirection = 1
-  end
-  self.pulseTime = self.pulseTime + dt * self.pulseDirection
 
   handleHits(self)
 
