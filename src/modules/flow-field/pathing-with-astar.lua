@@ -1,6 +1,15 @@
 local pprint = require 'utils.pprint'
 
 local function getFlowFieldValue(flowField, gridX, gridY)
+  if flowField.getValue then
+    local v = flowField:getValue(gridX, gridY)
+    if v then
+      return v.x, v.y, v.dist
+    else
+      return 0, 0, 0
+    end
+  end
+
   local row = flowField[gridY]
   if not row then
     return 0, 0, 0

@@ -2,8 +2,7 @@
 
 local TablePool = require 'utils.table-pool'
 
-local function FlowFieldFactory(canVisitCallback)
-
+local function FlowFieldFactory(canVisitCallback, getter)
   local flowCellTablePool = TablePool.new()
   local frontierTablePool = TablePool.new()
   local cameFromRowTablePool = TablePool.new()
@@ -120,7 +119,8 @@ local function FlowFieldFactory(canVisitCallback)
     local cameFromList = {
       -- gets incremented each time a flow field cell is generated. Also used as the id for the table pool
       _cellCount = 0,
-      start = start
+      start = start,
+      getValue = getter
     }
     cameFromList[startY] = cameFromRowPool(cameFromList._cellCount)
     -- {directionX, directionY, distance}
