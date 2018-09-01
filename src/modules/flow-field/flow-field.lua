@@ -33,10 +33,8 @@ local function FlowFieldFactory(canVisitCallback, getter)
   end
 
   local function addCellData(grid, x, y, from, frontier, cameFromList, canVisit)
-    cameFromList._cellCount = cameFromList._cellCount + 1
-    -- cameFromList[y] = cameFromList[y] or {}
-    cameFromList[y] = cameFromList[y] or cameFromRowPool(cameFromList._cellCount)
-    local hasVisited = cameFromList[y][x] ~= nil
+    local row = cameFromList[y]
+    local hasVisited = row and row[x] ~= nil
     local dist = from.dist
     if hasVisited or not canVisit(grid, x, y, dist) then
       return
@@ -44,6 +42,8 @@ local function FlowFieldFactory(canVisitCallback, getter)
       -- insert cell to unvisited list
       frontier[#frontier + 1] = toVisitData(x, y, dist + 1, cameFromList._cellCount)
     end
+    cameFromList._cellCount = cameFromList._cellCount + 1
+    cameFromList[y] = cameFromList[y] or cameFromRowPool(cameFromList._cellCount)
 
     -- directions
     -- we multiply by -1 because we want the direction to where it came from
