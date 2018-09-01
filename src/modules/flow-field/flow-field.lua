@@ -42,7 +42,6 @@ local function FlowFieldFactory(canVisitCallback, getter)
       -- insert cell to unvisited list
       frontier[#frontier + 1] = toVisitData(x, y, dist + 1, cameFromList._cellCount)
     end
-    cameFromList._cellCount = cameFromList._cellCount + 1
     cameFromList[y] = cameFromList[y] or cameFromRowPool(cameFromList._cellCount)
 
     -- directions
@@ -50,6 +49,7 @@ local function FlowFieldFactory(canVisitCallback, getter)
     local dirX = (x - from.x) * -1
     local dirY = (y - from.y) * -1
     cameFromList[y][x] = flowCellData(dirX, dirY, dist, cameFromList._cellCount)
+    cameFromList._cellCount = cameFromList._cellCount + 1
   end
 
   --[[

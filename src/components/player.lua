@@ -50,7 +50,7 @@ local Player = {
   facingDirectionY = 1,
   pickupRadius = 5 * config.gridSize,
   speed = 100,
-  flowFieldDistance = 40,
+  flowFieldDistance = 30,
 
   -- collision properties
   type = 'player',
@@ -59,31 +59,18 @@ local Player = {
   mapGrid = nil,
 
   init = function(self)
-    local function blockedAiCollisionFilter(item)
-      return item.group == 'ai'
-      -- return item.parent and item.parent.isFinishedMoving
-    end
-
-    local function isBlockedByAi(collisionWorld, x, y, w, h)
-      local items, len = collisionWorld:queryRect(x, y, w, h, blockedAiCollisionFilter)
-      return len > 0
-    end
-
     self.getFlowField = FlowField(function (grid, x, y, dist)
       local row = grid[y]
       local cell = row and row[x]
-      local isBlocked = false
-      local radiusFromTarget = 3
-      if dist <= radiusFromTarget then
-        local gridSize = config.gridSize
-        local targetGridX, targetGridY = Position.pixelsToGrid(self.x, self.y, gridSize)
-        isBlocked = isBlockedByAi(colMap, x * gridSize, y * gridSize, gridSize * 1, gridSize * 1)
-      end
       return
-        (not isBlocked) and
         (cell == Map.WALKABLE) and
         (dist < self.flowFieldDistance)
     end)
+    self.getFlowField = require'utils.perf'({
+      done = function(_, totalTime, callCount)
+        consoleLog('flowfield', totalTime / callCount)
+      end
+    })(self.getFlowField)
 
     local CreateStore = require'components.state.state'
     self.rootStore = self.rootStore or CreateStore()
@@ -155,8 +142,8 @@ local Player = {
         local item = msg
         local dist = calcDist(self.x, self.y, item.x, item.y)
         local outOfRange = dist > self.pickupRadius
-        local gridX1, gridY1 = Position.pixelsToGrid(self.x, self.y, config.gridSize)
-        local gridX2, gridY2 = Position.pixelsToGrid(item.x, item.y, config.gridSize)
+        local gridX1, gridY1 = Position.pixelsToGridUnits(self.x, self.y, config.gridSize)
+        local gridX2, gridY2 = Position.pixelsToGridUnits(item.x, item.y, config.gridSize)
         local canWalkToItem = LineOfSight(self.mapGrid, Map.WALKABLE)(gridX1, gridY1, gridX2, gridY2)
         if outOfRange or (not canWalkToItem) then
           msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, true)
@@ -354,11 +341,10 @@ function Player.update(self, dt)
   -- update camera to follow player
   camera:setPosition(self.x, self.y)
 
-  local gridX, gridY = Position.pixelsToGrid(self.x, self.y, config.gridSize)
-  self.updateCount = (self.updateCount or 0) + 1
+  local gridX, gridY = Position.pixelsToGridUnits(self.x, self.y, config.gridSize)
   -- update flowfield every x frames since it also considers ai in the way
   -- as blocked positions, so we need to keep this fresh
-  local shouldUpdateFlowField = (self.updateCount % 10) == 0
+  local shouldUpdateFlowField = self.prevGridX ~= gridX or self.prevGridY ~= gridY
   if shouldUpdateFlowField and self.mapGrid then
     local flowField, callCount = self.getFlowField(self.mapGrid, gridX, gridY)
     self.flowFieldMessage = self.flowFieldMessage or {}

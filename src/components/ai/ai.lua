@@ -16,6 +16,8 @@ local dynamic = require'modules.dynamic-module'
 local Math = require 'utils.math'
 local Enum = require 'utils.enum'
 local Color = require 'modules.color'
+local Map = require 'modules.map-generator.index'
+local Position = require 'utils.position'
 
 local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
 local outlineColor = {1,1,1,1}
@@ -23,10 +25,28 @@ local shader = love.graphics.newShader(pixelOutlineShader)
 local atlasData = animationFactory.atlasData
 shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
 
+local DirectionalFlowFields = require 'modules.flow-field.directional-flow-fields'
+local subFlowFields = DirectionalFlowFields(function()
+  local playerX, playerY = (Component.get('PLAYER') or Component.get('TEST_PLAYER')):getPosition()
+  local config = require 'config.config'
+  return Position.pixelsToGridUnits(playerX, playerY, config.gridSize)
+end, Map.WALKABLE)
+local getSubFlowField = (function()
+  local index = 1
+  return function()
+    index = index + 1
+    if index > #subFlowFields then
+      index = 1
+    end
+    return subFlowFields[index]
+  end
+end)()
+
 local Ai = {
   group = groups.all,
   health = 10,
   pulseTime = 0,
+  silenced = false,
   speed = 100,
   attackRange = 8,
   sightRadius = 11,
@@ -175,6 +195,7 @@ function Ai._update2(self, grid, flowField, dt)
   local playerX, playerY = playerRef:getPosition()
   local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
   self.isInViewOfPlayer = gridDistFromPlayer <= 40
+  self.gridDistFromPlayer = gridDistFromPlayer
 
   if self.pulseTime >= 0.4 then
     self.pulseDirection = -1
@@ -219,7 +240,7 @@ function Ai._update2(self, grid, flowField, dt)
 
   self.canSeeTarget = canSeeTarget
 
-  if canSeeTarget then
+  if canSeeTarget and (not self.silenced) then
     local Dash = require 'components.abilities.dash'
     if self.attackRange <= Dash.range then
       if (distFromTarget <= Dash.range) then
@@ -238,7 +259,8 @@ function Ai._update2(self, grid, flowField, dt)
 
   if shouldGetNewPath then
     local distanceToPlanAhead = actualSightRadius / self.gridSize
-    self.pathWithAstar = self.getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
+    local flowFieldToUse = self.gridDistFromPlayer <= 8 and self.subFlowField or flowField
+    self.pathWithAstar = self.getPathWithAstar(flowFieldToUse, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
 
     local index = 1
     local path = self.pathWithAstar
@@ -264,7 +286,7 @@ function Ai._update2(self, grid, flowField, dt)
         }
         self.nextPos = nextPos
 
-        local flowFieldValue = flowField[pos.y][pos.x]
+        local flowFieldValue = flowField[pos.y] and flowField[pos.y][pos.x]
         if flowFieldValue then
           self.direction.x = flowFieldValue.x
           self.direction.y = flowFieldValue.y
@@ -390,6 +412,7 @@ function Ai.init(self)
     x = 0,
     y = 0
   }
+  self.subFlowField = getSubFlowField()
   self.animation = self.animations.idle:update(math.random(0, 20) * 1/60)
 
   if scale % 1 == 0 then
