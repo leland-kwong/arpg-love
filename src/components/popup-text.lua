@@ -64,8 +64,9 @@ function PopupTextBlueprint.update(self)
   end
 end
 
+local spriteSize = {w, h}
 function PopupTextBlueprint.draw(self)
-  shader:send('sprite_size', {w, h})
+  shader:send('sprite_size', spriteSize)
   shader:send('outline_width', 2/16)
   shader:send('outline_color', outlineColor)
   shader:send('use_drawing_color', true)

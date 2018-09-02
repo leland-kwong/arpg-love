@@ -47,6 +47,7 @@ local Gui = {
   h = 1,
   onClick = noop,
   onChange = noop,
+  onCreate = noop,
   onFocus = noop,
   onBlur = noop,
   onScroll = noop,
@@ -199,6 +200,8 @@ function Gui.init(self)
     posX, posY,
     self.w, self.h
   ):addToWorld(collisionWorlds.gui)
+
+  self.onCreate(self)
 end
 
 local Lru = require 'utils.lru'
