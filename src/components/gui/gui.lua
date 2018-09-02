@@ -201,21 +201,37 @@ function Gui.init(self)
   ):addToWorld(collisionWorlds.gui)
 end
 
+local Lru = require 'utils.lru'
+local mouseCollisionsCache = Lru.new(20)
+local function indexByMouseCoord(x, y)
+  local maxCols = love.graphics.getWidth()
+  return (y * maxCols) + x
+end
+
+local function isDifferent(a, b)
+  return a ~= b
+end
+
 function Gui.update(self, dt)
   local posX, posY = self:getPosition()
   self.colObj:update(posX, posY, self.w, self.h)
 
   local mx, my = self.getMousePosition()
-  local items, len = collisionWorlds.gui:queryPoint(mx, my, mouseCollisionFilter)
+  local cacheKey = indexByMouseCoord(mx, my)
+  local items = mouseCollisionsCache:get(cacheKey)
+  local hasChangedPosition = isDifferent(self.x, self.prevX) or isDifferent(self.y, self.prevY)
+  local hasChanges = (not items) or hasChangedPosition
+  if hasChanges then
+    items = collisionWorlds.gui:queryPoint(mx, my, mouseCollisionFilter)
+    mouseCollisionsCache:set(cacheKey, items)
+  end
 
   self.hovered = false
 
   -- if the collided item is `self`, then we're hovered
-  if len > 0 then
-    for i=1, len do
-      if items[i] == self.colObj then
-        self.hovered = true
-      end
+  for i=1, #items do
+    if items[i] == self.colObj then
+      self.hovered = true
     end
   end
 
@@ -238,6 +254,8 @@ function Gui.update(self, dt)
   self.prevHovered = self.hovered
   self.prevColPosX = posX
   self.prevColPosY = posY
+  self.prevX = self.x
+  self.prevY = self.y
 end
 
 function Gui.draw(self)
