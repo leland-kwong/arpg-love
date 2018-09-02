@@ -1,6 +1,7 @@
 -- https://www.geeksforgeeks.org/flood-fill-algorithm-implement-fill-paint/
 
 local TablePool = require 'utils.table-pool'
+local setProp = require 'utils.set-prop'
 
 local function FlowFieldFactory(canVisitCallback, getter)
   local flowCellTablePool = TablePool.new()
@@ -42,6 +43,7 @@ local function FlowFieldFactory(canVisitCallback, getter)
       -- insert cell to unvisited list
       frontier[#frontier + 1] = toVisitData(x, y, dist + 1, cameFromList._cellCount)
     end
+    cameFromList._cellCount = cameFromList._cellCount + 1
     cameFromList[y] = cameFromList[y] or cameFromRowPool(cameFromList._cellCount)
 
     -- directions
@@ -49,7 +51,6 @@ local function FlowFieldFactory(canVisitCallback, getter)
     local dirX = (x - from.x) * -1
     local dirY = (y - from.y) * -1
     cameFromList[y][x] = flowCellData(dirX, dirY, dist, cameFromList._cellCount)
-    cameFromList._cellCount = cameFromList._cellCount + 1
   end
 
   --[[
@@ -106,16 +107,24 @@ local function FlowFieldFactory(canVisitCallback, getter)
     Returns a flow field, where each cell contains the following data:
     {directionX, directionY, distance from start}
   ]]
+
+  -- [[ pooled objects ]]
+  -- list of nodes to visit
+  local frontier = {}
+  local start = {}
+
   local function flowField(grid, startX, startY)
-    local start = {
-      x = startX,
-      y = startY,
-      dist = 1
-    }
-    -- list of nodes to visit
-    local frontier = {
-      start
-    }
+    start = setProp(start)
+      :set('x', startX)
+      :set('y', startY)
+      :set('dist', 1)
+
+    -- reset frontier
+    for i=1, #frontier do
+      frontier[i] = nil
+    end
+    table.insert(frontier, start)
+
     local cameFromList = {
       -- gets incremented each time a flow field cell is generated. Also used as the id for the table pool
       _cellCount = 0,
@@ -124,11 +133,7 @@ local function FlowFieldFactory(canVisitCallback, getter)
     }
     cameFromList[startY] = cameFromRowPool(cameFromList._cellCount)
     -- {directionX, directionY, distance}
-    cameFromList[startY][startX] = {
-      x = 0,
-      y = 0,
-      dist = 0
-    }
+    cameFromList[startY][startX] = flowCellData(0, 0, 0, cameFromList._cellCount)
 
     local i = 1
     while i <= #frontier do
