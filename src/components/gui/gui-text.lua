@@ -1,4 +1,5 @@
-local Component = require 'modules.component'local groups = require 'components.groups'
+local Component = require 'modules.component'
+local groups = require 'components.groups'
 local font = require 'components.font'
 local f = require 'utils.functional'
 
