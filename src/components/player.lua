@@ -67,6 +67,7 @@ local Player = {
         (dist < self.flowFieldDistance)
     end)
     self.getFlowField = require'utils.perf'({
+      enabled = false,
       done = function(_, totalTime, callCount)
         consoleLog('flowfield', totalTime / callCount)
       end
@@ -129,7 +130,7 @@ local Player = {
     ):addToWorld(colMap)
 
     local calcDist = require'utils.math'.dist
-    msgBus.subscribe(function(msgType, msg)
+    local function subscriber(msgType, msg)
       if self:isDeleted() then
         return msgBus.CLEANUP
       end
@@ -182,7 +183,8 @@ local Player = {
       if msgBus.CHARACTER_HIT == msgType and msg.parent == self then
         msgBus.send(msgBus.PLAYER_HIT_RECEIVED, msg.damage)
       end
-    end)
+    end
+    msgBus.subscribe(subscriber)
   end
 }
 
@@ -318,19 +320,6 @@ function Player.update(self, dt)
   local w,h = sw, sh
   -- true center taking into account pivot
   local oX, oY = self.animation:getSourceOffset()
-
-  -- COLLISION UPDATES
-  -- local colOrigX, colOrigY = self.colObj.x, self.colObj.y
-  -- local sizeOffset = 10
-  -- self.colObj:update(
-  --   -- use current coordinates because we only want to update size
-  --   colOrigX,
-  --   colOrigY,
-  --   w,
-  --   h - sizeOffset,
-  --   oX,
-  --   oY - sizeOffset
-  -- )
 
   local actualX, actualY, cols, len = self.colObj:move(nextX, nextY, collisionFilter)
   self.x = actualX

@@ -55,6 +55,7 @@ local flowFieldTestBlueprint = {
   -- showFlowFieldText = true,
   -- showGridCoordinates = true,
   -- showAiPath = true,
+  -- drawSubFlowFields = true,
   showAi = true,
   showFlowFieldArrows = true,
   drawOrder = function()
@@ -77,79 +78,20 @@ local function pxToGridUnits(pixelX, pixelY, gridSize)
 end
 
 function flowFieldTestBlueprint.init(self)
-  -- creates a flow field with virtual walls to steer ai to a certain direction
-  local function FlowFieldWithFilter(filter, maxDist, getter)
-    return FlowField(function (grid, x, y, dist)
-      local row = grid[y]
-      local cell = row and row[x]
-      local isBlocked = false
-      local radiusFromTarget = 2
-      if (filter) then
-        isBlocked = filter(x, y)
-      end
-      return
-        not isBlocked and
-        (cell == WALKABLE) and
-        (dist < maxDist)
-    end, getter)
-  end
-
-  self.getMainFlowField = FlowFieldWithFilter(nil, maxFlowFieldDistance)
-
-  local makeGrid = require 'utils.make-grid'
-  local subFlowFieldSize = 40
-  local startX, startY = subFlowFieldSize/2, subFlowFieldSize/2
-  local subFlowFieldGrid = makeGrid(subFlowFieldSize, subFlowFieldSize, WALKABLE)
   local parent = self
-  local function flowFieldGetter(self, x, y)
-    local tx, ty = pxToGridUnits(parent.targetPosition.x, parent.targetPosition.y, gridSize)
-    local centerPosition = subFlowFieldSize/2
-    local row = self[y - ty + centerPosition]
-    return row and row[x - tx + centerPosition]
-  end
-  -- east direction
-  local flowFieldEast = FlowFieldWithFilter(function(x, y)
-    return
-      (startX - 1 == x and startY == y) or -- W
-      (startX == x and startY - 1 == y) or -- N
-      (startX == x and startY + 1 == y) or -- S
-      (startX - 1 == x and startY - 1 == y) or -- NW
-      (startX - 1 == x and startY + 1 == y) -- SW
-  end, subFlowFieldSize, flowFieldGetter)(subFlowFieldGrid, startX, startY)
-  -- south direction
-  local flowFieldSouth = FlowFieldWithFilter(function(x, y)
-    return
-      (startX - 1 == x and startY == y) or -- W
-      (startX - 1 == x and startY - 1 == y) or -- NW
-      (startX == x and startY - 1 == y) or -- N
-      (startX + 1 == x and startY - 1 == y) or -- NE
-      (startX + 1 == x and startY == y) -- E
-  end, subFlowFieldSize, flowFieldGetter)(subFlowFieldGrid, startX, startY)
-  -- west direction
-  local flowFieldWest = FlowFieldWithFilter(function(x, y)
-    return
-      (startX == x and startY - 1 == y) or -- N
-      (startX + 1 == x and startY - 1 == y) or -- NE
-      (startX + 1 == x and startY == y) or -- E
-      (startX + 1 == x and startY + 1 == y) or -- SE
-      (startX == x and startY + 1 == y) -- S
-  end, subFlowFieldSize, flowFieldGetter)(subFlowFieldGrid, startX, startY)
-  -- north opening
-  local flowFieldNorth = FlowFieldWithFilter(function(x, y)
-    return
-      (startX - 1 == x and startY == y) or -- W
-      (startX - 1 == x and startY + 1 == y) or -- SW
-      (startX == x and startY + 1 == y) or -- S
-      (startX + 1 == x and startY + 1 == y) or -- SE
-      (startX + 1 == x and startY == y) -- E
-  end, subFlowFieldSize, flowFieldGetter)(subFlowFieldGrid, startX, startY)
 
-  self.subFlowFields = {
-    flowFieldNorth,
-    flowFieldEast,
-    flowFieldSouth,
-    flowFieldWest
-  }
+  self.getMainFlowField = FlowField(function (grid, x, y, dist)
+    local row = grid[y]
+    local cell = row and row[x]
+    return
+      (cell == WALKABLE) and
+      (dist < maxFlowFieldDistance)
+  end)
+
+  local DirectionalFlowFields = require 'modules.flow-field.directional-flow-fields'
+  self.subFlowFields = DirectionalFlowFields(function()
+    return pxToGridUnits(parent.targetPosition.x, parent.targetPosition.y, gridSize)
+  end, WALKABLE)
 
   local iterateGrid = require 'utils.iterate-grid'
   self.wallCollisions = {}
@@ -283,7 +225,7 @@ function flowFieldTestBlueprint.init(self)
 
     if grid[gridY][gridX] == WALKABLE and not positionsFilled[positionId] then
       positionsFilled[positionId] = true
-      local scale = generateScale(math.random(1))
+      local scale = generateScale(math.random(1, 2))
       local attackRange = math.random(2, 6)
       local speed = 350/scale
       table.insert(
@@ -362,13 +304,6 @@ function flowFieldTestBlueprint.update(self, dt)
     local fieldIndex = 1
     f.forEach(self.ai, function(ai)
       local flowFieldToUse = self.mainFlowField
-      if (ai.gridDistFromPlayer or 0) <= 8 then
-        flowFieldToUse = self.subFlowFields[fieldIndex]
-        fieldIndex = fieldIndex + 1
-        if fieldIndex > #self.subFlowFields then
-          fieldIndex = 1
-        end
-      end
       ai._update2(ai, grid, flowFieldToUse, dt)
     end)
   end
@@ -397,13 +332,13 @@ local function drawMousePosition()
 end
 
 local function drawFlowFields(self)
-  if not self.flowFieldEast then
+  if not self.subFlowFields then
     return
   end
   love.graphics.setColor(0.8,1,0.2,0.8)
   local iterateGrid = require 'utils.iterate-grid'
   love.graphics.setColor(1,1,0)
-  iterateGrid(self.flowFieldEast, function(v, x, y)
+  iterateGrid(self.subFlowFields[1], function(v, x, y)
     if not v then
       return
     end
@@ -530,7 +465,9 @@ local function drawScene(self)
   local arrowDrawQueue = {}
 
   drawMainFlowField(self, arrowDrawQueue, textDrawQueue)
-  drawFlowFields(self)
+  if self.drawSubFlowFields then
+    drawFlowFields(self)
+  end
 
   local function drawTitle()
     local offsetX = 50

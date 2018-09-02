@@ -130,11 +130,11 @@ local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', 
 love.mouse.setCursor(cursor)
 
 local function generateAi(parent, player, map)
-  local aiCount = 100
+  local aiCount = 0
   local generated = 0
   local grid = map.grid
   local rows, cols = #grid, #grid[1]
-  local minPos, maxPos = 10, 30
+  local minPos, maxPos = 10, 40
   while generated < aiCount do
     local posX, posY = math.random(minPos, maxPos), math.random(minPos, maxPos)
     local isValidPosition = grid[posY][posX] == Map.WALKABLE
@@ -142,6 +142,7 @@ local function generateAi(parent, player, map)
       generated = generated + 1
       local isMeleeType = math.random(0, 1) == 0
       SpawnerAi.create({
+        -- debug = true,
         grid = grid,
         WALKABLE = Map.WALKABLE,
         target = player,

@@ -1,7 +1,4 @@
 local config = require 'config.config'
-local iterateGrid = require 'utils.iterate-grid'
-local bump = require 'modules.bump'
-local pprint = require 'utils.pprint'
 local noop = require 'utils.noop'
 local Map = require 'modules.map-generator.index'
 local Camera = require 'modules.camera'
