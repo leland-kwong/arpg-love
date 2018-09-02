@@ -15,14 +15,14 @@ local guiStackSizeTextLayer = GuiText.create({
 })
 
 local function drawItem(item, x, y, slotSize)
-  local d = itemDefinition.getDefinition(item)
-  if d then
+  local def = itemDefinition.getDefinition(item)
+  if def then
     local animation = itemAnimationsCache[def]
     if not animation then
       animation = animationFactory:new({
-        d.sprite
+        def.sprite
       })
-      itemAnimationsCache[d] = animation
+      itemAnimationsCache[def] = animation
     end
 
     local sx, sy, sw, sh = animation.sprite:getViewport()
