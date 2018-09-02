@@ -45,6 +45,10 @@ local function drawShadow(self)
   love.graphics.setColor(r,g,b,a)
 end
 
+local function getRandomDirection()
+  return math.random(0, 1) == 1 and 1 or -1
+end
+
 function TreasureChest.init(self)
   local parent = self
   self:addCollisionObject('obstacle', self.x, self.y, self.w, self.h - 6, 0, -6)
@@ -62,7 +66,8 @@ function TreasureChest.init(self)
     onClick = function(self)
       local lootAlgorithm = require'components.loot-generator.algorithm-1'
       for i=1, 5 do
-        local offsetX, offsetY = math.random(0, 10), math.random(0, 10)
+        local offsetX, offsetY = math.random(0, 10) * getRandomDirection(),
+          math.random(0, 10) * getRandomDirection()
         msgBus.send(msgBus.GENERATE_LOOT, {self.x + offsetX, self.y + offsetY, lootAlgorithm()})
       end
       parent:delete(true)
