@@ -51,6 +51,7 @@ local Gui = {
   onFocus = noop,
   onBlur = noop,
   onScroll = noop,
+  onPointerDown = noop,
   onPointerEnter = noop,
   onPointerLeave = noop,
   onUpdate = noop,
@@ -177,6 +178,10 @@ function Gui.init(self)
           self.onChange(self, self.checked)
         end
       end
+    end
+
+    if self.hovered and love.mouse.isDown(1) then
+        self.onPointerDown(self)
     end
 
     if self.focused and guiType.TEXT_INPUT == self.type then
