@@ -146,21 +146,14 @@ local Player = {
         local gridX1, gridY1 = Position.pixelsToGridUnits(self.x, self.y, config.gridSize)
         local gridX2, gridY2 = Position.pixelsToGridUnits(item.x, item.y, config.gridSize)
         local canWalkToItem = LineOfSight(self.mapGrid, Map.WALKABLE)(gridX1, gridY1, gridX2, gridY2)
-        if outOfRange or (not canWalkToItem) then
+        if canWalkToItem and (not outOfRange) then
           msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, true)
-          -- move towards item
-          self.forceMove = true
-        elseif canWalkToItem then
-          self.forceMove = false
           item:pickup()
         end
-      elseif (msgBus.ITEM_PICKUP_CANCEL == msgType) or (msgBus.ITEM_PICKUP_SUCCESS == msgType) then
-        self.forceMove = false
-        msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
       end
 
-      if msgBus.ITEM_HOVERED == msgType then
-        msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, msg)
+      if msgBus.ITEM_PICKUP_SUCCESS == msgType then
+        msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
       end
 
       if msgBus.DROP_ITEM_ON_FLOOR == msgType then
@@ -198,11 +191,6 @@ local function handleMovement(self, dt)
   local nextX, nextY = self.x, self.y
   self.dir = mDx > 0 and DIRECTION_RIGHT or DIRECTION_LEFT
 
-  if self.forceMove then
-    nextX = nextX + moveAmount * mDx
-    nextY = nextY + moveAmount * mDy
-  end
-
   -- MOVEMENT
   local inputX, inputY = 0, 0
   if love.keyboard.isDown(keyMap.RIGHT) then
@@ -218,7 +206,7 @@ local function handleMovement(self, dt)
   end
 
   if love.keyboard.isDown(keyMap.DOWN) then
-    inputY= 1
+    inputY = 1
   end
 
   local dx, dy = Position.getDirection(0, 0, inputX, inputY)

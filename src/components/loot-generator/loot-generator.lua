@@ -88,8 +88,8 @@ local itemNamesTooltipLayer = Gui.create({
         onUpdate = function(self)
           tooltip.hovered = self.hovered
         end,
-        onPointerDown = function()
-          itemParent:setProp('selected', true)
+        onClick = function()
+          msgBus.send(msgBus.ITEM_PICKUP, itemParent)
         end
       })
     end
@@ -233,6 +233,7 @@ function LootGenerator.init(self)
     end,
     onClick = function(self)
       self.selected = true
+      msgBus.send(msgBus.ITEM_PICKUP, self)
     end,
     onUpdate = function(self, dt)
       -- IMPORTANT: run any update logic before the pickup messages trigger, since those can
@@ -243,16 +244,6 @@ function LootGenerator.init(self)
         local complete = self.tween:update(dt)
         self.tween2:update(dt)
         self.animationComplete = complete
-      end
-
-      if self.selected then
-        if love.mouse.isDown(1) then
-          -- self.selected = true
-          msgBus.send(msgBus.ITEM_PICKUP, self)
-        elseif not self.pickupPending then
-          msgBus.send(msgBus.ITEM_PICKUP_CANCEL)
-          self.selected = false
-        end
       end
     end,
     draw = function(self)
