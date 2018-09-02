@@ -1,33 +1,45 @@
-local function rgba255(r, g, b, a)
+local assign = require 'utils.object-utils'.assign
+
+local Color = {}
+
+function Color.rgba255(r, g, b, a)
   return r/255, g/255, b/255, (a or 1)
 end
 
-local Color = {
-  PRIMARY = {rgba255(81, 234, 241)},
+function Color.multiply(a, b)
+  return {
+    a[1] * b[1],
+    a[2] * b[2],
+    a[3] * b[3],
+    a[4] * b[4]
+  }
+end
+
+local colors = {
+  PRIMARY = {Color.rgba255(81, 234, 241)},
   SKY_BLUE = {0.8,1,1,1},
   LIME = {0,1,0,1},
   WHITE = {1,1,1,1},
-  LIME = {rgba255(35, 219, 93)},
+  LIME = {Color.rgba255(35, 219, 93)},
   LIGHT_GRAY = {0.7,0.7,0.7,1},
-  MED_GRAY = {0.5,0.5,0.5},
-  MED_DARK_GRAY = {0.3,0.3,0.3},
+  MED_GRAY = {0.5,0.5,0.5,1},
+  MED_DARK_GRAY = {0.3,0.3,0.3,1},
   DARK_GRAY = {0.1,0.1,0.1,1},
-  CYAN = {0.2,1,1},
+  CYAN = {0.2,1,1,1},
   BLACK = {0,0,0,1},
   YELLOW = {1,1,0,1},
-  GOLDEN_PALE = {rgba255(243, 156, 18)},
+  GOLDEN_PALE = {Color.rgba255(243, 156, 18)},
   RED = {1,0,0,1},
-
-  multiply = function(a, b)
-    return {
-      a[1] * b[1],
-      a[2] * b[2],
-      a[3] * b[3],
-      a[4] * b[4]
-    }
-  end
 }
+-- validate colors
+for name,color in pairs(colors) do
+  local inspect = require 'utils.inspect'
+  assert(#color == 4, 'colors should be a table of 4-channel rgba values. Color was \n' .. inspect(color))
+  for k,v in pairs(color) do
+    assert(type(v) == 'number' and v >= 0 and v <= 1, 'color channel value must be between 0 and 1')
+  end
+end
 
-Color.rgba255 = rgba255
+assign(Color, colors)
 
 return Color
