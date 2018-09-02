@@ -8,6 +8,7 @@ local camera = require 'components.camera'
 local CreateStore = require 'components.state.state'
 local msgBus = require 'components.msg-bus'
 local tick = require 'utils.tick'
+local tween = require 'modules.tween'
 
 local LootGenerator = {
   group = groups.all,
@@ -32,6 +33,12 @@ local function collisionFilter(item, other)
   return false
 end
 
+-- parabola that goes up and back down
+local curve = love.math.newBezierCurve(0, 0, 10, -10, 0, 0)
+local function flyoutEasing(t, b, c, d)
+  return c * curve:evaluate(t/d) + b
+end
+
 function LootGenerator.init(self)
   assert(self.item ~= nil, 'item must be provided')
 
@@ -48,11 +55,6 @@ function LootGenerator.init(self)
 
   local colObj = self:addCollisionObject(COLLISION_FLOOR_ITEM_TYPE, self.x, self.y, sw, sh)
     :addToWorld(collisionWorlds.map)
-  local actualX, actualY, cols, len = colObj:move(self.x, self.y, collisionFilter)
-  if len > 0 then
-    self.x = actualX
-    self.y = actualY
-  end
 
   Gui.create({
     group = groups.all,
@@ -60,6 +62,28 @@ function LootGenerator.init(self)
     y = self.y,
     w = sw,
     h = sh,
+    onCreate = function(self)
+      local direction = math.random(0, 1) == 1 and 1 or -1
+      local xOffset = math.random(10, 20)
+      local yOffset = -10 -- cause item to fly upwards
+      local endStateX = {
+        x = self.x + direction * xOffset
+      }
+      local endStateY = {
+        y = self.y + yOffset
+      }
+      -- check collision of position to make sure its at a droppable position
+      local actualX, actualY, cols, len = colObj:move(endStateX.x, endStateY.y, collisionFilter)
+      if len > 0 then
+        endStateX.x = actualX
+        -- update initial position to new initial position
+        self.y = actualY
+        endStateY.y = actualY + yOffset
+      end
+
+      self.tween = tween.new(0.5, self, endStateY, flyoutEasing)
+      self.tween2 = tween.new(0.5, self, endStateX)
+    end,
     getMousePosition = function()
       return camera:getMousePosition()
     end,
@@ -96,6 +120,14 @@ function LootGenerator.init(self)
           self.selected = false
         end
       end
+      if self.tween then
+        local complete = self.tween:update(dt)
+        self.tween2:update(dt)
+        if complete then
+          self.tween = nil
+          self.tween2 = nil
+        end
+      end
     end,
     draw = function(self)
       -- draw item shadow
@@ -123,6 +155,7 @@ function LootGenerator.init(self)
       if self.hovered then
         love.graphics.setShader()
       end
+
     end
   }):setParent(self)
 end
