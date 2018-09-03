@@ -121,17 +121,18 @@ local itemNamesTooltipLayer = Gui.create({
       local itemName = def.title
       local textColor = itemConfig.rarityColor[def.rarity]
       local bgWidth, bgHeight = GuiText.getTextSize(itemName, itemNameTextLayer.font)
-      local padding = self.tooltipPadding
+      local paddingX = self.tooltipPadding + 2
+      local paddingY = self.tooltipPadding
 
       love.graphics.setColor(0,0,0,0.4)
       love.graphics.rectangle(
         'fill',
         tooltip.x,
         tooltip.y,
-        bgWidth + padding,
-        bgHeight + padding
+        bgWidth + paddingX,
+        bgHeight + paddingY
       )
-      itemNameTextLayer:add(itemName, textColor, tooltip.x + padding/2, tooltip.y + padding/2 + 1)
+      itemNameTextLayer:add(itemName, textColor, tooltip.x + paddingX/2, tooltip.y + paddingY/2 + 1)
 
       if tooltip.hovered then
         love.graphics.setColor(1,1,1,1)
@@ -139,8 +140,8 @@ local itemNamesTooltipLayer = Gui.create({
           'line',
           tooltip.x,
           tooltip.y,
-          bgWidth + padding,
-          bgHeight + padding
+          bgWidth + paddingX,
+          bgHeight + paddingY
         )
       end
     end
