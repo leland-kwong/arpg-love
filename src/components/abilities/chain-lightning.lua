@@ -12,6 +12,7 @@ local memoize = require 'utils.memoize'
 local typeCheck = require 'utils.type-check'
 local random = math.random
 local tween = require 'modules.tween'
+local camera = require 'components.camera'
 
 local colMap = collisionWorlds.map
 
@@ -60,7 +61,9 @@ local function findNearestTarget(self, foundTargets)
   local maxSeekRadius = 10 -- radius to find nearest targets
   local nearestEnemyFound = nil
   local i = 2
-  local previousTarget = foundTargets[#foundTargets] or self
+  local mx, my = camera:getMousePosition()
+  local previousTarget = foundTargets[#foundTargets] or {x = mx, y = my}
+
   local startX, startY = previousTarget.x, previousTarget.y
   while (i < maxSeekRadius) and (not nearestEnemyFound) do
     local seekRadius = i * config.gridSize
@@ -112,6 +115,13 @@ ChainLightning.init = function(self)
   for i=1, self.maxTargets do
     local target = findNearestTarget(self, self.targets)
     table.insert(self.targets, target)
+  end
+
+  local foundTargets = #self.targets > 0
+  -- set target to mouse position so we at least have an animation when no targets are found
+  if (not foundTargets) then
+    local mx, my = camera:getMousePosition()
+    table.insert(self.targets, {x = mx, y = my})
   end
 
   self.polyLine = {}
@@ -168,6 +178,7 @@ end
 local function drawTargets(self)
   for i=1, #self.targets do
     local t = self.targets[i]
+    -- point outer
     love.graphics.setColor(0.6,0.6,1,0.8)
     love.graphics.circle(
       'fill',
@@ -176,6 +187,7 @@ local function drawTargets(self)
       5
     )
 
+    -- point inner
     love.graphics.setColor(1,1,1,1)
     love.graphics.circle(
       'fill',
@@ -189,16 +201,15 @@ end
 ChainLightning.draw = function(self)
   local originalLineWidth = love.graphics.getLineWidth()
 
-  -- draw chain
-  if #self.polyLine >= 4 then
-    love.graphics.setColor(0.6,0.6,1,0.8)
-    love.graphics.setLineWidth(4)
-    love.graphics.line(self.polyLine)
+  -- chain outer
+  love.graphics.setColor(0.6,0.6,1,0.8)
+  love.graphics.setLineWidth(4)
+  love.graphics.line(self.polyLine)
 
-    love.graphics.setColor(Color.WHITE)
-    love.graphics.setLineWidth(2)
-    love.graphics.line(self.polyLine)
-  end
+  -- chain inner
+  love.graphics.setColor(Color.WHITE)
+  love.graphics.setLineWidth(2)
+  love.graphics.line(self.polyLine)
 
   drawTargets(self)
   love.graphics.setLineWidth(originalLineWidth)

@@ -32,6 +32,7 @@ local baseProps = {
   draw = noop,
   final = noop,
   _update = function(self, dt)
+    self._ready = true
     local parent = self.parent
     if parent then
       -- update position relative to its parent
@@ -222,6 +223,10 @@ function M.createFactory(blueprint)
     return self._deleted
   end
 
+  function blueprint:isReady()
+    return self._ready
+  end
+
   -- default methods
   for k,v in pairs(baseProps) do
     if not blueprint[k] then
@@ -263,8 +268,10 @@ function M.newGroup(groupDefinition)
 
   function Group.drawAll()
     for id,c in pairs(componentsById) do
-      local drawFunc = (c.debug == true) and c._drawDebug or c.draw
-      drawQ:add(c:drawOrder(), drawFunc, c)
+      if c:isReady() then
+        local drawFunc = (c.debug == true) and c._drawDebug or c.draw
+        drawQ:add(c:drawOrder(), drawFunc, c)
+      end
     end
 
     drawQ:flush()
