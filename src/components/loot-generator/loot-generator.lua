@@ -13,6 +13,7 @@ local tick = require 'utils.tick'
 local tween = require 'modules.tween'
 local bump = require 'modules.bump'
 
+local itemGroup = groups.all
 local tooltipCollisionWorld = bump.newWorld(16)
 local function itemMousePosition()
   return camera:getMousePosition()
@@ -29,7 +30,7 @@ shader:send('outline_color', outlineColor)
 local DRAW_ORDER_BACKGROUND = 200
 local DRAW_ORDER_TEXT = DRAW_ORDER_BACKGROUND + 1
 local itemNameTextLayer = GuiText.create({
-  group = groups.all,
+  group = itemGroup,
   font = require 'components.font'.primary.font,
   drawOrder = function(self)
     return DRAW_ORDER_TEXT
@@ -37,7 +38,7 @@ local itemNameTextLayer = GuiText.create({
 })
 
 local itemNamesTooltipLayer = Gui.create({
-  group = groups.all,
+  group = itemGroup,
   tooltipPadding = 4,
   drawOrder = function(self)
     return DRAW_ORDER_BACKGROUND
@@ -46,24 +47,24 @@ local itemNamesTooltipLayer = Gui.create({
     self.cache = {}
   end,
   set = function(self, item, x, y, itemParent)
-    local hasChangedPosition = x ~= self.lastX or y ~= self.lastY
-    self.lastX = x
-    self.lastY = y
-    if not hasChangedPosition then
-      return
-    end
-
     y = y - 16 -- start above the item
     local isNew = self.cache[item] == nil
     self.cache[item] = self.cache[item] or {
-      x = x,
-      y = y,
       hovered = false,
       itemParent = itemParent
     }
     local tooltip = self.cache[item]
-    tooltip.x = x
-    tooltip.y = y
+    local hasChangedPosition = x ~= tooltip.lastX or y ~= tooltip.lastY
+    tooltip.hasChangedPosition = hasChangedPosition
+    tooltip.lastX = x
+    tooltip.lastY = y
+
+    if not hasChangedPosition then
+      return
+    else
+      tooltip.x = x
+      tooltip.y = y
+    end
 
     if isNew then
       local def = itemDefs.getDefinition(item)
@@ -79,7 +80,7 @@ local itemNamesTooltipLayer = Gui.create({
       )
 
       tooltip.gui = Gui.create({
-        group = groups.all,
+        group = itemGroup,
         x = tooltip.x,
         y = tooltip.y,
         w = ttWidth,
@@ -97,16 +98,20 @@ local itemNamesTooltipLayer = Gui.create({
   delete = function(self, item)
     local tooltip = self.cache[item]
     self.cache[item] = nil
-    tooltipCollisionWorld:remove(tooltip)
-    tooltip.gui:delete()
+    if tooltip then
+      tooltipCollisionWorld:remove(tooltip)
+      tooltip.gui:delete()
+    end
   end,
   onUpdate = function(self)
     local floor = math.floor
     for item, tooltip in pairs(self.cache) do
-      local actualX, actualY, cols, len = tooltipCollisionWorld:move(tooltip, tooltip.x, tooltip.y)
-      tooltip.x = floor(actualX)
-      tooltip.y = floor(actualY)
-      tooltip.gui:setPosition(tooltip.x, tooltip.y)
+      if tooltip.hasChangedPosition then
+        local actualX, actualY, cols, len = tooltipCollisionWorld:move(tooltip, tooltip.x, tooltip.y)
+        tooltip.x = floor(actualX)
+        tooltip.y = floor(actualY)
+        tooltip.gui:setPosition(tooltip.x, tooltip.y)
+      end
       tooltip.hovered = tooltip.hovered or tooltip.itemParent.hovered
     end
   end,
@@ -143,7 +148,7 @@ local itemNamesTooltipLayer = Gui.create({
 })
 
 local LootGenerator = {
-  group = groups.all,
+  group = itemGroup,
   rootStore = CreateStore,
   -- item to generate
   item = nil
@@ -181,7 +186,7 @@ function LootGenerator.init(self)
     :addToWorld(collisionWorlds.map)
 
   Gui.create({
-    group = groups.all,
+    group = itemGroup,
     x = self.x,
     y = self.y,
     w = sw,
@@ -236,6 +241,17 @@ function LootGenerator.init(self)
       msgBus.send(msgBus.ITEM_PICKUP, self)
     end,
     onUpdate = function(self, dt)
+      local w,e,n,s = camera:getBounds(camera.scale)
+      local isOutOfBounds = self.x < w
+        or self.y < n
+        or self.x > e
+        or self.y > s
+      self.isOutOfBounds = isOutOfBounds
+      if isOutOfBounds then
+        itemNamesTooltipLayer:delete(item)
+        return
+      end
+
       -- IMPORTANT: run any update logic before the pickup messages trigger, since those can
       -- cause the item to be deleted part-way through the update method, which will cause race conditions.
       itemNamesTooltipLayer:set(item, self.x, self.y, self)
@@ -247,6 +263,9 @@ function LootGenerator.init(self)
       end
     end,
     draw = function(self)
+      if self.isOutOfBounds then
+        return
+      end
       -- draw item shadow
       love.graphics.setColor(0,0,0,.3)
       love.graphics.draw(
