@@ -7,7 +7,7 @@ local setProp = require 'utils.set-prop'
 
 local mathFloor = math.floor
 
-local baseDamage = 2
+local baseDamage = 1
 
 local function statValue(stat, color, type)
 	local sign = stat >= 0 and "+" or "-"
@@ -45,7 +45,7 @@ return itemDefs.registerType({
 		category = config.category.WEAPON_1,
 
 		energyCost = function(self)
-			return 2
+			return 4
 		end,
 
 		tooltip = function(self)
@@ -72,8 +72,6 @@ return itemDefs.registerType({
 			local Attack = require 'components.abilities.chain-lightning'
 			return Attack.create(
         setProp(props)
-          :set('minDamage', 0)
-          :set('maxDamage', 0)
           :set('targetGroup', 'ai')
       )
 		end

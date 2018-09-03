@@ -1,14 +1,15 @@
 local Component = require 'modules.component'
+local memoize = require 'utils.memoize'
 local config = require 'config.config'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local animationFactory = require 'components.animation-factory'
 local collisionWorlds = require 'components.collision-worlds'
 local collisionObject = require 'modules.collision'
+local LOS = memoize(require 'modules.line-of-sight')
 local gameWorld = require 'components.game-world'
 local Position = require 'utils.position'
 local Color = require 'modules.color'
-local memoize = require 'utils.memoize'
 local typeCheck = require 'utils.type-check'
 local random = math.random
 local tween = require 'modules.tween'
@@ -51,21 +52,30 @@ local ChainLightning = {
   scale = 1,
   lifeTime = 5,
   speed = 200,
-  cooldown = 0.4,
+  cooldown = 0.3,
   maxTargets = 3,
   targetGroup = nil,
+  attackRange = 6 * config.gridSize,
   color = {Color.rgba255(0, 246, 255, 1)}
 }
 
-local function findNearestTarget(self, foundTargets)
-  local maxSeekRadius = 10 -- radius to find nearest targets
+local function checkMousePositionLineOfSight(self, mx, my, los)
+  local gx1, gy1 = Position.pixelsToGridUnits(self.x, self.y, config.gridSize)
+  local gx2, gy2 = Position.pixelsToGridUnits(mx, my, config.gridSize)
+  return los(gx1, gy1, gx2, gy2)
+end
+
+local function findNearestTarget(self, foundTargets, pointerX, pointerY, maxSeekRadius)
+  local mapGrid = Component.get('MAIN_SCENE').mapGrid
+  local Map = require 'modules.map-generator.index'
+  local los = LOS(mapGrid, Map.WALKABLE)
+
   local nearestEnemyFound = nil
-  local i = 2
-  local mx, my = camera:getMousePosition()
-  local previousTarget = foundTargets[#foundTargets] or {x = mx, y = my}
+  local i = 1
+  local previousTarget = foundTargets[#foundTargets] or {x = pointerX, y = pointerY}
 
   local startX, startY = previousTarget.x, previousTarget.y
-  while (i < maxSeekRadius) and (not nearestEnemyFound) do
+  while (i <= maxSeekRadius) and (not nearestEnemyFound) do
     local seekRadius = i * config.gridSize
     local width, height = seekRadius * 2, seekRadius * 2
     local collisionX, collisionY = startX, startY
@@ -78,7 +88,10 @@ local function findNearestTarget(self, foundTargets)
         if (not nearestEnemyFound) and item.group == 'ai' then
           local target = item.parent
           local isAlreadyFound = foundTargets:hasTarget(target)
-          if not isAlreadyFound then
+          local gx1, gy1 = Position.pixelsToGridUnits(startX, startY, config.gridSize)
+          local gx2, gy2 = Position.pixelsToGridUnits(target.x, target.y, config.gridSize)
+          local canSeeTarget = los(gx1, gy1, gx2, gy2)
+          if (not isAlreadyFound) and canSeeTarget then
             nearestEnemyFound = target
           end
         end
@@ -102,6 +115,34 @@ local function hasTarget(self, target)
   return found
 end
 
+-- check if mouse position is blocked by a wall or out of attack range
+local function checkMousePosition(self)
+  local mx, my = camera:getMousePosition()
+  local dx, dy = Position.getDirection(self.x, self.y, mx, my)
+  local actualMx, actualMy = self.x + dx * self.attackRange, self.y + dy * self.attackRange
+  mx, my = actualMx, actualMy
+  local items, wallCollisionCount = colMap:querySegment(self.x, self.y, mx, my, function(item)
+    -- obstacle filters
+    return defaultFilters[item.group]
+  end)
+  local isBlockedByWall = wallCollisionCount > 0
+  if isBlockedByWall then
+    local wallCollision = items[1]
+    mx = wallCollision.x
+    my = wallCollision.y
+  end
+  local isValidPosition = not isBlockedByWall
+  return mx, my, isValidPosition
+end
+
+local function getAllTargets(self, pointerX, pointerY)
+  for i=1, self.maxTargets do
+    local maxSeekRadius = i == 1 and 1 or 6
+    local target = findNearestTarget(self, self.targets, pointerX, pointerY, maxSeekRadius)
+    table.insert(self.targets, target)
+  end
+end
+
 ChainLightning.init = function(self)
   assert(
     type(self.targetGroup) == 'string' and self.targetGroup ~= nil,
@@ -112,16 +153,16 @@ ChainLightning.init = function(self)
   self.targets = {
     hasTarget = hasTarget
   }
-  for i=1, self.maxTargets do
-    local target = findNearestTarget(self, self.targets)
-    table.insert(self.targets, target)
+
+  local pointerX, pointerY, isValidPosition = checkMousePosition(self)
+  if (isValidPosition) then
+    getAllTargets(self, pointerX, pointerY)
   end
 
   local foundTargets = #self.targets > 0
   -- set target to mouse position so we at least have an animation when no targets are found
   if (not foundTargets) then
-    local mx, my = camera:getMousePosition()
-    table.insert(self.targets, {x = mx, y = my})
+    table.insert(self.targets, {x = pointerX, y = pointerY})
   end
 
   self.polyLine = {}
