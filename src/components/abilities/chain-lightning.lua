@@ -122,7 +122,8 @@ ChainLightning.init = function(self)
   local endState = nil
   local subject = nil
   local currentTarget = nil
-  self.animate = function(dt)
+  -- animate and deal damage once the animation ends for a given target
+  self.tween = function(dt)
     local isFullAnimationComplete = targetIndex > #self.targets
     if (not isFullAnimationComplete) then
       if animationDone then
@@ -140,6 +141,10 @@ ChainLightning.init = function(self)
       self.polyLine[polyLineIndex + 4] = subject.y
 
       if animationDone then
+        msgBus.send(msgBus.CHARACTER_HIT, {
+          parent = currentTarget,
+          damage = math.random(self.minDamage, self.maxDamage)
+        })
         previousTarget = currentTarget
         targetIndex = targetIndex + 1
       end
@@ -157,7 +162,7 @@ ChainLightning.update = function(self, dt)
     self:delete()
   end
 
-  self.animate(dt)
+  self.tween(dt)
 end
 
 local function drawTargets(self)
