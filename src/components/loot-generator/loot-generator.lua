@@ -39,7 +39,7 @@ local itemNameTextLayer = GuiText.create({
 
 local itemNamesTooltipLayer = Gui.create({
   group = itemGroup,
-  tooltipPadding = 4,
+  tooltipPadding = 2,
   drawOrder = function(self)
     return DRAW_ORDER_BACKGROUND
   end,
@@ -123,7 +123,7 @@ local itemNamesTooltipLayer = Gui.create({
       local bgWidth, bgHeight = GuiText.getTextSize(itemName, itemNameTextLayer.font)
       local padding = self.tooltipPadding
 
-      love.graphics.setColor(0,0,0,0.8)
+      love.graphics.setColor(0,0,0,0.4)
       love.graphics.rectangle(
         'fill',
         tooltip.x,
