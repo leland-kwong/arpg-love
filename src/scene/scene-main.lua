@@ -98,6 +98,7 @@ local gridTileTypes = {
 }
 
 local MainScene = {
+  id = 'MAIN_SCENE',
   group = groups.all,
 
   -- options
@@ -130,7 +131,7 @@ local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', 
 love.mouse.setCursor(cursor)
 
 local function generateAi(parent, player, map)
-  local aiCount = 100
+  local aiCount = 20
   local generated = 0
   local grid = map.grid
   local rows, cols = #grid, #grid[1]
@@ -196,6 +197,7 @@ function MainScene.init(self)
     local tileGroup = gridTileTypes[v]
     return tileGroup[math.random(1, #tileGroup)]
   end)
+  self.mapGrid = map.grid
 
   msgBus.subscribe(function(msgType, msgValue)
     if self:isDeleted() then

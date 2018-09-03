@@ -17,8 +17,10 @@ end
 
 local function insertTestItems(rootStore)
   local itemsPath = 'components.item-inventory.items.definitions'
-  local item1 = require(itemsPath..'.poison-blade').create()
   local item2 = require(itemsPath..'.mock-shoes').create()
+  rootStore:addItemToInventory(
+    require(itemsPath..'.lightning-rod').create()
+  )
   rootStore:addItemToInventory(item1, {3, 1})
   rootStore:addItemToInventory(require(itemsPath..'.poison-blade').create(), {3, 2})
   rootStore:addItemToInventory(item2, {4, 1})
@@ -44,6 +46,14 @@ function MainGameTest.init(self)
 
   TreasureChest.create({
     x = 5 * 16,
+    y = 5 * 16
+  }):setParent(self)
+  TreasureChest.create({
+    x = 8 * 16,
+    y = 5 * 16
+  }):setParent(self)
+  TreasureChest.create({
+    x = 11 * 16,
     y = 5 * 16
   }):setParent(self)
 
