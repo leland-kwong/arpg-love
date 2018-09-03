@@ -3,6 +3,7 @@ local functional = require("utils.functional")
 local itemDefs = require("components.item-inventory.items.item-definitions")
 local Color = require('modules.color')
 local msgBus = require 'components.msg-bus'
+local Aoe = require 'components.abilities.aoe'
 
 local healSource = "ION_GENERATOR_2"
 local healType = 2
@@ -23,6 +24,16 @@ local function statValue(stat, color, type)
 	}
 end
 
+local function aoeOnHit(self)
+	return {
+		duration = 2, -- a tick is one update cycle
+		modifiers = {
+			speed = -100
+		},
+		statusIcon = 'status-slow'
+	}
+end
+
 return itemDefs.registerType({
 	type = "ion-generator-2",
 
@@ -38,7 +49,7 @@ return itemDefs.registerType({
 
 	properties = {
 		sprite = "book_1",
-		title = 'Ion Generator',
+		title = 'Ion Generator 2',
 		rarity = config.rarity.NORMAL,
 		category = config.category.SIDE_ARM,
 
@@ -72,5 +83,14 @@ return itemDefs.registerType({
 			local toSlot = itemDefs.getDefinition(self).category
 			msgBus.send(msgBus.EQUIPMENT_SWAP, self)
 		end,
+
+		onActivateWhenEquipped = function(self, props)
+			return Aoe.create(
+				props
+					:set('area', 100)
+					:set('targetGroup', 'ai')
+					:set('onHit', aoeOnHit)
+			)
+		end
 	}
 })

@@ -35,6 +35,15 @@ M.MOUSE_WHEEL_MOVED = 'MOUSE_WHEEL_MOVED'
 M.WINDOW_FOCUS = 'WINDOW_FOCUS'
 M.NEW_FLOWFIELD = 'NEW_FLOWFIELD'
 M.CHARACTER_HIT = 'CHARACTER_HIT'
+--[[
+  {
+    parent = TABLE, -- component instance
+    damage = NUMBER,
+    duration = NUMBER,
+    modifiers = TABLE, -- key-value hash of properties
+    statusIcon = STRING
+  }
+]]
 M.EXPERIENCE_GAIN = 'EXPERIENCE_GAIN'
 M.PLAYER_HIT_RECEIVED = 'PLAYER_HIT_RECEIVED'
 M.PLAYER_ATTACK = 'PLAYER_ATTACK'

@@ -53,6 +53,7 @@ local Ai = {
   gridSize = 1,
   COLOR_FILL = {1,1,1,1},
   facingDirectionX = 1,
+  modifiersApplied = {},
   drawOrder = function(self)
     return self.group.drawOrder(self) + 1
   end
@@ -149,40 +150,62 @@ local function spreadAggroToAllies(self)
   end
 end
 
-local function handleHits(self)
-  local hitCount = #self.hits
-  if hitCount > 0 then
-    for i=1, hitCount do
-      local hit = self.hits[i]
-      self.health = self.health - hit.damage
+local function applyModifiers(self, modifiers, multiplier)
+  if (not modifiers) then
+    return
+  end
+  multiplier = multiplier or 1
+  for prop, value in pairs(modifiers) do
+    self[prop] = self[prop] + value * multiplier
+  end
+end
 
+local function handleHits(self, dt)
+  local hasHits = false
+  for hitId,hit in pairs(self.hits) do
+    hasHits = true
+
+    if hit.damage then
+      self.health = self.health - hit.damage
       local offsetCenter = 6
       popupText:new(
         hit.damage,
         self.x + (self.w / 2) - offsetCenter,
         self.y - self.h
       )
-
-      local isDestroyed = self.health <= 0
-      if isDestroyed then
-        msgBus.send(msgBus.ENEMY_DESTROYED, {
-          x = self.x,
-          y = self.y,
-          experience = 1
-        })
-        self:delete()
-        return
-      end
-
-      self.hits[i] = nil
+      self.hitAnimation = coroutine.wrap(hitAnimation)
     end
 
-    self.hitAnimation = coroutine.wrap(hitAnimation)
-    self.isAggravated = true
-
-    if self.isAggravated then
-      spreadAggroToAllies(self)
+    if hit.modifiers and (not self.modifiersApplied[hitId]) then
+      self.modifiersApplied[hitId] = true
+      applyModifiers(self, hit.modifiers)
     end
+
+    local isDestroyed = self.health <= 0
+    if isDestroyed then
+      msgBus.send(msgBus.ENEMY_DESTROYED, {
+        x = self.x,
+        y = self.y,
+        experience = 1
+      })
+      self:delete()
+      return
+    end
+
+    hit.duration = (hit.duration or 0) - dt
+    local isEffectFinished = hit.duration <= 0
+    if isEffectFinished then
+      self.hits[hitId] = nil
+      self.modifiersApplied[hitId] = nil
+      -- remove modifiers by negating them
+      applyModifiers(self, hit.modifiers, -1)
+    end
+  end
+
+  self.isAggravated = hasHits
+
+  if self.isAggravated then
+    spreadAggroToAllies(self)
   end
 end
 
@@ -222,7 +245,7 @@ function Ai._update2(self, grid, flowField, dt)
   self.isInViewOfPlayer = gridDistFromPlayer <= 40
   self.gridDistFromPlayer = gridDistFromPlayer
 
-  handleHits(self)
+  handleHits(self, dt)
 
   if self:isDeleted() then
     return
@@ -292,7 +315,6 @@ function Ai._update2(self, grid, flowField, dt)
 
     self.positionTweener = function(dt)
       if index > #path then
-        -- self.pathWithAstar = nil
         return
       end
 
@@ -315,6 +337,11 @@ function Ai._update2(self, grid, flowField, dt)
 
         local dist = distOfLine(self.x, self.y, nextPos.x, nextPos.y)
         local duration = dist / self.speed
+
+        if duration <= 0 then
+          done = true
+          return
+        end
 
         local easing = tween.easing.linear
         posTween = tween.new(duration, self, nextPos, easing)
@@ -385,6 +412,33 @@ local function drawShadow(self, h, w, ox, oy)
   )
 end
 
+local function getStatusIcons()
+  local iconAnimations = {}
+  for spriteName,_ in pairs(animationFactory.frameData) do
+    if string.find(spriteName, '^status-') then
+      local animation = animationFactory:new({ spriteName })
+      iconAnimations[spriteName] = animation
+    end
+  end
+  return iconAnimations
+end
+local statusIconAnimations = getStatusIcons()
+local function drawStatusEffects(self, statusIcons)
+  local offsetX = 0
+  local iconSize = 20
+  for hitId,hit in pairs(self.hits) do
+    if hit.statusIcon then
+      love.graphics.draw(
+        animationFactory.atlas,
+        statusIconAnimations[hit.statusIcon].sprite,
+        self.x + offsetX,
+        self.y - 20
+      )
+      offsetX = offsetX + iconSize
+    end
+  end
+end
+
 function Ai.draw(self)
   if (not self.isInViewOfPlayer) then
     return
@@ -414,6 +468,9 @@ function Ai.draw(self)
   )
 
   love.graphics.setShader()
+
+  love.graphics.setColor(1,1,1)
+  drawStatusEffects(self, statusIcons)
 
   -- self:debugLineOfSight()
 end
@@ -473,7 +530,8 @@ function Ai.init(self)
     end
 
     if msgBus.CHARACTER_HIT == msgType and msgValue.parent == self then
-      table.insert(self.hits, msgValue)
+      local uid = require 'utils.uid'
+      self.hits[uid()] = msgValue
     end
   end)
 end

@@ -5,6 +5,7 @@ local camera = require 'components.camera'
 local Color = require 'modules.color'
 local drawItem = require 'components.item-inventory.draw-item'
 local config = require 'config.config'
+local setProp = require 'utils.set-prop'
 
 local keyMap = config.keyboard
 local mouseInputMap = config.mouseInputMap
@@ -119,12 +120,12 @@ local function ActiveEquipmentHandler()
       local mx, my = camera:getMousePosition()
       local playerX, playerY = self.player:getPosition()
       local instance = modifyAbility(
-        activateFn(activeItem, {
+        activateFn(activeItem, setProp({
             x = playerX
           , y = playerY
           , x2 = mx
           , y2 = my
-        }),
+        })),
         curState.statModifiers
       )
       curCooldown = instance.cooldown
