@@ -55,7 +55,7 @@ return itemDefs.registerType({
 		category = config.category.SIDE_ARM,
 
 		energyCost = function(self)
-			return 5
+			return 2
 		end,
 
 		onEquip = function(self)
