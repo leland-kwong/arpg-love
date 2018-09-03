@@ -60,10 +60,12 @@ local function findNearestTarget(self, foundTargets)
   local maxSeekRadius = 10 -- radius to find nearest targets
   local nearestEnemyFound = nil
   local i = 2
+  local previousTarget = foundTargets[#foundTargets] or self
+  local startX, startY = previousTarget.x, previousTarget.y
   while (i < maxSeekRadius) and (not nearestEnemyFound) do
     local seekRadius = i * config.gridSize
     local width, height = seekRadius * 2, seekRadius * 2
-    local collisionX, collisionY = self.x, self.y
+    local collisionX, collisionY = startX, startY
     local items, len = collisionWorlds.map:queryRect(
       collisionX - width/2,
       collisionY - height/2,
@@ -111,47 +113,88 @@ ChainLightning.init = function(self)
     local target = findNearestTarget(self, self.targets)
     table.insert(self.targets, target)
   end
+
+  self.polyLine = {}
+  local targetIndex = 1
+  local animationDone = true
+  local tw = nil
+  local previousTarget = self
+  local endState = nil
+  local subject = nil
+  local currentTarget = nil
+  self.animate = function(dt)
+    local isFullAnimationComplete = targetIndex > #self.targets
+    if (not isFullAnimationComplete) then
+      if animationDone then
+        currentTarget = self.targets[targetIndex]
+        subject = {x = previousTarget.x, y = previousTarget.y}
+        endState = {x = currentTarget.x, y = currentTarget.y}
+        tw = tween.new(0.04, subject, endState)
+      end
+      animationDone = tw:update(dt)
+
+      local polyLineIndex = (targetIndex - 1) * 2
+      self.polyLine[polyLineIndex + 1] = previousTarget.x
+      self.polyLine[polyLineIndex + 2] = previousTarget.y
+      self.polyLine[polyLineIndex + 3] = subject.x
+      self.polyLine[polyLineIndex + 4] = subject.y
+
+      if animationDone then
+        previousTarget = currentTarget
+        targetIndex = targetIndex + 1
+      end
+    else
+      self.done = true
+    end
+  end
 end
 
 ChainLightning.update = function(self, dt)
   self.lifeTime = self.lifeTime - dt
 
   local isExpired = self.lifeTime <= 0
-  if isExpired then
+  if isExpired or self.done then
     self:delete()
   end
+
+  self.animate(dt)
 end
 
 local function drawTargets(self)
-  local previousTarget = nil
   for i=1, #self.targets do
     local t = self.targets[i]
-
-    if previousTarget then
-      love.graphics.setColor(1,1,1,1)
-      love.graphics.setLineWidth(2)
-      love.graphics.line(
-        previousTarget.x,
-        previousTarget.y,
-        t.x,
-        t.y
-      )
-    end
-
-    previousTarget = t
-
-    love.graphics.setColor(1,1,1,1)
+    love.graphics.setColor(0.6,0.6,1,0.8)
     love.graphics.circle(
       'fill',
       t.x,
       t.y,
       5
     )
+
+    love.graphics.setColor(1,1,1,1)
+    love.graphics.circle(
+      'fill',
+      t.x,
+      t.y,
+      3
+    )
   end
 end
 
 ChainLightning.draw = function(self)
   local originalLineWidth = love.graphics.getLineWidth()
+
+  -- draw chain
+  if #self.polyLine >= 4 then
+    love.graphics.setColor(0.6,0.6,1,0.8)
+    love.graphics.setLineWidth(4)
+    love.graphics.line(self.polyLine)
+
+    love.graphics.setColor(Color.WHITE)
+    love.graphics.setLineWidth(2)
+    love.graphics.line(self.polyLine)
+  end
+
   drawTargets(self)
   love.graphics.setLineWidth(originalLineWidth)
 end
