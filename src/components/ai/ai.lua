@@ -53,7 +53,6 @@ local Ai = {
   gridSize = 1,
   COLOR_FILL = {1,1,1,1},
   facingDirectionX = 1,
-  modifiersApplied = {},
   drawOrder = function(self)
     return self.group.drawOrder(self) + 1
   end
@@ -176,9 +175,11 @@ local function handleHits(self, dt)
       self.hitAnimation = coroutine.wrap(hitAnimation)
     end
 
-    if hit.modifiers and (not self.modifiersApplied[hitId]) then
-      self.modifiersApplied[hitId] = true
-      applyModifiers(self, hit.modifiers)
+    if hit.modifiers then
+      if (not self.modifiersApplied[hitId]) then
+        self.modifiersApplied[hitId] = true
+        applyModifiers(self, hit.modifiers)
+      end
     end
 
     local isDestroyed = self.health <= 0
@@ -483,6 +484,7 @@ function Ai.init(self)
   assert(type(self.gridSize) == 'number')
   local scale = self.scale
   local gridSize = self.gridSize
+  self.modifiersApplied = {}
   self.hits = {}
   self.direction = {
     x = 0,
@@ -531,7 +533,8 @@ function Ai.init(self)
 
     if msgBus.CHARACTER_HIT == msgType and msgValue.parent == self then
       local uid = require 'utils.uid'
-      self.hits[uid()] = msgValue
+      local hitId = msgValue.source or uid()
+      self.hits[hitId] = msgValue
     end
   end)
 end

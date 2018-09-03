@@ -30,7 +30,8 @@ local function aoeOnHit(self)
 		modifiers = {
 			speed = -100
 		},
-		statusIcon = 'status-slow'
+		statusIcon = 'status-slow',
+		source = 'DEBUFF_SLOW'
 	}
 end
 
@@ -52,6 +53,10 @@ return itemDefs.registerType({
 		title = 'Ion Generator 2',
 		rarity = config.rarity.NORMAL,
 		category = config.category.SIDE_ARM,
+
+		energyCost = function(self)
+			return 5
+		end,
 
 		onEquip = function(self)
 			local duration = math.pow(10, 10)

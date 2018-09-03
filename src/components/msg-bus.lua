@@ -41,7 +41,8 @@ M.CHARACTER_HIT = 'CHARACTER_HIT'
     damage = NUMBER,
     duration = NUMBER,
     modifiers = TABLE, -- key-value hash of properties
-    statusIcon = STRING
+    statusIcon = STRING,
+    source = STRING -- multiple sources of the same type will get reapplied instead of stacked
   }
 ]]
 M.EXPERIENCE_GAIN = 'EXPERIENCE_GAIN'
