@@ -27,7 +27,7 @@ shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
 shader:send('outline_width', 1)
 shader:send('outline_color', outlineColor)
 
-local DRAW_ORDER_BACKGROUND = 200
+local DRAW_ORDER_BACKGROUND = 3
 local DRAW_ORDER_TEXT = DRAW_ORDER_BACKGROUND + 1
 local itemNameTextLayer = GuiText.create({
   group = itemGroup,
