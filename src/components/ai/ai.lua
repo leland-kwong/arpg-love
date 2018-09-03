@@ -144,7 +144,7 @@ local function spreadAggroToAllies(self)
     local ai = items[i].parent
     local canSee = self:checkLineOfSight(self.grid, Map.WALKABLE, ai:getProp('x'), ai:getProp('y'))
     if canSee then
-      ai:setProp('isAggravated', true)
+      ai:set('isAggravated', true)
     end
   end
 end

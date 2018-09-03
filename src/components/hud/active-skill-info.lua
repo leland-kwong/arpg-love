@@ -83,9 +83,9 @@ local function ActiveEquipmentHandler()
     local max = floor((v.maxDamage * dmgMultiplier) + m.flatDamage + totalWeaponDmg)
 
     -- update instance properties
-    v:setProp('minDamage', min)
-      :setProp('maxDamage', max)
-      :setProp('cooldown', v.cooldown - (v.cooldown * m.cooldownReduction))
+    v:set('minDamage', min)
+      :set('maxDamage', max)
+      :set('cooldown', v.cooldown - (v.cooldown * m.cooldownReduction))
 
     return v
   end

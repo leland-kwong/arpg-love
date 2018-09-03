@@ -1,13 +1,11 @@
 local isDebug = require 'config.config'.isDebug
 local tc = require 'utils.type-check'
 local uid = require 'utils.uid'
-local inspect = require 'utils.inspect'
 local noop = require 'utils.noop'
 local objectUtils = require 'utils.object-utils'
 local Q = require 'modules.queue'
-local typeCheck = require 'utils.type-check'
-local pprint = require 'utils.pprint'
 local collisionObject = require 'modules.collision'
+local setProp = require 'utils.set-prop'
 
 local M = {}
 local allComponentsById = {}
@@ -105,7 +103,7 @@ function M.createFactory(blueprint)
   end
 
   function blueprint.create(props)
-    local c = (props or {})
+    local c = setProp(props or {}, isDebug)
     assert(
       not c._isComponent,
       invalidPropsErrorMsg
@@ -165,12 +163,6 @@ function M.createFactory(blueprint)
     parent._children = parent._children or {}
     -- add self as child to its parent
     parent._children[id] = self
-    return self
-  end
-
-  function blueprint:setProp(prop, value)
-    assert(self[prop] ~= nil, 'property '..prop..' not defined')
-    self[prop] = value
     return self
   end
 

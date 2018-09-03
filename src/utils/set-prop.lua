@@ -8,8 +8,17 @@ local function set(self, prop, value)
   return self
 end
 
-local function setProp(obj)
-  obj.set = set
+local function setWithUndefinedCheck(self, prop, value)
+  local isUndefinedProp = self[prop] == nil
+  if isUndefinedProp then
+    error('property '..prop..' is not defined')
+  end
+  self[prop] = value
+  return self
+end
+
+local function setProp(obj, isDebug)
+  obj.set = isDebug and setWithUndefinedCheck or set
   return obj
 end
 
