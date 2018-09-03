@@ -133,7 +133,7 @@ local function AiFactory(self, x, y, speed, scale)
           if isNewAttack then
             isAnimationComplete = false
           end
-          self:setProp(
+          self:set(
             'animation',
             attackAnimation
           )

@@ -12,7 +12,7 @@ local Dash = {
 }
 
 local function modifyCasterSpeed(caster, boost)
-  caster:setProp(
+  caster:set(
     'speed',
     caster:getProp('speed') + boost
   )

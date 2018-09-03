@@ -46,7 +46,7 @@ local itemNamesTooltipLayer = Gui.create({
   onCreate = function(self)
     self.cache = {}
   end,
-  set = function(self, item, x, y, itemParent)
+  add = function(self, item, x, y, itemParent)
     y = y - 16 -- start above the item
     local isNew = self.cache[item] == nil
     self.cache[item] = self.cache[item] or {
@@ -255,7 +255,7 @@ function LootGenerator.init(self)
 
       -- IMPORTANT: run any update logic before the pickup messages trigger, since those can
       -- cause the item to be deleted part-way through the update method, which will cause race conditions.
-      itemNamesTooltipLayer:set(item, self.x, self.y, self)
+      itemNamesTooltipLayer:add(item, self.x, self.y, self)
 
       if not self.animationComplete then
         local complete = self.tween:update(dt)
