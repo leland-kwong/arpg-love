@@ -74,13 +74,32 @@ local Camera = function(options)
     end
   end
 
-  function camera:getBounds()
+  function camera:getBounds(divisor)
+    divisor = divisor or 1
     local scale = self.scale
     local west = (self.x * scale) - self.w/2
     local east = (self.x * scale) + self.w/2
     local north = (self.y * scale) - self.h/2
     local south = (self.y * scale) + self.h/2
-    return west, east, north, south
+    return
+      west / divisor,
+      east / divisor,
+      north / divisor,
+      south / divisor
+  end
+
+  -- userful for debugging
+  function camera:drawBounds()
+    local w,e,n,s = camera:getBounds()
+    love.graphics.setColor(1,1,1)
+    love.graphics.setLineWidth(2)
+    love.graphics.rectangle(
+      'line',
+      w / camera.scale,
+      n / camera.scale,
+      camera.w / camera.scale,
+      camera.h / camera.scale
+    )
   end
 
   function camera:setScale(scale)
