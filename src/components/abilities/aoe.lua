@@ -11,7 +11,7 @@ local Aoe = AbilityBase()
   :set('onHit', function(self)
   end)
   :set('drawOrder', function(self)
-    return self.group.drawOrder(self) + 1
+    return 3
   end)
 
 local animationEndState = {
