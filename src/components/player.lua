@@ -107,14 +107,6 @@ local Player = {
     -- set default animation since its needed in the draw method
     self.animation = self.animations.idle
 
-    local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
-    self.outlineColor = {1,1,1,1}
-    self.shader = love.graphics.newShader(pixelOutlineShader)
-    local atlasData = animationFactory.atlasData
-    self.shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
-    self.shader:send('outline_width', 1)
-    self.shader:send('outline_color', self.outlineColor)
-
     local collisionW, collisionH = self.animations.idle:getSourceSize()
     local collisionOffX, collisionOffY = self.animations.idle:getOffset()
     self.colObj = self:addCollisionObject(
@@ -371,7 +363,7 @@ function Player.draw(self)
   drawShadow(self, scaleX, scaleY, ox, oy)
   drawDebug(self)
 
-  love.graphics.setShader(self.shader)
+  love.graphics.setColor(1,1,1)
   love.graphics.draw(
     animationFactory.atlas,
     self.animation.sprite,
@@ -383,7 +375,6 @@ function Player.draw(self)
     ox,
     oy
   )
-  love.graphics.setShader()
 end
 
 Player.drawOrder = function(self)
