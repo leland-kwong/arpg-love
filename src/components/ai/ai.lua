@@ -294,8 +294,7 @@ function Ai._update2(self, grid, dt)
     actualSightRadius
   )
   local canSeeTarget = self.isInViewOfPlayer and self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY)
-  local pathUpdateResolution = 4 -- after x update frames
-  local shouldGetNewPath = (self.updateCount % pathUpdateResolution == 0) and flowField and canSeeTarget
+  local shouldGetNewPath = flowField and canSeeTarget
   local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or 99999
   local isInAttackRange = canSeeTarget and (distFromTarget <= self:stat('attackRange'))
 
