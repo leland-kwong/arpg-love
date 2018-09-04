@@ -788,7 +788,32 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_1.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_10.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_11.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_12.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_13.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_14.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_15.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_16.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_17.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_18.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_19.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_2.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_20.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_21.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_22.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_23.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_24.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_3.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_4.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_5.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_6.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_7.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_8.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_9.png</key>
             <key type="filename">custom-art/bullet-1.png</key>
+            <key type="filename">custom-art/characters/eyeball/eyeball.png</key>
             <key type="filename">custom-art/tiles/floor-11.png</key>
             <key type="filename">custom-art/tiles/floor-12.png</key>
             <struct type="IndividualSpriteSettings">
@@ -1031,6 +1056,8 @@
             <filename>custom-art/items/weapons/pods</filename>
             <filename>custom-art/characters/ai-1</filename>
             <filename>custom-art/characters/slime</filename>
+            <filename>custom-art/characters/eyeball</filename>
+            <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
