@@ -11,35 +11,12 @@ local Enum = require 'utils.enum'
 
 local aiType = Enum({
   'MELEE',
-  'RANGE'
+  'RANGE',
+  'EYEBALL'
 })
 
-local SpawnerAi = {
-  group = groups.all,
-  x = 0,
-  y = 0,
-  types = aiType,
-  speed = 0,
-  scale = 1,
-  -- these need to be passed in
-  grid = nil,
-  WALKABLE = nil,
-
-  colWorld = collisionWorlds.map,
-  pxToGridUnits = function(screenX, screenY, gridSize)
-    typeCheck.validate(gridSize, typeCheck.NUMBER)
-
-    local gridPixelX, gridPixelY = screenX, screenY
-    local gridX, gridY =
-      Math.round(gridPixelX / gridSize),
-      Math.round(gridPixelY / gridSize)
-    return gridX, gridY
-  end,
-  gridSize = config.gridSize,
-}
-
-local function getAiType(type)
-  if type == aiType.MELEE then
+local aiTypeDef = {
+  [aiType.MELEE] = function()
     local animations = {
       attacking = animationFactory:new({
         'slime1',
@@ -157,9 +134,8 @@ local function getAiType(type)
       ability1,
       attackRange,
       fillColor
-  end
-
-  if type == aiType.RANGE then
+  end,
+  [aiType.RANGE] = function()
     local animations = {
       moving = animationFactory:new({
         'ai-1',
@@ -214,7 +190,31 @@ local function getAiType(type)
 
     return spriteWidth, spriteHeight, animations, ability1, attackRange
   end
-end
+}
+
+local SpawnerAi = {
+  group = groups.all,
+  x = 0,
+  y = 0,
+  types = aiType,
+  speed = 0,
+  scale = 1,
+  -- these need to be passed in
+  grid = nil,
+  WALKABLE = nil,
+
+  colWorld = collisionWorlds.map,
+  pxToGridUnits = function(screenX, screenY, gridSize)
+    typeCheck.validate(gridSize, typeCheck.NUMBER)
+
+    local gridPixelX, gridPixelY = screenX, screenY
+    local gridX, gridY =
+      Math.round(gridPixelX / gridSize),
+      Math.round(gridPixelY / gridSize)
+    return gridX, gridY
+  end,
+  gridSize = config.gridSize,
+}
 
 local function AiFactory(self, x, y, speed, scale)
 
@@ -235,7 +235,7 @@ local function AiFactory(self, x, y, speed, scale)
   end
 
   -- local type = math.random(0, 1) == 1 and aiType.MELEE or aiType.RANGE
-  local w, h, animations, ability1, attackRange, fillColor = getAiType(self.type)
+  local w, h, animations, ability1, attackRange, fillColor = aiTypeDef[self.type]()
 
   return Ai.create({
     debug = self.debug,
