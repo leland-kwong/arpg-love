@@ -26,7 +26,7 @@ end
 
 local aoeModifiers = {
 	speed = function(target)
-		return target.speed * -0.5
+		return target.speed * -0.2
 	end
 }
 
