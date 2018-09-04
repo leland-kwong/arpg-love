@@ -3,6 +3,7 @@ local groups = require 'components.groups'
 local SceneMain = require 'scene.scene-main'
 local TreasureChest = require 'components.treasure-chest'
 local config = require 'config.config'
+local msgBus = require 'components.msg-bus'
 
 local MainGameTest = {
   group = groups.all
@@ -36,6 +37,20 @@ local function insertTestItems(rootStore)
   rootStore:addItemToInventory(
     require(itemsPath..'.ion-generator-2').create()
   )
+
+  local defaultBoots = require'components.item-inventory.items.definitions.mock-shoes'
+  local canEquip, errorMsg = rootStore:equipItem(defaultBoots.create(), 1, 4)
+  if not canEquip then
+    error(errorMsg)
+  end
+
+  local defaultWeapon2 = require'components.item-inventory.items.definitions.lightning-rod'
+  local canEquip, errorMsg = rootStore:equipItem(defaultWeapon2.create(), 2, 3)
+  if not canEquip then
+    error(errorMsg)
+  end
+
+  msgBus.send(msgBus.EQUIPMENT_CHANGE)
 end
 
 function MainGameTest.init(self)
