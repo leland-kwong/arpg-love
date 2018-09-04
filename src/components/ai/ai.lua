@@ -56,9 +56,6 @@ local Ai = {
   damage = 0,
   updateCount = 0,
 
-  -- base properties
-  health = 10,
-
   isAggravated = false,
   gridSize = 1,
   fillColor = {1,1,1,1},
@@ -474,6 +471,9 @@ function Ai.init(self)
   assert(type(self.gridSize) == 'number')
   local scale = self.scale
   local gridSize = self.gridSize
+
+  -- [[ BASE PROPERTIES ]]
+  self.health = self.health or self.maxHealth
 
   self.direction = {
     x = 0,

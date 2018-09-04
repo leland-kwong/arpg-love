@@ -118,6 +118,7 @@ return function()
 
   return {
     speed = 110,
+    maxHealth = 30,
     w = spriteWidth,
     h = spriteHeight,
     animations = animations,
