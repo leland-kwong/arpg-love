@@ -56,7 +56,9 @@ end
 function MainGameTest.init(self)
   modifyLevelRequirements()
 
-  local scene = SceneMain.create():setParent(self)
+  local scene = SceneMain.create({
+    autoSave = false
+  }):setParent(self)
   insertTestItems(scene.rootStore)
 
   TreasureChest.create({

@@ -103,6 +103,7 @@ local MainScene = {
 
   -- options
   initialGameState = nil,
+  autoSave = true
 }
 
 local random = math.random
@@ -306,16 +307,20 @@ function MainScene.init(self)
 
   generateAi(parent, player, map)
 
-  self.autoSave = tick.recur(function()
-    fileSystem.saveFile(
-      rootState:getId(),
-      rootState:get()
-    )
-  end, 0.2)
+  if self.autoSave then
+    self.autoSaveTimer = tick.recur(function()
+      fileSystem.saveFile(
+        rootState:getId(),
+        rootState:get()
+      )
+    end, 0.2)
+  end
 end
 
 function MainScene.final(self)
-  self.autoSave:stop()
+  if self.autoSave then
+    self.autoSaveTimer:stop()
+  end
   msgBus.clearAll()
 end
 

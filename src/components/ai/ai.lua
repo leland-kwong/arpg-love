@@ -63,11 +63,6 @@ local Ai = {
   gridSize = 1,
   COLOR_FILL = {1,1,1,1},
   facingDirectionX = 1,
-  -- Returns calculated stats. This should always be used when we need the stat including any modifiers.
-  stat = function(self, prop)
-    -- baseProperty + modifier
-    return self[prop] + (self.modifiers[prop] or 0)
-  end,
   drawOrder = function(self)
     return self.group.drawOrder(self) + 1
   end
@@ -230,6 +225,7 @@ local abilityDash = (function()
 end)()
 
 function Ai._update2(self, grid, dt)
+  handleHits(self, dt)
   local flowField = Component.get('PLAYER').flowField
   self.updateCount = self.updateCount + 1
 
@@ -240,7 +236,6 @@ function Ai._update2(self, grid, dt)
   self.isInViewOfPlayer = gridDistFromPlayer <= 40
   self.gridDistFromPlayer = gridDistFromPlayer
 
-  handleHits(self, dt)
 
   if self:isDeleted() then
     return

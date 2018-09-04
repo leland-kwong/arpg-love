@@ -13,6 +13,12 @@ local function applyModifiers(self, newModifiers, multiplier)
   end
 end
 
+-- Returns calculated stats. This should always be used when we need the stat including any modifiers.
+local function getCalculatedStat(self, prop)
+  -- baseProperty + modifier
+  return self[prop] + (self.modifiers[prop] or 0)
+end
+
 --[[
   self [TABLE] - component instance
   dt [NUMBER] - dt from component.update
@@ -23,6 +29,7 @@ local function hitManager(self, dt, onDamageTaken)
     self.modifiers = {}
     self.modifiersApplied = {}
     self.hits = {}
+    self.stat = getCalculatedStat
   end
 
   local hitCount = 0
