@@ -144,7 +144,16 @@ local function getNextDirectionWithAdjustmentIfNeeded(grid, vx, vy, vx2, vy2, cu
   return vx, vy
 end
 
+local function createPositionVector(objectPool, id, x, y)
+  local vec = objectPool.get(id)
+  vec.x = x
+  vec.y = y
+  return vec
+end
+
 local function aiPath()
+  local TablePool = require 'utils.table-pool'
+  local positionPool = TablePool.new()
   local path = {}
 
   return function (flowField, grid, gridX, gridY, length, WALKABLE, clearance)
@@ -153,9 +162,12 @@ local function aiPath()
       path[i] = nil
     end
 
-    local curPosition = {x = gridX, y = gridY}
+    local id = 0
+    local curPosition = createPositionVector(positionPool, id, gridX, gridY)
 
     while #path < length do
+      id = id + 1
+
       local px, py = curPosition.x, curPosition.y
       local vx, vy = getFlowFieldValue(flowField, px, py)
       local nextPx, nextPy = px + vx, py + vy
@@ -172,7 +184,7 @@ local function aiPath()
         vxActual, vyActual = getNextDirectionWithAdjustmentIfNeeded(grid, vx, vy, nextVx, nextVy, px, py, nextPx, nextPy, WALKABLE)
       end
 
-      local nextPosition = {x = px + vxActual, y = py + vyActual}
+      local nextPosition = createPositionVector(positionPool, id, px + vxActual, py + vyActual)
 
       -- table insert
       path[#path + 1] = nextPosition
