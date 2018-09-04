@@ -52,6 +52,7 @@ local Ai = {
   sightRadius = 11,
   armor = 0,
   maxHealth = 10,
+  healthRegeneration = 0,
   damage = 0,
 
   -- base properties
@@ -460,15 +461,15 @@ function Ai.draw(self)
     return
   end
 
+  local oBlendMode = love.graphics.getBlendMode()
   local ox, oy = self.animation:getOffset()
   local w, h = self.animation:getSourceSize()
   drawShadow(self, h, w, ox, oy)
 
+  love.graphics.setColor(self.COLOR_FILL)
   if self.hitAnimation then
-    love.graphics.setShader(shader)
-    shader:send('fill_color', Color.WHITE)
-  else
-    love.graphics.setColor(self.COLOR_FILL)
+    love.graphics.setBlendMode('add')
+    love.graphics.setColor(3,3,3)
   end
 
   love.graphics.draw(
@@ -483,11 +484,10 @@ function Ai.draw(self)
     oy
   )
 
-  love.graphics.setShader()
-
   love.graphics.setColor(1,1,1)
   drawStatusEffects(self, statusIcons)
 
+  love.graphics.setBlendMode(oBlendMode)
   -- self:debugLineOfSight()
 end
 
