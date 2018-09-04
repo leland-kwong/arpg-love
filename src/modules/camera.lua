@@ -61,6 +61,10 @@ local Camera = function(options)
     return self
   end
 
+  function camera:getPosition()
+    return self.x, self.y
+  end
+
   function camera:update(dt)
     lerpDuration = options.lerp()
     if (lerpDuration > 0) then

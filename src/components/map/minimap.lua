@@ -8,7 +8,8 @@ local GetIndexByCoordinate = memoize(require 'utils.get-index-by-coordinate')
 
 local COLOR_TILE_OUT_OF_VIEW = {1,1,1,0.3}
 local COLOR_TILE_IN_VIEW = {1,1,1,1}
-local COLOR_WALL = {1,1,1,1}
+local COLOR_WALL = {1,1,1,0.9}
+local COLOR_GROUND = {0,0,0,0.2}
 local floor = math.floor
 local minimapTileRenderers = {
   -- obstacle
@@ -23,7 +24,16 @@ local minimapTileRenderers = {
     )
   end,
   -- walkable
-  [1] = nil,
+  [1] = function(self, x, y, originX, originY, isInViewport)
+    love.graphics.setColor(COLOR_GROUND)
+    local rectSize = 1
+    local x = (self.x * rectSize) + x
+    local y = (self.y * rectSize) + y
+    love.graphics.rectangle(
+      'fill',
+      x, y, rectSize, rectSize
+    )
+  end,
 }
 
 local minimapCanvas = love.graphics.newCanvas()
@@ -52,10 +62,6 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   renderStart = function(self)
     love.graphics.push()
     love.graphics.origin()
-    -- draw background
-    love.graphics.setColor(0,0,0,0.3)
-    local scale = self.scale
-    love.graphics.rectangle('fill', self.x * scale, self.y * scale, self.w * scale, self.h * scale)
     love.graphics.setCanvas(minimapCanvas)
   end,
 
@@ -72,17 +78,24 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   end,
 
   renderEnd = function(self)
+    local centerX, centerY = self.w/2, self.h/2
+
     love.graphics.setCanvas()
-    love.graphics.setColor(1,1,1,1)
     love.graphics.scale(self.scale)
+
+    love.graphics.setColor(1,1,0)
+    love.graphics.circle('fill', self.x + centerX, self.y + centerY, 2)
+
+    love.graphics.setColor(1,1,1,1)
     love.graphics.setBlendMode('alpha', 'premultiplied')
 
     love.graphics.stencil(self.stencil, 'replace', 1)
     love.graphics.setStencilTest('greater', 0)
 
     -- translate the minimap so its centered around the player
-    local w, e, n, s = self.getGridBounds(self.gridSize, self.camera)
-    love.graphics.translate(-w, -n)
+    local cameraX, cameraY  = self.camera:getPosition()
+    local tx, ty = centerX - cameraX/self.gridSize, centerY - cameraY/self.gridSize
+    love.graphics.translate(tx, ty)
     love.graphics.draw(minimapCanvas)
     love.graphics.setBlendMode('alpha')
     love.graphics.setStencilTest()
