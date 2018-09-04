@@ -189,10 +189,22 @@ local aiTypeDef = {
     local spriteWidth, spriteHeight = animations.idle:getSourceSize()
 
     return spriteWidth, spriteHeight, animations, ability1, attackRange
+  end,
+  [aiType.EYEBALL] = function()
+    local animations = {
+      idle = animationFactory:new({
+        'eyeball'
+      })
+    }
+
+    local ability1 = (function()
+      -- deals damage with a chance to slow
+    end)
   end
 }
 
 local SpawnerAi = {
+  -- debug = true,
   group = groups.all,
   x = 0,
   y = 0,

@@ -73,7 +73,9 @@ local Ai = {
   end
 }
 
-local popupText = PopupTextController.create()
+local popupText = PopupTextController.create({
+  font = require 'components.font'.primary.font
+})
 
 -- gets directions from grid position, adjusting vectors to handle wall collisions as needed
 local aiPathWithAstar = require'modules.flow-field.pathing-with-astar'
@@ -164,61 +166,33 @@ local function spreadAggroToAllies(self)
   end
 end
 
-local function applyModifiers(self, newModifiers, multiplier)
-  if (not newModifiers) then
+local function onDamageTaken(self, damage)
+  self.health = self.health - damage
+  local getTextSize = require 'components.gui.gui-text'.getTextSize
+  local offsetCenter = -getTextSize(damage, popupText.font) / 2
+  popupText:new(
+    damage,
+    self.x + offsetCenter,
+    self.y - self.h
+  )
+  self.hitAnimation = coroutine.wrap(hitAnimation)
+
+  local isDestroyed = self.health <= 0
+  if isDestroyed then
+    msgBus.send(msgBus.ENEMY_DESTROYED, {
+      x = self.x,
+      y = self.y,
+      experience = 1
+    })
+    self:delete()
     return
-  end
-  multiplier = multiplier or 1
-  local totalModifiers = self.modifiers
-  for prop, value in pairs(newModifiers) do
-    local actualValue = type(value) == 'function' and value(self) or value
-    totalModifiers[prop] = (totalModifiers[prop] or 0) + (actualValue * multiplier)
   end
 end
 
 local function handleHits(self, dt)
-  local hasHits = false
-  for hitId,hit in pairs(self.hits) do
-    hasHits = true
-
-    if hit.damage then
-      self.health = self.health - hit.damage
-      local offsetCenter = 6
-      popupText:new(
-        hit.damage,
-        self.x + (self.w / 2) - offsetCenter,
-        self.y - self.h
-      )
-      self.hitAnimation = coroutine.wrap(hitAnimation)
-    end
-
-    if hit.modifiers then
-      if (not self.modifiersApplied[hitId]) then
-        self.modifiersApplied[hitId] = true
-        applyModifiers(self, hit.modifiers)
-      end
-    end
-
-    local isDestroyed = self.health <= 0
-    if isDestroyed then
-      msgBus.send(msgBus.ENEMY_DESTROYED, {
-        x = self.x,
-        y = self.y,
-        experience = 1
-      })
-      self:delete()
-      return
-    end
-
-    hit.duration = (hit.duration or 0) - dt
-    local isEffectFinished = hit.duration <= 0
-    if isEffectFinished then
-      self.hits[hitId] = nil
-      self.modifiersApplied[hitId] = nil
-      -- remove modifiers by negating them
-      applyModifiers(self, hit.modifiers, -1)
-    end
-  end
+  local hitManager = require 'modules.hit-manager'
+  local hitCount = hitManager(self, dt, onDamageTaken)
+  local hasHits = hitCount > 0
 
   self.isAggravated = hasHits
 
@@ -506,9 +480,6 @@ function Ai.init(self)
   local scale = self.scale
   local gridSize = self.gridSize
 
-  self.modifiers = {}
-  self.modifiersApplied = {}
-  self.hits = {}
   self.direction = {
     x = 0,
     y = 0
