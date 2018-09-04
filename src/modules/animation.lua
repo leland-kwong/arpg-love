@@ -112,9 +112,10 @@ function meta:update(dt)
   end
 
   self.time = self.time + dt
+  local isLastFrame = frameKey == self.aniFrames[#self.aniFrames]
   local isSameFrame = self.index == self.lastIndex
   if isSameFrame then
-    return self
+    return self, isLastFrame
   end
 
   local frameKey = self.aniFrames[self.index]
@@ -127,7 +128,7 @@ function meta:update(dt)
     self.frame.spriteSourceSize.h + (pad * 2)
   )
   self.lastIndex = self.index
-  return self
+  return self, isLastFrame
 end
 
 function meta:getSpriteSize(spriteName, includePadding)

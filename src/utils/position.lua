@@ -4,7 +4,7 @@ local gridToPixels = require("utils.grid-units-to-screen-units")
 local memoize = require("utils.memoize")
 
 local Position = {
-  pixelsToGrid = pixelsToGrid,
+  pixelsToGridUnits = pixelsToGrid,
   gridToPixels = gridToPixels
 }
 

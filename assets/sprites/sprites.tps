@@ -169,7 +169,7 @@
             <key>trimMargin</key>
             <uint>1</uint>
             <key>trimMode</key>
-            <enum type="SpriteSettings::TrimMode">None</enum>
+            <enum type="SpriteSettings::TrimMode">CropKeepPos</enum>
             <key>tracerTolerance</key>
             <int>200</int>
             <key>heuristicMask</key>
@@ -788,7 +788,34 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_1.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_10.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_11.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_12.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_13.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_14.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_15.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_16.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_17.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_18.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_19.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_2.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_20.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_21.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_22.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_23.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_24.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_3.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_4.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_5.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_6.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_7.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_8.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_9.png</key>
             <key type="filename">custom-art/bullet-1.png</key>
+            <key type="filename">custom-art/characters/eyeball/eyeball.png</key>
+            <key type="filename">custom-art/tiles/floor-11.png</key>
+            <key type="filename">custom-art/tiles/floor-12.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -798,6 +825,28 @@
                 <rect>4,4,8,8</rect>
                 <key>scale9Paddings</key>
                 <rect>4,4,8,8</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/characters/ai-1/ai-1.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-10.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-2.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-3.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-4.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-5.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-6.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-7.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-8.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-9.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.45</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>6,6,12,11</rect>
+                <key>scale9Paddings</key>
+                <rect>6,6,12,11</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -841,6 +890,34 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/characters/slime/slime1.png</key>
+            <key type="filename">custom-art/characters/slime/slime10.png</key>
+            <key type="filename">custom-art/characters/slime/slime11.png</key>
+            <key type="filename">custom-art/characters/slime/slime12.png</key>
+            <key type="filename">custom-art/characters/slime/slime13.png</key>
+            <key type="filename">custom-art/characters/slime/slime14.png</key>
+            <key type="filename">custom-art/characters/slime/slime15.png</key>
+            <key type="filename">custom-art/characters/slime/slime16.png</key>
+            <key type="filename">custom-art/characters/slime/slime2.png</key>
+            <key type="filename">custom-art/characters/slime/slime3.png</key>
+            <key type="filename">custom-art/characters/slime/slime4.png</key>
+            <key type="filename">custom-art/characters/slime/slime5.png</key>
+            <key type="filename">custom-art/characters/slime/slime6.png</key>
+            <key type="filename">custom-art/characters/slime/slime7.png</key>
+            <key type="filename">custom-art/characters/slime/slime8.png</key>
+            <key type="filename">custom-art/characters/slime/slime9.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.203125,0.555556</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>18,10,35,20</rect>
+                <key>scale9Paddings</key>
+                <rect>18,10,35,20</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/fireball.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -854,10 +931,25 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/items/weapons/pods/pod-one.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one1.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one10.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one11.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one12.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one13.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one14.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one15.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one16.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one2.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one3.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one4.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one5.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one6.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one7.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one8.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one9.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.380952,0.5</point_f>
+                <point_f>0,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -870,7 +962,7 @@
             <key type="filename">custom-art/primitives/pixel-white-1x1.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.266667</point_f>
+                <point_f>0,0</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -880,10 +972,29 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/status-effect-icons/status-slow.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,5,9,9</rect>
+                <key>scale9Paddings</key>
+                <rect>5,5,9,9</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/tiles/floor-1.png</key>
+            <key type="filename">custom-art/tiles/floor-10.png</key>
             <key type="filename">custom-art/tiles/floor-2.png</key>
             <key type="filename">custom-art/tiles/floor-3.png</key>
             <key type="filename">custom-art/tiles/floor-4.png</key>
+            <key type="filename">custom-art/tiles/floor-5.png</key>
+            <key type="filename">custom-art/tiles/floor-6.png</key>
+            <key type="filename">custom-art/tiles/floor-7.png</key>
+            <key type="filename">custom-art/tiles/floor-8.png</key>
+            <key type="filename">custom-art/tiles/floor-9.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,1</point_f>
@@ -893,6 +1004,19 @@
                 <rect>4,4,8,8</rect>
                 <key>scale9Paddings</key>
                 <rect>4,4,8,8</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/treasure-chest.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>9,7,17,13</rect>
+                <key>scale9Paddings</key>
+                <rect>9,7,17,13</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -926,19 +1050,6 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/treasure-chest.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.266667</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>12,11,24,22</rect>
-                <key>scale9Paddings</key>
-                <rect>12,11,24,22</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
         </map>
         <key>fileList</key>
         <array>
@@ -951,12 +1062,16 @@
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets</filename>
-            <filename>custom-art/treasure-chest.png</filename>
             <filename>custom-art/bullet-1.png</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets</filename>
             <filename>custom-art/items/weapons/pods</filename>
+            <filename>custom-art/characters/ai-1</filename>
+            <filename>custom-art/characters/slime</filename>
+            <filename>custom-art/characters/eyeball</filename>
+            <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons</filename>
+            <filename>custom-art/status-effect-icons</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

@@ -43,6 +43,7 @@ local Bullet = {
   minDamage = 1,
   maxDamage = 2,
   weaponDamageScaling = 1,
+  startOffset = 0,
   scale = 1,
   lifeTime = 2,
   speed = 250,
@@ -58,6 +59,8 @@ local Bullet = {
 
     local dx, dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
     self.direction = {x = dx, y = dy}
+    self.x = self.x + self.startOffset * dx
+    self.y = self.y + self.startOffset * dy
 
     self.animation = animationFactory:new({
       'bullet-1'

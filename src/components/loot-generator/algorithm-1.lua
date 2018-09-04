@@ -4,7 +4,8 @@ local lootPool = {
   require(itemsPath..'mock-shoes'),
   require(itemsPath..'gpow-armor'),
   require(itemsPath..'potion-health'),
-  require(itemsPath..'potion-health')
+  require(itemsPath..'potion-energy'),
+  require(itemsPath..'lightning-rod')
 }
 
 return function()

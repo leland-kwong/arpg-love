@@ -9,10 +9,11 @@ local collisionObject = require 'modules.collision'
 local camera = require 'components.camera'
 local Position = require 'utils.position'
 local Map = require 'modules.map-generator.index'
-local Flowfield = require 'modules.flow-field.flow-field'
+local FlowField = require 'modules.flow-field.flow-field'
 local Color = require 'modules.color'
 local memoize = require 'utils.memoize'
 local LineOfSight = memoize(require'modules.line-of-sight')
+local Math = require 'utils.math'
 local getDist = memoize(require('utils.math').dist)
 
 local colMap = collisionWorlds.map
@@ -45,9 +46,11 @@ local Player = {
   group = groups.all,
   x = startPos.x,
   y = startPos.y,
+  facingDirectionX = 1,
+  facingDirectionY = 1,
   pickupRadius = 5 * config.gridSize,
   speed = 100,
-  flowFieldDistance = 40,
+  flowFieldDistance = 30,
 
   -- collision properties
   type = 'player',
@@ -56,10 +59,34 @@ local Player = {
   mapGrid = nil,
 
   init = function(self)
+    self.getFlowField = FlowField(function (grid, x, y, dist)
+      local row = grid[y]
+      local cell = row and row[x]
+      return
+        (cell == Map.WALKABLE) and
+        (dist < self.flowFieldDistance)
+    end)
+    self.getFlowField = require'utils.perf'({
+      enabled = false,
+      done = function(_, totalTime, callCount)
+        consoleLog('flowfield', totalTime / callCount)
+      end
+    })(self.getFlowField)
+
     local CreateStore = require'components.state.state'
     self.rootStore = self.rootStore or CreateStore()
     self.dir = DIRECTION_RIGHT
     colMap:add(self, self.x, self.y, self.w, self.h)
+
+    local energyRegenerationDuration = 99999999
+    msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
+      source = 'BASE_ENERGY_REGENERATION',
+      amount = energyRegenerationDuration *
+        self.rootStore:get().statModifiers.energyRegeneration,
+      duration = energyRegenerationDuration,
+      property = 'energy',
+      maxProperty = 'maxEnergy'
+    })
 
     self.animations = {
       idle = animationFactory:new({
@@ -80,30 +107,22 @@ local Player = {
     -- set default animation since its needed in the draw method
     self.animation = self.animations.idle
 
-    local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
-    self.outlineColor = {1,1,1,1}
-    self.shader = love.graphics.newShader(pixelOutlineShader)
-    local atlasData = animationFactory.atlasData
-    self.shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
-    self.shader:send('outline_width', 1)
-    self.shader:send('outline_color', self.outlineColor)
-
+    local collisionW, collisionH = self.animations.idle:getSourceSize()
+    local collisionOffX, collisionOffY = self.animations.idle:getOffset()
     self.colObj = self:addCollisionObject(
       'player',
       self.x,
       self.y,
-      self.w,
-      self.h
+      collisionW,
+      14,
+      collisionOffX,
+      5
+      -- (collisionH / 1.5)
+      -- collisionOffY / 2
     ):addToWorld(colMap)
 
-    self.isGridCellVisitable = function(grid, x, y, dist)
-      local row = grid[y]
-      local cell = row and row[x]
-      return (cell == Map.WALKABLE) and (dist < self.flowFieldDistance)
-    end
-
     local calcDist = require'utils.math'.dist
-    msgBus.subscribe(function(msgType, msg)
+    local function subscriber(msgType, msg)
       if self:isDeleted() then
         return msgBus.CLEANUP
       end
@@ -116,24 +135,17 @@ local Player = {
         local item = msg
         local dist = calcDist(self.x, self.y, item.x, item.y)
         local outOfRange = dist > self.pickupRadius
-        local gridX1, gridY1 = Position.pixelsToGrid(self.x, self.y, config.gridSize)
-        local gridX2, gridY2 = Position.pixelsToGrid(item.x, item.y, config.gridSize)
+        local gridX1, gridY1 = Position.pixelsToGridUnits(self.x, self.y, config.gridSize)
+        local gridX2, gridY2 = Position.pixelsToGridUnits(item.x, item.y, config.gridSize)
         local canWalkToItem = LineOfSight(self.mapGrid, Map.WALKABLE)(gridX1, gridY1, gridX2, gridY2)
-        if outOfRange or (not canWalkToItem) then
+        if canWalkToItem and (not outOfRange) then
           msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, true)
-          -- move towards item
-          self.forceMove = true
-        elseif canWalkToItem then
-          self.forceMove = false
           item:pickup()
         end
-      elseif (msgBus.ITEM_PICKUP_CANCEL == msgType) or (msgBus.ITEM_PICKUP_SUCCESS == msgType) then
-        self.forceMove = false
-        msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
       end
 
-      if msgBus.ITEM_HOVERED == msgType then
-        msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, msg)
+      if msgBus.ITEM_PICKUP_SUCCESS == msgType then
+        msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
       end
 
       if msgBus.DROP_ITEM_ON_FLOOR == msgType then
@@ -156,7 +168,8 @@ local Player = {
       if msgBus.CHARACTER_HIT == msgType and msg.parent == self then
         msgBus.send(msgBus.PLAYER_HIT_RECEIVED, msg.damage)
       end
-    end)
+    end
+    msgBus.subscribe(subscriber)
   end
 }
 
@@ -169,11 +182,6 @@ local function handleMovement(self, dt)
 
   local nextX, nextY = self.x, self.y
   self.dir = mDx > 0 and DIRECTION_RIGHT or DIRECTION_LEFT
-
-  if self.forceMove then
-    nextX = nextX + moveAmount * mDx
-    nextY = nextY + moveAmount * mDy
-  end
 
   -- MOVEMENT
   local inputX, inputY = 0, 0
@@ -190,7 +198,7 @@ local function handleMovement(self, dt)
   end
 
   if love.keyboard.isDown(keyMap.DOWN) then
-    inputY= 1
+    inputY = 1
   end
 
   local dx, dy = Position.getDirection(0, 0, inputX, inputY)
@@ -263,31 +271,35 @@ local function handleAbilities(self, dt)
   if not self.clickDisabled and isSkill4Activate then
     msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_4')
   end
+
+  -- MOVE_BOOST
+  local isMoveBoostActivate = love.keyboard.isDown(keyMap.MOVE_BOOST) or
+    (mouseInputMap.MOVE_BOOST and love.mouse.isDown(mouseInputMap.MOVE_BOOST))
+  if not self.clickDisabled and isMoveBoostActivate then
+    msgBus.send(msgBus.PLAYER_USE_SKILL, 'MOVE_BOOST')
+  end
+end
+
+local min = math.min
+
+local function updateStats(rootStore)
+  local state = rootStore:get()
+  local mods = state.statModifiers
+  rootStore:set('health', min(state.health, state.maxHealth + mods.maxHealth))
+  rootStore:set('energy', min(state.energy, state.maxEnergy + mods.maxEnergy))
 end
 
 function Player.update(self, dt)
   local nextX, nextY, totalMoveSpeed = handleMovement(self, dt)
   handleAnimation(self, dt, nextX, nextY, totalMoveSpeed)
   handleAbilities(self, dt)
+  updateStats(self.rootStore)
 
   -- dynamically get the current animation frame's height
   local sx, sy, sw, sh = self.animation.sprite:getViewport()
   local w,h = sw, sh
   -- true center taking into account pivot
   local oX, oY = self.animation:getSourceOffset()
-
-  -- COLLISION UPDATES
-  local colOrigX, colOrigY = self.colObj.x, self.colObj.y
-  local sizeOffset = 10
-  self.colObj:update(
-    -- use current coordinates because we only want to update size
-    colOrigX,
-    colOrigY,
-    w,
-    h - sizeOffset,
-    oX,
-    oY - sizeOffset
-  )
 
   local actualX, actualY, cols, len = self.colObj:move(nextX, nextY, collisionFilter)
   self.x = actualX
@@ -298,14 +310,13 @@ function Player.update(self, dt)
   -- update camera to follow player
   camera:setPosition(self.x, self.y)
 
-  local gridX, gridY = Position.pixelsToGrid(self.x, self.y, config.gridSize)
-  local dist = getDist(self.prevGridX or 0, self.prevGridY or 0, gridX, gridY)
-  local shouldUpdateFlowField = dist >= 4
+  local gridX, gridY = Position.pixelsToGridUnits(self.x, self.y, config.gridSize)
+  -- update flowfield every x frames since it also considers ai in the way
+  -- as blocked positions, so we need to keep this fresh
+  local shouldUpdateFlowField = self.prevGridX ~= gridX or self.prevGridY ~= gridY
   if shouldUpdateFlowField and self.mapGrid then
-    local flowField, callCount = Flowfield(self.mapGrid, gridX, gridY, self.isGridCellVisitable)
-    self.flowFieldMessage = self.flowFieldMessage or {}
-    self.flowFieldMessage.flowField = flowField
-    msgBus.send(msgBus.NEW_FLOWFIELD, self.flowFieldMessage)
+    local flowField, callCount = self.getFlowField(self.mapGrid, gridX, gridY)
+    self.flowField = flowField
     self.prevGridX = gridX
     self.prevGridY = gridY
   end
@@ -350,7 +361,7 @@ function Player.draw(self)
   drawShadow(self, scaleX, scaleY, ox, oy)
   drawDebug(self)
 
-  love.graphics.setShader(self.shader)
+  love.graphics.setColor(1,1,1)
   love.graphics.draw(
     animationFactory.atlas,
     self.animation.sprite,
@@ -362,7 +373,6 @@ function Player.draw(self)
     ox,
     oy
   )
-  love.graphics.setShader()
 end
 
 Player.drawOrder = function(self)

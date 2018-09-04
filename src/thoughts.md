@@ -69,3 +69,35 @@ progress = currentLevelExp / expRequiredForLevelUp
 - [x] persist selected scene to disk so we can reload last selected scene
 - [x] if no scene is selected, show menu
 - [x] cleanup scene before loading a new scene
+
+## Stat modifier calculation
+
+stat = baseStat + (baseState * percentModier) + flatModifier
+
+### Base stats
+
+- speed (movement speed)
+- armor (percent damage reduction)
+- health
+- maxHealth
+- healthRegeneration
+- damage
+- resistances (fire, cold, lightning, poision, etc...)
+- sightRadius
+- attackRange
+
+### Status effects
+
+- silenced
+- stun (could be implemented with `silence` and `speed = 0`)
+
+### Modifiable stats
+
+- speed
+- armor
+- maxHealth
+- healthRegeneration
+- damage
+- resistances
+- sightRadius
+- attackRange

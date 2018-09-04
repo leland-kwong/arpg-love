@@ -16,6 +16,7 @@ M.keyboard = {
   SKILL_4 = 'r',
   ACTIVE_ITEM_1 = '1',
   ACTIVE_ITEM_2 = '2',
+  MOVE_BOOST = 'space',
   INVENTORY_TOGGLE = 'i',
   MAIN_MENU = 'escape'
 }
@@ -28,7 +29,7 @@ M.mouseInputMap = {
 }
 
 M.camera = {
-  speed = 0.3 -- lerp duration (larger value means slower movement)
+  speed = 0.4 -- lerp duration (larger value means slower movement)
 }
 
 return M

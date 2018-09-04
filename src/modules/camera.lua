@@ -2,6 +2,8 @@
 local tween = require 'modules.tween'
 local mergeProps = require 'utils.object-utils'.assign
 local round = require 'utils.math'.round
+local mathUtils = require 'utils.math'
+local config = require 'config.config'
 
 local defaultOptions = {
   lerp = function()
@@ -25,8 +27,15 @@ local Camera = function(options)
   local lerpTween = nil
 
   local function lerp(dt, reset)
+    local dist = mathUtils.dist(camera.x, camera.y, targetPosition.x, targetPosition.y)
+    local actualDuration = lerpDuration
+    local isFarTransition = (dist / config.gridSize) > 50
+    if isFarTransition then
+      -- increase duration so that the screen doesn't scroll too fast, otherwise it looks too jarring
+      actualDuration = 2
+    end
     if reset then
-      lerpTween = tween.new(lerpDuration, camera, targetPosition, tween.easing.outQuint)
+      lerpTween = tween.new(actualDuration, camera, targetPosition, tween.easing.outExpo)
     end
     lerpTween:update(dt)
   end
@@ -52,6 +61,10 @@ local Camera = function(options)
     return self
   end
 
+  function camera:getPosition()
+    return self.x, self.y
+  end
+
   function camera:update(dt)
     lerpDuration = options.lerp()
     if (lerpDuration > 0) then
@@ -65,13 +78,32 @@ local Camera = function(options)
     end
   end
 
-  function camera:getBounds()
+  function camera:getBounds(divisor)
+    divisor = divisor or 1
     local scale = self.scale
     local west = (self.x * scale) - self.w/2
     local east = (self.x * scale) + self.w/2
     local north = (self.y * scale) - self.h/2
     local south = (self.y * scale) + self.h/2
-    return west, east, north, south
+    return
+      west / divisor,
+      east / divisor,
+      north / divisor,
+      south / divisor
+  end
+
+  -- userful for debugging
+  function camera:drawBounds()
+    local w,e,n,s = camera:getBounds()
+    love.graphics.setColor(1,1,1)
+    love.graphics.setLineWidth(2)
+    love.graphics.rectangle(
+      'line',
+      w / camera.scale,
+      n / camera.scale,
+      camera.w / camera.scale,
+      camera.h / camera.scale
+    )
   end
 
   function camera:setScale(scale)

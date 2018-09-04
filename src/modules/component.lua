@@ -1,13 +1,11 @@
 local isDebug = require 'config.config'.isDebug
 local tc = require 'utils.type-check'
 local uid = require 'utils.uid'
-local inspect = require 'utils.inspect'
 local noop = require 'utils.noop'
 local objectUtils = require 'utils.object-utils'
 local Q = require 'modules.queue'
-local typeCheck = require 'utils.type-check'
-local pprint = require 'utils.pprint'
 local collisionObject = require 'modules.collision'
+local setProp = require 'utils.set-prop'
 
 local M = {}
 local allComponentsById = {}
@@ -32,6 +30,7 @@ local baseProps = {
   draw = noop,
   final = noop,
   _update = function(self, dt)
+    self._ready = true
     local parent = self.parent
     if parent then
       -- update position relative to its parent
@@ -43,6 +42,34 @@ local baseProps = {
       self.prevParentY = parent.y
     end
     self:update(dt)
+  end,
+  _drawDebug = function(self)
+    self.draw(self)
+    local colObjects = self.collisionObjects
+    love.graphics.setColor(1,1,0,0.4)
+    if colObjects then
+      for i=1, #colObjects do
+        local c = colObjects[i]
+        local x, y = c:getPositionWithOffset()
+        love.graphics.rectangle(
+          'fill',
+          x, y,
+          c.w, c.h
+        )
+        love.graphics.rectangle(
+          'line',
+          x, y,
+          c.w, c.h
+        )
+      end
+    end
+    love.graphics.setColor(0,1,0,0.2)
+    love.graphics.circle(
+      'fill',
+      self.x,
+      self.y,
+      2
+    )
   end,
   _isComponent = true,
 }
@@ -76,7 +103,8 @@ function M.createFactory(blueprint)
   end
 
   function blueprint.create(props)
-    local c = (props or {})
+    assert(type(props) == 'table' or props == nil, 'props must be of type `table` or `nil`')
+    local c = setProp(props or {}, isDebug)
     assert(
       not c._isComponent,
       invalidPropsErrorMsg
@@ -119,17 +147,23 @@ function M.createFactory(blueprint)
     We don't want an `addChild` method so we can avoid coupling between child and parent.
   ]]
   function blueprint:setParent(parent)
-    self.parent = parent
+    local isSameParent = parent == self.parent
+    if isSameParent then
+      return self
+    end
 
+    local id = self:getId()
+    -- dissasociate itself from previous parent
+    local previousParent = self.parent
+    if (previousParent and previousParent._children) then
+      previousParent._children[id] = nil
+    end
+
+    -- set new parent
+    self.parent = parent
     parent._children = parent._children or {}
     -- add self as child to its parent
-    parent._children[#parent._children + 1] = self
-    return self
-  end
-
-  function blueprint:setProp(prop, value)
-    assert(self[prop] ~= nil, 'property '..prop..' not defined')
-    self[prop] = value
+    parent._children[id] = self
     return self
   end
 
@@ -153,8 +187,8 @@ function M.createFactory(blueprint)
 
     local children = self._children
     if (recursive and children) then
-      for i=1, #children do
-        children[i]:delete(true)
+      for _,child in pairs(children) do
+        child:delete(true)
       end
       self._children = nil
     end
@@ -180,6 +214,10 @@ function M.createFactory(blueprint)
 
   function blueprint:isDeleted()
     return self._deleted
+  end
+
+  function blueprint:isReady()
+    return self._ready
   end
 
   -- default methods
@@ -223,7 +261,10 @@ function M.newGroup(groupDefinition)
 
   function Group.drawAll()
     for id,c in pairs(componentsById) do
-      drawQ:add(c:drawOrder(), c.draw, c)
+      if c:isReady() then
+        local drawFunc = (c.debug == true) and c._drawDebug or c.draw
+        drawQ:add(c:drawOrder(), drawFunc, c)
+      end
     end
 
     drawQ:flush()

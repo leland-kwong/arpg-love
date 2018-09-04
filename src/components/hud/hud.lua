@@ -1,31 +1,21 @@
 local Component = require 'modules.component'
 local groups = require 'components.groups'
-local HealthIndicator = require 'components.hud.health-indicator'
+local StatusBar = require 'components.hud.status-bar'
 local ExperienceIndicator = require 'components.hud.experience-indicator'
 local ScreenFx = require 'components.hud.screen-fx'
 local ActiveSkillInfo = require 'components.hud.active-skill-info'
 local GuiText = require 'components.gui.gui-text'
+local msgBus = require 'components.msg-bus'
 local Position = require 'utils.position'
 local scale = require 'config.config'.scaleFactor
+local Color = require 'modules.color'
 
 local Hud = {
   group = groups.gui,
   rootStore = {}
 }
 
-local function setupHealthIndicator(self)
-  local w, h = 180, 18
-  local winWidth, winHeight = love.graphics.getWidth() / scale, love.graphics.getHeight() / scale
-  local offX, offY = Position.boxCenterOffset(w, h, winWidth, winHeight)
-  HealthIndicator.create({
-    rootStore = self.rootStore,
-    x = offX,
-    y = winHeight - h - 13,
-    w = w,
-    h = h,
-    hudTextLayer = self.hudTextLayer
-  }):setParent(self)
-end
+local healthManaWidth = 180
 
 local function setupExperienceIndicator(self)
   local w, h = 180, 6
@@ -56,75 +46,110 @@ function Hud.init(self)
     end
   }):setParent(self)
 
-  setupHealthIndicator(self)
+  local winWidth, winHeight = love.graphics.getWidth() / scale, love.graphics.getHeight() / scale
+  local barHeight = 18
+  local offX, offY = Position.boxCenterOffset(healthManaWidth, barHeight, winWidth, winHeight)
+
+  -- health bar
+  StatusBar.create({
+    x = offX,
+    y = winHeight - barHeight - 13,
+    w = healthManaWidth / 2,
+    h = barHeight,
+    color = {Color.rgba255(209, 27, 27)},
+    fillPercentage = function()
+      local state = self.rootStore:get()
+      local maxHealth = state.maxHealth + state.statModifiers.maxHealth
+      local health = state.health
+      return health / maxHealth
+    end
+  }):setParent(self)
+
+  -- mana bar
+  StatusBar.create({
+    x = offX + healthManaWidth / 2,
+    y = winHeight - barHeight - 13,
+    w = healthManaWidth / 2,
+    h = barHeight,
+    fillDirection = -1,
+    color = {Color.rgba255(33, 89, 186)},
+    fillPercentage = function()
+      local state = self.rootStore:get()
+      local maxEnergy = state.maxEnergy + state.statModifiers.maxEnergy
+      local energy = state.energy
+      return energy / maxEnergy
+    end
+  }):setParent(self)
+
+  msgBus.subscribe(function(msgType, msgValue)
+    if self:isDeleted() then
+      return msgBus.CLEANUP
+    end
+
+    if msgBus.PLAYER_HIT_RECEIVED == msgType then
+      self.rootStore:set('health', function(state)
+        return state.health - msgValue
+      end)
+    end
+  end)
+
   setupExperienceIndicator(self)
   ScreenFx.create():setParent(self)
 
-  ActiveSkillInfo.create({
-    skillId = 'ACTIVE_ITEM_1',
-    player = self.player,
-    rootStore = self.rootStore,
-    x = 300,
-    y = (love.graphics.getHeight() / scale) - 32 - 5,
-    slotX = 1,
-    slotY = 5,
-    hudTextLayer = self.hudTextSmallLayer
-  }):setParent(self)
+  local spacing = 32
+  local endXPos = 340
 
-  ActiveSkillInfo.create({
-    skillId = 'ACTIVE_ITEM_2',
-    player = self.player,
-    rootStore = self.rootStore,
-    x = 340,
-    y = (love.graphics.getHeight() / scale) - 32 - 5,
-    slotX = 2,
-    slotY = 5,
-    hudTextLayer = self.hudTextSmallLayer
-  }):setParent(self)
+  local skillSetup = {
+    {
+      skillId = 'ACTIVE_ITEM_2',
+      slotX = 2,
+      slotY = 5
+    },
+    {
+      skillId = 'ACTIVE_ITEM_1',
+      slotX = 1,
+      slotY = 5
+    },
+    {
+      skillId = 'SKILL_4',
+      slotX = 2,
+      slotY = 2
+    },
+    {
+      skillId = 'SKILL_3',
+      slotX = 1,
+      slotY = 2
+    },
+    {
+      skillId = 'SKILL_2',
+      slotX = 2,
+      slotY = 3
+    },
+    {
+      skillId = 'SKILL_1',
+      slotX = 1,
+      slotY = 3
+    },
+    {
+      skillId = 'MOVE_BOOST',
+      slotX = 1,
+      slotY = 4
+    }
+  }
 
-  ActiveSkillInfo.create({
-    skillId = 'SKILL_1',
-    player = self.player,
-    rootStore = self.rootStore,
-    x = 140,
-    y = (love.graphics.getHeight() / scale) - 32 - 5,
-    slotX = 1,
-    slotY = 3,
-    hudTextLayer = self.hudTextSmallLayer
-  }):setParent(self)
-
-  ActiveSkillInfo.create({
-    skillId = 'SKILL_2',
-    player = self.player,
-    rootStore = self.rootStore,
-    x = 180,
-    y = (love.graphics.getHeight() / scale) - 32 - 5,
-    slotX = 2,
-    slotY = 3,
-    hudTextLayer = self.hudTextSmallLayer
-  }):setParent(self)
-
-  ActiveSkillInfo.create({
-    skillId = 'SKILL_3',
-    player = self.player,
-    rootStore = self.rootStore,
-    x = 220,
-    y = (love.graphics.getHeight() / scale) - 32 - 5,
-    slotX = 1,
-    slotY = 2,
-    hudTextLayer = self.hudTextSmallLayer
-  }):setParent(self)
-
-  ActiveSkillInfo.create({
-    skillId = 'SKILL_4',
-    player = self.player,
-    rootStore = self.rootStore,
-    x = 260,
-    y = (love.graphics.getHeight() / scale) - 32 - 5,
-    slotX = 2,
-    slotY = 2,
-    hudTextLayer = self.hudTextSmallLayer
-  }):setParent(self)
+  for i=1, #skillSetup do
+    local skill = skillSetup[i]
+    ActiveSkillInfo.create({
+      skillId = skill.skillId,
+      player = self.player,
+      rootStore = self.rootStore,
+      x = endXPos - (spacing * (i - 1)),
+      y = (love.graphics.getHeight() / scale) - 32 - 1,
+      slotX = skill.slotX,
+      slotY = skill.slotY,
+      hudTextLayer = self.hudTextSmallLayer
+    }):setParent(self)
+  end
 end
 
 return Component.createFactory(Hud)

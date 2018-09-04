@@ -1,11 +1,12 @@
-local Component = require 'modules.component'local groups = require 'components.groups'
+local Component = require 'modules.component'
+local groups = require 'components.groups'
 local font = require 'components.font'
 local f = require 'utils.functional'
 
 local textForMeasuringCache = {}
 local function getTextForMeasuring(font)
   local textObject = textForMeasuringCache[font]
-  if not fromCache then
+  if (not textObject) then
     textObject = love.graphics.newText(font, '')
     textForMeasuringCache[font] = textObject
   end

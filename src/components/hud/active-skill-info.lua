@@ -5,6 +5,7 @@ local camera = require 'components.camera'
 local Color = require 'modules.color'
 local drawItem = require 'components.item-inventory.draw-item'
 local config = require 'config.config'
+local setProp = require 'utils.set-prop'
 
 local keyMap = config.keyboard
 local mouseInputMap = config.mouseInputMap
@@ -76,7 +77,6 @@ local function ActiveEquipmentHandler()
   local function modifyAbility(instance, modifiers)
     local v = instance
     local m = modifiers
-    local energyCost = v.energyCost
     local totalFlatWeaponDamage = m.weaponDamage
     local totalWeaponDmg = v.weaponDamageScaling * totalFlatWeaponDamage
     local dmgMultiplier = 1 + m.percentDamage
@@ -84,9 +84,9 @@ local function ActiveEquipmentHandler()
     local max = floor((v.maxDamage * dmgMultiplier) + m.flatDamage + totalWeaponDmg)
 
     -- update instance properties
-    v:setProp('minDamage', min)
-      :setProp('maxDamage', max)
-      :setProp('cooldown', v.cooldown - (v.cooldown * m.cooldownReduction))
+    v:set('minDamage', min)
+      :set('maxDamage', max)
+      :set('cooldown', v.cooldown - (v.cooldown * m.cooldownReduction))
 
     return v
   end
@@ -104,29 +104,51 @@ local function ActiveEquipmentHandler()
     if (not activeItem) or curCooldown > 0 then
       return skill
     else
-      local activateFn = itemDefinitions.getDefinition(activeItem).onActivateWhenEquipped
+      local definition = itemDefinitions.getDefinition(activeItem)
+      local activateFn = definition.onActivateWhenEquipped
+      local energyCost = definition.energyCost(activeItem)
+      local curState = self.rootStore:get()
+      local enoughEnergy = (energyCost == nil) or
+        (energyCost <= curState.energy)
+      if (not enoughEnergy) then
+        return skill
+      end
+
       if (not activateFn) then
         return skill
       end
       local mx, my = camera:getMousePosition()
       local playerX, playerY = self.player:getPosition()
       local instance = modifyAbility(
-        activateFn(activeItem, {
+        activateFn(activeItem, setProp({
             x = playerX
           , y = playerY
           , x2 = mx
           , y2 = my
-        }),
-        self.rootStore:get().statModifiers
+        })),
+        curState.statModifiers
       )
       curCooldown = instance.cooldown
       skillCooldown = instance.cooldown
+
+      local actualEnergyCost = energyCost -
+        (energyCost * curState.statModifiers.energyCostReduction)
+      self.rootStore:set(
+        'energy',
+        curState.energy - actualEnergyCost
+      )
       return skill
     end
   end
 
   function skill.updateCooldown(dt)
     curCooldown = max(0, curCooldown - dt)
+    if activeItem then
+      local itemUpdateFn = itemDefinitions.getDefinition(activeItem).update
+      if itemUpdateFn then
+        itemUpdateFn(activeItem, dt)
+      end
+    end
     return skill
   end
 
@@ -162,18 +184,20 @@ local ActiveSkillInfo = {
   skillId = nil,
   slotX = 1,
   slotY = 1,
-  size = 32,
+  size = 28,
   player = nil,
   rootStore = nil
 }
 
 local ItemRender = {
-  group = groups.all
+  group = groups.all,
 }
 Component.createFactory(ItemRender)
 
 function ActiveSkillInfo.init(self)
   self.skillHandlers = {
+    MOVE_BOOST = ActiveConsumableHandler(),
+
     SKILL_1 = ActiveEquipmentHandler(),
     SKILL_2 = ActiveEquipmentHandler(),
     SKILL_3 = ActiveEquipmentHandler(),

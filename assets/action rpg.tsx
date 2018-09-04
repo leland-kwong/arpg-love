@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset name="action rpg" tilewidth="16" tileheight="56" tilecount="10" columns="0">
+<tileset name="action rpg" tilewidth="34" tileheight="56" tilecount="17" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <image width="16" height="16" source="sprites/custom-art/tiles/floor-1.png"/>
@@ -30,5 +30,26 @@
  </tile>
  <tile id="9">
   <image width="16" height="56" source="sprites/custom-art/tiles/wall-6.png"/>
+ </tile>
+ <tile id="10">
+  <image width="16" height="16" source="sprites/custom-art/tiles/floor-5.png"/>
+ </tile>
+ <tile id="11">
+  <image width="16" height="16" source="sprites/custom-art/tiles/floor-6.png"/>
+ </tile>
+ <tile id="18">
+  <image width="16" height="16" source="sprites/custom-art/tiles/floor-7.png"/>
+ </tile>
+ <tile id="19">
+  <image width="16" height="16" source="sprites/custom-art/tiles/floor-8.png"/>
+ </tile>
+ <tile id="20">
+  <image width="16" height="16" source="sprites/custom-art/tiles/floor-9.png"/>
+ </tile>
+ <tile id="21">
+  <image width="16" height="16" source="sprites/custom-art/tiles/floor-10.png"/>
+ </tile>
+ <tile id="22">
+  <image width="34" height="26" source="sprites/custom-art/tiles/treasure-chest.png"/>
  </tile>
 </tileset>

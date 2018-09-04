@@ -47,9 +47,11 @@ local Gui = {
   h = 1,
   onClick = noop,
   onChange = noop,
+  onCreate = noop,
   onFocus = noop,
   onBlur = noop,
   onScroll = noop,
+  onPointerDown = noop,
   onPointerEnter = noop,
   onPointerLeave = noop,
   onUpdate = noop,
@@ -178,6 +180,10 @@ function Gui.init(self)
       end
     end
 
+    if self.hovered and love.mouse.isDown(1) then
+        self.onPointerDown(self)
+    end
+
     if self.focused and guiType.TEXT_INPUT == self.type then
       if msgBus.GUI_TEXT_INPUT == msgType then
         local txt = msgValue
@@ -199,6 +205,19 @@ function Gui.init(self)
     posX, posY,
     self.w, self.h
   ):addToWorld(collisionWorlds.gui)
+
+  self.onCreate(self)
+end
+
+local Lru = require 'utils.lru'
+local mouseCollisionsCache = Lru.new(20)
+local function indexByMouseCoord(x, y)
+  local maxCols = love.graphics.getWidth()
+  return (y * maxCols) + x
+end
+
+local function isDifferent(a, b)
+  return a ~= b
 end
 
 function Gui.update(self, dt)
@@ -206,16 +225,21 @@ function Gui.update(self, dt)
   self.colObj:update(posX, posY, self.w, self.h)
 
   local mx, my = self.getMousePosition()
-  local items, len = collisionWorlds.gui:queryPoint(mx, my, mouseCollisionFilter)
+  local cacheKey = indexByMouseCoord(mx, my)
+  local items = mouseCollisionsCache:get(cacheKey)
+  local hasChangedPosition = isDifferent(self.x, self.prevX) or isDifferent(self.y, self.prevY)
+  local hasChanges = (not items) or hasChangedPosition
+  if hasChanges then
+    items = collisionWorlds.gui:queryPoint(mx, my, mouseCollisionFilter)
+    mouseCollisionsCache:set(cacheKey, items)
+  end
 
   self.hovered = false
 
   -- if the collided item is `self`, then we're hovered
-  if len > 0 then
-    for i=1, len do
-      if items[i] == self.colObj then
-        self.hovered = true
-      end
+  for i=1, #items do
+    if items[i] == self.colObj then
+      self.hovered = true
     end
   end
 
@@ -238,6 +262,8 @@ function Gui.update(self, dt)
   self.prevHovered = self.hovered
   self.prevColPosX = posX
   self.prevColPosY = posY
+  self.prevX = self.x
+  self.prevY = self.y
 end
 
 function Gui.draw(self)

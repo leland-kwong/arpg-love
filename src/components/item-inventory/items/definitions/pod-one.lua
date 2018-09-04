@@ -6,6 +6,7 @@ local Color = require 'modules.color'
 local functional = require("utils.functional")
 local AnimationFactory = require 'components.animation-factory'
 local setProp = require 'utils.set-prop'
+local Sound = require 'components.sound'
 
 local bulletColor = {Color.rgba255(252, 122, 255)}
 
@@ -34,24 +35,30 @@ return itemDefs.registerType({
 			maxStackSize = 1,
 
 			-- static properties
-			weaponDamage = 1
+			weaponDamage = 1,
 		}
 	end,
 
 	properties = {
-		sprite = "pod-one",
+		sprite = "pod-one16",
 		title = 'Pod One',
 		rarity = config.rarity.NORMAL,
 		category = config.category.WEAPON_1,
 
+		energyCost = function(self)
+			return 1
+		end,
+
 		onEquip = function(self)
+			local frames = {}
+			for i=1, 16 do
+				table.insert(frames, 'pod-one'..i)
+			end
+			for i=16, 1, -1 do
+				table.insert(frames, 'pod-one'..i)
+			end
 			itemDefs.getState(self)
-				:set(
-					'animation',
-					AnimationFactory:new({
-						'pod-one'
-					})
-				)
+				:set('animation', AnimationFactory:new(frames))
 				:set('isAttacking', false)
 		end,
 
@@ -69,12 +76,15 @@ return itemDefs.registerType({
 
 		onActivateWhenEquipped = function(self, props)
 			local Projectile = require 'components.abilities.bullet'
+			love.audio.stop(Sound.PLASMA_SHOT)
+			love.audio.play(Sound.PLASMA_SHOT)
 			return Projectile.create(
 				setProp(props)
 					:set('minDamage', 1)
 					:set('maxDamage', 3)
 					:set('color', bulletColor)
 					:set('targetGroup', 'ai')
+					:set('startOffset', 26)
 					:set('speed', 400)
 			)
 		end,
@@ -86,9 +96,10 @@ return itemDefs.registerType({
 			return msgValue
 		end,
 
-		update = function(self)
-			itemDefs.getState(self)
-				:set('isAttacking', false)
+		update = function(self, dt)
+			local state = itemDefs.getState(self)
+			state:set('isAttacking', false)
+			state.animation:update(dt / 5)
 		end,
 
 		render = function(self)
@@ -104,6 +115,23 @@ return itemDefs.registerType({
 			local facingSide = facingX > 0 and 1 or -1
 			local offsetX = (facingSide * -1) * 30
 			local angle = (math.atan2(facingX, facingY) * -1) + (math.pi/2)
+
+			--shadow
+			love.graphics.setColor(0,0,0,0.17)
+			love.graphics.draw(
+				AnimationFactory.atlas,
+				state.animation.sprite,
+				posX,
+				posY + 15,
+				angle,
+				1,
+				-- vertically flip when facing other side so the shadow is in the right position
+				(1 * facingSide) / 2,
+				centerOffsetX, centerOffsetY
+			)
+
+			love.graphics.setColor(1,1,1)
+			-- actual graphic
 			love.graphics.draw(
 				AnimationFactory.atlas,
 				state.animation.sprite,

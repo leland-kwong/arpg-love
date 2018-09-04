@@ -1,6 +1,7 @@
 local perf = require'utils.perf'
 local bresenhamLine = require'utils.bresenham-line'
 local Perf = require'utils.perf'
+local config = require 'config.config'
 
 local perf = Perf({
   enabled = false,
@@ -51,18 +52,20 @@ return function(grid, WALKABLE, debugFn)
   end
 
   -- return [BOOLEAN] - true if line of sight is valid
-  local gridCoordinateAssertionErrorMsg = 'coordinates must be grid positions'
   local function checkLineOfSight(x1, y1, x2, y2)
     -- if any values are not integers, we can assume that they're not grid positions
-    local isGridCoordinates =
-      grid[y1]      ~= nil and
-      grid[y1][x1]  ~= nil and
-      grid[y2]      ~= nil and
-      grid[y2][x2]  ~= nil
-    assert(
-      isGridCoordinates,
-      gridCoordinateAssertionErrorMsg
-    )
+    if (config.isDebug) then
+      local isGridCoordinates =
+        grid[y1]      ~= nil and
+        grid[y1][x1]  ~= nil and
+        grid[y2]      ~= nil and
+        grid[y2][x2]  ~= nil
+      if (not isGridCoordinates) then
+        error(
+          'coordinates must be grid positions '..require'utils.inspect'({x1, y1, x2, y2})
+        )
+      end
+    end
 
     prevX, prevY = x1, y1
     return bresenhamLine(x1, y1, x2, y2, callback)

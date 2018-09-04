@@ -17,37 +17,93 @@ local msgBus = require 'components.msg-bus'
 local HealSource = require 'components.heal-source'
 local tick = require 'utils.tick'
 
+local function setupTileTypes(types)
+  local list = {}
+  for i=1, #types do
+    local t = types[i]
+    for j=1, t.chance do
+      table.insert(list, t.type)
+    end
+  end
+  return list
+end
+
 local gridTileTypes = {
   -- unwalkable
-  [0] = {
-    'wall-1',
-    'wall-2',
-    'wall-3',
-    'wall-3',
-    'wall-4',
-    'wall-4',
-    'wall-4',
-    'wall-4',
-    'wall-5',
-    'wall-6'
-  },
+  [0] = setupTileTypes({
+    {
+      type = 'wall-1',
+      chance = 10
+    },
+    {
+      type = 'wall-2',
+      chance = 10
+    },
+    {
+      type = 'wall-3',
+      chance = 20
+    },
+    {
+      type = 'wall-4',
+      chance = 40
+    },
+    {
+      type = 'wall-5',
+      chance = 2
+    },
+    {
+      type = 'wall-6',
+      chance = 2
+    }
+  }),
   -- walkable
-  [1] = {
-    'floor-1',
-    'floor-1',
-    'floor-2',
-    'floor-3',
-    'floor-4',
-    'floor-4',
-    'floor-4'
-  }
+  [1] = setupTileTypes({
+    {
+      type = 'floor-1',
+      chance = 30 -- number out of 100
+    },
+    {
+      type = 'floor-2',
+      chance = 20 -- number out of 100
+    },
+    {
+      type = 'floor-3',
+      chance = 45 -- number out of 100
+    },
+    {
+      type = 'floor-4',
+      chance = 45 -- number out of 100
+    },
+    {
+      type = 'floor-5',
+      chance = 25
+    },
+    {
+      type = 'floor-6',
+      chance = 1
+    },
+    {
+      type = 'floor-7',
+      chance = 1
+    },
+    {
+      type = 'floor-8',
+      chance = 1
+    },
+    {
+      type = 'floor-9',
+      chance = 1
+    }
+  })
 }
 
 local MainScene = {
+  id = 'MAIN_SCENE',
   group = groups.all,
 
   -- options
   initialGameState = nil,
+  autoSave = true
 }
 
 local random = math.random
@@ -57,7 +113,7 @@ local function getDroppablePosition(posX, posY, mapGrid, callCount)
   callCount = (callCount or 0)
 
   local dropX, dropY = posX + random(0, 16), posY + random(0, 16)
-  local gridX, gridY = Position.pixelsToGrid(dropX, dropY, config.gridSize)
+  local gridX, gridY = Position.pixelsToGridUnits(dropX, dropY, config.gridSize)
   local isWalkable = mapGrid[gridX][gridY] == Map.WALKABLE
   if (not isWalkable) and (callCount < 10) then
     return getDroppablePosition(
@@ -76,24 +132,30 @@ local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', 
 love.mouse.setCursor(cursor)
 
 local function generateAi(parent, player, map)
-  local aiCount = 60
+  local aiCount = 20
   local generated = 0
   local grid = map.grid
   local rows, cols = #grid, #grid[1]
-  local minPos, maxPos = 10, cols
+  local minPos, maxPos = 10, 40
   while generated < aiCount do
     local posX, posY = math.random(minPos, maxPos), math.random(minPos, maxPos)
     local isValidPosition = grid[posY][posX] == Map.WALKABLE
     if isValidPosition then
       generated = generated + 1
+      local isMeleeType = math.random(0, 1) == 0
       SpawnerAi.create({
+        -- debug = true,
         grid = grid,
         WALKABLE = Map.WALKABLE,
         target = player,
         x = posX,
         y = posY,
-        speed = 80,
-        scale = 0.5 + (math.random(1, 7) / 10)
+        type = isMeleeType and SpawnerAi.types.MELEE or SpawnerAi.types.RANGE,
+        speed = isMeleeType and 110 or 80,
+        scale = 0.5 + (math.random(1, 7) / 10),
+        -- make some enemies with very close attack range
+        attackRange = isMeleeType and 2 or nil,
+        COLOR_FILL = isMeleeType and {1,0.6,0} or nil
       }):setParent(parent)
     end
   end
@@ -101,6 +163,7 @@ end
 
 function MainScene.init(self)
   msgBus.send(msgBus.NEW_GAME)
+
   local rootState = CreateStore()
   local inventoryController = InventoryController(rootState)
   if self.initialGameState then
@@ -114,21 +177,28 @@ function MainScene.init(self)
     if not canEquip then
       error(errorMsg)
     end
+
+    local defaultHealthPotion = require'components.item-inventory.items.definitions.potion-health'
+    local canEquip, errorMsg = rootState:equipItem(defaultHealthPotion.create(), 1, 5)
+    if not canEquip then
+      error(errorMsg)
+    end
+
+    local defaultEnergyPotion = require'components.item-inventory.items.definitions.potion-energy'
+    local canEquip, errorMsg = rootState:equipItem(defaultEnergyPotion.create(), 2, 5)
+    if not canEquip then
+      error(errorMsg)
+    end
   end
 
   self.rootStore = rootState
   local parent = self
-
   local map = Map.createAdjacentRooms(6, 20)
   local gridTileDefinitions = cloneGrid(map.grid, function(v, x, y)
     local tileGroup = gridTileTypes[v]
     return tileGroup[math.random(1, #tileGroup)]
   end)
-
-  local player = Player.create({
-    mapGrid = map.grid,
-    rootStore = rootState
-  }):setParent(parent)
+  self.mapGrid = map.grid
 
   msgBus.subscribe(function(msgType, msgValue)
     if self:isDeleted() then
@@ -194,7 +264,25 @@ function MainScene.init(self)
       local newModifiers = msgValue
       rootState:set('statModifiers', newModifiers)
     end
+
+    if msgBus.PLAYER_STATS_ADD_MODIFIERS == msgType then
+      local curState = rootState:get()
+      local curMods = curState.statModifiers
+      local nextModifiers = msgValue
+      for k,v in pairs(curMods) do
+        nextModifiers[k] = v + (nextModifiers[k] or 0)
+      end
+      rootState:set(
+        'statModifiers',
+        nextModifiers
+      )
+    end
   end)
+
+  local player = Player.create({
+    mapGrid = map.grid,
+    rootStore = rootState
+  }):setParent(parent)
 
   Minimap.create({
     camera = camera,
@@ -219,16 +307,20 @@ function MainScene.init(self)
 
   generateAi(parent, player, map)
 
-  self.autoSave = tick.recur(function()
-    fileSystem.saveFile(
-      rootState:getId(),
-      rootState:get()
-    )
-  end, 0.2)
+  if self.autoSave then
+    self.autoSaveTimer = tick.recur(function()
+      fileSystem.saveFile(
+        rootState:getId(),
+        rootState:get()
+      )
+    end, 0.2)
+  end
 end
 
 function MainScene.final(self)
-  self.autoSave:stop()
+  if self.autoSave then
+    self.autoSaveTimer:stop()
+  end
   msgBus.clearAll()
 end
 

@@ -3,17 +3,23 @@ local font = require 'components.font'
 local groups = require 'components.groups'
 local tween = require 'modules.tween'
 local f = require 'utils.functional'
+local TablePool = require 'utils.table-pool'
+local setProp = require 'utils.set-prop'
 
 local PopupTextBlueprint = {
   group = groups.overlay,
+  font = font.secondary.font,
   x = 0,
   y = 0,
 }
 
+local subjectPool = TablePool.newAuto()
+
 local tweenEndState = {offset = -10}
 local function animationCo()
   local frame = 0
-  local subject = {offset = 0}
+  local subject = setProp(subjectPool.get())
+    :set('offset', 0)
   local posTween = tween.new(0.2, subject, tweenEndState, tween.easing.outCubic)
   local complete = false
 
@@ -21,6 +27,7 @@ local function animationCo()
     complete = posTween:update(1/60)
     coroutine.yield(subject.offset)
   end
+  subjectPool.release(subject)
 end
 
 function PopupTextBlueprint:new(text, x, y)
@@ -33,14 +40,13 @@ local outlineColor = {0,0,0,1}
 local shader = love.graphics.newShader(pixelOutlineShader)
 local w, h = 16, 16
 
-local textObj = love.graphics.newText(font.secondary.font, '')
-
 function PopupTextBlueprint.init(self)
+  self.textObj = love.graphics.newText(self.font, '')
   self.textObjectsList = {}
 end
 
 function PopupTextBlueprint.update(self)
-  textObj:clear()
+  self.textObj:clear()
 
   local i = 1
   while i <= #self.textObjectsList do
@@ -53,13 +59,15 @@ function PopupTextBlueprint.update(self)
       table.remove(self.textObjectsList, i)
     else
       i = i + 1
-      textObj:add(text, x, y + offsetY)
+      self.textObj:add(text, x, y + offsetY)
     end
   end
 end
 
+local spriteSize = {w, h}
+
 function PopupTextBlueprint.draw(self)
-  shader:send('sprite_size', {w, h})
+  shader:send('sprite_size', spriteSize)
   shader:send('outline_width', 2/16)
   shader:send('outline_color', outlineColor)
   shader:send('use_drawing_color', true)
@@ -68,7 +76,7 @@ function PopupTextBlueprint.draw(self)
   love.graphics.setShader(shader)
   love.graphics.setColor(1,1,1,1)
   love.graphics.draw(
-    textObj,
+    self.textObj,
     self.x,
     self.y
   )
