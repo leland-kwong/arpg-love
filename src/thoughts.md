@@ -70,9 +70,34 @@ progress = currentLevelExp / expRequiredForLevelUp
 - [x] if no scene is selected, show menu
 - [x] cleanup scene before loading a new scene
 
-## Ai flocking behavior
+## Stat modifier calculation
 
-```lua
--- follow flow field
--- if nearby agents are detected, adjust position to avoid them by taking the mean of all their direction vectors. (Sum then normalize)
-```
+stat = baseStat + (baseState * percentModier) + flatModifier
+
+### Base stats
+
+- speed (movement speed)
+- armor (percent damage reduction)
+- health
+- maxHealth
+- healthRegeneration
+- damage
+- resistances (fire, cold, lightning, poision, etc...)
+- sightRadius
+- attackRange
+
+### Status effects
+
+- silenced
+- stun (could be implemented with `silence` and `speed = 0`)
+
+### Modifiable stats
+
+- speed
+- armor
+- maxHealth
+- healthRegeneration
+- damage
+- resistances
+- sightRadius
+- attackRange
