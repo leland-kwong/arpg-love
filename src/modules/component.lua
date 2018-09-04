@@ -103,6 +103,7 @@ function M.createFactory(blueprint)
   end
 
   function blueprint.create(props)
+    assert(type(props) == 'table' or props == nil, 'props must be of type `table` or `nil`')
     local c = setProp(props or {}, isDebug)
     assert(
       not c._isComponent,
