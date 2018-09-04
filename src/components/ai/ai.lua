@@ -44,15 +44,28 @@ end)()
 
 local Ai = {
   group = groups.all,
-  health = 10,
+
+  -- calculated base properties (properties that can be changed from external modifiers)
   silenced = false,
   speed = 100,
   attackRange = 8,
   sightRadius = 11,
+  armor = 0,
+  maxHealth = 10,
+  damage = 0,
+
+  -- base properties
+  health = 10,
+
   isAggravated = false,
   gridSize = 1,
   COLOR_FILL = {1,1,1,1},
   facingDirectionX = 1,
+  -- Returns calculated stats. This should always be used when we need the stat including any modifiers.
+  stat = function(self, prop)
+    -- baseProperty + modifier
+    return self[prop] + (self.modifiers[prop] or 0)
+  end,
   drawOrder = function(self)
     return self.group.drawOrder(self) + 1
   end
@@ -149,13 +162,15 @@ local function spreadAggroToAllies(self)
   end
 end
 
-local function applyModifiers(self, modifiers, multiplier)
-  if (not modifiers) then
+local function applyModifiers(self, newModifiers, multiplier)
+  if (not newModifiers) then
     return
   end
   multiplier = multiplier or 1
-  for prop, value in pairs(modifiers) do
-    self[prop] = self[prop] + value * multiplier
+  local totalModifiers = self.modifiers
+  for prop, value in pairs(newModifiers) do
+    local actualValue = type(value) == 'function' and value(self) or value
+    totalModifiers[prop] = (totalModifiers[prop] or 0) + (actualValue * multiplier)
   end
 end
 
@@ -267,7 +282,7 @@ function Ai._update2(self, grid, flowField, dt)
   local isNewFlowField = self.lastFlowField ~= flowField
   local actualSightRadius = self.isAggravated and
       self:aggravatedRadius() or
-      self.sightRadius
+      self:stat('sightRadius')
   local targetX, targetY = self.findNearestTarget(
     self.x,
     self.y,
@@ -276,7 +291,7 @@ function Ai._update2(self, grid, flowField, dt)
   local canSeeTarget = self.isInViewOfPlayer and self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY)
   local shouldGetNewPath = flowField and canSeeTarget
   local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or 99999
-  local isInAttackRange = canSeeTarget and (distFromTarget <= self.attackRange)
+  local isInAttackRange = canSeeTarget and (distFromTarget <= self:stat('attackRange'))
 
   self:autoUnstuckFromWallIfNeeded(grid, gridX, gridY)
 
@@ -284,7 +299,7 @@ function Ai._update2(self, grid, flowField, dt)
 
   if canSeeTarget and (not self.silenced) then
     local Dash = require 'components.abilities.dash'
-    if self.attackRange <= Dash.range then
+    if self:stat('attackRange') <= Dash.range then
       if (distFromTarget <= Dash.range) then
         abilityDash.use(self)
         abilityDash.updateCooldown(self, dt)
@@ -337,7 +352,7 @@ function Ai._update2(self, grid, flowField, dt)
         end
 
         local dist = distOfLine(self.x, self.y, nextPos.x, nextPos.y)
-        local duration = dist / self.speed
+        local duration = dist / self:stat('speed')
 
         if duration <= 0 then
           done = true
@@ -484,6 +499,8 @@ function Ai.init(self)
   assert(type(self.gridSize) == 'number')
   local scale = self.scale
   local gridSize = self.gridSize
+
+  self.modifiers = {}
   self.modifiersApplied = {}
   self.hits = {}
   self.direction = {

@@ -24,12 +24,16 @@ local function statValue(stat, color, type)
 	}
 end
 
+local aoeModifiers = {
+	speed = function(target)
+		return target.speed * -0.5
+	end
+}
+
 local function aoeOnHit(self)
 	return {
 		duration = 2, -- a tick is one update cycle
-		modifiers = {
-			speed = -100
-		},
+		modifiers = aoeModifiers,
 		statusIcon = 'status-slow',
 		source = 'DEBUFF_SLOW'
 	}
