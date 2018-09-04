@@ -131,6 +131,9 @@ local cursorSize = 64
 local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', cursorSize/2, cursorSize/2)
 love.mouse.setCursor(cursor)
 
+local keys = require 'utils.functional'.keys
+local aiTypesList = keys(SpawnerAi.types)
+
 local function generateAi(parent, player, map)
   local aiCount = 20
   local generated = 0
@@ -150,12 +153,7 @@ local function generateAi(parent, player, map)
         target = player,
         x = posX,
         y = posY,
-        type = isMeleeType and SpawnerAi.types.MELEE or SpawnerAi.types.RANGE,
-        speed = isMeleeType and 110 or 80,
-        scale = 0.5 + (math.random(1, 7) / 10),
-        -- make some enemies with very close attack range
-        attackRange = isMeleeType and 2 or nil,
-        COLOR_FILL = isMeleeType and {1,0.6,0} or nil
+        type = aiTypesList[math.random(1, #aiTypesList)],
       }):setParent(parent)
     end
   end

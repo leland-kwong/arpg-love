@@ -61,7 +61,7 @@ local Ai = {
 
   isAggravated = false,
   gridSize = 1,
-  COLOR_FILL = {1,1,1,1},
+  fillColor = {1,1,1,1},
   facingDirectionX = 1,
   drawOrder = function(self)
     return self.group.drawOrder(self) + 1
@@ -441,7 +441,7 @@ function Ai.draw(self)
   local w, h = self.animation:getSourceSize()
   drawShadow(self, h, w, ox, oy)
 
-  love.graphics.setColor(self.COLOR_FILL)
+  love.graphics.setColor(self.fillColor)
   if self.hitAnimation then
     love.graphics.setBlendMode('add')
     love.graphics.setColor(3,3,3)

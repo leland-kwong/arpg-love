@@ -8,11 +8,12 @@ local typeCheck = require 'utils.type-check'
 local Math = require 'utils.math'
 local animationFactory = require 'components.animation-factory'
 local Enum = require 'utils.enum'
+local setProp = require 'utils.set-prop'
 
 local aiType = Enum({
   'MELEE',
   'RANGE',
-  'EYEBALL'
+  -- 'EYEBALL'
 })
 
 local aiTypeDef = {
@@ -128,12 +129,15 @@ local aiTypeDef = {
     local fillColor = {0,1,0.2}
     local spriteWidth, spriteHeight = animations.idle:getSourceSize()
 
-    return spriteWidth,
-      spriteHeight,
-      animations,
-      ability1,
-      attackRange,
-      fillColor
+    return {
+      speed = 110,
+      w = spriteWidth,
+      h = spriteHeight,
+      animations = animations,
+      ability1 = ability1,
+      attackRange = attackRange,
+      fillColor = fillColor
+    }
   end,
   [aiType.RANGE] = function()
     local animations = {
@@ -188,19 +192,17 @@ local aiTypeDef = {
     local attackRange = 8
     local spriteWidth, spriteHeight = animations.idle:getSourceSize()
 
-    return spriteWidth, spriteHeight, animations, ability1, attackRange
-  end,
-  [aiType.EYEBALL] = function()
-    local animations = {
-      idle = animationFactory:new({
-        'eyeball'
-      })
+    return {
+      speed = 80,
+      w = spriteWidth,
+      h = spriteHeight,
+      animations = animations,
+      ability1 = ability1,
+      attackRange = attackRange,
+      fillColor = fillColor
     }
-
-    local ability1 = (function()
-      -- deals damage with a chance to slow
-    end)
-  end
+  end,
+  -- [aiType.EYEBALL] = require 'components.spawn.ai-eyeball'
 }
 
 local SpawnerAi = {
@@ -247,28 +249,20 @@ local function AiFactory(self, x, y, speed, scale)
   end
 
   -- local type = math.random(0, 1) == 1 and aiType.MELEE or aiType.RANGE
-  local w, h, animations, ability1, attackRange, fillColor = aiTypeDef[self.type]()
-
-  return Ai.create({
-    debug = self.debug,
-    x = self.x * self.gridSize,
-    y = self.y * self.gridSize,
-    w = w,
-    h = h,
-    speed = self.speed,
-    scale = 1,
-    collisionWorld = self.colWorld,
-    pxToGridUnits = self.pxToGridUnits,
-    findNearestTarget = findNearestTarget,
-    grid = self.grid,
-    gridSize = self.gridSize,
-    WALKABLE = self.WALKABLE,
-    showAiPath = self.showAiPath,
-    attackRange = attackRange,
-    COLOR_FILL = fillColor,
-    animations = animations,
-    ability1 = ability1
-  })
+  local aiPrototype = setProp(aiTypeDef[self.type]())
+  return Ai.create(aiPrototype
+    :set('debug',             self.debug)
+    :set('x',                 self.x * self.gridSize)
+    :set('y',                 self.y * self.gridSize)
+    :set('scale',             1)
+    :set('collisionWorld',    self.colWorld)
+    :set('pxToGridUnits',     self.pxToGridUnits)
+    :set('findNearestTarget', findNearestTarget)
+    :set('grid',              self.grid)
+    :set('gridSize',          self.gridSize)
+    :set('WALKABLE',          self.WALKABLE)
+    :set('showAiPath',        self.showAiPath)
+  )
 end
 
 function SpawnerAi.init(self)
