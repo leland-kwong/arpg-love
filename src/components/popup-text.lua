@@ -8,6 +8,7 @@ local setProp = require 'utils.set-prop'
 
 local PopupTextBlueprint = {
   group = groups.overlay,
+  font = font.secondary.font,
   x = 0,
   y = 0,
 }
@@ -39,14 +40,13 @@ local outlineColor = {0,0,0,1}
 local shader = love.graphics.newShader(pixelOutlineShader)
 local w, h = 16, 16
 
-local textObj = love.graphics.newText(font.secondary.font, '')
-
 function PopupTextBlueprint.init(self)
+  self.textObj = love.graphics.newText(self.font, '')
   self.textObjectsList = {}
 end
 
 function PopupTextBlueprint.update(self)
-  textObj:clear()
+  self.textObj:clear()
 
   local i = 1
   while i <= #self.textObjectsList do
@@ -59,12 +59,13 @@ function PopupTextBlueprint.update(self)
       table.remove(self.textObjectsList, i)
     else
       i = i + 1
-      textObj:add(text, x, y + offsetY)
+      self.textObj:add(text, x, y + offsetY)
     end
   end
 end
 
 local spriteSize = {w, h}
+
 function PopupTextBlueprint.draw(self)
   shader:send('sprite_size', spriteSize)
   shader:send('outline_width', 2/16)
@@ -75,7 +76,7 @@ function PopupTextBlueprint.draw(self)
   love.graphics.setShader(shader)
   love.graphics.setColor(1,1,1,1)
   love.graphics.draw(
-    textObj,
+    self.textObj,
     self.x,
     self.y
   )
