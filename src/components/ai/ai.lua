@@ -54,6 +54,7 @@ local Ai = {
   maxHealth = 10,
   healthRegeneration = 0,
   damage = 0,
+  updateCount = 0,
 
   -- base properties
   health = 10,
@@ -254,7 +255,10 @@ local abilityDash = (function()
   return skill
 end)()
 
-function Ai._update2(self, grid, flowField, dt)
+function Ai._update2(self, grid, dt)
+  local flowField = Component.get('PLAYER').flowField
+  self.updateCount = self.updateCount + 1
+
   self.isFinishedMoving = true
   local playerRef = self.getPlayerRef and self.getPlayerRef() or Component.get('PLAYER')
   local playerX, playerY = playerRef:getPosition()
@@ -290,7 +294,8 @@ function Ai._update2(self, grid, flowField, dt)
     actualSightRadius
   )
   local canSeeTarget = self.isInViewOfPlayer and self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY)
-  local shouldGetNewPath = flowField and canSeeTarget
+  local pathUpdateResolution = 4 -- after x update frames
+  local shouldGetNewPath = (self.updateCount % pathUpdateResolution == 0) and flowField and canSeeTarget
   local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or 99999
   local isInAttackRange = canSeeTarget and (distFromTarget <= self:stat('attackRange'))
 
@@ -331,7 +336,9 @@ function Ai._update2(self, grid, flowField, dt)
     end
 
     self.positionTweener = function(dt)
-      if index > #path then
+      local finishedMoving = index > #path
+      if finishedMoving then
+        self.pathWithAstar = nil
         return
       end
 

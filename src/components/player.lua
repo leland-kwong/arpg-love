@@ -316,9 +316,7 @@ function Player.update(self, dt)
   local shouldUpdateFlowField = self.prevGridX ~= gridX or self.prevGridY ~= gridY
   if shouldUpdateFlowField and self.mapGrid then
     local flowField, callCount = self.getFlowField(self.mapGrid, gridX, gridY)
-    self.flowFieldMessage = self.flowFieldMessage or {}
-    self.flowFieldMessage.flowField = flowField
-    msgBus.send(msgBus.NEW_FLOWFIELD, self.flowFieldMessage)
+    self.flowField = flowField
     self.prevGridX = gridX
     self.prevGridY = gridY
   end

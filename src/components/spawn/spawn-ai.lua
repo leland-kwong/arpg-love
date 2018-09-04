@@ -260,16 +260,6 @@ local function AiFactory(self, x, y, speed, scale)
 end
 
 function SpawnerAi.init(self)
-  msgBus.subscribe(function(msgType, msgValue)
-    if self:isDeleted() then
-      return msgBus.CLEANUP
-    end
-
-    if msgBus.NEW_FLOWFIELD == msgType then
-      self.flowField = msgValue.flowField
-    end
-  end)
-
   self.ai = AiFactory(self):setParent(self)
 end
 
@@ -278,7 +268,7 @@ function SpawnerAi.update(self, dt)
     self:delete()
     return
   end
-  self.ai._update2(self.ai, self.grid, self.flowField, dt)
+  self.ai._update2(self.ai, self.grid, dt)
 end
 
 return Component.createFactory(SpawnerAi)
