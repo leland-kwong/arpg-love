@@ -34,9 +34,15 @@ function PlayerStatsPanel.draw(self)
 
   local rootStore = self.rootStore
   local i = 0
+  local originY = 25
+
+  -- player level
+  local playerLevelOriginY = self.y + padding + (primaryFont.fontSize * primaryFont.lineHeight)
+  self.guiText:add('Level: '..rootStore:get().level, Color.YELLOW, self.x + padding, playerLevelOriginY)
+
   for stat,val in pairs(rootStore:get().statModifiers) do
     local w, h = self.guiText:getSize()
-    local xPos, yPos = self.x + padding, self.y + 25 + (h * i * primaryFont.lineHeight)
+    local xPos, yPos = self.x + padding, self.y + originY + 16 + (h * i * primaryFont.lineHeight)
     local statType = stat..': '
     self.guiText:add(statType, Color.WHITE, xPos, yPos)
     local statValue = val..'\n'
