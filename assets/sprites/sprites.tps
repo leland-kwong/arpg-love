@@ -972,6 +972,19 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/status-effect-icons/status-slow.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,5,9,9</rect>
+                <key>scale9Paddings</key>
+                <rect>5,5,9,9</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/tiles/floor-1.png</key>
             <key type="filename">custom-art/tiles/floor-10.png</key>
             <key type="filename">custom-art/tiles/floor-2.png</key>
@@ -1058,6 +1071,7 @@
             <filename>custom-art/characters/slime</filename>
             <filename>custom-art/characters/eyeball</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons</filename>
+            <filename>custom-art/status-effect-icons</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
