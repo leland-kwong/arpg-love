@@ -4,6 +4,10 @@ local collisionWorlds = require 'components.collision-worlds'
 local msgBus = require 'components.msg-bus'
 local animationFactory = require 'components.animation-factory'
 
+local function slimeAttackCollisionFilter(item)
+  return item.group == 'player'
+end
+
 local SlimeAttack = Component.createFactory({
   group = groups.all,
   minDamage = 5,
@@ -59,10 +63,6 @@ return function()
       'slime16'
     })
   }
-
-  local function slimeAttackCollisionFilter(item)
-    return item.group == 'player'
-  end
 
   local ability1 = (function()
     local curCooldown = 0
