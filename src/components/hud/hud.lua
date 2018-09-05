@@ -10,6 +10,7 @@ local msgBus = require 'components.msg-bus'
 local Position = require 'utils.position'
 local scale = require 'config.config'.scaleFactor
 local Color = require 'modules.color'
+local Sound = require 'components.sound'
 
 local Hud = {
   id = 'HUD',
@@ -52,6 +53,20 @@ function Hud.init(self)
   local barHeight = 18
   local offX, offY = Position.boxCenterOffset(healthManaWidth, barHeight, winWidth, winHeight)
 
+  local function getHealthRemaining()
+    local state = self.rootStore:get()
+    local maxHealth = state.maxHealth + state.statModifiers.maxHealth
+    local health = state.health
+    return health / maxHealth
+  end
+
+  local function getEnergyRemaining()
+    local state = self.rootStore:get()
+    local maxEnergy = state.maxEnergy + state.statModifiers.maxEnergy
+    local energy = state.energy
+    return energy / maxEnergy
+  end
+
   -- health bar
   StatusBar.create({
     x = offX,
@@ -59,12 +74,7 @@ function Hud.init(self)
     w = healthManaWidth / 2,
     h = barHeight,
     color = {Color.rgba255(209, 27, 27)},
-    fillPercentage = function()
-      local state = self.rootStore:get()
-      local maxHealth = state.maxHealth + state.statModifiers.maxHealth
-      local health = state.health
-      return health / maxHealth
-    end
+    fillPercentage = getHealthRemaining
   }):setParent(self)
 
   -- mana bar
@@ -75,12 +85,7 @@ function Hud.init(self)
     h = barHeight,
     fillDirection = -1,
     color = {Color.rgba255(33, 89, 186)},
-    fillPercentage = function()
-      local state = self.rootStore:get()
-      local maxEnergy = state.maxEnergy + state.statModifiers.maxEnergy
-      local energy = state.energy
-      return energy / maxEnergy
-    end
+    fillPercentage = getEnergyRemaining
   }):setParent(self)
 
   msgBus.subscribe(function(msgType, msgValue)
