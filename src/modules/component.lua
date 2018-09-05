@@ -136,7 +136,7 @@ function M.createFactory(blueprint)
   end
 
   function blueprint:getPosition()
-    return self.x, self.y
+    return self.x, self.y, self.z
   end
 
   function blueprint:setPosition(x, y, z)
