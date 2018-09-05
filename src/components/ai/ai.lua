@@ -364,7 +364,7 @@ function Ai._update2(self, grid, dt)
     return
   end
 
-  local actualX, actualY, cols, len = self.collision:move(nextX, nextY, collisionFilter)
+  local actualX, actualY, cols, len = self.collision:move(nextX, nextY - self.z, collisionFilter)
   local hasCollisions = len > 0
 
   self.isFinishedMoving = (not canSeeTarget)
@@ -376,7 +376,7 @@ function Ai._update2(self, grid, dt)
   self.prevX = self.x
   self.prevY = self.y
   self.x = actualX
-  self.y = actualY
+  self.y = actualY + self.z
   self.facingDirectionX = (originalX - self.x) > 0 and -1 or 1
   self.lastFlowField = flowField
 end
