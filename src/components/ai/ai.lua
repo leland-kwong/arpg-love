@@ -48,7 +48,7 @@ local Ai = {
 
   -- calculated base properties (properties that can be changed from external modifiers)
   silenced = false,
-  speed = 100,
+  moveSpeed = 100,
   attackRange = 8,
   sightRadius = 11,
   armor = 0,
@@ -331,7 +331,7 @@ function Ai._update2(self, grid, dt)
         end
 
         local dist = distOfLine(self.x, self.y, nextPos.x, nextPos.y)
-        local duration = dist / self:stat('speed')
+        local duration = dist / self:stat('moveSpeed')
 
         if duration <= 0 then
           done = true

@@ -25,8 +25,8 @@ local function statValue(stat, color, type)
 end
 
 local aoeModifiers = {
-	speed = function(target)
-		return target.speed * -0.2
+	moveSpeed = function(target)
+		return target.moveSpeed * -0.2
 	end
 }
 

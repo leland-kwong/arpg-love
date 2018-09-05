@@ -52,7 +52,6 @@ return function()
     return skill
   end)()
 
-  local attackRange = 8
   local spriteWidth, spriteHeight = animations.idle:getSourceSize()
 
   local heightChange = 4
@@ -60,13 +59,13 @@ return function()
     z = 10,
     heightOffset = math.random(0, heightChange),
     heightChange = heightChange,
-    speed = 100,
+    moveSpeed = 100,
     maxHealth = 17,
     w = spriteWidth,
     h = spriteHeight,
     animations = animations,
     ability1 = ability1,
-    attackRange = attackRange,
+    attackRange = 10,
     onUpdateStart = function(self, dt)
       self.heightOffset = self.heightOffset + (dt * self.heightChange)
       if self.heightOffset >= 4 then

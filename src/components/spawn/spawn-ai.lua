@@ -28,7 +28,7 @@ local SpawnerAi = {
   x = 0,
   y = 0,
   types = aiType,
-  speed = 0,
+  moveSpeed = 0,
   scale = 1,
   -- these need to be passed in
   grid = nil,
@@ -47,7 +47,7 @@ local SpawnerAi = {
   gridSize = config.gridSize,
 }
 
-local function AiFactory(self, x, y, speed, scale)
+local function AiFactory(self, x, y, moveSpeed, scale)
 
   local function findNearestTarget(otherX, otherY, otherSightRadius)
     if not self.target then

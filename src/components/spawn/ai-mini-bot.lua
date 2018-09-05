@@ -54,7 +54,7 @@ return function()
   local spriteWidth, spriteHeight = animations.idle:getSourceSize()
 
   return {
-    speed = 80,
+    moveSpeed = 80,
     maxHealth = 20,
     w = spriteWidth,
     h = spriteHeight,

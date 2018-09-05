@@ -50,7 +50,7 @@ local Player = {
   facingDirectionX = 1,
   facingDirectionY = 1,
   pickupRadius = 5 * config.gridSize,
-  speed = 100,
+  moveSpeed = 100,
   flowFieldDistance = 30,
 
   -- collision properties
@@ -179,7 +179,7 @@ local Player = {
 }
 
 local function handleMovement(self, dt)
-  local totalMoveSpeed = self:stat('speed') + self.rootStore:get().statModifiers.moveSpeed
+  local totalMoveSpeed = self:stat('moveSpeed') + self.rootStore:get().statModifiers.moveSpeed
   local moveAmount = totalMoveSpeed * dt
   local origx, origy = self.x, self.y
   local mx, my = camera:getMousePosition()

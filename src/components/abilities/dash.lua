@@ -3,6 +3,8 @@ local config = require 'config.config'
 local groups = require 'components.groups'
 local tick = require 'utils.tick'
 
+local MOVE_SPEED = 'moveSpeed'
+
 local Dash = {
   group = groups.all,
   fromCaster = nil, -- object thats casted it
@@ -13,8 +15,8 @@ local Dash = {
 
 local function modifyCasterSpeed(caster, boost)
   caster:set(
-    'speed',
-    caster:getProp('speed') + boost
+    MOVE_SPEED,
+    caster:getProp(MOVE_SPEED) + boost
   )
 end
 

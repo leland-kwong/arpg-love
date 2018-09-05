@@ -99,8 +99,8 @@ local FrostSpark = {
               damage = random(self.minDamage, self.maxDamage),
               duration = 1,
               modifiers = {
-                speed = function(target)
-                  return target.speed * -0.5
+                moveSpeed = function(target)
+                  return target.moveSpeed * -0.5
                 end,
               },
               source = 'FROST_SPARK_SLOW'
