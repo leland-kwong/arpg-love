@@ -24,16 +24,20 @@ return function()
       if curCooldown > 0 then
         return skill
       else
-        local Attack = require 'components.abilities.bullet'
+        local Attack = require 'components.abilities.frost-spark'
         local projectile = Attack.create({
             debug = false
           , x = self.x
           , y = self.y - self.z
           , x2 = targetX
           , y2 = targetY
-          , speed = 125
-          , cooldown = 0.3
+          , speed = 115
+          , cooldown = 0.6
+          , lifeTime = 2.5
           , targetGroup = 'player'
+          , drawOrder = function()
+            return self.drawOrder(self) + 1
+          end
         })
         curCooldown = projectile.cooldown
         return skill
