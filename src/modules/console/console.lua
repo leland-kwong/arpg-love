@@ -100,7 +100,10 @@ local logger = Logger:new(10)
 
 function Console.debug(...)
   local args = {...}
-  local output = table.concat(args, ' ')
+  local output = ''
+  for i=1, #args do
+    output = output..' '..tostring(args[i])
+  end
   logger:add(output)
 end
 

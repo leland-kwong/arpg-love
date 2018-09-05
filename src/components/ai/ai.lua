@@ -21,10 +21,10 @@ local Position = require 'utils.position'
 local noop = require 'utils.noop'
 
 local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
-local outlineColor = {1,1,1,1}
 local shader = love.graphics.newShader(pixelOutlineShader)
 local atlasData = animationFactory.atlasData
 shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
+shader:send('outline_width', 1)
 
 local DirectionalFlowFields = require 'modules.flow-field.directional-flow-fields'
 local subFlowFields = DirectionalFlowFields(function()
@@ -446,6 +446,12 @@ function Ai.draw(self)
   drawShadow(self, h, w, ox, oy)
 
   love.graphics.setColor(self.fillColor)
+
+  if (self.outlineColor) then
+    love.graphics.setShader(shader)
+    shader:send('outline_color', self.outlineColor)
+  end
+
   if self.hitAnimation then
     love.graphics.setBlendMode('add')
     love.graphics.setColor(3,3,3)
@@ -467,6 +473,7 @@ function Ai.draw(self)
   drawStatusEffects(self, statusIcons)
 
   love.graphics.setBlendMode(oBlendMode)
+  love.graphics.setShader()
   -- self:debugLineOfSight()
 end
 

@@ -146,6 +146,11 @@ function M.createFactory(blueprint)
     return self
   end
 
+  function blueprint:setDisabled(isDisabled)
+    self._disabled = isDisabled
+    return self
+  end
+
   --[[
     Sets the parent if a parent is provided, otherwise unsets it (when parent is `nil`).
     We don't want an `addChild` method so we can avoid coupling between child and parent.
@@ -257,7 +262,9 @@ function M.newGroup(groupDefinition)
 
   function Group.updateAll(dt)
     for id,c in pairs(componentsById) do
-      c:_update(dt)
+      if (not c._disabled) then
+        c:_update(dt)
+      end
     end
 
     return Group
@@ -265,7 +272,7 @@ function M.newGroup(groupDefinition)
 
   function Group.drawAll()
     for id,c in pairs(componentsById) do
-      if c:isReady() then
+      if c:isReady() and (not c._disabled) then
         local drawFunc = (c.debug == true) and c._drawDebug or c.draw
         drawQ:add(c:drawOrder(), drawFunc, c)
       end

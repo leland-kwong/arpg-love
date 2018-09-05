@@ -29,7 +29,6 @@ local SpawnerAi = {
   y = 0,
   types = aiType,
   moveSpeed = 0,
-  scale = 1,
   -- these need to be passed in
   grid = nil,
   WALKABLE = nil,
@@ -68,10 +67,9 @@ local function AiFactory(self, x, y, moveSpeed, scale)
   -- local type = math.random(0, 1) == 1 and aiType.MELEE or aiType.RANGE
   local aiPrototype = setProp(aiTypeDef[self.type]())
   return Ai.create(aiPrototype
-    :set('debug',             self.debug)
+    -- :set('debug',             self.debug)
     :set('x',                 self.x * self.gridSize)
     :set('y',                 self.y * self.gridSize)
-    :set('scale',             1)
     :set('collisionWorld',    self.colWorld)
     :set('pxToGridUnits',     self.pxToGridUnits)
     :set('findNearestTarget', findNearestTarget)

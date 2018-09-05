@@ -5,12 +5,14 @@ local ExperienceIndicator = require 'components.hud.experience-indicator'
 local ScreenFx = require 'components.hud.screen-fx'
 local ActiveSkillInfo = require 'components.hud.active-skill-info'
 local GuiText = require 'components.gui.gui-text'
+local NpcInfo = require 'components.hud.npc-info'
 local msgBus = require 'components.msg-bus'
 local Position = require 'utils.position'
 local scale = require 'config.config'.scaleFactor
 local Color = require 'modules.color'
 
 local Hud = {
+  id = 'HUD',
   group = groups.gui,
   rootStore = {}
 }
@@ -95,6 +97,7 @@ function Hud.init(self)
 
   setupExperienceIndicator(self)
   ScreenFx.create():setParent(self)
+  NpcInfo.create():setParent(self)
 
   local spacing = 32
   local endXPos = 340

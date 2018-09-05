@@ -11,7 +11,6 @@ local HealthIndicator = {
     return 0
   end,
   fillDirection = 1,
-  hudTextLayer = nil
 }
 
 function HealthIndicator.draw(self)

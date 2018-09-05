@@ -1,5 +1,12 @@
 local animationFactory = require 'components.animation-factory'
 
+local dataSheet = {
+  name = 'minibot',
+  properties = {
+    'ranged'
+  }
+}
+
 return function()
   local animations = {
     moving = animationFactory:new({
@@ -54,6 +61,7 @@ return function()
   local spriteWidth, spriteHeight = animations.idle:getSourceSize()
 
   return {
+    dataSheet = dataSheet,
     moveSpeed = 80,
     maxHealth = 20,
     w = spriteWidth,
