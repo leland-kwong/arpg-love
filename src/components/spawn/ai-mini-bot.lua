@@ -34,7 +34,7 @@ return function()
           , x2 = targetX
           , y2 = targetY
           , speed = 125
-          , cooldown = 0.3
+          , cooldown = 0.4
           , targetGroup = 'player'
         })
         curCooldown = projectile.cooldown
