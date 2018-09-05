@@ -19,6 +19,7 @@ local Color = require 'modules.color'
 local Map = require 'modules.map-generator.index'
 local Position = require 'utils.position'
 local noop = require 'utils.noop'
+local Lru = require 'utils.lru'
 
 local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
 local shader = love.graphics.newShader(pixelOutlineShader)
@@ -139,15 +140,17 @@ local function hitAnimation()
   coroutine.yield(true)
 end
 
+local aggroMessageCache = Lru.new(100)
+
 local function spreadAggroToAllies(self)
   local c = self.collision
-  local areaMultiplier = 2
+  local areaMultiplier = 10
   local function aggravationCollisionFilter(item)
     return item.group == 'ai' and item ~= c
   end
   local items, len = self.collisionWorld:queryRect(
     c.x - c.ox * areaMultiplier,
-    c.y - c.oy * areaMultiplier,
+    c.y - self.z - c.oy * areaMultiplier,
     c.w * areaMultiplier,
     c.h * areaMultiplier,
     aggravationCollisionFilter
@@ -157,7 +160,13 @@ local function spreadAggroToAllies(self)
     local ai = items[i].parent
     local canSee = self:checkLineOfSight(self.grid, Map.WALKABLE, ai:getProp('x'), ai:getProp('y'))
     if canSee then
-      ai:set('isAggravated', true)
+      local id = ai:getId()
+      local message = aggroMessageCache:get(id)
+      if (not message) then
+        message = {parent = ai}
+        aggroMessageCache:set(id, message)
+      end
+      msgBus.send(msgBus.CHARACTER_HIT, message)
     end
   end
 end

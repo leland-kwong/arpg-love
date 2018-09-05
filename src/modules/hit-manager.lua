@@ -45,7 +45,7 @@ local function hitManager(self, dt, onDamageTaken)
   for hitId,hit in pairs(self.hits) do
     hitCount = hitCount + 1
 
-    if hit.damage and onDamageTaken then
+    if onDamageTaken and hit.damage then
       onDamageTaken(self, hit.damage)
     end
 
