@@ -111,8 +111,7 @@ local function ActiveEquipmentHandler()
       local enoughEnergy = (energyCost == nil) or
         (energyCost <= curState.energy)
       if (not enoughEnergy) then
-        local Sound = require 'components.sound'
-        love.audio.play(Sound.ACTION_ERROR)
+        msgBus.send(msgBus.PLAYER_ACTION_ERROR, 'not enough energy')
         return skill
       end
 
