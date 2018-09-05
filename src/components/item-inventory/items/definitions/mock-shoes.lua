@@ -1,3 +1,4 @@
+local Component = require 'modules.component'
 local config = require("components.item-inventory.items.config")
 local msgBus = require("components.msg-bus")
 local functional = require("utils.functional")
@@ -73,15 +74,15 @@ return itemDefs.registerType({
 		onActivateWhenEquipped = function(self)
 			love.audio.stop(Sound.MOVE_SPEED_BOOST)
 			love.audio.play(Sound.MOVE_SPEED_BOOST)
-			msgBus.send(msgBus.PLAYER_STATS_ADD_MODIFIERS, {
-				moveSpeed = self.speedBoost
-			})
 			local buffDuration = self.speedBoostDuration
-			tick.delay(function()
-				msgBus.send(msgBus.PLAYER_STATS_ADD_MODIFIERS, {
-					moveSpeed = -self.speedBoost
-				})
-			end, buffDuration)
+			msgBus.send(msgBus.CHARACTER_HIT, {
+				parent = Component.get('PLAYER'),
+				duration = buffDuration,
+				modifiers = {
+					moveSpeed = self.speedBoost
+				},
+				source = 'MOCK_SHOES'
+			})
 			return {
 				cooldown = buffDuration
 			}

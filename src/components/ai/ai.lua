@@ -259,7 +259,7 @@ function Ai._update2(self, grid, dt)
   local isNewFlowField = self.lastFlowField ~= flowField
   local actualSightRadius = self.isAggravated and
       self:aggravatedRadius() or
-      self:stat('sightRadius')
+      self:getCalculatedStat('sightRadius')
   local targetX, targetY = self.findNearestTarget(
     self.x,
     self.y,
@@ -268,7 +268,7 @@ function Ai._update2(self, grid, dt)
   local canSeeTarget = self.isInViewOfPlayer and self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY)
   local shouldGetNewPath = flowField and canSeeTarget
   local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or 99999
-  local isInAttackRange = canSeeTarget and (distFromTarget <= self:stat('attackRange'))
+  local isInAttackRange = canSeeTarget and (distFromTarget <= self:getCalculatedStat('attackRange'))
 
   self:autoUnstuckFromWallIfNeeded(grid, gridX, gridY)
 
@@ -276,7 +276,7 @@ function Ai._update2(self, grid, dt)
 
   if canSeeTarget and (not self.silenced) then
     local Dash = require 'components.abilities.dash'
-    if self:stat('attackRange') <= Dash.range then
+    if self:getCalculatedStat('attackRange') <= Dash.range then
       if (distFromTarget <= Dash.range) then
         abilityDash.use(self)
         abilityDash.updateCooldown(self, dt)
@@ -331,7 +331,7 @@ function Ai._update2(self, grid, dt)
         end
 
         local dist = distOfLine(self.x, self.y, nextPos.x, nextPos.y)
-        local duration = dist / self:stat('moveSpeed')
+        local duration = dist / self:getCalculatedStat('moveSpeed')
 
         if duration <= 0 then
           done = true

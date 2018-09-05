@@ -145,7 +145,6 @@ local function generateAi(parent, player, map)
     local isValidPosition = grid[posY][posX] == Map.WALKABLE
     if isValidPosition then
       generated = generated + 1
-      local isMeleeType = math.random(0, 1) == 0
       SpawnerAi.create({
         -- debug = true,
         grid = grid,

@@ -171,7 +171,11 @@ local Player = {
         local uid = require 'utils.uid'
         local hitId = msg.source or uid()
         self.hits[hitId] = msg
-        msgBus.send(msgBus.PLAYER_HIT_RECEIVED, msg.damage)
+
+        local damage = msg.damage or 0
+        if (damage > 0) then
+          msgBus.send(msgBus.PLAYER_HIT_RECEIVED, damage)
+        end
       end
     end
     msgBus.subscribe(subscriber)
@@ -179,7 +183,7 @@ local Player = {
 }
 
 local function handleMovement(self, dt)
-  local totalMoveSpeed = self:stat('moveSpeed') + self.rootStore:get().statModifiers.moveSpeed
+  local totalMoveSpeed = self:getCalculatedStat('moveSpeed')
   local moveAmount = totalMoveSpeed * dt
   local origx, origy = self.x, self.y
   local mx, my = camera:getMousePosition()
@@ -287,7 +291,7 @@ end
 
 local min = math.min
 
-local function updateStats(rootStore)
+local function updateHealthAndEnergy(rootStore)
   local state = rootStore:get()
   local mods = state.statModifiers
   rootStore:set('health', min(state.health, state.maxHealth + mods.maxHealth))
@@ -295,11 +299,12 @@ local function updateStats(rootStore)
 end
 
 function Player.update(self, dt)
+  self.equipmentModifiers = self.rootStore:get().statModifiers
   hitManager(self, dt)
   local nextX, nextY, totalMoveSpeed = handleMovement(self, dt)
   handleAnimation(self, dt, nextX, nextY, totalMoveSpeed)
   handleAbilities(self, dt)
-  updateStats(self.rootStore)
+  updateHealthAndEnergy(self.rootStore)
 
   -- dynamically get the current animation frame's height
   local sx, sy, sw, sh = self.animation.sprite:getViewport()

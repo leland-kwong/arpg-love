@@ -100,15 +100,17 @@ local FrostSpark = {
               duration = 1,
               modifiers = {
                 moveSpeed = function(target)
-                  return target.moveSpeed * -0.5
+                  return target:getBaseStat('moveSpeed') * -0.5
                 end,
               },
               source = 'FROST_SPARK_SLOW'
             })
-            self:delete()
             self.hits = self.hits + 1
           end
         end
+      end
+      if isExpired or (self.hits <= self.maxHits) then
+        self:delete()
       end
     end
   end,

@@ -16,7 +16,15 @@ end
 -- Returns calculated stats. This should always be used when we need the stat including any modifiers.
 local function getCalculatedStat(self, prop)
   -- baseProperty + modifier
-  return self[prop] + (self.modifiers[prop] or 0)
+  return self:getBaseStat(prop) + (self.modifiers[prop] or 0)
+end
+
+local defaultEquipmentModifiers = require'components.state.base-stat-modifiers'()
+
+-- Returns stat including any equipment modifiers
+local function getBaseStat(self, prop)
+  local equipmentModifiers = self.equipmentModifiers or defaultEquipmentModifiers
+  return self[prop] + (equipmentModifiers[prop] or 0)
 end
 
 --[[
@@ -29,7 +37,8 @@ local function hitManager(self, dt, onDamageTaken)
     self.modifiers = {}
     self.modifiersApplied = {}
     self.hits = {}
-    self.stat = getCalculatedStat
+    self.getCalculatedStat = getCalculatedStat
+    self.getBaseStat = getBaseStat
   end
 
   local hitCount = 0
@@ -41,8 +50,13 @@ local function hitManager(self, dt, onDamageTaken)
     end
 
     if hit.modifiers then
-      if (not self.modifiersApplied[hitId]) then
-        self.modifiersApplied[hitId] = true
+      local currentModifiers = self.modifiersApplied[hitId]
+      local isNewModifiers = currentModifiers ~= hit.modifiers
+      -- update modifiers for the source
+      if (isNewModifiers) then
+        -- undo current ones first
+        applyModifiers(self, currentModifiers, -1)
+        self.modifiersApplied[hitId] = hit.modifiers
         applyModifiers(self, hit.modifiers)
       end
     end
