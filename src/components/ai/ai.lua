@@ -18,6 +18,7 @@ local Enum = require 'utils.enum'
 local Color = require 'modules.color'
 local Map = require 'modules.map-generator.index'
 local Position = require 'utils.position'
+local noop = require 'utils.noop'
 
 local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
 local outlineColor = {1,1,1,1}
@@ -60,6 +61,9 @@ local Ai = {
   gridSize = 1,
   fillColor = {1,1,1,1},
   facingDirectionX = 1,
+  onInit = noop,
+  onFinal = noop,
+  onUpdateStart = nil,
   drawOrder = function(self)
     return self.group.drawOrder(self) + 1
   end
@@ -222,6 +226,9 @@ local abilityDash = (function()
 end)()
 
 function Ai._update2(self, grid, dt)
+  if self.onUpdateStart then
+    self.onUpdateStart(self, dt)
+  end
   handleHits(self, dt)
   local flowField = Component.get('PLAYER').flowField
   self.updateCount = self.updateCount + 1
@@ -232,7 +239,6 @@ function Ai._update2(self, grid, dt)
   local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
   self.isInViewOfPlayer = gridDistFromPlayer <= 40
   self.gridDistFromPlayer = gridDistFromPlayer
-
 
   if self:isDeleted() then
     return
@@ -387,6 +393,7 @@ Ai._update2 = perf({
 })(Ai._update2)
 
 local function drawShadow(self, h, w, ox, oy)
+  local heightScaleDiff = self.z * 0.01
   love.graphics.setColor(0,0,0,0.4)
   love.graphics.draw(
     animationFactory.atlas,
@@ -394,8 +401,8 @@ local function drawShadow(self, h, w, ox, oy)
     self.x,
     self.y + (h * self.scale / 1.75),
     0,
-    self.scale * self.facingDirectionX,
-    -self.scale/2,
+    self.scale*0.8 * self.facingDirectionX - heightScaleDiff,
+    -self.scale/2 + heightScaleDiff,
     ox,
     oy
   )
@@ -421,7 +428,7 @@ local function drawStatusEffects(self, statusIcons)
         animationFactory.atlas,
         statusIconAnimations[hit.statusIcon].sprite,
         self.x + offsetX,
-        self.y - 20
+        self.y - 20 - self.z
       )
       offsetX = offsetX + iconSize
     end
@@ -448,7 +455,7 @@ function Ai.draw(self)
     animationFactory.atlas,
     self.animation.sprite,
     self.x,
-    self.y,
+    self.y - self.z,
     0,
     self.scale * self.facingDirectionX,
     self.scale,
@@ -498,7 +505,7 @@ function Ai.init(self)
   self.collision = self:addCollisionObject(
       'ai',
       self.x,
-      self.y,
+      self.y - self.z,
       self.w * self.scale,
       self.h * self.scale,
       ox * self.scale,
@@ -526,6 +533,12 @@ function Ai.init(self)
       self.hits[hitId] = msgValue
     end
   end)
+
+  self.onInit(self)
+end
+
+function Ai.final(self)
+  self.onFinal(self)
 end
 
 return Component.createFactory(Ai)

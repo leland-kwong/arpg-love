@@ -15,6 +15,7 @@ local floor = math.floor
 local baseProps = {
   x = 0,
   y = 0,
+  z = 0, -- axis normal to the x-y plane
   angle = 0,
   scale = 1,
 
@@ -34,12 +35,14 @@ local baseProps = {
     local parent = self.parent
     if parent then
       -- update position relative to its parent
-      local dx, dy =
+      local dx, dy, dz =
         self.prevParentX and (parent.x - self.prevParentX) or 0,
-        self.prevParentY and (parent.y - self.prevParentY) or 0
-      self:setPosition(self.x + dx, self.y + dy)
+        self.prevParentY and (parent.y - self.prevParentY) or 0,
+        self.prevParentZ and (parent.z - self.prevParentZ) or 0
+      self:setPosition(self.x + dx, self.y + dy, self.z + dz)
       self.prevParentX = parent.x
       self.prevParentY = parent.y
+      self.prevParentZ = parent.z
     end
     self:update(dt)
   end,
@@ -136,9 +139,10 @@ function M.createFactory(blueprint)
     return self.x, self.y
   end
 
-  function blueprint:setPosition(x, y)
+  function blueprint:setPosition(x, y, z)
     self.x = x
     self.y = y
+    self.z = z
     return self
   end
 
