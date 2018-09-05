@@ -15,6 +15,7 @@ local memoize = require 'utils.memoize'
 local LineOfSight = memoize(require'modules.line-of-sight')
 local Math = require 'utils.math'
 local getDist = memoize(require('utils.math').dist)
+local hitManager = require 'modules.hit-manager'
 
 local colMap = collisionWorlds.map
 local keyMap = config.keyboard
@@ -59,6 +60,7 @@ local Player = {
   mapGrid = nil,
 
   init = function(self)
+    self.hits = {}
     self.getFlowField = FlowField(function (grid, x, y, dist)
       local row = grid[y]
       local cell = row and row[x]
@@ -166,6 +168,9 @@ local Player = {
       end
 
       if msgBus.CHARACTER_HIT == msgType and msg.parent == self then
+        local uid = require 'utils.uid'
+        local hitId = msg.source or uid()
+        self.hits[hitId] = msg
         msgBus.send(msgBus.PLAYER_HIT_RECEIVED, msg.damage)
       end
     end
@@ -174,7 +179,7 @@ local Player = {
 }
 
 local function handleMovement(self, dt)
-  local totalMoveSpeed = self.speed + self.rootStore:get().statModifiers.moveSpeed
+  local totalMoveSpeed = self:stat('speed') + self.rootStore:get().statModifiers.moveSpeed
   local moveAmount = totalMoveSpeed * dt
   local origx, origy = self.x, self.y
   local mx, my = camera:getMousePosition()
@@ -290,6 +295,7 @@ local function updateStats(rootStore)
 end
 
 function Player.update(self, dt)
+  hitManager(self, dt)
   local nextX, nextY, totalMoveSpeed = handleMovement(self, dt)
   handleAnimation(self, dt, nextX, nextY, totalMoveSpeed)
   handleAbilities(self, dt)

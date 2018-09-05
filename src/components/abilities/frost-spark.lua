@@ -49,6 +49,8 @@ local FrostSpark = {
   speed = 250,
   cooldown = 0.1,
   targetGroup = nil,
+  hits = 0,
+  maxHits = 1,
   color = Color.WHITE,
 
   init = function(self)
@@ -91,7 +93,7 @@ local FrostSpark = {
       if hasCollisions then
         for i=1, len do
           local col = cols[i]
-          if col.other.group == self.targetGroup then
+          if (self.hits < self.maxHits) and (col.other.group == self.targetGroup) then
             msgBus.send(msgBus.CHARACTER_HIT, {
               parent = col.other.parent,
               damage = random(self.minDamage, self.maxDamage),
@@ -103,11 +105,11 @@ local FrostSpark = {
               },
               source = 'FROST_SPARK_SLOW'
             })
+            self:delete()
+            self.hits = self.hits + 1
           end
         end
       end
-
-      self:delete()
     end
   end,
 
