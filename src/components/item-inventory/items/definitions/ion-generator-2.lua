@@ -32,7 +32,7 @@ local aoeModifiers = {
 
 local function aoeOnHit(self)
 	return {
-		duration = 2, -- a tick is one update cycle
+		duration = 2,
 		modifiers = aoeModifiers,
 		statusIcon = 'status-slow',
 		source = 'DEBUFF_SLOW'
