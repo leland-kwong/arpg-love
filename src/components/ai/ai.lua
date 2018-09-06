@@ -245,7 +245,8 @@ function Ai._update2(self, grid, dt)
     self.onUpdateStart(self, dt)
   end
   handleHits(self, dt)
-  local flowField = Component.get('PLAYER').flowField
+  local playerRef = Component.get('PLAYER') or Component.get('TEST_PLAYER')
+  local flowField = playerRef.flowField
 
   self.isFinishedMoving = true
   local playerRef = self.getPlayerRef and self.getPlayerRef() or Component.get('PLAYER')
@@ -378,9 +379,8 @@ function Ai._update2(self, grid, dt)
     return
   end
 
-  local actualX, actualY = nextX, nextY - self.z
-  -- local actualX, actualY, cols, len = self.collision:move(nextX, nextY - self.z, collisionFilter)
-  -- local hasCollisions = len > 0
+  local actualX, actualY, cols, len = self.collision:move(nextX, nextY - self.z, collisionFilter)
+  local hasCollisions = len > 0
 
   self.isFinishedMoving = (not canSeeTarget)
     or (canSeeTarget and isInAttackRange)
