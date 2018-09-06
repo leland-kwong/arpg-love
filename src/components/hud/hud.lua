@@ -11,6 +11,7 @@ local msgBus = require 'components.msg-bus'
 local Position = require 'utils.position'
 local scale = require 'config.config'.scaleFactor
 local Color = require 'modules.color'
+local max = math.max
 
 local Hud = {
   id = 'HUD',
@@ -95,7 +96,7 @@ function Hud.init(self)
 
     if msgBus.PLAYER_HIT_RECEIVED == msgType then
       self.rootStore:set('health', function(state)
-        return state.health - msgValue
+        return max(0, state.health - msgValue)
       end)
     end
   end)
