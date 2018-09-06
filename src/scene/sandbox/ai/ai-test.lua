@@ -11,10 +11,12 @@ local arrow = love.graphics.newImage('scene/sandbox/ai/arrow-up.png')
 local f = require'utils.functional'
 local Ai = require'components.ai.ai'
 local Math = require'utils.math'
+local aiTypes = require 'components.spawn.ai-types'
+local config = require 'config.config'
 
 local gridSize = 32
 local WALKABLE = 0
-local agentCount = 50
+local agentCount = 100
 local maxFlowFieldDistance = 30
 local colWorld = bump.newWorld(gridSize)
 local aiTestGroup = groups.hud
@@ -55,7 +57,6 @@ local flowFieldTestBlueprint = {
   -- showFlowFieldText = true,
   -- showGridCoordinates = true,
   -- showAiPath = true,
-  -- drawSubFlowFields = true,
   showAi = true,
   showFlowFieldArrows = true,
   drawOrder = function()
@@ -78,6 +79,8 @@ local function pxToGridUnits(pixelX, pixelY, gridSize)
 end
 
 function flowFieldTestBlueprint.init(self)
+  config.gridSize = gridSize
+
   local parent = self
 
   self.getMainFlowField = FlowField(function (grid, x, y, dist)
@@ -87,11 +90,6 @@ function flowFieldTestBlueprint.init(self)
       (cell == WALKABLE) and
       (dist < maxFlowFieldDistance)
   end)
-
-  local DirectionalFlowFields = require 'modules.flow-field.directional-flow-fields'
-  self.subFlowFields = DirectionalFlowFields(function()
-    return pxToGridUnits(parent.targetPosition.x, parent.targetPosition.y, gridSize)
-  end, WALKABLE)
 
   local iterateGrid = require 'utils.iterate-grid'
   self.wallCollisions = {}
@@ -123,81 +121,77 @@ function flowFieldTestBlueprint.init(self)
 
   local function AiFactory(x, y, speed, scale, attackRange)
     local AnimationFactory = require 'components.animation-factory'
-    return Ai.create({
-      group = aiTestGroup,
-      silenced = true,
-      -- debug = true,
-      x = x * gridSize,
-      y = y * gridSize,
-      speed = speed,
-      scale = scale,
-      collisionWorld = colWorld,
-      pxToGridUnits = pxToGridUnits,
-      findNearestTarget = findNearestTarget,
-      attackRange = attackRange,
-      grid = grid,
-      gridSize = gridSize,
-      WALKABLE = WALKABLE,
-      showAiPath = self.showAiPath,
-      animations = {
-        idle = AnimationFactory:new({'pixel-white-1x1'}),
-        moving = AnimationFactory:new({'pixel-white-1x1'})
-      },
-      w = 32,
-      h = 32,
-      getPlayerRef = function()
-        return self.dummyPlayer
-      end,
-      sightRadius = 40,
-      draw = function(self)
-        local scale = self.scale
-        local w, h = self.w * scale, self.h * scale
-        local alpha = 0.6
-        if not self.isFinishedMoving then
-          love.graphics.setColor(1,0.2,1,alpha)
-        else
-          love.graphics.setColor(0,0.8,0, alpha)
+    local assign = require 'utils.object-utils'.assign
+    local base = aiTypes.typeDefs[aiTypes.types.SLIME]()
+    return Ai.create(
+      assign(base, {
+        group = aiTestGroup,
+        silenced = true,
+        -- debug = true,
+        x = x * gridSize,
+        y = y * gridSize,
+        collisionWorld = colWorld,
+        pxToGridUnits = pxToGridUnits,
+        findNearestTarget = findNearestTarget,
+        grid = grid,
+        gridSize = gridSize,
+        WALKABLE = WALKABLE,
+        getPlayerRef = function()
+          return self.dummyPlayer
+        end,
+        moveSpeed = 200,
+        attackRange = 2,
+        sightRadius = 40,
+        draw = function(self)
+          local scale = self.scale
+          local w, h = self.w * scale, self.h * scale
+          local alpha = 0.6
+          if not self.isFinishedMoving then
+            love.graphics.setColor(1,0.2,1,alpha)
+          else
+            love.graphics.setColor(0,0.8,0, alpha)
+          end
+          love.graphics.rectangle('fill', self.x, self.y, w, h)
+
+          -- border
+          love.graphics.setColor(0,0,0)
+          love.graphics.setLineWidth(1)
+          love.graphics.rectangle('line', self.x, self.y, w, h)
+
+          -- local arrowRotation = arrowRotationFromDirection(self.direction.x, self.direction.y)
+          -- love.graphics.setColor(1,1,1)
+          -- love.graphics.draw(
+          --   arrow,
+          --   self.x + w/2,
+          --   self.y + h/2,
+          --   arrowRotation,
+          --   1,
+          --   1,
+          --   8,
+          --   8
+          -- )
+
+          -- local path = self.pathWithAstar
+          -- if path then
+          --   for i=1, #path do
+          --     local position = path[i]
+          --     love.graphics.setLineWidth(2)
+          --     love.graphics.setColor(1,1,1)
+          --     love.graphics.rectangle(
+          --       'line',
+          --       position.x * gridSize,
+          --       position.y * gridSize,
+          --       gridSize,
+          --       gridSize
+          --     )
+          --   end
+          -- end
+        end,
+        drawOrder = function(self)
+          return 5
         end
-        love.graphics.rectangle('fill', self.x, self.y, w, h)
-
-        -- border
-        love.graphics.setColor(0,0,0)
-        love.graphics.setLineWidth(1)
-        love.graphics.rectangle('line', self.x, self.y, w, h)
-
-        -- local arrowRotation = arrowRotationFromDirection(self.direction.x, self.direction.y)
-        -- love.graphics.setColor(1,1,1)
-        -- love.graphics.draw(
-        --   arrow,
-        --   self.x + w/2,
-        --   self.y + h/2,
-        --   arrowRotation,
-        --   1,
-        --   1,
-        --   8,
-        --   8
-        -- )
-
-        -- local path = self.pathWithAstar
-        -- if path then
-        --   for i=1, #path do
-        --     local position = path[i]
-        --     love.graphics.setLineWidth(2)
-        --     love.graphics.setColor(1,1,1)
-        --     love.graphics.rectangle(
-        --       'line',
-        --       position.x * gridSize,
-        --       position.y * gridSize,
-        --       gridSize,
-        --       gridSize
-        --     )
-        --   end
-        -- end
-      end,
-      drawOrder = function(self)
-        return 5
-      end
-    })
+      })
+    )
   end
 
   self.ai = {
@@ -227,7 +221,6 @@ function flowFieldTestBlueprint.init(self)
       positionsFilled[positionId] = true
       local scale = generateScale(math.random(1, 2))
       local attackRange = math.random(2, 6)
-      local speed = 350/scale
       table.insert(
         self.ai,
         AiFactory(gridX, gridY, speed, scale, attackRange):setParent(self)
@@ -288,6 +281,7 @@ local function generateFlowField(self, dt)
   }
 
   self.mainFlowField = self.getMainFlowField(grid, gridX, gridY)
+  self.dummyPlayer.flowField = self.mainFlowField
 
   local executionTimeMs = (socket.gettime() - ts) * 1000
   self.callCount = (self.callCount or 0) + 1
@@ -300,13 +294,9 @@ function flowFieldTestBlueprint.update(self, dt)
     generateFlowField(self, dt)
   end
 
-  if self.subFlowFields then
-    local fieldIndex = 1
-    f.forEach(self.ai, function(ai)
-      local flowFieldToUse = self.mainFlowField
-      ai._update2(ai, grid, flowFieldToUse, dt)
-    end)
-  end
+  f.forEach(self.ai, function(ai)
+    ai._update2(ai, grid, dt)
+  end)
 end
 
 local COLOR_UNWALKABLE = {0.2,0.2,0.2,1}
@@ -465,9 +455,6 @@ local function drawScene(self)
   local arrowDrawQueue = {}
 
   drawMainFlowField(self, arrowDrawQueue, textDrawQueue)
-  if self.drawSubFlowFields then
-    drawFlowFields(self)
-  end
 
   local function drawTitle()
     local offsetX = 50
