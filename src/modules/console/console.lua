@@ -182,6 +182,7 @@ function Console.draw(self)
 
   gfx.setCanvas()
   gfx.setBlendMode('alpha', 'premultiplied')
+  gfx.scale(config.scale / 2)
   gfx.draw(canvas)
   gfx.pop()
   gfx.setBlendMode('alpha')
