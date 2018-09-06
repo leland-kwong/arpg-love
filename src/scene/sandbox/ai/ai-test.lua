@@ -12,7 +12,7 @@ local f = require'utils.functional'
 local Ai = require'components.ai.ai'
 local Math = require'utils.math'
 local aiTypes = require 'components.spawn.ai-types'
-local config = require 'config.config'
+local msgBus = require 'components.msg-bus'
 
 local gridSize = 32
 local WALKABLE = 0
@@ -79,7 +79,7 @@ local function pxToGridUnits(pixelX, pixelY, gridSize)
 end
 
 function flowFieldTestBlueprint.init(self)
-  config.gridSize = gridSize
+  msgBus.send(msgBus.SET_CONFIG, {gridSize = gridSize})
 
   local parent = self
 

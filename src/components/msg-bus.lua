@@ -24,6 +24,7 @@ end
 
 M.GAME_LOADED = 'GAME_LOADED'
 M.NEW_GAME = 'NEW_GAME'
+M.SET_CONFIG = 'SET_CONFIG' -- makes updates to the game config
 
 M.KEY_PRESSED = 'KEY_PRESSED'
 M.KEY_RELEASED = 'KEY_RELEASED'
