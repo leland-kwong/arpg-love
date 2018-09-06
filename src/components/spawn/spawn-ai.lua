@@ -7,27 +7,15 @@ local config = require 'config.config'
 local typeCheck = require 'utils.type-check'
 local Math = require 'utils.math'
 local animationFactory = require 'components.animation-factory'
-local Enum = require 'utils.enum'
 local setProp = require 'utils.set-prop'
-
-local aiType = Enum({
-  'SLIME',
-  'MINI_BOT',
-  'EYEBALL'
-})
-
-local aiTypeDef = {
-  [aiType.SLIME] = require 'components.spawn.ai-slime',
-  [aiType.MINI_BOT] = require 'components.spawn.ai-mini-bot',
-  [aiType.EYEBALL] = require 'components.spawn.ai-eyeball'
-}
+local aiTypes = require 'components.spawn.ai-types'
+local f = require 'utils.functional'
 
 local SpawnerAi = {
   -- debug = true,
   group = groups.all,
   x = 0,
   y = 0,
-  types = aiType,
   moveSpeed = 0,
   -- these need to be passed in
   grid = nil,
@@ -45,6 +33,13 @@ local SpawnerAi = {
   end,
   gridSize = config.gridSize,
 }
+
+local directions = {
+  1, -1
+}
+local function getRandomDirection()
+  return directions[math.random(1, 2)]
+end
 
 local function AiFactory(self, x, y, moveSpeed, scale)
 
@@ -64,32 +59,43 @@ local function AiFactory(self, x, y, moveSpeed, scale)
     return nil
   end
 
-  -- local type = math.random(0, 1) == 1 and aiType.MELEE or aiType.RANGE
-  local aiPrototype = setProp(aiTypeDef[self.type]())
-  return Ai.create(aiPrototype
-    -- :set('debug',             self.debug)
-    :set('x',                 self.x * self.gridSize)
-    :set('y',                 self.y * self.gridSize)
-    :set('collisionWorld',    self.colWorld)
-    :set('pxToGridUnits',     self.pxToGridUnits)
-    :set('findNearestTarget', findNearestTarget)
-    :set('grid',              self.grid)
-    :set('gridSize',          self.gridSize)
-    :set('WALKABLE',          self.WALKABLE)
-    :set('showAiPath',        self.showAiPath)
-  )
+  return f.map(self.types, function(aiType)
+    local aiPrototype = setProp(aiTypes.typeDefs[aiType]())
+    local spawnX, spawnY =
+      self.x * self.gridSize + math.random(0, self.gridSize) * getRandomDirection(),
+      self.y * self.gridSize + math.random(0, self.gridSize) * getRandomDirection()
+    return Ai.create(aiPrototype
+      :set('x',                 spawnX)
+      :set('y',                 spawnY)
+      :set('collisionWorld',    self.colWorld)
+      :set('pxToGridUnits',     self.pxToGridUnits)
+      :set('findNearestTarget', findNearestTarget)
+      :set('grid',              self.grid)
+      :set('gridSize',          self.gridSize)
+      :set('WALKABLE',          self.WALKABLE)
+      :set('showAiPath',        self.showAiPath)
+    ):setParent(self)
+  end)
 end
 
 function SpawnerAi.init(self)
-  self.ai = AiFactory(self):setParent(self)
+  self.allAis = AiFactory(self)
 end
 
 function SpawnerAi.update(self, dt)
-  if self.ai:isDeleted() then
-    self:delete()
-    return
+  local i = 1
+  while i <= #self.allAis do
+    local ai = self.allAis[i]
+    if ai:isDeleted() then
+      table.remove(self.allAis, i)
+    else
+      ai._update2(ai, self.grid, dt)
+      i = i + 1
+    end
   end
-  self.ai._update2(self.ai, self.grid, dt)
+  if #self.allAis == 0 then
+    self:delete(true)
+  end
 end
 
 return Component.createFactory(SpawnerAi)

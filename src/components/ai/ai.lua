@@ -486,6 +486,13 @@ function Ai.draw(self)
   -- self:debugLineOfSight()
 end
 
+local function adjustInitialPositionIfNeeded(self)
+  -- check initial position and move if necessary
+  local actualX, actualY = self.collision:move(self.collision.x, self.collision.y - self.z, collisionFilter)
+  self.x = actualX
+  self.y = actualY
+end
+
 function Ai.init(self)
   assert(self.WALKABLE ~= nil)
   assert(type(self.pxToGridUnits) == 'function')
@@ -528,6 +535,7 @@ function Ai.init(self)
       oy * self.scale
     )
     :addToWorld(self.collisionWorld)
+  adjustInitialPositionIfNeeded(self)
 
   self.attackRange = self.attackRange * self.gridSize
   self.sightRadius = self.sightRadius * self.gridSize

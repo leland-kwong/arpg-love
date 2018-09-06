@@ -5,26 +5,6 @@ local function eyeballAttackCollisionFilter(item)
   return item.group == 'player'
 end
 
-local rarityDefinition = {
-  {
-    color = nil,
-    maxHealth = 17
-  },
-  {
-    color = {1,1,0,0.7},
-    maxHealth = 100
-  }
-}
-
-local rarityChance = {
-  1,1,1,1,1,
-  2,2,2
-}
-
-local function getRarity()
-  return rarityChance[math.random(1, #rarityChance)]
-end
-
 local dataSheet = {
   name = 'i-229',
   properties = {
@@ -83,18 +63,15 @@ return function()
   local spriteWidth, spriteHeight = animations.idle:getSourceSize()
 
   local heightChange = 4
-  local rarityDef = rarityDefinition[getRarity()]
   return {
     dataSheet = dataSheet,
-    fillColor = rarityDef.color,
-    outlineColor = rarityDef.color,
     -- debug = true,
     scale = 1,
     z = 10,
     heightOffset = math.random(0, heightChange),
     heightChange = heightChange,
     moveSpeed = 100,
-    maxHealth = rarityDef.maxHealth,
+    maxHealth = 17,
     w = spriteWidth,
     h = spriteHeight,
     animations = animations,

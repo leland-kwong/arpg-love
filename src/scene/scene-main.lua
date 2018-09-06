@@ -132,10 +132,11 @@ local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', 
 love.mouse.setCursor(cursor)
 
 local keys = require 'utils.functional'.keys
-local aiTypesList = keys(SpawnerAi.types)
+local aiTypes = require 'components.spawn.ai-types'
+local aiTypesList = keys(aiTypes.types)
 
 local function generateAi(parent, player, map)
-  local aiCount = 20
+  local aiCount = 10
   local generated = 0
   local grid = map.grid
   local rows, cols = #grid, #grid[1]
@@ -152,7 +153,11 @@ local function generateAi(parent, player, map)
         target = player,
         x = posX,
         y = posY,
-        type = aiTypesList[math.random(1, #aiTypesList)],
+        types = {
+          aiTypesList[math.random(1, #aiTypesList)],
+          aiTypesList[math.random(1, #aiTypesList)],
+          aiTypesList[math.random(1, #aiTypesList)]
+        },
       }):setParent(parent)
     end
   end
