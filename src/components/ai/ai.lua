@@ -56,7 +56,6 @@ local Ai = {
   maxHealth = 10,
   healthRegeneration = 0,
   damage = 0,
-  updateCount = 0,
 
   isAggravated = false,
   gridSize = 1,
@@ -247,7 +246,6 @@ function Ai._update2(self, grid, dt)
   end
   handleHits(self, dt)
   local flowField = Component.get('PLAYER').flowField
-  self.updateCount = self.updateCount + 1
 
   self.isFinishedMoving = true
   local playerRef = self.getPlayerRef and self.getPlayerRef() or Component.get('PLAYER')
