@@ -159,7 +159,7 @@ local function spreadAggroToAllies(self)
   for i=1, len do
     local ai = items[i].parent
     local canSee = self:checkLineOfSight(self.grid, Map.WALKABLE, ai:getProp('x'), ai:getProp('y'))
-    if canSee then
+    if canSee and (not ai.isAggravated) then
       local id = ai:getId()
       local message = aggroMessageCache:get(id)
       if (not message) then
@@ -199,10 +199,17 @@ local function handleHits(self, dt)
   local hitCount = hitManager(self, dt, onDamageTaken)
   local hasHits = hitCount > 0
 
-  self.isAggravated = hasHits
-
-  if self.isAggravated then
-    spreadAggroToAllies(self)
+  local previouslyAggravated = self.isAggravated
+  if hasHits then
+    self.isAggravated = true
+    if (not previouslyAggravated) then
+      spreadAggroToAllies(self)
+      -- put a short delay before setting `isAggravated` to false to prevent aggro spreading to cascade infinitely
+      local tick = require 'utils.tick'
+      tick.delay(function()
+        self.isAggravated = false
+      end, 0.5)
+    end
   end
 end
 
@@ -373,8 +380,9 @@ function Ai._update2(self, grid, dt)
     return
   end
 
-  local actualX, actualY, cols, len = self.collision:move(nextX, nextY - self.z, collisionFilter)
-  local hasCollisions = len > 0
+  local actualX, actualY = nextX, nextY - self.z
+  -- local actualX, actualY, cols, len = self.collision:move(nextX, nextY - self.z, collisionFilter)
+  -- local hasCollisions = len > 0
 
   self.isFinishedMoving = (not canSeeTarget)
     or (canSeeTarget and isInAttackRange)
