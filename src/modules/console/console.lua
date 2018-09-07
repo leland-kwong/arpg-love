@@ -179,7 +179,6 @@ function Console.draw(self)
     startY + 12 * lineHeight
   )
 
-  gfx.setColor(Color.YELLOW)
   gfx.print('msgBus '..self.msgBusAverageTime, edgeOffset, 700)
 
   local logEntries = logger:get()
