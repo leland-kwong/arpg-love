@@ -4,7 +4,7 @@ uniform vec4 outline_color;
 // includes the intercardinal pixels for outline generation
 uniform bool include_corners;
 uniform bool use_drawing_color;
-uniform vec4 fill_color;
+uniform vec4 fill_color = vec4(1,1,1,1);
 vec4 empty_color = vec4(0,0,0,0);
 
 float pixelSizeX = 1.0 / sprite_size.x;
@@ -14,12 +14,6 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
 {
 	// texture color
 	vec4 col = texture2D(texture, texture_coords);
-
-	bool isSolidColor = fill_color != empty_color;
-	if (isSolidColor) {
-		bool hasColor = col.a > 0.0;
-		return hasColor ? fill_color : col;
-	}
 
 	bool hasOutline = outline_width > 0.0;
 	if (!hasOutline) {
@@ -50,8 +44,8 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
   }
   else {
       if (use_drawing_color) {
-          return isCurrentPixelTransparent ? col : color;
+          return (isCurrentPixelTransparent ? col : color) * fill_color;
       }
-      return col;
+      return col * fill_color;
   }
 }

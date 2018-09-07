@@ -9,6 +9,7 @@ local Math = require 'utils.math'
 local animationFactory = require 'components.animation-factory'
 local setProp = require 'utils.set-prop'
 local aiTypes = require 'components.spawn.ai-types'
+local aiRarity = require 'components.spawn.ai-rarity'
 local f = require 'utils.functional'
 
 local SpawnerAi = {
@@ -64,16 +65,17 @@ local function AiFactory(self, x, y, moveSpeed, scale)
     local spawnX, spawnY =
       self.x * self.gridSize + math.random(0, self.gridSize) * getRandomDirection(),
       self.y * self.gridSize + math.random(0, self.gridSize) * getRandomDirection()
-    return Ai.create(aiPrototype
-      :set('x',                 spawnX)
-      :set('y',                 spawnY)
-      :set('collisionWorld',    self.colWorld)
-      :set('pxToGridUnits',     self.pxToGridUnits)
-      :set('findNearestTarget', findNearestTarget)
-      :set('grid',              self.grid)
-      :set('gridSize',          self.gridSize)
-      :set('WALKABLE',          self.WALKABLE)
-      :set('showAiPath',        self.showAiPath)
+    return Ai.create(
+      aiRarity(aiPrototype)
+        :set('x',                 spawnX)
+        :set('y',                 spawnY)
+        :set('collisionWorld',    self.colWorld)
+        :set('pxToGridUnits',     self.pxToGridUnits)
+        :set('findNearestTarget', findNearestTarget)
+        :set('grid',              self.grid)
+        :set('gridSize',          self.gridSize)
+        :set('WALKABLE',          self.WALKABLE)
+        :set('showAiPath',        self.showAiPath)
     ):setParent(self)
   end)
 end

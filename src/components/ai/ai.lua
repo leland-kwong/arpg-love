@@ -460,11 +460,10 @@ function Ai.draw(self)
   local w, h = self.animation:getSourceSize()
   drawShadow(self, h, w, ox, oy)
 
-  love.graphics.setColor(self.fillColor)
-
   if (self.outlineColor) then
     love.graphics.setShader(shader)
     shader:send('outline_color', self.outlineColor)
+    shader:send('fill_color', self.fillColor)
   end
 
   if self.hitAnimation then
@@ -472,6 +471,7 @@ function Ai.draw(self)
     love.graphics.setColor(3,3,3)
   end
 
+  love.graphics.setColor(self.fillColor)
   love.graphics.draw(
     animationFactory.atlas,
     self.animation.sprite,

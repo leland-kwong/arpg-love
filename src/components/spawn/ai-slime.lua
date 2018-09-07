@@ -121,7 +121,7 @@ return function()
   end)()
 
   local attackRange = 3
-  local fillColor = {0,1,0.2}
+  local fillColor = {0,1,0.2,1}
   local spriteWidth, spriteHeight = animations.idle:getSourceSize()
 
   return {
