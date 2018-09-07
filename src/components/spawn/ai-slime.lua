@@ -4,6 +4,14 @@ local collisionWorlds = require 'components.collision-worlds'
 local msgBus = require 'components.msg-bus'
 local animationFactory = require 'components.animation-factory'
 
+local dataSheet = {
+  name = 'slime',
+  properties = {
+    'melee',
+    'dashes in when near'
+  }
+}
+
 local function slimeAttackCollisionFilter(item)
   return item.group == 'player'
 end
@@ -117,6 +125,7 @@ return function()
   local spriteWidth, spriteHeight = animations.idle:getSourceSize()
 
   return {
+    dataSheet = dataSheet,
     moveSpeed = 110,
     maxHealth = 30,
     w = spriteWidth,

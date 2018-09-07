@@ -30,6 +30,7 @@ local colors = {
   YELLOW = {1,1,0,1},
   GOLDEN_PALE = {Color.rgba255(243, 156, 18)},
   RED = {1,0,0,1},
+  DEEP_RED = {Color.rgba255(209, 43, 43)}
 }
 -- validate colors
 for name,color in pairs(colors) do

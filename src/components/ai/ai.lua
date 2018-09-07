@@ -19,12 +19,13 @@ local Color = require 'modules.color'
 local Map = require 'modules.map-generator.index'
 local Position = require 'utils.position'
 local noop = require 'utils.noop'
+local Lru = require 'utils.lru'
 
 local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
-local outlineColor = {1,1,1,1}
 local shader = love.graphics.newShader(pixelOutlineShader)
 local atlasData = animationFactory.atlasData
 shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
+shader:send('outline_width', 1)
 
 local DirectionalFlowFields = require 'modules.flow-field.directional-flow-fields'
 local subFlowFields = DirectionalFlowFields(function()
@@ -55,7 +56,6 @@ local Ai = {
   maxHealth = 10,
   healthRegeneration = 0,
   damage = 0,
-  updateCount = 0,
 
   isAggravated = false,
   gridSize = 1,
@@ -139,15 +139,17 @@ local function hitAnimation()
   coroutine.yield(true)
 end
 
+local aggroMessageCache = Lru.new(100)
+
 local function spreadAggroToAllies(self)
   local c = self.collision
-  local areaMultiplier = 2
+  local areaMultiplier = 10
   local function aggravationCollisionFilter(item)
     return item.group == 'ai' and item ~= c
   end
   local items, len = self.collisionWorld:queryRect(
     c.x - c.ox * areaMultiplier,
-    c.y - c.oy * areaMultiplier,
+    c.y - self.z - c.oy * areaMultiplier,
     c.w * areaMultiplier,
     c.h * areaMultiplier,
     aggravationCollisionFilter
@@ -156,8 +158,14 @@ local function spreadAggroToAllies(self)
   for i=1, len do
     local ai = items[i].parent
     local canSee = self:checkLineOfSight(self.grid, Map.WALKABLE, ai:getProp('x'), ai:getProp('y'))
-    if canSee then
-      ai:set('isAggravated', true)
+    if canSee and (not ai.isAggravated) then
+      local id = ai:getId()
+      local message = aggroMessageCache:get(id)
+      if (not message) then
+        message = {parent = ai}
+        aggroMessageCache:set(id, message)
+      end
+      msgBus.send(msgBus.CHARACTER_HIT, message)
     end
   end
 end
@@ -190,10 +198,17 @@ local function handleHits(self, dt)
   local hitCount = hitManager(self, dt, onDamageTaken)
   local hasHits = hitCount > 0
 
-  self.isAggravated = hasHits
-
-  if self.isAggravated then
-    spreadAggroToAllies(self)
+  local previouslyAggravated = self.isAggravated
+  if hasHits then
+    self.isAggravated = true
+    if (not previouslyAggravated) then
+      spreadAggroToAllies(self)
+      -- put a short delay before setting `isAggravated` to false to prevent aggro spreading to cascade infinitely
+      local tick = require 'utils.tick'
+      tick.delay(function()
+        self.isAggravated = false
+      end, 0.5)
+    end
   end
 end
 
@@ -230,8 +245,8 @@ function Ai._update2(self, grid, dt)
     self.onUpdateStart(self, dt)
   end
   handleHits(self, dt)
-  local flowField = Component.get('PLAYER').flowField
-  self.updateCount = self.updateCount + 1
+  local playerRef = Component.get('PLAYER') or Component.get('TEST_PLAYER')
+  local flowField = playerRef.flowField
 
   self.isFinishedMoving = true
   local playerRef = self.getPlayerRef and self.getPlayerRef() or Component.get('PLAYER')
@@ -364,7 +379,7 @@ function Ai._update2(self, grid, dt)
     return
   end
 
-  local actualX, actualY, cols, len = self.collision:move(nextX, nextY, collisionFilter)
+  local actualX, actualY, cols, len = self.collision:move(nextX, nextY - self.z, collisionFilter)
   local hasCollisions = len > 0
 
   self.isFinishedMoving = (not canSeeTarget)
@@ -376,7 +391,7 @@ function Ai._update2(self, grid, dt)
   self.prevX = self.x
   self.prevY = self.y
   self.x = actualX
-  self.y = actualY
+  self.y = actualY + self.z
   self.facingDirectionX = (originalX - self.x) > 0 and -1 or 1
   self.lastFlowField = flowField
 end
@@ -446,6 +461,12 @@ function Ai.draw(self)
   drawShadow(self, h, w, ox, oy)
 
   love.graphics.setColor(self.fillColor)
+
+  if (self.outlineColor) then
+    love.graphics.setShader(shader)
+    shader:send('outline_color', self.outlineColor)
+  end
+
   if self.hitAnimation then
     love.graphics.setBlendMode('add')
     love.graphics.setColor(3,3,3)
@@ -467,7 +488,15 @@ function Ai.draw(self)
   drawStatusEffects(self, statusIcons)
 
   love.graphics.setBlendMode(oBlendMode)
+  love.graphics.setShader()
   -- self:debugLineOfSight()
+end
+
+local function adjustInitialPositionIfNeeded(self)
+  -- check initial position and move if necessary
+  local actualX, actualY = self.collision:move(self.collision.x, self.collision.y - self.z, collisionFilter)
+  self.x = actualX
+  self.y = actualY
 end
 
 function Ai.init(self)
@@ -512,6 +541,7 @@ function Ai.init(self)
       oy * self.scale
     )
     :addToWorld(self.collisionWorld)
+  adjustInitialPositionIfNeeded(self)
 
   self.attackRange = self.attackRange * self.gridSize
   self.sightRadius = self.sightRadius * self.gridSize

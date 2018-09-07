@@ -65,7 +65,7 @@ local Console = {
   stats = {
     accumulatedMemoryUsed = 0,
     currentMemoryUsed = 0,
-    frameCount = 0
+    frameCount = 0,
   }
 }
 
@@ -93,19 +93,31 @@ local function getAllGameObjectStats()
   return stats
 end
 
-local canvas = love.graphics.newCanvas()
+local canvas = love.graphics.newCanvas(1000, 1000)
 
 local Logger = require'utils.logger'
 local logger = Logger:new(10)
 
 function Console.debug(...)
   local args = {...}
-  local output = table.concat(args, ' ')
+  local output = ''
+  for i=1, #args do
+    output = output..' '..tostring(args[i])
+  end
   logger:add(output)
 end
 
 -- GLOBAL console logger
 consoleLog = Console.debug
+
+function Console.init(self)
+  local perf = require 'utils.perf'
+  msgBus.send = perf({
+    done = function(_, totalTime, callCount)
+      self.msgBusAverageTime = totalTime/callCount
+    end
+  })(msgBus.send)
+end
 
 function Console.update(self)
   local s = self.stats
@@ -167,9 +179,11 @@ function Console.draw(self)
     startY + 12 * lineHeight
   )
 
+  gfx.print('msgBus '..self.msgBusAverageTime, edgeOffset, 700)
+
   local logEntries = logger:get()
   gfx.setColor(Color.MED_GRAY)
-  local loggerYPosition = 700
+  local loggerYPosition = 730
   gfx.print('LOG', edgeOffset, loggerYPosition)
   gfx.setColor(Color.WHITE)
   for i=1, #logEntries do
@@ -179,6 +193,7 @@ function Console.draw(self)
 
   gfx.setCanvas()
   gfx.setBlendMode('alpha', 'premultiplied')
+  gfx.scale(config.scale / 2)
   gfx.draw(canvas)
   gfx.pop()
   gfx.setBlendMode('alpha')

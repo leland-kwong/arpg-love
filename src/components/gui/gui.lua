@@ -3,6 +3,7 @@ local font = require 'components.font'
 local groups = require 'components.groups'
 local collisionWorlds = require 'components.collision-worlds'
 local msgBus = require 'components.msg-bus'
+local GuiNode = require 'components.gui.gui-node'
 local collisionObject = require 'modules.collision'
 local scale = require 'config.config'.scaleFactor
 local noop = require 'utils.noop'
@@ -21,14 +22,6 @@ local function toggleTextInput(msgType, enabled)
 end
 msgBus.subscribe(toggleTextInput)
 msgBus.send(msgBus.SET_TEXT_INPUT, false)
-
---[[
-  A generic node with no built-in functionality.
-  Currently used internally as a node for the parenting of childNodes to the LIST
-]]
-local GuiNode = Component.createFactory({
-  group = groups.gui
-})
 
 local guiType = {
   INTERACT = 'INTERACT', -- a stateless gui node used only for event listening

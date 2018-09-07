@@ -4,13 +4,17 @@ local StatusBar = require 'components.hud.status-bar'
 local ExperienceIndicator = require 'components.hud.experience-indicator'
 local ScreenFx = require 'components.hud.screen-fx'
 local ActiveSkillInfo = require 'components.hud.active-skill-info'
+local ActionError = require 'components.hud.action-error'
 local GuiText = require 'components.gui.gui-text'
+local NpcInfo = require 'components.hud.npc-info'
 local msgBus = require 'components.msg-bus'
 local Position = require 'utils.position'
 local scale = require 'config.config'.scaleFactor
 local Color = require 'modules.color'
+local max = math.max
 
 local Hud = {
+  id = 'HUD',
   group = groups.gui,
   rootStore = {}
 }
@@ -50,6 +54,20 @@ function Hud.init(self)
   local barHeight = 18
   local offX, offY = Position.boxCenterOffset(healthManaWidth, barHeight, winWidth, winHeight)
 
+  local function getHealthRemaining()
+    local state = self.rootStore:get()
+    local maxHealth = state.maxHealth + state.statModifiers.maxHealth
+    local health = state.health
+    return health / maxHealth
+  end
+
+  local function getEnergyRemaining()
+    local state = self.rootStore:get()
+    local maxEnergy = state.maxEnergy + state.statModifiers.maxEnergy
+    local energy = state.energy
+    return energy / maxEnergy
+  end
+
   -- health bar
   StatusBar.create({
     x = offX,
@@ -57,12 +75,7 @@ function Hud.init(self)
     w = healthManaWidth / 2,
     h = barHeight,
     color = {Color.rgba255(209, 27, 27)},
-    fillPercentage = function()
-      local state = self.rootStore:get()
-      local maxHealth = state.maxHealth + state.statModifiers.maxHealth
-      local health = state.health
-      return health / maxHealth
-    end
+    fillPercentage = getHealthRemaining
   }):setParent(self)
 
   -- mana bar
@@ -73,12 +86,7 @@ function Hud.init(self)
     h = barHeight,
     fillDirection = -1,
     color = {Color.rgba255(33, 89, 186)},
-    fillPercentage = function()
-      local state = self.rootStore:get()
-      local maxEnergy = state.maxEnergy + state.statModifiers.maxEnergy
-      local energy = state.energy
-      return energy / maxEnergy
-    end
+    fillPercentage = getEnergyRemaining
   }):setParent(self)
 
   msgBus.subscribe(function(msgType, msgValue)
@@ -88,13 +96,17 @@ function Hud.init(self)
 
     if msgBus.PLAYER_HIT_RECEIVED == msgType then
       self.rootStore:set('health', function(state)
-        return state.health - msgValue
+        return max(0, state.health - msgValue)
       end)
     end
   end)
 
   setupExperienceIndicator(self)
   ScreenFx.create():setParent(self)
+  NpcInfo.create():setParent(self)
+  ActionError.create({
+    textLayer = self.hudTextSmallLayer
+  }):setParent(self)
 
   local spacing = 32
   local endXPos = 340

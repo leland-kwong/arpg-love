@@ -39,12 +39,21 @@ function love.load()
   local console = Console.create()
   require 'components.profiler.component-groups'(console)
 
-  msgBusMainMenu.subscribe(function(msgType, nextScene)
+  msgBusMainMenu.subscribe(function(msgType, msgValue)
     if msgBusMainMenu.SCENE_SWITCH == msgType then
+      local nextScene = msgValue
       if globalState.activeScene then
         globalState.activeScene:delete(true)
       end
       globalState.activeScene = nextScene.scene.create(nextScene.props)
+    end
+  end)
+
+  msgBus.subscribe(function(msgType, msgValue)
+    if msgBus.SET_CONFIG == msgType then
+      local configChanges = msgValue
+      local oUtils = require 'utils.object-utils'
+      oUtils.assign(config, configChanges)
     end
   end)
 end

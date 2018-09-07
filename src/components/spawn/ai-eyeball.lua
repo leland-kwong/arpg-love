@@ -5,6 +5,14 @@ local function eyeballAttackCollisionFilter(item)
   return item.group == 'player'
 end
 
+local dataSheet = {
+  name = 'i-229',
+  properties = {
+    'ranged',
+    'slow on hit'
+  }
+}
+
 return function()
   local animations = {
     idle = animationFactory:new({
@@ -56,6 +64,9 @@ return function()
 
   local heightChange = 4
   return {
+    dataSheet = dataSheet,
+    -- debug = true,
+    scale = 1,
     z = 10,
     heightOffset = math.random(0, heightChange),
     heightChange = heightChange,
@@ -78,7 +89,7 @@ return function()
       self:setPosition(
         self.x,
         self.y,
-        self.z + (dt * self.heightChange)
+        self.z + dt * self.heightChange
       )
     end
   }
