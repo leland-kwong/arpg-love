@@ -94,6 +94,10 @@ return itemDefs.registerType({
 		end,
 
 		onActivateWhenEquipped = function(self, props)
+			local Sound = require 'components.sound'
+			love.audio.stop(Sound.SLOW_TIME)
+			love.audio.play(Sound.SLOW_TIME)
+
 			return Aoe.create(
 				props
 					:set('area', 100)
