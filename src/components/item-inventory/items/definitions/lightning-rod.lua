@@ -70,6 +70,14 @@ return itemDefs.registerType({
 
 		onActivateWhenEquipped = function(self, props)
 			local Attack = require 'components.abilities.chain-lightning'
+			local Sound = require 'components.sound'
+			local soundSource = Sound.ENERGY_BEAM
+			soundSource:setFilter {
+				type = 'lowpass',
+				volume = .6,
+			}
+			love.audio.stop(Sound.ENERGY_BEAM)
+			love.audio.play(Sound.ENERGY_BEAM)
 			return Attack.create(
         setProp(props)
           :set('targetGroup', 'ai')

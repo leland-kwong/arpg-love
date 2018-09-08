@@ -6,7 +6,9 @@ local Sound = {
   PLASMA_SHOT = love.audio.newSource('built/sounds/plasma-shot.wav', 'static'),
   MOVE_SPEED_BOOST = love.audio.newSource('built/sounds/generic-spell-rush.wav', 'static'),
   LOW_HEALTH_WARNING = love.audio.newSource('built/sounds/low-health-warning.wav', 'static'),
-  ACTION_ERROR = love.audio.newSource('built/sounds/action-error.wav', 'static')
+  ACTION_ERROR = love.audio.newSource('built/sounds/action-error.wav', 'static'),
+  ENEMY_IMPACT = love.audio.newSource('built/sounds/attack-impact-1.wav', 'static'),
+  ENERGY_BEAM = love.audio.newSource('built/sounds/energy-beam-1.wav', 'static')
 }
 
 return Sound

@@ -57,6 +57,12 @@ local Ai = {
   healthRegeneration = 0,
   damage = 0,
 
+  abilities = {},
+  dataSheet = {
+    name = '',
+    properties = {}
+  },
+
   isAggravated = false,
   gridSize = 1,
   fillColor = {1,1,1,1},
@@ -209,6 +215,14 @@ local function handleHits(self, dt)
         self.isAggravated = false
       end, 0.5)
     end
+
+    local Sound = require 'components.sound'
+    Sound.ENEMY_IMPACT:setFilter {
+      type = 'lowpass',
+      volume = .6,
+    }
+    love.audio.stop(Sound.ENEMY_IMPACT)
+    love.audio.play(Sound.ENEMY_IMPACT)
   end
 end
 
