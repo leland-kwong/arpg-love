@@ -516,6 +516,7 @@ function Ai.init(self)
     y = 0
   }
   self.subFlowField = getSubFlowField()
+  -- start idle animation at a random point to add variance to the ai's idle state
   self.animation = self.animations.idle:update(math.random(0, 20) * 1/60)
 
   if scale % 1 == 0 then
