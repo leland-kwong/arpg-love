@@ -40,12 +40,12 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
   bool isCurrentPixelTransparent = originalAlpha == 0.0;
   bool isTransparentEdge = isCurrentPixelTransparent && isEdgePixel;
   if (isTransparentEdge) {
-      return outline_color;
+    return outline_color;
   }
   else {
-      if (use_drawing_color) {
-          return (isCurrentPixelTransparent ? col : color) * fill_color;
-      }
-      return col * fill_color;
+		if (use_drawing_color) {
+			return (isCurrentPixelTransparent ? col : color) * fill_color;
+		}
+		return col * fill_color;
   }
 }
