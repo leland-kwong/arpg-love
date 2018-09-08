@@ -187,6 +187,14 @@ local function onDamageTaken(self, damage)
   )
   self.hitAnimation = coroutine.wrap(hitAnimation)
 
+  local Sound = require 'components.sound'
+  Sound.ENEMY_IMPACT:setFilter {
+    type = 'lowpass',
+    volume = .5,
+  }
+  love.audio.stop(Sound.ENEMY_IMPACT)
+  love.audio.play(Sound.ENEMY_IMPACT)
+
   local isDestroyed = self.health <= 0
   if isDestroyed then
     msgBus.send(msgBus.ENEMY_DESTROYED, {
@@ -215,14 +223,6 @@ local function handleHits(self, dt)
         self.isAggravated = false
       end, 0.5)
     end
-
-    local Sound = require 'components.sound'
-    Sound.ENEMY_IMPACT:setFilter {
-      type = 'lowpass',
-      volume = .6,
-    }
-    love.audio.stop(Sound.ENEMY_IMPACT)
-    love.audio.play(Sound.ENEMY_IMPACT)
   end
 end
 
@@ -471,11 +471,11 @@ function Ai.draw(self)
     oy
   )
 
-  love.graphics.setColor(1,1,1)
-  drawStatusEffects(self, statusIcons)
-
   love.graphics.setBlendMode(oBlendMode)
   love.graphics.setShader()
+
+  love.graphics.setColor(1,1,1)
+  drawStatusEffects(self, statusIcons)
   -- self:debugLineOfSight()
 end
 

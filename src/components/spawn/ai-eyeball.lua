@@ -1,6 +1,11 @@
 local animationFactory = require 'components.animation-factory'
 local tick = require 'utils.tick'
 
+local frostShotSoundFilter = {
+  type = 'lowpass',
+  volume = .4,
+}
+
 local function eyeballAttackCollisionFilter(item)
   return item.group == 'player'
 end
@@ -42,6 +47,11 @@ return function()
           end
         })
         curCooldown = projectile.cooldown
+        local Sound = require 'components.sound'
+        local source = Sound.FROST_SHOT
+        source:setFilter(frostShotSoundFilter)
+        love.audio.stop(source)
+        love.audio.play(source)
         return skill
       end
     end

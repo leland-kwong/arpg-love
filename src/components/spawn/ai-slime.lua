@@ -116,6 +116,11 @@ return function()
           , cooldown = 0.5
           , targetGroup = 'player'
         })
+
+        local Sound = require 'components.sound'
+        love.audio.stop(Sound.SLIME_SPLAT)
+        love.audio.play(Sound.SLIME_SPLAT)
+
         curCooldown = attack.cooldown
         initialCooldown = attack.cooldown
         return skill
