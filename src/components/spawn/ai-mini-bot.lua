@@ -1,9 +1,18 @@
 local animationFactory = require 'components.animation-factory'
+local debounce = require 'modules.debounce'
 
 local blastSoundFilter = {
   type = 'lowpass',
   volume = .4,
 }
+
+local playblasterSound = debounce(function()
+  local Sound = require 'components.sound'
+  local source = Sound.BLASTER_2
+  source:setFilter(blastSoundFilter)
+  love.audio.stop(source)
+  love.audio.play(source)
+end, 0.2)
 
 return function()
   local animations = {
@@ -45,12 +54,7 @@ return function()
           , targetGroup = 'player'
         })
         curCooldown = projectile.cooldown
-
-        local Sound = require 'components.sound'
-        local source = Sound.BLASTER_2
-        source:setFilter(blastSoundFilter)
-        love.audio.stop(source)
-        love.audio.play(source)
+        playblasterSound()
 
         return skill
       end
