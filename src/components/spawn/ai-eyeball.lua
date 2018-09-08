@@ -5,14 +5,6 @@ local function eyeballAttackCollisionFilter(item)
   return item.group == 'player'
 end
 
-local dataSheet = {
-  name = 'i-229',
-  properties = {
-    'ranged',
-    'slow on hit'
-  }
-}
-
 return function()
   local animations = {
     idle = animationFactory:new({
@@ -26,7 +18,9 @@ return function()
   -- deals damage with a chance to slow
   local ability1 = (function()
     local curCooldown = 0
-    local skill = {}
+    local skill = {
+      range = 10
+    }
 
     function skill.use(self, targetX, targetY)
       if curCooldown > 0 then
@@ -63,6 +57,13 @@ return function()
   local spriteWidth, spriteHeight = animations.idle:getSourceSize()
 
   local heightChange = 4
+  local dataSheet = {
+    name = 'i-229',
+    properties = {
+      'ranged',
+      'slow on hit'
+    }
+  }
   return {
     dataSheet = dataSheet,
     -- debug = true,
@@ -75,7 +76,9 @@ return function()
     w = spriteWidth,
     h = spriteHeight,
     animations = animations,
-    ability1 = ability1,
+    abilities = {
+      ability1
+    },
     attackRange = 10,
     onUpdateStart = function(self, dt)
       self.heightOffset = self.heightOffset + (dt * self.heightChange)

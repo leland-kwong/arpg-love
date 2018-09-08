@@ -1,4 +1,4 @@
-local function setupRarityTypes(types)
+local function setupChanceFunctions(types)
   local list = {}
   for i=1, #types do
     local t = types[i]
@@ -6,7 +6,10 @@ local function setupRarityTypes(types)
       table.insert(list, t)
     end
   end
-  return list
+  return function(a, b, c, d, e, f)
+    local index = math.random(1, #list)
+    return list[index](a, b, c, d, e, f)
+  end
 end
 
 local function CallableObject(props)
@@ -15,7 +18,21 @@ local function CallableObject(props)
   })
 end
 
-local rarityTypes = setupRarityTypes({
+local generateRandomProperty = setupChanceFunctions({
+  CallableObject({
+    type = 'extra fast',
+    chance = 1,
+    lowerPercentSpeed = 1,
+    upperPercentSpeed = 2,
+    __call = function(self, ai)
+      local moveSpeedBonus = math.random(self.lowerPercentSpeed, self.upperPercentSpeed) / 2
+      local modType = 'extra fast'
+      return self.type, 'moveSpeed', ai.moveSpeed + (ai.moveSpeed * moveSpeedBonus)
+    end
+  })
+})
+
+local generateRandomRarity = setupChanceFunctions({
   CallableObject({
     type = 'NORMAL',
     chance = 3,
@@ -37,6 +54,10 @@ local rarityTypes = setupRarityTypes({
     chance = 3,
     outlineColor = {0.8, 0.8, 0, 1},
     __call = function(self, ai)
+      local modType, prop, value = generateRandomProperty(ai)
+      ai:set(prop, value)
+      table.insert(ai.dataSheet.properties, modType)
+
       return ai:set('outlineColor', self.outlineColor)
         :set('maxHealth', ai.maxHealth * 5)
     end
@@ -44,6 +65,5 @@ local rarityTypes = setupRarityTypes({
 })
 
 return function(ai)
-  local rarityTypeIndex = math.random(1, #rarityTypes)
-  return rarityTypes[rarityTypeIndex](ai)
+  return generateRandomRarity(ai)
 end

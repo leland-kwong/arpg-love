@@ -212,34 +212,6 @@ local function handleHits(self, dt)
   end
 end
 
-local abilityDash = (function()
-  local curCooldown = 0
-  local skill = {}
-
-  function skill.use(self)
-    if curCooldown > 0 then
-      return skill
-    else
-      local Dash = require 'components.abilities.dash'
-      local projectile = Dash.create({
-          fromCaster = self
-        , cooldown = 1
-        , duration = 7/60
-        , range = require 'config.config'.gridSize * 6
-      })
-      curCooldown = projectile.cooldown
-      return skill
-    end
-  end
-
-  function skill.updateCooldown(self, dt)
-    curCooldown = curCooldown - dt
-    return skill
-  end
-
-  return skill
-end)()
-
 function Ai._update2(self, grid, dt)
   if self.onUpdateStart then
     self.onUpdateStart(self, dt)
@@ -289,19 +261,20 @@ function Ai._update2(self, grid, dt)
 
   self.canSeeTarget = canSeeTarget
 
-  if canSeeTarget and (not self.silenced) then
-    local Dash = require 'components.abilities.dash'
-    if self:getCalculatedStat('attackRange') <= Dash.range then
-      if (distFromTarget <= Dash.range) then
-        abilityDash.use(self)
-        abilityDash.updateCooldown(self, dt)
+  if canSeeTarget then
+    if (not self.silenced) then
+      local abilities = self.abilities
+      for i=1, #abilities do
+        local ability = abilities[i]
+        if (distFromTarget <= ability.range * self.gridSize) then
+          ability.use(self, targetX, targetY)
+          ability.updateCooldown(self, dt)
+        end
       end
     end
 
     if isInAttackRange then
-      self.ability1.use(self, targetX, targetY)
-      self.ability1.updateCooldown(self, dt)
-      -- we're already in attack range, so we don't need to move
+      -- we're already in attack range, so we can stop the update here since the rest of the update is just moving
       return
     end
   end

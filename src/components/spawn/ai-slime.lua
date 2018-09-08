@@ -4,14 +4,6 @@ local collisionWorlds = require 'components.collision-worlds'
 local msgBus = require 'components.msg-bus'
 local animationFactory = require 'components.animation-factory'
 
-local dataSheet = {
-  name = 'slime',
-  properties = {
-    'melee',
-    'dashes in when near'
-  }
-}
-
 local function slimeAttackCollisionFilter(item)
   return item.group == 'player'
 end
@@ -72,10 +64,42 @@ return function()
     })
   }
 
+  local abilityDash = (function()
+    local curCooldown = 0
+    local skill = {
+      range = 6
+    }
+
+    function skill.use(self)
+      if curCooldown > 0 then
+        return skill
+      else
+        local Dash = require 'components.abilities.dash'
+        local projectile = Dash.create({
+            fromCaster = self
+          , cooldown = 1
+          , duration = 7/60
+          , range = skill.range
+        })
+        curCooldown = projectile.cooldown
+        return skill
+      end
+    end
+
+    function skill.updateCooldown(self, dt)
+      curCooldown = curCooldown - dt
+      return skill
+    end
+
+    return skill
+  end)()
+
   local ability1 = (function()
     local curCooldown = 0
     local initialCooldown = 0
-    local skill = {}
+    local skill = {
+      range = 3
+    }
     local isAnimationComplete = false
 
     function skill.use(self, targetX, targetY)
@@ -124,14 +148,26 @@ return function()
   local fillColor = {0,1,0.2,1}
   local spriteWidth, spriteHeight = animations.idle:getSourceSize()
 
+  local dataSheet = {
+    name = 'slime',
+    properties = {
+      'melee',
+      'dashes in when near'
+    }
+  }
+
   return {
+    modifierNames = {},
     dataSheet = dataSheet,
     moveSpeed = 110,
     maxHealth = 30,
     w = spriteWidth,
     h = spriteHeight,
     animations = animations,
-    ability1 = ability1,
+    abilities = {
+      ability1,
+      abilityDash
+    },
     attackRange = attackRange,
     fillColor = fillColor
   }

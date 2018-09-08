@@ -1,12 +1,5 @@
 local animationFactory = require 'components.animation-factory'
 
-local dataSheet = {
-  name = 'minibot',
-  properties = {
-    'ranged'
-  }
-}
-
 return function()
   local animations = {
     moving = animationFactory:new({
@@ -27,7 +20,9 @@ return function()
 
   local ability1 = (function()
     local curCooldown = 0
-    local skill = {}
+    local skill = {
+      range = 8
+    }
 
     function skill.use(self, targetX, targetY)
       if curCooldown > 0 then
@@ -59,6 +54,12 @@ return function()
 
   local attackRange = 8
   local spriteWidth, spriteHeight = animations.idle:getSourceSize()
+  local dataSheet = {
+    name = 'minibot',
+    properties = {
+      'ranged'
+    }
+  }
 
   return {
     dataSheet = dataSheet,
@@ -67,7 +68,9 @@ return function()
     w = spriteWidth,
     h = spriteHeight,
     animations = animations,
-    ability1 = ability1,
+    abilities = {
+      ability1
+    },
     attackRange = attackRange,
     fillColor = fillColor
   }
