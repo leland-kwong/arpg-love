@@ -165,7 +165,7 @@ local function spreadAggroToAllies(self)
         message = {parent = ai}
         aggroMessageCache:set(id, message)
       end
-      msgBus.send(msgBus.CHARACTER_HIT, message)
+      msgBus.send(msgBus.CHARACTER_AGGRO, message)
     end
   end
 end
