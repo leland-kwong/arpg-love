@@ -139,7 +139,7 @@ local function hitAnimation()
   coroutine.yield(true)
 end
 
-local aggroMessageCache = Lru.new(100)
+local aggroMessageCache = Lru.new(200)
 
 local function spreadAggroToAllies(self)
   local c = self.collision
