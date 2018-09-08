@@ -409,14 +409,14 @@ Ai._update2 = perf({
 
 local function drawShadow(self, h, w, ox, oy)
   local heightScaleDiff = self.z * 0.01
-  love.graphics.setColor(0,0,0,0.4)
+  love.graphics.setColor(0,0,0,0.3)
   love.graphics.draw(
     animationFactory.atlas,
     self.animation.sprite,
     self.x,
-    self.y + (h * self.scale / 1.75),
+    self.y + (h * self.scale / 1.3),
     0,
-    self.scale*0.8 * self.facingDirectionX - heightScaleDiff,
+    self.scale*0.9 * self.facingDirectionX - heightScaleDiff,
     -self.scale/2 + heightScaleDiff,
     ox,
     oy
