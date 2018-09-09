@@ -208,15 +208,6 @@ function M.createFactory(blueprint)
     return self
   end
 
-  --[[
-    Revives the game object, which is effectively recreating the component, except we're reusing it.
-    This allows gives us to save memory by not having to recreate objects
-  ]]
-  function blueprint:revive()
-    self:setGroup(self.group)
-    self:init()
-  end
-
   function blueprint:getId()
     return self._id
   end

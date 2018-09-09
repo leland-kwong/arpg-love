@@ -4,7 +4,6 @@ local Color = require 'modules.color'
 local screenScale = require 'config.config'.scaleFactor
 local tween = require 'modules.tween'
 local msgBus = require 'components.msg-bus'
-local moonshine = require 'modules.moonshine'
 
 local vignette = love.graphics.newImage('built/images/vignette2.png')
 
@@ -34,13 +33,6 @@ function ScreenFx.init(self)
       self.currentTween = self.tween
     end
   end)
-
-  local screenWidth, screenHeight = getScreenSize()
-  self.glowEffect = moonshine(screenWidth, screenHeight, moonshine.effects.vignette)
-  self.glowEffect.vignette.radius = 0.1
-  self.glowEffect.vignette.softness = 0.1
-  self.glowEffect.vignette.opacity = 0.9
-  self.glowEffect.vignette.color = {255,0,0}
 end
 
 -- we do a two-step tween to animate in then out
