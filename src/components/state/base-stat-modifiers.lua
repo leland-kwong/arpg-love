@@ -13,6 +13,7 @@ return function()
 		healthRegeneration = 0,
 		energyRegeneration = base.energyRegeneration,
 		armor = 0,
+		flatPhysicalDamageReduction = 0,
 		cooldownReduction = 0, -- multiplier
 		moveSpeed = 0, -- flat increase
 		resistFire = 0,

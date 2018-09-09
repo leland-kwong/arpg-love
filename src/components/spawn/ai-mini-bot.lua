@@ -79,6 +79,7 @@ return function()
 
   return {
     dataSheet = dataSheet,
+    armor = 100,
     moveSpeed = 80,
     maxHealth = 20,
     w = spriteWidth,

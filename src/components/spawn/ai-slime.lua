@@ -168,11 +168,13 @@ return function()
     maxHealth = 30,
     w = spriteWidth,
     h = spriteHeight,
+    flatPhysicalDamageReduction = 1,
     animations = animations,
     abilities = {
       ability1,
       abilityDash
     },
+    armor = 900,
     attackRange = attackRange,
     fillColor = fillColor
   }

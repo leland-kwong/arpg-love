@@ -91,6 +91,7 @@ return function()
     w = spriteWidth,
     h = spriteHeight,
     animations = animations,
+    armor = 100,
     abilities = {
       ability1
     },

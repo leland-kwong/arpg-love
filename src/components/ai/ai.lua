@@ -53,6 +53,7 @@ local Ai = {
   attackRange = 8,
   sightRadius = 11,
   armor = 0,
+  flatPhysicalDamageReduction = 0,
   maxHealth = 10,
   healthRegeneration = 0,
   damage = 0,
@@ -176,12 +177,25 @@ local function spreadAggroToAllies(self)
   end
 end
 
+local max = math.max
+local round = require 'utils.math'.round
+local damageReductionPerArmor = 0.0001
+local function adjustedDamage(self, damage)
+  local damageAfterFlatReduction = damage - self.flatPhysicalDamageReduction
+  local finalDamage = damageAfterFlatReduction -
+    (damageAfterFlatReduction * self.armor * damageReductionPerArmor)
+  return round(
+    max(0, finalDamage)
+  )
+end
+
 local function onDamageTaken(self, damage)
-  self.health = self.health - damage
+  local actualDamage = adjustedDamage(self, damage)
+  self.health = self.health - actualDamage
   local getTextSize = require 'components.gui.gui-text'.getTextSize
-  local offsetCenter = -getTextSize(damage, popupText.font) / 2
+  local offsetCenter = -getTextSize(actualDamage, popupText.font) / 2
   popupText:new(
-    damage,
+    actualDamage,
     self.x + offsetCenter,
     self.y - self.h
   )
