@@ -243,9 +243,11 @@ local function computeCohesion(self, neighbors)
 	local px, py = 0, 0
 	local neighborCount = #neighbors
 	for i=1, neighborCount do
-		local n = neighbors[i].parent
-		px = px + n.x
-		py = py + n.y
+    local n = neighbors[i].parent
+    if (not n.isInAttackRange) then
+      px = px + n.x
+      py = py + n.y
+    end
 	end
 	if neighborCount > 0 then
 		px = px / neighborCount
@@ -274,12 +276,34 @@ local function computeSeparation(self, neighbors)
 	return sx, sy
 end
 
+local function obstacleFilter(item)
+  return item.group == 'obstacle'
+end
+
 local function computeObstacleInfluence(self)
-  local Obstacle = require 'components.ai.obstacle'
-	-- We'll just use the single nearest obstacle for demo purposes.
+  local obstacles, len = self.collision.world:queryRect(
+    self.x - self.w,
+    self.y - self.h,
+    self.w * 3,
+    self.h * 3,
+    obstacleFilter
+  )
+  local dist = 99999
+  local no = nil
+  for i=1, len do
+    local o = obstacles[i]
+    local curDist = Math.dist(self.x, self.y, o.x + o.w/2, o.y + o.h/2) - (o.w * 0.5)
+    if curDist < dist then
+      no = o
+      dist = curDist
+    end
+  end
+  if (len == 0) then
+    return 0, 0
+  end
+	-- We'll just use the single nearest obstacle.
 	-- A lot of the time this is enough but more complex environments might need influences from all nearby obstacles
-  local no, dist = Obstacle:getNearest(self.x, self.y)
-	dist = math.max(0.01, dist - self.w*0.5)
+  dist = math.max(0.01, dist - self.w*0.5)
 	local sepX, sepY = Math.normalizeVector(self.x - no.x, self.y - no.y)
 
 	return sepX/dist, sepY/dist
@@ -416,16 +440,19 @@ function Ai._update2(self, grid, dt)
       end
     end
 
+    self.isInAttackRange = isInAttackRange
     if isInAttackRange then
       -- we're already in attack range, so we can stop the update here since the rest of the update is just moving
       return
     end
 
-    local distanceToPlanAhead = actualSightRadius / self.gridSize
-    local path = self.getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
-    local targetPos = path[#path]
-    self.targetX, self.targetY = targetPos.x * self.gridSize, targetPos.y * self.gridSize
-    setNextPosition(self, dt, 40)
+    if shouldGetNewPath then
+      local distanceToPlanAhead = actualSightRadius / self.gridSize
+      local path = self.getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
+      local targetPos = path[#path]
+      self.targetX, self.targetY = targetPos.x * self.gridSize, targetPos.y * self.gridSize
+      setNextPosition(self, dt, 40)
+    end
   elseif self.targetX then
     setNextPosition(self, dt, 40)
   end
