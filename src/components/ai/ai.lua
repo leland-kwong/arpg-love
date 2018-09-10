@@ -57,12 +57,16 @@ local Ai = {
   maxHealth = 10,
   healthRegeneration = 0,
   damage = 0,
+  frameCount = 0,
 
   abilities = {},
   dataSheet = {
     name = '',
     properties = {}
   },
+
+  vx = 0,
+  vy = 0,
 
   isAggravated = false,
   gridSize = 1,
@@ -101,26 +105,6 @@ function Ai:aggravatedRadius()
   local playerFlowFieldDistance = Component.get('PLAYER')
     :getProp('flowFieldDistance')
   return (playerFlowFieldDistance - 3) * self.gridSize
-end
-
-function Ai:autoUnstuckFromWallIfNeeded(grid, gridX, gridY)
-  local row = grid[gridY]
-  local isInsideWall = (not row) or (row[gridX] ~= self.WALKABLE)
-
-  if isInsideWall then
-    local openX, openY = getAdjacentWalkablePosition(grid, gridX, gridY, self.WALKABLE)
-    if openX then
-      local nextX, nextY = openX * self.gridSize, openY * self.gridSize
-      self.x = nextX
-      self.y = nextY
-      self.collision:update(
-        self.x,
-        self.y,
-        self.w,
-        self.h
-      )
-    end
-  end
 end
 
 local COLLISION_SLIDE = 'slide'
@@ -235,20 +219,150 @@ local function handleHits(self, dt)
       local tick = require 'utils.tick'
       tick.delay(function()
         self.isAggravated = false
-      end, 0.5)
+      end, 1)
     end
   end
 end
 
+local function computeAlignment(self, neighbors)
+	local vx, vy = 0, 0
+	local neighborCount = #neighbors
+  for i=1, neighborCount do
+    local n = neighbors[i].parent
+		vx = vx + n.vx
+		vy = vy + n.vy
+	end
+	if neighborCount > 0 then
+		vx = vx / neighborCount
+		vy = vy / neighborCount
+	end
+	return Math.normalizeVector(vx, vy)
+end
+
+local function computeCohesion(self, neighbors)
+	local px, py = 0, 0
+	local neighborCount = #neighbors
+	for i=1, neighborCount do
+		local n = neighbors[i].parent
+		px = px + n.x
+		py = py + n.y
+	end
+	if neighborCount > 0 then
+		px = px / neighborCount
+		py = py / neighborCount
+	end
+	px = px - self.x
+	py = py - self.y
+	return Math.normalizeVector(px, py)
+end
+
+local function computeSeparation(self, neighbors)
+	local sx, sy = 0, 0
+	local neighborCount = #neighbors
+	for i=1, neighborCount do
+		local n = neighbors[i].parent
+		-- add separation vector, reducing strength by distance
+		-- this can be fancier with decay by the square or taking into account weight or whatever
+		local sepX, sepY = Math.normalizeVector(self.x - n.x, self.y - n.y)
+		local dist = math.max(0.01, Math.dist(self.x, self.y, n.x, n.y) - n.w*0.5 - self.w*0.5)
+		sx = sx + (sepX/dist)
+		sy = sy + (sepY/dist)
+	end
+
+	-- Note that this isn't normalised as you want the influence to reduce if the entity is well separated.
+	-- You could apply a similar approach to other influence vectors depending on what sort of behaviour you want
+	return sx, sy
+end
+
+local function computeObstacleInfluence(self)
+  local Obstacle = require 'components.ai.obstacle'
+	-- We'll just use the single nearest obstacle for demo purposes.
+	-- A lot of the time this is enough but more complex environments might need influences from all nearby obstacles
+  local no, dist = Obstacle:getNearest(self.x, self.y)
+	dist = math.max(0.01, dist - self.w*0.5)
+	local sepX, sepY = Math.normalizeVector(self.x - no.x, self.y - no.y)
+
+	return sepX/dist, sepY/dist
+end
+
+local function neighborFilter(item)
+  return item.group == 'ai'
+end
+local function getNeighbors(agent, neighborOffset)
+	local b = agent
+	return agent.collision.world:queryRect(
+		b.x - neighborOffset/2,
+		b.y - neighborOffset/2,
+		b.w + neighborOffset,
+    b.h + neighborOffset,
+    neighborFilter
+	)
+end
+
+local function setNextPosition(self, dt, radius)
+  local neighbors = getNeighbors(self, 10)
+  local speed = self.moveSpeed * dt
+
+	-- These calcs are to get an adjustment for movement speed based on distance.
+	-- Don't take this as a complete solution as it only works based on the mouse target for
+	-- this test setup.
+	-- In reality you need to be a bit smarter about slowing/stopping AI entities when
+	-- they have reached a goal point. This will often tie into the combat system (stopping
+  -- when they can hit the player, for example).
+  local targetX, targetY = self.targetX, self.targetY
+	local targetDist = Math.dist(self.x, self.y, targetX, targetY)
+	local targetDistDamping = math.min(1.0, targetDist/radius)
+
+	-- Calculate direction influence vectors
+	-- Remember that you're not bound to the classical boids here. You can add influences from all sorts
+	-- of things in your game. I've added some obstacles (which could be traps or fire or whatever) to demonstrate.
+	local targetDirX, targetDirY = Position.getDirection(self.x, self.y, targetX, targetY)
+	local alignmentX, alignmentY = computeAlignment(self, neighbors)
+	local cohesionX, cohesionY = computeCohesion(self, neighbors)
+	local separationX, separationY = computeSeparation(self, neighbors)
+	local obstInfluenceX, obstInfluenceY = computeObstacleInfluence(self)
+
+	-- these are the weights for each influence vector and can be adjusted to get different behaviours
+	local separationWeight = 4
+	local alignmentWeight = 0.1
+	local cohesionWeight = 0.4
+	local targetDirectionWeight = 1.5
+	local obstInfluenceWeight = 6.0
+
+	-- Now we calculate the overall influence vector
+	local adjustedVx = targetDirX*targetDirectionWeight + obstInfluenceX*obstInfluenceWeight + (alignmentX * alignmentWeight) + (cohesionX * cohesionWeight) + (separationX * separationWeight)
+	local adjustedVy = targetDirY*targetDirectionWeight + obstInfluenceY*obstInfluenceWeight + (alignmentY * alignmentWeight) + (cohesionY * cohesionWeight) + (separationY * separationWeight)
+
+	-- Normalise to a direction vector
+	local normVx, normVy = Math.normalizeVector(adjustedVx, adjustedVy)
+
+	-- Here I'm effectively lerping the direction just to smooth things out a bit. Completely optional/adjustable
+	self.vx = (self.vx + normVx) * 0.5
+	self.vy = (self.vy + normVy) * 0.5
+
+  -- Apply direction with speed and our damping based on the target distance
+	self.x = self.x + self.vx * speed * targetDistDamping
+  self.y = self.y + self.vy * speed * targetDistDamping
+  self.collision:update(self.x, self.y)
+end
+
 function Ai._update2(self, grid, dt)
+  self.frameCount = self.frameCount + 1
+
   if self.onUpdateStart then
     self.onUpdateStart(self, dt)
   end
   handleHits(self, dt)
+
+  if (self.frameCount % 5 == 0) then
+    local shouldFlipX = math.abs(self.vx) > 0.15
+    self.facingDirectionX = shouldFlipX and (self.vx > 0 and 1 or -1) or self.facingDirectionX
+    self.facingDirectionY = self.vy > 0 and 1 or -1
+  end
+
   local playerRef = Component.get('PLAYER') or Component.get('TEST_PLAYER')
   local flowField = playerRef.flowField
 
-  self.isFinishedMoving = true
   local playerRef = self.getPlayerRef and self.getPlayerRef() or Component.get('PLAYER')
   local playerX, playerY = playerRef:getPosition()
   local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
@@ -280,16 +394,17 @@ function Ai._update2(self, grid, dt)
     self.y,
     actualSightRadius
   )
+
   local canSeeTarget = self.isInViewOfPlayer and self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY)
   local shouldGetNewPath = flowField and canSeeTarget
   local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or 99999
   local isInAttackRange = canSeeTarget and (distFromTarget <= self:getCalculatedStat('attackRange'))
-
-  self:autoUnstuckFromWallIfNeeded(grid, gridX, gridY)
+  local originalX, originalY = self.x, self.y
 
   self.canSeeTarget = canSeeTarget
 
   if canSeeTarget then
+    -- use abilities
     if (not self.silenced) then
       local abilities = self.abilities
       for i=1, #abilities do
@@ -305,96 +420,24 @@ function Ai._update2(self, grid, dt)
       -- we're already in attack range, so we can stop the update here since the rest of the update is just moving
       return
     end
-  end
 
-  if shouldGetNewPath then
     local distanceToPlanAhead = actualSightRadius / self.gridSize
-    local flowFieldToUse = self.gridDistFromPlayer <= 6 and self.subFlowField or flowField
-    self.pathWithAstar = self.getPathWithAstar(flowFieldToUse, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
-
-    local index = 1
-    local path = self.pathWithAstar
-    local posTween
-    local done = true
-    local isEmptyPath = #path == 0
-
-    if isEmptyPath then
-      return
-    end
-
-    self.positionTweener = function(dt)
-      local finishedMoving = index > #path
-      if finishedMoving then
-        self.pathWithAstar = nil
-        return
-      end
-
-      if done then
-        local pos = path[index]
-        local nextPos = {
-          x = pos.x * self.gridSize,
-          y = pos.y * self.gridSize
-        }
-        self.nextPos = nextPos
-
-        local flowFieldValue = flowField[pos.y] and flowField[pos.y][pos.x]
-        if flowFieldValue then
-          self.direction.x = flowFieldValue.x
-          self.direction.y = flowFieldValue.y
-        else
-          self.direction.x = 0
-          self.direction.y = 0
-        end
-
-        local dist = distOfLine(self.x, self.y, nextPos.x, nextPos.y)
-        local duration = dist / self:getCalculatedStat('moveSpeed')
-
-        if duration <= 0 then
-          done = true
-          return
-        end
-
-        local easing = tween.easing.linear
-        posTween = tween.new(duration, self, nextPos, easing)
-        index = index + 1
-      end
-      done = posTween:update(dt)
-    end
+    local path = self.getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
+    local targetPos = path[#path]
+    self.targetX, self.targetY = targetPos.x * self.gridSize, targetPos.y * self.gridSize
+    setNextPosition(self, dt, 40)
+  elseif self.targetX then
+    setNextPosition(self, dt, 40)
   end
 
   if self.isInViewOfPlayer then
     self.animation:update(dt / 12)
   end
 
-  if not self.positionTweener then
-    return
-  end
-
-  local originalX, originalY = self.x, self.y
-  self.positionTweener(dt)
   local nextX, nextY = self.x, self.y
 
   local isMoving = originalX ~= nextX or originalY ~= nextY
   self.animation = isMoving and self.animations.moving or self.animations.idle
-  if not isMoving then
-    return
-  end
-
-  local actualX, actualY, cols, len = self.collision:move(nextX, nextY - self.z, collisionFilter)
-  local hasCollisions = len > 0
-
-  self.isFinishedMoving = (not canSeeTarget)
-    or (canSeeTarget and isInAttackRange)
-
-  self.hasDeviatedPosition = hasCollisions and
-    (originalX ~= actualX or originalY ~= actualY)
-
-  self.prevX = self.x
-  self.prevY = self.y
-  self.x = actualX
-  self.y = actualY + self.z
-  self.facingDirectionX = (originalX - self.x) > 0 and -1 or 1
-  self.lastFlowField = flowField
 end
 
 local perf = require'utils.perf'
