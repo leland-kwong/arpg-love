@@ -174,7 +174,7 @@ function MainScene.init(self)
     end
     -- setup defaults
   else
-    local defaultWeapon = require'components.item-inventory.items.definitions.pod-one'
+    local defaultWeapon = require'components.item-inventory.items.definitions.pod-module-initiate'
     local canEquip, errorMsg = rootState:equipItem(defaultWeapon.create(), 1, 1)
     if not canEquip then
       error(errorMsg)

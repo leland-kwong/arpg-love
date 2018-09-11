@@ -47,6 +47,7 @@ local generateRandomRarity = setupChanceFunctions({
     __call = function(self, ai)
       return ai:set('outlineColor', self.outlineColor)
         :set('maxHealth', ai.maxHealth * 2)
+        :set('experience', ai.experience * 2)
     end
   }),
   CallableObject({
@@ -60,6 +61,7 @@ local generateRandomRarity = setupChanceFunctions({
 
       return ai:set('outlineColor', self.outlineColor)
         :set('maxHealth', ai.maxHealth * 5)
+        :set('experience', ai.experience * 5)
     end
   }),
 })

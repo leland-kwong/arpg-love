@@ -88,6 +88,7 @@ return function()
     heightChange = heightChange,
     moveSpeed = 100,
     maxHealth = 17,
+    experience = 1,
     w = spriteWidth,
     h = spriteHeight,
     animations = animations,

@@ -57,6 +57,8 @@ local Ai = {
   maxHealth = 10,
   healthRegeneration = 0,
   damage = 0,
+  experience = 1,
+
   frameCount = 0,
 
   abilities = {},
@@ -198,7 +200,7 @@ local function onDamageTaken(self, damage)
     msgBus.send(msgBus.ENEMY_DESTROYED, {
       x = self.x,
       y = self.y,
-      experience = 1
+      experience = self.experience
     })
     self:delete()
     return

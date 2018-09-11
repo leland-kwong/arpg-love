@@ -175,6 +175,7 @@ return function()
       abilityDash
     },
     armor = 900,
+    experience = 2,
     attackRange = attackRange,
     fillColor = fillColor
   }

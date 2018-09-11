@@ -36,12 +36,13 @@ return itemDefs.registerType({
 
 			-- static properties
 			weaponDamage = 1,
+			experience = 0
 		}
 	end,
 
 	properties = {
 		sprite = "weapon-module-initiate",
-		title = 'Pod One',
+		title = 'r-1 initiate',
 		rarity = config.rarity.NORMAL,
 		category = config.category.POD_MODULE,
 
@@ -54,6 +55,14 @@ return itemDefs.registerType({
 				statValue(self.weaponDamage, Color.CYAN, "damage \n"),
 			}
 			return functional.reduce(stats, concatTable, {})
+		end,
+
+		onEquip = function(self)
+			msgBus.subscribe(function(msgType, msgValue)
+				if msgBus.ENEMY_DESTROYED == msgType then
+					self.experience = self.experience + msgValue.experience
+				end
+			end)
 		end,
 
 		onActivate = function(self)

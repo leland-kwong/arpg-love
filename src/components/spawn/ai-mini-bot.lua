@@ -82,6 +82,7 @@ return function()
     armor = 100,
     moveSpeed = 80,
     maxHealth = 20,
+    experience = 1,
     w = spriteWidth,
     h = spriteHeight,
     animations = animations,
