@@ -1,6 +1,6 @@
 local itemsPath = 'components.item-inventory.items.definitions.'
 local lootPool = {
-  require(itemsPath..'poison-blade'),
+  require(itemsPath..'pod-module-fireball'),
   require(itemsPath..'mock-shoes'),
   require(itemsPath..'gpow-armor'),
   require(itemsPath..'potion-health'),

@@ -959,6 +959,23 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/items/weapons/weapon-modules/weapon-module-empty.png</key>
+            <key type="filename">custom-art/items/weapons/weapon-modules/weapon-module-fireball.png</key>
+            <key type="filename">custom-art/items/weapons/weapon-modules/weapon-module-initiate.png</key>
+            <key type="filename">custom-art/items/weapons/weapon-modules/weapon-module-lightning-rod.png</key>
+            <key type="filename">custom-art/items/weapons/weapon-modules/weapon-module-slow-time.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>6,6,12,12</rect>
+                <key>scale9Paddings</key>
+                <rect>6,6,12,12</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/primitives/pixel-white-1x1.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -1086,6 +1103,7 @@
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons</filename>
             <filename>custom-art/status-effect-icons</filename>
             <filename>custom-art/spells</filename>
+            <filename>custom-art/items/weapons/weapon-modules</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

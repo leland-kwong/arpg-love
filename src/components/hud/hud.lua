@@ -142,18 +142,18 @@ function Hud.init(self)
     },
     {
       skillId = 'SKILL_3',
+      slotX = 2,
+      slotY = 1
+    },
+    {
+      skillId = 'SKILL_2',
       slotX = 1,
       slotY = 2
     },
     {
-      skillId = 'SKILL_2',
-      slotX = 2,
-      slotY = 3
-    },
-    {
       skillId = 'SKILL_1',
       slotX = 1,
-      slotY = 3
+      slotY = 1
     },
     {
       skillId = 'MOVE_BOOST',

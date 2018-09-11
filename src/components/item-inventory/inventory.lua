@@ -86,7 +86,7 @@ function InventoryBlueprint.init(self)
   local w, h = calcInventorySize(self.slots(), self.slotSize, self.slotMargin)
   local panelMargin = 5
   local statsWidth, statsHeight = 165, h
-  local equipmentWidth, equipmentHeight = 80, h
+  local equipmentWidth, equipmentHeight = 120, h
   self.w = w
   self.h = h
 

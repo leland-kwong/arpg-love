@@ -55,10 +55,10 @@ return itemDefs.registerType({
 	end,
 
 	properties = {
-		sprite = "sword_18",
-		title = 'Blade of the plague bearer',
+		sprite = "weapon-module-fireball",
+		title = 'tz-819 mortar',
 		rarity = config.rarity.LEGENDARY,
-		category = config.category.WEAPON_1,
+		category = config.category.POD_MODULE,
 
 		energyCost = function(self)
 			return 2

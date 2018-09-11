@@ -40,26 +40,13 @@ return itemDefs.registerType({
 	end,
 
 	properties = {
-		sprite = "pod-one16",
+		sprite = "weapon-module-initiate",
 		title = 'Pod One',
 		rarity = config.rarity.NORMAL,
-		category = config.category.WEAPON_1,
+		category = config.category.POD_MODULE,
 
 		energyCost = function(self)
 			return 1
-		end,
-
-		onEquip = function(self)
-			local frames = {}
-			for i=1, 16 do
-				table.insert(frames, 'pod-one'..i)
-			end
-			for i=16, 1, -1 do
-				table.insert(frames, 'pod-one'..i)
-			end
-			itemDefs.getState(self)
-				:set('animation', AnimationFactory:new(frames))
-				:set('isAttacking', false)
 		end,
 
 		tooltip = function(self)
@@ -95,54 +82,5 @@ return itemDefs.registerType({
 			end
 			return msgValue
 		end,
-
-		update = function(self, dt)
-			local state = itemDefs.getState(self)
-			state:set('isAttacking', false)
-			state.animation:update(dt / 5)
-		end,
-
-		render = function(self)
-			local state = itemDefs.getState(self)
-			local playerRef = Component.get('PLAYER')
-			if (not playerRef) then
-				return
-			end
-			local posX, posY = playerRef:getPosition()
-			local centerOffsetX, centerOffsetY = state.animation:getOffset()
-			local facingX, facingY = playerRef:getProp('facingDirectionX'),
-															 playerRef:getProp('facingDirectionY')
-			local facingSide = facingX > 0 and 1 or -1
-			local offsetX = (facingSide * -1) * 30
-			local angle = (math.atan2(facingX, facingY) * -1) + (math.pi/2)
-
-			--shadow
-			love.graphics.setColor(0,0,0,0.17)
-			love.graphics.draw(
-				AnimationFactory.atlas,
-				state.animation.sprite,
-				posX,
-				posY + 15,
-				angle,
-				1,
-				-- vertically flip when facing other side so the shadow is in the right position
-				(1 * facingSide) / 2,
-				centerOffsetX, centerOffsetY
-			)
-
-			love.graphics.setColor(1,1,1)
-			-- actual graphic
-			love.graphics.draw(
-				AnimationFactory.atlas,
-				state.animation.sprite,
-				posX,
-				posY,
-				angle,
-				1,
-				-- vertically flip when facing other side so the shadow is in the right position
-				1 * facingSide,
-				centerOffsetX, centerOffsetY
-			)
-		end
 	}
 })

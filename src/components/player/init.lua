@@ -16,6 +16,7 @@ local LineOfSight = memoize(require'modules.line-of-sight')
 local Math = require 'utils.math'
 local getDist = memoize(require('utils.math').dist)
 local hitManager = require 'modules.hit-manager'
+local WeaponCore = require 'components.player.weapon-core'
 
 local colMap = collisionWorlds.map
 local keyMap = config.keyboard
@@ -60,6 +61,7 @@ local Player = {
   mapGrid = nil,
 
   init = function(self)
+    WeaponCore.create()
     self.hits = {}
     self.getFlowField = FlowField(function (grid, x, y, dist)
       local row = grid[y]

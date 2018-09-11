@@ -18,12 +18,12 @@ end
 
 local function insertTestItems(rootStore)
   local itemsPath = 'components.item-inventory.items.definitions'
-  rootStore:addItemToInventory(require(itemsPath..'.poison-blade').create(), {3, 2})
+  rootStore:addItemToInventory(require(itemsPath..'.pod-module-fireball').create(), {3, 2})
   rootStore:addItemToInventory(
     require(itemsPath..'.mock-armor').create()
-    , {5, 1})
+    , {2, 3})
   rootStore:addItemToInventory(
-    require(itemsPath..'.ion-generator-2').create()
+    require(itemsPath..'.pod-module-slow-time').create()
   )
 
   local defaultBoots = require'components.item-inventory.items.definitions.mock-shoes'
@@ -33,7 +33,7 @@ local function insertTestItems(rootStore)
   end
 
   local defaultWeapon2 = require'components.item-inventory.items.definitions.lightning-rod'
-  local canEquip, errorMsg = rootStore:equipItem(defaultWeapon2.create(), 2, 3)
+  local canEquip, errorMsg = rootStore:equipItem(defaultWeapon2.create(), 1, 2)
   if not canEquip then
     error(errorMsg)
   end

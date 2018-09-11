@@ -39,10 +39,10 @@ return itemDefs.registerType({
 	end,
 
 	properties = {
-		sprite = "magicweapon_24",
+		sprite = "weapon-module-lightning-rod",
 		title = 'The lightning rod',
 		rarity = config.rarity.LEGENDARY,
-		category = config.category.WEAPON_1,
+		category = config.category.POD_MODULE,
 
 		energyCost = function(self)
 			return 4

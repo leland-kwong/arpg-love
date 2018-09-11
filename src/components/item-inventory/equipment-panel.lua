@@ -93,7 +93,7 @@ function EquipmentPanel.init(self)
 	setupSlotInteractions(
 		self,
 		getSlots,
-		5,
+		25,
 		onItemPickupFromSlot,
 		onItemDropToSlot,
 		nil,

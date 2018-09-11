@@ -41,14 +41,10 @@ config.consumableCategory = consumableCategory
 
 local equipmentCategory = {
 	BODY_ARMOR = 'BODY_ARMOR',
-	WEAPON_1 = 'WEAPON_1',
-	AMULET = 'AMULET',
+	POD_MODULE = 'POD_MODULE',
 	SHOES = 'SHOES',
-	PANTS = 'PANTS',
-	GLOVES = 'GLOVES',
-	SIDE_ARM = 'SIDE_ARM',
 	HELMET = 'HELMET',
-	RING = 'RING',
+	RELIC = 'RELIC',
 }
 config.equipmentCategory = equipmentCategory
 
@@ -58,50 +54,45 @@ config.category = objectUtils.assign(
 )
 
 config.categoryTitle = {
+	[equipmentCategory.POD_MODULE] = 'pod module',
 	[consumableCategory.CONSUMABLE] = 'consumable',
+	[equipmentCategory.HELMET] = 'helmet',
 	[equipmentCategory.BODY_ARMOR] = 'chest armor',
-	[equipmentCategory.WEAPON_1] = 'weapon',
-	[equipmentCategory.RING] = 'ring',
-	[equipmentCategory.AMULET] = 'amulet',
 	[equipmentCategory.SHOES] = 'shoes',
-	[equipmentCategory.PANTS] = 'pants',
-	[equipmentCategory.GLOVES] = 'gloves',
-	[equipmentCategory.SIDE_ARM] = 'ion generator',
+	[equipmentCategory.RELIC] = 'relic'
 }
 
 config.equipmentCategorySilhouette = {
+	[equipmentCategory.POD_MODULE] = 'weapon-module-empty',
+	[consumableCategory.CONSUMABLE] = 'potion_48',
 	[equipmentCategory.HELMET] = 'helmet_106',
-	[equipmentCategory.SIDE_ARM] = 'book_25',
-	[equipmentCategory.RING] = 'ring_1',
-	[equipmentCategory.AMULET] = 'amulet_16',
 	[equipmentCategory.BODY_ARMOR] = 'armor_121',
-	[equipmentCategory.WEAPON_1] = 'sword_17',
 	[equipmentCategory.SHOES] = 'shoe_1',
-	[consumableCategory.CONSUMABLE] = 'potion_48'
+	[equipmentCategory.RELIC] = 'amulet_13'
 }
 
 -- defines what gui node that equipment may be dropped into
 config.equipmentGuiSlotMap = {
 	{
+		equipmentCategory.POD_MODULE,
+		equipmentCategory.POD_MODULE
+	},
+	{
+		equipmentCategory.POD_MODULE,
+		equipmentCategory.POD_MODULE
+	},
+	{
 		equipmentCategory.HELMET,
 		equipmentCategory.BODY_ARMOR
 	},
 	{
-		equipmentCategory.SIDE_ARM,
-		equipmentCategory.SIDE_ARM
-	},
-	{
-		equipmentCategory.WEAPON_1,
-		equipmentCategory.WEAPON_1
-	},
-	{
 		equipmentCategory.SHOES,
-		equipmentCategory.AMULET
+		equipmentCategory.RELIC
 	},
 	{
 		consumableCategory.CONSUMABLE,
 		consumableCategory.CONSUMABLE
-	}
+	},
 }
 
 function config.findEquipmentSlotByCategory(category)
