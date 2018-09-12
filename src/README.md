@@ -75,3 +75,7 @@ Creates a time field at a location that slows everything (including players) ins
 
 ### Screen resolution
 - [hardware stats](https://store.steampowered.com/hwsurvey/)
+
+## Sound effects rules
+
+- sounds should not play more often than half their cooldown to prevent excessive sound noise.

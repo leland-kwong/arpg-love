@@ -16,8 +16,11 @@ if config.isDebug then
       end
       return proxy[name]
     end,
-    __newindex = function(_, name, value)
-      proxy[name] = value
+    __newindex = function(_, eventName, eventType)
+      proxy[eventName] = {
+        name = eventName,
+        type = eventType
+      }
     end
   })
 end
@@ -45,6 +48,8 @@ M.CHARACTER_HIT = 'CHARACTER_HIT'
     source = STRING -- multiple sources of the same type will get reapplied instead of stacked
   }
 ]]
+M.CHARACTER_AGGRO = M.CHARACTER_HIT -- triggers aggro by trigger the `CHARACTER_HIT` event
+
 M.EXPERIENCE_GAIN = 'EXPERIENCE_GAIN'
 M.PLAYER_ACTION_ERROR = 'PLAYER_ACTION_ERROR'
 M.PLAYER_HIT_RECEIVED = 'PLAYER_HIT_RECEIVED'

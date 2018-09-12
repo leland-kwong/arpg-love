@@ -5,7 +5,7 @@ local Color = require('modules.color')
 local msgBus = require 'components.msg-bus'
 local Aoe = require 'components.abilities.aoe'
 
-local healSource = "ION_GENERATOR_2"
+local healSource = "X_1_TIME_SHAPER"
 local healType = 2
 
 local function concatTable(a, b)
@@ -53,10 +53,10 @@ return itemDefs.registerType({
 	end,
 
 	properties = {
-		sprite = "book_1",
-		title = 'Ion Generator 2',
+		sprite = "weapon-module-slow-time",
+		title = 'x-1 time-bender',
 		rarity = config.rarity.NORMAL,
-		category = config.category.SIDE_ARM,
+		category = config.category.POD_MODULE,
 
 		energyCost = function(self)
 			return 2
@@ -94,6 +94,10 @@ return itemDefs.registerType({
 		end,
 
 		onActivateWhenEquipped = function(self, props)
+			local Sound = require 'components.sound'
+			love.audio.stop(Sound.SLOW_TIME)
+			love.audio.play(Sound.SLOW_TIME)
+
 			return Aoe.create(
 				props
 					:set('area', 100)

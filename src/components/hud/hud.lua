@@ -15,7 +15,7 @@ local max = math.max
 
 local Hud = {
   id = 'HUD',
-  group = groups.gui,
+  group = groups.hud,
   rootStore = {}
 }
 
@@ -30,7 +30,10 @@ local function setupExperienceIndicator(self)
     x = offX,
     y = winHeight - h - 5,
     w = w,
-    h = h
+    h = h,
+    drawOrder = function()
+      return 2
+    end
   }):setParent(self)
 end
 
@@ -75,7 +78,10 @@ function Hud.init(self)
     w = healthManaWidth / 2,
     h = barHeight,
     color = {Color.rgba255(209, 27, 27)},
-    fillPercentage = getHealthRemaining
+    fillPercentage = getHealthRemaining,
+    drawOrder = function()
+      return 2
+    end
   }):setParent(self)
 
   -- mana bar
@@ -86,7 +92,10 @@ function Hud.init(self)
     h = barHeight,
     fillDirection = -1,
     color = {Color.rgba255(33, 89, 186)},
-    fillPercentage = getEnergyRemaining
+    fillPercentage = getEnergyRemaining,
+    drawOrder = function()
+      return 2
+    end
   }):setParent(self)
 
   msgBus.subscribe(function(msgType, msgValue)
@@ -102,7 +111,11 @@ function Hud.init(self)
   end)
 
   setupExperienceIndicator(self)
-  ScreenFx.create():setParent(self)
+  ScreenFx.create({
+    drawOrder = function()
+      return 1
+    end
+  }):setParent(self)
   NpcInfo.create():setParent(self)
   ActionError.create({
     textLayer = self.hudTextSmallLayer
@@ -129,18 +142,18 @@ function Hud.init(self)
     },
     {
       skillId = 'SKILL_3',
+      slotX = 2,
+      slotY = 1
+    },
+    {
+      skillId = 'SKILL_2',
       slotX = 1,
       slotY = 2
     },
     {
-      skillId = 'SKILL_2',
-      slotX = 2,
-      slotY = 3
-    },
-    {
       skillId = 'SKILL_1',
       slotX = 1,
-      slotY = 3
+      slotY = 1
     },
     {
       skillId = 'MOVE_BOOST',
@@ -159,7 +172,10 @@ function Hud.init(self)
       y = (love.graphics.getHeight() / scale) - 32 - 1,
       slotX = skill.slotX,
       slotY = skill.slotY,
-      hudTextLayer = self.hudTextSmallLayer
+      hudTextLayer = self.hudTextSmallLayer,
+      drawOrder = function()
+        return 2
+      end
     }):setParent(self)
   end
 end

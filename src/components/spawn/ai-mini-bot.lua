@@ -1,11 +1,18 @@
 local animationFactory = require 'components.animation-factory'
+local debounce = require 'modules.debounce'
 
-local dataSheet = {
-  name = 'minibot',
-  properties = {
-    'ranged'
-  }
+local blastSoundFilter = {
+  type = 'lowpass',
+  volume = .4,
 }
+
+local playblasterSound = debounce(function()
+  local Sound = require 'components.sound'
+  local source = Sound.BLASTER_2
+  source:setFilter(blastSoundFilter)
+  love.audio.stop(source)
+  love.audio.play(source)
+end, 0.2)
 
 return function()
   local animations = {
@@ -27,7 +34,9 @@ return function()
 
   local ability1 = (function()
     local curCooldown = 0
-    local skill = {}
+    local skill = {
+      range = 8
+    }
 
     function skill.use(self, targetX, targetY)
       if curCooldown > 0 then
@@ -45,6 +54,8 @@ return function()
           , targetGroup = 'player'
         })
         curCooldown = projectile.cooldown
+        playblasterSound()
+
         return skill
       end
     end
@@ -59,15 +70,25 @@ return function()
 
   local attackRange = 8
   local spriteWidth, spriteHeight = animations.idle:getSourceSize()
+  local dataSheet = {
+    name = 'minibot',
+    properties = {
+      'ranged'
+    }
+  }
 
   return {
     dataSheet = dataSheet,
+    armor = 100,
     moveSpeed = 80,
     maxHealth = 20,
+    experience = 1,
     w = spriteWidth,
     h = spriteHeight,
     animations = animations,
-    ability1 = ability1,
+    abilities = {
+      ability1
+    },
     attackRange = attackRange,
     fillColor = fillColor
   }

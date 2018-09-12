@@ -13,4 +13,14 @@ function math_utils.dist(x1, y1, x2, y2)
 	return sqrt(a*a + b*b)
 end
 
+function math_utils.normalizeVector(a, b)
+	local c = sqrt(a*a + b*b)
+  -- dividing by zero returns a NAN value, so we should coerce to zero
+  if c == 0 then
+	return 0.0, 0.0
+  else
+    return a/c, b/c
+  end
+end
+
 return math_utils

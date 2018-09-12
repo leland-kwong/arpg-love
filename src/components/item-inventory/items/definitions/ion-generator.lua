@@ -40,7 +40,7 @@ return itemDefs.registerType({
 		sprite = "book_25",
 		title = 'Ion Generator',
 		rarity = config.rarity.NORMAL,
-		category = config.category.SIDE_ARM,
+		category = config.category.POD_MODULE,
 
 		onEquip = function(self)
 			local duration = math.pow(10, 10)

@@ -23,7 +23,7 @@ local function windowSize()
 end
 
 function NpcInfo.init(self)
-  local w, h = 100, 20
+  local w, h = 200, 20
   local y = 14
   local windowW, windowH = windowSize()
   local x = Position.boxCenterOffset(w, h, windowW, windowH)
@@ -76,7 +76,7 @@ function NpcInfo.update(self, dt)
     )
     textLayer:add(
       dataSheet.name,
-      Color.WHITE,
+      itemHovered.outlineColor or Color.WHITE,
       x,
       20
     )

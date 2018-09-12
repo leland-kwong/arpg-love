@@ -1,14 +1,4 @@
-local perf = require'utils.perf'
 local bresenhamLine = require'utils.bresenham-line'
-local Perf = require'utils.perf'
-local config = require 'config.config'
-
-local perf = Perf({
-  enabled = false,
-  done = function(t)
-    print('bresenham line:', t)
-  end
-})
 
 local function getDirection(x1, y1, x2, y2)
   local vx, vy = x2 - x1, y2 - y1
@@ -20,7 +10,7 @@ local function getSlope(x1, y1, x2, y2)
 end
 
 -- return [FUNCTION] - a line of sight checker based on the provided grid and walkable params
-return function(grid, WALKABLE, debugFn)
+return function(grid, WALKABLE, debugFn, isDebug)
   local prevX, prevY
 
   local function callback(_, gridX, gridY, i, DONE)
@@ -54,7 +44,7 @@ return function(grid, WALKABLE, debugFn)
   -- return [BOOLEAN] - true if line of sight is valid
   local function checkLineOfSight(x1, y1, x2, y2)
     -- if any values are not integers, we can assume that they're not grid positions
-    if (config.isDebug) then
+    if (isDebug) then
       local isGridCoordinates =
         grid[y1]      ~= nil and
         grid[y1][x1]  ~= nil and
@@ -71,5 +61,5 @@ return function(grid, WALKABLE, debugFn)
     return bresenhamLine(x1, y1, x2, y2, callback)
   end
 
-  return perf(checkLineOfSight)
+  return checkLineOfSight
 end

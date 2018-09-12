@@ -53,9 +53,22 @@ local Ai = {
   attackRange = 8,
   sightRadius = 11,
   armor = 0,
+  flatPhysicalDamageReduction = 0,
   maxHealth = 10,
   healthRegeneration = 0,
   damage = 0,
+  experience = 1,
+
+  frameCount = 0,
+
+  abilities = {},
+  dataSheet = {
+    name = '',
+    properties = {}
+  },
+
+  vx = 0,
+  vy = 0,
 
   isAggravated = false,
   gridSize = 1,
@@ -96,26 +109,6 @@ function Ai:aggravatedRadius()
   return (playerFlowFieldDistance - 3) * self.gridSize
 end
 
-function Ai:autoUnstuckFromWallIfNeeded(grid, gridX, gridY)
-  local row = grid[gridY]
-  local isInsideWall = (not row) or (row[gridX] ~= self.WALKABLE)
-
-  if isInsideWall then
-    local openX, openY = getAdjacentWalkablePosition(grid, gridX, gridY, self.WALKABLE)
-    if openX then
-      local nextX, nextY = openX * self.gridSize, openY * self.gridSize
-      self.x = nextX
-      self.y = nextY
-      self.collision:update(
-        self.x,
-        self.y,
-        self.w,
-        self.h
-      )
-    end
-  end
-end
-
 local COLLISION_SLIDE = 'slide'
 local collisionFilters = {
   player = true,
@@ -139,7 +132,7 @@ local function hitAnimation()
   coroutine.yield(true)
 end
 
-local aggroMessageCache = Lru.new(100)
+local aggroMessageCache = Lru.new(200)
 
 local function spreadAggroToAllies(self)
   local c = self.collision
@@ -165,28 +158,49 @@ local function spreadAggroToAllies(self)
         message = {parent = ai}
         aggroMessageCache:set(id, message)
       end
-      msgBus.send(msgBus.CHARACTER_HIT, message)
+      msgBus.send(msgBus.CHARACTER_AGGRO, message)
     end
   end
 end
 
+local max = math.max
+local round = require 'utils.math'.round
+local damageReductionPerArmor = 0.0001
+local function adjustedDamage(self, damage)
+  local damageAfterFlatReduction = damage - self.flatPhysicalDamageReduction
+  local finalDamage = damageAfterFlatReduction -
+    (damageAfterFlatReduction * self.armor * damageReductionPerArmor)
+  return round(
+    max(0, finalDamage)
+  )
+end
+
 local function onDamageTaken(self, damage)
-  self.health = self.health - damage
+  local actualDamage = adjustedDamage(self, damage)
+  self.health = self.health - actualDamage
   local getTextSize = require 'components.gui.gui-text'.getTextSize
-  local offsetCenter = -getTextSize(damage, popupText.font) / 2
+  local offsetCenter = -getTextSize(actualDamage, popupText.font) / 2
   popupText:new(
-    damage,
+    actualDamage,
     self.x + offsetCenter,
     self.y - self.h
   )
   self.hitAnimation = coroutine.wrap(hitAnimation)
+
+  local Sound = require 'components.sound'
+  Sound.ENEMY_IMPACT:setFilter {
+    type = 'lowpass',
+    volume = .5,
+  }
+  love.audio.stop(Sound.ENEMY_IMPACT)
+  love.audio.play(Sound.ENEMY_IMPACT)
 
   local isDestroyed = self.health <= 0
   if isDestroyed then
     msgBus.send(msgBus.ENEMY_DESTROYED, {
       x = self.x,
       y = self.y,
-      experience = 1
+      experience = self.experience
     })
     self:delete()
     return
@@ -207,48 +221,174 @@ local function handleHits(self, dt)
       local tick = require 'utils.tick'
       tick.delay(function()
         self.isAggravated = false
-      end, 0.5)
+      end, 1)
     end
   end
 end
 
-local abilityDash = (function()
-  local curCooldown = 0
-  local skill = {}
+local function computeAlignment(self, neighbors)
+	local vx, vy = 0, 0
+	local neighborCount = #neighbors
+  for i=1, neighborCount do
+    local n = neighbors[i].parent
+		vx = vx + n.vx
+		vy = vy + n.vy
+	end
+	if neighborCount > 0 then
+		vx = vx / neighborCount
+		vy = vy / neighborCount
+	end
+	return Math.normalizeVector(vx, vy)
+end
 
-  function skill.use(self)
-    if curCooldown > 0 then
-      return skill
-    else
-      local Dash = require 'components.abilities.dash'
-      local projectile = Dash.create({
-          fromCaster = self
-        , cooldown = 1
-        , duration = 7/60
-        , range = require 'config.config'.gridSize * 6
-      })
-      curCooldown = projectile.cooldown
-      return skill
+local function computeCohesion(self, neighbors)
+	local px, py = 0, 0
+	local neighborCount = #neighbors
+	for i=1, neighborCount do
+    local n = neighbors[i].parent
+    if (not n.isInAttackRange) then
+      px = px + n.x
+      py = py + n.y
+    end
+	end
+	if neighborCount > 0 then
+		px = px / neighborCount
+		py = py / neighborCount
+	end
+	px = px - self.x
+	py = py - self.y
+	return Math.normalizeVector(px, py)
+end
+
+local function computeSeparation(self, neighbors)
+	local sx, sy = 0, 0
+	local neighborCount = #neighbors
+	for i=1, neighborCount do
+		local n = neighbors[i].parent
+		-- add separation vector, reducing strength by distance
+		-- this can be fancier with decay by the square or taking into account weight or whatever
+		local sepX, sepY = Math.normalizeVector(self.x - n.x, self.y - n.y)
+		local dist = math.max(0.01, Math.dist(self.x, self.y, n.x, n.y) - n.w*0.5 - self.w*0.5)
+		sx = sx + (sepX/dist)
+		sy = sy + (sepY/dist)
+	end
+
+	-- Note that this isn't normalised as you want the influence to reduce if the entity is well separated.
+	-- You could apply a similar approach to other influence vectors depending on what sort of behaviour you want
+	return sx, sy
+end
+
+local function obstacleFilter(item)
+  return item.group == 'obstacle'
+end
+
+local function computeObstacleInfluence(self)
+  local obstacles, len = self.collision.world:queryRect(
+    self.x - self.w,
+    self.y - self.h,
+    self.w * 3,
+    self.h * 3,
+    obstacleFilter
+  )
+  local dist = 99999
+  local no = nil
+  for i=1, len do
+    local o = obstacles[i]
+    local curDist = Math.dist(self.x, self.y, o.x + o.w/2, o.y + o.h/2) - (o.w * 0.5)
+    if curDist < dist then
+      no = o
+      dist = curDist
     end
   end
-
-  function skill.updateCooldown(self, dt)
-    curCooldown = curCooldown - dt
-    return skill
+  if (len == 0) then
+    return 0, 0
   end
+	-- We'll just use the single nearest obstacle.
+	-- A lot of the time this is enough but more complex environments might need influences from all nearby obstacles
+  dist = math.max(0.01, dist - self.w*0.5)
+	local sepX, sepY = Math.normalizeVector(self.x - no.x, self.y - no.y)
 
-  return skill
-end)()
+	return sepX/dist, sepY/dist
+end
+
+local function neighborFilter(item)
+  return item.group == 'ai'
+end
+local function getNeighbors(agent, neighborOffset)
+	local b = agent
+	return agent.collision.world:queryRect(
+		b.x - neighborOffset/2,
+		b.y - neighborOffset/2,
+		b.w + neighborOffset,
+    b.h + neighborOffset,
+    neighborFilter
+	)
+end
+
+local function setNextPosition(self, dt, radius)
+  local neighbors = getNeighbors(self, 10)
+  local speed = self.moveSpeed * dt
+
+	-- These calcs are to get an adjustment for movement speed based on distance.
+	-- Don't take this as a complete solution as it only works based on the mouse target for
+	-- this test setup.
+	-- In reality you need to be a bit smarter about slowing/stopping AI entities when
+	-- they have reached a goal point. This will often tie into the combat system (stopping
+  -- when they can hit the player, for example).
+  local targetX, targetY = self.targetX, self.targetY
+	local targetDist = Math.dist(self.x, self.y, targetX, targetY)
+	local targetDistDamping = math.min(1.0, targetDist/radius)
+
+	-- Calculate direction influence vectors
+	-- Remember that you're not bound to the classical boids here. You can add influences from all sorts
+	-- of things in your game. I've added some obstacles (which could be traps or fire or whatever) to demonstrate.
+	local targetDirX, targetDirY = Position.getDirection(self.x, self.y, targetX, targetY)
+	local alignmentX, alignmentY = computeAlignment(self, neighbors)
+	local cohesionX, cohesionY = computeCohesion(self, neighbors)
+	local separationX, separationY = computeSeparation(self, neighbors)
+	local obstInfluenceX, obstInfluenceY = computeObstacleInfluence(self)
+
+	-- these are the weights for each influence vector and can be adjusted to get different behaviours
+	local separationWeight = 4
+	local alignmentWeight = 0.1
+	local cohesionWeight = 0.4
+	local targetDirectionWeight = 1.5
+	local obstInfluenceWeight = 6.0
+
+	-- Now we calculate the overall influence vector
+	local adjustedVx = targetDirX*targetDirectionWeight + obstInfluenceX*obstInfluenceWeight + (alignmentX * alignmentWeight) + (cohesionX * cohesionWeight) + (separationX * separationWeight)
+	local adjustedVy = targetDirY*targetDirectionWeight + obstInfluenceY*obstInfluenceWeight + (alignmentY * alignmentWeight) + (cohesionY * cohesionWeight) + (separationY * separationWeight)
+
+	-- Normalise to a direction vector
+	local normVx, normVy = Math.normalizeVector(adjustedVx, adjustedVy)
+
+	-- Here I'm effectively lerping the direction just to smooth things out a bit. Completely optional/adjustable
+	self.vx = (self.vx + normVx) * 0.5
+	self.vy = (self.vy + normVy) * 0.5
+
+  -- Apply direction with speed and our damping based on the target distance
+	self.x = self.x + self.vx * speed * targetDistDamping
+  self.y = self.y + self.vy * speed * targetDistDamping
+  self.collision:update(self.x, self.y)
+end
 
 function Ai._update2(self, grid, dt)
+  self.frameCount = self.frameCount + 1
+
   if self.onUpdateStart then
     self.onUpdateStart(self, dt)
   end
   handleHits(self, dt)
+
+  if (self.frameCount % 5 == 0) then
+    local shouldFlipX = math.abs(self.vx) > 0.15
+    self.facingDirectionX = shouldFlipX and (self.vx > 0 and 1 or -1) or self.facingDirectionX
+    self.facingDirectionY = self.vy > 0 and 1 or -1
+  end
+
   local playerRef = Component.get('PLAYER') or Component.get('TEST_PLAYER')
   local flowField = playerRef.flowField
 
-  self.isFinishedMoving = true
   local playerRef = self.getPlayerRef and self.getPlayerRef() or Component.get('PLAYER')
   local playerX, playerY = playerRef:getPosition()
   local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
@@ -280,120 +420,53 @@ function Ai._update2(self, grid, dt)
     self.y,
     actualSightRadius
   )
+
   local canSeeTarget = self.isInViewOfPlayer and self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY)
   local shouldGetNewPath = flowField and canSeeTarget
   local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or 99999
   local isInAttackRange = canSeeTarget and (distFromTarget <= self:getCalculatedStat('attackRange'))
-
-  self:autoUnstuckFromWallIfNeeded(grid, gridX, gridY)
+  local originalX, originalY = self.x, self.y
 
   self.canSeeTarget = canSeeTarget
 
-  if canSeeTarget and (not self.silenced) then
-    local Dash = require 'components.abilities.dash'
-    if self:getCalculatedStat('attackRange') <= Dash.range then
-      if (distFromTarget <= Dash.range) then
-        abilityDash.use(self)
-        abilityDash.updateCooldown(self, dt)
+  if canSeeTarget then
+    -- use abilities
+    if (not self.silenced) then
+      local abilities = self.abilities
+      for i=1, #abilities do
+        local ability = abilities[i]
+        if (distFromTarget <= ability.range * self.gridSize) then
+          ability.use(self, targetX, targetY)
+          ability.updateCooldown(self, dt)
+        end
       end
     end
 
+    self.isInAttackRange = isInAttackRange
     if isInAttackRange then
-      self.ability1.use(self, targetX, targetY)
-      self.ability1.updateCooldown(self, dt)
-      -- we're already in attack range, so we don't need to move
-      return
-    end
-  end
-
-  if shouldGetNewPath then
-    local distanceToPlanAhead = actualSightRadius / self.gridSize
-    local flowFieldToUse = self.gridDistFromPlayer <= 6 and self.subFlowField or flowField
-    self.pathWithAstar = self.getPathWithAstar(flowFieldToUse, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
-
-    local index = 1
-    local path = self.pathWithAstar
-    local posTween
-    local done = true
-    local isEmptyPath = #path == 0
-
-    if isEmptyPath then
+      -- we're already in attack range, so we can stop the update here since the rest of the update is just moving
       return
     end
 
-    self.positionTweener = function(dt)
-      local finishedMoving = index > #path
-      if finishedMoving then
-        self.pathWithAstar = nil
-        return
-      end
-
-      if done then
-        local pos = path[index]
-        local nextPos = {
-          x = pos.x * self.gridSize,
-          y = pos.y * self.gridSize
-        }
-        self.nextPos = nextPos
-
-        local flowFieldValue = flowField[pos.y] and flowField[pos.y][pos.x]
-        if flowFieldValue then
-          self.direction.x = flowFieldValue.x
-          self.direction.y = flowFieldValue.y
-        else
-          self.direction.x = 0
-          self.direction.y = 0
-        end
-
-        local dist = distOfLine(self.x, self.y, nextPos.x, nextPos.y)
-        local duration = dist / self:getCalculatedStat('moveSpeed')
-
-        if duration <= 0 then
-          done = true
-          return
-        end
-
-        local easing = tween.easing.linear
-        posTween = tween.new(duration, self, nextPos, easing)
-        index = index + 1
-      end
-      done = posTween:update(dt)
+    if shouldGetNewPath then
+      local distanceToPlanAhead = actualSightRadius / self.gridSize
+      local path = self.getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
+      local targetPos = path[#path]
+      self.targetX, self.targetY = targetPos.x * self.gridSize, targetPos.y * self.gridSize
+      setNextPosition(self, dt, 40)
     end
+  elseif self.targetX then
+    setNextPosition(self, dt, 40)
   end
 
   if self.isInViewOfPlayer then
     self.animation:update(dt / 12)
   end
 
-  if not self.positionTweener then
-    return
-  end
-
-  local originalX, originalY = self.x, self.y
-  self.positionTweener(dt)
   local nextX, nextY = self.x, self.y
 
   local isMoving = originalX ~= nextX or originalY ~= nextY
   self.animation = isMoving and self.animations.moving or self.animations.idle
-  if not isMoving then
-    return
-  end
-
-  local actualX, actualY, cols, len = self.collision:move(nextX, nextY - self.z, collisionFilter)
-  local hasCollisions = len > 0
-
-  self.isFinishedMoving = (not canSeeTarget)
-    or (canSeeTarget and isInAttackRange)
-
-  self.hasDeviatedPosition = hasCollisions and
-    (originalX ~= actualX or originalY ~= actualY)
-
-  self.prevX = self.x
-  self.prevY = self.y
-  self.x = actualX
-  self.y = actualY + self.z
-  self.facingDirectionX = (originalX - self.x) > 0 and -1 or 1
-  self.lastFlowField = flowField
 end
 
 local perf = require'utils.perf'
@@ -409,14 +482,14 @@ Ai._update2 = perf({
 
 local function drawShadow(self, h, w, ox, oy)
   local heightScaleDiff = self.z * 0.01
-  love.graphics.setColor(0,0,0,0.4)
+  love.graphics.setColor(0,0,0,0.3)
   love.graphics.draw(
     animationFactory.atlas,
     self.animation.sprite,
     self.x,
-    self.y + (h * self.scale / 1.75),
+    self.y + (h * self.scale / 1.3),
     0,
-    self.scale*0.8 * self.facingDirectionX - heightScaleDiff,
+    self.scale*0.9 * self.facingDirectionX - heightScaleDiff,
     -self.scale/2 + heightScaleDiff,
     ox,
     oy
@@ -460,11 +533,10 @@ function Ai.draw(self)
   local w, h = self.animation:getSourceSize()
   drawShadow(self, h, w, ox, oy)
 
-  love.graphics.setColor(self.fillColor)
-
   if (self.outlineColor) then
     love.graphics.setShader(shader)
     shader:send('outline_color', self.outlineColor)
+    shader:send('fill_color', self.fillColor)
   end
 
   if self.hitAnimation then
@@ -472,6 +544,7 @@ function Ai.draw(self)
     love.graphics.setColor(3,3,3)
   end
 
+  love.graphics.setColor(self.fillColor)
   love.graphics.draw(
     animationFactory.atlas,
     self.animation.sprite,
@@ -484,11 +557,11 @@ function Ai.draw(self)
     oy
   )
 
-  love.graphics.setColor(1,1,1)
-  drawStatusEffects(self, statusIcons)
-
   love.graphics.setBlendMode(oBlendMode)
   love.graphics.setShader()
+
+  love.graphics.setColor(1,1,1)
+  drawStatusEffects(self, statusIcons)
   -- self:debugLineOfSight()
 end
 
@@ -516,6 +589,7 @@ function Ai.init(self)
     y = 0
   }
   self.subFlowField = getSubFlowField()
+  -- start idle animation at a random point to add variance to the ai's idle state
   self.animation = self.animations.idle:update(math.random(0, 20) * 1/60)
 
   if scale % 1 == 0 then

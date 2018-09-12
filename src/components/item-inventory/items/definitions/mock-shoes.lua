@@ -15,6 +15,11 @@ local function concatTable(a, b)
 	return a
 end
 
+local speedBoostSoundFilter = {
+  type = 'lowpass',
+  volume = .5,
+}
+
 return itemDefs.registerType({
 	type = "mock-shoes",
 
@@ -72,6 +77,7 @@ return itemDefs.registerType({
 		end,
 
 		onActivateWhenEquipped = function(self)
+			Sound.MOVE_SPEED_BOOST:setFilter(speedBoostSoundFilter)
 			love.audio.stop(Sound.MOVE_SPEED_BOOST)
 			love.audio.play(Sound.MOVE_SPEED_BOOST)
 			local buffDuration = self.speedBoostDuration

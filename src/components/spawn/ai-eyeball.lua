@@ -1,17 +1,23 @@
 local animationFactory = require 'components.animation-factory'
+local debounce = require 'modules.debounce'
 local tick = require 'utils.tick'
+
+local frostShotSoundFilter = {
+  type = 'lowpass',
+  volume = .25,
+}
+
+local playFrostShotSound = debounce(function()
+  local Sound = require 'components.sound'
+  local source = Sound.FROST_SHOT
+  source:setFilter(frostShotSoundFilter)
+  love.audio.stop(source)
+  love.audio.play(source)
+end, 0.3)
 
 local function eyeballAttackCollisionFilter(item)
   return item.group == 'player'
 end
-
-local dataSheet = {
-  name = 'i-229',
-  properties = {
-    'ranged',
-    'slow on hit'
-  }
-}
 
 return function()
   local animations = {
@@ -26,7 +32,9 @@ return function()
   -- deals damage with a chance to slow
   local ability1 = (function()
     local curCooldown = 0
-    local skill = {}
+    local skill = {
+      range = 10
+    }
 
     function skill.use(self, targetX, targetY)
       if curCooldown > 0 then
@@ -48,6 +56,7 @@ return function()
           end
         })
         curCooldown = projectile.cooldown
+        playFrostShotSound()
         return skill
       end
     end
@@ -63,6 +72,13 @@ return function()
   local spriteWidth, spriteHeight = animations.idle:getSourceSize()
 
   local heightChange = 4
+  local dataSheet = {
+    name = 'i-229',
+    properties = {
+      'ranged',
+      'slow on hit'
+    }
+  }
   return {
     dataSheet = dataSheet,
     -- debug = true,
@@ -72,10 +88,14 @@ return function()
     heightChange = heightChange,
     moveSpeed = 100,
     maxHealth = 17,
+    experience = 1,
     w = spriteWidth,
     h = spriteHeight,
     animations = animations,
-    ability1 = ability1,
+    armor = 100,
+    abilities = {
+      ability1
+    },
     attackRange = 10,
     onUpdateStart = function(self, dt)
       self.heightOffset = self.heightOffset + (dt * self.heightChange)

@@ -101,3 +101,22 @@ stat = baseStat + (baseState * percentModier) + flatModifier
 - resistances
 - sightRadius
 - attackRange
+
+## Socketables
+
+### Multi attack (weapons)
+
+(ranged) Projectiles split into 3, each projectile dealing 33% damage
+(melee) Melee attacks do 2 quick attacks in succession
+
+### Reduced energy cost (weapons)
+
+Reduces energy cost of the weapon
+
+### Faster energy regeneration (armor only)
+
+Increases player's energy regeneration
+
+### Reduced physical damage (armor only)
+
+Reduces physical damage taken by player
