@@ -37,6 +37,18 @@ function GuiTextLayer.add(self, text, color, x, y)
   self.textGraphic:add(self.tablePool, x, y)
 end
 
+function GuiTextLayer.addf(self, text, color, wrapLimit, alignMode, x, y)
+  self.tablePool[1] = color
+  self.tablePool[2] = text
+  self.textGraphic:addf(
+    self.tablePool,
+    wrapLimit,
+    alignMode,
+    x,
+    y
+  )
+end
+
 -- adds a text group via [love's text string format](https://love2d.org/wiki/Text:add)
 function GuiTextLayer.addTextGroup(self, textGroup, x, y)
   self.textGraphic:add(textGroup, x, y)

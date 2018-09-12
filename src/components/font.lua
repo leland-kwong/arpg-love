@@ -1,6 +1,7 @@
 local function fontPrimary(fontSize)
   local font = love.graphics.newFont(
-    'built/fonts/StarPerv.ttf',
+    'built/fonts/pixelsix/pixelsix00fixed.ttf',
+    -- 'built/fonts/StarPerv.ttf',
     fontSize
   )
 

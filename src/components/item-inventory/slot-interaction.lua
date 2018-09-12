@@ -12,6 +12,18 @@ local msgBus = require 'components.msg-bus'
 local groups = require 'components.groups'
 local boxCenterOffset = Position.boxCenterOffset
 local drawItem = require 'components.item-inventory.draw-item'
+local Lru = require 'utils.lru'
+
+local spriteCache = Lru.new(100)
+-- returns a static sprite for drawing
+local function getSprite(name)
+  local sprite = spriteCache:get(name)
+  if (not sprite) then
+    sprite = animationFactory:new({ name })
+    spriteCache:set(name, sprite)
+  end
+  return sprite
+end
 
 -- currently picked up item. We can only have one item picked up at a time
 local itemPickedUp = nil
@@ -51,6 +63,7 @@ local function drawTooltip(item, x, y, w2, h2)
   local padding = 12
   local itemDef = itemDefinition.getDefinition(item)
   local tooltipContent = itemDef.tooltip(item)
+  local tooltipItemUpgrade = itemDef.tooltipItemUpgrade(item)
 
   --[[
     IMPORTANT: We must do the tooltip content dimension calculations first to see if the tooltip
@@ -72,8 +85,15 @@ local function drawTooltip(item, x, y, w2, h2)
   -- body text and dimensions
   local bodyCopyW, bodyCopyH = GuiText.getTextSize(tooltipContent, guiTextLayers.body.font)
 
+  -- item upgrade content and dimensions
+  local itemUpgradeW, itemUpgradeH = 200, 200
+
   -- total tooltip height
-  local totalHeight = (titleH + titleH) + (rarityH + rarityH) + bodyCopyH + (padding * 2)
+  local totalHeight = (titleH + titleH) +
+                      (rarityH + rarityH) +
+                      bodyCopyH +
+                      itemUpgradeH +
+                      (padding * 2)
 
   local isBottomOutOfView = posY + totalHeight > config.resolution.h
   if isBottomOutOfView then
@@ -100,10 +120,10 @@ local function drawTooltip(item, x, y, w2, h2)
   )
 
   -- background
-  local maxWidth = math.max(titleW, rarityW, bodyCopyW) + (padding * 2) -- include side padding
+  local maxWidth = math.max(titleW, rarityW, bodyCopyW, itemUpgradeW) + (padding * 2) -- include side padding
 
-  local bgColor = 0.15
-  love.graphics.setColor(bgColor, bgColor, bgColor)
+  local bgColor = 0
+  love.graphics.setColor(bgColor, bgColor, bgColor, 0.9)
   love.graphics.rectangle(
     'fill',
     posX, posY,
@@ -119,6 +139,90 @@ local function drawTooltip(item, x, y, w2, h2)
     maxWidth,
     totalHeight
   )
+
+  -- [item upgrades]
+  if tooltipItemUpgrade then
+    local tooltipStartX = posX + padding
+    local upgradePanelPosY = tooltipContentY + bodyCopyH + 20
+    local titleTextLayer = guiTextLayers.body
+    local titleW, titleH = GuiText.getTextSize('test title', titleTextLayer.font)
+
+    -- upgrade experience bar
+    local experienceBarWidth, experienceBarHeight = 10, 170
+    local iconWidth, iconHeight = 13, 13
+    local experienceBarPosY = upgradePanelPosY
+    local lastUpgrade = tooltipItemUpgrade[#tooltipItemUpgrade]
+    local expfillPercentage = item.experience / lastUpgrade.experienceRequired
+    local expBarPosX = tooltipStartX
+    expfillPercentage = expfillPercentage > 1 and 1 or expfillPercentage
+    -- experience bar unfilled background
+    love.graphics.setColor(0.1,0.1,0.1)
+    love.graphics.rectangle('fill', expBarPosX, experienceBarPosY, experienceBarWidth, experienceBarHeight)
+    -- experience progress fill
+    love.graphics.setColor(1,0.8,0)
+    love.graphics.rectangle(
+      'fill', expBarPosX, experienceBarPosY,
+      experienceBarWidth,
+      (experienceBarHeight * expfillPercentage)
+    )
+    -- experience bar border
+    love.graphics.setColor(0.4,0.4,0.4)
+    love.graphics.rectangle(
+      'line', expBarPosX, experienceBarPosY,
+      experienceBarWidth, experienceBarHeight
+    )
+
+    local upgradeCount = #tooltipItemUpgrade
+    for i=1, #tooltipItemUpgrade do
+      local upgradeItem = tooltipItemUpgrade[i]
+      local expReq = upgradeItem.experienceRequired
+      local percentReq = expReq / lastUpgrade.experienceRequired
+      local positionIndex = i - 1
+      local segmentY = math.ceil(experienceBarPosY + (percentReq * experienceBarHeight))
+      local isAvailable = item.experience >= expReq
+
+      local isLastItem = i == upgradeCount
+      if not isLastItem then
+        -- exp requirement line
+        love.graphics.setLineWidth(1)
+        love.graphics.setColor(0.4,0.4,0.4)
+        love.graphics.line(expBarPosX + 1, segmentY, expBarPosX + experienceBarWidth - 1, segmentY)
+      end
+
+      -- upgrade graphic
+      local iconPosX = tooltipStartX + experienceBarWidth + 5
+      local iconPosY = segmentY - (iconHeight/2)
+      local opacity = isAvailable and 1 or 0.4
+      love.graphics.setColor(1, 1, 1, opacity)
+      love.graphics.draw(
+        animationFactory.atlas,
+        getSprite(upgradeItem.sprite).sprite,
+        iconPosX,
+        iconPosY
+      )
+
+      -- upgrade title
+      local titlePosX = iconPosX + iconWidth + 5
+      local titlePosY = iconPosY + 2
+      titleTextLayer:add(
+        upgradeItem.title,
+        Color.WHITE,
+        titlePosX,
+        titlePosY
+      )
+
+      -- upgrade experience help text
+      local titleW, titleH = GuiText.getTextSize(upgradeItem.title, titleTextLayer.font)
+      local descPosX = titlePosX
+      local descPosY = titlePosY + titleH + 5
+      guiTextLayers.body:add(
+        upgradeItem.experienceRequired .. ' experience to unlock',
+        Color.MED_GRAY,
+        descPosX,
+        descPosY
+      )
+    end
+  end
 end
 
 -- handles the picked up item and makes it follow the cursor

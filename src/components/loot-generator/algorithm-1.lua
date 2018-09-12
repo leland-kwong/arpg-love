@@ -5,7 +5,8 @@ local lootPool = {
   require(itemsPath..'gpow-armor'),
   require(itemsPath..'potion-health'),
   require(itemsPath..'potion-energy'),
-  require(itemsPath..'lightning-rod')
+  require(itemsPath..'lightning-rod'),
+  require(itemsPath..'pod-module-slow-time')
 }
 
 return function()

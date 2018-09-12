@@ -20,11 +20,16 @@ local function insertTestItems(rootStore)
   local itemsPath = 'components.item-inventory.items.definitions'
   rootStore:addItemToInventory(require(itemsPath..'.pod-module-fireball').create(), {3, 2})
   rootStore:addItemToInventory(
-    require(itemsPath..'.mock-armor').create()
-    , {2, 3})
-  rootStore:addItemToInventory(
-    require(itemsPath..'.pod-module-slow-time').create()
+    require(itemsPath..'.mock-armor').create(),
+    {2, 3}
   )
+
+  local generateRandomItem = require 'components.loot-generator.algorithm-1'
+  for i=1, 60 do
+    rootStore:addItemToInventory(
+      generateRandomItem()
+    )
+  end
 
   local defaultBoots = require'components.item-inventory.items.definitions.mock-shoes'
   local canEquip, errorMsg = rootStore:equipItem(defaultBoots.create(), 1, 4)

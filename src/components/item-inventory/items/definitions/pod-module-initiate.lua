@@ -52,15 +52,48 @@ return itemDefs.registerType({
 
 		tooltip = function(self)
 			local stats = {
-				statValue(self.weaponDamage, Color.CYAN, "damage \n"),
+				statValue(self.weaponDamage, Color.CYAN, "damage \n")
 			}
 			return functional.reduce(stats, concatTable, {})
 		end,
 
+		tooltipItemUpgrade = function(self)
+			return {
+				{
+					sprite = 'item-upgrade-placeholder-unlocked',
+					title = 'Shock',
+					description = 'Attacks shock the target, dealing 1-2 lightning damage and briefly stunning them for 0.1s.',
+					experienceRequired = 10
+				},
+				{
+					sprite = 'item-upgrade-placeholder-unlocked',
+					title = 'Critical Strikes',
+					description = 'Attacks have a 25% chance to deal 2x damage',
+					experienceRequired = 40
+				},
+				{
+					sprite = 'item-upgrade-placeholder-unlocked',
+					title = 'Bouncing Strikes',
+					description = 'Attacks bounce to 2 other targets, dealing 50% less damage each bounce.',
+					experienceRequired = 120
+				}
+			}
+		end,
+
 		onEquip = function(self)
+			local msgTypes = {
+				[msgBus.EQUIPMENT_UNEQUIP] = function(v)
+					return msgBus.CLEANUP
+				end,
+				[msgBus.ENEMY_DESTROYED] = function(v)
+					self.experience = self.experience + v.experience
+				end
+			}
+
 			msgBus.subscribe(function(msgType, msgValue)
-				if msgBus.ENEMY_DESTROYED == msgType then
-					self.experience = self.experience + msgValue.experience
+				local handler = msgTypes[msgType]
+				if handler then
+					handler(msgValue)
 				end
 			end)
 		end,

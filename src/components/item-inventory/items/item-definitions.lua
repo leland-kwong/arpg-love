@@ -60,6 +60,9 @@ local defaultProperties = {
 	-- tooltip content to render
 	tooltip = noop,
 
+	-- tooltip info for upgrade path
+	tooltipItemUpgrade = noop,
+
 	-- item picked up from ground, given as a reward, etc...
 	onInventoryEnter = noop,
 

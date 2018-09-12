@@ -95,8 +95,9 @@ function InventoryBlueprint.init(self)
     w + (equipmentWidth + panelMargin) + (statsWidth + panelMargin), h,
     love.graphics.getWidth() / config.scaleFactor, love.graphics.getHeight() / config.scaleFactor
   )
+  inventoryX = inventoryX - 100
   self.x = inventoryX + equipmentWidth + panelMargin + statsWidth + panelMargin
-  self.y = (config.resolution.h - h) / 2
+  self.y = 60
 
   InteractArea(self):setParent(self)
 
