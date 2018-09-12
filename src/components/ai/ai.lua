@@ -567,7 +567,7 @@ end
 
 local function adjustInitialPositionIfNeeded(self)
   -- check initial position and move if necessary
-  local actualX, actualY = self.collision:move(self.collision.x, self.collision.y - self.z, collisionFilter)
+  local actualX, actualY = self.collision:move(self.collision.x, self.collision.y, collisionFilter)
   self.x = actualX
   self.y = actualY
 end
@@ -608,11 +608,11 @@ function Ai.init(self)
   self.collision = self:addCollisionObject(
       'ai',
       self.x,
-      self.y - self.z,
+      self.y,
       self.w * self.scale,
       self.h * self.scale,
       ox * self.scale,
-      oy * self.scale
+      oy + self.z * self.scale
     )
     :addToWorld(self.collisionWorld)
   adjustInitialPositionIfNeeded(self)
