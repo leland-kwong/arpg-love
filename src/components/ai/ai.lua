@@ -20,6 +20,7 @@ local Map = require 'modules.map-generator.index'
 local Position = require 'utils.position'
 local noop = require 'utils.noop'
 local Lru = require 'utils.lru'
+local setElectricShockShader = require 'modules.shaders.shader-electric-shock'
 
 local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
 local shader = love.graphics.newShader(pixelOutlineShader)
@@ -60,6 +61,7 @@ local Ai = {
   experience = 1,
 
   frameCount = 0,
+  clock = 0, -- amount of time the ai has been alive
 
   abilities = {},
   dataSheet = {
@@ -69,6 +71,11 @@ local Ai = {
 
   vx = 0,
   vy = 0,
+
+  -- statuses
+  shocked = false,
+  burning = false,
+  cold = false,
 
   isAggravated = false,
   gridSize = 1,
@@ -373,6 +380,7 @@ local function setNextPosition(self, dt, radius)
 end
 
 function Ai._update2(self, grid, dt)
+  self.clock = self.clock + dt
   self.frameCount = self.frameCount + 1
 
   if self.onUpdateStart then
@@ -523,6 +531,20 @@ local function drawStatusEffects(self, statusIcons)
   end
 end
 
+function drawSprite(self)
+  love.graphics.draw(
+    animationFactory.atlas,
+    self.animation.sprite,
+    self.x,
+    self.y - self.z,
+    0,
+    self.scale * self.facingDirectionX,
+    self.scale,
+    ox,
+    oy
+  )
+end
+
 function Ai.draw(self)
   if (not self.isInViewOfPlayer) then
     return
@@ -544,18 +566,16 @@ function Ai.draw(self)
     love.graphics.setColor(3,3,3)
   end
 
-  love.graphics.setColor(self.fillColor)
-  love.graphics.draw(
-    animationFactory.atlas,
-    self.animation.sprite,
-    self.x,
-    self.y - self.z,
-    0,
-    self.scale * self.facingDirectionX,
-    self.scale,
-    ox,
-    oy
+  local isShocked = self.shocked > 0
+  if (isShocked) then
+    setElectricShockShader(math.sin(self.clock))
+  end
+
+  local hasStatusEffect = self.shocked > 0
+  love.graphics.setColor(
+    hasStatusEffect and Color.TRANSPARENT or self.fillColor
   )
+  drawSprite(self)
 
   love.graphics.setBlendMode(oBlendMode)
   love.graphics.setShader()

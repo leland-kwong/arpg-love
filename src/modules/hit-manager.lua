@@ -1,6 +1,7 @@
 local PopupTextController = require 'components.popup-text'
 local popupText = PopupTextController.create()
 
+-- modifiers modify properties such as `maxHealth`, `moveSpeed`, etc...
 local function applyModifiers(self, newModifiers, multiplier)
   if (not newModifiers) then
     return

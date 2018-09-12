@@ -42,10 +42,14 @@ M.CHARACTER_HIT = 'CHARACTER_HIT'
   {
     parent = TABLE, -- component instance
     damage = NUMBER,
-    duration = NUMBER,
+    duration = NUMBER, -- duration in seconds
     modifiers = TABLE, -- key-value hash of properties
     statusIcon = STRING,
-    source = STRING -- multiple sources of the same type will get reapplied instead of stacked
+    source = STRING, -- multiple sources of the same type will get reapplied instead of stacked
+
+    shockStatus = BOOL, -- whether enemy is shocked
+    fireStatus = BOOL,
+    coldStatus = BOOL
   }
 ]]
 M.CHARACTER_AGGRO = M.CHARACTER_HIT -- triggers aggro by trigger the `CHARACTER_HIT` event

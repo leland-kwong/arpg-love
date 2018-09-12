@@ -49,6 +49,9 @@ local Bullet = {
   speed = 250,
   cooldown = 0.1,
   targetGroup = nil,
+  onHit = function(hitMessage)
+    return hitMessage
+  end,
   color = {Color.rgba255(244, 220, 66, 1)},
 
   init = function(self)
@@ -92,10 +95,11 @@ local Bullet = {
         for i=1, len do
           local col = cols[i]
           if col.other.group == self.targetGroup then
-            msgBus.send(msgBus.CHARACTER_HIT, {
+            local msg = self.onHit({
               parent = col.other.parent,
               damage = random(self.minDamage, self.maxDamage)
             })
+            msgBus.send(msgBus.CHARACTER_HIT, msg)
           end
         end
       end

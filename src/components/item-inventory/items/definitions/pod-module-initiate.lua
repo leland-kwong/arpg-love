@@ -115,6 +115,12 @@ return itemDefs.registerType({
 					:set('targetGroup', 'ai')
 					:set('startOffset', 26)
 					:set('speed', 400)
+					:set('onHit', function(hitMessage)
+						hitMessage.modifiers = hitMessage.modifiers or {}
+						hitMessage.modifiers.shocked = 1
+						hitMessage.duration = 5
+						return hitMessage
+					end)
 			)
 		end,
 
