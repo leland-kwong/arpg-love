@@ -334,7 +334,7 @@ end
 
 local function setNextPosition(self, dt, radius)
   local neighbors = getNeighbors(self, 10)
-  local speed = self.moveSpeed * dt
+  local speed = max(0, self:getCalculatedStat('moveSpeed') * dt)
 
 	-- These calcs are to get an adjustment for movement speed based on distance.
 	-- Don't take this as a complete solution as it only works based on the mouse target for
