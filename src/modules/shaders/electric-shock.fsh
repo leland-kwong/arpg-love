@@ -1,6 +1,6 @@
 uniform float time;
 uniform float speed;
-uniform float resolution;
+uniform vec2 resolution; // the higher the value, the more granular the lighting effect
 uniform float brightness;
 uniform sampler2D noiseImage;
 vec4 transparentColor = vec4(0,0,0,0);

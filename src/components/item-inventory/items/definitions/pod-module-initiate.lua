@@ -96,6 +96,22 @@ return itemDefs.registerType({
 					handler(msgValue)
 				end
 			end)
+
+			local state = itemDefs.getState(self)
+			state.onHit = function(hitMessage)
+				msgBus.send(msgBus.CHARACTER_HIT, {
+					parent = hitMessage.parent,
+					duration = 5,
+					lightningDamage = 1,
+					modifiers = {
+						shocked = 1
+					},
+					source = 'INITIATE_SHOCK'
+				})
+				love.audio.stop(Sound.ELECTRIC_SHOCK_SHORT)
+				love.audio.play(Sound.ELECTRIC_SHOCK_SHORT)
+				return hitMessage
+			end
 		end,
 
 		onActivate = function(self)
@@ -115,12 +131,7 @@ return itemDefs.registerType({
 					:set('targetGroup', 'ai')
 					:set('startOffset', 26)
 					:set('speed', 400)
-					:set('onHit', function(hitMessage)
-						hitMessage.modifiers = hitMessage.modifiers or {}
-						hitMessage.modifiers.shocked = 1
-						hitMessage.duration = 5
-						return hitMessage
-					end)
+					:set('onHit', itemDefs.getState(self).onHit)
 			)
 		end,
 

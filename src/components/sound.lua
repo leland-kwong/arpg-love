@@ -12,7 +12,8 @@ local Sound = {
   ENERGY_BEAM = love.audio.newSource('built/sounds/energy-beam-1.wav', 'static'),
   FROST_SHOT = love.audio.newSource('built/sounds/ice-shot.wav', 'static'),
   SLIME_SPLAT = love.audio.newSource('built/sounds/splat-sound.wav', 'static'),
-  SLOW_TIME = love.audio.newSource('built/sounds/slow-time.wav', 'static')
+  SLOW_TIME = love.audio.newSource('built/sounds/slow-time.wav', 'static'),
+  ELECTRIC_SHOCK_SHORT = love.audio.newSource('built/sounds/electric-shock-short.wav', 'static')
 }
 
 return Sound

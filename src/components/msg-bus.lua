@@ -47,9 +47,9 @@ M.CHARACTER_HIT = 'CHARACTER_HIT'
     statusIcon = STRING,
     source = STRING, -- multiple sources of the same type will get reapplied instead of stacked
 
-    shockStatus = BOOL, -- whether enemy is shocked
-    fireStatus = BOOL,
-    coldStatus = BOOL
+    shockStatus = NUMBER, -- amount enemy is shocked
+    fireStatus = NUMBER,
+    coldStatus = NUMBER
   }
 ]]
 M.CHARACTER_AGGRO = M.CHARACTER_HIT -- triggers aggro by trigger the `CHARACTER_HIT` event

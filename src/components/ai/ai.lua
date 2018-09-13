@@ -72,10 +72,10 @@ local Ai = {
   vx = 0,
   vy = 0,
 
-  -- statuses
-  shocked = false,
-  burning = false,
-  cold = false,
+  -- elemental status effects
+  shocked = 0,
+  burning = 0,
+  cold = 0,
 
   isAggravated = false,
   gridSize = 1,
@@ -332,6 +332,7 @@ local function getNeighbors(agent, neighborOffset)
 	)
 end
 
+local min = math.min
 local function setNextPosition(self, dt, radius)
   local neighbors = getNeighbors(self, 10)
   local speed = max(0, self:getCalculatedStat('moveSpeed') * dt)
@@ -531,9 +532,10 @@ local function drawStatusEffects(self, statusIcons)
   end
 end
 
-function drawSprite(self)
+function drawSprite(self, ox, oy)
+  local atlas = animationFactory.atlas
   love.graphics.draw(
-    animationFactory.atlas,
+    atlas,
     self.animation.sprite,
     self.x,
     self.y - self.z,
@@ -543,6 +545,21 @@ function drawSprite(self)
     ox,
     oy
   )
+end
+
+local textureW, textureH = animationFactory.atlas:getDimensions()
+local shockResolution = {
+  1 * 4,
+  (textureH/textureW) * 4
+}
+
+local function drawShockEffect(self, ox, oy)
+  setElectricShockShader(
+    math.pow(math.sin(self.clock + self.clockOffset), 2),
+    shockResolution
+  )
+  love.graphics.setColor(0.8,0.8,1)
+  drawSprite(self, ox, oy)
 end
 
 function Ai.draw(self)
@@ -566,16 +583,14 @@ function Ai.draw(self)
     love.graphics.setColor(3,3,3)
   end
 
-  local isShocked = self.shocked > 0
-  if (isShocked) then
-    setElectricShockShader(math.sin(self.clock))
-  end
+  local texture = animationFactory.atlas
+  love.graphics.setColor(self.fillColor)
+  drawSprite(self, ox, oy)
 
-  local hasStatusEffect = self.shocked > 0
-  love.graphics.setColor(
-    hasStatusEffect and Color.TRANSPARENT or self.fillColor
-  )
-  drawSprite(self)
+  local isShocked = self:getCalculatedStat('shocked') > 0
+  if (isShocked) then
+    drawShockEffect(self, ox, oy)
+  end
 
   love.graphics.setBlendMode(oBlendMode)
   love.graphics.setShader()
@@ -603,6 +618,7 @@ function Ai.init(self)
 
   -- [[ BASE PROPERTIES ]]
   self.health = self.health or self.maxHealth
+  self.clockOffset = math.random(0, 100)
 
   self.direction = {
     x = 0,

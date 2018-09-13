@@ -69,6 +69,7 @@ function M.new()
 	@msgValue - Data for the msg
 	]]
 	function msgBus.send(msgType, msgValue)
+		assert(msgType ~= nil, 'message type must be provided')
 		local nextValue = reduceValueAndHandleCleanup(allReducers, msgType, msgValue)
 		callSubscribersAndHandleCleanup(msgHandlers, msgType, nextValue)
 	end
