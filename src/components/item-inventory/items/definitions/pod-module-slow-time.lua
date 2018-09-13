@@ -5,7 +5,7 @@ local Color = require('modules.color')
 local msgBus = require 'components.msg-bus'
 local Aoe = require 'components.abilities.aoe'
 
-local healSource = "X_1_TIME_SHAPER"
+local healSource = "X_1_TIME_BENDER"
 local healType = 2
 
 local function concatTable(a, b)
@@ -55,7 +55,7 @@ return itemDefs.registerType({
 	properties = {
 		sprite = "weapon-module-slow-time",
 		title = 'x-1 time-bender',
-		rarity = config.rarity.NORMAL,
+		rarity = config.rarity.EPIC,
 		category = config.category.POD_MODULE,
 
 		energyCost = function(self)
