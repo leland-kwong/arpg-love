@@ -136,7 +136,7 @@ local aiTypes = require 'components.spawn.ai-types'
 local aiTypesList = keys(aiTypes.types)
 
 local function generateAi(parent, player, map)
-  local aiCount = 10
+  local aiCount = 30
   local generated = 0
   local grid = map.grid
   local rows, cols = #grid, #grid[1]

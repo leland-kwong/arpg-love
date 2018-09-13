@@ -30,14 +30,23 @@ local upgrades = {
 	{
 		sprite = 'item-upgrade-placeholder-unlocked',
 		title = 'Shock',
-		description = 'Attacks shock the target, dealing 1-2 lightning damage and briefly stunning them for 0.1s.',
-		experienceRequired = 10
+		description = 'Attacks shock the target, dealing 1-2 lightning damage.',
+		experienceRequired = 10,
+		props = {
+			shockDuration = 0.4,
+			minLightningDamage = 1,
+			maxLightningDamage = 2
+		}
 	},
 	{
 		sprite = 'item-upgrade-placeholder-unlocked',
 		title = 'Critical Strikes',
 		description = 'Attacks have a 25% chance to deal 1.5x damage',
-		experienceRequired = 40
+		experienceRequired = 40,
+		props = {
+			critChance = 0.25,
+			critMultiplier = 0.5
+		}
 	},
 	{
 		sprite = 'item-upgrade-placeholder-unlocked',
@@ -101,11 +110,12 @@ return itemDefs.registerType({
 
 			local state = itemDefs.getState(self)
 			state.onHit = function(hitMessage)
-				local upgrade1Ready = self.experience >= upgrades[1].experienceRequired
-				if upgrade1Ready then
+				local up1 = upgrades[1]
+				local up1Ready = self.experience >= up1.experienceRequired
+				if up1Ready then
 					msgBus.send(msgBus.CHARACTER_HIT, {
 						parent = hitMessage.parent,
-						duration = 5,
+						duration = up1.props.shockDuration,
 						modifiers = {
 							shocked = 1
 						},
@@ -114,13 +124,17 @@ return itemDefs.registerType({
 					love.audio.stop(Sound.ELECTRIC_SHOCK_SHORT)
 					love.audio.play(Sound.ELECTRIC_SHOCK_SHORT)
 
-					hitMessage.lightningDamage = 1
+					hitMessage.lightningDamage = math.random(
+						up1.props.minLightningDamage,
+						up1.props.maxLightningDamage
+					)
 				end
 
-				local upgrade2Ready = self.experience >= upgrades[2].experienceRequired
-				if upgrade2Ready then
-					hitMessage.criticalChance = 0.25
-					hitMessage.criticalMultiplier = 0.5
+				local up2 = upgrades[2]
+				local up2Ready = self.experience >= up2.experienceRequired
+				if up2Ready then
+					hitMessage.criticalChance = up2.props.critChance
+					hitMessage.criticalMultiplier = up2.props.critMultiplier
 				end
 				return hitMessage
 			end

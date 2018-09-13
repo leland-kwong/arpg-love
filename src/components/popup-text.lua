@@ -9,6 +9,7 @@ local setProp = require 'utils.set-prop'
 local PopupTextBlueprint = {
   group = groups.overlay,
   font = font.secondary.font,
+  color = {1,1,1,1},
   x = 0,
   y = 0,
 }
@@ -20,7 +21,7 @@ local function animationCo()
   local frame = 0
   local subject = setProp(subjectPool.get())
     :set('offset', 0)
-  local posTween = tween.new(0.2, subject, tweenEndState, tween.easing.outCubic)
+  local posTween = tween.new(0.3, subject, tweenEndState, tween.easing.outExpo)
   local complete = false
 
   while (not complete) do
@@ -74,7 +75,7 @@ function PopupTextBlueprint.draw(self)
   shader:send('include_corners', true)
 
   love.graphics.setShader(shader)
-  love.graphics.setColor(1,1,1,1)
+  love.graphics.setColor(self.color)
   love.graphics.draw(
     self.textObj,
     self.x,

@@ -91,7 +91,11 @@ local Ai = {
 }
 
 local popupText = PopupTextController.create({
-  font = require 'components.font'.primary.font
+  font = require 'components.font'.secondary.font
+})
+local popupTextCritMultiplier = PopupTextController.create({
+  font = require 'components.font'.secondary.font,
+  color = Color.YELLOW
 })
 
 -- gets directions from grid position, adjusting vectors to handle wall collisions as needed
@@ -191,13 +195,13 @@ local function adjustedDamage(self, damage, lightningDamage, criticalChance, cri
     + lightningDamageAfterResistance
   local critical = rollCritChance(criticalChance) and criticalMultiplier or 0
   local totalDamageWithCrit = totalDamage + (totalDamage * critical)
-  return round(
-    max(0, totalDamageWithCrit)
-  )
+  return round(max(0, totalDamageWithCrit)), totalDamage, critical
 end
 
 local function onDamageTaken(self, damage, lightningDamage, criticalChance, criticalMultiplier)
-  local actualDamage = adjustedDamage(self, damage, lightningDamage, criticalChance, criticalMultiplier)
+  local actualDamage, actualNonCritDamage, criticalMultiplier = adjustedDamage(
+    self, damage, lightningDamage, criticalChance, criticalMultiplier
+  )
   if actualDamage == 0 then
     return
   end
@@ -205,6 +209,15 @@ local function onDamageTaken(self, damage, lightningDamage, criticalChance, crit
   self.health = self.health - actualDamage
   local getTextSize = require 'components.gui.gui-text'.getTextSize
   local offsetCenter = -getTextSize(actualDamage, popupText.font) / 2
+  local isCriticalHit = criticalMultiplier > 0
+  if (isCriticalHit) then
+    local critText = criticalMultiplier..'x '
+    popupTextCritMultiplier:new(
+      critText,
+      self.x + offsetCenter - getTextSize(critText, popupText.font),
+      self.y - self.h
+    )
+  end
   popupText:new(
     actualDamage,
     self.x + offsetCenter,
