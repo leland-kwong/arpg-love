@@ -47,6 +47,13 @@ function ExperienceIndicator.init(self)
         love.audio.stop(Sound.levelUp)
         love.audio.play(Sound.levelUp)
         msgBus.send(msgBus.PLAYER_LEVEL_UP)
+        msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
+          title = 'level up!',
+          description = {
+            Color.WHITE, 'you are now level ',
+            Color.CYAN, self.rootStore:get().level
+          }
+        })
       end
     end
   end)

@@ -17,18 +17,20 @@ local GuiTextLayer = {
   group = groups.gui,
   font = font.secondary.font,
   outline = true,
+  color = {1,1,1,1},
 
   -- statics
-  getTextSize = function(text, font)
+  getTextSize = function(text, font, wrapLimit, alignMode)
     local textForMeasuring = getTextForMeasuring(font)
-    textForMeasuring:set(text)
+    textForMeasuring:setf(
+      text,
+      wrapLimit or 99999,
+      alignMode or 'left'
+    )
     return textForMeasuring:getWidth(), textForMeasuring:getHeight()
   end
 }
 
-local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
-local outlineColor = {0,0,0,1}
-local shader = love.graphics.newShader(pixelOutlineShader)
 local w, h = 16, 16
 
 function GuiTextLayer.add(self, text, color, x, y)
@@ -53,12 +55,16 @@ function GuiTextLayer.addTextGroup(self, textGroup, x, y)
   return self
 end
 
+local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
+local outlineColor = {0,0,0,1}
+local shader = love.graphics.newShader(pixelOutlineShader)
+shader:send('sprite_size', {w, h})
+shader:send('outline_width', 2/w)
+shader:send('outline_color', outlineColor)
+shader:send('use_drawing_color', true)
+shader:send('include_corners', true)
+
 function GuiTextLayer.init(self)
-  shader:send('sprite_size', {w, h})
-  shader:send('outline_width', 2/w)
-  shader:send('outline_color', outlineColor)
-  shader:send('use_drawing_color', true)
-  shader:send('include_corners', true)
   self.textGraphic = love.graphics.newText(self.font, '')
   self.tablePool = {}
 end
@@ -72,7 +78,8 @@ function GuiTextLayer.draw(self)
     love.graphics.setShader(shader)
   end
 
-  love.graphics.setColor(1,1,1)
+  shader:send('alpha', self.color[4])
+  love.graphics.setColor(self.color)
   love.graphics.draw(self.textGraphic, x, y)
   self.textGraphic:clear()
 

@@ -4,6 +4,7 @@ local function fontPrimary(fontSize)
     -- 'built/fonts/StarPerv.ttf',
     fontSize
   )
+  font:setLineHeight(1.2)
 
   return {
     fontSize = fontSize,
@@ -18,6 +19,7 @@ local function fontSecondary(fontSize)
     'built/fonts/m41.ttf',
     fontSize
   )
+  font:setLineHeight(1.2)
   return {
     fontSize = fontSize,
     lineHeight = 1.2,

@@ -179,7 +179,7 @@ local function drawTooltip(item, x, y, w2, h2)
       local percentReq = expReq / lastUpgrade.experienceRequired
       local positionIndex = i - 1
       local segmentY = math.ceil(experienceBarPosY + (percentReq * experienceBarHeight))
-      local isAvailable = item.experience >= expReq
+      local isUnlocked = item.experience >= expReq
 
       local isLastItem = i == upgradeCount
       if not isLastItem then
@@ -192,7 +192,7 @@ local function drawTooltip(item, x, y, w2, h2)
       -- upgrade graphic
       local iconPosX = tooltipStartX + experienceBarWidth + 5
       local iconPosY = segmentY - (iconHeight/2)
-      local opacity = isAvailable and 1 or 0.4
+      local opacity = isUnlocked and 1 or 0.4
       love.graphics.setColor(1, 1, 1, opacity)
       love.graphics.draw(
         animationFactory.atlas,
@@ -211,16 +211,19 @@ local function drawTooltip(item, x, y, w2, h2)
         titlePosY
       )
 
-      -- upgrade experience help text
-      local titleW, titleH = GuiText.getTextSize(upgradeItem.title, titleTextLayer.font)
-      local descPosX = titlePosX
-      local descPosY = titlePosY + titleH + 5
-      guiTextLayers.body:add(
-        upgradeItem.experienceRequired .. ' experience to unlock',
-        Color.MED_GRAY,
-        descPosX,
-        descPosY
-      )
+      if (not isUnlocked) then
+        -- upgrade experience help text
+        local titleW, titleH = GuiText.getTextSize(upgradeItem.title, titleTextLayer.font)
+        local descPosX = titlePosX
+        local descPosY = titlePosY + titleH + 5
+        local expRequirementDiff = upgradeItem.experienceRequired - item.experience
+        guiTextLayers.body:add(
+          expRequirementDiff .. ' experience to unlock',
+          Color.MED_GRAY,
+          descPosX,
+          descPosY
+        )
+      end
     end
   end
 end
