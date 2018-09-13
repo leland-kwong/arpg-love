@@ -1,5 +1,6 @@
 local PopupTextController = require 'components.popup-text'
 local popupText = PopupTextController.create()
+local min, max = math.min, math.max
 
 -- modifiers modify properties such as `maxHealth`, `moveSpeed`, etc...
 local function applyModifiers(self, newModifiers, multiplier)
@@ -46,8 +47,14 @@ local function hitManager(self, dt, onDamageTaken)
   for hitId,hit in pairs(self.hits) do
     hitCount = hitCount + 1
 
-    if onDamageTaken and hit.damage then
-      onDamageTaken(self, hit.damage)
+    if onDamageTaken then
+      onDamageTaken(
+        self,
+        hit.damage or 0,
+        hit.lightningDamage or 0,
+        min(1, hit.criticalChance or 0), -- maximum value of 1
+        hit.criticalMultiplier or 0
+      )
     end
 
     if hit.modifiers then

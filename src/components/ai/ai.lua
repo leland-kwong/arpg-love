@@ -55,6 +55,7 @@ local Ai = {
   sightRadius = 11,
   armor = 0,
   flatPhysicalDamageReduction = 0,
+  lightningResist = 0,
   maxHealth = 10,
   healthRegeneration = 0,
   damage = 0,
@@ -170,20 +171,37 @@ local function spreadAggroToAllies(self)
   end
 end
 
-local max = math.max
+local max, random = math.max, math.random
 local round = require 'utils.math'.round
 local damageReductionPerArmor = 0.0001
-local function adjustedDamage(self, damage)
+
+local function rollCritChance(chance)
+  if chance == 0 then
+    return false
+  end
+  return random(1, 1/chance) == 1
+end
+
+local function adjustedDamage(self, damage, lightningDamage, criticalChance, criticalMultiplier)
   local damageAfterFlatReduction = damage - self.flatPhysicalDamageReduction
-  local finalDamage = damageAfterFlatReduction -
-    (damageAfterFlatReduction * self.armor * damageReductionPerArmor)
+  local damageAfterArmorResistance = (damageAfterFlatReduction * self.armor * damageReductionPerArmor)
+  local lightningDamageAfterResistance = lightningDamage - (lightningDamage * self.lightningResist)
+  local totalDamage = damageAfterFlatReduction
+    - damageAfterArmorResistance
+    + lightningDamageAfterResistance
+  local critical = rollCritChance(criticalChance) and criticalMultiplier or 0
+  local totalDamageWithCrit = totalDamage + (totalDamage * critical)
   return round(
-    max(0, finalDamage)
+    max(0, totalDamageWithCrit)
   )
 end
 
-local function onDamageTaken(self, damage)
-  local actualDamage = adjustedDamage(self, damage)
+local function onDamageTaken(self, damage, lightningDamage, criticalChance, criticalMultiplier)
+  local actualDamage = adjustedDamage(self, damage, lightningDamage, criticalChance, criticalMultiplier)
+  if actualDamage == 0 then
+    return
+  end
+
   self.health = self.health - actualDamage
   local getTextSize = require 'components.gui.gui-text'.getTextSize
   local offsetCenter = -getTextSize(actualDamage, popupText.font) / 2

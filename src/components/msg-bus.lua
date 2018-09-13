@@ -42,6 +42,9 @@ M.CHARACTER_HIT = 'CHARACTER_HIT'
   {
     parent = TABLE, -- component instance
     damage = NUMBER,
+    lightningDamage = NUMBER,
+    criticalChance = NUMBER, -- percentage value multiplier where 0.25 means 25%
+    criticalMultiplier = NUMBER, -- percentage value multplier where 0.25 means 25%
     duration = NUMBER, -- duration in seconds
     modifiers = TABLE, -- key-value hash of properties
     statusIcon = STRING,

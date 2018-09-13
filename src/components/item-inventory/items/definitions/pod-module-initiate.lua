@@ -26,6 +26,27 @@ local function concatTable(a, b)
 	return a
 end
 
+local upgrades = {
+	{
+		sprite = 'item-upgrade-placeholder-unlocked',
+		title = 'Shock',
+		description = 'Attacks shock the target, dealing 1-2 lightning damage and briefly stunning them for 0.1s.',
+		experienceRequired = 10
+	},
+	{
+		sprite = 'item-upgrade-placeholder-unlocked',
+		title = 'Critical Strikes',
+		description = 'Attacks have a 25% chance to deal 1.5x damage',
+		experienceRequired = 40
+	},
+	{
+		sprite = 'item-upgrade-placeholder-unlocked',
+		title = 'Bouncing Strikes',
+		description = 'Attacks bounce to 2 other targets, dealing 50% less damage each bounce.',
+		experienceRequired = 120
+	}
+}
+
 return itemDefs.registerType({
 	type = "pod-one",
 
@@ -58,26 +79,7 @@ return itemDefs.registerType({
 		end,
 
 		tooltipItemUpgrade = function(self)
-			return {
-				{
-					sprite = 'item-upgrade-placeholder-unlocked',
-					title = 'Shock',
-					description = 'Attacks shock the target, dealing 1-2 lightning damage and briefly stunning them for 0.1s.',
-					experienceRequired = 10
-				},
-				{
-					sprite = 'item-upgrade-placeholder-unlocked',
-					title = 'Critical Strikes',
-					description = 'Attacks have a 25% chance to deal 2x damage',
-					experienceRequired = 40
-				},
-				{
-					sprite = 'item-upgrade-placeholder-unlocked',
-					title = 'Bouncing Strikes',
-					description = 'Attacks bounce to 2 other targets, dealing 50% less damage each bounce.',
-					experienceRequired = 120
-				}
-			}
+			return upgrades
 		end,
 
 		onEquip = function(self)
@@ -99,17 +101,27 @@ return itemDefs.registerType({
 
 			local state = itemDefs.getState(self)
 			state.onHit = function(hitMessage)
-				msgBus.send(msgBus.CHARACTER_HIT, {
-					parent = hitMessage.parent,
-					duration = 5,
-					lightningDamage = 1,
-					modifiers = {
-						shocked = 1
-					},
-					source = 'INITIATE_SHOCK'
-				})
-				love.audio.stop(Sound.ELECTRIC_SHOCK_SHORT)
-				love.audio.play(Sound.ELECTRIC_SHOCK_SHORT)
+				local upgrade1Ready = self.experience >= upgrades[1].experienceRequired
+				if upgrade1Ready then
+					msgBus.send(msgBus.CHARACTER_HIT, {
+						parent = hitMessage.parent,
+						duration = 5,
+						modifiers = {
+							shocked = 1
+						},
+						source = 'INITIATE_SHOCK'
+					})
+					love.audio.stop(Sound.ELECTRIC_SHOCK_SHORT)
+					love.audio.play(Sound.ELECTRIC_SHOCK_SHORT)
+
+					hitMessage.lightningDamage = 1
+				end
+
+				local upgrade2Ready = self.experience >= upgrades[2].experienceRequired
+				if upgrade2Ready then
+					hitMessage.criticalChance = 0.25
+					hitMessage.criticalMultiplier = 0.5
+				end
 				return hitMessage
 			end
 		end,
