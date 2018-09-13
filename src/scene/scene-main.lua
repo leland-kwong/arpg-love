@@ -136,7 +136,7 @@ local aiTypes = require 'components.spawn.ai-types'
 local aiTypesList = keys(aiTypes.types)
 
 local function generateAi(parent, player, map)
-  local aiCount = 30
+  local aiCount = 20
   local generated = 0
   local grid = map.grid
   local rows, cols = #grid, #grid[1]
@@ -188,6 +188,24 @@ function MainScene.init(self)
 
     local defaultEnergyPotion = require'components.item-inventory.items.definitions.potion-energy'
     local canEquip, errorMsg = rootState:equipItem(defaultEnergyPotion.create(), 2, 5)
+    if not canEquip then
+      error(errorMsg)
+    end
+
+    local defaultBoots = require'components.item-inventory.items.definitions.mock-shoes'
+    local canEquip, errorMsg = rootState:equipItem(defaultBoots.create(), 1, 4)
+    if not canEquip then
+      error(errorMsg)
+    end
+
+    local defaultWeapon2 = require'components.item-inventory.items.definitions.lightning-rod'
+    local canEquip, errorMsg = rootState:equipItem(defaultWeapon2.create(), 1, 2)
+    if not canEquip then
+      error(errorMsg)
+    end
+
+    local defaultArmor = require('components.item-inventory.items.definitions.mock-armor').create()
+    local canEquip, errorMsg = rootState:equipItem(defaultArmor, 2, 3)
     if not canEquip then
       error(errorMsg)
     end

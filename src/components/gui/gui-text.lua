@@ -37,11 +37,9 @@ function GuiTextLayer.add(self, text, color, x, y)
   self.textGraphic:add(self.tablePool, x, y)
 end
 
-function GuiTextLayer.addf(self, text, color, wrapLimit, alignMode, x, y)
-  self.tablePool[1] = color
-  self.tablePool[2] = text
+function GuiTextLayer.addf(self, formattedText, wrapLimit, alignMode, x, y)
   self.textGraphic:addf(
-    self.tablePool,
+    formattedText, -- [TABLE]
     wrapLimit,
     alignMode,
     x,

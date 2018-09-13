@@ -17,11 +17,11 @@ local PopupTextBlueprint = {
 local subjectPool = TablePool.newAuto()
 
 local tweenEndState = {offset = -10}
-local function animationCo()
+local function animationCo(duration)
   local frame = 0
   local subject = setProp(subjectPool.get())
     :set('offset', 0)
-  local posTween = tween.new(0.3, subject, tweenEndState, tween.easing.outExpo)
+  local posTween = tween.new(duration, subject, tweenEndState, tween.easing.outExpo)
   local complete = false
 
   while (not complete) do
@@ -31,9 +31,9 @@ local function animationCo()
   subjectPool.release(subject)
 end
 
-function PopupTextBlueprint:new(text, x, y)
+function PopupTextBlueprint:new(text, x, y, duration)
   local animation = coroutine.wrap(animationCo)
-  table.insert(self.textObjectsList, {text, x, y, animation})
+  table.insert(self.textObjectsList, {text, x, y, animation, duration or 0.3})
 end
 
 local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
@@ -52,8 +52,8 @@ function PopupTextBlueprint.update(self)
   local i = 1
   while i <= #self.textObjectsList do
     local obj = self.textObjectsList[i]
-    local text, x, y, animation = unpack(obj)
-    local offsetY, errors = animation()
+    local text, x, y, animation, duration = obj[1], obj[2], obj[3], obj[4], obj[5]
+    local offsetY, errors = animation(duration)
 
     local isComplete = offsetY == nil
     if isComplete then

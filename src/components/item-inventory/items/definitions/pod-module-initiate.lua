@@ -92,12 +92,39 @@ return itemDefs.registerType({
 		end,
 
 		onEquip = function(self)
+			local function getHighestUpgradeUnlocked()
+				local highestUpgradeUnlocked = 0
+				for i=1, #upgrades do
+					local up = upgrades[i]
+					if self.experience >= up.experienceRequired then
+						highestUpgradeUnlocked = i
+					end
+				end
+				return highestUpgradeUnlocked
+			end
+
+			local lastUpgradeUnlocked = getHighestUpgradeUnlocked()
+
 			local msgTypes = {
 				[msgBus.EQUIPMENT_UNEQUIP] = function(v)
 					return msgBus.CLEANUP
 				end,
 				[msgBus.ENEMY_DESTROYED] = function(v)
 					self.experience = self.experience + v.experience
+					local nextUpgradeLevel = getHighestUpgradeUnlocked()
+					local newUpgradeUnlocked = nextUpgradeLevel > lastUpgradeUnlocked
+					lastUpgradeUnlocked = nextUpgradeLevel
+					if newUpgradeUnlocked then
+						local itemTitle = itemDefs.getDefinition(self).title
+						msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
+							title = itemTitle..' upgraded',
+							icon = itemDefs.getDefinition(self).sprite,
+							description = {
+								Color.CYAN, upgrades[nextUpgradeLevel].title,
+								Color.WHITE, ' is now available'
+							}
+						})
+					end
 				end
 			}
 

@@ -7,10 +7,12 @@ local ActiveSkillInfo = require 'components.hud.active-skill-info'
 local ActionError = require 'components.hud.action-error'
 local GuiText = require 'components.gui.gui-text'
 local NpcInfo = require 'components.hud.npc-info'
+local Notifier = require 'components.hud.notifier'
 local msgBus = require 'components.msg-bus'
 local Position = require 'utils.position'
 local scale = require 'config.config'.scaleFactor
 local Color = require 'modules.color'
+local config = require 'config.config'
 local max = math.max
 
 local Hud = {
@@ -51,6 +53,14 @@ function Hud.init(self)
     drawOrder = function()
       return 10
     end
+  }):setParent(self)
+
+  local notifierWidth, notifierHeight = 200, 200
+  Notifier.create({
+    x = love.graphics.getWidth()/config.scale - notifierWidth,
+    y = love.graphics.getHeight()/config.scale - notifierHeight,
+    h = notifierHeight,
+    w = notifierWidth
   }):setParent(self)
 
   local winWidth, winHeight = love.graphics.getWidth() / scale, love.graphics.getHeight() / scale

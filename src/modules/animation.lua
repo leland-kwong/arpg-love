@@ -3,6 +3,7 @@
 ]]
 
 local abs = math.abs
+local Lru = require 'utils.lru'
 
 local meta = {}
 
@@ -20,7 +21,8 @@ local function createAnimationFactory(
     atlasData = frameJson,
     frameData = frameJson.frames,
     pad = paddingOffset,
-    frameRate = frameRate
+    frameRate = frameRate,
+    staticCacheByName = Lru.new(1000)
   }
   setmetatable(factory, meta)
   meta.__index = meta
@@ -43,6 +45,15 @@ function meta:new(aniFrames)
 
   -- set initial frame
   animation:update(0)
+  return animation
+end
+
+function meta:newStaticSprite(name)
+  local animation = self.staticCacheByName:get(name)
+  if (not animation) then
+    animation = self:new({ name })
+    self.staticCacheByName:set(name, animation)
+  end
   return animation
 end
 
