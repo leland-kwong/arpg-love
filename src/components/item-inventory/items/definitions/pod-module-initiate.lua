@@ -50,7 +50,7 @@ local upgrades = {
 	},
 	{
 		sprite = 'item-upgrade-placeholder-unlocked',
-		title = 'Bouncing Strikes',
+		title = 'Ricochet',
 		description = 'Attacks bounce to 2 other targets, dealing 50% less damage each bounce.',
 		experienceRequired = 120
 	}
@@ -121,7 +121,7 @@ return itemDefs.registerType({
 							icon = itemDefs.getDefinition(self).sprite,
 							description = {
 								Color.CYAN, upgrades[nextUpgradeLevel].title,
-								Color.WHITE, ' is now available'
+								Color.WHITE, ' is unlocked'
 							}
 						})
 					end
