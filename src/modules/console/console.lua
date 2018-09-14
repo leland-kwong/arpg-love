@@ -179,11 +179,11 @@ function Console.draw(self)
     startY + 12 * lineHeight
   )
 
-  gfx.print('msgBus '..self.msgBusAverageTime, edgeOffset, 700)
+  gfx.print('msgBus '..self.msgBusAverageTime, edgeOffset, 720)
 
   local logEntries = logger:get()
   gfx.setColor(Color.MED_GRAY)
-  local loggerYPosition = 730
+  local loggerYPosition = 750
   gfx.print('LOG', edgeOffset, loggerYPosition)
   gfx.setColor(Color.WHITE)
   for i=1, #logEntries do

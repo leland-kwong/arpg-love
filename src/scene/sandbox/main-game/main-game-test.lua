@@ -6,7 +6,7 @@ local config = require 'config.config'
 local msgBus = require 'components.msg-bus'
 
 local MainGameTest = {
-  group = groups.all
+  group = groups.firstLayer
 }
 
 local function modifyLevelRequirements()

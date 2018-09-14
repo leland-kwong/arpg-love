@@ -99,7 +99,7 @@ local gridTileTypes = {
 
 local MainScene = {
   id = 'MAIN_SCENE',
-  group = groups.all,
+  group = groups.firstLayer,
 
   -- options
   initialGameState = nil,

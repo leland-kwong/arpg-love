@@ -21,6 +21,12 @@ local function guiStencil()
 end
 
 local Groups = {
+  --[[
+    This is for change that seldom change their draw order. This way we can prevent the min/max order queue from
+    spreading out too much. For example, if the main scene's draw order is 1, and the player's draw order is 10000, then
+    the draw queue will have to skip 99999 iterations just to go from 1-10000.
+  ]]
+  firstLayer = Component.newGroup(),
   all = Component.newGroup({
     -- automatic draw-ordering based on y position
     drawOrder = function(self)
@@ -43,5 +49,9 @@ local Groups = {
   -- used for handling system/os related functionality
   system = Component.newGroup()
 }
+
+Groups.all.drawQueue:onBeforeFlush(function(self)
+  consoleLog(self:getStats())
+end)
 
 return Groups

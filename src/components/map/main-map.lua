@@ -65,7 +65,7 @@ local function renderWallCollisionDebug(self)
 end
 
 local blueprint = objectUtils.assign({}, mapBlueprint, {
-  group = groups.all,
+  group = groups.firstLayer,
   tileRenderDefinition = {},
 
   init = function(self)
@@ -83,7 +83,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     self.renderFloorCache = {}
     local rows, cols = #self.grid, #self.grid[1]
     self.floorCanvas = love.graphics.newCanvas(cols * self.gridSize, rows * self.gridSize)
-  end,  
+  end,
 
   onUpdate = function(self, value, x, y, originX, originY, isInViewport, dt)
     renderWallCollisionDebug(self)
