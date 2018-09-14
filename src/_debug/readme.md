@@ -1,0 +1,1 @@
+This folder is named **_debug** because **debug** is a core lua module, so we cannot name any folders or files as **debug**.

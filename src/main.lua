@@ -149,4 +149,5 @@ end
 if config.isDebug then
   require 'modules.test.index'
   require 'utils.test.index'
+  require '_debug'
 end
