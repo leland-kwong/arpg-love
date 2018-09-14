@@ -14,6 +14,7 @@ local typeCheck = require 'utils.type-check'
 local random = math.random
 local tween = require 'modules.tween'
 local camera = require 'components.camera'
+local findNearestTarget = require 'modules.find-nearest-target'
 
 local colMap = collisionWorlds.map
 
@@ -65,55 +66,6 @@ local function checkMousePositionLineOfSight(self, mx, my, los)
   return los(gx1, gy1, gx2, gy2)
 end
 
-local function findNearestTarget(self, foundTargets, pointerX, pointerY, maxSeekRadius)
-  local mapGrid = Component.get('MAIN_SCENE').mapGrid
-  local Map = require 'modules.map-generator.index'
-  local los = LOS(mapGrid, Map.WALKABLE)
-
-  local nearestEnemyFound = nil
-  local i = 1
-  local previousTarget = foundTargets[#foundTargets] or {x = pointerX, y = pointerY}
-
-  local startX, startY = previousTarget.x, previousTarget.y
-  while (i <= maxSeekRadius) and (not nearestEnemyFound) do
-    local seekRadius = i * config.gridSize
-    local width, height = seekRadius * 2, seekRadius * 2
-    local collisionX, collisionY = startX, startY
-    local items, len = collisionWorlds.map:queryRect(
-      collisionX - width/2,
-      collisionY - height/2,
-      width,
-      height,
-      function(item)
-        if (not nearestEnemyFound) and item.group == 'ai' then
-          local target = item.parent
-          local isAlreadyFound = foundTargets:hasTarget(target)
-          local gx1, gy1 = Position.pixelsToGridUnits(startX, startY, config.gridSize)
-          local gx2, gy2 = Position.pixelsToGridUnits(target.x, target.y, config.gridSize)
-          local canSeeTarget = los(gx1, gy1, gx2, gy2)
-          if (not isAlreadyFound) and canSeeTarget then
-            nearestEnemyFound = target
-          end
-        end
-        return false
-      end
-    )
-    i = i + 1
-  end
-
-  return nearestEnemyFound
-end
-
-local function hasTarget(self, target)
-  local found = false
-  local i = 1
-  while (i <= #self) and (not found) do
-    local t = self[i]
-    found = target == t
-    i = i + 1
-  end
-  return found
-end
 
 -- check if mouse position is blocked by a wall or out of attack range
 local function checkMousePosition(self)
@@ -137,8 +89,23 @@ end
 
 local function getAllTargets(self, pointerX, pointerY)
   for i=1, self.maxTargets do
-    local maxSeekRadius = i == 1 and 1 or 6
-    local target = findNearestTarget(self, self.targets, pointerX, pointerY, maxSeekRadius)
+    local startX, startY
+    if i == 1 then
+      startX = pointerX
+      startY = pointerY
+    else
+      local lastTarget = self.targets[#self.targets]
+      if (not lastTarget) then
+        return
+      end
+      startX = lastTarget.x
+      startY = lastTarget.y
+    end
+    local maxSeekRadius = 6 * config.gridSize
+    local mapGrid = Component.get('MAIN_SCENE').mapGrid
+    local Map = require 'modules.map-generator.index'
+    local losFn = LOS(mapGrid, Map.WALKABLE)
+    local target = findNearestTarget(self, colMap, self.targets, startX, startY, maxSeekRadius, losFn, config.gridSize)
     table.insert(self.targets, target)
   end
 end
@@ -149,12 +116,9 @@ ChainLightning.init = function(self)
     '[ChainLightning] `targetGroup` is required'
   )
 
-  -- find 3 targets to hit ahead of time
-  self.targets = {
-    hasTarget = hasTarget
-  }
-
   local pointerX, pointerY, isValidPosition = checkMousePosition(self)
+  -- find 3 targets to hit ahead of time
+  self.targets = {}
   if (isValidPosition) then
     getAllTargets(self, pointerX, pointerY)
   end
