@@ -14,7 +14,7 @@ local f = require 'utils.functional'
 
 local SpawnerAi = {
   -- debug = true,
-  group = groups.all,
+  group = groups.firstLayer,
   x = 0,
   y = 0,
   moveSpeed = 0,

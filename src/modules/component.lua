@@ -131,7 +131,8 @@ function M.createFactory(blueprint)
       tc.validate(c.angle, tc.NUMBER, false)
     end
 
-    c:setGroup(c.group)
+    -- add component to default group first
+    c.group.addComponent(c)
     c:init()
     return c
   end
@@ -148,7 +149,18 @@ function M.createFactory(blueprint)
   end
 
   function blueprint:setDisabled(isDisabled)
-    self._disabled = isDisabled
+    self:setUpdateDisabled(isDisabled)
+    self:setDrawDisabled(isDisabled)
+    return self
+  end
+
+  function blueprint:setDrawDisabled(isDisabled)
+    self._drawDisabled = isDisabled
+    return self
+  end
+
+  function blueprint:setUpdateDisabled(isDisabled)
+    self._updatedDisabled = isDisabled
     return self
   end
 
@@ -182,11 +194,11 @@ function M.createFactory(blueprint)
   end
 
   function blueprint:setGroup(group)
-    if not group and self.group then
+    if self.group then
       self.group.removeComponent(self)
-    else
-      group.addComponent(self)
     end
+    group.addComponent(self)
+    self.group = group
     return self
   end
 
@@ -255,7 +267,7 @@ function M.newGroup(groupDefinition)
 
   function Group.updateAll(dt)
     for id,c in pairs(componentsById) do
-      if (not c._disabled) then
+      if (not c._updatedDisabled) then
         c:_update(dt)
       end
     end
@@ -265,7 +277,7 @@ function M.newGroup(groupDefinition)
 
   function Group.drawAll()
     for id,c in pairs(componentsById) do
-      if c:isReady() and (not c._disabled) then
+      if c:isReady() and (not c._drawDisabled) then
         local drawFunc = (c.debug == true) and c._drawDebug or c.draw
         drawQueue:add(c:drawOrder(), drawFunc, c)
       end
@@ -285,6 +297,12 @@ function M.newGroup(groupDefinition)
 
     allComponentsById[id] = component
     componentsById[id] = component
+  end
+
+  function Group.removeComponent(component)
+    count = count - 1
+    local id = component:getId()
+    componentsById[id] = nil
   end
 
   function Group.delete(component)

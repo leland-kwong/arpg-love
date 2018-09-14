@@ -36,7 +36,6 @@ local minimapTileRenderers = {
   end,
 }
 
-local minimapCanvas = love.graphics.newCanvas()
 -- minimap
 local blueprint = objectUtils.assign({}, mapBlueprint, {
   group = groups.hud,
@@ -47,6 +46,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   offset = 10,
 
   init = function(self)
+    self.canvas = love.graphics.newCanvas()
     self.renderCache = {}
     self.stencil = function()
       love.graphics.rectangle(
@@ -62,7 +62,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   renderStart = function(self)
     love.graphics.push()
     love.graphics.origin()
-    love.graphics.setCanvas(minimapCanvas)
+    love.graphics.setCanvas(self.canvas)
   end,
 
   render = function(self, value, _x, _y, originX, originY, isInViewport)
@@ -96,7 +96,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     local cameraX, cameraY  = self.camera:getPosition()
     local tx, ty = centerX - cameraX/self.gridSize, centerY - cameraY/self.gridSize
     love.graphics.translate(tx, ty)
-    love.graphics.draw(minimapCanvas)
+    love.graphics.draw(self.canvas)
     love.graphics.setBlendMode('alpha')
     love.graphics.setStencilTest()
     love.graphics.pop()

@@ -412,6 +412,8 @@ local function setNextPosition(self, dt, radius)
 end
 
 function Ai._update2(self, grid, dt)
+  self:setDrawDisabled(not self.isInViewOfPlayer)
+
   self.clock = self.clock + dt
   self.frameCount = self.frameCount + 1
 
@@ -594,10 +596,6 @@ local function drawShockEffect(self, ox, oy)
 end
 
 function Ai.draw(self)
-  if (not self.isInViewOfPlayer) then
-    return
-  end
-
   local oBlendMode = love.graphics.getBlendMode()
   local ox, oy = self.animation:getOffset()
   local w, h = self.animation:getSourceSize()
