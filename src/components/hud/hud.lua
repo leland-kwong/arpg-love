@@ -55,7 +55,7 @@ function Hud.init(self)
     end
   }):setParent(self)
 
-  local notifierWidth, notifierHeight = 200, 200
+  local notifierWidth, notifierHeight = 250, 200
   Notifier.create({
     x = love.graphics.getWidth()/config.scale - notifierWidth,
     y = love.graphics.getHeight()/config.scale - notifierHeight,

@@ -387,7 +387,7 @@ function Player.draw(self)
 end
 
 Player.drawOrder = function(self)
-  return self.group.drawOrder(self)
+  return self.group.drawOrder(self) + 1
 end
 
 return Component.createFactory(Player)

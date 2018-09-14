@@ -56,7 +56,9 @@ function Notifier.draw(self)
   love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
   local padding = 5
 
-  local wrapWidth = self.w - padding
+  local iconSize = 30
+  local iconRightMargin = 5
+  local wrapWidth = self.w - padding - iconSize - iconRightMargin
 
   local startX, startY = self.x + padding, self.y + padding
   local totalHeight = 0
@@ -65,7 +67,6 @@ function Notifier.draw(self)
   for i=1, #events do
     local e = events[i]
     local posY = startY + totalHeight
-    local iconSize = 30
 
     if e.icon then
       love.graphics.setColor(self.color)
@@ -86,7 +87,7 @@ function Notifier.draw(self)
       table.insert(content, e.description[i])
     end
 
-    local contentStartX = startX + iconSize + 5
+    local contentStartX = startX + iconSize + iconRightMargin
     self.guiText:addf(
       content,
       wrapWidth,
@@ -95,7 +96,7 @@ function Notifier.draw(self)
       posY
     )
     self.guiText:set('color', self.color)
-    local contentWidth, contentHeight = GuiText.getTextSize(content, self.guiText.font)
+    local contentWidth, contentHeight = GuiText.getTextSize(content, self.guiText.font, wrapWidth)
     totalHeight = totalHeight + contentHeight + eventSpacing
   end
 end

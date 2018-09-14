@@ -33,9 +33,9 @@ local Groups = {
       --[[
         number of layers between each order. This is to allow multiple different items to be stacked within the same draw order
       ]]
-      local layers = 5
+      local layers = 3
       local granularity = self.y / gridSize
-      local order = floor(granularity) + layers
+      local order = floor(granularity) * layers
       return max(1, order)
     end,
   }),
@@ -50,8 +50,25 @@ local Groups = {
   system = Component.newGroup()
 }
 
-Groups.all.drawQueue:onBeforeFlush(function(self)
-  consoleLog(self:getStats())
-end)
+if config.isDebug then
+  Groups.all.drawQueue:onBeforeFlush(function(self)
+    local minOrder, maxOrder = self:getStats()
+    local maxDivergence = 300
+    local divergence = maxOrder - minOrder
+    local isDivergingTooMuch = divergence > maxDivergence
+    if isDivergingTooMuch then
+      local Color = require 'modules.color'
+      msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
+        title = 'draw queue divergence',
+        description = {
+          Color.WHITE, 'draw order gap of ',
+          Color.CYAN, divergence,
+          Color.WHITE, ' exceeded threshold of ',
+          Color.RED, maxDivergence
+        }
+      })
+    end
+  end)
+end
 
 return Groups
