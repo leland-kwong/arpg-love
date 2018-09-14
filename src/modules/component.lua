@@ -246,7 +246,7 @@ function M.newGroup(groupDefinition)
     groupDefinition or {}
   )
 
-  local drawQ = Q:new({development = isDebug})
+  local drawQueue = Q:new({development = isDebug})
   local Group = groupDefinition
   local componentsById = {}
   local count = 0
@@ -265,11 +265,11 @@ function M.newGroup(groupDefinition)
     for id,c in pairs(componentsById) do
       if c:isReady() and (not c._disabled) then
         local drawFunc = (c.debug == true) and c._drawDebug or c.draw
-        drawQ:add(c:drawOrder(), drawFunc, c)
+        drawQueue:add(c:drawOrder(), drawFunc, c)
       end
     end
 
-    drawQ:flush()
+    drawQueue:flush()
     return Group
   end
 
