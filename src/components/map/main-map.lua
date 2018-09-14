@@ -22,7 +22,7 @@ end
 local function addWallTileEntity(self, positionIndex, animation, x, y, opacity)
   local wallTileEntity = self.wallObjectsPool:get()
     :changeTile(animation, x, y, opacity)
-    :setParent(self)
+    :setParent(Component.get('MAIN_SCENE'))
   self.wallTileCache:set(positionIndex, wallTileEntity)
 end
 
@@ -57,7 +57,7 @@ local function renderWallCollisionDebug(self)
         grid = self.grid,
         collisionObjectsHash = self.collisionObjectsHash,
         camera = self.camera
-      }):setParent(self)
+      }):setParent(Component.get('MAIN_SCENE'))
   elseif self.wallCollisionDebug then
     self.wallCollisionDebug:delete(true)
     self.wallCollisionDebug = nil
@@ -83,7 +83,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     self.renderFloorCache = {}
     local rows, cols = #self.grid, #self.grid[1]
     self.floorCanvas = love.graphics.newCanvas(cols * self.gridSize, rows * self.gridSize)
-  end,
+  end,  
 
   onUpdate = function(self, value, x, y, originX, originY, isInViewport, dt)
     renderWallCollisionDebug(self)

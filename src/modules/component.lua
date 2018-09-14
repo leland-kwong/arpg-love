@@ -27,8 +27,9 @@ local baseProps = {
   init = noop,
 
   -- these methods will not be called until the component has been initialized
-  update = noop,
-  draw = noop,
+  update = noop, -- optional
+  draw = noop, -- optional
+
   final = noop,
   _update = function(self, dt)
     self._ready = true
@@ -246,8 +247,9 @@ function M.newGroup(groupDefinition)
     groupDefinition or {}
   )
 
-  local drawQueue = Q:new({development = isDebug})
   local Group = groupDefinition
+  local drawQueue = Q:new({development = isDebug})
+  Group.drawQueue = drawQueue
   local componentsById = {}
   local count = 0
 
