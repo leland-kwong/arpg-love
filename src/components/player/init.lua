@@ -121,8 +121,6 @@ local Player = {
       14,
       collisionOffX,
       5
-      -- (collisionH / 1.5)
-      -- collisionOffY / 2
     ):addToWorld(colMap)
 
     local calcDist = require'utils.math'.dist
