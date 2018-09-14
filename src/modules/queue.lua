@@ -1,26 +1,32 @@
 local perf = require 'utils.perf'
 local typeCheck = require 'utils.type-check'
+local noop = require 'utils.noop'
+local assign = require 'utils.object-utils'.assign
 
 local Q = {}
 
+local defaultOptions = {
+  development = false,
+}
+
 function Q:new(options)
-  options = options or { development = false }
+  options = assign({}, defaultOptions, options)
   local queue = {
     list = {},
-    length = 0,
+    length = 0, -- num of calls added to the queue
     minOrder = 0,
     maxOrder = 0, -- highest order that has been added to the queue
-    development = options.development
+    itemPool = {},
+    development = options.development,
+    beforeFlush = noop,
   }
   setmetatable(queue, self)
   self.__index = self
   return queue
 end
 
-local itemPool = {}
-local NUMBER = 'number'
 local orderError = function(order)
-  local valid = type(order) == NUMBER
+  local valid = type(order) == 'number'
     and order > 0
     and order % 1 == 0 -- must be integer
   if valid then return true end
@@ -50,10 +56,10 @@ function Q:add(order, cb, a, b)
   end
 
   local itemIndex = self.length + 1
-  local item = itemPool[itemIndex]
+  local item = self.itemPool[itemIndex]
   if not item then
     item = {}
-    itemPool[itemIndex] = item
+    self.itemPool[itemIndex] = item
   end
 
   item[1] = cb
@@ -69,6 +75,7 @@ end
 
 -- iterate callbacks by `order` and clears the queue
 function Q:flush()
+  self:beforeFlush()
   for i=self.minOrder, self.maxOrder do
     local row = self.list[i]
     local rowLen = row and #row or 0
@@ -84,6 +91,10 @@ function Q:flush()
   end
   self.length = 0
   return self
+end
+
+function Q:onBeforeFlush(fn)
+  self.beforeFlush = fn
 end
 
 function Q:getStats()
