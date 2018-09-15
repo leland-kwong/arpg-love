@@ -32,7 +32,7 @@ function ActionError.init(self)
       }
       local endColor = {1,1,0,0} -- fade out
       self.errorMessage = subject
-      self.errorMessageTween = tween.new(1, textColor, endColor, tween.easing.inExpo)
+      self.errorMessageTween = tween.new(2.5, textColor, endColor, tween.easing.inExpo)
     end
   end)
 end

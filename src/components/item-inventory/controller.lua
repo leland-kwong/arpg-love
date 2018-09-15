@@ -3,6 +3,7 @@ local itemDefs = require("components.item-inventory.items.item-definitions")
 local itemConfig = require("components.item-inventory.items.config")
 local sc = require("components.state.constants")
 local cloneGrid = require('utils.clone-grid')
+local msgBus = require 'components.msg-bus'
 
 local EMPTY_SLOT = sc.inventory.EMPTY_SLOT
 
@@ -211,10 +212,11 @@ return function(rootStore)
 	]]
 	function rootStore:equipItem(item, slotX, slotY)
 		local category = itemDefs.getDefinition(item).category
-		local canEquip = self:canEquiptToSlot(item, slotX, slotY)
+		local canEquip, errorMsg = self:canEquiptToSlot(item, slotX, slotY)
 		if not canEquip then
-			local allowedSlotCategory = itemConfig.equipmentGuiSlotMap[slotY][slotX]
-			local errorMsg = "[EQUIP_ITEM] invalid category `"..category
+			msgBus.send(msgBus.PLAYER_ACTION_ERROR, errorMsg)
+			-- local allowedSlotCategory = itemConfig.equipmentGuiSlotMap[slotY][slotX]
+			-- local errorMsg = "[EQUIP_ITEM] invalid category `"..category
 			return canEquip, errorMsg
 		end
 		local currentItemInSlot = self:unequipItem(slotX, slotY)
@@ -234,10 +236,19 @@ return function(rootStore)
 		if not item then
 			return false
 		end
-		local category = itemDefs.getDefinition(item).category
+		local itemDef = itemDefs.getDefinition(item)
+		local category = itemDef.category
+		local levelRequirement = itemDef.levelRequirement or 0
 		local allowedSlotCategory = itemConfig.equipmentGuiSlotMap[slotY][slotX]
-		local canEquip = allowedSlotCategory == category
-		return canEquip
+		local canEquip = allowedSlotCategory == category and
+			rootStore:get().level >= levelRequirement
+		if not canEquip then
+			if allowedSlotCategory ~= category then
+				return false, 'invalid category for slot '..slotY..','..slotX
+			end
+			return false, 'level requirement not met for item '..itemDef.title
+		end
+		return canEquip, false
 	end
 
 	-- unequips and picks up the item from the slot

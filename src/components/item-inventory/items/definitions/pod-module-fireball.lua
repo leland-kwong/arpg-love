@@ -66,6 +66,7 @@ return itemDefs.registerType({
 		rarity = config.rarity.LEGENDARY,
 		category = config.category.POD_MODULE,
 
+		levelRequirement = 3,
 		attackTime = 0.4,
 		energyCost = function(self)
 			return 2

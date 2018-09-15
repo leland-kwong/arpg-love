@@ -200,13 +200,14 @@ local function parseItemModifiers(item)
   return modifiers
 end
 
-local function drawTooltip(item, x, y, w2, h2)
+local function drawTooltip(item, x, y, w2, h2, rootStore)
   local posX, posY = x, y
   local padding = 12
   local itemDef = itemDefinition.getDefinition(item)
   local tooltipContent = itemDef.tooltip(item)
   local tooltipItemUpgrade = itemDef.tooltipItemUpgrade(item)
   local tooltipModifierValues = parseItemModifiers(item)
+  local levelRequirementText = itemDef.levelRequirement and 'Required level: '..itemDef.levelRequirement or nil
   tooltipContent = concatTable(tooltipModifierValues, tooltipContent)
 
   --[[
@@ -226,6 +227,11 @@ local function drawTooltip(item, x, y, w2, h2)
     posY + padding + titleH + titleH
   local rarityW, rarityH = GuiText.getTextSize(rarityTextCopy, guiTextLayers.body.font)
 
+  local levelRequirementW, levelRequirementH = 0, 0
+  if levelRequirementText then
+    levelRequirementW, levelRequirementH = GuiText.getTextSize(itemDef.levelRequirement or '', guiTextLayers.body.font)
+  end
+
   -- body text and dimensions
   local bodyCopyW, bodyCopyH = GuiText.getTextSize(tooltipContent, guiTextLayers.body.font)
 
@@ -237,14 +243,16 @@ local function drawTooltip(item, x, y, w2, h2)
 
   -- total tooltip height
   local totalHeight = (titleH + titleH) +
-                      (rarityH + rarityH) +
+                      (rarityH * 2) +
+                      (levelRequirementH * 2) +
                       bodyCopyH +
                       itemUpgradeH +
                       (padding * 2)
+  local maxWidth = math.max(titleW, rarityW, bodyCopyW, itemUpgradeW) + (padding * 2) -- include side padding
   local bottomOutOfView = (posY + totalHeight) - config.resolution.h
   local isBottomOutOfView = bottomOutOfView > 0
   if isBottomOutOfView then
-    -- flip the tooltip vertically so that its pivot is on the south side
+    -- shift tooltip vertically so that it stays within viewport
     return drawTooltip(item, x, y - bottomOutOfView - 5, w2, h2)
   end
 
@@ -259,8 +267,30 @@ local function drawTooltip(item, x, y, w2, h2)
     rarityX, rarityY
   )
 
+  local levelRequirementY = rarityY + (rarityH * 2)
+  local requirementNotMet = rootStore:get().level < (itemDef.levelRequirement or 0)
+  if requirementNotMet then
+    guiTextLayers.body:addf(
+      {
+        Color.WHITE, 'level requirement: ',
+        Color.RED, itemDef.levelRequirement
+      },
+      maxWidth,
+      'left',
+      posX + padding,
+      levelRequirementY
+    )
+  else
+    guiTextLayers.body:add(
+      levelRequirementText,
+      Color.WHITE,
+      posX + padding,
+      levelRequirementY
+    )
+  end
+
   -- stats
-  local tooltipContentY = rarityY + (rarityH * 2)
+  local tooltipContentY = levelRequirementY + (levelRequirementH * 2)
   guiTextLayers.body:addTextGroup(
     tooltipContent,
     posX + padding,
@@ -268,7 +298,6 @@ local function drawTooltip(item, x, y, w2, h2)
   )
 
   -- background
-  local maxWidth = math.max(titleW, rarityW, bodyCopyW, itemUpgradeW) + (padding * 2) -- include side padding
 
   local bgColor = 0
   love.graphics.setColor(bgColor, bgColor, bgColor, 0.9)
@@ -424,7 +453,7 @@ local function setupSlotInteractions(
             x = posX + self.w,
             y = posY,
             draw = function(self)
-              drawTooltip(item, self.x, self.y, slotSize, slotSize)
+              drawTooltip(item, self.x, self.y, slotSize, slotSize, rootStore)
             end,
             drawOrder = function()
               return 6
