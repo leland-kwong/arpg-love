@@ -28,23 +28,6 @@ local atlasData = animationFactory.atlasData
 shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
 shader:send('outline_width', 1)
 
-local DirectionalFlowFields = require 'modules.flow-field.directional-flow-fields'
-local subFlowFields = DirectionalFlowFields(function()
-  local playerX, playerY = (Component.get('PLAYER') or Component.get('TEST_PLAYER')):getPosition()
-  local config = require 'config.config'
-  return Position.pixelsToGridUnits(playerX, playerY, config.gridSize)
-end, Map.WALKABLE)
-local getSubFlowField = (function()
-  local index = 1
-  return function()
-    index = index + 1
-    if index > #subFlowFields then
-      index = 1
-    end
-    return subFlowFields[index]
-  end
-end)()
-
 local Ai = {
   group = groups.all,
 
@@ -653,7 +636,6 @@ function Ai.init(self)
     x = 0,
     y = 0
   }
-  self.subFlowField = getSubFlowField()
   -- start idle animation at a random point to add variance to the ai's idle state
   self.animation = self.animations.idle:update(math.random(0, 20) * 1/60)
 
