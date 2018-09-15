@@ -14,53 +14,6 @@ local extend = require 'utils.object-utils'.extend
 
 local bulletColor = {Color.rgba255(252, 122, 255)}
 
-local function statValue(stat, color, type)
-	local sign = stat >= 0 and "+" or "-"
-	return {
-		color, sign..stat..' ',
-		{1,1,1}, type
-	}
-end
-
-local function concatTable(a, b)
-	for i=1, #b do
-		local elem = b[i]
-		table.insert(a, elem)
-	end
-	return a
-end
-
-local upgrades = {
-	{
-		sprite = 'item-upgrade-placeholder-unlocked',
-		title = 'Shock',
-		description = 'Attacks shock the target, dealing 1-2 lightning damage.',
-		experienceRequired = 10,
-		props = {
-			shockDuration = 0.4,
-			minLightningDamage = 1,
-			maxLightningDamage = 2
-		}
-	},
-	{
-		sprite = 'item-upgrade-placeholder-unlocked',
-		title = 'Critical Strikes',
-		description = 'Attacks have a 25% chance to deal 1.2 - 1.4x damage',
-		experienceRequired = 40,
-		props = {
-			minCritMultiplier = 0.2,
-			maxCritMultiplier = 0.4,
-			critChance = 0.25
-		}
-	},
-	{
-		sprite = 'item-upgrade-placeholder-unlocked',
-		title = 'Ricochet',
-		description = 'Attacks bounce to 2 other targets, dealing 50% less damage each bounce.',
-		experienceRequired = 120
-	}
-}
-
 local weaponLength = 26
 local weaponCooldown = 0.1
 
@@ -117,6 +70,37 @@ return itemDefs.registerType({
 		end,
 
 		onEquip = function(self)
+			local upgrades = {
+				{
+					sprite = 'item-upgrade-placeholder-unlocked',
+					title = 'Shock',
+					description = 'Attacks shock the target, dealing 1-2 lightning damage.',
+					experienceRequired = 10,
+					props = {
+						shockDuration = 0.4,
+						minLightningDamage = 1,
+						maxLightningDamage = 2
+					}
+				},
+				{
+					sprite = 'item-upgrade-placeholder-unlocked',
+					title = 'Critical Strikes',
+					description = 'Attacks have a 25% chance to deal 1.2 - 1.4x damage',
+					experienceRequired = 40,
+					props = {
+						minCritMultiplier = 0.2,
+						maxCritMultiplier = 0.4,
+						critChance = 0.25
+					}
+				},
+				{
+					sprite = 'item-upgrade-placeholder-unlocked',
+					title = 'Ricochet',
+					description = 'Attacks bounce to 2 other targets, dealing 50% less damage each bounce.',
+					experienceRequired = 120
+				}
+			}
+
 			local function getHighestUpgradeUnlocked()
 				local highestUpgradeUnlocked = 0
 				for i=1, #upgrades do
@@ -132,7 +116,9 @@ return itemDefs.registerType({
 
 			local msgTypes = {
 				[msgBus.EQUIPMENT_UNEQUIP] = function(v)
-					return msgBus.CLEANUP
+					if v == self then
+						return msgBus.CLEANUP
+					end
 				end,
 				[msgBus.ENEMY_DESTROYED] = function(v)
 					self.experience = self.experience + v.experience
