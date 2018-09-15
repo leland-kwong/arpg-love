@@ -1,6 +1,27 @@
 local PopupTextController = require 'components.popup-text'
 local popupText = PopupTextController.create()
-local min, max = math.min, math.max
+local min, max, random = math.min, math.max, math.random
+local round = require 'utils.math'.round
+
+local function rollCritChance(chance)
+  if chance == 0 then
+    return false
+  end
+  return random(1, 1/chance) == 1
+end
+
+local function adjustedDamage(self, damage, lightningDamage, criticalChance, criticalMultiplier)
+  local damageReductionPerArmor = 0.0001
+  local damageAfterFlatReduction = damage - self:getCalculatedStat('flatPhysicalDamageReduction')
+  local damageAfterArmorResistance = (damageAfterFlatReduction * self:getCalculatedStat('armor') * damageReductionPerArmor)
+  local lightningDamageAfterResistance = lightningDamage - (lightningDamage * self:getCalculatedStat('lightningResist'))
+  local totalDamage = damageAfterFlatReduction
+    - damageAfterArmorResistance
+    + lightningDamageAfterResistance
+  local criticalMultiplier = rollCritChance(criticalChance) and criticalMultiplier or 0
+  local totalDamageWithCrit = totalDamage + (totalDamage * criticalMultiplier)
+  return round(max(0, totalDamageWithCrit)), totalDamage, criticalMultiplier
+end
 
 -- modifiers modify properties such as `maxHealth`, `moveSpeed`, etc...
 local function applyModifiers(self, newModifiers, multiplier)
@@ -26,7 +47,9 @@ local defaultEquipmentModifiers = require'components.state.base-stat-modifiers'(
 -- Returns stat including any equipment modifiers
 local function getBaseStat(self, prop)
   local equipmentModifiers = self.equipmentModifiers or defaultEquipmentModifiers
-  return self[prop] + (equipmentModifiers[prop] or 0)
+  local baseStat = self[prop] or 0
+  local equipmentModifierStat = equipmentModifiers[prop] or 0
+  return baseStat + equipmentModifierStat
 end
 
 --[[
@@ -48,12 +71,18 @@ local function hitManager(self, dt, onDamageTaken)
     hitCount = hitCount + 1
 
     if onDamageTaken then
-      onDamageTaken(
+      local actualDamage, actualNonCritDamage, actualCritMultiplier = adjustedDamage(
         self,
         hit.damage or 0,
         hit.lightningDamage or 0,
         min(1, hit.criticalChance or 0), -- maximum value of 1
         hit.criticalMultiplier or 0
+      )
+      onDamageTaken(
+        self,
+        actualDamage,
+        actualNonCritDamage,
+        actualCritMultiplier
       )
     end
 

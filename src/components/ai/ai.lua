@@ -159,32 +159,8 @@ local function spreadAggroToAllies(self)
 end
 
 local max, random = math.max, math.random
-local round = require 'utils.math'.round
-local damageReductionPerArmor = 0.0001
 
-local function rollCritChance(chance)
-  if chance == 0 then
-    return false
-  end
-  return random(1, 1/chance) == 1
-end
-
-local function adjustedDamage(self, damage, lightningDamage, criticalChance, criticalMultiplier)
-  local damageAfterFlatReduction = damage - self.flatPhysicalDamageReduction
-  local damageAfterArmorResistance = (damageAfterFlatReduction * self.armor * damageReductionPerArmor)
-  local lightningDamageAfterResistance = lightningDamage - (lightningDamage * self.lightningResist)
-  local totalDamage = damageAfterFlatReduction
-    - damageAfterArmorResistance
-    + lightningDamageAfterResistance
-  local critical = rollCritChance(criticalChance) and criticalMultiplier or 0
-  local totalDamageWithCrit = totalDamage + (totalDamage * critical)
-  return round(max(0, totalDamageWithCrit)), totalDamage, critical
-end
-
-local function onDamageTaken(self, damage, lightningDamage, criticalChance, criticalMultiplier)
-  local actualDamage, actualNonCritDamage, criticalMultiplier = adjustedDamage(
-    self, damage, lightningDamage, criticalChance, criticalMultiplier
-  )
+local function onDamageTaken(self, actualDamage, actualNonCritDamage, criticalMultiplier)
   if actualDamage == 0 then
     return
   end

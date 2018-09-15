@@ -51,6 +51,8 @@ return function()
           , cooldown = 0.6
           , lifeTime = 2.5
           , targetGroup = 'player'
+          , minDamage = 1
+          , maxDamage = 2
           , drawOrder = function()
             return self.drawOrder(self) + 1
           end

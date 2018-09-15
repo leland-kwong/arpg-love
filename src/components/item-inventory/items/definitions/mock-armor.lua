@@ -21,7 +21,7 @@ return itemDefs.registerType({
 			stackSize = 1,
 			maxStackSize = 1,
 
-			armor = 100,
+			armor = 1000,
 			maxHealth = 200,
 			moveSpeed = 10,
 			damage = 5,
