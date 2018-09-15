@@ -12,7 +12,7 @@ local function hasItem(list, item)
 end
 
 local function findNearestTarget(
-  self, collisionWorld, ignoreTargets, startX, startY, maxSeekRadius, lineOfSightFn, gridSize
+  collisionWorld, ignoreTargets, startX, startY, maxSeekRadius, lineOfSightFn, gridSize
 )
   local los = lineOfSightFn
 

@@ -105,7 +105,7 @@ local function getAllTargets(self, pointerX, pointerY)
     local mapGrid = Component.get('MAIN_SCENE').mapGrid
     local Map = require 'modules.map-generator.index'
     local losFn = LOS(mapGrid, Map.WALKABLE)
-    local target = findNearestTarget(self, colMap, self.targets, startX, startY, maxSeekRadius, losFn, config.gridSize)
+    local target = findNearestTarget(colMap, self.targets, startX, startY, maxSeekRadius, losFn, config.gridSize)
     table.insert(self.targets, target)
   end
 end
