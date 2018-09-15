@@ -52,6 +52,8 @@ function Object.immutableApply(t1, t2)
 	return copy or t1
 end
 
+Object.extend = Object.immutableApply
+
 local readOnlyMetatable = {
 	__newindex = function()
 		error('this data is read only')
