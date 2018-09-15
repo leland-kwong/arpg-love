@@ -46,7 +46,7 @@ local function drawMuzzleFlash(color, x, y, angle, radius)
     'fill',
     x + math.sin( -angle + halfRad ) * weaponLength,
     y + math.cos( -angle + halfRad ) * weaponLength,
-    radius
+    radius * 1.4
   )
 
   love.graphics.setColor(r,g,b,1)
@@ -108,7 +108,7 @@ function WeaponCore.draw(self)
       playerX,
       playerY,
       self.angle,
-      9
+      8
     )
   end
 end

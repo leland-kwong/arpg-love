@@ -35,6 +35,11 @@ local function concatTable(a, b)
 	return a
 end
 
+local MUZZLE_FLASH_COLOR = {Color.rgba255(232, 187, 27, 1)}
+local muzzleFlashMessage = {
+	color = MUZZLE_FLASH_COLOR
+}
+
 return itemDefs.registerType({
 	type = 'pod-module-fireball',
 
@@ -89,6 +94,7 @@ return itemDefs.registerType({
 			Fireball.minDamage = 0
 			Fireball.maxDamage = 0
 			Fireball.startOffset = 26
+			msgBus.send(msgBus.SHOW_MUZZLE_FLASH, muzzleFlashMessage)
 			return Fireball.create(props)
 		end,
 
