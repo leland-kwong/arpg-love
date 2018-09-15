@@ -90,14 +90,15 @@ return itemDefs.registerType({
 	type = "pod-module-initiate",
 
 	create = function()
-		return {
+		local addPrefix = require 'components.item-inventory.items.modifier-prefixes'
+		return addPrefix({
 			stackSize = 1,
 			maxStackSize = 1,
 
 			-- static properties
 			weaponDamage = 1,
 			experience = 0
-		}
+		})
 	end,
 
 	properties = {
@@ -109,13 +110,6 @@ return itemDefs.registerType({
 		attackTime = weaponCooldown - 0.01,
 		energyCost = function(self)
 			return 1
-		end,
-
-		tooltip = function(self)
-			local stats = {
-				statValue(self.weaponDamage, Color.CYAN, "damage \n")
-			}
-			return functional.reduce(stats, concatTable, {})
 		end,
 
 		tooltipItemUpgrade = function(self)

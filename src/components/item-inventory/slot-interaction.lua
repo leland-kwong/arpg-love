@@ -58,12 +58,156 @@ local function getSlotPosition(gridX, gridY, offsetX, offsetY, slotSize, margin)
   return posX, posY
 end
 
+local signHumanized = function(v)
+  return v >= 0 and "+" or "-"
+end
+
+local modifierParsers = {
+  maxEnergy = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' maximum energy'
+    }
+  end,
+  maxHealth = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' maximum health'
+    }
+  end,
+  healthRegeneration = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' health regeneration'
+    }
+  end,
+  energyRegeneration = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' energy regeneration'
+    }
+  end,
+  flatDamage = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..value,
+      Color.WHITE, ' physical damage'
+    }
+  end,
+  weaponDamage = function(value)
+    return {
+      Color.CYAN, value,
+      Color.WHITE, ' weapon damage'
+    }
+  end,
+  percentDamage = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, '% weapon damage'
+    }
+  end,
+  armor = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' armor'
+    }
+  end,
+  moveSpeed = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' movement speed'
+    }
+  end,
+  coldResist = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' cold reistance'
+    }
+  end,
+  lightningResist = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' lightning resistance'
+    }
+  end,
+  fireResist = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' fire resistance'
+    }
+  end,
+  flatPhysicalDamageReduction = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' physical damage reduction'
+    }
+  end,
+  cooldownReduction = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, '% cooldown reduction'
+    }
+  end,
+  energyCostReduction = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, '% energy cost reduction'
+    }
+  end,
+  experienceMultiplier = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, '% experience gain'
+    }
+  end
+}
+
+local function concatTable(a, b)
+  if not b then
+    return a
+  end
+	for i=1, #b do
+		local elem = b[i]
+		table.insert(a, elem)
+	end
+	return a
+end
+
+local baseModifiers = require 'components.state.base-stat-modifiers'()
+local function parseItemModifiers(item)
+  local modifiers = {}
+  for k,_ in pairs(baseModifiers) do
+    local parser = modifierParsers[k]
+    if parser then
+      if item[k] then
+        local v = item[k]
+        local output = parser(v)
+        local length = #output
+        for i=1, length, 2 do
+          local color = output[i]
+          local str = output[i + 1]
+          local isLastItem = i == length - 1
+          if isLastItem then
+            str = str..'\n'
+          end
+          table.insert(modifiers, color)
+          table.insert(modifiers, str)
+        end
+      end
+    else
+      error('no parser for property '..k)
+    end
+  end
+  return modifiers
+end
+
 local function drawTooltip(item, x, y, w2, h2)
   local posX, posY = x, y
   local padding = 12
   local itemDef = itemDefinition.getDefinition(item)
   local tooltipContent = itemDef.tooltip(item)
   local tooltipItemUpgrade = itemDef.tooltipItemUpgrade(item)
+  local tooltipModifierValues = parseItemModifiers(item)
+  tooltipContent = concatTable(tooltipModifierValues, tooltipContent)
 
   --[[
     IMPORTANT: We must do the tooltip content dimension calculations first to see if the tooltip
@@ -105,7 +249,8 @@ local function drawTooltip(item, x, y, w2, h2)
   end
 
   -- title
-  guiTextLayers.title:add(itemDef.title, Color.WHITE, posX + padding, posY + padding)
+  local completeTitle = (item.prefixName and item.prefixName..' ' or '') .. itemDef.title .. (item.suffixName and item.suffixName..' ' or '')
+  guiTextLayers.title:add(completeTitle, Color.WHITE, posX + padding, posY + padding)
 
   -- rarity
   guiTextLayers.body:add(

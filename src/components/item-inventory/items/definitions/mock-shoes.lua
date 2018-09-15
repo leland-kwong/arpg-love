@@ -7,14 +7,6 @@ local Color = require('modules.color')
 local tick = require('utils.tick')
 local Sound = require 'components.sound'
 
-local function concatTable(a, b)
-	for i=1, #b do
-		local elem = b[i]
-		table.insert(a, elem)
-	end
-	return a
-end
-
 local speedBoostSoundFilter = {
   type = 'lowpass',
   volume = .5,
@@ -30,7 +22,6 @@ return itemDefs.registerType({
 
 			armor = 20,
 			moveSpeed = 100,
-			magicResist = 20,
 			fireResist = 20,
 
 			speedBoost = 100,
@@ -45,30 +36,13 @@ return itemDefs.registerType({
 		category = config.category.SHOES,
 
 		tooltip = function(self)
-			local function statValue(stat, color, type)
-				local sign = stat >= 0 and "+" or "-"
-				return {
-					color, sign..stat..' ',
-					{1,1,1}, type..'\n'
-				}
-			end
-			local stats = {
-				statValue(self.armor, Color.CYAN, "armor"),
-				statValue(self.moveSpeed, Color.CYAN, "move speed"),
-				statValue(self.magicResist, Color.CYAN, "magic resist"),
-				statValue(self.fireResist, Color.CYAN, "fire resist"),
-
-				{
-					Color.YELLOW, '\nactive skill:\n\n',
-					Color.WHITE, 'Gain ',
-					Color.LIME, self.speedBoost..' extra move speed',
-					Color.WHITE, ' for ',
-					Color.CYAN, self.speedBoostDuration..' seconds'
-				}
+			return {
+				Color.YELLOW, '\nactive skill:\n\n',
+				Color.WHITE, 'Gain ',
+				Color.LIME, self.speedBoost..' extra move speed',
+				Color.WHITE, ' for ',
+				Color.CYAN, self.speedBoostDuration..' seconds'
 			}
-			return functional.reduce(stats, function(combined, textObj)
-				return concatTable(combined, textObj)
-			end, {})
 		end,
 
 		onActivate = function(self)

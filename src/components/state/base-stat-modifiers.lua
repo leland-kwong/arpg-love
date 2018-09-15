@@ -16,10 +16,9 @@ return function()
 		flatPhysicalDamageReduction = 0,
 		cooldownReduction = 0, -- multiplier
 		moveSpeed = 0, -- flat increase
-		resistFire = 0,
-		resistCold = 0,
-		resistLightning = 0,
-		resistAcid = 0,
+		fireResist = 0,
+		coldResist = 0,
+		lightningResist = 0,
 		experienceMultiplier = 0 -- increases experience gained by percentage amount
 	}
 end

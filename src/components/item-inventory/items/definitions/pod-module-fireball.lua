@@ -17,6 +17,7 @@ local function onEnemyDestroyedIncreaseDamage(self)
 	if s.bonusDamage > maxBonusDamage then
 		s.bonusDamage = maxBonusDamage
 	end
+	self.flatDamage = s.bonusDamage
 end
 
 local function statValue(stat, color, type)
@@ -73,8 +74,6 @@ return itemDefs.registerType({
 		tooltip = function(self)
 			local _state = self.state
 			local stats = {
-				statValue(_state.baseDamage, Color.CYAN, ""), statValue(_state.bonusDamage, Color.CYAN, "damage \n"),
-				statValue(self.weaponDamage, Color.CYAN, "poison damage\n"),
 				{
 					Color.WHITE, '\nWhile equipped: \nPermanently gain +1 damage for every 10 enemies killed.\n',
 					Color.CYAN, _state.enemiesKilled, Color.WHITE, ' enemies killed'
