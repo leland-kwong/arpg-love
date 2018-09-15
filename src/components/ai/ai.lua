@@ -581,7 +581,7 @@ function Ai.draw(self)
     shader:send('alpha', self.opacity)
   end
 
-  if self.hitAnimation then
+  if self.hitAnimation and (not self.destroyedAnimation) then
     love.graphics.setBlendMode('add')
     love.graphics.setColor(3,3,3)
   end
@@ -601,7 +601,6 @@ function Ai.draw(self)
 
   love.graphics.setColor(1,1,1, self.opacity)
   drawStatusEffects(self, statusIcons)
-  -- self:debugLineOfSight()
 end
 
 local function adjustInitialPositionIfNeeded(self)

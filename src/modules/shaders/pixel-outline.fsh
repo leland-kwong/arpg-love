@@ -18,6 +18,7 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
 
 	bool hasOutline = outline_width > 0.0;
 	if (!hasOutline) {
+    col.a *= alpha;
 		return col;
 	}
 
@@ -42,13 +43,14 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
   bool isTransparentEdge = isCurrentPixelTransparent && isEdgePixel;
   if (isTransparentEdge) {
     vec4 result = vec4(outline_color);
-    result.a = alpha;
+    result.a *= alpha;
     return result;
   }
   else {
-		if (use_drawing_color) {
-			return (isCurrentPixelTransparent ? col : color) * fill_color;
-		}
-		return col * fill_color;
+    vec4 result = use_drawing_color
+      ? (isCurrentPixelTransparent ? col : color) * fill_color
+      : col * fill_color;
+    result.a *= alpha;
+		return result;
   }
 }
