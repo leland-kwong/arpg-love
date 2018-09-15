@@ -65,6 +65,7 @@ return itemDefs.registerType({
 		rarity = config.rarity.LEGENDARY,
 		category = config.category.POD_MODULE,
 
+		attackTime = 0.4,
 		energyCost = function(self)
 			return 2
 		end,
@@ -93,8 +94,9 @@ return itemDefs.registerType({
 			local Fireball = require 'components.fireball'
 			Fireball.minDamage = 0
 			Fireball.maxDamage = 0
+			Fireball.cooldown = 0.2
 			Fireball.startOffset = 26
-			msgBus.send(msgBus.SHOW_MUZZLE_FLASH, muzzleFlashMessage)
+			msgBus.send(msgBus.PLAYER_WEAPON_MUZZLE_FLASH, muzzleFlashMessage)
 
 			local Sound = require 'components.sound'
 			love.audio.play(Sound.functions.fireBlast())
@@ -105,13 +107,6 @@ return itemDefs.registerType({
 			if msgBus.ENEMY_DESTROYED == msgType then
 				onEnemyDestroyedIncreaseDamage(self)
 			end
-		end,
-
-		modifier = function(self, msgType, msgValue)
-			if msgBus.PLAYER_ATTACK == msgType then
-				msgValue.flatDamage = self.state.bonusDamage
-			end
-			return msgValue
 		end
 	}
 })

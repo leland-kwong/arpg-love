@@ -564,7 +564,7 @@ local function drawShockEffect(self, ox, oy)
     math.pow(math.sin(self.clock + self.clockOffset), 2),
     shockResolution
   )
-  love.graphics.setColor(0.8,0.8,self.opacity)
+  love.graphics.setColor(0.8,0.8,1,self.opacity)
   drawSprite(self, ox, oy)
 end
 

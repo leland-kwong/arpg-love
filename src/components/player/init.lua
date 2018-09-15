@@ -53,6 +53,7 @@ local Player = {
   pickupRadius = 5 * config.gridSize,
   moveSpeed = 100,
   flowFieldDistance = 30,
+  attackRecoveryTime = 0,
 
   -- collision properties
   type = 'player',
@@ -308,6 +309,7 @@ local function updateHealthAndEnergy(rootStore)
 end
 
 function Player.update(self, dt)
+  self.attackRecoveryTime = self.attackRecoveryTime - dt
   self.equipmentModifiers = self.rootStore:get().statModifiers
   hitManager(self, dt, self.hitManagerOnDamageTaken)
   local nextX, nextY, totalMoveSpeed = handleMovement(self, dt)

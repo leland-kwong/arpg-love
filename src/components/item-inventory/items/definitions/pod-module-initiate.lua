@@ -62,6 +62,7 @@ local upgrades = {
 }
 
 local weaponLength = 26
+local weaponCooldown = 0.1
 
 local function CreateAttack(self, props)
 	local Projectile = require 'components.abilities.bullet'
@@ -76,9 +77,14 @@ local function CreateAttack(self, props)
 			:set('targetGroup', 'ai')
 			:set('startOffset', weaponLength)
 			:set('speed', 400)
+			:set('cooldown', weaponCooldown)
 			:set('onHit', itemDefs.getState(self).onHit)
 	)
 end
+
+local muzzleFlashMessage = {
+	color = bulletColor
+}
 
 return itemDefs.registerType({
 	type = "pod-module-initiate",
@@ -100,6 +106,7 @@ return itemDefs.registerType({
 		rarity = itemConfig.rarity.NORMAL,
 		category = itemConfig.category.POD_MODULE,
 
+		attackTime = weaponCooldown - 0.01,
 		energyCost = function(self)
 			return 1
 		end,
@@ -238,17 +245,8 @@ return itemDefs.registerType({
 		onActivateWhenEquipped = function(self, props)
 			love.audio.stop(Sound.PLASMA_SHOT)
 			love.audio.play(Sound.PLASMA_SHOT)
-			msgBus.send(msgBus.SHOW_MUZZLE_FLASH, {
-				color = bulletColor
-			})
+			msgBus.send(msgBus.PLAYER_WEAPON_MUZZLE_FLASH, muzzleFlashMessage)
 			return CreateAttack(self, props)
-		end,
-
-		modifier = function(self, msgType, msgValue)
-			if msgBus.PLAYER_ATTACK == msgType then
-				msgValue.flatDamage = self.state.bonusDamage
-			end
-			return msgValue
 		end
 	}
 })

@@ -44,6 +44,7 @@ return itemDefs.registerType({
 		rarity = config.rarity.LEGENDARY,
 		category = config.category.POD_MODULE,
 
+		attackTime = 0.1,
 		energyCost = function(self)
 			return 4
 		end,
