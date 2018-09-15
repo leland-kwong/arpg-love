@@ -1,15 +1,47 @@
 local itemsPath = 'components.item-inventory.items.definitions.'
-local lootPool = {
-  require(itemsPath..'pod-module-fireball'),
-  require(itemsPath..'mock-shoes'),
-  require(itemsPath..'gpow-armor'),
-  require(itemsPath..'potion-health'),
-  require(itemsPath..'potion-energy'),
-  require(itemsPath..'lightning-rod'),
-  require(itemsPath..'pod-module-slow-time')
-}
+local setupChanceFunctions = require 'utils.chance'
 
-return function()
-  local item = lootPool[math.random(1, #lootPool)]
-  return item.create()
+local function generator(path)
+  return function()
+    return require(path).create()
+  end
 end
+
+local lootPool = setupChanceFunctions({
+  {
+    chance = 20,
+    __call = function()
+      return nil
+    end
+  },
+  {
+    chance = 3,
+    __call = generator(itemsPath..'pod-module-fireball')
+  },
+  {
+    chance = 3,
+    __call = generator(itemsPath..'mock-shoes')
+  },
+  {
+    chance = 3,
+    __call = generator(itemsPath..'gpow-armor')
+  },
+  {
+    chance = 3,
+    __call = generator(itemsPath..'potion-health')
+  },
+  {
+    chance = 3,
+    __call = generator(itemsPath..'potion-energy')
+  },
+  {
+    chance = 3,
+    __call = generator(itemsPath..'lightning-rod')
+  },
+  {
+    chance = 3,
+    __call = generator(itemsPath..'pod-module-slow-time')
+  }
+})
+
+return lootPool

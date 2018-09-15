@@ -61,6 +61,17 @@ local Player = {
   mapGrid = nil,
 
   init = function(self)
+    self.hitManagerOnDamageTaken = function(self, actualDamage, actualNonCritDamage, criticalMultiplier)
+      if (actualDamage > 0) then
+        msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
+          title = 'player hit received',
+          description = {
+            Color.CYAN, actualDamage
+          }
+        })
+        msgBus.send(msgBus.PLAYER_HIT_RECEIVED, actualDamage)
+      end
+    end
     WeaponCore.create():setParent(self)
     self.hits = {}
     self.getFlowField = FlowField(function (grid, x, y, dist)
@@ -172,10 +183,10 @@ local Player = {
         local hitId = msg.source or uid()
         self.hits[hitId] = msg
 
-        local damage = msg.damage or 0
-        if (damage > 0) then
-          msgBus.send(msgBus.PLAYER_HIT_RECEIVED, damage)
-        end
+        -- local damage = msg.damage or 0
+        -- if (damage > 0) then
+        --   msgBus.send(msgBus.PLAYER_HIT_RECEIVED, damage)
+        -- end
       end
     end
     msgBus.subscribe(subscriber)
@@ -300,7 +311,7 @@ end
 
 function Player.update(self, dt)
   self.equipmentModifiers = self.rootStore:get().statModifiers
-  hitManager(self, dt)
+  hitManager(self, dt, self.hitManagerOnDamageTaken)
   local nextX, nextY, totalMoveSpeed = handleMovement(self, dt)
   handleAnimation(self, dt, nextX, nextY, totalMoveSpeed)
   handleAbilities(self, dt)
