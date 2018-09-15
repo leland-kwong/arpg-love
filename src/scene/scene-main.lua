@@ -2,7 +2,6 @@ local Component = require 'modules.component'
 local groups = require 'components.groups'
 local Map = require 'modules.map-generator.index'
 local Player = require 'components.player'
-local Minimap = require 'components.map.minimap'
 local MainMap = require 'components.map.main-map'
 local Inventory = require 'components.item-inventory.inventory'
 local SpawnerAi = require 'components.spawn.spawn-ai'
@@ -136,11 +135,11 @@ local aiTypes = require 'components.spawn.ai-types'
 local aiTypesList = keys(aiTypes.types)
 
 local function generateAi(parent, player, map)
-  local aiCount = 20
+  local aiCount = 30
   local generated = 0
   local grid = map.grid
   local rows, cols = #grid, #grid[1]
-  local minPos, maxPos = 10, 40
+  local minPos, maxPos = 10, cols - 5
   while generated < aiCount do
     local posX, posY = math.random(minPos, maxPos), math.random(minPos, maxPos)
     local isValidPosition = grid[posY][posX] == Map.WALKABLE
@@ -304,12 +303,6 @@ function MainScene.init(self)
     rootStore = rootState
   }):setParent(parent)
 
-  Minimap.create({
-    camera = camera,
-    grid = map.grid,
-    scale = config.scaleFactor
-  }):setParent(parent)
-
   MainMap.create({
     camera = camera,
     grid = map.grid,
@@ -328,12 +321,19 @@ function MainScene.init(self)
   generateAi(parent, player, map)
 
   if self.autoSave then
-    self.autoSaveTimer = tick.recur(function()
-      fileSystem.saveFile(
-        rootState:getId(),
-        rootState:get()
-      )
-    end, 0.2)
+    local lastSavedState = nil
+    local function saveState()
+      local state = rootState:get()
+      local hasChanged = state ~= lastSavedState
+      if hasChanged then
+        fileSystem.saveFile(
+          rootState:getId(),
+          rootState:get()
+        )
+        lastSavedState = state
+      end
+    end
+    self.autoSaveTimer = tick.recur(saveState, 0.5)
   end
 end
 

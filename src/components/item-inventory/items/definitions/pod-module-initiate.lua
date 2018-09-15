@@ -79,7 +79,7 @@ local function CreateAttack(self, props)
 end
 
 return itemDefs.registerType({
-	type = "pod-one",
+	type = "pod-module-initiate",
 
 	create = function()
 		return {

@@ -171,6 +171,11 @@ function items.registerType(itemDefinition)
 
 	if isDebug then
 		assert(itemDefinition ~= nil, "item type missing")
+		local file = love.filesystem.load('components/item-inventory/items/definitions/'..def.type..'.lua')
+		assert(
+			file ~= nil,
+			'Invalid type `'..tostring(def.type)..'`. Type should match the name of the file since its needed for dynamic requires'
+		)
 
 		local isDuplicateType = types[def.type] ~= nil
 		assert(not isDuplicateType, "duplicate item type ".."\""..def.type.."\"")

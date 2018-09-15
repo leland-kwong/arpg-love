@@ -40,7 +40,7 @@ local function aoeOnHit(self)
 end
 
 return itemDefs.registerType({
-	type = "ion-generator-2",
+	type = 'pod-module-slow-time',
 
 	create = function()
 		return {

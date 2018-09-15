@@ -61,7 +61,7 @@ local Player = {
   mapGrid = nil,
 
   init = function(self)
-    WeaponCore.create()
+    WeaponCore.create():setParent(self)
     self.hits = {}
     self.getFlowField = FlowField(function (grid, x, y, dist)
       local row = grid[y]
