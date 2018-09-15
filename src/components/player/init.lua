@@ -66,7 +66,6 @@ local Player = {
         msgBus.send(msgBus.PLAYER_HIT_RECEIVED, actualDamage)
       end
     end
-    WeaponCore.create():setParent(self)
     self.hits = {}
     self.getFlowField = FlowField(function (grid, x, y, dist)
       local row = grid[y]
@@ -127,6 +126,11 @@ local Player = {
       collisionOffX,
       5
     ):addToWorld(colMap)
+
+    WeaponCore.create({
+      x = self.x,
+      y = self.y
+    }):setParent(self)
 
     local calcDist = require'utils.math'.dist
     local function subscriber(msgType, msg)

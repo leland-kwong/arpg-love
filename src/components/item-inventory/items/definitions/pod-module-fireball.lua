@@ -95,6 +95,9 @@ return itemDefs.registerType({
 			Fireball.maxDamage = 0
 			Fireball.startOffset = 26
 			msgBus.send(msgBus.SHOW_MUZZLE_FLASH, muzzleFlashMessage)
+
+			local Sound = require 'components.sound'
+			love.audio.play(Sound.functions.fireBlast())
 			return Fireball.create(props)
 		end,
 

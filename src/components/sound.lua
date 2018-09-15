@@ -16,13 +16,21 @@ local Sound = {
   SLIME_SPLAT = love.audio.newSource('built/sounds/splat-sound.wav', 'static'),
   SLOW_TIME = love.audio.newSource('built/sounds/slow-time.wav', 'static'),
   ELECTRIC_SHOCK_SHORT = love.audio.newSource('built/sounds/electric-shock-short.wav', 'static'),
+  -- FIRE_BLAST = love.audio.newSource('built/sounds/fire-blast.wav', 'static'),
 
   functions = {
+    fireBlast = function()
+      local source = love.audio.newSource('built/sounds/fire-blast.wav', 'static')
+      source:setVolume(0.6)
+      return source
+    end,
     robotDestroyed = setupChanceFunctions({
       {
         chance = 1,
         __call = function()
-          return love.audio.newSource('built/sounds/robot-destroyed-1.wav', 'static')
+          local source = love.audio.newSource('built/sounds/robot-destroyed-1.wav', 'static')
+          source:setVolume(0.7)
+          return source
         end
       },
       {
