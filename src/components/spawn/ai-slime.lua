@@ -33,6 +33,11 @@ local SlimeAttack = Component.createFactory({
   end
 })
 
+local function onDestroyStart()
+  local Sound = require 'components.sound'
+  love.audio.play(Sound.functions.creatureDestroyed())
+end
+
 return function()
   local animations = {
     attacking = animationFactory:new({
@@ -177,6 +182,7 @@ return function()
     armor = 900,
     experience = 2,
     attackRange = attackRange,
-    fillColor = fillColor
+    fillColor = fillColor,
+    onDestroyStart = onDestroyStart
   }
 end

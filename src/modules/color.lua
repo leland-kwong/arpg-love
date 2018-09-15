@@ -6,13 +6,13 @@ function Color.rgba255(r, g, b, a)
   return r/255, g/255, b/255, (a or 1)
 end
 
+-- multiplies two color tables and returns the 4 channel values separately (for performance reasons)
 function Color.multiply(a, b)
-  return {
+  return
     a[1] * b[1],
     a[2] * b[2],
     a[3] * b[3],
     a[4] * b[4]
-  }
 end
 
 local colors = {

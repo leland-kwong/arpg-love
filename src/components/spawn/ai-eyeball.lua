@@ -19,6 +19,11 @@ local function eyeballAttackCollisionFilter(item)
   return item.group == 'player'
 end
 
+local function onDestroyStart()
+  local Sound = require 'components.sound'
+  love.audio.play(Sound.functions.robotDestroyed())
+end
+
 return function()
   local animations = {
     idle = animationFactory:new({
@@ -113,6 +118,7 @@ return function()
         self.y,
         self.z + dt * self.heightChange
       )
-    end
+    end,
+    onDestroyStart = onDestroyStart
   }
 end

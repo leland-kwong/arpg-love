@@ -83,6 +83,7 @@ local function cleanupCollisionObjects(self)
     for i=1, #self.collisionObjects do
       self.collisionObjects[i]:delete()
     end
+    self.collisionObjects = nil
   end
 end
 

@@ -64,9 +64,11 @@ local Ai = {
   isAggravated = false,
   gridSize = 1,
   fillColor = {1,1,1,1},
+  opacity = 1,
   facingDirectionX = 1,
   onInit = noop,
   onFinal = noop,
+  onDestroyStart = noop,
   onUpdateStart = nil,
   drawOrder = function(self)
     return self.group.drawOrder(self) + 1
@@ -161,11 +163,26 @@ end
 local max, random = math.max, math.random
 
 local function onDamageTaken(self, actualDamage, actualNonCritDamage, criticalMultiplier)
-  if actualDamage == 0 then
+  self.health = self.health - actualDamage
+  local isDestroyed = self.health <= 0
+
+  if (actualDamage == 0) then
     return
   end
 
-  self.health = self.health - actualDamage
+  if isDestroyed then
+    msgBus.send(msgBus.ENEMY_DESTROYED, {
+      parent = self,
+      x = self.x,
+      y = self.y,
+      experience = self.experience
+    })
+
+    self.destroyedAnimation = tween.new(0.5, self, {opacity = 0}, tween.easing.outCubic)
+    self.collision:delete()
+    return
+  end
+
   local getTextSize = require 'components.gui.gui-text'.getTextSize
   local offsetCenter = -getTextSize(actualDamage, popupText.font) / 2
   local isCriticalHit = criticalMultiplier > 0
@@ -191,17 +208,6 @@ local function onDamageTaken(self, actualDamage, actualNonCritDamage, criticalMu
   }
   love.audio.stop(Sound.ENEMY_IMPACT)
   love.audio.play(Sound.ENEMY_IMPACT)
-
-  local isDestroyed = self.health <= 0
-  if isDestroyed then
-    msgBus.send(msgBus.ENEMY_DESTROYED, {
-      x = self.x,
-      y = self.y,
-      experience = self.experience
-    })
-    self:delete()
-    return
-  end
 end
 
 local function handleHits(self, dt)
@@ -371,15 +377,23 @@ local function setNextPosition(self, dt, radius)
 end
 
 function Ai._update2(self, grid, dt)
-  self:setDrawDisabled(not self.isInViewOfPlayer)
-
   self.clock = self.clock + dt
   self.frameCount = self.frameCount + 1
+
+  handleHits(self, dt)
+  if self.destroyedAnimation then
+    local complete = self.destroyedAnimation:update(dt)
+    if complete then
+      self:delete()
+    end
+    return
+  end
+
+  self:setDrawDisabled(not self.isInViewOfPlayer)
 
   if self.onUpdateStart then
     self.onUpdateStart(self, dt)
   end
-  handleHits(self, dt)
 
   if (self.frameCount % 5 == 0) then
     local shouldFlipX = math.abs(self.vx) > 0.15
@@ -483,7 +497,7 @@ Ai._update2 = perf({
 
 local function drawShadow(self, h, w, ox, oy)
   local heightScaleDiff = self.z * 0.01
-  love.graphics.setColor(0,0,0,0.3)
+  love.graphics.setColor(0,0,0,0.3 * self.opacity)
   love.graphics.draw(
     animationFactory.atlas,
     self.animation.sprite,
@@ -550,7 +564,7 @@ local function drawShockEffect(self, ox, oy)
     math.pow(math.sin(self.clock + self.clockOffset), 2),
     shockResolution
   )
-  love.graphics.setColor(0.8,0.8,1)
+  love.graphics.setColor(0.8,0.8,self.opacity)
   drawSprite(self, ox, oy)
 end
 
@@ -564,6 +578,7 @@ function Ai.draw(self)
     love.graphics.setShader(shader)
     shader:send('outline_color', self.outlineColor)
     shader:send('fill_color', self.fillColor)
+    shader:send('alpha', self.opacity)
   end
 
   if self.hitAnimation then
@@ -572,7 +587,8 @@ function Ai.draw(self)
   end
 
   local texture = animationFactory.atlas
-  love.graphics.setColor(self.fillColor)
+  local r,g,b,a = self.fillColor[1], self.fillColor[2], self.fillColor[3], self.fillColor[4]
+  love.graphics.setColor(r, g, b, a * self.opacity)
   drawSprite(self, ox, oy)
 
   local isShocked = self:getCalculatedStat('shocked') > 0
@@ -583,7 +599,7 @@ function Ai.draw(self)
   love.graphics.setBlendMode(oBlendMode)
   love.graphics.setShader()
 
-  love.graphics.setColor(1,1,1)
+  love.graphics.setColor(1,1,1, self.opacity)
   drawStatusEffects(self, statusIcons)
   -- self:debugLineOfSight()
 end
@@ -659,13 +675,13 @@ function Ai.init(self)
       local hitId = msgValue.source or uid()
       self.hits[hitId] = msgValue
     end
+
+    if msgBus.ENEMY_DESTROYED == msgType and (msgValue.parent == self) then
+      self:onDestroyStart()
+    end
   end)
 
   self.onInit(self)
-end
-
-function Ai.final(self)
-  self.onFinal(self)
 end
 
 return Component.createFactory(Ai)

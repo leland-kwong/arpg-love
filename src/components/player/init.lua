@@ -63,12 +63,6 @@ local Player = {
   init = function(self)
     self.hitManagerOnDamageTaken = function(self, actualDamage, actualNonCritDamage, criticalMultiplier)
       if (actualDamage > 0) then
-        msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
-          title = 'player hit received',
-          description = {
-            Color.CYAN, actualDamage
-          }
-        })
         msgBus.send(msgBus.PLAYER_HIT_RECEIVED, actualDamage)
       end
     end

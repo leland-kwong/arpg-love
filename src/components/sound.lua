@@ -1,3 +1,5 @@
+local setupChanceFunctions = require 'utils.chance'
+
 local Sound = {
   drinkPotion = love.audio.newSource('built/sounds/drink-potion.wav', 'static'),
   levelUp = love.audio.newSource('built/sounds/level-up.wav', 'static'),
@@ -13,7 +15,38 @@ local Sound = {
   FROST_SHOT = love.audio.newSource('built/sounds/ice-shot.wav', 'static'),
   SLIME_SPLAT = love.audio.newSource('built/sounds/splat-sound.wav', 'static'),
   SLOW_TIME = love.audio.newSource('built/sounds/slow-time.wav', 'static'),
-  ELECTRIC_SHOCK_SHORT = love.audio.newSource('built/sounds/electric-shock-short.wav', 'static')
+  ELECTRIC_SHOCK_SHORT = love.audio.newSource('built/sounds/electric-shock-short.wav', 'static'),
+
+  functions = {
+    robotDestroyed = setupChanceFunctions({
+      {
+        chance = 1,
+        __call = function()
+          return love.audio.newSource('built/sounds/robot-destroyed-1.wav', 'static')
+        end
+      },
+      {
+        chance = 1,
+        __call = function()
+          return love.audio.newSource('built/sounds/robot-destroyed-2.wav', 'static')
+        end
+      }
+    }),
+    creatureDestroyed = setupChanceFunctions({
+      {
+        chance = 1,
+        __call = function()
+          return love.audio.newSource('built/sounds/creature-destroyed-1.wav', 'static')
+        end
+      },
+      {
+        chance = 1,
+        __call = function()
+          return love.audio.newSource('built/sounds/creature-destroyed-2.wav', 'static')
+        end
+      }
+    })
+  },
 }
 
 return Sound

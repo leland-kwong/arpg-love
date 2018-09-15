@@ -14,6 +14,11 @@ local playblasterSound = debounce(function()
   love.audio.play(source)
 end, 0.2)
 
+local function onDestroyStart()
+  local Sound = require 'components.sound'
+  love.audio.play(Sound.functions.robotDestroyed())
+end
+
 return function()
   local animations = {
     moving = animationFactory:new({
@@ -90,6 +95,7 @@ return function()
       ability1
     },
     attackRange = attackRange,
-    fillColor = fillColor
+    fillColor = fillColor,
+    onDestroyStart = onDestroyStart
   }
 end
