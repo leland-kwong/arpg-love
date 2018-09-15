@@ -33,11 +33,15 @@ local function findNearestTarget(
       function(item)
         if (not nearestEnemyFound) and item.group == 'ai' then
           local target = item.parent
-          local isAlreadyFound = hasItem(ignoreTargets, target)
-          local gx1, gy1 = Position.pixelsToGridUnits(startX, startY, gridSize)
-          local gx2, gy2 = Position.pixelsToGridUnits(target.x, target.y, gridSize)
-          local canSeeTarget = los(gx1, gy1, gx2, gy2)
-          if (not isAlreadyFound) and canSeeTarget then
+          local isAlreadyFound = ignoreTargets and hasItem(ignoreTargets, target)
+          if los then
+            local gx1, gy1 = Position.pixelsToGridUnits(startX, startY, gridSize)
+            local gx2, gy2 = Position.pixelsToGridUnits(target.x, target.y, gridSize)
+            local canSeeTarget = los(gx1, gy1, gx2, gy2)
+            if (not isAlreadyFound) and canSeeTarget then
+              nearestEnemyFound = target
+            end
+          else
             nearestEnemyFound = target
           end
         end

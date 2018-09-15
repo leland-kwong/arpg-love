@@ -8,6 +8,8 @@ local ActionError = require 'components.hud.action-error'
 local GuiText = require 'components.gui.gui-text'
 local NpcInfo = require 'components.hud.npc-info'
 local Notifier = require 'components.hud.notifier'
+local Minimap = require 'components.map.minimap'
+local camera = require 'components.camera'
 local msgBus = require 'components.msg-bus'
 local Position = require 'utils.position'
 local scale = require 'config.config'.scaleFactor
@@ -40,6 +42,18 @@ local function setupExperienceIndicator(self)
 end
 
 function Hud.init(self)
+  local minimapW, minimapH = 100, 100
+  local minimapMargin = 5
+  Minimap.create({
+    camera = camera,
+    grid = Component.get('MAIN_SCENE').mapGrid,
+    x = love.graphics.getWidth()/config.scale - minimapW - minimapMargin,
+    y = minimapH + minimapMargin,
+    w = minimapW,
+    h = minimapH,
+    scale = config.scale
+  }):setParent(self)
+
   self.hudTextLayer = GuiText.create({
     group = groups.hud,
     drawOrder = function()

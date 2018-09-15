@@ -45,22 +45,23 @@ function NpcInfo.update(self, dt)
   local textLayer = Component.get('HUD').hudTextLayer
   local textLayerSmall = Component.get('HUD').hudTextSmallLayer
   local mx, my = camera:getMousePosition()
+  local maxArea = 32
   local area = 4
   itemHovered = nil
-  local items, len = collisionWorlds.map:queryRect(
-    -- readjust coordinates to center to mouse
-    mx - area,
-    my - area,
-    area,
-    area,
-    aiHoverFilter
-  )
-
-  self.collisionShape = {
-    x = mx,
-    y = my,
-    size = area
-  }
+  local items, len = nil, 0
+  -- slowly increase area around cursor until we find something.
+  -- This improves the ux since it makes for a larger hitbox
+  while (len == 0) and (area < maxArea) do
+    items, len = collisionWorlds.map:queryRect(
+      -- readjust coordinates to center to mouse
+      mx - area/2,
+      my - area/2,
+      area,
+      area,
+      aiHoverFilter
+    )
+    area = area + 4
+  end
 
   if len > 0 then
     itemHovered = items[1].parent

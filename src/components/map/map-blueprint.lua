@@ -70,11 +70,11 @@ local mapBlueprint = {
   getGridBounds = getGridBounds,
 
   update = function(self, dt)
-    self.onUpdateStart(self)
+    self.onUpdateStart(self, dt)
     if self.onUpdate then
       iterateActiveGrid(self, self.onUpdate, dt)
     end
-    self.onUpdateEnd(self)
+    self.onUpdateEnd(self, dt)
   end,
 
   draw = function(self)

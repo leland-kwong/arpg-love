@@ -112,7 +112,7 @@ local Player = {
     self.animation = self.animations.idle
 
     local collisionW, collisionH = self.animations.idle:getSourceSize()
-    local collisionOffX, collisionOffY = self.animations.idle:getOffset()
+    local collisionOffX, collisionOffY = self.animations.idle:getSourceOffset()
     self.colObj = self:addCollisionObject(
       'player',
       self.x,
@@ -366,7 +366,7 @@ local function drawDebug(self)
 end
 
 function Player.draw(self)
-  local ox, oy = self.animation:getOffset()
+  local ox, oy = self.animation:getSourceOffset()
   local scaleX, scaleY = 1 * self.dir, 1
 
   drawShadow(self, scaleX, scaleY, ox, oy)
