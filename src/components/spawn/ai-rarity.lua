@@ -1,7 +1,13 @@
+local function CallableObject(props)
+  return setmetatable(props, {
+    __call = props.__call
+  })
+end
+
 local function setupChanceFunctions(types)
   local list = {}
   for i=1, #types do
-    local t = types[i]
+    local t = CallableObject(types[i])
     for j=1, t.chance do
       table.insert(list, t)
     end
@@ -12,14 +18,8 @@ local function setupChanceFunctions(types)
   end
 end
 
-local function CallableObject(props)
-  return setmetatable(props, {
-    __call = props.__call
-  })
-end
-
 local generateRandomProperty = setupChanceFunctions({
-  CallableObject({
+  {
     type = 'extra fast',
     chance = 1,
     lowerPercentSpeed = 1,
@@ -29,18 +29,18 @@ local generateRandomProperty = setupChanceFunctions({
       local modType = 'extra fast'
       return self.type, 'moveSpeed', ai.moveSpeed + (ai.moveSpeed * moveSpeedBonus)
     end
-  })
+  }
 })
 
 local generateRandomRarity = setupChanceFunctions({
-  CallableObject({
+  {
     type = 'NORMAL',
     chance = 3,
     __call = function(self, ai)
       return ai
     end
-  }),
-  CallableObject({
+  },
+  {
     type = 'MAGICAL',
     chance = 3,
     outlineColor = {0.5, 0.5, 1, 1},
@@ -49,8 +49,8 @@ local generateRandomRarity = setupChanceFunctions({
         :set('maxHealth', ai.maxHealth * 2)
         :set('experience', ai.experience * 2)
     end
-  }),
-  CallableObject({
+  },
+  {
     type = 'RARE',
     chance = 3,
     outlineColor = {0.8, 0.8, 0, 1},
@@ -63,7 +63,7 @@ local generateRandomRarity = setupChanceFunctions({
         :set('maxHealth', ai.maxHealth * 5)
         :set('experience', ai.experience * 5)
     end
-  }),
+  },
 })
 
 return function(ai)
