@@ -590,18 +590,6 @@
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/vial_6.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/vial_7.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/vial_8.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_1.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_10.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_11.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_12.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_2.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_3.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_4.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_5.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_6.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_7.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_8.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings/ring_9.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_1.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_10.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_11.png</key>
@@ -624,158 +612,6 @@
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_7.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_8.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_9.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_1.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_10.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_100.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_101.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_102.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_103.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_104.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_105.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_106.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_107.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_108.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_109.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_11.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_110.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_111.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_112.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_113.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_114.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_115.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_116.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_117.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_118.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_119.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_12.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_120.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_121.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_122.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_123.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_124.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_125.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_126.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_127.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_128.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_129.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_13.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_130.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_131.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_132.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_133.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_134.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_135.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_136.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_137.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_138.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_139.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_14.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_140.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_141.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_142.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_143.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_144.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_145.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_146.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_147.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_148.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_149.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_15.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_150.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_151.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_152.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_16.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_17.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_18.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_19.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_2.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_20.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_21.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_22.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_23.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_24.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_25.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_26.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_27.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_28.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_29.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_3.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_30.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_31.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_32.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_33.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_34.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_35.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_36.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_37.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_38.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_39.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_4.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_40.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_41.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_42.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_43.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_44.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_45.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_46.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_47.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_48.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_49.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_5.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_50.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_51.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_52.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_53.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_54.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_55.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_56.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_57.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_58.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_59.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_6.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_60.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_61.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_62.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_63.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_64.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_65.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_66.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_67.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_68.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_69.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_7.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_70.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_71.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_72.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_73.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_74.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_75.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_76.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_77.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_78.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_79.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_8.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_80.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_81.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_82.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_83.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_84.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_85.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_86.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_87.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_88.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_89.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_9.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_90.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_91.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_92.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_93.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_94.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_95.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_96.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_97.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_98.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords/sword_99.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.266667</point_f>
@@ -788,32 +624,10 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_1.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_10.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_11.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_12.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_13.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_14.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_15.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_16.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_17.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_18.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_19.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_2.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_20.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_21.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_22.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_23.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_24.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_3.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_4.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_5.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_6.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_7.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_8.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons/magicweapon_9.png</key>
             <key type="filename">custom-art/bullet-1.png</key>
             <key type="filename">custom-art/characters/eyeball/eyeball.png</key>
+            <key type="filename">custom-art/items/weapons/weapon-modules/item-upgrade-placeholder-locked.png</key>
+            <key type="filename">custom-art/items/weapons/weapon-modules/item-upgrade-placeholder-unlocked.png</key>
             <key type="filename">custom-art/tiles/floor-11.png</key>
             <key type="filename">custom-art/tiles/floor-12.png</key>
             <struct type="IndividualSpriteSettings">
@@ -931,22 +745,22 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/items/weapons/pods/pod-one1.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one10.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one11.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one12.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one13.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one14.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one15.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one16.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one2.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one3.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one4.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one5.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one6.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one7.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one8.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one9.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one-0.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one-1.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one-10.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one-11.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one-12.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one-13.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one-14.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one-15.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one-2.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one-3.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one-4.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one-5.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one-6.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one-7.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one-8.png</key>
+            <key type="filename">custom-art/items/weapons/pods/pod-one-9.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0,0.5</point_f>
@@ -1090,17 +904,14 @@
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions</filename>
-            <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/swords</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets</filename>
             <filename>custom-art/bullet-1.png</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/books</filename>
-            <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/rings</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets</filename>
             <filename>custom-art/items/weapons/pods</filename>
             <filename>custom-art/characters/ai-1</filename>
             <filename>custom-art/characters/slime</filename>
             <filename>custom-art/characters/eyeball</filename>
-            <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/magic-weapons</filename>
             <filename>custom-art/status-effect-icons</filename>
             <filename>custom-art/spells</filename>
             <filename>custom-art/items/weapons/weapon-modules</filename>

@@ -12,11 +12,11 @@ local WeaponCore = {
 
 function WeaponCore.init(self)
   local frames = {}
-  for i=1, 16 do
-    table.insert(frames, 'pod-one'..i)
+  for i=0, 15 do
+    table.insert(frames, 'pod-one-'..i)
   end
-  for i=16, 1, -1 do
-    table.insert(frames, 'pod-one'..i)
+  for i=15, 0, -1 do
+    table.insert(frames, 'pod-one-'..i)
   end
   self.animation = AnimationFactory:new(frames)
 end
