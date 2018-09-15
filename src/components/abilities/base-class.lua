@@ -1,25 +1,27 @@
 local groups = require 'components.groups'
-local setProp = require 'utils.set-prop'
+local extend = require 'utils.object-utils'.extend
 
-return function()
-  return setProp({
-    group = groups.all,
+local baseClass = {
+  group = groups.all,
 
-    -- [DEFAULTS]
+  -- [DEFAULTS]
 
-    -- start position
-    x = 0,
-    y = 0,
+  -- start position
+  x = 0,
+  y = 0,
 
-    -- target position
-    x2 = 0,
-    y2 = 0,
-    minDamage = 1,
-    maxDamage = 2,
-    weaponDamageScaling = 1,
-    lifeTime = 2,
-    speed = 250,
-    cooldown = 0.1,
-    targetGroup = 'ai'
-  })
+  -- target position
+  x2 = 0,
+  y2 = 0,
+  minDamage = 1,
+  maxDamage = 2,
+  weaponDamageScaling = 1,
+  lifeTime = 2,
+  speed = 250,
+  cooldown = 0.1,
+  targetGroup = 'ai',
+}
+
+return function(props)
+  return extend(baseClass, props)
 end

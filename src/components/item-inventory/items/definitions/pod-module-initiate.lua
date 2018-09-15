@@ -1,5 +1,6 @@
 local Component = require 'modules.component'
-local config = require("components.item-inventory.items.config")
+local itemConfig = require("components.item-inventory.items.config")
+local gameConfig = require 'config.config'
 local msgBus = require("components.msg-bus")
 local itemDefs = require("components.item-inventory.items.item-definitions")
 local Color = require 'modules.color'
@@ -7,6 +8,9 @@ local functional = require("utils.functional")
 local AnimationFactory = require 'components.animation-factory'
 local setProp = require 'utils.set-prop'
 local Sound = require 'components.sound'
+local memoize = require 'utils.memoize'
+local LOS = memoize(require 'modules.line-of-sight')
+local extend = require 'utils.object-utils'.extend
 
 local bulletColor = {Color.rgba255(252, 122, 255)}
 
@@ -41,11 +45,12 @@ local upgrades = {
 	{
 		sprite = 'item-upgrade-placeholder-unlocked',
 		title = 'Critical Strikes',
-		description = 'Attacks have a 25% chance to deal 1.5x damage',
+		description = 'Attacks have a 25% chance to deal 1.2 - 1.4x damage',
 		experienceRequired = 40,
 		props = {
-			critChance = 0.25,
-			critMultiplier = 0.5
+			minCritMultiplier = 0.2,
+			maxCritMultiplier = 0.4,
+			critChance = 0.25
 		}
 	},
 	{
@@ -55,6 +60,23 @@ local upgrades = {
 		experienceRequired = 120
 	}
 }
+
+local function CreateAttack(self, props)
+	local Projectile = require 'components.abilities.bullet'
+	local numBounces = props.numBounces and (props.numBounces + 1) or 0
+	return Projectile.create(
+		setProp(props)
+			:set('maxBounces', 1)
+			:set('numBounces', numBounces)
+			:set('minDamage', 1)
+			:set('maxDamage', 3)
+			:set('color', bulletColor)
+			:set('targetGroup', 'ai')
+			:set('startOffset', 26)
+			:set('speed', 400)
+			:set('onHit', itemDefs.getState(self).onHit)
+	)
+end
 
 return itemDefs.registerType({
 	type = "pod-one",
@@ -73,8 +95,8 @@ return itemDefs.registerType({
 	properties = {
 		sprite = "weapon-module-initiate",
 		title = 'r-1 initiate',
-		rarity = config.rarity.NORMAL,
-		category = config.category.POD_MODULE,
+		rarity = itemConfig.rarity.NORMAL,
+		category = itemConfig.category.POD_MODULE,
 
 		energyCost = function(self)
 			return 1
@@ -136,7 +158,7 @@ return itemDefs.registerType({
 			end)
 
 			local state = itemDefs.getState(self)
-			state.onHit = function(hitMessage)
+			state.onHit = function(attack, hitMessage)
 				local up1 = upgrades[1]
 				local up1Ready = self.experience >= up1.experienceRequired
 				if up1Ready then
@@ -161,8 +183,47 @@ return itemDefs.registerType({
 				local up2Ready = self.experience >= up2.experienceRequired
 				if up2Ready then
 					hitMessage.criticalChance = up2.props.critChance
-					hitMessage.criticalMultiplier = up2.props.critMultiplier
+					hitMessage.criticalMultiplier = math.random(
+						up2.props.minCritMultiplier * 100,
+						up2.props.maxCritMultiplier * 100
+					) / 100
 				end
+
+				local up3 = upgrades[3]
+				local up3Ready = self.experience >= up3.experienceRequired
+				if up3Ready then
+					if attack.numBounces >= attack.maxBounces then
+						return hitMessage
+					end
+					local findNearestTarget = require 'modules.find-nearest-target'
+					local currentTarget = hitMessage.parent
+
+					local mainSceneRef = Component.get('MAIN_SCENE')
+					local mapGrid = mainSceneRef.mapGrid
+					local gridSize = gameConfig.gridSize
+					local Map = require 'modules.map-generator.index'
+					local losFn = LOS(mapGrid, Map.WALKABLE)
+
+					local target = findNearestTarget(
+						currentTarget.collisionWorld,
+						{currentTarget},
+						currentTarget.x,
+						currentTarget.y,
+						6 * gridSize,
+						losFn,
+						gridSize
+					)
+					if target then
+						local props = extend(attack, {
+							x = currentTarget.x,
+							y = currentTarget.y,
+							x2 = target.x,
+							y2 = target.y
+						})
+						CreateAttack(self, props)
+					end
+				end
+
 				return hitMessage
 			end
 		end,
@@ -173,19 +234,9 @@ return itemDefs.registerType({
 		end,
 
 		onActivateWhenEquipped = function(self, props)
-			local Projectile = require 'components.abilities.bullet'
 			love.audio.stop(Sound.PLASMA_SHOT)
 			love.audio.play(Sound.PLASMA_SHOT)
-			return Projectile.create(
-				setProp(props)
-					:set('minDamage', 1)
-					:set('maxDamage', 3)
-					:set('color', bulletColor)
-					:set('targetGroup', 'ai')
-					:set('startOffset', 26)
-					:set('speed', 400)
-					:set('onHit', itemDefs.getState(self).onHit)
-			)
+			return CreateAttack(self, props)
 		end,
 
 		modifier = function(self, msgType, msgValue)

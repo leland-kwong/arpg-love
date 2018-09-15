@@ -19,6 +19,7 @@ return function()
 		resistFire = 0,
 		resistCold = 0,
 		resistLightning = 0,
-		resistAcid = 0
+		resistAcid = 0,
+		experienceMultiplier = 0 -- increases experience gained by percentage amount
 	}
 end

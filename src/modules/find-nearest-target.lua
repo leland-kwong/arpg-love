@@ -11,6 +11,9 @@ local function hasItem(list, item)
   return found
 end
 
+--[[
+  maxSeekRadius [NUMBER] - Maximum pixel radius to seek out enemies
+]]
 local function findNearestTarget(
   collisionWorld, ignoreTargets, startX, startY, maxSeekRadius, lineOfSightFn, gridSize
 )
