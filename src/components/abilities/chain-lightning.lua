@@ -87,27 +87,30 @@ local function checkMousePosition(self)
   return mx, my, isValidPosition
 end
 
-local function getAllTargets(self, pointerX, pointerY)
-  for i=1, self.maxTargets do
+local function getAllTargets(pointerX, pointerY, maxTargets, initialSeekRadius)
+  local targets = {}
+  for i=1, maxTargets do
+    local maxSeekRadius = 6 * config.gridSize
     local startX, startY
     if i == 1 then
       startX = pointerX
       startY = pointerY
+      maxSeekRadius = initialSeekRadius or maxSeekRadius
     else
-      local lastTarget = self.targets[#self.targets]
+      local lastTarget = targets[#targets]
       if (not lastTarget) then
-        return
+        return targets
       end
       startX = lastTarget.x
       startY = lastTarget.y
     end
-    local maxSeekRadius = 6 * config.gridSize
     local mapGrid = Component.get('MAIN_SCENE').mapGrid
     local Map = require 'modules.map-generator.index'
     local losFn = LOS(mapGrid, Map.WALKABLE)
-    local target = findNearestTarget(colMap, self.targets, startX, startY, maxSeekRadius, losFn, config.gridSize)
-    table.insert(self.targets, target)
+    local target = findNearestTarget(colMap, targets, startX, startY, maxSeekRadius, losFn, config.gridSize)
+    table.insert(targets, target)
   end
+  return targets
 end
 
 ChainLightning.init = function(self)
@@ -118,15 +121,19 @@ ChainLightning.init = function(self)
 
   local pointerX, pointerY, isValidPosition = checkMousePosition(self)
   -- find 3 targets to hit ahead of time
-  self.targets = {}
+  self.targets = nil
   if (isValidPosition) then
-    getAllTargets(self, pointerX, pointerY)
+    self.targets = getAllTargets(pointerX, pointerY, self.maxTargets, 0.5 * config.gridSize)
   end
 
-  local foundTargets = #self.targets > 0
+  local foundTargets = self.targets and (#self.targets > 0)
   -- set target to mouse position so we at least have an animation when no targets are found
   if (not foundTargets) then
-    table.insert(self.targets, {x = pointerX, y = pointerY})
+    self.targets = getAllTargets(pointerX, pointerY, self.maxTargets)
+    local foundTargets = #self.targets > 0
+    if (not foundTargets) then
+      table.insert(self.targets, {x = pointerX, y = pointerY})
+    end
   end
 
   self.polyLine = {}
