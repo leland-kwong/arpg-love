@@ -26,7 +26,7 @@ end
 
 local aoeModifiers = {
 	moveSpeed = function(target)
-		return target.moveSpeed * -0.2
+		return target.moveSpeed * -0.35
 	end
 }
 
@@ -58,6 +58,7 @@ return itemDefs.registerType({
 		rarity = config.rarity.EPIC,
 		category = config.category.POD_MODULE,
 
+		levelRequirement = 4,
 		energyCost = function(self)
 			return 2
 		end,
