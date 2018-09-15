@@ -120,6 +120,10 @@ ChainLightning.init = function(self)
   )
 
   local pointerX, pointerY, isValidPosition = checkMousePosition(self)
+  local dx, dy = Position.getDirection(self.x, self.y, pointerX, pointerY)
+  self.x = self.x + self.startOffset * dx
+  self.y = self.y + self.startOffset * dy
+
   -- find 3 targets to hit ahead of time
   self.targets = nil
   if (isValidPosition) then
@@ -187,26 +191,31 @@ ChainLightning.update = function(self, dt)
   self.tween(dt)
 end
 
+local function drawPoint(x, y, radius)
+  -- point outer
+  love.graphics.setColor(0.6,0.6,1,0.8)
+  love.graphics.circle(
+    'fill',
+    x,
+    y,
+    radius
+  )
+
+  -- point inner
+  love.graphics.setColor(1,1,1,1)
+  love.graphics.circle(
+    'fill',
+    x,
+    y,
+    radius * 0.65
+  )
+end
+
 local function drawTargets(self)
+  drawPoint(self.x, self.y, 8)
   for i=1, #self.targets do
     local t = self.targets[i]
-    -- point outer
-    love.graphics.setColor(0.6,0.6,1,0.8)
-    love.graphics.circle(
-      'fill',
-      t.x,
-      t.y,
-      5
-    )
-
-    -- point inner
-    love.graphics.setColor(1,1,1,1)
-    love.graphics.circle(
-      'fill',
-      t.x,
-      t.y,
-      3
-    )
+    drawPoint(t.x, t.y, 5)
   end
 end
 

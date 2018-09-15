@@ -100,12 +100,17 @@ local Fireball = {
   scale = 1,
   maxLifeTime = 2,
   speed = 400,
+  startOffset = 0,
   weaponDamageScaling = 1.2,
   cooldown = 0.15,
   animation = { 'fireball' },
 
   init = function(self)
     local dx, dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
+    -- adjust starting position based on the start offset
+    self.x = self.x + self.startOffset * dx
+    self.y = self.y + self.startOffset * dy
+
     self.direction = {x = dx, y = dy}
     self.animation = animationFactory:new(self.animation)
 

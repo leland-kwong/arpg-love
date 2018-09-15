@@ -61,6 +61,8 @@ local upgrades = {
 	}
 }
 
+local weaponLength = 26
+
 local function CreateAttack(self, props)
 	local Projectile = require 'components.abilities.bullet'
 	local numBounces = props.numBounces and (props.numBounces + 1) or 0
@@ -72,7 +74,7 @@ local function CreateAttack(self, props)
 			:set('maxDamage', 3)
 			:set('color', bulletColor)
 			:set('targetGroup', 'ai')
-			:set('startOffset', 26)
+			:set('startOffset', weaponLength)
 			:set('speed', 400)
 			:set('onHit', itemDefs.getState(self).onHit)
 	)
@@ -236,6 +238,9 @@ return itemDefs.registerType({
 		onActivateWhenEquipped = function(self, props)
 			love.audio.stop(Sound.PLASMA_SHOT)
 			love.audio.play(Sound.PLASMA_SHOT)
+			msgBus.send(msgBus.SHOW_MUZZLE_FLASH, {
+				color = bulletColor
+			})
 			return CreateAttack(self, props)
 		end,
 
@@ -244,6 +249,6 @@ return itemDefs.registerType({
 				msgValue.flatDamage = self.state.bonusDamage
 			end
 			return msgValue
-		end,
+		end
 	}
 })

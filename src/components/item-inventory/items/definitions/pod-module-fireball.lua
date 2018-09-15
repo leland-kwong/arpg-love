@@ -88,6 +88,7 @@ return itemDefs.registerType({
 			local Fireball = require 'components.fireball'
 			Fireball.minDamage = 0
 			Fireball.maxDamage = 0
+			Fireball.startOffset = 26
 			return Fireball.create(props)
 		end,
 

@@ -80,7 +80,8 @@ return itemDefs.registerType({
 			love.audio.play(Sound.ENERGY_BEAM)
 			return Attack.create(
         setProp(props)
-          :set('targetGroup', 'ai')
+					:set('targetGroup', 'ai')
+					:set('startOffset', 26)
       )
 		end
 	}

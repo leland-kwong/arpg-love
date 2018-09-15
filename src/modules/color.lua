@@ -8,6 +8,12 @@ end
 
 -- multiplies two color tables and returns the 4 channel values separately (for performance reasons)
 function Color.multiply(a, b)
+  if not b then
+    return a[1],
+      a[2],
+      a[3],
+      a[4]
+  end
   return
     a[1] * b[1],
     a[2] * b[2],
