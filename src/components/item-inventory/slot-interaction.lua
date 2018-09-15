@@ -87,6 +87,9 @@ local function drawTooltip(item, x, y, w2, h2)
 
   -- item upgrade content and dimensions
   local itemUpgradeW, itemUpgradeH = 200, 200
+  if not tooltipItemUpgrade then
+    itemUpgradeW, itemUpgradeH = 0, 0
+  end
 
   -- total tooltip height
   local totalHeight = (titleH + titleH) +
@@ -94,11 +97,11 @@ local function drawTooltip(item, x, y, w2, h2)
                       bodyCopyH +
                       itemUpgradeH +
                       (padding * 2)
-
-  local isBottomOutOfView = posY + totalHeight > config.resolution.h
+  local bottomOutOfView = (posY + totalHeight) - config.resolution.h
+  local isBottomOutOfView = bottomOutOfView > 0
   if isBottomOutOfView then
     -- flip the tooltip vertically so that its pivot is on the south side
-    return drawTooltip(item, x, y - totalHeight + h2, w2, h2)
+    return drawTooltip(item, x, y - bottomOutOfView - 5, w2, h2)
   end
 
   -- title
@@ -131,8 +134,8 @@ local function drawTooltip(item, x, y, w2, h2)
     totalHeight
   )
 
-  local outlineColor = bgColor * 2
-  love.graphics.setColor(outlineColor, outlineColor, outlineColor)
+  local outlineColor = 0.2
+  love.graphics.setColor(outlineColor, outlineColor, outlineColor, 0.9)
   love.graphics.rectangle(
     'line',
     posX, posY,
@@ -148,7 +151,7 @@ local function drawTooltip(item, x, y, w2, h2)
     local titleW, titleH = GuiText.getTextSize('test title', titleTextLayer.font)
 
     -- upgrade experience bar
-    local experienceBarWidth, experienceBarHeight = 10, 170
+    local experienceBarWidth, experienceBarHeight = 10, 160
     local iconWidth, iconHeight = 13, 13
     local experienceBarPosY = upgradePanelPosY
     local lastUpgrade = tooltipItemUpgrade[#tooltipItemUpgrade]

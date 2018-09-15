@@ -152,7 +152,7 @@ ChainLightning.init = function(self)
         currentTarget = self.targets[targetIndex]
         subject = {x = previousTarget.x, y = previousTarget.y}
         endState = {x = currentTarget.x, y = currentTarget.y}
-        tw = tween.new(0.04, subject, endState)
+        tw = tween.new(0.03, subject, endState)
       end
       animationDone = tw:update(dt)
 
