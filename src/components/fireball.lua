@@ -28,7 +28,10 @@ local function colFilter(item, other)
 end
 
 local function impactCollisionFilter(item)
-  return item.group == 'ai'
+  if item.group == 'ai' then
+    return true
+  end
+  return false
 end
 
 local ImpactAnimation = Component.createFactory({
@@ -39,6 +42,9 @@ local ImpactAnimation = Component.createFactory({
   endState = {w = 0},
   color = {1,0.7,0,0.15},
   group = groups.all,
+  onHit = function(self, hitMessage)
+    return hitMessage
+  end,
   init = function(self)
     -- shrinks the impact animation over time
     self.tween = tween.new(0.2, self, self.endState, tween.easing.inExpo)
@@ -68,6 +74,7 @@ local function handleImpact(self)
   local width, height = self.w * 4, self.h * 4
   local collisionX, collisionY = self.x - width/2, self.y - height/2
   local parentX, parentY = self.x, self.y
+
   local items, len = collisionWorlds.map:queryRect(
     collisionX,
     collisionY,
@@ -78,10 +85,10 @@ local function handleImpact(self)
 
   for i=1, len do
     local it = items[i]
-    msgBus.send(msgBus.CHARACTER_HIT, {
+    msgBus.send(msgBus.CHARACTER_HIT, self.onHit(self, {
       parent = it.parent,
       damage = math.random(self.minDamage, self.maxDamage)
-    })
+    }))
   end
 
   ImpactAnimation.create({

@@ -3,6 +3,7 @@ local msgBus = require("components.msg-bus")
 local itemDefs = require("components.item-inventory.items.item-definitions")
 local Color = require 'modules.color'
 local functional = require("utils.functional")
+local equipmentBaseSubscriber = require 'components.item-inventory.items.equipment-base-subscriber'
 
 local mathFloor = math.floor
 
@@ -57,6 +58,7 @@ return itemDefs.registerType({
 
 			-- static properties
 			weaponDamage = baseDamage,
+			experience = 0
 		}
 	end,
 
@@ -72,6 +74,18 @@ return itemDefs.registerType({
 			return 2
 		end,
 
+		upgrades = {
+			{
+				sprite = 'item-upgrade-placeholder-unlocked',
+				title = 'Daze',
+				description = 'Attacks slow the target',
+				experienceRequired = 20,
+				props = {
+					knockBackDistance = 50
+				}
+			},
+		},
+
 		tooltip = function(self)
 			local _state = self.state
 			local stats = {
@@ -85,6 +99,32 @@ return itemDefs.registerType({
 			end, {})
 		end,
 
+		onEquip = function(self)
+			equipmentBaseSubscriber(self)
+			local state = itemDefs.getState(self)
+			local definition = itemDefs.getDefinition(self)
+			local upgrades = definition.upgrades
+			state.onHit = function(attack, hitMessage)
+				local up1 = upgrades[1]
+				local up1Ready = self.experience >= up1.experienceRequired
+				if up1Ready then
+					local target = hitMessage.parent
+					msgBus.send(msgBus.CHARACTER_HIT, {
+						parent = target,
+						statusIcon = 'status-slow',
+						duration = 1,
+						modifiers = {
+							moveSpeed = function(t)
+								return t.moveSpeed * -0.5
+							end
+						},
+						source = definition.title
+					})
+				end
+				return hitMessage
+			end
+		end,
+
 		onActivate = function(self)
 			local toSlot = itemDefs.getDefinition(self).category
 			msgBus.send(msgBus.EQUIPMENT_SWAP, self)
@@ -94,8 +134,9 @@ return itemDefs.registerType({
 			local Fireball = require 'components.fireball'
 			Fireball.minDamage = 0
 			Fireball.maxDamage = 0
-			Fireball.cooldown = 0.2
+			Fireball.cooldown = 0.7
 			Fireball.startOffset = 26
+			Fireball.onHit = itemDefs.getState(self).onHit
 			msgBus.send(msgBus.PLAYER_WEAPON_MUZZLE_FLASH, muzzleFlashMessage)
 
 			local Sound = require 'components.sound'

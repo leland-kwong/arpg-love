@@ -1,5 +1,6 @@
 local itemDefs = require 'components.item-inventory.items.item-definitions'
 local msgBus = require 'components.msg-bus'
+local Color = require 'modules.color'
 
 return function(item)
   local self = item

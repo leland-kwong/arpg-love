@@ -205,7 +205,7 @@ local function drawTooltip(item, x, y, w2, h2, rootStore)
   local padding = 12
   local itemDef = itemDefinition.getDefinition(item)
   local tooltipContent = itemDef.tooltip(item)
-  local tooltipItemUpgrade = itemDef.tooltipItemUpgrade(item)
+  local tooltipItemUpgrade = itemDef.upgrades
   local tooltipModifierValues = parseItemModifiers(item)
   local levelRequirementText = itemDef.levelRequirement and 'Required level: '..itemDef.levelRequirement or nil
   tooltipContent = concatTable(tooltipModifierValues, tooltipContent)
