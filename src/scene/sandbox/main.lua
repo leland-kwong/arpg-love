@@ -113,6 +113,10 @@ local sceneOptions = {
     'particle fx',
     'scene.sandbox.particle-fx.particle-test'
   ),
+  menuOptionSceneLoad(
+    'ground flame fx',
+    'scene.sandbox.particle-fx.ground-flame-test'
+  ),
   {
     name = 'exit game',
     value = function()

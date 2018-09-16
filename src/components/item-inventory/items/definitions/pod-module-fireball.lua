@@ -1,9 +1,11 @@
-local config = require("components.item-inventory.items.config")
+local itemConfig = require("components.item-inventory.items.config")
+local config = require 'config.config'
 local msgBus = require("components.msg-bus")
 local itemDefs = require("components.item-inventory.items.item-definitions")
 local Color = require 'modules.color'
 local functional = require("utils.functional")
 local equipmentBaseSubscriber = require 'components.item-inventory.items.equipment-base-subscriber'
+local groups = require 'components.groups'
 
 local mathFloor = math.floor
 
@@ -65,8 +67,8 @@ return itemDefs.registerType({
 	properties = {
 		sprite = "weapon-module-fireball",
 		title = 'tz-819 mortar',
-		rarity = config.rarity.LEGENDARY,
-		category = config.category.POD_MODULE,
+		rarity = itemConfig.rarity.LEGENDARY,
+		category = itemConfig.category.POD_MODULE,
 
 		levelRequirement = 3,
 		attackTime = 0.4,
@@ -79,11 +81,22 @@ return itemDefs.registerType({
 				sprite = 'item-upgrade-placeholder-unlocked',
 				title = 'Daze',
 				description = 'Attacks slow the target',
-				experienceRequired = 20,
+				experienceRequired = 5,
 				props = {
 					knockBackDistance = 50
 				}
 			},
+			{
+				sprite = 'item-upgrade-placeholder-unlocked',
+				title = 'Scorch',
+				description = 'Chance to create an area of ground fire, dealing damage over time to those who step into it.',
+				experienceRequired = 10,
+				props = {
+					duration = 10,
+					minDamagePerSecond = 1,
+					maxDamagePerSecond = 3,
+				}
+			}
 		},
 
 		tooltip = function(self)
@@ -105,10 +118,10 @@ return itemDefs.registerType({
 			local definition = itemDefs.getDefinition(self)
 			local upgrades = definition.upgrades
 			state.onHit = function(attack, hitMessage)
+				local target = hitMessage.parent
 				local up1 = upgrades[1]
 				local up1Ready = self.experience >= up1.experienceRequired
 				if up1Ready then
-					local target = hitMessage.parent
 					msgBus.send(msgBus.CHARACTER_HIT, {
 						parent = target,
 						statusIcon = 'status-slow',
@@ -120,6 +133,52 @@ return itemDefs.registerType({
 						},
 						source = definition.title
 					})
+				end
+
+				local up2 = upgrades[2]
+				local up2Ready = self.experience >= up2.experienceRequired
+				if up2Ready then
+					local GroundFlame = require 'components.particle.ground-flame'
+					local x, y = target.x, target.y
+					local width, height = 16, 16
+					GroundFlame.create({
+						group = groups.all,
+						x = x,
+						y = y,
+						width = width,
+						height = height,
+						gridSize = config.gridSize,
+						duration = up2.props.duration
+					})
+
+					local collisionWorlds = require 'components.collision-worlds'
+					local tick = require 'utils.tick'
+					local tickCount = 0
+					local timer
+					timer = tick.recur(function()
+						tickCount = tickCount + 1
+						if tickCount >= 10 then
+							timer:stop()
+						end
+						collisionWorlds.map:queryRect(
+							x - config.gridSize,
+							y - config.gridSize,
+							width * 2,
+							height * 2,
+							function(item)
+								if item.group == 'ai' then
+									msgBus.send(msgBus.CHARACTER_HIT, {
+										parent = item.parent,
+										damage = math.random(
+											up2.props.minDamagePerSecond,
+											up2.props.maxDamagePerSecond
+										)
+									})
+								end
+							end
+						)
+					end, 1)
+
 				end
 				return hitMessage
 			end

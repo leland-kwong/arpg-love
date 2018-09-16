@@ -208,6 +208,9 @@ function MainScene.init(self)
     if not canEquip then
       error(errorMsg)
     end
+
+    local defaultWeapon3 = require'components.item-inventory.items.definitions.pod-module-fireball'
+    rootState:addItemToInventory(defaultWeapon3.create())
   end
 
   self.rootStore = rootState
@@ -255,13 +258,19 @@ function MainScene.init(self)
 
     if msgBus.ENEMY_DESTROYED == msgType then
       local lootAlgorithm = require 'components.loot-generator.algorithm-1'
-      msgBus.send(msgBus.GENERATE_LOOT, {msgValue.x, msgValue.y, lootAlgorithm()})
+      local randomItem = lootAlgorithm()
+      if randomItem then
+        msgBus.send(msgBus.GENERATE_LOOT, {msgValue.x, msgValue.y, randomItem})
+      end
       msgBus.send(msgBus.EXPERIENCE_GAIN, msgValue.experience)
     end
 
     if msgBus.GENERATE_LOOT == msgType then
       local LootGenerator = require'components.loot-generator.loot-generator'
       local x, y, item = unpack(msgValue)
+      if not item then
+        return
+      end
       local dropX, dropY = getDroppablePosition(x, y, map.grid)
       LootGenerator.create({
         x = dropX,
