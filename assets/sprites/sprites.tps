@@ -773,8 +773,22 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/items/weapons/weapon-modules/weapon-hammer-attachment.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,5,8,10</rect>
+                <key>scale9Paddings</key>
+                <rect>4,5,8,10</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/items/weapons/weapon-modules/weapon-module-empty.png</key>
             <key type="filename">custom-art/items/weapons/weapon-modules/weapon-module-fireball.png</key>
+            <key type="filename">custom-art/items/weapons/weapon-modules/weapon-module-hammer.png</key>
             <key type="filename">custom-art/items/weapons/weapon-modules/weapon-module-initiate.png</key>
             <key type="filename">custom-art/items/weapons/weapon-modules/weapon-module-lightning-rod.png</key>
             <key type="filename">custom-art/items/weapons/weapon-modules/weapon-module-slow-time.png</key>
