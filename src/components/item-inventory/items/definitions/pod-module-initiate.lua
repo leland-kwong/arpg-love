@@ -11,6 +11,7 @@ local Sound = require 'components.sound'
 local memoize = require 'utils.memoize'
 local LOS = memoize(require 'modules.line-of-sight')
 local extend = require 'utils.object-utils'.extend
+local equipmentBaseSubscriber = require 'components.item-inventory.items.equipment-base-subscriber'
 
 local bulletColor = {Color.rgba255(252, 122, 255)}
 
@@ -69,84 +70,43 @@ return itemDefs.registerType({
 			return upgrades
 		end,
 
-		onEquip = function(self)
-			local upgrades = {
-				{
-					sprite = 'item-upgrade-placeholder-unlocked',
-					title = 'Shock',
-					description = 'Attacks shock the target, dealing 1-2 lightning damage.',
-					experienceRequired = 10,
-					props = {
-						shockDuration = 0.4,
-						minLightningDamage = 1,
-						maxLightningDamage = 2
-					}
-				},
-				{
-					sprite = 'item-upgrade-placeholder-unlocked',
-					title = 'Critical Strikes',
-					description = 'Attacks have a 25% chance to deal 1.2 - 1.4x damage',
-					experienceRequired = 40,
-					props = {
-						minCritMultiplier = 0.2,
-						maxCritMultiplier = 0.4,
-						critChance = 0.25
-					}
-				},
-				{
-					sprite = 'item-upgrade-placeholder-unlocked',
-					title = 'Ricochet',
-					description = 'Attacks bounce to 2 other targets, dealing 50% less damage each bounce.',
-					experienceRequired = 120
+		upgrades = {
+			{
+				sprite = 'item-upgrade-placeholder-unlocked',
+				title = 'Shock',
+				description = 'Attacks shock the target, dealing 1-2 lightning damage.',
+				experienceRequired = 10,
+				props = {
+					shockDuration = 0.4,
+					minLightningDamage = 1,
+					maxLightningDamage = 2
 				}
+			},
+			{
+				sprite = 'item-upgrade-placeholder-unlocked',
+				title = 'Critical Strikes',
+				description = 'Attacks have a 25% chance to deal 1.2 - 1.4x damage',
+				experienceRequired = 40,
+				props = {
+					minCritMultiplier = 0.2,
+					maxCritMultiplier = 0.4,
+					critChance = 0.25
+				}
+			},
+			{
+				sprite = 'item-upgrade-placeholder-unlocked',
+				title = 'Ricochet',
+				description = 'Attacks bounce to 2 other targets, dealing 50% less damage each bounce.',
+				experienceRequired = 120
 			}
+		},
 
-			local function getHighestUpgradeUnlocked()
-				local highestUpgradeUnlocked = 0
-				for i=1, #upgrades do
-					local up = upgrades[i]
-					if self.experience >= up.experienceRequired then
-						highestUpgradeUnlocked = i
-					end
-				end
-				return highestUpgradeUnlocked
-			end
-
-			local lastUpgradeUnlocked = getHighestUpgradeUnlocked()
-
-			local msgTypes = {
-				[msgBus.EQUIPMENT_UNEQUIP] = function(v)
-					if v == self then
-						return msgBus.CLEANUP
-					end
-				end,
-				[msgBus.ENEMY_DESTROYED] = function(v)
-					self.experience = self.experience + v.experience
-					local nextUpgradeLevel = getHighestUpgradeUnlocked()
-					local newUpgradeUnlocked = nextUpgradeLevel > lastUpgradeUnlocked
-					lastUpgradeUnlocked = nextUpgradeLevel
-					if newUpgradeUnlocked then
-						local itemTitle = itemDefs.getDefinition(self).title
-						msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
-							title = itemTitle..' upgraded',
-							icon = itemDefs.getDefinition(self).sprite,
-							description = {
-								Color.CYAN, upgrades[nextUpgradeLevel].title,
-								Color.WHITE, ' is unlocked'
-							}
-						})
-					end
-				end
-			}
-
-			msgBus.subscribe(function(msgType, msgValue)
-				local handler = msgTypes[msgType]
-				if handler then
-					handler(msgValue)
-				end
-			end)
+		onEquip = function(self)
+			equipmentBaseSubscriber(self)
 
 			local state = itemDefs.getState(self)
+			local definition = itemDefs.getDefinition(self)
+			local upgrades = definition.upgrades
 			state.onHit = function(attack, hitMessage)
 				local up1 = upgrades[1]
 				local up1Ready = self.experience >= up1.experienceRequired
