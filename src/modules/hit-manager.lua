@@ -13,10 +13,10 @@ end
 local function adjustedDamageTaken(self, damage, lightningDamage, criticalChance, criticalMultiplier)
   local damageReductionPerArmor = 0.0001
   local damageAfterFlatReduction = damage - self:getCalculatedStat('flatPhysicalDamageReduction')
-  local damageAfterArmorResistance = (damageAfterFlatReduction * self:getCalculatedStat('armor') * damageReductionPerArmor)
+  local reducedDamageFromArmorResistance = (damageAfterFlatReduction * self:getCalculatedStat('armor') * damageReductionPerArmor)
   local lightningDamageAfterResistance = lightningDamage - (lightningDamage * self:getCalculatedStat('lightningResist'))
   local totalDamage = damageAfterFlatReduction
-    - damageAfterArmorResistance
+    - reducedDamageFromArmorResistance
     + lightningDamageAfterResistance
   local criticalMultiplier = rollCritChance(criticalChance) and criticalMultiplier or 0
   local totalDamageWithCrit = totalDamage + (totalDamage * criticalMultiplier)

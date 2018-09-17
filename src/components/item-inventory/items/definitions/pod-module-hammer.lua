@@ -8,7 +8,7 @@ local msgBus = require 'components.msg-bus'
 local AbilityBase = require 'components.abilities.base-class'
 local tween = require 'modules.tween'
 
-local healSource = 'H_2_HAMMER'
+local itemSource = 'H_2_HAMMER'
 local healType = 2
 
 local function concatTable(a, b)
@@ -43,11 +43,68 @@ end
 
 local bump = require 'modules.bump'
 local hammerWorld = bump.newWorld(4)
+
+local function triggerAttack(self)
+	local Position = require 'utils.position'
+	local dx, dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
+	self.dx, self.dy = dx, dy
+	local attackPosX, attackPosY = 30 * dx, 30 * dy
+	self.collisionX, self.collisionY = self.x - (self.w/2) + attackPosX, self.y - (self.h/2) + attackPosY
+	self.collisionW, self.collisionH = self.w, self.h
+	local cw = require 'components.collision-worlds'.map
+	cw:queryRect(
+		self.collisionX,
+		self.collisionY,
+		self.collisionW,
+		self.collisionH,
+		function(item)
+			if (item.group == 'ai') then
+				local aiCollision = item
+				local aiCollisionX, aiCollisionY = aiCollision:getPositionWithOffset()
+				hammerWorld:add(
+					item.parent,
+					aiCollisionX,
+					aiCollisionY,
+					aiCollision.w,
+					aiCollision.h
+				)
+				return true
+			end
+		end
+	)
+	hammerWorld:queryRect(
+		self.collisionX,
+		self.collisionY,
+		self.collisionW,
+		self.collisionH,
+		function(item)
+			msgBus.send(msgBus.CHARACTER_HIT, {
+				parent = item,
+				damage = calcDamage(self)
+			})
+			msgBus.send(msgBus.CHARACTER_HIT, {
+				parent = item,
+				duration = self.cooldown * 2,
+				modifiers = {
+					armor = -1000
+				},
+				source = itemSource
+			})
+		end
+	)
+
+	local itemsAddedToWorld, len = hammerWorld:getItems()
+	for i=1, len do
+		hammerWorld:remove(itemsAddedToWorld[i])
+	end
+end
+
 local Attack = Component.createFactory(
 	AbilityBase({
 		group = groups.all,
-		minDamage = 3,
-		maxDamage = 5,
+		minDamage = 2,
+		maxDamage = 4,
+		weaponDamageScaling = 1,
 		w = 40,
 		h = 40,
 		impactDuration = 0.4,
@@ -55,53 +112,13 @@ local Attack = Component.createFactory(
 		opacity = 1,
 		init = function(self)
 			self.animationTween = tween.new(self.impactDuration, self, { opacity = 0 }, tween.easing.inExpo)
-
-			local Position = require 'utils.position'
-			local dx, dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
-			self.dx, self.dy = dx, dy
-			local attackPosX, attackPosY = 30 * dx, 30 * dy
-			self.collisionX, self.collisionY = self.x - (self.w/2) + attackPosX, self.y - (self.h/2) + attackPosY
-			self.collisionW, self.collisionH = self.w, self.h
-			local cw = require 'components.collision-worlds'.map
-			cw:queryRect(
-				self.collisionX,
-				self.collisionY,
-				self.collisionW,
-				self.collisionH,
-				function(item)
-					if (item.group == 'ai') then
-						local aiCollision = item
-						local aiCollisionX, aiCollisionY = aiCollision:getPositionWithOffset()
-						hammerWorld:add(
-							item.parent,
-							aiCollisionX,
-							aiCollisionY,
-							aiCollision.w,
-							aiCollision.h
-						)
-						return true
-					end
-				end
-			)
-			hammerWorld:queryRect(
-				self.collisionX,
-				self.collisionY,
-				self.collisionW,
-				self.collisionH,
-				function(item)
-					msgBus.send(msgBus.CHARACTER_HIT, {
-						parent = item,
-						damage = calcDamage(self)
-					})
-				end
-			)
-
-			local itemsAddedToWorld, len = hammerWorld:getItems()
-			for i=1, len do
-				hammerWorld:remove(itemsAddedToWorld[i])
-			end
 		end,
 		update = function(self, dt)
+			-- we must trigger after init since the attack gets modified immediately upon creation
+			if (not self.triggered) then
+				triggerAttack(self)
+				self.triggered = true
+			end
 			local complete = self.animationTween:update(dt)
 			if complete then
 				self:delete()
@@ -131,7 +148,8 @@ return itemDefs.registerType({
 			maxStackSize = 1,
 
 			healthRegeneration = 2,
-			maxHealth = 10
+			maxHealth = 10,
+			weaponDamage = 2
 		}
 	end,
 
@@ -152,7 +170,7 @@ return itemDefs.registerType({
 			msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
 				amount = self.healthRegeneration * duration,
 				duration = duration,
-				source = healSource,
+				source = itemSource,
 				type = healType,
 				property = 'health',
 				maxProperty = 'maxHealth'
@@ -164,13 +182,18 @@ return itemDefs.registerType({
 
 		final = function(self)
 			msgBus.send(msgBus.PLAYER_HEAL_SOURCE_REMOVE, {
-				source = healSource,
+				source = itemSource,
 			})
 			msgBus.send(msgBus.PLAYER_WEAPON_RENDER_ATTACHMENT_REMOVE)
 		end,
 
 		tooltip = function(self)
-			return {}
+			return {
+				Color.YELLOW, '\nactive skill:\n',
+				Color.WHITE, 'deals ',
+				Color.CYAN, Attack.minDamage ..'-'.. Attack.maxDamage,
+				Color.WHITE, ' damage in an area in front.'
+			}
 		end,
 
 		onActivate = function(self)

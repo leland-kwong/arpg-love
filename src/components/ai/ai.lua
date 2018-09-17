@@ -171,24 +171,6 @@ local function onDamageTaken(self, actualDamage, actualNonCritDamage, criticalMu
     return
   end
 
-  if isDestroyed then
-    msgBus.send(msgBus.ENEMY_DESTROYED, {
-      parent = self,
-      x = self.x,
-      y = self.y,
-      experience = self.experience
-    })
-
-    self.destroyedAnimation = tween.new(0.5, self, {opacity = 0}, tween.easing.outCubic)
-    self.collision:delete()
-    return
-  end
-
-  if actualLightningDamage > 0 then
-    love.audio.stop(Sound.ELECTRIC_SHOCK_SHORT)
-    love.audio.play(Sound.ELECTRIC_SHOCK_SHORT)
-  end
-
   local getTextSize = require 'components.gui.gui-text'.getTextSize
   local offsetCenter = -getTextSize(actualDamage, popupText.font) / 2
   local isCriticalHit = criticalMultiplier > 0
@@ -206,6 +188,24 @@ local function onDamageTaken(self, actualDamage, actualNonCritDamage, criticalMu
     self.y - self.h
   )
   self.hitAnimation = coroutine.wrap(hitAnimation)
+
+  if isDestroyed then
+    msgBus.send(msgBus.ENEMY_DESTROYED, {
+      parent = self,
+      x = self.x,
+      y = self.y,
+      experience = self.experience
+    })
+
+    self.destroyedAnimation = tween.new(0.5, self, {opacity = 0}, tween.easing.outCubic)
+    self.collision:delete()
+    return
+  end
+
+  if actualLightningDamage > 0 then
+    love.audio.stop(Sound.ELECTRIC_SHOCK_SHORT)
+    love.audio.play(Sound.ELECTRIC_SHOCK_SHORT)
+  end
 
   Sound.ENEMY_IMPACT:setFilter {
     type = 'lowpass',
