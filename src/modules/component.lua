@@ -32,19 +32,31 @@ local baseProps = {
   final = noop, -- optional
   _update = function(self, dt)
     self._ready = true
-    local parent = self.parent
-    if parent then
-      -- update position relative to its parent
-      local dx, dy, dz =
-        self.prevParentX and (parent.x - self.prevParentX) or 0,
-        self.prevParentY and (parent.y - self.prevParentY) or 0,
-        self.prevParentZ and (parent.z - self.prevParentZ) or 0
-      self:setPosition(self.x + dx, self.y + dy, self.z + dz)
-      self.prevParentX = parent.x
-      self.prevParentY = parent.y
-      self.prevParentZ = parent.z
-    end
     self:update(dt)
+    local children = self._children
+    if children then
+      local hasChangedPosition = self.x ~= self.prevX
+        or self.y ~= self.prevY
+        or self.z ~= self.prevZ
+
+      if hasChangedPosition then
+        for _,child in pairs(children) do
+          -- update position relative to its parent
+          local dx, dy, dz =
+            (self.x - child.prevParentX),
+            (self.y - child.prevParentY),
+            (self.z - child.prevParentZ)
+          child:setPosition(child.x + dx, child.y + dy, child.z + dz)
+          child.prevParentX = self.x
+          child.prevParentY = self.y
+          child.prevParentZ = self.z
+        end
+
+        self.prevX = self.x
+        self.prevY = self.y
+        self.prevZ = self.z
+      end
+    end
   end,
   _drawDebug = function(self)
     self.draw(self)
@@ -173,6 +185,14 @@ function M.createFactory(blueprint)
     if isSameParent then
       return self
     end
+
+    --[[
+      The child's position will now be relative to its parent,
+      so we need to store the parent's initial position
+    ]]
+    self.prevParentX = parent.x
+    self.prevParentY = parent.y
+    self.prevParentZ = parent.z
 
     local id = self:getId()
     -- dissasociate itself from previous parent
