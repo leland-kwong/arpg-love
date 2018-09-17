@@ -10,7 +10,7 @@ local function rollCritChance(chance)
   return random(1, 1/chance) == 1
 end
 
-local function adjustedDamage(self, damage, lightningDamage, criticalChance, criticalMultiplier)
+local function adjustedDamageTaken(self, damage, lightningDamage, criticalChance, criticalMultiplier)
   local damageReductionPerArmor = 0.0001
   local damageAfterFlatReduction = damage - self:getCalculatedStat('flatPhysicalDamageReduction')
   local damageAfterArmorResistance = (damageAfterFlatReduction * self:getCalculatedStat('armor') * damageReductionPerArmor)
@@ -20,7 +20,7 @@ local function adjustedDamage(self, damage, lightningDamage, criticalChance, cri
     + lightningDamageAfterResistance
   local criticalMultiplier = rollCritChance(criticalChance) and criticalMultiplier or 0
   local totalDamageWithCrit = totalDamage + (totalDamage * criticalMultiplier)
-  return round(max(0, totalDamageWithCrit)), totalDamage, criticalMultiplier
+  return round(max(0, totalDamageWithCrit)), totalDamage, criticalMultiplier, lightningDamageAfterResistance
 end
 
 -- modifiers modify properties such as `maxHealth`, `moveSpeed`, etc...
@@ -52,7 +52,19 @@ local function getBaseStat(self, prop)
   return baseStat + equipmentModifierStat
 end
 
+local function getDamageParams(self, hit)
+  local dmg = (type(hit.damage) == 'table') and hit.damage or hit
+  return
+    self,
+    dmg.damage or 0,
+    dmg.lightningDamage or 0,
+    min(1, hit.criticalChance or 0), -- maximum value of 1
+    hit.criticalMultiplier or 0
+end
+
 --[[
+  handles hits taken for a character, managing damage and property modifiers
+
   self [TABLE] - component instance
   dt [NUMBER] - dt from component.update
 ]]
@@ -71,18 +83,15 @@ local function hitManager(self, dt, onDamageTaken)
     hitCount = hitCount + 1
 
     if onDamageTaken then
-      local actualDamage, actualNonCritDamage, actualCritMultiplier = adjustedDamage(
-        self,
-        hit.damage or 0,
-        hit.lightningDamage or 0,
-        min(1, hit.criticalChance or 0), -- maximum value of 1
-        hit.criticalMultiplier or 0
+      local actualDamage, actualNonCritDamage, actualCritMultiplier, actualLightningDamage = adjustedDamageTaken(
+        getDamageParams(self, hit)
       )
       onDamageTaken(
         self,
         actualDamage,
         actualNonCritDamage,
-        actualCritMultiplier
+        actualCritMultiplier,
+        actualLightningDamage
       )
     end
 

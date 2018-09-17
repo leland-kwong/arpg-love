@@ -34,6 +34,16 @@ function WeaponCore.init(self)
       self.recoilDuration = msgValue.attackTime or 0.1
       self.recoilDurationRemaining = self.recoilDuration
     end
+    if msgBus.PLAYER_WEAPON_RENDER_ATTACHMENT_ADD == msgType then
+      self.renderAttachmentAnimationSpeed = msgValue.animationSpeed or 1
+      self.renderAttachmentAnimation = AnimationFactory:new(
+        msgValue.animationFrames
+      )
+    end
+    if msgBus.PLAYER_WEAPON_RENDER_ATTACHMENT_REMOVE == msgType then
+      self.renderAttachmentAnimationSpeed = nil
+      self.renderAttachmentAnimation = nil
+    end
   end)
 end
 
@@ -41,6 +51,11 @@ local max = math.max
 function WeaponCore.update(self, dt)
   self.recoilDurationRemaining = self.recoilDurationRemaining - dt
   self.muzzleFlashDuration = max(0, self.muzzleFlashDuration - dt)
+  if self.renderAttachmentAnimation then
+    self.renderAttachmentAnimation:update(
+      dt * self.renderAttachmentAnimationSpeed
+    )
+  end
   self.animation:update(dt / 4)
 end
 
@@ -65,6 +80,27 @@ local function drawMuzzleFlash(color, x, y, angle, radius)
     x + offsetX,
     y + offsetY,
     radius * 0.65
+  )
+end
+
+local function drawRenderAttachment(self, x, y, angle)
+  if (not self.renderAttachmentAnimation) then
+    return
+  end
+  local weaponLength = 26
+  local spriteOffsetX, spriteOffsetY = self.renderAttachmentAnimation:getSourceOffset()
+  local offsetX, offsetY = math.sin( -angle + halfRad ) * (weaponLength),
+    math.cos( -angle + halfRad ) * (weaponLength)
+  love.graphics.setColor(1,1,1)
+  love.graphics.draw(
+    AnimationFactory.atlas,
+    self.renderAttachmentAnimation.sprite,
+    x + offsetX,
+    y + offsetY,
+    angle,
+    1, 1,
+    spriteOffsetX,
+    spriteOffsetY
   )
 end
 
@@ -128,6 +164,8 @@ function WeaponCore.draw(self)
       8
     )
   end
+
+  drawRenderAttachment(self, posX, posY, self.angle)
 end
 
 return Component.createFactory(WeaponCore)

@@ -25,9 +25,9 @@ local equipmentSubscribers = {
 				return msgBus.CLEANUP
 			end
 
-			-- add the item's stats the list of modifiers
+			-- add the item's stats to the list of modifiers
 			if msgBus.PLAYER_STATS_NEW_MODIFIERS == msgType then
-				-- merge item properties into the new modifiers list
+				-- add up item properties with the new modifiers list
 				for k,v in pairs(msgValue) do
 					msgValue[k] = msgValue[k] + (item[k] or 0)
 				end

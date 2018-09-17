@@ -47,7 +47,7 @@ return itemDefs.registerType({
 			stackSize = 1,
 			maxStackSize = 1,
 
-			regeneration = 2,
+			healthRegeneration = 2,
 			maxHealth = 10
 		}
 	end,
@@ -66,7 +66,7 @@ return itemDefs.registerType({
 		onEquip = function(self)
 			local duration = math.pow(10, 10)
 			msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
-				amount = self.regeneration * duration,
+				amount = self.healthRegeneration * duration,
 				duration = duration,
 				source = healSource,
 				type = healType,
@@ -82,11 +82,10 @@ return itemDefs.registerType({
 		end,
 
 		tooltip = function(self)
-			local stats = {
-				statValue(self.regeneration, Color.CYAN, "health regeneration per second"),
-				statValue(self.maxHealth, Color.CYAN, "maximum health"),
+			return {
+				Color.YELLOW, 'active skill:\n',
+				Color.WHITE, 'slows enemies in an area around a target position'
 			}
-			return functional.reduce(stats, concatTable, {})
 		end,
 
 		onActivate = function(self)

@@ -119,9 +119,6 @@ return itemDefs.registerType({
 						},
 						source = 'INITIATE_SHOCK'
 					})
-					love.audio.stop(Sound.ELECTRIC_SHOCK_SHORT)
-					love.audio.play(Sound.ELECTRIC_SHOCK_SHORT)
-
 					hitMessage.lightningDamage = math.random(
 						up1.props.minLightningDamage,
 						up1.props.maxLightningDamage

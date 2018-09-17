@@ -20,6 +20,7 @@ local Map = require 'modules.map-generator.index'
 local Position = require 'utils.position'
 local noop = require 'utils.noop'
 local Lru = require 'utils.lru'
+local Sound = require 'components.sound'
 local setElectricShockShader = require 'modules.shaders.shader-electric-shock'
 
 local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
@@ -162,7 +163,7 @@ end
 
 local max, random = math.max, math.random
 
-local function onDamageTaken(self, actualDamage, actualNonCritDamage, criticalMultiplier)
+local function onDamageTaken(self, actualDamage, actualNonCritDamage, criticalMultiplier, actualLightningDamage)
   self.health = self.health - actualDamage
   local isDestroyed = self.health <= 0
 
@@ -183,6 +184,11 @@ local function onDamageTaken(self, actualDamage, actualNonCritDamage, criticalMu
     return
   end
 
+  if actualLightningDamage > 0 then
+    love.audio.stop(Sound.ELECTRIC_SHOCK_SHORT)
+    love.audio.play(Sound.ELECTRIC_SHOCK_SHORT)
+  end
+
   local getTextSize = require 'components.gui.gui-text'.getTextSize
   local offsetCenter = -getTextSize(actualDamage, popupText.font) / 2
   local isCriticalHit = criticalMultiplier > 0
@@ -201,7 +207,6 @@ local function onDamageTaken(self, actualDamage, actualNonCritDamage, criticalMu
   )
   self.hitAnimation = coroutine.wrap(hitAnimation)
 
-  local Sound = require 'components.sound'
   Sound.ENEMY_IMPACT:setFilter {
     type = 'lowpass',
     volume = .5,
