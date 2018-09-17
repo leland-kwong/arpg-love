@@ -29,8 +29,7 @@ local baseProps = {
   -- these methods will not be called until the component has been initialized
   update = noop, -- optional
   draw = noop, -- optional
-
-  final = noop,
+  final = noop, -- optional
   _update = function(self, dt)
     self._ready = true
     local parent = self.parent

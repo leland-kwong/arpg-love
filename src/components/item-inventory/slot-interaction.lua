@@ -248,7 +248,10 @@ local function drawTooltip(item, x, y, w2, h2, rootStore)
                       bodyCopyH +
                       itemUpgradeH +
                       (padding * 2)
-  local maxWidth = math.max(titleW, rarityW, bodyCopyW, itemUpgradeW) + (padding * 2) -- include side padding
+  local maxWidth = math.min(
+    200,
+    math.max(titleW, rarityW, bodyCopyW, itemUpgradeW) -- include side padding
+  )
   local bottomOutOfView = (posY + totalHeight) - config.resolution.h
   local isBottomOutOfView = bottomOutOfView > 0
   if isBottomOutOfView then
@@ -291,20 +294,22 @@ local function drawTooltip(item, x, y, w2, h2, rootStore)
 
   -- stats
   local tooltipContentY = levelRequirementY + (levelRequirementH * 2)
-  guiTextLayers.body:addTextGroup(
+  guiTextLayers.body:addf(
     tooltipContent,
+    maxWidth,
+    'left',
     posX + padding,
     tooltipContentY
   )
 
   -- background
-
+  local bgWidth = maxWidth + padding
   local bgColor = 0
   love.graphics.setColor(bgColor, bgColor, bgColor, 0.9)
   love.graphics.rectangle(
     'fill',
     posX, posY,
-    maxWidth,
+    bgWidth,
     totalHeight
   )
 
@@ -313,7 +318,7 @@ local function drawTooltip(item, x, y, w2, h2, rootStore)
   love.graphics.rectangle(
     'line',
     posX, posY,
-    maxWidth,
+    bgWidth,
     totalHeight
   )
 

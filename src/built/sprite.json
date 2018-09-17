@@ -4759,7 +4759,7 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":20},
 	"sourceSize": {"w":16,"h":20},
-	"pivot": {"x":0.5,"y":0.5}
+	"pivot": {"x":0,"y":0.55}
 },
 "weapon-module-empty":
 {
@@ -4822,6 +4822,6 @@
 	"format": "RGBA8888",
 	"size": {"w":128,"h":1359},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:58d95b297b5a7c61db4d673250dd3357:0ede57e06a6a9e5aee15cf4af2f55e73:68d88b3cf7eafc9b5accfffdfb2fda91$"
+	"smartupdate": "$TexturePacker:SmartUpdate:857a2bd144220b1c1165f2374960376a:0ede57e06a6a9e5aee15cf4af2f55e73:68d88b3cf7eafc9b5accfffdfb2fda91$"
 }
 }

@@ -199,10 +199,6 @@ local Fireball = {
         false
       )
     end
-  end,
-
-  final = function(self)
-    self.colObj:delete()
   end
 }
 

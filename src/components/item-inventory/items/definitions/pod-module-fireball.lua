@@ -92,7 +92,7 @@ return itemDefs.registerType({
 				description = 'Chance to create an area of ground fire, dealing damage over time to those who step into it.',
 				experienceRequired = 10,
 				props = {
-					duration = 10,
+					duration = 3,
 					minDamagePerSecond = 1,
 					maxDamagePerSecond = 3,
 				}
@@ -117,6 +117,7 @@ return itemDefs.registerType({
 			local state = itemDefs.getState(self)
 			local definition = itemDefs.getDefinition(self)
 			local upgrades = definition.upgrades
+
 			state.onHit = function(attack, hitMessage)
 				local target = hitMessage.parent
 				local up1 = upgrades[1]
@@ -134,12 +135,15 @@ return itemDefs.registerType({
 						source = definition.title
 					})
 				end
+				return hitMessage
+			end
 
+			local function handleUpgrade2(attack)
 				local up2 = upgrades[2]
 				local up2Ready = self.experience >= up2.experienceRequired
 				if up2Ready then
 					local GroundFlame = require 'components.particle.ground-flame'
-					local x, y = target.x, target.y
+					local x, y = attack.x, attack.y
 					local width, height = 16, 16
 					GroundFlame.create({
 						group = groups.all,
@@ -157,7 +161,7 @@ return itemDefs.registerType({
 					local timer
 					timer = tick.recur(function()
 						tickCount = tickCount + 1
-						if tickCount >= 10 then
+						if tickCount >= up2.props.duration then
 							timer:stop()
 						end
 						collisionWorlds.map:queryRect(
@@ -178,10 +182,9 @@ return itemDefs.registerType({
 							end
 						)
 					end, 1)
-
 				end
-				return hitMessage
 			end
+			state.final = handleUpgrade2
 		end,
 
 		onActivate = function(self)
@@ -191,11 +194,16 @@ return itemDefs.registerType({
 
 		onActivateWhenEquipped = function(self, props)
 			local Fireball = require 'components.fireball'
-			Fireball.minDamage = 0
-			Fireball.maxDamage = 0
-			Fireball.cooldown = 0.7
-			Fireball.startOffset = 26
-			Fireball.onHit = itemDefs.getState(self).onHit
+			local F = require 'utils.functional'
+			props.minDamage = 0
+			props.maxDamage = 0
+			props.cooldown = 0.7
+			props.startOffset = 26
+			props.onHit = itemDefs.getState(self).onHit
+			props.final = F.wrap(
+				props.final,
+				itemDefs.getState(self).final
+			)
 			msgBus.send(msgBus.PLAYER_WEAPON_MUZZLE_FLASH, muzzleFlashMessage)
 
 			local Sound = require 'components.sound'

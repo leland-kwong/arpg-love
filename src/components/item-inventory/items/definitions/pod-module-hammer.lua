@@ -43,6 +43,11 @@ end
 
 local bump = require 'modules.bump'
 local hammerWorld = bump.newWorld(4)
+local hitModifers = {
+	armor = -200
+}
+local attackCooldown = 0.2
+local hitModifierDuration = attackCooldown * 1.2
 
 local function triggerAttack(self)
 	local Position = require 'utils.position'
@@ -82,12 +87,11 @@ local function triggerAttack(self)
 				parent = item,
 				damage = calcDamage(self)
 			})
+			-- attack modifier
 			msgBus.send(msgBus.CHARACTER_HIT, {
 				parent = item,
-				duration = self.cooldown * 2,
-				modifiers = {
-					armor = -1000
-				},
+				duration = hitModifierDuration,
+				modifiers = hitModifers,
 				source = itemSource
 			})
 		end
@@ -108,7 +112,7 @@ local Attack = Component.createFactory(
 		w = 40,
 		h = 40,
 		impactDuration = 0.4,
-		cooldown = 0.2,
+		cooldown = attackCooldown,
 		opacity = 1,
 		init = function(self)
 			self.animationTween = tween.new(self.impactDuration, self, { opacity = 0 }, tween.easing.inExpo)
@@ -192,7 +196,11 @@ return itemDefs.registerType({
 				Color.YELLOW, '\nactive skill:\n',
 				Color.WHITE, 'deals ',
 				Color.CYAN, Attack.minDamage ..'-'.. Attack.maxDamage,
-				Color.WHITE, ' damage in an area in front.'
+				Color.WHITE, " damage at a target area in front of you. Each hit reduces the target's armor by ",
+				Color.CYAN, hitModifers.armor,
+				Color.WHITE, ' for ',
+				Color.CYAN, hitModifierDuration,
+				Color.WHITE, ' seconds'
 			}
 		end,
 
