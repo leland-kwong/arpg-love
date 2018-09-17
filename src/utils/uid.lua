@@ -10,7 +10,7 @@ end
 local seed = toHex(socket.gettime() * 10000).."_"..toHex(random(0, 10000000))
 local increment = 0
 local function uid()
-	local newId = increment.."_"..seed
+	local newId = seed.."_"..increment
 	-- increment
 	increment = increment + 1
 	return newId
