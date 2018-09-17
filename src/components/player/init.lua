@@ -189,6 +189,11 @@ local Player = {
 
 local function handleMovement(self, dt)
   local totalMoveSpeed = self:getCalculatedStat('moveSpeed')
+
+  if self.attackRecoveryTime > 0 then
+    totalMoveSpeed = 0
+  end
+
   local moveAmount = totalMoveSpeed * dt
   local origx, origy = self.x, self.y
   local mx, my = camera:getMousePosition()

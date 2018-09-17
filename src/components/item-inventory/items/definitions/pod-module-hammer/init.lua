@@ -211,7 +211,8 @@ return itemDefs.registerType({
 						x = playerRef.x,
 						y = playerRef.y,
 						size = 17,
-						maxShieldHealth = 20,
+						maxShieldHealth = 30,
+						unhitDurationRequirement = 1.5,
 						drawOrder = function()
 							return playerRef:drawOrder() + 3
 						end

@@ -66,6 +66,9 @@ local function drawMuzzleFlash(color, x, y, angle, radius)
   local offsetX, offsetY = math.sin( -angle + halfRad ) * weaponLength,
     math.cos( -angle + halfRad ) * weaponLength
 
+  local oBlendMode = love.graphics.getBlendMode()
+  love.graphics.setBlendMode('add')
+
   love.graphics.setColor(r,g,b,a * 0.3)
   love.graphics.circle(
     'fill',
@@ -74,13 +77,15 @@ local function drawMuzzleFlash(color, x, y, angle, radius)
     radius * 1.4
   )
 
-  love.graphics.setColor(r,g,b,1)
+  love.graphics.setColor(r,g,b,0.6)
   love.graphics.circle(
     'fill',
     x + offsetX,
     y + offsetY,
     radius * 0.65
   )
+
+  love.graphics.setBlendMode(oBlendMode)
 end
 
 local function drawRenderAttachment(self, x, y, angle)
