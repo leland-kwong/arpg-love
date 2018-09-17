@@ -160,7 +160,7 @@ return itemDefs.registerType({
 		category = config.category.POD_MODULE,
 
 		levelRequirement = 1,
-		attackTime = 0.05,
+		attackTime = 0.1,
 		energyCost = function(self)
 			return 2
 		end,

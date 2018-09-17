@@ -47,7 +47,7 @@ return function(item)
   msgBus.subscribe(function(msgType, msgValue)
     local handler = msgTypes[msgType]
     if handler then
-      handler(msgValue)
+      return handler(msgValue)
     end
   end)
 end

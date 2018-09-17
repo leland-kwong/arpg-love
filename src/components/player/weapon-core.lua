@@ -91,6 +91,19 @@ local function drawRenderAttachment(self, x, y, angle)
   local spriteOffsetX, spriteOffsetY = self.renderAttachmentAnimation:getSourceOffset()
   local offsetX, offsetY = math.sin( -angle + halfRad ) * (weaponLength),
     math.cos( -angle + halfRad ) * (weaponLength)
+
+  love.graphics.setColor(0,0,0,0.17)
+  love.graphics.draw(
+    AnimationFactory.atlas,
+    self.renderAttachmentAnimation.sprite,
+    x + offsetX,
+    y + offsetY + 15,
+    angle,
+    1, 1,
+    spriteOffsetX,
+    spriteOffsetY
+  )
+
   love.graphics.setColor(1,1,1)
   love.graphics.draw(
     AnimationFactory.atlas,
