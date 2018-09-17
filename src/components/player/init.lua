@@ -181,11 +181,6 @@ local Player = {
         local uid = require 'utils.uid'
         local hitId = msg.source or uid()
         self.hits[hitId] = msg
-
-        -- local damage = msg.damage or 0
-        -- if (damage > 0) then
-        --   msgBus.send(msgBus.PLAYER_HIT_RECEIVED, damage)
-        -- end
       end
     end
     msgBus.subscribe(subscriber)

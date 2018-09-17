@@ -28,6 +28,9 @@ function ScreenFx.init(self)
     end
 
     if msgBus.PLAYER_HIT_RECEIVED == msgType then
+      if msgValue <= 0 then
+        return
+      end
       self.opacity = self.damageFlashOpacity
       self.tween:reset()
       self.currentTween = self.tween

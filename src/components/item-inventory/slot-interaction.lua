@@ -375,10 +375,13 @@ local function drawTooltip(item, x, y, w2, h2, rootStore)
       local iconPosX = tooltipStartX + experienceBarWidth + 5
       local iconPosY = segmentY - (iconHeight/2)
       local opacity = isUnlocked and 1 or 0.4
+      local upgradeItemSprite = getSprite(
+        upgradeItem.sprite or 'item-upgrade-placeholder-unlocked'
+      ).sprite
       love.graphics.setColor(1, 1, 1, opacity)
       love.graphics.draw(
         animationFactory.atlas,
-        getSprite(upgradeItem.sprite).sprite,
+        upgradeItemSprite,
         iconPosX,
         iconPosY
       )

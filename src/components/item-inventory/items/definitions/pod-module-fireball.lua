@@ -81,7 +81,7 @@ return itemDefs.registerType({
 				sprite = 'item-upgrade-placeholder-unlocked',
 				title = 'Daze',
 				description = 'Attacks slow the target',
-				experienceRequired = 5,
+				experienceRequired = 45,
 				props = {
 					knockBackDistance = 50
 				}
@@ -90,7 +90,7 @@ return itemDefs.registerType({
 				sprite = 'item-upgrade-placeholder-unlocked',
 				title = 'Scorch',
 				description = 'Chance to create an area of ground fire, dealing damage over time to those who step into it.',
-				experienceRequired = 10,
+				experienceRequired = 135,
 				props = {
 					duration = 3,
 					minDamagePerSecond = 1,

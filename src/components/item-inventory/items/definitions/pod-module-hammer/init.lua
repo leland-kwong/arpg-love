@@ -153,7 +153,8 @@ return itemDefs.registerType({
 
 			healthRegeneration = 2,
 			maxHealth = 10,
-			weaponDamage = 2
+			weaponDamage = 2,
+			experience = 0
 		}
 	end,
 
@@ -169,6 +170,18 @@ return itemDefs.registerType({
 			return 2
 		end,
 
+		upgrades = {
+			{
+				title = 'force field',
+				description = '',
+				experienceRequired = 10,
+				props = {
+					duration = 99999,
+					shieldHealth = 100
+				},
+			}
+		},
+
 		onEquip = function(self)
 			local duration = math.pow(10, 10)
 			msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
@@ -182,6 +195,17 @@ return itemDefs.registerType({
 			msgBus.send(msgBus.PLAYER_WEAPON_RENDER_ATTACHMENT_ADD, {
 				animationFrames = {'weapon-hammer-attachment'}
 			})
+
+			local ForceField = require 'components.item-inventory.items.definitions.pod-module-hammer.force-field'
+			local playerRef = Component.get('PLAYER')
+			self.forceField = ForceField.create({
+				x = playerRef.x,
+				y = playerRef.y,
+				size = 20,
+				drawOrder = function()
+					return playerRef:drawOrder() + 1
+				end
+			}):setParent(playerRef)
 		end,
 
 		final = function(self)
@@ -189,6 +213,7 @@ return itemDefs.registerType({
 				source = itemSource,
 			})
 			msgBus.send(msgBus.PLAYER_WEAPON_RENDER_ATTACHMENT_REMOVE)
+			self.forceField:delete()
 		end,
 
 		tooltip = function(self)
