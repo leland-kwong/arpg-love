@@ -79,7 +79,8 @@ return function(rootStore)
       local final = definition.final
       local newlyEquipped = lastState.equipment[y][x] ~= item
       if newlyEquipped then
-        definition.onEquip(item)
+				definition.onEquip(item)
+				msgBus.send(msgBus.ITEM_EQUIPPED, item)
         msgBus.subscribe(equipmentSubscribers.onMessage(item, onMessage, final))
         msgBus.addReducer(equipmentSubscribers.staticModifiers(item))
         msgBus.addReducer(equipmentSubscribers.modifier(item, modifier))

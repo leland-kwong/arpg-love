@@ -113,7 +113,6 @@ local function ActiveEquipmentHandler()
       local activateFn = definition.onActivateWhenEquipped
       local energyCost = definition.energyCost(activeItem)
       -- time an attack takes to finish (triggers a global cooldown)
-      local attackTime = definition.attackTime or 0.1
       local curState = self.rootStore:get()
       local enoughEnergy = (energyCost == nil) or
         (energyCost <= curState.energy)
@@ -126,10 +125,12 @@ local function ActiveEquipmentHandler()
         return skill
       end
 
-      playerRef:set('attackRecoveryTime', attackTime)
+      local attackTime = definition.attackTime or 0.1
+      local actualAttackTime = attackTime - (attackTime * curState.statModifiers.attackTimeReduction)
+      playerRef:set('attackRecoveryTime', actualAttackTime)
       msgBus.send(
         msgBus.PLAYER_WEAPON_ATTACK,
-        { attackTime = attackTime }
+        { attackTime = actualAttackTime }
       )
 
       local mx, my = camera:getMousePosition()

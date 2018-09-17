@@ -108,7 +108,7 @@ local Attack = Component.createFactory(
 		group = groups.all,
 		minDamage = 2,
 		maxDamage = 4,
-		weaponDamageScaling = 1,
+		weaponDamageScaling = 1.2,
 		w = 40,
 		h = 40,
 		impactDuration = 0.4,
@@ -195,17 +195,29 @@ return itemDefs.registerType({
 			msgBus.send(msgBus.PLAYER_WEAPON_RENDER_ATTACHMENT_ADD, {
 				animationFrames = {'weapon-hammer-attachment'}
 			})
-
-			local ForceField = require 'components.item-inventory.items.definitions.pod-module-hammer.force-field'
-			local playerRef = Component.get('PLAYER')
-			self.forceField = ForceField.create({
-				x = playerRef.x,
-				y = playerRef.y,
-				size = 20,
-				drawOrder = function()
-					return playerRef:drawOrder() + 1
+			msgBus.subscribe(function(msgType, msgValue)
+				if (msgBus.ITEM_UPGRADE_UNLOCKED == msgType)
+					and (msgValue.item == self)
+					and (msgValue.level == 1) then
+					local upgrades = itemDefs.getDefinition(self).upgrades
+					local up1 = upgrades[1]
+					local state = itemDefs.getState(self)
+					if state.forceField then
+						return
+					end
+					local ForceField = require 'components.item-inventory.items.definitions.pod-module-hammer.force-field'
+					local playerRef = Component.get('PLAYER')
+					state.forceField = ForceField.create({
+						x = playerRef.x,
+						y = playerRef.y,
+						size = 17,
+						maxShieldHealth = 20,
+						drawOrder = function()
+							return playerRef:drawOrder() + 3
+						end
+					}):setParent(playerRef)
 				end
-			}):setParent(playerRef)
+			end)
 		end,
 
 		final = function(self)
@@ -213,7 +225,9 @@ return itemDefs.registerType({
 				source = itemSource,
 			})
 			msgBus.send(msgBus.PLAYER_WEAPON_RENDER_ATTACHMENT_REMOVE)
-			self.forceField:delete()
+			if self.forceField then
+				self.forceField:delete()
+			end
 		end,
 
 		tooltip = function(self)

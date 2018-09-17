@@ -2,18 +2,35 @@ local itemDefs = require 'components.item-inventory.items.item-definitions'
 local msgBus = require 'components.msg-bus'
 local Color = require 'modules.color'
 
-return function(item)
+local UpgradeManager = {}
+
+local function triggerUpgradeMessage(item, level)
+  msgBus.send(
+    msgBus.ITEM_UPGRADE_UNLOCKED, {
+      item = item,
+      level = level
+    }
+  )
+end
+
+local function handleUpgrades(item)
   local self = item
   local upgrades = itemDefs.getDefinition(item).upgrades
 
+  if (not upgrades) then
+    return
+  end
+
   local function getHighestUpgradeUnlocked()
     local highestUpgradeUnlocked = 0
-    for i=1, #upgrades do
-      local up = upgrades[i]
+    for level=1, #upgrades do
+      local up = upgrades[level]
       if self.experience >= up.experienceRequired then
-        highestUpgradeUnlocked = i
+        highestUpgradeUnlocked = level
+        triggerUpgradeMessage(item, level)
       end
     end
+
     return highestUpgradeUnlocked
   end
 
@@ -40,6 +57,7 @@ return function(item)
             Color.WHITE, ' is unlocked'
           }
         })
+        triggerUpgradeMessage(item, nextUpgradeLevel)
       end
     end
   }
@@ -51,3 +69,11 @@ return function(item)
     end
   end)
 end
+
+msgBus.subscribe(function(msgType, msgValue)
+  if msgBus.ITEM_EQUIPPED ~= msgType then
+    return
+  end
+
+  handleUpgrades(msgValue)
+end)

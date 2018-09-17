@@ -4,7 +4,6 @@ local msgBus = require("components.msg-bus")
 local itemDefs = require("components.item-inventory.items.item-definitions")
 local Color = require 'modules.color'
 local functional = require("utils.functional")
-local equipmentBaseSubscriber = require 'components.item-inventory.items.equipment-base-subscriber'
 local groups = require 'components.groups'
 
 local mathFloor = math.floor
@@ -113,7 +112,6 @@ return itemDefs.registerType({
 		end,
 
 		onEquip = function(self)
-			equipmentBaseSubscriber(self)
 			local state = itemDefs.getState(self)
 			local definition = itemDefs.getDefinition(self)
 			local upgrades = definition.upgrades

@@ -15,6 +15,7 @@ return function()
 		armor = 0,
 		flatPhysicalDamageReduction = 0,
 		cooldownReduction = 0, -- multiplier
+		attackTimeReduction = 0, -- multiplier
 		moveSpeed = 0, -- flat increase
 		fireResist = 0,
 		coldResist = 0,

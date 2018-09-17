@@ -2,6 +2,7 @@ local Component = require 'modules.component'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local Enum = require 'utils.enum'
+local tween = require 'modules.tween'
 
 local state = Enum({
   'SHIELD_HIT',
@@ -61,6 +62,23 @@ function ForceField.update(self, dt)
   if shouldEnableShield then
     self.shieldHealth = self.maxShieldHealth
     self.state = state.SHIELD_UP
+
+    local isNewShield = not hasShield
+    if isNewShield then
+      love.audio.play(
+        love.audio.newSource('built/sounds/force-field.wav', 'static')
+      )
+      local oSize = self.size
+      self.size = 0
+      self.tween = tween.new(0.4, self, {size = oSize}, tween.easing.inCubic)
+    end
+  end
+
+  if self.tween then
+    local done = self.tween:update(dt)
+    if done then
+      self.tween = nil
+    end
   end
 
   if self.hitAnimation then
@@ -73,17 +91,24 @@ function ForceField.update(self, dt)
 end
 
 function ForceField.draw(self)
+  local oBlendMode = love.graphics.getBlendMode()
+  love.graphics.setBlendMode('add')
+  local percentHealthLeft = self.shieldHealth / self.maxShieldHealth
+  local size = self.size + (percentHealthLeft * 7)
+
   local r,g,b = 0.3, 0.5, 1
   if self.state == state.SHIELD_HIT then
     love.graphics.setColor(1,1,1,0.6)
   else
-    love.graphics.setColor(r, g, b, 0.05)
+    love.graphics.setColor(r, g, b, 0.5 * percentHealthLeft)
   end
-  love.graphics.circle('fill', self.x, self.y, self.size)
+  love.graphics.circle('fill', self.x, self.y, size)
 
   love.graphics.setLineWidth(1)
   love.graphics.setColor(r, g, b, 0.3)
-  love.graphics.circle('line', self.x, self.y, self.size)
+  love.graphics.circle('line', self.x, self.y, size)
+
+  love.graphics.setBlendMode(oBlendMode)
 end
 
 return Component.createFactory(ForceField)

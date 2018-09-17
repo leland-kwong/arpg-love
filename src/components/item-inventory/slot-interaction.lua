@@ -63,6 +63,12 @@ local signHumanized = function(v)
 end
 
 local modifierParsers = {
+  attackTimeReduction = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value..'%',
+      Color.WHITE, ' attack time reduction'
+    }
+  end,
   maxEnergy = function(value)
     return {
       Color.CYAN, signHumanized(value)..' '..value,
@@ -143,20 +149,20 @@ local modifierParsers = {
   end,
   cooldownReduction = function(value)
     return {
-      Color.CYAN, signHumanized(value)..' '..value,
-      Color.WHITE, '% cooldown reduction'
+      Color.CYAN, signHumanized(value)..' '..value..'%',
+      Color.WHITE, ' cooldown reduction'
     }
   end,
   energyCostReduction = function(value)
     return {
-      Color.CYAN, signHumanized(value)..' '..value,
-      Color.WHITE, '% energy cost reduction'
+      Color.CYAN, signHumanized(value)..' '..value..'%',
+      Color.WHITE, ' energy cost reduction'
     }
   end,
   experienceMultiplier = function(value)
     return {
-      Color.CYAN, signHumanized(value)..' '..value,
-      Color.WHITE, '% experience gain'
+      Color.CYAN, signHumanized(value)..' '..value..'%',
+      Color.WHITE, ' experience gain'
     }
   end
 }

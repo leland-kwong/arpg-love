@@ -18,6 +18,7 @@ return itemDefs.registerType({
 			moveSpeed = 10,
 			damage = 5,
 			cooldownReduction = 0.25,
+			attackTimeReduction = 0.25,
 			healthRegeneration = 4,
 			source = category
 		}

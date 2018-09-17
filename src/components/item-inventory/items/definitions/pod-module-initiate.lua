@@ -11,7 +11,6 @@ local Sound = require 'components.sound'
 local memoize = require 'utils.memoize'
 local LOS = memoize(require 'modules.line-of-sight')
 local extend = require 'utils.object-utils'.extend
-local equipmentBaseSubscriber = require 'components.item-inventory.items.equipment-base-subscriber'
 
 local bulletColor = {Color.rgba255(252, 122, 255)}
 
@@ -102,8 +101,6 @@ return itemDefs.registerType({
 		},
 
 		onEquip = function(self)
-			equipmentBaseSubscriber(self)
-
 			local state = itemDefs.getState(self)
 			local definition = itemDefs.getDefinition(self)
 			local upgrades = definition.upgrades
