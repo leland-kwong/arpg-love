@@ -59,15 +59,19 @@ end
 local function callSubscribersByTypeAndHandleCleanup(msgHandlers, nextValue)
 	local i = 1
 	local t = msgHandlers
-	local count = #t
 	local ret = nextValue
-	while (i <= count) do
+	while (i <= #t) do
 		local subscriber = t[i]
-		ret = subscriber(ret)
-		i = i + 1
+		local result = subscriber(ret)
+		if result == CLEANUP then
+			table.remove(t, i)
+		else
+			ret = result
+			i = i + 1
+		end
 	end
 
-	return (count == 0) and nil or ret
+	return (i == 1) and nil or ret
 end
 
 function M.new()

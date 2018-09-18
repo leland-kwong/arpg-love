@@ -8,7 +8,12 @@ local function filteredListeners()
 	local listener1 = msgBus.on(msgFoo, function()
 		return 1
 	end)
+	local listener2Called = false
 	local listener2 = msgBus.on(msgBar, function(input)
+		if listener2Called then
+			return msgBus.CLEANUP
+		end
+		listener2Called = true
 		return input
 	end)
 	msgBus.on(msgBar, function(input)
@@ -19,7 +24,6 @@ local function filteredListeners()
 	assert(msgBus.send(msgBar, 1) == 2)
 
 	msgBus.off(msgFoo, listener1)
-	msgBus.off(msgBar, listener2)
 	assert(msgBus.send(msgFoo) == nil)
 	assert(msgBus.send(msgBar, 1) == 2)
 end
