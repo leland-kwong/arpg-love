@@ -65,7 +65,7 @@ local function AiFactory(self, x, y, moveSpeed, scale)
     local spawnX, spawnY =
       self.x * self.gridSize + math.random(0, self.gridSize) * getRandomDirection(),
       self.y * self.gridSize + math.random(0, self.gridSize) * getRandomDirection()
-    return Ai.create(
+    local ai = Ai.create(
       aiRarity(aiPrototype)
         :set('x',                 spawnX)
         :set('y',                 spawnY)
@@ -76,9 +76,12 @@ local function AiFactory(self, x, y, moveSpeed, scale)
         :set('gridSize',          self.gridSize)
         :set('WALKABLE',          self.WALKABLE)
         :set('showAiPath',        self.showAiPath)
-    ):setParent(
-      Component.get('MAIN_SCENE')
     )
+    local listenerRef = msgBus.on(msgBus.GAME_UNLOADED, function()
+      msgBus.off(msgBus.GAME_UNLOADED, listenerRef)
+      ai:delete()
+    end)
+    return ai
   end)
 end
 

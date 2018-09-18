@@ -25,26 +25,27 @@ function WeaponCore.init(self)
   end
   self.animation = AnimationFactory:new(frames)
 
-  msgBus.subscribe(function(msgType, msgValue)
-    if msgBus.PLAYER_WEAPON_MUZZLE_FLASH == msgType then
-      self.muzzleFlashDuration = 0.1
-      self.muzzleFlashColor = msgValue.color
-    end
-    if msgBus.PLAYER_WEAPON_ATTACK == msgType then
+  self.listeners = {
+    msgBus.on(msgBus.PLAYER_WEAPON_ATTACK, function(msgValue)
       self.recoilDuration = msgValue.attackTime or 0.1
       self.recoilDurationRemaining = self.recoilDuration
-    end
-    if msgBus.PLAYER_WEAPON_RENDER_ATTACHMENT_ADD == msgType then
+    end),
+    msgBus.on(msgBus.PLAYER_WEAPON_RENDER_ATTACHMENT_ADD, function(msgValue)
       self.renderAttachmentAnimationSpeed = msgValue.animationSpeed or 1
       self.renderAttachmentAnimation = AnimationFactory:new(
         msgValue.animationFrames
       )
-    end
-    if msgBus.PLAYER_WEAPON_RENDER_ATTACHMENT_REMOVE == msgType then
+    end),
+    msgBus.on(msgBus.PLAYER_WEAPON_RENDER_ATTACHMENT_REMOVE, function(msgValue)
       self.renderAttachmentAnimationSpeed = nil
       self.renderAttachmentAnimation = nil
-    end
-  end)
+    end),
+    msgBus.on(msgBus.PLAYER_WEAPON_MUZZLE_FLASH, function(msgValue)
+      self.muzzleFlashDuration = 0.1
+      self.muzzleFlashColor = msgValue.color
+      return msgValue
+    end)
+  }
 end
 
 local max = math.max
@@ -184,6 +185,13 @@ function WeaponCore.draw(self)
   end
 
   drawRenderAttachment(self, posX, posY, self.angle)
+end
+
+function WeaponCore.final(self)
+  msgBus.send(msgBus.CLEANUP_LISTENERS, {
+    eventBus = msgBus,
+    listeners = self.listeners
+  })
 end
 
 return Component.createFactory(WeaponCore)

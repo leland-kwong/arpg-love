@@ -22,7 +22,6 @@ end
 local function addWallTileEntity(self, positionIndex, animation, x, y, opacity)
   local wallTileEntity = self.wallObjectsPool:get()
     :changeTile(animation, x, y, opacity)
-    :setParent(Component.get('MAIN_SCENE'))
   self.wallTileCache:set(positionIndex, wallTileEntity)
 end
 

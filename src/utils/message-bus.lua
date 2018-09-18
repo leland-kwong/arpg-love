@@ -130,15 +130,16 @@ function M.new()
 			handlersByType = {}
 			msgHandlersByMessageType[messageType] = handlersByType
 		end
-		table.insert(handlersByType, {handler, priority or 2})
-		return handler -- this can be used as the reference for removing a handler
+		local handlerRef = {handler, priority or 2, messageType}
+		table.insert(handlersByType, handlerRef)
+		return handlerRef -- this can be used as the reference for removing a handler
 	end
 
-	function msgBus.off(messageType, handler)
+	function msgBus.off(messageType, handlerRef)
 		local handlersByType = msgHandlersByMessageType[messageType]
 		for i=1, #handlersByType do
-			local fn = handlersByType[i][1]
-			local isMatch = fn == handler
+			local ref = handlersByType[i]
+			local isMatch = ref == handlerRef
 			if (isMatch) then
 				table.remove(handlersByType, i)
 				return

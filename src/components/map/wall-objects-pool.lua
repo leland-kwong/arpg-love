@@ -1,3 +1,4 @@
+local Component = require 'modules.component'
 local MainMapSolidsFactory = require 'components.map.main-map-solids'
 
 local function generateWallObjects(gridSize, cacheSize)
@@ -12,7 +13,7 @@ local function generateWallObjects(gridSize, cacheSize)
         ox = 0,
         oy = 0,
         gridSize = gridSize
-      })
+      }):setParent(Component.get('MAIN_SCENE'))
     )
   end
 
