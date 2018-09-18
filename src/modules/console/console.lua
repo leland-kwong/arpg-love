@@ -126,6 +126,15 @@ function Console.update(self)
   s.accumulatedMemoryUsed = s.accumulatedMemoryUsed + s.currentMemoryUsed
 end
 
+local function calcMessageBusHandlers()
+  local reducers, handlers, handlersByType = msgBus.getStats()
+  local handlersByTypeCount = 0
+  for _,handlers in pairs(handlersByType) do
+    handlersByTypeCount = handlersByTypeCount + #handlers
+  end
+  return #reducers + #handlers + handlersByTypeCount
+end
+
 function Console.draw(self)
   if not state.showConsole then
     return
@@ -172,7 +181,7 @@ function Console.draw(self)
       memoryAvg = string.format('%0.2f', s.accumulatedMemoryUsed / s.frameCount / 1024),
       delta = love.timer.getAverageDelta(),
       fps = love.timer.getFPS(),
-      eventHandlers = #select(2, msgBus.getStats())
+      eventHandlers = calcMessageBusHandlers()
     },
     lineHeight,
     edgeOffset,
