@@ -22,19 +22,21 @@ end
 
 function ScreenFx.init(self)
   self.tween = tween.new(1.8, self, {opacity = 0}, tween.easing.outExpo)
-  msgBus.subscribe(function(msgType, msgValue)
+
+  msgBus.on(msgBus.PLAYER_HIT_RECEIVED, function(msgValue)
     if self:isDeleted() then
       return msgBus.CLEANUP
     end
 
-    if msgBus.PLAYER_HIT_RECEIVED == msgType then
-      if msgValue <= 0 then
-        return
-      end
-      self.opacity = self.damageFlashOpacity
-      self.tween:reset()
-      self.currentTween = self.tween
+    if msgValue <= 0 then
+      return msgValue
     end
+
+    self.opacity = self.damageFlashOpacity
+    self.tween:reset()
+    self.currentTween = self.tween
+
+    return msgValue
   end)
 end
 

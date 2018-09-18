@@ -122,16 +122,16 @@ function Hud.init(self)
     end
   }):setParent(self)
 
-  msgBus.subscribe(function(msgType, msgValue)
+  msgBus.on(msgBus.PLAYER_HIT_RECEIVED, function(msgValue)
     if self:isDeleted() then
       return msgBus.CLEANUP
     end
 
-    if msgBus.PLAYER_HIT_RECEIVED == msgType then
-      self.rootStore:set('health', function(state)
-        return max(0, state.health - msgValue)
-      end)
-    end
+    self.rootStore:set('health', function(state)
+      return max(0, state.health - msgValue)
+    end)
+
+    return msgValue
   end)
 
   setupExperienceIndicator(self)

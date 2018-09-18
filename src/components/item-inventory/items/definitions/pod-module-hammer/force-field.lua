@@ -32,25 +32,20 @@ local function hitAnimation()
 end
 
 function ForceField.init(self)
-  -- body
-  msgBus.addReducer(function(msgType, msgValue)
+  msgBus.on(msgBus.PLAYER_HIT_RECEIVED, function(msgValue)
     if self:isDeleted() then
       return msgBus.CLEANUP
     end
 
-    if (msgBus.PLAYER_HIT_RECEIVED == msgType) then
-      self.unhitDuration = 0
-      local damageAfterAbsorption = math.max(0, msgValue - self.shieldHealth)
-      -- modify shield health
-      self.shieldHealth = math.max(0, self.shieldHealth - msgValue)
+    self.unhitDuration = 0
+    local damageAfterAbsorption = math.max(0, msgValue - self.shieldHealth)
+    -- modify shield health
+    self.shieldHealth = math.max(0, self.shieldHealth - msgValue)
 
-      if self.shieldHealth > 0 then
-        self.hitAnimation = coroutine.wrap(hitAnimation)
-      end
-      return damageAfterAbsorption
+    if self.shieldHealth > 0 then
+      self.hitAnimation = coroutine.wrap(hitAnimation)
     end
-
-    return msgValue
+    return damageAfterAbsorption
   end)
 end
 
