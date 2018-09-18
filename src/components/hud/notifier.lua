@@ -23,21 +23,21 @@ function Notifier.init(self)
     font = font.primary.font,
   })
   self.eventLog = logger:new(4)
-  msgBus.subscribe(function(msgType, msgValue)
-    if msgBus.NOTIFIER_NEW_EVENT == msgType then
-      --[[ SCHEMA
-        msgValue = {
-          title = title,
-          description = description,
-          icon = icon
-        }
-      ]]
-      msgValue.timestamp = os.date('%X')
-      self.eventLog:add(msgValue)
-      self.opacity = 1
-      self.tween = tween.new(4, self, {opacity = 0}, tween.easing.inExpo)
-      self:setDisabled(false)
-    end
+  msgBus.on(msgBus.NOTIFIER_NEW_EVENT, function(msgValue)
+    --[[ SCHEMA
+      msgValue = {
+        title = title,
+        description = description,
+        icon = icon
+      }
+    ]]
+    msgValue.timestamp = os.date('%X')
+    self.eventLog:add(msgValue)
+    self.opacity = 1
+    self.tween = tween.new(4, self, {opacity = 0}, tween.easing.inExpo)
+    self:setDisabled(false)
+
+    return msgValue
   end)
 end
 
