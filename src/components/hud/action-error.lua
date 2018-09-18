@@ -17,23 +17,23 @@ local ActionError = {
 }
 
 function ActionError.init(self)
-  msgBus.subscribe(function(msgType, msgValue)
+  msgBus.on(msgBus.PLAYER_ACTION_ERROR, function(msgValue)
     if self:isDeleted() then
       return msgBus.CLEANUP
     end
 
-    if msgBus.PLAYER_ACTION_ERROR == msgType then
-      local Sound = require 'components.sound'
-      love.audio.play(Sound.ACTION_ERROR)
-      local textColor = {1,1,0,1}
-      local subject = {
-        message = msgValue,
-        color = textColor
-      }
-      local endColor = {1,1,0,0} -- fade out
-      self.errorMessage = subject
-      self.errorMessageTween = tween.new(2.5, textColor, endColor, tween.easing.inExpo)
-    end
+    local Sound = require 'components.sound'
+    love.audio.play(Sound.ACTION_ERROR)
+    local textColor = {1,1,0,1}
+    local subject = {
+      message = msgValue,
+      color = textColor
+    }
+    local endColor = {1,1,0,0} -- fade out
+    self.errorMessage = subject
+    self.errorMessageTween = tween.new(2.5, textColor, endColor, tween.easing.inExpo)
+
+    return msgValue
   end)
 end
 
