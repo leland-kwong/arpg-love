@@ -134,12 +134,13 @@ function M.new()
 
 	-- this should be used for just debugging and performance monitoring
 	function msgBus.getStats()
-		return allReducers, msgHandlers
+		return allReducers, msgHandlers, msgHandlersByMessageType
 	end
 
 	function msgBus.clearAll()
 		allReducers = {}
 		msgHandlers = {}
+		msgHandlersByMessageType = {}
 	end
 
 	return msgBus
