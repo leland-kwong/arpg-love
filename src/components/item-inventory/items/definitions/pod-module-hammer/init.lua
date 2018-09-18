@@ -1,12 +1,13 @@
 local Component = require 'modules.component'
 local Color = require 'modules.color'
 local groups = require 'components.groups'
-local config = require 'components.item-inventory.items.config'
+local itemConfig = require 'components.item-inventory.items.config'
 local functional = require 'utils.functional'
 local itemDefs = require 'components.item-inventory.items.item-definitions'
 local msgBus = require 'components.msg-bus'
 local AbilityBase = require 'components.abilities.base-class'
 local tween = require 'modules.tween'
+local config = require 'config.config'
 
 local itemSource = 'H_2_HAMMER'
 local healType = 2
@@ -104,6 +105,111 @@ local function triggerAttack(self)
 	end
 end
 
+local function angleFromDirection(dx, dy, startAngle)
+	return (math.atan2(dx, dy) * -1) + startAngle
+end
+
+local setupChanceFunctions = require 'utils.chance'
+local genFloorCrackStyle = setupChanceFunctions({
+	{
+		chance = 1,
+		__call = function()
+			return 'floor-crack-1'
+		end
+	},
+	{
+		chance = 1,
+		__call = function()
+			return 'floor-crack-2'
+		end
+	},
+	{
+		chance = 1,
+		__call = function()
+			return 'floor-crack-3'
+		end
+	}
+})
+
+local function drawFloorCrack(style, x, y, angle)
+	local AnimationFactory = require 'components.animation-factory'
+	local floorCrackSprite = AnimationFactory:newStaticSprite(style)
+	local ox, oy = floorCrackSprite:getSourceOffset()
+	love.graphics.draw(
+		AnimationFactory.atlas,
+		floorCrackSprite.sprite,
+		x, y,
+		angle,
+		1, 1,
+		ox, oy
+	)
+end
+
+local Fissure = Component.createFactory(
+	AbilityBase({
+		group = groups.all,
+		minDamage = 3,
+		maxDamage = 5,
+		weaponDamageScaling = 1.3,
+		width = 10,
+		speed = 250,
+		lifeTime = 0,
+		maxAnimationLifeTime = 1,
+		maxWallLifeTime = 2,
+		init = function(self)
+			self.crackSize = 32
+			local collisionWorlds = require 'components.collision-worlds'
+			local collisionSize = self.crackSize
+			self.collision = self:addCollisionObject(
+				'PROJECTILE',
+				self.x,
+				self.y,
+				collisionSize,
+				collisionSize
+			):addToWorld(collisionWorlds.map)
+			local Position = require 'utils.position'
+			self.dx, self.dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
+
+			self.floorCrackStyles = {}
+			for i=1, 4 do
+				table.insert(self.floorCrackStyles, genFloorCrackStyle())
+			end
+
+			local shockWaveDistance = (#self.floorCrackStyles + 1) * self.crackSize
+			local finalX = self.x + self.dx * shockWaveDistance
+			local finalY = self.y + self.dy * shockWaveDistance
+			self.collision:move(finalX, finalY, function(item, other)
+				if other.group == 'ai' then
+					msgBus.send(msgBus.CHARACTER_HIT, {
+						parent =  other.parent,
+						damage = calcDamage(self)
+					})
+					return 'touch'
+				end
+			end)
+		end,
+		update = function(self, dt)
+			self.lifeTime = self.lifeTime + dt
+			if self.lifeTime > self.maxAnimationLifeTime then
+				self:delete()
+			end
+		end,
+		draw = function(self)
+			local crackStyles = self.floorCrackStyles
+			love.graphics.setColor(0,0,0,0.8)
+			for i=1, #crackStyles do
+				local dist = self.crackSize * i
+				drawFloorCrack(
+					crackStyles[i],
+					self.x + dist * self.dx,
+					self.y + dist * self.dy,
+					angleFromDirection(self.dx, self.dy, math.pi/2)
+				)
+			end
+		end
+	})
+)
+
 local Attack = Component.createFactory(
 	AbilityBase({
 		group = groups.all,
@@ -117,6 +223,13 @@ local Attack = Component.createFactory(
 		opacity = 1,
 		init = function(self)
 			self.animationTween = tween.new(self.impactAnimationDuration, self, { opacity = 0 }, tween.easing.inExpo)
+
+			Fissure.create({
+				x = self.x,
+				y = self.y,
+				x2 = self.x2,
+				y2 = self.y2
+			})
 		end,
 		update = function(self, dt)
 			-- we must trigger after init since the attack gets modified immediately upon creation
@@ -185,8 +298,8 @@ return itemDefs.registerType({
 	properties = {
 		sprite = "weapon-module-hammer",
 		title = 'h-2 hammer',
-		rarity = config.rarity.NORMAL,
-		category = config.category.POD_MODULE,
+		rarity = itemConfig.rarity.NORMAL,
+		category = itemConfig.category.POD_MODULE,
 
 		levelRequirement = 1,
 		attackTime = attackTime,
@@ -203,6 +316,12 @@ return itemDefs.registerType({
 					duration = 99999,
 					shieldHealth = 100
 				},
+			},
+			{
+				title = 'fissure',
+				description = '',
+				experienceRequired = 0,
+				props = {},
 			}
 		},
 
@@ -225,6 +344,9 @@ return itemDefs.registerType({
 				then
 					if (msgValue.level == 1) then
 						handleUpgrade1(self)
+					end
+					if (msgValue.level == 2) then
+						itemDefs.getState(self).level2Ready = true
 					end
 				end
 			end)

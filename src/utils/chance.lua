@@ -1,4 +1,5 @@
 local function CallableObject(props)
+  assert(type(props.chance) == 'number')
   assert(type(props.__call) == 'function', '__call property must be a function')
   return setmetatable(props, {
     __call = props.__call
