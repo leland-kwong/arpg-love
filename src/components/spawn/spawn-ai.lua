@@ -76,28 +76,15 @@ local function AiFactory(self, x, y, moveSpeed, scale)
         :set('gridSize',          self.gridSize)
         :set('WALKABLE',          self.WALKABLE)
         :set('showAiPath',        self.showAiPath)
-    ):setParent(self)
+    ):setParent(
+      Component.get('MAIN_SCENE')
+    )
   end)
 end
 
 function SpawnerAi.init(self)
-  self.allAis = AiFactory(self)
-end
-
-function SpawnerAi.update(self, dt)
-  local i = 1
-  while i <= #self.allAis do
-    local ai = self.allAis[i]
-    if ai:isDeleted() then
-      table.remove(self.allAis, i)
-    else
-      ai._update2(ai, self.grid, dt)
-      i = i + 1
-    end
-  end
-  if #self.allAis == 0 then
-    self:delete(true)
-  end
+  AiFactory(self)
+  self:delete()
 end
 
 return Component.createFactory(SpawnerAi)

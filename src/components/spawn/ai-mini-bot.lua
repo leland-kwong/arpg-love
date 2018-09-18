@@ -40,7 +40,8 @@ return function()
   local ability1 = (function()
     local curCooldown = 0
     local skill = {
-      range = 8
+      range = 8,
+      attackTime = 0.15
     }
 
     function skill.use(self, targetX, targetY)

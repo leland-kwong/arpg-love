@@ -12,6 +12,7 @@ local SlimeAttack = Component.createFactory({
   group = groups.all,
   minDamage = 5,
   maxDamage = 10,
+  attackTime = 0.2,
   init = function(self)
     local items, len = collisionWorlds.map:queryRect(
       self.x2 - self.w/2,
@@ -72,7 +73,8 @@ return function()
   local abilityDash = (function()
     local curCooldown = 0
     local skill = {
-      range = 6
+      range = 6,
+      attackTime = 0.2,
     }
 
     function skill.use(self)
@@ -82,7 +84,8 @@ return function()
         local Dash = require 'components.abilities.dash'
         local projectile = Dash.create({
             fromCaster = self
-          , cooldown = 1
+          , cooldown = 0.5
+          , attackTime = skill.attackTime
           , duration = 7/60
           , range = skill.range
         })

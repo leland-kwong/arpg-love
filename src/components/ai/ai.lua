@@ -22,6 +22,7 @@ local noop = require 'utils.noop'
 local Lru = require 'utils.lru'
 local Sound = require 'components.sound'
 local setElectricShockShader = require 'modules.shaders.shader-electric-shock'
+local Enum = require 'utils.enum'
 
 local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
 local shader = love.graphics.newShader(pixelOutlineShader)
@@ -29,13 +30,23 @@ local atlasData = animationFactory.atlasData
 shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
 shader:send('outline_width', 1)
 
+local states = Enum({
+  'ATTACKING', -- attack has been triggered and character and character is still recovering from it
+  'IDLE',
+  'MOVING',
+  'FREE_MOVING'
+})
+
 local Ai = {
   group = groups.all,
+
+  state = states.IDLE,
+  attackRecoveryTime = 0,
 
   -- calculated base properties (properties that can be changed from external modifiers)
   silenced = false,
   moveSpeed = 100,
-  attackRange = 8,
+  attackRange = 8, -- distance in grid units from the player that the ai will stop moving
   sightRadius = 11,
   armor = 0,
   flatPhysicalDamageReduction = 0,
@@ -43,7 +54,8 @@ local Ai = {
   maxHealth = 10,
   healthRegeneration = 0,
   damage = 0,
-  experience = 1,
+
+  experience = 1, -- amount of experience the ai grants when destroyed
 
   frameCount = 0,
   clock = 0, -- amount of time the ai has been alive
@@ -334,9 +346,13 @@ local function getNeighbors(agent, neighborOffset)
 end
 
 local min = math.min
-local function setNextPosition(self, dt, radius)
+local function setNextPosition(self, speed, radius)
+  local finiteState = self:getFiniteState()
+  if (finiteState ~= states.MOVING) and (finiteState ~= states.FREE_MOVING) then
+    return
+  end
+
   local neighbors = getNeighbors(self, 10)
-  local speed = max(0, self:getCalculatedStat('moveSpeed') * dt)
 
 	-- These calcs are to get an adjustment for movement speed based on distance.
 	-- Don't take this as a complete solution as it only works based on the mouse target for
@@ -381,9 +397,31 @@ local function setNextPosition(self, dt, radius)
   self.collision:update(self.x, self.y)
 end
 
-function Ai._update2(self, grid, dt)
+function Ai.getFiniteState(self)
+  if self.modifiers.freelyMove > 0 then
+    return states.FREE_MOVING
+  end
+
+  if self.attackRecoveryTime > 0 then
+    return states.ATTACKING
+  end
+
+  if self.canSeeTarget then
+    return states.MOVING
+  end
+
+  return states.IDLE
+end
+
+function Ai.getActualSpeed(self, dt)
+  return max(0, self:getCalculatedStat('moveSpeed') * dt)
+end
+
+function Ai.update(self, dt)
+  local grid = self.grid
   self.clock = self.clock + dt
   self.frameCount = self.frameCount + 1
+  self.attackRecoveryTime = self.attackRecoveryTime - dt
 
   handleHits(self, dt)
   if self.destroyedAnimation then
@@ -455,10 +493,15 @@ function Ai._update2(self, grid, dt)
       local abilities = self.abilities
       for i=1, #abilities do
         local ability = abilities[i]
-        if (distFromTarget <= ability.range * self.gridSize) then
+        local isInAbilityRange = distFromTarget <= ability.range * self.gridSize
+        local isRecoveringFromAttack = self.attackRecoveryTime > 0
+        local finiteState = self:getFiniteState()
+        local canUseAbility = isInAbilityRange and (finiteState == states.MOVING)
+        if (canUseAbility) then
+          self.attackRecoveryTime = ability.attackTime
           ability.use(self, targetX, targetY)
-          ability.updateCooldown(self, dt)
         end
+        ability.updateCooldown(self, dt)
       end
     end
 
@@ -473,10 +516,10 @@ function Ai._update2(self, grid, dt)
       local path = self.getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
       local targetPos = path[#path]
       self.targetX, self.targetY = targetPos.x * self.gridSize, targetPos.y * self.gridSize
-      setNextPosition(self, dt, 40)
+      setNextPosition(self, self:getActualSpeed(dt), 40)
     end
   elseif self.targetX then
-    setNextPosition(self, dt, 40)
+    setNextPosition(self, self:getActualSpeed(dt), 40)
   end
 
   if self.isInViewOfPlayer then
@@ -490,7 +533,7 @@ function Ai._update2(self, grid, dt)
 end
 
 local perf = require'utils.perf'
-Ai._update2 = perf({
+Ai.update = perf({
   enabled = false,
   done = function(_, totalTime, callCount)
     local avgTime = totalTime / callCount
@@ -498,7 +541,7 @@ Ai._update2 = perf({
       consoleLog('ai update -', avgTime)
     end
   end
-})(Ai._update2)
+})(Ai.update)
 
 local function drawShadow(self, h, w, ox, oy)
   local heightScaleDiff = self.z * 0.01

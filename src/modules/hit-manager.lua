@@ -71,7 +71,9 @@ end
 local function hitManager(self, dt, onDamageTaken)
   local arePropertiesSetup = self.modifiers ~= nil
   if not arePropertiesSetup then
-    self.modifiers = {}
+    self.modifiers = {
+      freelyMove = 0, -- if > 0 this allows the character to move regardless of any other states
+    }
     self.modifiersApplied = {}
     self.hits = {}
     self.getCalculatedStat = getCalculatedStat

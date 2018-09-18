@@ -17,7 +17,8 @@ function Dash.init(self)
     parent = self.fromCaster,
     duration = self.duration,
     modifiers = {
-      moveSpeed = boost
+      moveSpeed = boost,
+      freelyMove = 1
     },
     source = 'MOCK_SHOES'
   })
