@@ -17,6 +17,7 @@ local ForceField = {
   maxShieldHealth = 100,
   unhitDuration = 0,
   unhitDurationRequirement = 2,
+  rechargeRate = 2,
   state = state.SHIELD_DOWN
 }
 
@@ -60,7 +61,7 @@ function ForceField.update(self, dt)
   local hasShield = self.shieldHealth > 0
   local shouldEnableShield = self.unhitDuration >= self.unhitDurationRequirement
   if shouldEnableShield then
-    self.shieldHealth = self.maxShieldHealth
+    self.shieldHealth = math.min(self.maxShieldHealth, self.shieldHealth + self.rechargeRate)
     self.state = state.SHIELD_UP
 
     local isNewShield = not hasShield

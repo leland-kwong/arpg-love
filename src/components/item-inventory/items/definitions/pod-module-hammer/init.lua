@@ -146,6 +146,27 @@ local Attack = Component.createFactory(
 	})
 )
 
+local function handleUpgrade1(self)
+	local upgrades = itemDefs.getDefinition(self).upgrades
+	local up1 = upgrades[1]
+	local state = itemDefs.getState(self)
+	if state.forceField then
+		return
+	end
+	local ForceField = require 'components.item-inventory.items.definitions.pod-module-hammer.force-field'
+	local playerRef = Component.get('PLAYER')
+	state.forceField = ForceField.create({
+		x = playerRef.x,
+		y = playerRef.y,
+		size = 17,
+		maxShieldHealth = 30,
+		unhitDurationRequirement = 1.5,
+		drawOrder = function()
+			return playerRef:drawOrder() + 3
+		end
+	}):setParent(playerRef)
+end
+
 return itemDefs.registerType({
 	type = 'pod-module-hammer',
 
@@ -201,25 +222,10 @@ return itemDefs.registerType({
 			msgBus.subscribe(function(msgType, msgValue)
 				if (msgBus.ITEM_UPGRADE_UNLOCKED == msgType)
 					and (msgValue.item == self)
-					and (msgValue.level == 1) then
-					local upgrades = itemDefs.getDefinition(self).upgrades
-					local up1 = upgrades[1]
-					local state = itemDefs.getState(self)
-					if state.forceField then
-						return
+				then
+					if (msgValue.level == 1) then
+						handleUpgrade1(self)
 					end
-					local ForceField = require 'components.item-inventory.items.definitions.pod-module-hammer.force-field'
-					local playerRef = Component.get('PLAYER')
-					state.forceField = ForceField.create({
-						x = playerRef.x,
-						y = playerRef.y,
-						size = 17,
-						maxShieldHealth = 30,
-						unhitDurationRequirement = 1.5,
-						drawOrder = function()
-							return playerRef:drawOrder() + 3
-						end
-					}):setParent(playerRef)
 				end
 			end)
 		end,
