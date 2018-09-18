@@ -77,3 +77,9 @@ msgBus.subscribe(function(msgType, msgValue)
 
   handleUpgrades(msgValue)
 end)
+
+msgBus.on(msgBus.ITEM_CHECK_UPGRADE_AVAILABILITY, function(v)
+  local item, level = v.item, v.level
+  local upgrades = itemDefs.getDefinition(item).upgrades
+  return item.experience >= upgrades[level].experienceRequired
+end)
