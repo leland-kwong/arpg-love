@@ -56,24 +56,33 @@ local function callSubscribersAndHandleCleanup(msgHandlers, msgType, nextValue)
 	end
 end
 
-local function callSubscribersByTypeAndHandleCleanup(msgHandlers, nextValue)
-	local i = 1
-	local t = msgHandlers
+local function callSubscribersByTypeAndHandleCleanup(queue, msgHandlers, nextValue)
+	local handlerCount = #msgHandlers
+	if handlerCount == 0 then
+		return nil
+	end
+
 	local ret = nextValue
-	while (i <= #t) do
-		local subscriber = t[i]
-		local result = subscriber(ret)
+	local callback = function(handler)
+		local result = handler(ret)
 		if result == CLEANUP then
-			table.remove(t, i)
+			table.remove(msgHandlers, i)
 		else
 			ret = result
-			i = i + 1
 		end
 	end
 
-	return (i == 1) and nil or ret
+	for i=1, handlerCount do
+		local h = msgHandlers[i]
+		local handler, priority = h[1], h[2]
+		queue:add(priority, callback, handler)
+	end
+
+	queue:flush()
+	return ret
 end
 
+local Q = require 'modules.queue'
 function M.new()
 	local msgBus = {
 		CLEANUP = CLEANUP
@@ -81,6 +90,7 @@ function M.new()
 	local allReducers = {}
 	local msgHandlers = {}
 	local msgHandlersByMessageType = {}
+	local queue = Q:new()
 
 	--[[
 	@msgType - Used by a reducer to determine how to handle the value.
@@ -93,7 +103,7 @@ function M.new()
 
 		local handlersByType = msgHandlersByMessageType[msgType]
 		if handlersByType then
-			return callSubscribersByTypeAndHandleCleanup(handlersByType, nextValue)
+			return callSubscribersByTypeAndHandleCleanup(queue, handlersByType, nextValue)
 		end
 	end
 
@@ -114,20 +124,20 @@ function M.new()
 		msgHandlers[#msgHandlers + 1] = handler
 	end
 
-	function msgBus.on(messageType, handler)
+	function msgBus.on(messageType, handler, priority)
 		local handlersByType = msgHandlersByMessageType[messageType]
 		if (not handlersByType) then
 			handlersByType = {}
 			msgHandlersByMessageType[messageType] = handlersByType
 		end
-		table.insert(handlersByType, handler)
+		table.insert(handlersByType, {handler, priority or 2})
 		return handler -- this can be used as the reference for removing a handler
 	end
 
 	function msgBus.off(messageType, handler)
 		local handlersByType = msgHandlersByMessageType[messageType]
 		for i=1, #handlersByType do
-			local fn = handlersByType[i]
+			local fn = handlersByType[i][1]
 			local isMatch = fn == handler
 			if (isMatch) then
 				table.remove(handlersByType, i)

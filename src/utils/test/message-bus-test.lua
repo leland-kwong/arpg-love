@@ -28,6 +28,17 @@ local function filteredListeners()
 	assert(msgBus.send(msgBar, 1) == 2)
 end
 
+local function listenersPriorityOrdering()
+	local msgBus = messageBus.new()
+	msgBus.on('foo', function(input)
+		return input + 1
+	end, 2)
+	msgBus.on('foo', function()
+		return 2
+	end, 1)
+	assert(msgBus.send('foo') == 3)
+end
+
 local function multipleReducers()
 	local msgBus = messageBus.new()
 	local increaseDamageBy1 = function(msgType, msgValue)
@@ -124,6 +135,7 @@ local function test()
 	multipleReducers()
 	removeFunctions()
 	filteredListeners()
+	listenersPriorityOrdering()
 	-- perfTest()
 end
 

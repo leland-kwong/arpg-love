@@ -46,7 +46,7 @@ function ForceField.init(self)
       self.hitAnimation = coroutine.wrap(hitAnimation)
     end
     return damageAfterAbsorption
-  end)
+  end, 1)
 end
 
 function ForceField.update(self, dt)
