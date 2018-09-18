@@ -106,7 +106,10 @@ return itemDefs.registerType({
 			local upgrades = definition.upgrades
 			state.onHit = function(attack, hitMessage)
 				local up1 = upgrades[1]
-				local up1Ready = self.experience >= up1.experienceRequired
+				local up1Ready = msgBus.send(msgBus.ITEM_CHECK_UPGRADE_AVAILABILITY, {
+					item = self,
+					level = 1
+				})
 				if up1Ready then
 					msgBus.send(msgBus.CHARACTER_HIT, {
 						parent = hitMessage.parent,
@@ -122,9 +125,12 @@ return itemDefs.registerType({
 					)
 				end
 
-				local up2 = upgrades[2]
-				local up2Ready = self.experience >= up2.experienceRequired
+				local up2Ready = msgBus.send(msgBus.ITEM_CHECK_UPGRADE_AVAILABILITY, {
+					item = self,
+					level = 2
+				})
 				if up2Ready then
+					local up2 = upgrades[2]
 					hitMessage.criticalChance = up2.props.critChance
 					hitMessage.criticalMultiplier = math.random(
 						up2.props.minCritMultiplier * 100,
@@ -132,8 +138,10 @@ return itemDefs.registerType({
 					) / 100
 				end
 
-				local up3 = upgrades[3]
-				local up3Ready = self.experience >= up3.experienceRequired
+				local up3Ready = msgBus.send(msgBus.ITEM_CHECK_UPGRADE_AVAILABILITY, {
+					item = self,
+					level = 3
+				})
 				if up3Ready then
 					if attack.numBounces >= attack.maxBounces then
 						return hitMessage
