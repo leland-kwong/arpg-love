@@ -19,6 +19,7 @@ end
 
 local function insertTestItems(rootStore)
   local itemsPath = 'components.item-inventory.items.definitions'
+  rootStore:addItemToInventory(require(itemsPath..'.pod-module-initiate').create())
   rootStore:addItemToInventory(require(itemsPath..'.pod-module-hammer').create())
   rootStore:addItemToInventory(require(itemsPath..'.pod-module-fireball').create())
 
