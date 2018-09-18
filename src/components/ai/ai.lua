@@ -406,7 +406,7 @@ function Ai.getFiniteState(self)
     return states.ATTACKING
   end
 
-  if self.canSeeTarget then
+  if self.targetX ~= nil then
     return states.MOVING
   end
 

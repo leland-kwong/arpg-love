@@ -46,8 +46,9 @@ local hammerWorld = bump.newWorld(4)
 local hitModifers = {
 	armor = -200
 }
-local attackCooldown = 0.2
-local hitModifierDuration = attackCooldown * 1.2
+local attackTime = 0.3
+local attackCooldown = 0
+local hitModifierDuration = attackTime * 1.2
 
 local function triggerAttack(self)
 	local Position = require 'utils.position'
@@ -106,16 +107,16 @@ end
 local Attack = Component.createFactory(
 	AbilityBase({
 		group = groups.all,
-		minDamage = 2,
-		maxDamage = 4,
+		minDamage = 4,
+		maxDamage = 6,
 		weaponDamageScaling = 1.2,
 		w = 40,
 		h = 40,
-		impactDuration = 0.4,
+		impactAnimationDuration = 0.4,
 		cooldown = attackCooldown,
 		opacity = 1,
 		init = function(self)
-			self.animationTween = tween.new(self.impactDuration, self, { opacity = 0 }, tween.easing.inExpo)
+			self.animationTween = tween.new(self.impactAnimationDuration, self, { opacity = 0 }, tween.easing.inExpo)
 		end,
 		update = function(self, dt)
 			-- we must trigger after init since the attack gets modified immediately upon creation
@@ -129,7 +130,9 @@ local Attack = Component.createFactory(
 			end
 		end,
 		draw = function(self)
-			love.graphics.setColor(0,0,0,0.3 * self.opacity)
+			love.graphics.setColor(
+				Color.rgba255(244, 177, 70, 0.3 * self.opacity)
+			)
 			love.graphics.rectangle('fill',
 				self.collisionX,
 				self.collisionY,
@@ -165,7 +168,7 @@ return itemDefs.registerType({
 		category = config.category.POD_MODULE,
 
 		levelRequirement = 1,
-		attackTime = 0.1,
+		attackTime = attackTime,
 		energyCost = function(self)
 			return 2
 		end,
@@ -174,7 +177,7 @@ return itemDefs.registerType({
 			{
 				title = 'force field',
 				description = '',
-				experienceRequired = 10,
+				experienceRequired = 0,
 				props = {
 					duration = 99999,
 					shieldHealth = 100
