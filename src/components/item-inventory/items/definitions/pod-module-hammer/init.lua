@@ -157,6 +157,9 @@ local Fissure = Component.createFactory(
 		maxAnimationLifeTime = 1,
 		maxWallLifeTime = 2,
 		init = function(self)
+			local Position = require 'utils.position'
+			self.dx, self.dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
+
 			self.crackSize = 32
 			local collisionWorlds = require 'components.collision-worlds'
 			local collisionSize = self.crackSize
@@ -165,17 +168,17 @@ local Fissure = Component.createFactory(
 				self.x,
 				self.y,
 				collisionSize,
-				collisionSize
+				collisionSize,
+				self.crackSize/2,
+				self.crackSize/2
 			):addToWorld(collisionWorlds.map)
-			local Position = require 'utils.position'
-			self.dx, self.dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
 
 			self.floorCrackStyles = {}
 			for i=1, 4 do
 				table.insert(self.floorCrackStyles, genFloorCrackStyle())
 			end
 
-			local shockWaveDistance = (#self.floorCrackStyles + 1) * self.crackSize
+			local shockWaveDistance = (#self.floorCrackStyles) * self.crackSize
 			local finalX = self.x + self.dx * shockWaveDistance
 			local finalY = self.y + self.dy * shockWaveDistance
 			self.collision:move(finalX, finalY, function(item, other)
@@ -195,8 +198,20 @@ local Fissure = Component.createFactory(
 			end
 		end,
 		draw = function(self)
+			local opacity = 1 - (self.lifeTime / self.maxAnimationLifeTime)
 			local crackStyles = self.floorCrackStyles
-			love.graphics.setColor(0,0,0,0.8)
+			love.graphics.setColor(0,0,0,0.3 * opacity)
+			for i=1, #crackStyles do
+				local dist = self.crackSize * i
+				drawFloorCrack(
+					crackStyles[i],
+					self.x + dist * self.dx,
+					self.y + dist * self.dy - 2,
+					angleFromDirection(self.dx, self.dy, math.pi/2)
+				)
+			end
+
+			love.graphics.setColor(0,0,0,0.8 * opacity)
 			for i=1, #crackStyles do
 				local dist = self.crackSize * i
 				drawFloorCrack(
@@ -213,8 +228,8 @@ local Fissure = Component.createFactory(
 local Attack = Component.createFactory(
 	AbilityBase({
 		group = groups.all,
-		minDamage = 4,
-		maxDamage = 6,
+		minDamage = 5,
+		maxDamage = 8,
 		weaponDamageScaling = 1.2,
 		w = 40,
 		h = 40,
@@ -223,13 +238,6 @@ local Attack = Component.createFactory(
 		opacity = 1,
 		init = function(self)
 			self.animationTween = tween.new(self.impactAnimationDuration, self, { opacity = 0 }, tween.easing.inExpo)
-
-			Fissure.create({
-				x = self.x,
-				y = self.y,
-				x2 = self.x2,
-				y2 = self.y2
-			})
 		end,
 		update = function(self, dt)
 			-- we must trigger after init since the attack gets modified immediately upon creation
@@ -311,7 +319,7 @@ return itemDefs.registerType({
 			{
 				title = 'force field',
 				description = '',
-				experienceRequired = 0,
+				experienceRequired = 10,
 				props = {
 					duration = 99999,
 					shieldHealth = 100
@@ -320,7 +328,7 @@ return itemDefs.registerType({
 			{
 				title = 'fissure',
 				description = '',
-				experienceRequired = 0,
+				experienceRequired = 40,
 				props = {},
 			}
 		},
@@ -387,6 +395,23 @@ return itemDefs.registerType({
 			)
 			sound:setVolume(0.65)
 			love.audio.play(sound)
+
+			local isUpgrade2Available = msgBus.send(
+				msgBus.ITEM_CHECK_UPGRADE_AVAILABILITY, {
+					item = self,
+					level = 2
+				}
+			)
+
+			if isUpgrade2Available then
+				Fissure.create({
+					x = props.x,
+					y = props.y,
+					x2 = props.x2,
+					y2 = props.y2
+				})
+			end
+
 			return Attack.create(props)
 		end
 	}

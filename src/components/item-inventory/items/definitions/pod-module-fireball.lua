@@ -118,9 +118,12 @@ return itemDefs.registerType({
 
 			state.onHit = function(attack, hitMessage)
 				local target = hitMessage.parent
-				local up1 = upgrades[1]
-				local up1Ready = self.experience >= up1.experienceRequired
+				local up1Ready = msgBus.send(msgBus.ITEM_CHECK_UPGRADE_AVAILABILITY, {
+					item = self,
+					level = 1
+				})
 				if up1Ready then
+					local up1 = upgrades[1]
 					msgBus.send(msgBus.CHARACTER_HIT, {
 						parent = target,
 						statusIcon = 'status-slow',
@@ -137,9 +140,12 @@ return itemDefs.registerType({
 			end
 
 			local function handleUpgrade2(attack)
-				local up2 = upgrades[2]
-				local up2Ready = self.experience >= up2.experienceRequired
+				local up2Ready = msgBus.send(msgBus.ITEM_CHECK_UPGRADE_AVAILABILITY, {
+					item = self,
+					level = 2
+				})
 				if up2Ready then
+					local up2 = upgrades[2]
 					local GroundFlame = require 'components.particle.ground-flame'
 					local x, y = attack.x, attack.y
 					local width, height = 16, 16
