@@ -1,6 +1,29 @@
 local messageBus = require("utils.message-bus")
 local perf = require("utils.perf")
 
+local function filteredListeners()
+	local msgBus = messageBus.new()
+	local msgFoo = 'foo'
+	local msgBar = 'bar'
+	local listener1 = msgBus.on(msgFoo, function()
+		return 1
+	end)
+	local listener2 = msgBus.on(msgBar, function(input)
+		return input
+	end)
+	msgBus.on(msgBar, function(input)
+		return input + 1
+	end)
+
+	assert(msgBus.send(msgFoo) == 1)
+	assert(msgBus.send(msgBar, 1) == 2)
+
+	msgBus.off(msgFoo, listener1)
+	msgBus.off(msgBar, listener2)
+	assert(msgBus.send(msgFoo) == nil)
+	assert(msgBus.send(msgBar, 1) == 2)
+end
+
 local function multipleReducers()
 	local msgBus = messageBus.new()
 	local increaseDamageBy1 = function(msgType, msgValue)
@@ -96,6 +119,7 @@ end
 local function test()
 	multipleReducers()
 	removeFunctions()
+	filteredListeners()
 	-- perfTest()
 end
 
