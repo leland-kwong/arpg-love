@@ -154,6 +154,7 @@ local function generateAi(parent, player, map)
         x = posX,
         y = posY,
         types = {
+          -- aiTypes.types.SLIME
           aiTypesList[math.random(1, #aiTypesList)],
           aiTypesList[math.random(1, #aiTypesList)],
           aiTypesList[math.random(1, #aiTypesList)]
@@ -174,7 +175,7 @@ function MainScene.init(self)
     end
     -- setup defaults
   else
-    local defaultWeapon = require'components.item-inventory.items.definitions.pod-module-initiate'
+    local defaultWeapon = require'components.item-inventory.items.definitions.pod-module-hammer'
     local canEquip, errorMsg = rootState:equipItem(defaultWeapon.create(), 1, 1)
     if not canEquip then
       error(errorMsg)
@@ -223,22 +224,51 @@ function MainScene.init(self)
   end)
   self.mapGrid = map.grid
 
-  msgBus.subscribe(function(msgType, msgValue)
-    if self:isDeleted() then
-      return msgBus.CLEANUP
-    end
-
-    if msgBus.NEW_GAME == msgType then
+  self.listeners = {
+    msgBus.on(msgBus.NEW_GAME, function()
       self:delete(true)
-    end
+    end),
 
-    if msgBus.EQUIPMENT_CHANGE == msgType then
+    msgBus.on(msgBus.PLAYER_STATS_ADD_MODIFIERS, function(msgValue)
+      local curState = rootState:get()
+      local curMods = curState.statModifiers
+      local nextModifiers = msgValue
+      for k,v in pairs(curMods) do
+        nextModifiers[k] = v + (nextModifiers[k] or 0)
+      end
+      rootState:set(
+        'statModifiers',
+        nextModifiers
+      )
+    end),
+
+    msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function(msgValue)
+      local newModifiers = msgValue
+      rootState:set('statModifiers', newModifiers)
+    end),
+
+    msgBus.on(msgBus.GENERATE_LOOT, function(msgValue)
+      local LootGenerator = require'components.loot-generator.loot-generator'
+      local x, y, item = unpack(msgValue)
+      if not item then
+        return
+      end
+      local dropX, dropY = getDroppablePosition(x, y, map.grid)
+      LootGenerator.create({
+        x = dropX,
+        y = dropY,
+        item = item,
+        rootStore = rootState
+      }):setParent(parent)
+    end),
+
+    msgBus.on(msgBus.EQUIPMENT_CHANGE, function()
       local equipmentChangeHandler = require'components.item-inventory.equipment-change-handler'
       equipmentChangeHandler(rootState)
-    end
+    end),
 
-    if msgBus.KEY_PRESSED == msgType then
-      local key = msgValue.key
+    msgBus.on(msgBus.KEY_PRESSED, function(v)
+      local key = v.key
       local isActive = rootState:get().activeMenu == 'INVENTORY'
       if key == config.keyboard.INVENTORY_TOGGLE then
         if not self.inventory then
@@ -255,58 +285,25 @@ function MainScene.init(self)
           rootState:set('activeMenu', false)
         end
       end
-    end
+    end),
 
-    if msgBus.ENEMY_DESTROYED == msgType then
+    msgBus.on(msgBus.PLAYER_HEAL_SOURCE_ADD, function(v)
+      HealSource.add(self, v, rootState)
+    end),
+
+    msgBus.on(msgBus.PLAYER_HEAL_SOURCE_REMOVE, function(v)
+      HealSource.remove(self, v.source)
+    end),
+
+    msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
       local lootAlgorithm = require 'components.loot-generator.algorithm-1'
       local randomItem = lootAlgorithm()
       if randomItem then
         msgBus.send(msgBus.GENERATE_LOOT, {msgValue.x, msgValue.y, randomItem})
       end
       msgBus.send(msgBus.EXPERIENCE_GAIN, msgValue.experience)
-    end
-
-    if msgBus.GENERATE_LOOT == msgType then
-      local LootGenerator = require'components.loot-generator.loot-generator'
-      local x, y, item = unpack(msgValue)
-      if not item then
-        return
-      end
-      local dropX, dropY = getDroppablePosition(x, y, map.grid)
-      LootGenerator.create({
-        x = dropX,
-        y = dropY,
-        item = item,
-        rootStore = rootState
-      }):setParent(parent)
-    end
-
-    if msgBus.PLAYER_HEAL_SOURCE_ADD == msgType then
-      HealSource.add(self, msgValue, rootState)
-    end
-
-    if msgBus.PLAYER_HEAL_SOURCE_REMOVE == msgType then
-      HealSource.remove(self, msgValue.source)
-    end
-
-    if msgBus.PLAYER_STATS_NEW_MODIFIERS == msgType then
-      local newModifiers = msgValue
-      rootState:set('statModifiers', newModifiers)
-    end
-
-    if msgBus.PLAYER_STATS_ADD_MODIFIERS == msgType then
-      local curState = rootState:get()
-      local curMods = curState.statModifiers
-      local nextModifiers = msgValue
-      for k,v in pairs(curMods) do
-        nextModifiers[k] = v + (nextModifiers[k] or 0)
-      end
-      rootState:set(
-        'statModifiers',
-        nextModifiers
-      )
-    end
-  end)
+    end)
+  }
 
   local player = Player.create({
     mapGrid = map.grid,
@@ -348,6 +345,8 @@ function MainScene.init(self)
 end
 
 function MainScene.final(self)
+  msgBus.off(self.listeners)
+  msgBus.send(msgBus.GAME_UNLOADED)
   if self.autoSave then
     self.autoSaveTimer:stop()
   end
