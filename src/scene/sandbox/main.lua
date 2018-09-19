@@ -166,15 +166,11 @@ function Sandbox.init(self)
     DebugMenu(not state.menuOpened)
   end)
 
-  msgBusMainMenu.subscribe(function(msgType, msgValue)
-    if self:isDeleted() then
-      return msgBusMainMenu.CLEANUP
-    end
-
-    if msgBusMainMenu.TOGGLE_MAIN_MENU == msgType then
+  self.listeners = {
+    msgBusMainMenu.on(msgBusMainMenu.TOGGLE_MAIN_MENU, function()
       DebugMenu(not state.menuOpened)
-    end
-  end)
+    end)
+  }
 end
 
 function Sandbox.draw()
@@ -185,6 +181,10 @@ function Sandbox.draw()
     love.graphics.setColor(0,0,0,0.7)
     love.graphics.rectangle('fill', 0, 0, w, h)
   end
+end
+
+function Sandbox.final(self)
+  msgBusMainMenu.off(self.listeners)
 end
 
 return Component.createFactory(Sandbox)
