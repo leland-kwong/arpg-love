@@ -32,6 +32,9 @@ local function hitAnimation()
 end
 
 function ForceField.init(self)
+  self:setParent(
+    Component.get('PLAYER')
+  )
   msgBus.on(msgBus.PLAYER_HIT_RECEIVED, function(msgValue)
     if self:isDeleted() then
       return msgBus.CLEANUP

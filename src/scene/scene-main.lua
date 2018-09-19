@@ -352,7 +352,6 @@ function MainScene.final(self)
     self.autoSaveTimer:stop()
   end
   msgBus.send(msgBus.GAME_UNLOADED)
-  -- msgBus.clearAll()
 end
 
 return Component.createFactory(MainScene)

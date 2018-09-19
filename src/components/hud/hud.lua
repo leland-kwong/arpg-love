@@ -124,10 +124,6 @@ function Hud.init(self)
 
   self.listeners = {
     msgBus.on(msgBus.PLAYER_HIT_RECEIVED, function(msgValue)
-      if self:isDeleted() then
-        return msgBus.CLEANUP
-      end
-
       self.rootStore:set('health', function(state)
         return max(0, state.health - msgValue)
       end)

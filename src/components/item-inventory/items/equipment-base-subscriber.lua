@@ -63,6 +63,10 @@ local function handleUpgrades(item)
   }
 
   msgBus.subscribe(function(msgType, msgValue)
+    if msgBus.GAME_UNLOADED == msgType then
+      return msgBus.CLEANUP
+    end
+
     local handler = msgTypes[msgType]
     if handler then
       return handler(msgValue)

@@ -347,6 +347,10 @@ return itemDefs.registerType({
 				animationFrames = {'weapon-hammer-attachment'}
 			})
 			msgBus.subscribe(function(msgType, msgValue)
+				if msgBus.GAME_UNLOADED == msgType then
+					return msgBus.CLEANUP
+				end
+
 				if (msgBus.ITEM_UPGRADE_UNLOCKED == msgType)
 					and (msgValue.item == self)
 				then

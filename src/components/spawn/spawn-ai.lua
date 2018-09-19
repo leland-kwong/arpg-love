@@ -76,12 +76,9 @@ local function AiFactory(self, x, y, moveSpeed, scale)
         :set('gridSize',          self.gridSize)
         :set('WALKABLE',          self.WALKABLE)
         :set('showAiPath',        self.showAiPath)
+    ):setParent(
+      Component.get('MAIN_SCENE')
     )
-    local listenerRef
-    listenerRef = msgBus.on(msgBus.GAME_UNLOADED, function()
-      msgBus.off(listenerRef)
-      ai:delete()
-    end)
     return ai
   end)
 end
