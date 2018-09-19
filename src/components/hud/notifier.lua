@@ -23,22 +23,24 @@ function Notifier.init(self)
     font = font.primary.font,
   })
   self.eventLog = logger:new(4)
-  msgBus.on(msgBus.NOTIFIER_NEW_EVENT, function(msgValue)
-    --[[ SCHEMA
-      msgValue = {
-        title = title,
-        description = description,
-        icon = icon
-      }
-    ]]
-    msgValue.timestamp = os.date('%X')
-    self.eventLog:add(msgValue)
-    self.opacity = 1
-    self.tween = tween.new(4, self, {opacity = 0}, tween.easing.inExpo)
-    self:setDisabled(false)
+  self.listeners = {
+    msgBus.on(msgBus.NOTIFIER_NEW_EVENT, function(msgValue)
+      --[[ SCHEMA
+        msgValue = {
+          title = title,
+          description = description,
+          icon = icon
+        }
+      ]]
+      msgValue.timestamp = os.date('%X')
+      self.eventLog:add(msgValue)
+      self.opacity = 1
+      self.tween = tween.new(4, self, {opacity = 0}, tween.easing.inExpo)
+      self:setDisabled(false)
 
-    return msgValue
-  end)
+      return msgValue
+    end)
+  }
 end
 
 function Notifier.update(self, dt)
@@ -99,6 +101,10 @@ function Notifier.draw(self)
     local contentWidth, contentHeight = GuiText.getTextSize(content, self.guiText.font, wrapWidth)
     totalHeight = totalHeight + contentHeight + eventSpacing
   end
+end
+
+function Notifier.final(self)
+  msgBus.off(self.listeners)
 end
 
 return Component.createFactory(Notifier)

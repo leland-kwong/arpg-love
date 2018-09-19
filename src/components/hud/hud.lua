@@ -122,17 +122,19 @@ function Hud.init(self)
     end
   }):setParent(self)
 
-  msgBus.on(msgBus.PLAYER_HIT_RECEIVED, function(msgValue)
-    if self:isDeleted() then
-      return msgBus.CLEANUP
-    end
+  self.listeners = {
+    msgBus.on(msgBus.PLAYER_HIT_RECEIVED, function(msgValue)
+      if self:isDeleted() then
+        return msgBus.CLEANUP
+      end
 
-    self.rootStore:set('health', function(state)
-      return max(0, state.health - msgValue)
+      self.rootStore:set('health', function(state)
+        return max(0, state.health - msgValue)
+      end)
+
+      return msgValue
     end)
-
-    return msgValue
-  end)
+  }
 
   setupExperienceIndicator(self)
   ScreenFx.create({
@@ -202,6 +204,10 @@ function Hud.init(self)
       end
     }):setParent(self)
   end
+end
+
+function Hud.final(self)
+  msgBus.off(self.listeners)
 end
 
 return Component.createFactory(Hud)

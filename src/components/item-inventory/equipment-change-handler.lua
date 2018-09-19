@@ -8,6 +8,10 @@ local equipmentSubscribers = {
 		final = final or noop
 
 		return function(msgType, msgValue)
+			if msgBus.GAME_UNLOADED == msgType then
+				return msgBus.CLEANUP
+			end
+
 			local shouldCleanup = msgBus.EQUIPMENT_UNEQUIP == msgType and msgValue == item
 			if shouldCleanup then
 				final(item)
@@ -20,6 +24,10 @@ local equipmentSubscribers = {
 	-- handle static props
 	staticModifiers = function(item)
 		return function(msgType, msgValue)
+			if msgBus.GAME_UNLOADED == msgType then
+				return msgBus.CLEANUP
+			end
+
 			local shouldCleanup = (msgBus.EQUIPMENT_UNEQUIP == msgType) and (msgValue == item)
 			if shouldCleanup then
 				return msgBus.CLEANUP
@@ -43,6 +51,10 @@ local equipmentSubscribers = {
 		end
 
 		return function(msgType, msgValue)
+			if msgBus.GAME_UNLOADED == msgType then
+				return msgBus.CLEANUP
+			end
+
 			local shouldCleanup = msgBus.EQUIPMENT_UNEQUIP == msgType and msgValue == item
 			if shouldCleanup then
 				return msgBus.CLEANUP
