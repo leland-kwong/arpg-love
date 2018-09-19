@@ -16,16 +16,19 @@ local function filteredListeners()
 		listener2Called = true
 		return input
 	end)
-	msgBus.on(msgBar, function(input)
+	local listener3 = msgBus.on(msgBar, function(input)
 		return input + 1
 	end)
 
 	assert(msgBus.send(msgFoo) == 1)
 	assert(msgBus.send(msgBar, 1) == 2)
 
-	msgBus.off(msgFoo, listener1)
+	msgBus.off(listener1)
 	assert(msgBus.send(msgFoo) == nil)
 	assert(msgBus.send(msgBar, 1) == 2)
+
+	msgBus.off({listener3})
+	assert(msgBus.send(msgBar) == nil)
 end
 
 local function listenersPriorityOrdering()
@@ -136,6 +139,7 @@ local function test()
 	removeFunctions()
 	filteredListeners()
 	listenersPriorityOrdering()
+
 	-- perfTest()
 end
 

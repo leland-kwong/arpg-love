@@ -56,17 +56,19 @@ local function callSubscribersAndHandleCleanup(msgHandlers, msgType, nextValue)
 	end
 end
 
-local function callSubscribersByTypeAndHandleCleanup(queue, msgHandlers, nextValue)
+local function callSubscribersByTypeAndHandleCleanup(self, msgType, queue, msgHandlers, wildCardListeners, nextValue)
 	local handlerCount = #msgHandlers
+	local wildcardHandlerCount = #wildCardListeners
+	local totalHandlerCount = handlerCount + wildcardHandlerCount
 	if handlerCount == 0 then
 		return nil
 	end
 
 	local ret = nextValue
-	local callback = function(handler)
-		local result = handler(ret)
+	local callback = function(handler, handlerRef)
+		local result = handler(ret, msgType)
 		if result == CLEANUP then
-			table.remove(msgHandlers, i)
+			self.off(handlerRef)
 		else
 			ret = result
 		end
@@ -75,7 +77,13 @@ local function callSubscribersByTypeAndHandleCleanup(queue, msgHandlers, nextVal
 	for i=1, handlerCount do
 		local h = msgHandlers[i]
 		local handler, priority = h[1], h[2]
-		queue:add(priority, callback, handler)
+		queue:add(priority, callback, handler, h)
+	end
+
+	for i=1, wildcardHandlerCount do
+		local h = wildCardListeners[i]
+		local handler, priority = h[1], h[2]
+		queue:add(priority, callback, handler, h)
 	end
 
 	queue:flush()
@@ -89,7 +97,9 @@ function M.new()
 	}
 	local allReducers = {}
 	local msgHandlers = {}
-	local msgHandlersByMessageType = {}
+	local msgHandlersByMessageType = {
+		['*'] = {}
+	}
 	local queue = Q:new()
 
 	--[[
@@ -102,8 +112,9 @@ function M.new()
 		callSubscribersAndHandleCleanup(msgHandlers, msgType, nextValue)
 
 		local handlersByType = msgHandlersByMessageType[msgType]
+		local wildCardListeners = msgHandlersByMessageType['*']
 		if handlersByType then
-			return callSubscribersByTypeAndHandleCleanup(queue, handlersByType, nextValue)
+			return callSubscribersByTypeAndHandleCleanup(msgBus, msgType, queue, handlersByType, wildCardListeners, nextValue)
 		end
 	end
 
@@ -115,8 +126,8 @@ function M.new()
 		allReducers[#allReducers + 1] = reducer
 	end
 
-	-- adds a subscriber
-	function msgBus.subscribe(handler, messageType)
+	-- adds a wildcard subscriber that listens to all message types
+	function msgBus.subscribe(handler)
 		if handler == nil then
 			return
 		end
@@ -133,12 +144,23 @@ function M.new()
 			msgHandlersByMessageType[messageType] = handlersByType
 		end
 		local handlerRef = {handler, priority or 2, messageType}
+		handlerRef.isListener = true
 		table.insert(handlersByType, handlerRef)
 		return handlerRef -- this can be used as the reference for removing a handler
 	end
 
-	function msgBus.off(messageType, handlerRef)
+	function msgBus.off(handlerRef)
+		local isMultipleRefs = not handlerRef.isListener
+		if isMultipleRefs then
+			for i=1, #handlerRef do
+				msgBus.off(handlerRef[i])
+			end
+			return
+		end
+
+		local messageType = handlerRef[3]
 		local handlersByType = msgHandlersByMessageType[messageType]
+		handlerRef.isRemoved = true
 		for i=1, #handlersByType do
 			local ref = handlersByType[i]
 			local isMatch = ref == handlerRef
