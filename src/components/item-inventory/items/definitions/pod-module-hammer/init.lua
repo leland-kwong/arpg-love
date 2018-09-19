@@ -346,21 +346,21 @@ return itemDefs.registerType({
 			msgBus.send(msgBus.PLAYER_WEAPON_RENDER_ATTACHMENT_ADD, {
 				animationFrames = {'weapon-hammer-attachment'}
 			})
-			msgBus.subscribe(function(msgType, msgValue)
-				if msgBus.GAME_UNLOADED == msgType then
-					return msgBus.CLEANUP
-				end
 
-				if (msgBus.ITEM_UPGRADE_UNLOCKED == msgType)
-					and (msgValue.item == self)
-				then
-					if (msgValue.level == 1) then
+			local listeners = {
+				msgBus.on(msgBus.ITEM_UPGRADE_UNLOCKED, function()
+					local isUpgradeLevel1Available = msgBus.send(msgBus.ITEM_CHECK_UPGRADE_AVAILABILITY, {
+						item = self,
+						level = 1
+					})
+					if isUpgradeLevel1Available then
 						handleUpgrade1(self)
 					end
-					if (msgValue.level == 2) then
-						itemDefs.getState(self).level2Ready = true
-					end
-				end
+				end)
+			}
+			msgBus.on(msgBus.GAME_UNLOADED, function()
+				msgBus.off(listeners)
+				return msgBus.CLEANUP
 			end)
 		end,
 

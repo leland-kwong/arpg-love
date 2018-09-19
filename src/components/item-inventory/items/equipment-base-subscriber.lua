@@ -36,13 +36,8 @@ local function handleUpgrades(item)
 
   local lastUpgradeUnlocked = getHighestUpgradeUnlocked()
 
-  local msgTypes = {
-    [msgBus.EQUIPMENT_UNEQUIP] = function(v)
-      if v == self then
-        return msgBus.CLEANUP
-      end
-    end,
-    [msgBus.ENEMY_DESTROYED] = function(v)
+  local listeners = {
+    msgBus.on(msgBus.ENEMY_DESTROYED, function(v)
       self.experience = self.experience + v.experience
       local nextUpgradeLevel = getHighestUpgradeUnlocked()
       local newUpgradeUnlocked = nextUpgradeLevel > lastUpgradeUnlocked
@@ -59,28 +54,18 @@ local function handleUpgrades(item)
         })
         triggerUpgradeMessage(item, nextUpgradeLevel)
       end
-    end
+    end)
   }
 
-  msgBus.subscribe(function(msgType, msgValue)
-    if msgBus.GAME_UNLOADED == msgType then
+  msgBus.on(msgBus.EQUIPMENT_UNEQUIP, function(v)
+    if v == self then
+      msgBus.off(listeners)
       return msgBus.CLEANUP
-    end
-
-    local handler = msgTypes[msgType]
-    if handler then
-      return handler(msgValue)
     end
   end)
 end
 
-msgBus.subscribe(function(msgType, msgValue)
-  if msgBus.ITEM_EQUIPPED ~= msgType then
-    return
-  end
-
-  handleUpgrades(msgValue)
-end)
+msgBus.on(msgBus.ITEM_EQUIPPED, handleUpgrades)
 
 msgBus.on(msgBus.ITEM_CHECK_UPGRADE_AVAILABILITY, function(v)
   local item, level = v.item, v.level
