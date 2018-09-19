@@ -12,13 +12,14 @@ local defaultOptions = {
 function Q:new(options)
   options = assign({}, defaultOptions, options)
   local queue = {
-    list = {},
+    list = nil,
     length = 0, -- num of calls added to the queue
     minOrder = 0,
     maxOrder = 0, -- highest order that has been added to the queue
     itemPool = {},
     development = options.development,
     beforeFlush = noop,
+    ready = true
   }
   setmetatable(queue, self)
   self.__index = self
@@ -36,8 +37,9 @@ local max, min = math.max, math.min
 
 -- insert callback with maximum 2 arguments
 function Q:add(order, cb, a, b)
-  local isNewQueue = self.length == 0
+  local isNewQueue = not self.list
   if isNewQueue then
+    self.list = {}
     self.minOrder = order
     self.maxOrder = order
   end
@@ -74,16 +76,17 @@ function Q:add(order, cb, a, b)
 end
 
 -- iterate callbacks by `order` and clears the queue
+local emptyList = {}
 function Q:flush()
   self:beforeFlush()
-  for i=self.minOrder, self.maxOrder do
-    local row = self.list[i]
+  local list = self.list or emptyList
+  self.list = nil
+  local _start, _end = self.minOrder, self.maxOrder
+  for i=_start, _end do
+    local row = list[i]
     local rowLen = row and #row or 0
     for j=1, rowLen do
       local item = row[j]
-      -- IMPORTANT: clear item from queue before calling it so we can avoid any infinite loop situations
-      row[j] = nil
-      -- execute callback
       item[1](item[2], item[3])
     end
   end
