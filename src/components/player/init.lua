@@ -165,6 +165,7 @@ local Player = {
           local hitId = msg.source or uid()
           self.hits[hitId] = msg
         end
+        return msg
       end),
 
       msgBus.on(msgBus.ITEM_PICKUP, function(msg)

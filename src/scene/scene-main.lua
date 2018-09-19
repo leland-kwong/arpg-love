@@ -289,12 +289,10 @@ function MainScene.init(self)
 
     msgBus.on(msgBus.PLAYER_HEAL_SOURCE_ADD, function(v)
       HealSource.add(self, v, rootState)
-      return v
     end),
 
     msgBus.on(msgBus.PLAYER_HEAL_SOURCE_REMOVE, function(v)
       HealSource.remove(self, v.source)
-      return v
     end),
 
     msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)

@@ -70,7 +70,8 @@ local function callSubscribersByTypeAndHandleCleanup(self, msgType, queue, msgHa
 		local result = handler(ret, msgType)
 		if result == CLEANUP then
 			self.off(handlerRef)
-		else
+		-- when the value is nil, we'll use the previous return value as the return value
+		elseif result ~= nil then
 			ret = result
 		end
 	end

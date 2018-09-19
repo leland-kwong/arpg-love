@@ -712,23 +712,34 @@ function Ai.init(self)
     end
   })(aiPathWithAstar())
 
-  msgBus.subscribe(function(msgType, msgValue)
-    if self:isDeleted() then
-      return msgBus.CLEANUP
-    end
+  self.listeners = {
+    msgBus.on(msgBus.CHARACTER_HIT, function(msgValue)
+      if msgValue.parent ~= self then
+        return msgValue
+      end
 
-    if msgBus.CHARACTER_HIT == msgType and msgValue.parent == self then
       local uid = require 'utils.uid'
       local hitId = msgValue.source or uid()
       self.hits[hitId] = msgValue
-    end
 
-    if msgBus.ENEMY_DESTROYED == msgType and (msgValue.parent == self) then
+      return msgValue
+    end),
+
+    msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
+      if msgValue.parent ~= self then
+        return msgValue
+      end
+
       self:onDestroyStart()
-    end
-  end)
+      return msgValue
+    end)
+  }
 
   self.onInit(self)
+end
+
+function Ai.final(self)
+  msgBus.off(self.listeners)
 end
 
 return Component.createFactory(Ai)
