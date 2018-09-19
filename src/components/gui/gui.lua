@@ -15,12 +15,10 @@ local mouseCollisionFilter = function()
   return COLLISION_CROSS
 end
 
-local function toggleTextInput(msgType, enabled)
-  if msgBus.SET_TEXT_INPUT == msgType then
-    love.keyboard.setTextInput(enabled)
-  end
+local function toggleTextInput(enabled)
+  love.keyboard.setTextInput(enabled)
 end
-msgBus.subscribe(toggleTextInput)
+msgBus.on(msgBus.SET_TEXT_INPUT, toggleTextInput)
 msgBus.send(msgBus.SET_TEXT_INPUT, false)
 
 local guiType = {
@@ -142,7 +140,7 @@ function Gui.init(self)
     assert(type(self.checked) == 'boolean')
   end
 
-  msgBus.subscribe(function(msgType, msgValue)
+  msgBus.on('*', function(msgValue, msgType)
     -- cleanup
     local shouldCleanup = self:isDeleted()
     if shouldCleanup then
@@ -190,6 +188,8 @@ function Gui.init(self)
         self.onChange(self)
       end
     end
+
+    return msgValue
   end)
 
   local posX, posY = self:getPosition()
