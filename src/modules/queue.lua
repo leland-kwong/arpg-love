@@ -79,14 +79,12 @@ function Q:flush()
   for i=self.minOrder, self.maxOrder do
     local row = self.list[i]
     local rowLen = row and #row or 0
-    if rowLen > 0 then
-      for j=1, rowLen do
-        local item = row[j]
-        -- execute callback
-        item[1](item[2], item[3])
-        -- clear item from queue
-        row[j] = nil
-      end
+    for j=1, rowLen do
+      local item = row[j]
+      -- IMPORTANT: clear item from queue before calling it so we can avoid any infinite loop situations
+      row[j] = nil
+      -- execute callback
+      item[1](item[2], item[3])
     end
   end
   self.length = 0

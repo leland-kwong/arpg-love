@@ -247,9 +247,6 @@ function ActiveSkillInfo.init(self)
     end,
     drawOrder = function(self)
       return self.group.drawOrder(self) + 3
-    end,
-    final = function()
-      consoleLog('item render deleted')
     end
   }):setPosition(playerRef:getPosition())
     :setParent(playerRef)
