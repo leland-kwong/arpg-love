@@ -101,7 +101,7 @@ end
 function love.mousepressed( x, y, button, istouch, presses )
   msgBus.send(
     msgBus.MOUSE_PRESSED,
-    { x, y, button, isTouch, presses }
+    { x, y, button, istouch, presses }
   )
 end
 
