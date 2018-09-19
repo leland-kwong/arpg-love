@@ -77,8 +77,9 @@ local function AiFactory(self, x, y, moveSpeed, scale)
         :set('WALKABLE',          self.WALKABLE)
         :set('showAiPath',        self.showAiPath)
     )
-    local listenerRef = msgBus.on(msgBus.GAME_UNLOADED, function()
-      msgBus.off(msgBus.GAME_UNLOADED, listenerRef)
+    local listenerRef
+    listenerRef = msgBus.on(msgBus.GAME_UNLOADED, function()
+      msgBus.off(listenerRef)
       ai:delete()
     end)
     return ai
