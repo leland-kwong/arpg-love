@@ -35,28 +35,25 @@ local function toggleCollisionDebug()
   config.collisionDebug = not config.collisionDebug
 end
 
-msgBus.subscribe(function(msgType, v)
-  if ((msgBus.KEY_PRESSED == msgType) or (msgBus.KEY_RELEASED == msgType)) and
-    not v.isRepeated
-  then
-    keysPressed[v.key] = msgBus.KEY_PRESSED == msgType
-  end
+msgBus.on(msgBus.KEY_PRESSED, function(v)
+  keysPressed[v.key] = true
 
-  -- toggle collision debugger
-  if (msgBus.KEY_PRESSED == msgType) and hasModifier()
-    and keysPressed.p
-    and not v.isRepeated
-  then
-    toggleCollisionDebug()
-  end
+  if hasModifier() and not v.isRepeated then
+    -- toggle collision debugger
+    if keysPressed.p then
+      toggleCollisionDebug()
+    end
 
-  -- toggle console
-  if (msgBus.KEY_PRESSED == msgType) and hasModifier()
-    and keysPressed.c
-    and not v.isRepeated
-  then
-    state.showConsole = not state.showConsole
+    if keysPressed.c then
+      state.showConsole = not state.showConsole
+    end
   end
+  return v
+end)
+
+msgBus.on(msgBus.KEY_RELEASED, function(v)
+  keysPressed[v.key] = false
+  return v
 end)
 
 local Console = {
