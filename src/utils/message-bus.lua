@@ -57,10 +57,10 @@ local function callSubscribersAndHandleCleanup(msgHandlers, msgType, nextValue)
 end
 
 local function callSubscribersByTypeAndHandleCleanup(self, msgType, queue, msgHandlers, wildCardListeners, nextValue)
-	local handlerCount = #msgHandlers
+	local handlerCount = msgHandlers and #msgHandlers or 0
 	local wildcardHandlerCount = #wildCardListeners
 	local totalHandlerCount = handlerCount + wildcardHandlerCount
-	if handlerCount == 0 then
+	if totalHandlerCount == 0 then
 		return nil
 	end
 
@@ -91,6 +91,7 @@ local function callSubscribersByTypeAndHandleCleanup(self, msgType, queue, msgHa
 end
 
 local Q = require 'modules.queue'
+local MESSAGE_TYPE_ALL = '*'
 function M.new()
 	local msgBus = {
 		CLEANUP = CLEANUP
@@ -98,7 +99,7 @@ function M.new()
 	local allReducers = {}
 	local msgHandlers = {}
 	local msgHandlersByMessageType = {
-		['*'] = {}
+		[MESSAGE_TYPE_ALL] = {}
 	}
 	local queue = Q:new()
 
@@ -112,10 +113,8 @@ function M.new()
 		callSubscribersAndHandleCleanup(msgHandlers, msgType, nextValue)
 
 		local handlersByType = msgHandlersByMessageType[msgType]
-		local wildCardListeners = msgHandlersByMessageType['*']
-		if handlersByType then
-			return callSubscribersByTypeAndHandleCleanup(msgBus, msgType, queue, handlersByType, wildCardListeners, nextValue)
-		end
+		local wildCardListeners = msgHandlersByMessageType[MESSAGE_TYPE_ALL]
+		return callSubscribersByTypeAndHandleCleanup(msgBus, msgType, queue, handlersByType, wildCardListeners, msgValue)
 	end
 
 	function msgBus.addReducer(reducer)
