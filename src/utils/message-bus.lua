@@ -125,6 +125,8 @@ function M.new()
 	end
 
 	function msgBus.on(messageType, handler, priority)
+		assert(type(messageType) ~= nil, 'message type must be a non-nil value')
+
 		local handlersByType = msgHandlersByMessageType[messageType]
 		if (not handlersByType) then
 			handlersByType = {}
