@@ -1,6 +1,8 @@
 local noop = require('utils.noop')
 local typeCheck = require('utils.type-check')
 
+local MESSAGE_TYPE_ALL = '*'
+
 -- module object
 local M = {}
 
@@ -56,7 +58,6 @@ local function callSubscribersAndHandleCleanup(msgHandlers, msgType, nextValue)
 	end
 end
 
-local MESSAGE_TYPE_ALL = '*'
 local function callSubscribersByTypeAndHandleCleanup(self, msgType, queue, msgHandlers, wildCardListeners, nextValue)
 	local handlerCount = msgHandlers and #msgHandlers or 0
 	local wildcardHandlerCount = wildCardListeners and #wildCardListeners or 0
@@ -95,7 +96,8 @@ end
 local Q = require 'modules.queue'
 function M.new()
 	local msgBus = {
-		CLEANUP = CLEANUP
+		CLEANUP = CLEANUP,
+		ALL = MESSAGE_TYPE_ALL
 	}
 	local allReducers = {}
 	local msgHandlers = {}
