@@ -229,15 +229,14 @@ function ActiveSkillInfo.init(self)
   assert(self.player ~= nil, '[HUD activeItem] property `player` is required')
   assert(self.rootStore ~= nil, '[HUD activeItem] property `rootStore` is required')
 
-  msgBus.subscribe(function(msgType, value)
-    if self:isDeleted() then
-      return msgBus.CLEANUP
-    end
-
-    if msgBus.PLAYER_USE_SKILL == msgType and value == self.skillId then
-      skillHandlers[self.skillId].use(self)
-    end
-  end)
+  self.listeners = {
+    msgBus.on(msgBus.PLAYER_USE_SKILL, function(value)
+      if value == self.skillId then
+        skillHandlers[self.skillId].use(self)
+      end
+      return value
+    end)
+  }
 
   local playerRef = Component.get('PLAYER')
   self.itemRender = ItemRender.create({
@@ -312,6 +311,10 @@ function ActiveSkillInfo.draw(self)
       love.graphics.setBlendMode('alpha')
     end
   end
+end
+
+function ActiveSkillInfo.final(self)
+  msgBus.off(self.listeners)
 end
 
 return Component.createFactory(ActiveSkillInfo)
