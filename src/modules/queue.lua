@@ -16,7 +16,6 @@ function Q:new(options)
     length = 0, -- num of calls added to the queue
     minOrder = 0,
     maxOrder = 0, -- highest order that has been added to the queue
-    itemPool = {},
     development = options.development,
     beforeFlush = noop,
     ready = true
@@ -58,15 +57,7 @@ function Q:add(order, cb, a, b)
   end
 
   local itemIndex = self.length + 1
-  local item = self.itemPool[itemIndex]
-  if not item then
-    item = {}
-    self.itemPool[itemIndex] = item
-  end
-
-  item[1] = cb
-  item[2] = a
-  item[3] = b
+  local item = {cb, a, b}
 
   list[#list + 1] = item
   self.length = self.length + 1
