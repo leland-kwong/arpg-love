@@ -133,18 +133,43 @@ local Player = {
       y = self.y
     }):setParent(self)
 
-    local calcDist = require'utils.math'.dist
-    local function subscriber(msgType, msg)
-      if self:isDeleted() then
-        return msgBus.CLEANUP
-      end
-
-      if msgBus.PLAYER_DISABLE_ABILITIES == msgType then
+    self.listeners = {
+      msgBus.on(msgBus.PLAYER_DISABLE_ABILITIES, function(msg)
         self.clickDisabled = msg
-      end
+      end),
 
-      if msgBus.ITEM_PICKUP == msgType then
+      msgBus.on(msgBus.PLAYER_LEVEL_UP, function(msg)
+        local tick = require 'utils.tick'
+        local fx = ParticleFx.Basic.create({
+          x = self.x,
+          y = self.y + 10,
+          duration = 1,
+          width = 4
+        }):setParent(self)
+      end),
+
+      msgBus.on(msgBus.DROP_ITEM_ON_FLOOR, function(item)
+        msgBus.send(
+          msgBus.GENERATE_LOOT,
+          {self.x, self.y, item}
+        )
+      end),
+
+      msgBus.on(msgBus.ITEM_PICKUP_SUCCESS, function()
+        msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
+      end),
+
+      msgBus.on(msgBus.CHARACTER_HIT, function(msg)
+        if msg.parent == self then
+          local uid = require 'utils.uid'
+          local hitId = msg.source or uid()
+          self.hits[hitId] = msg
+        end
+      end),
+
+      msgBus.on(msgBus.ITEM_PICKUP, function(msg)
         local item = msg
+        local calcDist = require'utils.math'.dist
         local dist = calcDist(self.x, self.y, item.x, item.y)
         local outOfRange = dist > self.pickupRadius
         local gridX1, gridY1 = Position.pixelsToGridUnits(self.x, self.y, config.gridSize)
@@ -154,36 +179,8 @@ local Player = {
           msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, true)
           item:pickup()
         end
-      end
-
-      if msgBus.ITEM_PICKUP_SUCCESS == msgType then
-        msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
-      end
-
-      if msgBus.DROP_ITEM_ON_FLOOR == msgType then
-        msgBus.send(
-          msgBus.GENERATE_LOOT,
-          {self.x, self.y, msg}
-        )
-      end
-
-      if msgBus.PLAYER_LEVEL_UP == msgType then
-        local tick = require 'utils.tick'
-        local fx = ParticleFx.Basic.create({
-          x = self.x,
-          y = self.y + 10,
-          duration = 1,
-          width = 4
-        }):setParent(self)
-      end
-
-      if msgBus.CHARACTER_HIT == msgType and msg.parent == self then
-        local uid = require 'utils.uid'
-        local hitId = msg.source or uid()
-        self.hits[hitId] = msg
-      end
-    end
-    msgBus.subscribe(subscriber)
+      end)
+    }
   end
 }
 
@@ -399,6 +396,10 @@ end
 
 Player.drawOrder = function(self)
   return self.group.drawOrder(self) + 1
+end
+
+Player.final = function(self)
+  msgBus.off(self.listeners)
 end
 
 return Component.createFactory(Player)

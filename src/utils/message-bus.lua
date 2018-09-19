@@ -159,7 +159,6 @@ function M.new()
 
 		local messageType = handlerRef[3]
 		local handlersByType = msgHandlersByMessageType[messageType]
-		handlerRef.isRemoved = true
 		for i=1, #handlersByType do
 			local ref = handlersByType[i]
 			local isMatch = ref == handlerRef
