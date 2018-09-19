@@ -29,28 +29,20 @@ end
 local itemPickedUp = nil
 local isDropModeFloor = false
 
-msgBus.subscribe(function(msgType, message)
-  if msgBus.INVENTORY_DROP_MODE_INVENTORY == msgType or
-    msgBus.INVENTORY_DROP_MODE_FLOOR == msgType then
-      isDropModeFloor = msgBus.INVENTORY_DROP_MODE_FLOOR == msgType
-  end
+msgBus.on(msgBus.INVENTORY_DROP_MODE_INVENTORY, function()
+  isDropModeFloor = false
 end)
-
+msgBus.on(msgBus.INVENTORY_DROP_MODE_FLOOR, function()
+  isDropModeFloor = true
+end)
 -- handles dropping items on the floor when its in the floor drop mode
-Component.createFactory({
-  group = groups.gui,
-  init = function(self)
-    msgBus.subscribe(function(msgType, msgValue)
-      if isDropModeFloor and
-        msgBus.MOUSE_PRESSED == msgType and
-        itemPickedUp
-      then
-        msgBus.send(msgBus.DROP_ITEM_ON_FLOOR, itemPickedUp)
-        itemPickedUp = nil
-      end
-    end)
+local function handleItemDrop()
+  if (isDropModeFloor and itemPickedUp) then
+    msgBus.send(msgBus.DROP_ITEM_ON_FLOOR, itemPickedUp)
+    itemPickedUp = nil
   end
-}).create()
+end
+msgBus.on(msgBus.MOUSE_PRESSED, handleItemDrop)
 
 local function getSlotPosition(gridX, gridY, offsetX, offsetY, slotSize, margin)
   local posX, posY = ((gridX - 1) * slotSize) + (gridX * margin) + offsetX,
