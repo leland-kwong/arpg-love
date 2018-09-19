@@ -188,10 +188,7 @@ function WeaponCore.draw(self)
 end
 
 function WeaponCore.final(self)
-  msgBus.send(msgBus.CLEANUP_LISTENERS, {
-    eventBus = msgBus,
-    listeners = self.listeners
-  })
+  msgBus.off(self.listeners)
 end
 
 return Component.createFactory(WeaponCore)

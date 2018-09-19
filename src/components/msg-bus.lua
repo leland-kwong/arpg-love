@@ -25,7 +25,6 @@ if config.isDebug then
   })
 end
 
-M.CLEANUP_LISTENERS = 'CLEANUP_LISTENERS'
 M.GAME_LOADED = 'GAME_LOADED'
 M.GAME_UNLOADED = 'GAME_UNLOADED'
 M.NEW_GAME = 'NEW_GAME'
@@ -129,14 +128,5 @@ M.PLAYER_DISABLE_ABILITIES = 'PLAYER_DISABLE_ABILITIES'
 M.TOGGLE_MAIN_MENU = 'TOGGLE_MAIN_MENU'
 
 M.NOTIFIER_NEW_EVENT = 'NOTIFIER_NEW_EVENT'
-
-M.on(M.CLEANUP_LISTENERS, function(v)
-  local eventBus, listeners = v.eventBus, v.listeners
-  for i=1, #listeners do
-    local ref = listeners[i]
-    local messageType = ref[3]
-    eventBus.off(messageType, ref)
-  end
-end)
 
 return M
