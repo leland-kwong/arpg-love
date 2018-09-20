@@ -1,6 +1,7 @@
 local setupChanceFunctions = require 'utils.chance'
 
-local generateRandomProperty = setupChanceFunctions({
+-- enhances the ai's base stats and abilities with new random powers
+local addRandomPropery = setupChanceFunctions({
   {
     type = 'extra fast',
     chance = 1,
@@ -17,33 +18,33 @@ local generateRandomProperty = setupChanceFunctions({
 local generateRandomRarity = setupChanceFunctions({
   {
     type = 'NORMAL',
-    chance = 3,
+    chance = 15,
     __call = function(self, ai)
       return ai
     end
   },
   {
     type = 'MAGICAL',
-    chance = 3,
+    chance = 4,
     outlineColor = {0.5, 0.5, 1, 1},
     __call = function(self, ai)
       return ai:set('outlineColor', self.outlineColor)
         :set('maxHealth', ai.maxHealth * 2)
-        :set('experience', ai.experience * 2)
+        :set('experience', ai.experience * 2.5)
     end
   },
   {
     type = 'RARE',
-    chance = 3,
+    chance = 2,
     outlineColor = {0.8, 0.8, 0, 1},
     __call = function(self, ai)
-      local modType, prop, value = generateRandomProperty(ai)
+      local modType, prop, value = addRandomPropery(ai)
       ai:set(prop, value)
       table.insert(ai.dataSheet.properties, modType)
 
       return ai:set('outlineColor', self.outlineColor)
         :set('maxHealth', ai.maxHealth * 5)
-        :set('experience', ai.experience * 5)
+        :set('experience', ai.experience * 6)
     end
   },
 })
