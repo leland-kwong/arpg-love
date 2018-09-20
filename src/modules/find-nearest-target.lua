@@ -1,4 +1,5 @@
 local Position = require 'utils.position'
+local collisionGroups = require 'modules.collision-groups'
 
 local function hasItem(list, item)
   local found = false
@@ -31,7 +32,7 @@ local function findNearestTarget(
       width,
       height,
       function(item)
-        if (not nearestEnemyFound) and item.group == 'ai' then
+        if (not nearestEnemyFound) and collisionGroups.matches(item.group, collisionGroups.ai) then
           local target = item.parent
           local isAlreadyFound = ignoreTargets and hasItem(ignoreTargets, target)
           if los then

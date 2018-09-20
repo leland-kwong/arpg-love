@@ -23,6 +23,7 @@ local Lru = require 'utils.lru'
 local Sound = require 'components.sound'
 local setElectricShockShader = require 'modules.shaders.shader-electric-shock'
 local Enum = require 'utils.enum'
+local collisionGroups = require 'modules.collision-groups'
 
 local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
 local shader = love.graphics.newShader(pixelOutlineShader)
@@ -148,7 +149,7 @@ local function spreadAggroToAllies(self)
   local c = self.collision
   local areaMultiplier = 10
   local function aggravationCollisionFilter(item)
-    return item.group == 'ai' and item ~= c
+    return collisionGroups.matches(item.group, collisionGroups.ai) and item ~= c
   end
   local items, len = self.collisionWorld:queryRect(
     c.x - c.ox * areaMultiplier,
@@ -332,7 +333,7 @@ local function computeObstacleInfluence(self)
 end
 
 local function neighborFilter(item)
-  return item.group == 'ai'
+  return collisionGroups.matches(item.group, 'ai')
 end
 local function getNeighbors(agent, neighborOffset)
 	local b = agent
@@ -692,7 +693,7 @@ function Ai.init(self)
 
   local ox, oy = self.animation:getOffset()
   self.collision = self:addCollisionObject(
-      'ai',
+      collisionGroups.ai,
       self.x,
       self.y,
       self.w * self.scale,
