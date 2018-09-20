@@ -3,6 +3,7 @@ local primes = {
 }
 
 local function GroupMatcher(groupNames)
+  -- the id is a multiplication of all the prime values
   local groupByGroupId = {}
   local Matcher = {}
   local valueByName = {}
