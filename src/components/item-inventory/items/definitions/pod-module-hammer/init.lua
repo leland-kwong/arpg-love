@@ -8,6 +8,7 @@ local msgBus = require 'components.msg-bus'
 local AbilityBase = require 'components.abilities.base-class'
 local tween = require 'modules.tween'
 local config = require 'config.config'
+local filter = require 'utils.filter-call'
 
 local itemSource = 'H_2_HAMMER'
 local healType = 2
@@ -267,16 +268,10 @@ local Attack = Component.createFactory(
 	})
 )
 
-local function handleUpgrade1(self)
-	local upgrades = itemDefs.getDefinition(self).upgrades
-	local up1 = upgrades[1]
-	local state = itemDefs.getState(self)
-	if state.forceField then
-		return
-	end
+local function setupForceField()
 	local ForceField = require 'components.item-inventory.items.definitions.pod-module-hammer.force-field'
 	local playerRef = Component.get('PLAYER')
-	state.forceField = ForceField.create({
+	return ForceField.create({
 		x = playerRef.x,
 		y = playerRef.y,
 		size = 17,
@@ -347,21 +342,15 @@ return itemDefs.registerType({
 				animationFrames = {'weapon-hammer-attachment'}
 			})
 
-			local listeners = {
-				msgBus.on(msgBus.ITEM_UPGRADE_UNLOCKED, function()
-					local isUpgradeLevel1Available = msgBus.send(msgBus.ITEM_CHECK_UPGRADE_AVAILABILITY, {
-						item = self,
-						level = 1
-					})
-					if isUpgradeLevel1Available then
-						handleUpgrade1(self)
-					end
-				end)
+			local state = itemDefs.getState(self)
+			state.forceField = state.forceField or setupForceField():setDisabled(true)
+			state.listeners = {
+				msgBus.on(msgBus.ITEM_UPGRADE_UNLOCKED, filter(function(v)
+					state.forceField:setDisabled(false)
+				end, function(v)
+					return v.item == self and v.level == 1
+				end))
 			}
-			msgBus.on(msgBus.GAME_UNLOADED, function()
-				msgBus.off(listeners)
-				return msgBus.CLEANUP
-			end)
 		end,
 
 		final = function(self)
@@ -369,9 +358,11 @@ return itemDefs.registerType({
 				source = itemSource,
 			})
 			msgBus.send(msgBus.PLAYER_WEAPON_RENDER_ATTACHMENT_REMOVE)
-			if self.forceField then
-				self.forceField:delete()
+			local state = itemDefs.getState(self)
+			if state.forceField then
+				state.forceField:setDisabled(true)
 			end
+			msgBus.off(state.listeners)
 		end,
 
 		tooltip = function(self)

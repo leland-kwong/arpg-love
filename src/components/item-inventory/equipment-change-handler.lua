@@ -57,7 +57,17 @@ return function(rootStore)
       if newlyEquipped then
 				definition.onEquip(item)
 				msgBus.send(msgBus.ITEM_EQUIPPED, item)
-        msgBus.on(msgBus.ALL, equipmentSubscribers.staticModifiers(item))
+				msgBus.on(msgBus.ALL, equipmentSubscribers.staticModifiers(item), 1)
+				msgBus.on(msgBus.EQUIPMENT_UNEQUIP, function(_item)
+					if _item == item then
+						definition.final(item)
+						return msgBus.CLEANUP
+					end
+				end)
+				msgBus.on(msgBus.GAME_UNLOADED, function()
+					definition.final(item)
+					return msgBus.CLEANUP
+				end)
       end
     end
   end)
