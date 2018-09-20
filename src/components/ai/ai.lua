@@ -603,8 +603,8 @@ end
 
 local textureW, textureH = animationFactory.atlas:getDimensions()
 local shockResolution = {
-  1 * 4,
-  (textureH/textureW) * 4
+  1 * 10,
+  (textureH/textureW) * 10
 }
 
 local function drawShockEffect(self, ox, oy)
