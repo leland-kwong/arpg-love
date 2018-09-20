@@ -1,6 +1,7 @@
 local animationFactory = require 'components.animation-factory'
 local debounce = require 'modules.debounce'
 local tick = require 'utils.tick'
+local collisionGroups = require 'modules.collision-groups'
 
 local frostShotSoundFilter = {
   type = 'lowpass',
@@ -14,10 +15,6 @@ local playFrostShotSound = debounce(function()
   love.audio.stop(source)
   love.audio.play(source)
 end, 0.3)
-
-local function eyeballAttackCollisionFilter(item)
-  return item.group == 'player'
-end
 
 local function onDestroyStart()
   local Sound = require 'components.sound'
@@ -56,7 +53,7 @@ return function()
           , speed = 115
           , cooldown = 0.6
           , lifeTime = 2.5
-          , targetGroup = 'player'
+          , targetGroup = collisionGroups.player
           , minDamage = 1
           , maxDamage = 2
           , drawOrder = function()

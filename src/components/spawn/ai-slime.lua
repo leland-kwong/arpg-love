@@ -3,9 +3,10 @@ local groups = require 'components.groups'
 local collisionWorlds = require 'components.collision-worlds'
 local msgBus = require 'components.msg-bus'
 local animationFactory = require 'components.animation-factory'
+local collisionGroups = require 'modules.collision-groups'
 
 local function slimeAttackCollisionFilter(item)
-  return item.group == 'player'
+  return collisionGroups.matches(item.group, collisionGroups.player)
 end
 
 local SlimeAttack = Component.createFactory({
@@ -122,7 +123,7 @@ return function()
           , w = 64
           , h = 36
           , cooldown = 0.5
-          , targetGroup = 'player'
+          , targetGroup = collisionGroups.player
         })
 
         local Sound = require 'components.sound'

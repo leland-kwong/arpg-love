@@ -56,7 +56,6 @@ local Player = {
   attackRecoveryTime = 0,
 
   -- collision properties
-  type = 'player',
   h = 1,
   w = 1,
   mapGrid = nil,

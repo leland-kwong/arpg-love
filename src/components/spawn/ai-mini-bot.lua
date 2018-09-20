@@ -1,5 +1,6 @@
 local animationFactory = require 'components.animation-factory'
 local debounce = require 'modules.debounce'
+local collisionGroups = require 'modules.collision-groups'
 
 local blastSoundFilter = {
   type = 'lowpass',
@@ -57,7 +58,7 @@ return function()
           , y2 = targetY
           , speed = 125
           , cooldown = 0.4
-          , targetGroup = 'player'
+          , targetGroup = collisionGroups.player
         })
         curCooldown = projectile.cooldown
         playblasterSound()
