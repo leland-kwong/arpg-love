@@ -66,7 +66,7 @@ local ImpactAnimation = Component.createFactory({
     )
   end,
   drawOrder = function(self)
-    return self.group.drawOrder(self) + 30
+    return self.group:drawOrder(self) + 30
   end
 })
 
@@ -203,7 +203,7 @@ local Fireball = {
 }
 
 Fireball.drawOrder = function(self)
-  local order = self.group.drawOrder(self) + 2
+  local order = self.group:drawOrder(self) + 2
   return order
 end
 

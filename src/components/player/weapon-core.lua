@@ -14,7 +14,7 @@ local WeaponCore = {
   drawOrder = function(self)
     -- adjust draw order based on the y-facing direction
     local config = require 'config.config'
-    local offsetY = math.floor(self.facingY) * 10
+    local offsetY = math.floor(self.facingY) * self.group.drawLayersPerGridCell
     return Component.get('PLAYER'):drawOrder() + 1 + offsetY
   end
 }

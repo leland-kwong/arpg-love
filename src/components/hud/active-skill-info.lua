@@ -245,7 +245,7 @@ function ActiveSkillInfo.init(self)
       skillHandlers[parent.skillId].draw(parent)
     end,
     drawOrder = function(self)
-      return self.group.drawOrder(self) + 3
+      return self.group:drawOrder(self) + 3
     end
   }):setPosition(playerRef:getPosition())
     :setParent(playerRef)

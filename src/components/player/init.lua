@@ -396,7 +396,7 @@ function Player.draw(self)
 end
 
 Player.drawOrder = function(self)
-  return self.group.drawOrder(self) + 1
+  return self.group:drawOrder(self) + 1
 end
 
 Player.final = function(self)

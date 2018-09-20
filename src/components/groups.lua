@@ -28,14 +28,14 @@ local Groups = {
   ]]
   firstLayer = Component.newGroup(),
   all = Component.newGroup({
+    drawLayersPerGridCell = 10,
     -- automatic draw-ordering based on y position
-    drawOrder = function(component)
+    drawOrder = function(self, component)
       --[[
         number of layers between each order. This is to allow multiple different items to be stacked within the same draw order
       ]]
-      local layers = 10
       local orderByTilePosition = floor(component.y / gridSize)
-      local order = orderByTilePosition * layers - 2
+      local order = orderByTilePosition * self.drawLayersPerGridCell - 2
       return max(1, order)
     end,
   }),

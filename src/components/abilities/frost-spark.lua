@@ -166,7 +166,7 @@ local FrostSpark = {
 }
 
 FrostSpark.drawOrder = function(self)
-  local order = self.group.drawOrder(self) + 2
+  local order = self.group:drawOrder(self) + 2
   return order
 end
 

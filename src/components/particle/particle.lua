@@ -61,7 +61,7 @@ function ParticleTest.draw(self)
 end
 
 function ParticleTest.drawOrder(self)
-  return self.group.drawOrder(self) + 2
+  return self.group:drawOrder(self) + 2
 end
 
 local Basic = Component.createFactory(ParticleTest)

@@ -237,7 +237,7 @@ ChainLightning.draw = function(self)
 end
 
 ChainLightning.drawOrder = function(self)
-  local order = self.group.drawOrder(self) + 100
+  local order = self.group:drawOrder(self) + 100
   return order
 end
 

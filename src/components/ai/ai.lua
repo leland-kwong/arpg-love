@@ -84,7 +84,7 @@ local Ai = {
   onDestroyStart = noop,
   onUpdateStart = nil,
   drawOrder = function(self)
-    return self.group.drawOrder(self) + 1
+    return self.group:drawOrder(self) + 1
   end
 }
 

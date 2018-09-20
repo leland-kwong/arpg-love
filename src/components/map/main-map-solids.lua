@@ -48,7 +48,7 @@ function MainMapSolidsBlueprint.draw(self)
 end
 
 function MainMapSolidsBlueprint.drawOrder(self)
-  return self.group.drawOrder(self)
+  return self.group:drawOrder(self)
 end
 
 return Component.createFactory(MainMapSolidsBlueprint)

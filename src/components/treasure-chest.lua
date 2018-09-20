@@ -90,7 +90,7 @@ local TreasureChest = extend(Gui, {
     end
   end,
   drawOrder = function(self)
-    return self.group.drawOrder(self) + 2
+    return self.group:drawOrder(self) + 2
   end
 })
 
