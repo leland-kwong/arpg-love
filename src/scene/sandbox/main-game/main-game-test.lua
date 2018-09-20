@@ -5,6 +5,7 @@ local TreasureChest = require 'components.treasure-chest'
 local config = require 'config.config'
 local msgBus = require 'components.msg-bus'
 local GroundFlame = require 'components.particle.ground-flame'
+local EnvironmentInteractable = require 'components.map.environment-interactable'
 
 local MainGameTest = {
   group = groups.firstLayer
@@ -47,14 +48,23 @@ function MainGameTest.init(self)
   local function randomTreasurePosition()
     local mapGrid = Component.get('MAIN_SCENE').mapGrid
     local rows, cols = #mapGrid, #mapGrid[1]
-    return math.random(10, 20) * config.gridSize,
-      math.random(40, rows - 2) * config.gridSize
+    return math.random(10, cols) * config.gridSize,
+      math.random(10, rows) * config.gridSize
   end
 
   local chestCount = 3
   for i=1, chestCount do
     local x, y = randomTreasurePosition()
     TreasureChest.create({
+      x = x,
+      y = y
+    }):setParent(self)
+  end
+
+  local treasureCacheCount = 15
+  for i=1, treasureCacheCount do
+    local x, y = randomTreasurePosition()
+    EnvironmentInteractable.create({
       x = x,
       y = y
     }):setParent(self)

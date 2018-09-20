@@ -2,7 +2,6 @@ local Component = require 'modules.component'
 local groups = require 'components.groups'
 local animationFactory = require 'components.animation-factory'
 local msgBus = require 'components.msg-bus'
-local PopupTextController = require 'components.popup-text'
 local getAdjacentWalkablePosition = require 'modules.get-adjacent-open-position'
 local collisionObject = require 'modules.collision'
 local uid = require'utils.uid'
@@ -20,7 +19,6 @@ local Map = require 'modules.map-generator.index'
 local Position = require 'utils.position'
 local noop = require 'utils.noop'
 local Lru = require 'utils.lru'
-local Sound = require 'components.sound'
 local setElectricShockShader = require 'modules.shaders.shader-electric-shock'
 local Enum = require 'utils.enum'
 local collisionGroups = require 'modules.collision-groups'
@@ -89,14 +87,6 @@ local Ai = {
   end
 }
 
-local popupText = PopupTextController.create({
-  font = require 'components.font'.secondary.font
-})
-local popupTextCritMultiplier = PopupTextController.create({
-  font = require 'components.font'.secondary.font,
-  color = Color.YELLOW
-})
-
 -- gets directions from grid position, adjusting vectors to handle wall collisions as needed
 local aiPathWithAstar = require'modules.flow-field.pathing-with-astar'
 
@@ -133,16 +123,6 @@ local function collisionFilter(item, other)
   return false
 end
 
-local function hitAnimation()
-  local frame = 0
-  local animationLength = 4
-  while frame < animationLength do
-    frame = frame + 1
-    coroutine.yield(false)
-  end
-  coroutine.yield(true)
-end
-
 local aggroMessageCache = Lru.new(200)
 
 local function spreadAggroToAllies(self)
@@ -175,58 +155,7 @@ local function spreadAggroToAllies(self)
 end
 
 local max, random = math.max, math.random
-
-local function onDamageTaken(self, actualDamage, actualNonCritDamage, criticalMultiplier, actualLightningDamage)
-  self.health = self.health - actualDamage
-  local isDestroyed = self.health <= 0
-
-  if (actualDamage == 0) then
-    return
-  end
-
-  local getTextSize = require 'components.gui.gui-text'.getTextSize
-  local offsetCenter = -getTextSize(actualDamage, popupText.font) / 2
-  local isCriticalHit = criticalMultiplier > 0
-  if (isCriticalHit) then
-    local critText = criticalMultiplier..'x '
-    popupTextCritMultiplier:new(
-      critText,
-      self.x + offsetCenter - getTextSize(critText, popupText.font),
-      self.y - self.h
-    )
-  end
-  popupText:new(
-    actualDamage,
-    self.x + offsetCenter,
-    self.y - self.h
-  )
-  self.hitAnimation = coroutine.wrap(hitAnimation)
-
-  if isDestroyed then
-    msgBus.send(msgBus.ENEMY_DESTROYED, {
-      parent = self,
-      x = self.x,
-      y = self.y,
-      experience = self.experience
-    })
-
-    self.destroyedAnimation = tween.new(0.5, self, {opacity = 0}, tween.easing.outCubic)
-    self.collision:delete()
-    return
-  end
-
-  if actualLightningDamage > 0 then
-    love.audio.stop(Sound.ELECTRIC_SHOCK_SHORT)
-    love.audio.play(Sound.ELECTRIC_SHOCK_SHORT)
-  end
-
-  Sound.ENEMY_IMPACT:setFilter {
-    type = 'lowpass',
-    volume = .5,
-  }
-  love.audio.stop(Sound.ENEMY_IMPACT)
-  love.audio.play(Sound.ENEMY_IMPACT)
-end
+local onDamageTaken = require 'modules.handle-damage-taken'
 
 local function handleHits(self, dt)
   local hitManager = require 'modules.hit-manager'

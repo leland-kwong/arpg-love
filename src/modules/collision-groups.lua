@@ -4,5 +4,6 @@ return GroupMatcher({
   'ai',
   'obstacle',
   'player',
-  'projectile'
+  'projectile',
+  'environment'
 })

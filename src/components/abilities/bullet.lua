@@ -11,6 +11,7 @@ local Color = require 'modules.color'
 local memoize = require 'utils.memoize'
 local typeCheck = require 'utils.type-check'
 local random = math.random
+local collisionGroups = require 'modules.collision-groups'
 
 local colMap = collisionWorlds.map
 
@@ -21,10 +22,14 @@ local defaultFilters = {
 
 local ColFilter = memoize(function(groupToMatch)
   return function (item, other)
-    if (other.group ~= groupToMatch) and not defaultFilters[other.group] then
-      return false
+    if collisionGroups.matches(other.group, groupToMatch) then
+      return 'touch'
     end
-    return 'touch'
+    return false
+    -- if (other.group ~= groupToMatch) and not defaultFilters[other.group] then
+    --   return false
+    -- end
+    -- return 'touch'
   end
 end)
 
@@ -56,7 +61,7 @@ local Bullet = {
 
   init = function(self)
     assert(
-      type(self.targetGroup) == 'string' and self.targetGroup ~= nil,
+      self.targetGroup ~= nil,
       '[Bullet] `targetGroup` is required'
     )
 
@@ -94,7 +99,7 @@ local Bullet = {
       if hasCollisions then
         for i=1, len do
           local col = cols[i]
-          if col.other.group == self.targetGroup then
+          if collisionGroups.matches(col.other.group, self.targetGroup) then
             local msg = self.onHit(self, {
               collision = col.other,
               parent = col.other.parent,

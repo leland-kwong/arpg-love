@@ -9,7 +9,10 @@ local objectCount = 0
 local CollisionObject = {}
 
 function CollisionObject:new(group, x, y, w, h, offsetX, offsetY)
-  typeCheck.validate(group, typeCheck.STRING)
+  assert(
+    group ~= nil,
+    'collision group must be provided'
+  )
 
   local id = uid()
   local obj = {

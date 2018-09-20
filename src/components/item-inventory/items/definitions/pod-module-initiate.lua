@@ -1,4 +1,5 @@
 local Component = require 'modules.component'
+local collisionGroups = require 'modules.collision-groups'
 local itemConfig = require("components.item-inventory.items.config")
 local gameConfig = require 'config.config'
 local msgBus = require("components.msg-bus")
@@ -27,7 +28,11 @@ local function CreateAttack(self, props)
 			:set('minDamage', 1)
 			:set('maxDamage', 3)
 			:set('color', bulletColor)
-			:set('targetGroup', 'ai')
+			:set('targetGroup', collisionGroups.create(
+				collisionGroups.ai,
+				collisionGroups.environment,
+				collisionGroups.obstacle
+			))
 			:set('startOffset', weaponLength)
 			:set('speed', 400)
 			:set('cooldown', weaponCooldown)

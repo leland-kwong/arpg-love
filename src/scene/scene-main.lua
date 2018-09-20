@@ -229,6 +229,12 @@ function MainScene.init(self)
       self:delete(true)
     end),
 
+    -- setup default properties in case they don't exist
+    msgBus.on(msgBus.CHARACTER_HIT, function(v)
+      v.damage = v.damage or 0
+      return v
+    end, 1),
+
     msgBus.on(msgBus.PLAYER_STATS_ADD_MODIFIERS, function(msgValue)
       local curState = rootState:get()
       local curMods = curState.statModifiers
@@ -301,7 +307,7 @@ function MainScene.init(self)
       if randomItem then
         msgBus.send(msgBus.GENERATE_LOOT, {msgValue.x, msgValue.y, randomItem})
       end
-      msgBus.send(msgBus.EXPERIENCE_GAIN, msgValue.experience)
+      msgBus.send(msgBus.EXPERIENCE_GAIN, math.floor(msgValue.experience))
     end)
   }
 

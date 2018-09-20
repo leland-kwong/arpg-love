@@ -295,11 +295,16 @@ function M.newGroup(groupDefinition)
     return Group
   end
 
+  local max = math.max
   function Group.drawAll()
     for id,c in pairs(componentsById) do
       if c:isReady() and (not c._drawDisabled) then
         local drawFunc = (c.debug == true) and c._drawDebug or c.draw
-        drawQueue:add(c:drawOrder(), drawFunc, c)
+        drawQueue:add(
+          max(c:drawOrder(), 1),
+          drawFunc,
+          c
+        )
       end
     end
 

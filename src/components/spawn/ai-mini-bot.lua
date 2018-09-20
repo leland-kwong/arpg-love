@@ -58,7 +58,7 @@ return function()
           , y2 = targetY
           , speed = 125
           , cooldown = 0.4
-          , targetGroup = collisionGroups.player
+          , targetGroup = collisionGroups.create(collisionGroups.player, collisionGroups.obstacle)
         })
         curCooldown = projectile.cooldown
         playblasterSound()
