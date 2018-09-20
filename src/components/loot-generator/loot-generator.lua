@@ -12,6 +12,7 @@ local msgBus = require 'components.msg-bus'
 local tick = require 'utils.tick'
 local tween = require 'modules.tween'
 local bump = require 'modules.bump'
+local collisionGroups = require 'modules.collision-groups'
 
 local itemGroup = groups.all
 local tooltipCollisionWorld = bump.newWorld(16)
@@ -157,7 +158,7 @@ local LootGenerator = {
 
 local COLLISION_FLOOR_ITEM_TYPE = 'floorItem'
 local function collisionFilter(item, other)
-  if other.group == COLLISION_FLOOR_ITEM_TYPE or other.group == 'obstacle' then
+  if other.group == COLLISION_FLOOR_ITEM_TYPE or collisionGroups.matches(other.group, collisionGroups.obstacle) then
     return 'slide'
   end
   return false

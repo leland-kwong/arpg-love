@@ -67,7 +67,7 @@ local function triggerAttack(self)
 		self.collisionW,
 		self.collisionH,
 		function(item)
-			if (collisionGroups.matches(collisionGroups.ai, item.group)) then
+			if (collisionGroups.matches(item.group, collisionGroups.create(collisionGroups.ai, collisionGroups.environment))) then
 				local aiCollision = item
 				local aiCollisionX, aiCollisionY = aiCollision:getPositionWithOffset()
 				hammerWorld:add(

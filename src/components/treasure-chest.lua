@@ -9,6 +9,7 @@ local Gui = require 'components.gui.gui'
 local camera = require 'components.camera'
 local extend = require'utils.object-utils'.extend
 local Color = require 'modules.color'
+local collisionGroups = require 'modules.collision-groups'
 
 local animation = AnimationFactory:new({
   'treasure-chest'
@@ -48,7 +49,7 @@ local TreasureChest = extend(Gui, {
   w = w,
   h = h,
   onCreate = function(self)
-    self:addCollisionObject('obstacle', self.x, self.y, self.w, self.h - 6, 0, -6)
+    self:addCollisionObject(collisionGroups.obstacle, self.x, self.y, self.w, self.h - 6, 0, -6)
       :addToWorld(collisionWorlds.map)
   end,
   getMousePosition = function()

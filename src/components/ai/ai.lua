@@ -300,7 +300,7 @@ local function computeSeparation(self, neighbors)
 end
 
 local function obstacleFilter(item)
-  return item.group == 'obstacle'
+  return collisionGroups.matches(item.group, collisionGroups.obstacle)
 end
 
 local function computeObstacleInfluence(self)

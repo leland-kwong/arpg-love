@@ -29,7 +29,7 @@ local function colFilter(item, other)
 end
 
 local function impactCollisionFilter(item)
-  if collisionGroups.matches(item.group, collisionGroups.ai) then
+  if collisionGroups.matches(item.group, collisionGroups.create(collisionGroups.ai, collisionGroups.environment)) then
     return true
   end
   return false

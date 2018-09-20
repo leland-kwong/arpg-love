@@ -21,7 +21,7 @@ local function GroupMatcher(groupNames)
   end
 
   function Matcher.create(a, b, c, d, e, f, g)
-    local groupId =
+    local id =
         valueByName[a]
       * valueByName[b]
       * valueByName[c]
@@ -29,19 +29,19 @@ local function GroupMatcher(groupNames)
       * valueByName[e]
       * valueByName[f]
       * valueByName[g]
-    local groupById = groupByGroupId[groupId]
-    if (not groupById) then
+    local group = groupByGroupId[id]
+    if (not group) then
       local items = {a, b, c, d, e, f, g}
-      groupById = {}
+      group = {}
       for i=1, #items do
         local v = items[i]
         if v then
-          groupById[v] = true
+          group[v] = true
         end
       end
-      groupByGroupId[groupId] = groupById
+      groupByGroupId[id] = group
     end
-    return groupById
+    return group
   end
 
   -- checks if a group contains the given string
@@ -56,10 +56,17 @@ local function GroupMatcher(groupNames)
 
   -- checks if at least one value in groupA exists in groupB
   function Matcher.matches(groupA, groupB)
+    local matches = groupA == groupB
+
+    if matches then
+      return true
+    end
+
     local typeA, typeB = type(groupA), type(groupB)
 
-    if (typeA == 'string' and typeB == 'string') then
-      return groupA == groupB
+    -- they weren't equal before, but they're the same type, so we know they don't match
+    if (typeA == 'string') and (typeB == 'string') then
+      return false
     end
 
     if (typeA == 'string') then

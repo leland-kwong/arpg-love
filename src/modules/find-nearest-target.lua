@@ -32,7 +32,7 @@ local function findNearestTarget(
       width,
       height,
       function(item)
-        if (not nearestEnemyFound) and collisionGroups.matches(item.group, collisionGroups.ai) then
+        if (not nearestEnemyFound) and collisionGroups.matches(item.group, collisionGroups.create(collisionGroups.ai, collisionGroups.environment)) then
           local target = item.parent
           local isAlreadyFound = ignoreTargets and hasItem(ignoreTargets, target)
           if los then

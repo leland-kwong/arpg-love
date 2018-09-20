@@ -5,6 +5,7 @@ local objectUtils = require 'utils.object-utils'
 local groups = require 'components.groups'
 local mapBlueprint = require 'components.map.map-blueprint'
 local Map = require 'modules.map-generator.index'
+local collisionGroups = require 'modules.collision-groups'
 local MainMapSolidsFactory = require 'components.map.main-map-solids'
 local animationFactory = require 'components.animation-factory'
 local lru = require 'utils.lru'
@@ -40,7 +41,7 @@ local function setupCollisionObjects(self, grid, gridSize)
       local gridSize = self.gridSize
       local tileX, tileY = x * gridSize, y * gridSize
       return self:addCollisionObject(
-        'obstacle',
+        collisionGroups.obstacle,
         tileX, tileY, gridSize, gridSize, gridSize/2 - 1, gridSize
       ):addToWorld(collisionWorlds.map)
     end

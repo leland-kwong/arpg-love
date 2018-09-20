@@ -187,7 +187,7 @@ return itemDefs.registerType({
 							width * 2,
 							height * 2,
 							function(item)
-								if collisionGroups.matches(item.group, collisionGroups.ai) then
+								if collisionGroups.matches(item.group, collisionGroups.create(collisionGroups.ai, collisionGroups.environment)) then
 									msgBus.send(msgBus.CHARACTER_HIT, {
 										parent = item.parent,
 										damage = math.random(
