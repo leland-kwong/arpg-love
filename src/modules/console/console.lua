@@ -124,12 +124,12 @@ function Console.update(self)
 end
 
 local function calcMessageBusHandlers()
-  local reducers, handlers, handlersByType = msgBus.getStats()
+  local handlersByType = msgBus.getStats()
   local handlersByTypeCount = 0
   for _,handlers in pairs(handlersByType) do
     handlersByTypeCount = handlersByTypeCount + #handlers
   end
-  return #reducers + #handlers + handlersByTypeCount
+  return handlersByTypeCount
 end
 
 function Console.draw(self)

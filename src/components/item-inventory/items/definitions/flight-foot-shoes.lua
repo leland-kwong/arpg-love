@@ -75,31 +75,6 @@ return itemDefs.registerType({
 			return utils.functional.reduce(stats, concat("\n"))
 		end,
 
-		modifier = function(self, msgType, msgValue, CLEANUP)
-			if msgFilters[msgType] then
-				local s = stateById:get(self.__id)
-
-				s.msgType = msgType
-
-				if not s.stackManager then
-					s.stackManager = coroutine.create(stackManager)
-				end
-
-				local alive, bonusSpeed = coroutine.resume(s.stackManager, s)
-
-				if not alive and Global.isDebug then
-					-- show error
-					error(moveStacks)
-				end
-
-				msgValue.modifier = msgValue.modifier + bonusSpeed
-				return msgValue
-			else
-				-- just pass through and do nothing
-				return msgValue
-			end
-		end,
-
 		final = function(self)
 			local s = stateById:done(self.__id)
 			if s.stackManager then

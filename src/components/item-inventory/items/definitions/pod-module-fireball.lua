@@ -116,6 +116,18 @@ return itemDefs.registerType({
 			local definition = itemDefs.getDefinition(self)
 			local upgrades = definition.upgrades
 
+			local listeners = {
+				msgBus.on(msgBus.ENEMY_DESTROYED, function()
+					onEnemyDestroyedIncreaseDamage(self)
+				end)
+			}
+			msgBus.on(msgBus.EQUIPMENT_UNEQUIP, function(item)
+				if item == self then
+					msgBus.off(listeners)
+					return msgBus.CLEANUP
+				end
+			end)
+
 			state.onHit = function(attack, hitMessage)
 				local target = hitMessage.parent
 				local up1Ready = msgBus.send(msgBus.ITEM_CHECK_UPGRADE_AVAILABILITY, {
@@ -213,12 +225,6 @@ return itemDefs.registerType({
 			local Sound = require 'components.sound'
 			love.audio.play(Sound.functions.fireBlast())
 			return Fireball.create(props)
-		end,
-
-		onMessage = function(self, msgType)
-			if msgBus.ENEMY_DESTROYED == msgType then
-				onEnemyDestroyedIncreaseDamage(self)
-			end
 		end
 	}
 })
