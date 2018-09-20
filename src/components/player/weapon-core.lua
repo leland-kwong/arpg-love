@@ -3,6 +3,7 @@ local groups = require 'components.groups'
 local AnimationFactory = require 'components.animation-factory'
 local msgBus = require 'components.msg-bus'
 local Color = require 'modules.color'
+local halfRad = math.pi/2
 
 local WeaponCore = {
   id = 'WEAPON_CORE',
@@ -11,7 +12,10 @@ local WeaponCore = {
   recoilDuration = 0,
   recoilDurationRemaining = 0,
   drawOrder = function(self)
-    return Component.get('PLAYER'):drawOrder() + 1
+    -- adjust draw order based on the y-facing direction
+    local config = require 'config.config'
+    local offsetY = math.floor(self.facingY) * 10
+    return Component.get('PLAYER'):drawOrder() + 1 + offsetY
   end
 }
 
@@ -58,9 +62,12 @@ function WeaponCore.update(self, dt)
     )
   end
   self.animation:update(dt / 4)
+
+  local playerRef = Component.get('PLAYER')
+  self.facingX, self.facingY = playerRef:getProp('facingDirectionX'),
+                               playerRef:getProp('facingDirectionY')
 end
 
-local halfRad = math.pi/2
 local function drawMuzzleFlash(color, x, y, angle, radius)
   local r,g,b,a = Color.multiply(color)
   local weaponLength = 26
@@ -131,8 +138,6 @@ function WeaponCore.draw(self)
   end
 
   local playerX, playerY = playerRef:getPosition()
-  self.facingX, self.facingY = playerRef:getProp('facingDirectionX'),
-                               playerRef:getProp('facingDirectionY')
   self.angle = (math.atan2(self.facingX, self.facingY) * -1) + (math.pi/2)
 
   local recoilMaxDistance = -4

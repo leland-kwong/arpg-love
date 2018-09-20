@@ -1,24 +1,25 @@
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 
+local emptyTable = {}
 for groupName,group in pairs(groups) do
-  group.drawQueue:onBeforeFlush(function(self)
-    local minOrder, maxOrder = self:getStats()
-    local maxDivergence = 500
-    local divergence = maxOrder - minOrder
-    local isDivergingTooMuch = divergence > maxDivergence
-    if isDivergingTooMuch then
+  local function drawQueueWarningCheck(self)
+    local maxOrdersCount = 200
+    local ordersCount = #(self.orders or emptyTable)
+    local isTooManyPriorities = ordersCount > maxOrdersCount
+    if isTooManyPriorities then
       local Color = require 'modules.color'
       msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
-        title = '['..groupName..'] WARNING: draw queue divergence',
+        title = '['..groupName..'] WARNING: excessive draw orders',
         description = {
-          Color.WHITE, 'draw order gap of ',
-          Color.CYAN, divergence,
+          Color.WHITE, 'number of draw orders ',
+          Color.CYAN, ordersCount,
           Color.WHITE, ' exceeded threshold of ',
-          Color.RED, maxDivergence,
-          Color.WHITE, '.\nA high draw order gap can cause performance issues because the draw queue will have to iterate over a large list. Additionally, a big gap will require the draw queue to skip positions, causing unecessary cpu strain.'
+          Color.RED, maxOrdersCount,
+          Color.WHITE, '.\nA high number of draw orders can cause performance issues because the draw queue will have to iterate over a large list.'
         }
       })
     end
-  end)
+  end
+  group.drawQueue:onBeforeFlush(drawQueueWarningCheck)
 end

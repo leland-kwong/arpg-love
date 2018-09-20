@@ -12,10 +12,9 @@ local defaultOptions = {
 function Q:new(options)
   options = assign({}, defaultOptions, options)
   local queue = {
-    list = nil,
+    list = nil, -- list of calls grouped by their order
+    orders = nil, -- list of orders (priority)
     length = 0, -- num of calls added to the queue
-    minOrder = 0,
-    maxOrder = 0, -- highest order that has been added to the queue
     development = options.development,
     beforeFlush = noop,
     ready = true
@@ -39,8 +38,7 @@ function Q:add(order, cb, a, b)
   local isNewQueue = not self.list
   if isNewQueue then
     self.list = {}
-    self.minOrder = order
-    self.maxOrder = order
+    self.orders = {}
   end
 
   if self.development then
@@ -51,9 +49,11 @@ function Q:add(order, cb, a, b)
   end
 
   local list = self.list[order]
-  if not list then
+  local isNewOrder = not list
+  if isNewOrder then
     list = {}
     self.list[order] = list
+    table.insert(self.orders, order)
   end
 
   local itemIndex = self.length + 1
@@ -61,8 +61,6 @@ function Q:add(order, cb, a, b)
 
   list[#list + 1] = item
   self.length = self.length + 1
-  self.minOrder = min(self.minOrder, order)
-  self.maxOrder = max(self.maxOrder, order)
   return self
 end
 
@@ -71,10 +69,13 @@ local emptyList = {}
 function Q:flush()
   self:beforeFlush()
   local list = self.list or emptyList
+  local orders = self.orders or emptyList
+  table.sort(orders)
   self.list = nil
-  local _start, _end = self.minOrder, self.maxOrder
-  for i=_start, _end do
-    local row = list[i]
+  self.orders = nil
+  for i=1, #orders do
+    local order = orders[i]
+    local row = list[order]
     local rowLen = row and #row or 0
     for j=1, rowLen do
       local item = row[j]

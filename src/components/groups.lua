@@ -29,13 +29,13 @@ local Groups = {
   firstLayer = Component.newGroup(),
   all = Component.newGroup({
     -- automatic draw-ordering based on y position
-    drawOrder = function(self)
+    drawOrder = function(component)
       --[[
         number of layers between each order. This is to allow multiple different items to be stacked within the same draw order
       ]]
-      local layers = 3
-      local granularity = self.y / gridSize
-      local order = floor(granularity) * layers
+      local layers = 10
+      local orderByTilePosition = floor(component.y / gridSize)
+      local order = orderByTilePosition * layers - 2
       return max(1, order)
     end,
   }),
