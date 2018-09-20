@@ -34,6 +34,8 @@ function ExperienceIndicator.init(self)
       return msgBus.CLEANUP
     end
 
+    msgValue = math.floor(msgValue) -- round fractional values
+
     self.rootStore:set('totalExperience', function(state)
       return state.totalExperience + msgValue
     end)
@@ -54,7 +56,9 @@ function ExperienceIndicator.init(self)
         }
       })
     end
-  end)
+
+    return msgValue
+  end, 1)
 end
 
 function ExperienceIndicator.update(self)

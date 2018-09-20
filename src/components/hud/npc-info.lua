@@ -7,10 +7,11 @@ local camera = require 'components.camera'
 local config = require 'config.config'
 local Position = require 'utils.position'
 local Color = require 'modules.color'
+local collisionGroups = require 'modules.collision-groups'
 
 local itemHovered = nil
 local aiHoverFilter = function(item)
-  return (not itemHovered) and item.group == 'ai'
+  return (not itemHovered) and collisionGroups.matches(item.group, collisionGroups.ai)
 end
 
 local NpcInfo = {

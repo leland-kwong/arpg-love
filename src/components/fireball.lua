@@ -5,6 +5,7 @@ local msgBus = require 'components.msg-bus'
 local animationFactory = require 'components.animation-factory'
 local collisionWorlds = require 'components.collision-worlds'
 local collisionObject = require 'modules.collision'
+local collisionGroups = require 'modules.collision-groups'
 local gameWorld = require 'components.game-world'
 local Position = require 'utils.position'
 local Gui = require 'components.gui.gui'
@@ -28,7 +29,7 @@ local function colFilter(item, other)
 end
 
 local function impactCollisionFilter(item)
-  if item.group == 'ai' then
+  if collisionGroups.matches(item.group, collisionGroups.ai) then
     return true
   end
   return false
@@ -146,7 +147,7 @@ local Fireball = {
       if hasCollisions then
         for i=1, len do
           local col = cols[i]
-          if col.other.group == 'ai' then
+          if collisionGroups.matches(col.other.group, collisionGroups.ai) then
             handleImpact(self)
           end
         end

@@ -3,6 +3,7 @@ local config = require 'config.config'
 local msgBus = require("components.msg-bus")
 local itemDefs = require("components.item-inventory.items.item-definitions")
 local Color = require 'modules.color'
+local collisionGroups = require 'modules.collision-groups'
 local functional = require("utils.functional")
 local groups = require 'components.groups'
 
@@ -186,7 +187,7 @@ return itemDefs.registerType({
 							width * 2,
 							height * 2,
 							function(item)
-								if item.group == 'ai' then
+								if collisionGroups.matches(item.group, collisionGroups.ai) then
 									msgBus.send(msgBus.CHARACTER_HIT, {
 										parent = item.parent,
 										damage = math.random(

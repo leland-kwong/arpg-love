@@ -7,6 +7,7 @@ local itemDefs = require 'components.item-inventory.items.item-definitions'
 local msgBus = require 'components.msg-bus'
 local AbilityBase = require 'components.abilities.base-class'
 local tween = require 'modules.tween'
+local collisionGroups = require 'modules.collision-groups'
 local config = require 'config.config'
 local filter = require 'utils.filter-call'
 
@@ -66,7 +67,7 @@ local function triggerAttack(self)
 		self.collisionW,
 		self.collisionH,
 		function(item)
-			if (item.group == 'ai') then
+			if (collisionGroups.matches(collisionGroups.ai, item.group)) then
 				local aiCollision = item
 				local aiCollisionX, aiCollisionY = aiCollision:getPositionWithOffset()
 				hammerWorld:add(
@@ -165,7 +166,7 @@ local Fissure = Component.createFactory(
 			local collisionWorlds = require 'components.collision-worlds'
 			local collisionSize = self.crackSize
 			self.collision = self:addCollisionObject(
-				'PROJECTILE',
+				collisionGroups.projectile,
 				self.x,
 				self.y,
 				collisionSize,
@@ -183,7 +184,7 @@ local Fissure = Component.createFactory(
 			local finalX = self.x + self.dx * shockWaveDistance
 			local finalY = self.y + self.dy * shockWaveDistance
 			self.collision:move(finalX, finalY, function(item, other)
-				if other.group == 'ai' then
+				if collisionGroups.matches(other.group, collisionGroups.ai) then
 					msgBus.send(msgBus.CHARACTER_HIT, {
 						parent =  other.parent,
 						damage = calcDamage(self)
