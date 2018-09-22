@@ -16,6 +16,7 @@ local msgBus = require 'components.msg-bus'
 local HealSource = require 'components.heal-source'
 local tick = require 'utils.tick'
 require 'components.item-inventory.items.equipment-base-subscriber'
+require 'modules.dungeon'
 
 local function setupTileTypes(types)
   local list = {}
@@ -114,7 +115,7 @@ local function getDroppablePosition(posX, posY, mapGrid, callCount)
 
   local dropX, dropY = posX + random(0, 16), posY + random(0, 16)
   local gridX, gridY = Position.pixelsToGridUnits(dropX, dropY, config.gridSize)
-  local isWalkable = mapGrid[gridX][gridY] == Map.WALKABLE
+  local isWalkable = mapGrid[gridY][gridX] == Map.WALKABLE
   if (not isWalkable) and (callCount < 10) then
     return getDroppablePosition(
       posX,
@@ -135,12 +136,12 @@ local keys = require 'utils.functional'.keys
 local aiTypes = require 'components.spawn.ai-types'
 local aiTypesList = keys(aiTypes.types)
 
-local function generateAi(parent, player, map)
-  local aiCount = 30
+local function generateAi(parent, player, mapGrid)
+  local aiCount = 20
   local generated = 0
-  local grid = map.grid
+  local grid = mapGrid
   local rows, cols = #grid, #grid[1]
-  local minPos, maxPos = 10, cols - 5
+  local minPos, maxPos = 3, cols - 2
   while generated < aiCount do
     local posX, posY = math.random(minPos, maxPos), math.random(minPos, maxPos)
     local isValidPosition = grid[posY][posX] == Map.WALKABLE
@@ -217,12 +218,21 @@ function MainScene.init(self)
 
   self.rootStore = rootState
   local parent = self
-  local map = Map.createAdjacentRooms(6, 20)
-  local gridTileDefinitions = cloneGrid(map.grid, function(v, x, y)
+  local Dungeon = require 'modules.dungeon'
+  local mapGrid = Dungeon.new({
+    'room-4',
+    'room-1',
+    'room-5',
+    'room-3',
+    'room-2',
+    'room-4',
+  })
+  print(#mapGrid[1])
+  local gridTileDefinitions = cloneGrid(mapGrid, function(v, x, y)
     local tileGroup = gridTileTypes[v]
     return tileGroup[math.random(1, #tileGroup)]
   end)
-  self.mapGrid = map.grid
+  self.mapGrid = mapGrid
 
   self.listeners = {
     msgBus.on(msgBus.NEW_GAME, function()
@@ -259,7 +269,7 @@ function MainScene.init(self)
       if not item then
         return
       end
-      local dropX, dropY = getDroppablePosition(x, y, map.grid)
+      local dropX, dropY = getDroppablePosition(x, y, mapGrid)
       LootGenerator.create({
         x = dropX,
         y = dropY,
@@ -312,13 +322,15 @@ function MainScene.init(self)
   }
 
   local player = Player.create({
-    mapGrid = map.grid,
+    x = 2 * config.gridSize,
+    y = 2 * config.gridSize,
+    mapGrid = mapGrid,
     rootStore = rootState
   }):setParent(parent)
 
   MainMap.create({
     camera = camera,
-    grid = map.grid,
+    grid = mapGrid,
     tileRenderDefinition = gridTileDefinitions,
     walkable = Map.WALKABLE
   }):setParent(parent)
@@ -331,7 +343,7 @@ function MainScene.init(self)
     rootStore = rootState
   }):setParent(parent)
 
-  generateAi(parent, player, map)
+  generateAi(parent, player, mapGrid)
 
   if self.autoSave then
     local lastSavedState = nil
