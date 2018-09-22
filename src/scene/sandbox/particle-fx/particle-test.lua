@@ -26,7 +26,7 @@ function ParticleTest.init(self)
     y = player.y + 6,
     duration = 9999,
     drawOrder = function(self)
-      return self.group.drawOrder(self)
+      return self.group:drawOrder(self)
     end
   }):setParent(self)
 end

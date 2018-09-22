@@ -4,9 +4,11 @@ local SceneMain = require 'scene.scene-main'
 local TreasureChest = require 'components.treasure-chest'
 local config = require 'config.config'
 local msgBus = require 'components.msg-bus'
+local GroundFlame = require 'components.particle.ground-flame'
+local EnvironmentInteractable = require 'components.map.environment-interactable'
 
 local MainGameTest = {
-  group = groups.all
+  group = groups.firstLayer
 }
 
 local function modifyLevelRequirements()
@@ -18,27 +20,16 @@ end
 
 local function insertTestItems(rootStore)
   local itemsPath = 'components.item-inventory.items.definitions'
-  rootStore:addItemToInventory(require(itemsPath..'.pod-module-fireball').create(), {3, 2})
-  rootStore:addItemToInventory(
-    require(itemsPath..'.mock-armor').create()
-    , {2, 3})
-  rootStore:addItemToInventory(
-    require(itemsPath..'.pod-module-slow-time').create()
-  )
+  rootStore:addItemToInventory(require(itemsPath..'.pod-module-initiate').create())
+  rootStore:addItemToInventory(require(itemsPath..'.pod-module-hammer').create())
+  rootStore:addItemToInventory(require(itemsPath..'.pod-module-fireball').create())
 
-  local defaultBoots = require'components.item-inventory.items.definitions.mock-shoes'
-  local canEquip, errorMsg = rootStore:equipItem(defaultBoots.create(), 1, 4)
-  if not canEquip then
-    error(errorMsg)
+  local generateRandomItem = require 'components.loot-generator.algorithm-1'
+  for i=1, 10 do
+    rootStore:addItemToInventory(
+      generateRandomItem()
+    )
   end
-
-  local defaultWeapon2 = require'components.item-inventory.items.definitions.lightning-rod'
-  local canEquip, errorMsg = rootStore:equipItem(defaultWeapon2.create(), 1, 2)
-  if not canEquip then
-    error(errorMsg)
-  end
-
-  msgBus.send(msgBus.EQUIPMENT_CHANGE)
 end
 
 function MainGameTest.init(self)
@@ -50,30 +41,34 @@ function MainGameTest.init(self)
   insertTestItems(scene.rootStore)
 
   TreasureChest.create({
-    x = 5 * 16,
-    y = 5 * 16
-  }):setParent(self)
-  TreasureChest.create({
-    x = 8 * 16,
-    y = 5 * 16
-  }):setParent(self)
-  TreasureChest.create({
-    x = 11 * 16,
-    y = 5 * 16
+    x = 10 * config.gridSize,
+    y = 5 * config.gridSize
   }):setParent(self)
 
   local function randomTreasurePosition()
-    return math.random(10 * 30) * config.gridSize
+    local mapGrid = Component.get('MAIN_SCENE').mapGrid
+    local rows, cols = #mapGrid, #mapGrid[1]
+    return math.random(10, cols) * config.gridSize,
+      math.random(10, rows) * config.gridSize
   end
-  TreasureChest.create({
-    x = randomTreasurePosition(),
-    y = randomTreasurePosition()
-  }):setParent(self)
 
-  TreasureChest.create({
-    x = randomTreasurePosition(),
-    y = randomTreasurePosition()
-  }):setParent(self)
+  local chestCount = 3
+  for i=1, chestCount do
+    local x, y = randomTreasurePosition()
+    TreasureChest.create({
+      x = x,
+      y = y
+    }):setParent(self)
+  end
+
+  local treasureCacheCount = 15
+  for i=1, treasureCacheCount do
+    local x, y = randomTreasurePosition()
+    EnvironmentInteractable.create({
+      x = x,
+      y = y
+    }):setParent(self)
+  end
 end
 
 return Component.createFactory(MainGameTest)

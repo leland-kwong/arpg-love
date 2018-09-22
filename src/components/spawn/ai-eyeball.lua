@@ -1,6 +1,7 @@
 local animationFactory = require 'components.animation-factory'
 local debounce = require 'modules.debounce'
 local tick = require 'utils.tick'
+local collisionGroups = require 'modules.collision-groups'
 
 local frostShotSoundFilter = {
   type = 'lowpass',
@@ -15,8 +16,9 @@ local playFrostShotSound = debounce(function()
   love.audio.play(source)
 end, 0.3)
 
-local function eyeballAttackCollisionFilter(item)
-  return item.group == 'player'
+local function onDestroyStart()
+  local Sound = require 'components.sound'
+  love.audio.play(Sound.functions.robotDestroyed())
 end
 
 return function()
@@ -33,7 +35,8 @@ return function()
   local ability1 = (function()
     local curCooldown = 0
     local skill = {
-      range = 10
+      range = 10,
+      attackTime = 0.2
     }
 
     function skill.use(self, targetX, targetY)
@@ -50,7 +53,9 @@ return function()
           , speed = 115
           , cooldown = 0.6
           , lifeTime = 2.5
-          , targetGroup = 'player'
+          , targetGroup = collisionGroups.player
+          , minDamage = 1
+          , maxDamage = 2
           , drawOrder = function()
             return self.drawOrder(self) + 1
           end
@@ -92,7 +97,7 @@ return function()
     w = spriteWidth,
     h = spriteHeight,
     animations = animations,
-    armor = 100,
+    armor = 250,
     abilities = {
       ability1
     },
@@ -111,6 +116,7 @@ return function()
         self.y,
         self.z + dt * self.heightChange
       )
-    end
+    end,
+    onDestroyStart = onDestroyStart
   }
 end

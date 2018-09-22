@@ -5,6 +5,7 @@ local msgBus = require 'components.msg-bus'
 local animationFactory = require 'components.animation-factory'
 local collisionWorlds = require 'components.collision-worlds'
 local collisionObject = require 'modules.collision'
+local collisionGroups = require 'modules.collision-groups'
 local gameWorld = require 'components.game-world'
 local Position = require 'utils.position'
 local Gui = require 'components.gui.gui'
@@ -28,7 +29,10 @@ local function colFilter(item, other)
 end
 
 local function impactCollisionFilter(item)
-  return item.group == 'ai'
+  if collisionGroups.matches(item.group, collisionGroups.create(collisionGroups.ai, collisionGroups.environment)) then
+    return true
+  end
+  return false
 end
 
 local ImpactAnimation = Component.createFactory({
@@ -39,6 +43,9 @@ local ImpactAnimation = Component.createFactory({
   endState = {w = 0},
   color = {1,0.7,0,0.15},
   group = groups.all,
+  onHit = function(self, hitMessage)
+    return hitMessage
+  end,
   init = function(self)
     -- shrinks the impact animation over time
     self.tween = tween.new(0.2, self, self.endState, tween.easing.inExpo)
@@ -60,7 +67,7 @@ local ImpactAnimation = Component.createFactory({
     )
   end,
   drawOrder = function(self)
-    return self.group.drawOrder(self) + 30
+    return self.group:drawOrder(self) + 30
   end
 })
 
@@ -68,6 +75,7 @@ local function handleImpact(self)
   local width, height = self.w * 4, self.h * 4
   local collisionX, collisionY = self.x - width/2, self.y - height/2
   local parentX, parentY = self.x, self.y
+
   local items, len = collisionWorlds.map:queryRect(
     collisionX,
     collisionY,
@@ -78,10 +86,10 @@ local function handleImpact(self)
 
   for i=1, len do
     local it = items[i]
-    msgBus.send(msgBus.CHARACTER_HIT, {
+    msgBus.send(msgBus.CHARACTER_HIT, self.onHit(self, {
       parent = it.parent,
       damage = math.random(self.minDamage, self.maxDamage)
-    })
+    }))
   end
 
   ImpactAnimation.create({
@@ -100,12 +108,17 @@ local Fireball = {
   scale = 1,
   maxLifeTime = 2,
   speed = 400,
+  startOffset = 0,
   weaponDamageScaling = 1.2,
   cooldown = 0.15,
   animation = { 'fireball' },
 
   init = function(self)
     local dx, dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
+    -- adjust starting position based on the start offset
+    self.x = self.x + self.startOffset * dx
+    self.y = self.y + self.startOffset * dy
+
     self.direction = {x = dx, y = dy}
     self.animation = animationFactory:new(self.animation)
 
@@ -134,7 +147,7 @@ local Fireball = {
       if hasCollisions then
         for i=1, len do
           local col = cols[i]
-          if col.other.group == 'ai' then
+          if collisionGroups.matches(col.other.group, collisionGroups.ai) then
             handleImpact(self)
           end
         end
@@ -187,15 +200,11 @@ local Fireball = {
         false
       )
     end
-  end,
-
-  final = function(self)
-    self.colObj:delete()
   end
 }
 
 Fireball.drawOrder = function(self)
-  local order = self.group.drawOrder(self) + 2
+  local order = self.group:drawOrder(self) + 2
   return order
 end
 

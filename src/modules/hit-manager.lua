@@ -1,6 +1,29 @@
 local PopupTextController = require 'components.popup-text'
 local popupText = PopupTextController.create()
+local min, max, random = math.min, math.max, math.random
+local round = require 'utils.math'.round
 
+local function rollCritChance(chance)
+  if chance == 0 then
+    return false
+  end
+  return random(1, 1/chance) == 1
+end
+
+local function adjustedDamageTaken(self, damage, lightningDamage, criticalChance, criticalMultiplier)
+  local damageReductionPerArmor = 0.0001
+  local damageAfterFlatReduction = damage - self:getCalculatedStat('flatPhysicalDamageReduction')
+  local reducedDamageFromArmorResistance = (damageAfterFlatReduction * self:getCalculatedStat('armor') * damageReductionPerArmor)
+  local lightningDamageAfterResistance = lightningDamage - (lightningDamage * self:getCalculatedStat('lightningResist'))
+  local totalDamage = damageAfterFlatReduction
+    - reducedDamageFromArmorResistance
+    + lightningDamageAfterResistance
+  local criticalMultiplier = rollCritChance(criticalChance) and criticalMultiplier or 0
+  local totalDamageWithCrit = totalDamage + (totalDamage * criticalMultiplier)
+  return round(max(0, totalDamageWithCrit)), totalDamage, criticalMultiplier, lightningDamageAfterResistance
+end
+
+-- modifiers modify properties such as `maxHealth`, `moveSpeed`, etc...
 local function applyModifiers(self, newModifiers, multiplier)
   if (not newModifiers) then
     return
@@ -24,17 +47,33 @@ local defaultEquipmentModifiers = require'components.state.base-stat-modifiers'(
 -- Returns stat including any equipment modifiers
 local function getBaseStat(self, prop)
   local equipmentModifiers = self.equipmentModifiers or defaultEquipmentModifiers
-  return self[prop] + (equipmentModifiers[prop] or 0)
+  local baseStat = self[prop] or 0
+  local equipmentModifierStat = equipmentModifiers[prop] or 0
+  return baseStat + equipmentModifierStat
+end
+
+local function getDamageParams(self, hit)
+  local dmg = (type(hit.damage) == 'table') and hit.damage or hit
+  return
+    self,
+    dmg.damage or 0,
+    dmg.lightningDamage or 0,
+    min(1, hit.criticalChance or 0), -- maximum value of 1
+    hit.criticalMultiplier or 0
 end
 
 --[[
+  handles hits taken for a character, managing damage and property modifiers
+
   self [TABLE] - component instance
   dt [NUMBER] - dt from component.update
 ]]
 local function hitManager(self, dt, onDamageTaken)
   local arePropertiesSetup = self.modifiers ~= nil
   if not arePropertiesSetup then
-    self.modifiers = {}
+    self.modifiers = {
+      freelyMove = 0, -- if > 0 this allows the character to move regardless of any other states
+    }
     self.modifiersApplied = {}
     self.hits = {}
     self.getCalculatedStat = getCalculatedStat
@@ -45,8 +84,17 @@ local function hitManager(self, dt, onDamageTaken)
   for hitId,hit in pairs(self.hits) do
     hitCount = hitCount + 1
 
-    if onDamageTaken and hit.damage then
-      onDamageTaken(self, hit.damage)
+    if onDamageTaken then
+      local actualDamage, actualNonCritDamage, actualCritMultiplier, actualLightningDamage = adjustedDamageTaken(
+        getDamageParams(self, hit)
+      )
+      onDamageTaken(
+        self,
+        actualDamage,
+        actualNonCritDamage,
+        actualCritMultiplier,
+        actualLightningDamage
+      )
     end
 
     if hit.modifiers then

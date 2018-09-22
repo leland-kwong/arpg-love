@@ -27,24 +27,36 @@ local baseProps = {
   init = noop,
 
   -- these methods will not be called until the component has been initialized
-  update = noop,
-  draw = noop,
-  final = noop,
+  update = noop, -- optional
+  draw = noop, -- optional
+  final = noop, -- optional
   _update = function(self, dt)
     self._ready = true
-    local parent = self.parent
-    if parent then
-      -- update position relative to its parent
-      local dx, dy, dz =
-        self.prevParentX and (parent.x - self.prevParentX) or 0,
-        self.prevParentY and (parent.y - self.prevParentY) or 0,
-        self.prevParentZ and (parent.z - self.prevParentZ) or 0
-      self:setPosition(self.x + dx, self.y + dy, self.z + dz)
-      self.prevParentX = parent.x
-      self.prevParentY = parent.y
-      self.prevParentZ = parent.z
-    end
     self:update(dt)
+    local children = self._children
+    if children then
+      local hasChangedPosition = self.x ~= self.prevX
+        or self.y ~= self.prevY
+        or self.z ~= self.prevZ
+
+      if hasChangedPosition then
+        for _,child in pairs(children) do
+          -- update position relative to its parent
+          local dx, dy, dz =
+            (self.x - child.prevParentX),
+            (self.y - child.prevParentY),
+            (self.z - child.prevParentZ)
+          child:setPosition(child.x + dx, child.y + dy, child.z + dz)
+          child.prevParentX = self.x
+          child.prevParentY = self.y
+          child.prevParentZ = self.z
+        end
+
+        self.prevX = self.x
+        self.prevY = self.y
+        self.prevZ = self.z
+      end
+    end
   end,
   _drawDebug = function(self)
     self.draw(self)
@@ -82,6 +94,7 @@ local function cleanupCollisionObjects(self)
     for i=1, #self.collisionObjects do
       self.collisionObjects[i]:delete()
     end
+    self.collisionObjects = nil
   end
 end
 
@@ -130,7 +143,8 @@ function M.createFactory(blueprint)
       tc.validate(c.angle, tc.NUMBER, false)
     end
 
-    c:setGroup(c.group)
+    -- add component to default group first
+    c.group.addComponent(c)
     c:init()
     return c
   end
@@ -147,7 +161,18 @@ function M.createFactory(blueprint)
   end
 
   function blueprint:setDisabled(isDisabled)
-    self._disabled = isDisabled
+    self:setUpdateDisabled(isDisabled)
+    self:setDrawDisabled(isDisabled)
+    return self
+  end
+
+  function blueprint:setDrawDisabled(isDisabled)
+    self._drawDisabled = isDisabled
+    return self
+  end
+
+  function blueprint:setUpdateDisabled(isDisabled)
+    self._updatedDisabled = isDisabled
     return self
   end
 
@@ -160,6 +185,14 @@ function M.createFactory(blueprint)
     if isSameParent then
       return self
     end
+
+    --[[
+      The child's position will now be relative to its parent,
+      so we need to store the parent's initial position
+    ]]
+    self.prevParentX = parent.x
+    self.prevParentY = parent.y
+    self.prevParentZ = parent.z
 
     local id = self:getId()
     -- dissasociate itself from previous parent
@@ -181,11 +214,11 @@ function M.createFactory(blueprint)
   end
 
   function blueprint:setGroup(group)
-    if not group and self.group then
+    if self.group then
       self.group.removeComponent(self)
-    else
-      group.addComponent(self)
     end
+    group.addComponent(self)
+    self.group = group
     return self
   end
 
@@ -246,14 +279,15 @@ function M.newGroup(groupDefinition)
     groupDefinition or {}
   )
 
-  local drawQ = Q:new({development = isDebug})
   local Group = groupDefinition
+  local drawQueue = Q:new({development = isDebug})
+  Group.drawQueue = drawQueue
   local componentsById = {}
   local count = 0
 
   function Group.updateAll(dt)
     for id,c in pairs(componentsById) do
-      if (not c._disabled) then
+      if (not c._updatedDisabled) then
         c:_update(dt)
       end
     end
@@ -261,15 +295,20 @@ function M.newGroup(groupDefinition)
     return Group
   end
 
+  local max = math.max
   function Group.drawAll()
     for id,c in pairs(componentsById) do
-      if c:isReady() and (not c._disabled) then
+      if c:isReady() and (not c._drawDisabled) then
         local drawFunc = (c.debug == true) and c._drawDebug or c.draw
-        drawQ:add(c:drawOrder(), drawFunc, c)
+        drawQueue:add(
+          max(c:drawOrder(), 1),
+          drawFunc,
+          c
+        )
       end
     end
 
-    drawQ:flush()
+    drawQueue:flush()
     return Group
   end
 
@@ -283,6 +322,12 @@ function M.newGroup(groupDefinition)
 
     allComponentsById[id] = component
     componentsById[id] = component
+  end
+
+  function Group.removeComponent(component)
+    count = count - 1
+    local id = component:getId()
+    componentsById[id] = nil
   end
 
   function Group.delete(component)

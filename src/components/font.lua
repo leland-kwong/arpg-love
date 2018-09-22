@@ -1,8 +1,10 @@
 local function fontPrimary(fontSize)
   local font = love.graphics.newFont(
-    'built/fonts/StarPerv.ttf',
+    'built/fonts/pixelsix/pixelsix00fixed.ttf',
+    -- 'built/fonts/StarPerv.ttf',
     fontSize
   )
+  font:setLineHeight(1.2)
 
   return {
     fontSize = fontSize,
@@ -17,6 +19,7 @@ local function fontSecondary(fontSize)
     'built/fonts/m41.ttf',
     fontSize
   )
+  font:setLineHeight(1.2)
   return {
     fontSize = fontSize,
     lineHeight = 1.2,

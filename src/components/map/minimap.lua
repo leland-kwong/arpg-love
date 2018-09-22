@@ -36,7 +36,17 @@ local minimapTileRenderers = {
   end,
 }
 
-local minimapCanvas = love.graphics.newCanvas()
+local function drawPlayerPosition(self, centerX, centerY)
+  -- translucent background around player for better visibility
+  love.graphics.setColor(1,1,1,0.3)
+  local bgRadius = 5
+  love.graphics.circle('fill', self.x + centerX, self.y + centerY, bgRadius)
+
+  -- granular player position indicator
+  love.graphics.setColor(1,1,0)
+  love.graphics.circle('fill', self.x + centerX, self.y + centerY, 1)
+end
+
 -- minimap
 local blueprint = objectUtils.assign({}, mapBlueprint, {
   group = groups.hud,
@@ -44,9 +54,10 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   y = 50,
   w = 100,
   h = 100,
-  offset = 10,
+  clock = 0,
 
   init = function(self)
+    self.canvas = love.graphics.newCanvas()
     self.renderCache = {}
     self.stencil = function()
       love.graphics.rectangle(
@@ -59,10 +70,14 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     end
   end,
 
+  onUpdateStart = function(self, dt)
+    self.clock = self.clock + dt
+  end,
+
   renderStart = function(self)
     love.graphics.push()
     love.graphics.origin()
-    love.graphics.setCanvas(minimapCanvas)
+    love.graphics.setCanvas(self.canvas)
   end,
 
   render = function(self, value, _x, _y, originX, originY, isInViewport)
@@ -83,10 +98,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     love.graphics.setCanvas()
     love.graphics.scale(self.scale)
 
-    love.graphics.setColor(1,1,0)
-    love.graphics.circle('fill', self.x + centerX, self.y + centerY, 2)
 
-    love.graphics.setColor(1,1,1,1)
     love.graphics.setBlendMode('alpha', 'premultiplied')
 
     love.graphics.stencil(self.stencil, 'replace', 1)
@@ -96,10 +108,13 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     local cameraX, cameraY  = self.camera:getPosition()
     local tx, ty = centerX - cameraX/self.gridSize, centerY - cameraY/self.gridSize
     love.graphics.translate(tx, ty)
-    love.graphics.draw(minimapCanvas)
+    love.graphics.setColor(1,1,1,1)
     love.graphics.setBlendMode('alpha')
+    love.graphics.draw(self.canvas)
     love.graphics.setStencilTest()
     love.graphics.pop()
+
+    drawPlayerPosition(self, centerX, centerY)
   end
 })
 

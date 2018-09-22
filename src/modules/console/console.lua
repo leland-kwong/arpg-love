@@ -35,28 +35,25 @@ local function toggleCollisionDebug()
   config.collisionDebug = not config.collisionDebug
 end
 
-msgBus.subscribe(function(msgType, v)
-  if ((msgBus.KEY_PRESSED == msgType) or (msgBus.KEY_RELEASED == msgType)) and
-    not v.isRepeated
-  then
-    keysPressed[v.key] = msgBus.KEY_PRESSED == msgType
-  end
+msgBus.on(msgBus.KEY_PRESSED, function(v)
+  keysPressed[v.key] = true
 
-  -- toggle collision debugger
-  if (msgBus.KEY_PRESSED == msgType) and hasModifier()
-    and keysPressed.p
-    and not v.isRepeated
-  then
-    toggleCollisionDebug()
-  end
+  if hasModifier() and not v.isRepeated then
+    -- toggle collision debugger
+    if keysPressed.p then
+      toggleCollisionDebug()
+    end
 
-  -- toggle console
-  if (msgBus.KEY_PRESSED == msgType) and hasModifier()
-    and keysPressed.c
-    and not v.isRepeated
-  then
-    state.showConsole = not state.showConsole
+    if keysPressed.c then
+      state.showConsole = not state.showConsole
+    end
   end
+  return v
+end)
+
+msgBus.on(msgBus.KEY_RELEASED, function(v)
+  keysPressed[v.key] = false
+  return v
 end)
 
 local Console = {
@@ -126,6 +123,15 @@ function Console.update(self)
   s.accumulatedMemoryUsed = s.accumulatedMemoryUsed + s.currentMemoryUsed
 end
 
+local function calcMessageBusHandlers()
+  local handlersByType = msgBus.getStats()
+  local handlersByTypeCount = 0
+  for _,handlers in pairs(handlersByType) do
+    handlersByTypeCount = handlersByTypeCount + #handlers
+  end
+  return handlersByTypeCount
+end
+
 function Console.draw(self)
   if not state.showConsole then
     return
@@ -172,18 +178,18 @@ function Console.draw(self)
       memoryAvg = string.format('%0.2f', s.accumulatedMemoryUsed / s.frameCount / 1024),
       delta = love.timer.getAverageDelta(),
       fps = love.timer.getFPS(),
-      eventHandlers = #select(2, msgBus.getStats())
+      eventHandlers = calcMessageBusHandlers()
     },
     lineHeight,
     edgeOffset,
     startY + 12 * lineHeight
   )
 
-  gfx.print('msgBus '..self.msgBusAverageTime, edgeOffset, 700)
+  gfx.print('msgBus '..self.msgBusAverageTime, edgeOffset, 720)
 
   local logEntries = logger:get()
   gfx.setColor(Color.MED_GRAY)
-  local loggerYPosition = 730
+  local loggerYPosition = 750
   gfx.print('LOG', edgeOffset, loggerYPosition)
   gfx.setColor(Color.WHITE)
   for i=1, #logEntries do

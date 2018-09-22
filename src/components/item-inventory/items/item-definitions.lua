@@ -60,6 +60,9 @@ local defaultProperties = {
 	-- tooltip content to render
 	tooltip = noop,
 
+	-- tooltip info for upgrade path
+	tooltipItemUpgrade = noop,
+
 	-- item picked up from ground, given as a reward, etc...
 	onInventoryEnter = noop,
 
@@ -136,6 +139,22 @@ local itemPropertiesPropTypes = {
 				error("invalid `category` `"..category.."` received")
 			end
 		end
+	},
+	upgrades = {
+		type = function(upgrades)
+			local forEach = require 'utils.functional'.forEach
+			forEach(upgrades, function(up)
+				assert(type(up.title) == 'string')
+				assert(type(up.description) == 'string')
+				assert(
+					type(up.props) == 'table' or (up.props == nil)
+				)
+				assert(type(up.experienceRequired) == 'number')
+				assert(
+					type(up.sprite) == 'string' or (up.sprite == nil)
+				)
+			end)
+		end
 	}
 }
 
@@ -162,17 +181,13 @@ end
 function items.registerType(itemDefinition)
 	local def = itemDefinition
 
-	if def.registered then
+	local registered = types[def.type] ~= nil
+	if registered then
 		return itemDefinition
 	end
 
-	if isDebug then
-		assert(itemDefinition ~= nil, "item type missing")
-
-		local isDuplicateType = types[def.type] ~= nil
-		assert(not isDuplicateType, "duplicate item type ".."\""..def.type.."\"")
-		checkPropTypes(def.properties, def.type, itemPropertiesPropTypes)
-	end
+	local isDuplicateType = types[def.type] ~= nil
+	assert(not isDuplicateType, "duplicate item type ".."\""..def.type.."\"")
 
 	types[def.type] = tableUtils.assign({
 		registered = true,
@@ -191,6 +206,16 @@ function items.registerType(itemDefinition)
 			return newItem
 		end
 	}, defaultProperties, def.properties)
+
+	if isDebug then
+		assert(itemDefinition ~= nil, "item type missing")
+		local file = 'components/item-inventory/items/definitions/'..def.type
+		assert(
+			require(file) ~= nil,
+			'Invalid type `'..tostring(def.type)..'`. Type should match the name of the file since its needed for dynamic requires'
+		)
+		checkPropTypes(def.properties, def.type, itemPropertiesPropTypes)
+	end
 
 	return types[def.type]
 end

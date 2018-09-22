@@ -2,7 +2,6 @@ local Component = require 'modules.component'
 local groups = require 'components.groups'
 local Map = require 'modules.map-generator.index'
 local Player = require 'components.player'
-local Minimap = require 'components.map.minimap'
 local MainMap = require 'components.map.main-map'
 local Inventory = require 'components.item-inventory.inventory'
 local SpawnerAi = require 'components.spawn.spawn-ai'
@@ -16,6 +15,7 @@ local fileSystem = require 'modules.file-system'
 local msgBus = require 'components.msg-bus'
 local HealSource = require 'components.heal-source'
 local tick = require 'utils.tick'
+require 'components.item-inventory.items.equipment-base-subscriber'
 
 local function setupTileTypes(types)
   local list = {}
@@ -99,7 +99,7 @@ local gridTileTypes = {
 
 local MainScene = {
   id = 'MAIN_SCENE',
-  group = groups.all,
+  group = groups.firstLayer,
 
   -- options
   initialGameState = nil,
@@ -136,11 +136,11 @@ local aiTypes = require 'components.spawn.ai-types'
 local aiTypesList = keys(aiTypes.types)
 
 local function generateAi(parent, player, map)
-  local aiCount = 10
+  local aiCount = 30
   local generated = 0
   local grid = map.grid
   local rows, cols = #grid, #grid[1]
-  local minPos, maxPos = 10, 40
+  local minPos, maxPos = 10, cols - 5
   while generated < aiCount do
     local posX, posY = math.random(minPos, maxPos), math.random(minPos, maxPos)
     local isValidPosition = grid[posY][posX] == Map.WALKABLE
@@ -154,6 +154,7 @@ local function generateAi(parent, player, map)
         x = posX,
         y = posY,
         types = {
+          -- aiTypes.types.SLIME
           aiTypesList[math.random(1, #aiTypesList)],
           aiTypesList[math.random(1, #aiTypesList)],
           aiTypesList[math.random(1, #aiTypesList)]
@@ -174,7 +175,7 @@ function MainScene.init(self)
     end
     -- setup defaults
   else
-    local defaultWeapon = require'components.item-inventory.items.definitions.pod-module-initiate'
+    local defaultWeapon = require'components.item-inventory.items.definitions.pod-module-hammer'
     local canEquip, errorMsg = rootState:equipItem(defaultWeapon.create(), 1, 1)
     if not canEquip then
       error(errorMsg)
@@ -191,6 +192,27 @@ function MainScene.init(self)
     if not canEquip then
       error(errorMsg)
     end
+
+    local defaultBoots = require'components.item-inventory.items.definitions.mock-shoes'
+    local canEquip, errorMsg = rootState:equipItem(defaultBoots.create(), 1, 4)
+    if not canEquip then
+      error(errorMsg)
+    end
+
+    local defaultWeapon2 = require'components.item-inventory.items.definitions.lightning-rod'
+    local canEquip, errorMsg = rootState:equipItem(defaultWeapon2.create(), 1, 2)
+    if not canEquip then
+      error(errorMsg)
+    end
+
+    local defaultArmor = require('components.item-inventory.items.definitions.mock-armor').create()
+    local canEquip, errorMsg = rootState:equipItem(defaultArmor, 2, 3)
+    if not canEquip then
+      error(errorMsg)
+    end
+
+    local defaultWeapon3 = require'components.item-inventory.items.definitions.pod-module-fireball'
+    rootState:addItemToInventory(defaultWeapon3.create())
   end
 
   self.rootStore = rootState
@@ -202,22 +224,57 @@ function MainScene.init(self)
   end)
   self.mapGrid = map.grid
 
-  msgBus.subscribe(function(msgType, msgValue)
-    if self:isDeleted() then
-      return msgBus.CLEANUP
-    end
-
-    if msgBus.NEW_GAME == msgType then
+  self.listeners = {
+    msgBus.on(msgBus.NEW_GAME, function()
       self:delete(true)
-    end
+    end),
 
-    if msgBus.EQUIPMENT_CHANGE == msgType then
+    -- setup default properties in case they don't exist
+    msgBus.on(msgBus.CHARACTER_HIT, function(v)
+      v.damage = v.damage or 0
+      return v
+    end, 1),
+
+    msgBus.on(msgBus.PLAYER_STATS_ADD_MODIFIERS, function(msgValue)
+      local curState = rootState:get()
+      local curMods = curState.statModifiers
+      local nextModifiers = msgValue
+      for k,v in pairs(curMods) do
+        nextModifiers[k] = v + (nextModifiers[k] or 0)
+      end
+      rootState:set(
+        'statModifiers',
+        nextModifiers
+      )
+    end),
+
+    msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function(msgValue)
+      local newModifiers = msgValue
+      rootState:set('statModifiers', newModifiers)
+    end),
+
+    msgBus.on(msgBus.GENERATE_LOOT, function(msgValue)
+      local LootGenerator = require'components.loot-generator.loot-generator'
+      local x, y, item = unpack(msgValue)
+      if not item then
+        return
+      end
+      local dropX, dropY = getDroppablePosition(x, y, map.grid)
+      LootGenerator.create({
+        x = dropX,
+        y = dropY,
+        item = item,
+        rootStore = rootState
+      }):setParent(parent)
+    end),
+
+    msgBus.on(msgBus.EQUIPMENT_CHANGE, function()
       local equipmentChangeHandler = require'components.item-inventory.equipment-change-handler'
       equipmentChangeHandler(rootState)
-    end
+    end),
 
-    if msgBus.KEY_PRESSED == msgType then
-      local key = msgValue.key
+    msgBus.on(msgBus.KEY_PRESSED, function(v)
+      local key = v.key
       local isActive = rootState:get().activeMenu == 'INVENTORY'
       if key == config.keyboard.INVENTORY_TOGGLE then
         if not self.inventory then
@@ -234,62 +291,29 @@ function MainScene.init(self)
           rootState:set('activeMenu', false)
         end
       end
-    end
+    end),
 
-    if msgBus.ENEMY_DESTROYED == msgType then
+    msgBus.on(msgBus.PLAYER_HEAL_SOURCE_ADD, function(v)
+      HealSource.add(self, v, rootState)
+    end),
+
+    msgBus.on(msgBus.PLAYER_HEAL_SOURCE_REMOVE, function(v)
+      HealSource.remove(self, v.source)
+    end),
+
+    msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
       local lootAlgorithm = require 'components.loot-generator.algorithm-1'
-      msgBus.send(msgBus.GENERATE_LOOT, {msgValue.x, msgValue.y, lootAlgorithm()})
-      msgBus.send(msgBus.EXPERIENCE_GAIN, msgValue.experience)
-    end
-
-    if msgBus.GENERATE_LOOT == msgType then
-      local LootGenerator = require'components.loot-generator.loot-generator'
-      local x, y, item = unpack(msgValue)
-      local dropX, dropY = getDroppablePosition(x, y, map.grid)
-      LootGenerator.create({
-        x = dropX,
-        y = dropY,
-        item = item,
-        rootStore = rootState
-      }):setParent(parent)
-    end
-
-    if msgBus.PLAYER_HEAL_SOURCE_ADD == msgType then
-      HealSource.add(self, msgValue, rootState)
-    end
-
-    if msgBus.PLAYER_HEAL_SOURCE_REMOVE == msgType then
-      HealSource.remove(self, msgValue.source)
-    end
-
-    if msgBus.PLAYER_STATS_NEW_MODIFIERS == msgType then
-      local newModifiers = msgValue
-      rootState:set('statModifiers', newModifiers)
-    end
-
-    if msgBus.PLAYER_STATS_ADD_MODIFIERS == msgType then
-      local curState = rootState:get()
-      local curMods = curState.statModifiers
-      local nextModifiers = msgValue
-      for k,v in pairs(curMods) do
-        nextModifiers[k] = v + (nextModifiers[k] or 0)
+      local randomItem = lootAlgorithm()
+      if randomItem then
+        msgBus.send(msgBus.GENERATE_LOOT, {msgValue.x, msgValue.y, randomItem})
       end
-      rootState:set(
-        'statModifiers',
-        nextModifiers
-      )
-    end
-  end)
+      msgBus.send(msgBus.EXPERIENCE_GAIN, math.floor(msgValue.experience))
+    end)
+  }
 
   local player = Player.create({
     mapGrid = map.grid,
     rootStore = rootState
-  }):setParent(parent)
-
-  Minimap.create({
-    camera = camera,
-    grid = map.grid,
-    scale = config.scaleFactor
   }):setParent(parent)
 
   MainMap.create({
@@ -310,20 +334,28 @@ function MainScene.init(self)
   generateAi(parent, player, map)
 
   if self.autoSave then
-    self.autoSaveTimer = tick.recur(function()
-      fileSystem.saveFile(
-        rootState:getId(),
-        rootState:get()
-      )
-    end, 0.2)
+    local lastSavedState = nil
+    local function saveState()
+      local state = rootState:get()
+      local hasChanged = state ~= lastSavedState
+      if hasChanged then
+        fileSystem.saveFile(
+          rootState:getId(),
+          rootState:get()
+        )
+        lastSavedState = state
+      end
+    end
+    self.autoSaveTimer = tick.recur(saveState, 0.5)
   end
 end
 
 function MainScene.final(self)
+  msgBus.off(self.listeners)
   if self.autoSave then
     self.autoSaveTimer:stop()
   end
-  msgBus.clearAll()
+  msgBus.send(msgBus.GAME_UNLOADED)
 end
 
 return Component.createFactory(MainScene)

@@ -4,6 +4,7 @@ uniform vec4 outline_color;
 // includes the intercardinal pixels for outline generation
 uniform bool include_corners;
 uniform bool use_drawing_color;
+uniform float alpha = 1.0;
 uniform vec4 fill_color = vec4(1,1,1,1);
 vec4 empty_color = vec4(0,0,0,0);
 
@@ -17,6 +18,7 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
 
 	bool hasOutline = outline_width > 0.0;
 	if (!hasOutline) {
+    col.a *= alpha;
 		return col;
 	}
 
@@ -40,12 +42,15 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
   bool isCurrentPixelTransparent = originalAlpha == 0.0;
   bool isTransparentEdge = isCurrentPixelTransparent && isEdgePixel;
   if (isTransparentEdge) {
-    return outline_color;
+    vec4 result = vec4(outline_color);
+    result.a *= alpha;
+    return result;
   }
   else {
-		if (use_drawing_color) {
-			return (isCurrentPixelTransparent ? col : color) * fill_color;
-		}
-		return col * fill_color;
+    vec4 result = use_drawing_color
+      ? (isCurrentPixelTransparent ? col : color) * fill_color
+      : col * fill_color;
+    result.a *= alpha;
+		return result;
   }
 }

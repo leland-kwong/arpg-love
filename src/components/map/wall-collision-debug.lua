@@ -17,7 +17,7 @@ return Component.createFactory(
       end
     end,
     drawOrder = function(self)
-      return self.group.drawOrder(self) + 1000
+      return self.group:drawOrder(self) + 1000
     end
   })
 )

@@ -3,51 +3,27 @@ local msgBus = require'components.msg-bus'
 local noop = require'utils.noop'
 
 local equipmentSubscribers = {
-	onMessage = function(item, callback, final)
-		callback = callback or noop
-		final = final or noop
-
-		return function(msgType, msgValue)
-			local shouldCleanup = msgBus.EQUIPMENT_UNEQUIP == msgType and msgValue == item
-			if shouldCleanup then
-				final(item)
-				return msgBus.CLEANUP
-			end
-			callback(item, msgType, msgValue)
-		end
-	end,
-
 	-- handle static props
 	staticModifiers = function(item)
-		return function(msgType, msgValue)
+		return function(msgValue, msgType)
+			if msgBus.GAME_UNLOADED == msgType then
+				return msgBus.CLEANUP
+			end
+
 			local shouldCleanup = (msgBus.EQUIPMENT_UNEQUIP == msgType) and (msgValue == item)
 			if shouldCleanup then
 				return msgBus.CLEANUP
 			end
 
-			-- add the item's stats the list of modifiers
+			-- add the item's stats to the list of modifiers
 			if msgBus.PLAYER_STATS_NEW_MODIFIERS == msgType then
-				-- merge item properties into the new modifiers list
+				-- add up item properties with the new modifiers list
 				for k,v in pairs(msgValue) do
 					msgValue[k] = msgValue[k] + (item[k] or 0)
 				end
 				return msgValue
 			end
 			return msgValue
-		end
-	end,
-
-	modifier = function(item, callback)
-		if not callback then
-			return nil
-		end
-
-		return function(msgType, msgValue)
-			local shouldCleanup = msgBus.EQUIPMENT_UNEQUIP == msgType and msgValue == item
-			if shouldCleanup then
-				return msgBus.CLEANUP
-			end
-			return callback(item, msgType, msgValue)
 		end
 	end
 }
@@ -79,10 +55,19 @@ return function(rootStore)
       local final = definition.final
       local newlyEquipped = lastState.equipment[y][x] ~= item
       if newlyEquipped then
-        definition.onEquip(item)
-        msgBus.subscribe(equipmentSubscribers.onMessage(item, onMessage, final))
-        msgBus.addReducer(equipmentSubscribers.staticModifiers(item))
-        msgBus.addReducer(equipmentSubscribers.modifier(item, modifier))
+				definition.onEquip(item)
+				msgBus.send(msgBus.ITEM_EQUIPPED, item)
+				msgBus.on(msgBus.ALL, equipmentSubscribers.staticModifiers(item), 1)
+				msgBus.on(msgBus.EQUIPMENT_UNEQUIP, function(_item)
+					if _item == item then
+						definition.final(item)
+						return msgBus.CLEANUP
+					end
+				end)
+				msgBus.on(msgBus.GAME_UNLOADED, function()
+					definition.final(item)
+					return msgBus.CLEANUP
+				end)
       end
     end
   end)

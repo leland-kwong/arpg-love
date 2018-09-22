@@ -1,1 +1,1 @@
-"C:\Program Files\Aseprite\Aseprite.exe" -b pod-one.aseprite --save-as pod-one-{layer}-{frame}.png
+"C:\Program Files\Aseprite\Aseprite.exe" -b pod-one.aseprite --save-as pod-one-{frame}.png

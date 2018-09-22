@@ -3,15 +3,17 @@ local groups = require 'components.groups'
 local collisionWorlds = require 'components.collision-worlds'
 local msgBus = require 'components.msg-bus'
 local animationFactory = require 'components.animation-factory'
+local collisionGroups = require 'modules.collision-groups'
 
 local function slimeAttackCollisionFilter(item)
-  return item.group == 'player'
+  return collisionGroups.matches(item.group, collisionGroups.player)
 end
 
 local SlimeAttack = Component.createFactory({
   group = groups.all,
   minDamage = 5,
   maxDamage = 10,
+  attackTime = 0.2,
   init = function(self)
     local items, len = collisionWorlds.map:queryRect(
       self.x2 - self.w/2,
@@ -32,6 +34,11 @@ local SlimeAttack = Component.createFactory({
     self:delete(true)
   end
 })
+
+local function onDestroyStart()
+  local Sound = require 'components.sound'
+  love.audio.play(Sound.functions.creatureDestroyed())
+end
 
 return function()
   local animations = {
@@ -67,7 +74,8 @@ return function()
   local abilityDash = (function()
     local curCooldown = 0
     local skill = {
-      range = 6
+      range = 6,
+      attackTime = 0.2,
     }
 
     function skill.use(self)
@@ -77,7 +85,8 @@ return function()
         local Dash = require 'components.abilities.dash'
         local projectile = Dash.create({
             fromCaster = self
-          , cooldown = 1
+          , cooldown = 0.5
+          , attackTime = skill.attackTime
           , duration = 7/60
           , range = skill.range
         })
@@ -114,7 +123,7 @@ return function()
           , w = 64
           , h = 36
           , cooldown = 0.5
-          , targetGroup = 'player'
+          , targetGroup = collisionGroups.player
         })
 
         local Sound = require 'components.sound'
@@ -177,6 +186,7 @@ return function()
     armor = 900,
     experience = 2,
     attackRange = attackRange,
-    fillColor = fillColor
+    fillColor = fillColor,
+    onDestroyStart = onDestroyStart
   }
 end

@@ -5,7 +5,7 @@ local Color = require('modules.color')
 local msgBus = require 'components.msg-bus'
 local Aoe = require 'components.abilities.aoe'
 
-local healSource = "X_1_TIME_SHAPER"
+local healSource = "X_1_TIME_BENDER"
 local healType = 2
 
 local function concatTable(a, b)
@@ -26,7 +26,7 @@ end
 
 local aoeModifiers = {
 	moveSpeed = function(target)
-		return target.moveSpeed * -0.2
+		return target.moveSpeed * -0.35
 	end
 }
 
@@ -40,14 +40,14 @@ local function aoeOnHit(self)
 end
 
 return itemDefs.registerType({
-	type = "ion-generator-2",
+	type = 'pod-module-slow-time',
 
 	create = function()
 		return {
 			stackSize = 1,
 			maxStackSize = 1,
 
-			regeneration = 2,
+			healthRegeneration = 2,
 			maxHealth = 10
 		}
 	end,
@@ -55,9 +55,10 @@ return itemDefs.registerType({
 	properties = {
 		sprite = "weapon-module-slow-time",
 		title = 'x-1 time-bender',
-		rarity = config.rarity.NORMAL,
+		rarity = config.rarity.EPIC,
 		category = config.category.POD_MODULE,
 
+		levelRequirement = 4,
 		energyCost = function(self)
 			return 2
 		end,
@@ -65,7 +66,7 @@ return itemDefs.registerType({
 		onEquip = function(self)
 			local duration = math.pow(10, 10)
 			msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
-				amount = self.regeneration * duration,
+				amount = self.healthRegeneration * duration,
 				duration = duration,
 				source = healSource,
 				type = healType,
@@ -81,11 +82,10 @@ return itemDefs.registerType({
 		end,
 
 		tooltip = function(self)
-			local stats = {
-				statValue(self.regeneration, Color.CYAN, "health regeneration per second"),
-				statValue(self.maxHealth, Color.CYAN, "maximum health"),
+			return {
+				Color.YELLOW, 'active skill:\n',
+				Color.WHITE, 'slows enemies in an area around a target position'
 			}
-			return functional.reduce(stats, concatTable, {})
 		end,
 
 		onActivate = function(self)

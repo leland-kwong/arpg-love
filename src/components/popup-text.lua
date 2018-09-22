@@ -5,34 +5,48 @@ local tween = require 'modules.tween'
 local f = require 'utils.functional'
 local TablePool = require 'utils.table-pool'
 local setProp = require 'utils.set-prop'
+local GuiText = require 'components.gui.gui-text'
+
+local lastDirection = 1
+local function getDirection()
+  lastDirection = lastDirection * -1
+  return lastDirection
+end
 
 local PopupTextBlueprint = {
   group = groups.overlay,
   font = font.secondary.font,
+  color = {1,1,1,1},
   x = 0,
-  y = 0,
+  y = 0
 }
 
 local subjectPool = TablePool.newAuto()
 
-local tweenEndState = {offset = -10}
-local function animationCo()
+local tweenEndState = {offset = -10, time = 1}
+local function animationCo(duration, textWidth)
   local frame = 0
   local subject = setProp(subjectPool.get())
     :set('offset', 0)
-  local posTween = tween.new(0.2, subject, tweenEndState, tween.easing.outCubic)
+    :set('time', 0)
+    :set('dx', getDirection() * textWidth + 4)
+    :set('dy', math.random(0, 2) * 4)
+  local posTween = tween.new(duration, subject, tweenEndState, tween.easing.outExpo)
   local complete = false
 
   while (not complete) do
     complete = posTween:update(1/60)
-    coroutine.yield(subject.offset)
+    coroutine.yield(subject.offset, subject.time, subject.dx, subject.dy)
   end
   subjectPool.release(subject)
 end
 
-function PopupTextBlueprint:new(text, x, y)
+function PopupTextBlueprint:new(text, x, y, duration)
+  duration = duration or 0.3
+  local textWidth = GuiText.getTextSize(text, self.font)
   local animation = coroutine.wrap(animationCo)
-  table.insert(self.textObjectsList, {text, x, y, animation})
+  animation(duration, textWidth)
+  table.insert(self.textObjectsList, {text, x, y, animation, duration})
 end
 
 local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
@@ -51,15 +65,15 @@ function PopupTextBlueprint.update(self)
   local i = 1
   while i <= #self.textObjectsList do
     local obj = self.textObjectsList[i]
-    local text, x, y, animation = unpack(obj)
-    local offsetY, errors = animation()
+    local text, x, y, animation, duration = obj[1], obj[2], obj[3], obj[4], obj[5]
+    local offsetY, time, dx, dy, errors = animation(duration)
 
     local isComplete = offsetY == nil
     if isComplete then
       table.remove(self.textObjectsList, i)
     else
       i = i + 1
-      self.textObj:add(text, x, y + offsetY)
+      self.textObj:add(text, x + (time * dx), y + offsetY + dy)
     end
   end
 end
@@ -74,7 +88,7 @@ function PopupTextBlueprint.draw(self)
   shader:send('include_corners', true)
 
   love.graphics.setShader(shader)
-  love.graphics.setColor(1,1,1,1)
+  love.graphics.setColor(self.color)
   love.graphics.draw(
     self.textObj,
     self.x,

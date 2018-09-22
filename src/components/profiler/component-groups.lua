@@ -23,7 +23,7 @@ return function(console)
         totalTimeUpdate = totalTimeUpdate + t
         framesUpdate = framesUpdate + 1
         local averageTime = totalTimeUpdate / framesUpdate
-        guiTextLayer:add(k..' update:'..averageTime, Color.WHITE, 5, y1 * 10 + yStart)
+        guiTextLayer:add(k..' update: '..averageTime, Color.WHITE, 5, y1 * 10 + yStart)
       end
     })(originalUpdateAll)
 
@@ -37,7 +37,7 @@ return function(console)
         totalTimeDraw = totalTimeDraw + t
         framesDraw = framesDraw + 1
         local averageTime = totalTimeDraw / framesDraw
-        guiTextLayer:add(k..' draw:'..averageTime, Color.WHITE, 5, y2 * 10 + yStart)
+        guiTextLayer:add(k..' draw: '..averageTime, Color.WHITE, 5, y2 * 10 + yStart)
       end
     })(originalDrawAll)
   end

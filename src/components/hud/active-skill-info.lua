@@ -16,7 +16,9 @@ local function ActiveConsumableHandler()
   local activeItem = nil
   local max = math.max
   local itemDefinitions = require("components.item-inventory.items.item-definitions")
-  local skill = {}
+  local skill = {
+    type = 'CONSUMABLE'
+  }
 
   function skill.set(item)
     local isDifferentSkill = item ~= activeItem
@@ -70,7 +72,9 @@ local function ActiveEquipmentHandler()
   local curCooldown = 0
   local skillCooldown = 0
   local activeItem = nil
-  local skill = {}
+  local skill = {
+    type = 'EQUIPMENT'
+  }
   local itemDefinitions = require("components.item-inventory.items.item-definitions")
 
   local floor = math.floor
@@ -101,12 +105,14 @@ local function ActiveEquipmentHandler()
   end
 
   function skill.use(self)
-    if (not activeItem) or curCooldown > 0 then
+    local playerRef = Component.get('PLAYER')
+    if (not activeItem) or (curCooldown > 0) or (playerRef.attackRecoveryTime > 0) then
       return skill
     else
       local definition = itemDefinitions.getDefinition(activeItem)
       local activateFn = definition.onActivateWhenEquipped
       local energyCost = definition.energyCost(activeItem)
+      -- time an attack takes to finish (triggers a global cooldown)
       local curState = self.rootStore:get()
       local enoughEnergy = (energyCost == nil) or
         (energyCost <= curState.energy)
@@ -118,6 +124,15 @@ local function ActiveEquipmentHandler()
       if (not activateFn) then
         return skill
       end
+
+      local attackTime = definition.attackTime or 0.1
+      local actualAttackTime = attackTime - (attackTime * curState.statModifiers.attackTimeReduction)
+      playerRef:set('attackRecoveryTime', actualAttackTime)
+      msgBus.send(
+        msgBus.PLAYER_WEAPON_ATTACK,
+        { attackTime = actualAttackTime }
+      )
+
       local mx, my = camera:getMousePosition()
       local playerX, playerY = self.player:getPosition()
       local instance = modifyAbility(
@@ -171,11 +186,23 @@ local function ActiveEquipmentHandler()
   return skill
 end
 
+local skillHandlers = {
+
+  SKILL_1 = ActiveEquipmentHandler(),
+  SKILL_2 = ActiveEquipmentHandler(),
+  SKILL_3 = ActiveEquipmentHandler(),
+  SKILL_4 = ActiveEquipmentHandler(),
+
+  MOVE_BOOST = ActiveConsumableHandler(),
+  ACTIVE_ITEM_1 = ActiveConsumableHandler(),
+  ACTIVE_ITEM_2 = ActiveConsumableHandler()
+}
+
 -- sets the new ability if it has changed and also updates the cooldown
 local function updateAbilities(self, dt)
   local item = self.rootStore:get().equipment[self.slotY][self.slotX]
-  self.skillHandlers[self.skillId].set(item)
-  self.skillHandlers[self.skillId].updateCooldown(dt)
+  skillHandlers[self.skillId].set(item)
+  skillHandlers[self.skillId].updateCooldown(dt)
 end
 
 local ActiveSkillInfo = {
@@ -196,45 +223,29 @@ local ItemRender = {
 Component.createFactory(ItemRender)
 
 function ActiveSkillInfo.init(self)
-  self.skillHandlers = {
-    MOVE_BOOST = ActiveConsumableHandler(),
-
-    SKILL_1 = ActiveEquipmentHandler(),
-    SKILL_2 = ActiveEquipmentHandler(),
-    SKILL_3 = ActiveEquipmentHandler(),
-    SKILL_4 = ActiveEquipmentHandler(),
-
-    ACTIVE_ITEM_1 = ActiveConsumableHandler(),
-    ACTIVE_ITEM_2 = ActiveConsumableHandler()
-  }
-
   local parent = self
   assert(self.skillId ~= nil, '[HUD activeItem] skillId is required')
-  assert(self.skillHandlers[self.skillId] ~= nil, '[HUD activeItem] `skillId`'..self.skillId..' is not defined')
+  assert(skillHandlers[self.skillId] ~= nil, '[HUD activeItem] `skillId`'..self.skillId..' is not defined')
   assert(self.player ~= nil, '[HUD activeItem] property `player` is required')
   assert(self.rootStore ~= nil, '[HUD activeItem] property `rootStore` is required')
 
-  msgBus.subscribe(function(msgType, value)
-    if self:isDeleted() then
-      return msgBus.CLEANUP
-    end
-
-    if msgBus.PLAYER_USE_SKILL == msgType and value == self.skillId then
-      self.skillHandlers[self.skillId].use(self)
-    end
-  end)
+  self.listeners = {
+    msgBus.on(msgBus.PLAYER_USE_SKILL, function(value)
+      if value == self.skillId then
+        skillHandlers[self.skillId].use(self)
+      end
+      return value
+    end)
+  }
 
   local playerRef = Component.get('PLAYER')
   self.itemRender = ItemRender.create({
     draw = function()
       love.graphics.setColor(1,1,1)
-      self.skillHandlers[parent.skillId].draw(parent)
+      skillHandlers[parent.skillId].draw(parent)
     end,
     drawOrder = function(self)
-      return self.group.drawOrder(self) + 3
-    end,
-    final = function()
-      consoleLog('item render deleted')
+      return self.group:drawOrder(self) + 3
     end
   }):setPosition(playerRef:getPosition())
     :setParent(playerRef)
@@ -275,7 +286,7 @@ function ActiveSkillInfo.draw(self)
   if activeItem then
     drawItem(activeItem, self.x, self.y, boxSize)
 
-    local cooldown, skillCooldown = self.skillHandlers[self.skillId].getStats()
+    local cooldown, skillCooldown = skillHandlers[self.skillId].getStats()
     local progress = (skillCooldown - cooldown) / skillCooldown
     local offsetY = progress * boxSize
     love.graphics.setColor(1,1,1,0.2)
@@ -290,7 +301,20 @@ function ActiveSkillInfo.draw(self)
         self.y + p
       )
     end
+
+    local attackRecoveryTime = Component.get('PLAYER').attackRecoveryTime
+    local skill = skillHandlers[self.skillId]
+    if (attackRecoveryTime > 0) and (skill.type == 'EQUIPMENT') then
+      love.graphics.setBlendMode('add')
+      love.graphics.setColor(1,0,0,0.4)
+      love.graphics.rectangle('fill', self.x, self.y, boxSize, boxSize)
+      love.graphics.setBlendMode('alpha')
+    end
   end
+end
+
+function ActiveSkillInfo.final(self)
+  msgBus.off(self.listeners)
 end
 
 return Component.createFactory(ActiveSkillInfo)

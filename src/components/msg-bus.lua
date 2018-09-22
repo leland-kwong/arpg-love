@@ -26,6 +26,7 @@ if config.isDebug then
 end
 
 M.GAME_LOADED = 'GAME_LOADED'
+M.GAME_UNLOADED = 'GAME_UNLOADED'
 M.NEW_GAME = 'NEW_GAME'
 M.SET_CONFIG = 'SET_CONFIG' -- makes updates to the game config
 
@@ -42,10 +43,17 @@ M.CHARACTER_HIT = 'CHARACTER_HIT'
   {
     parent = TABLE, -- component instance
     damage = NUMBER,
-    duration = NUMBER,
+    lightningDamage = NUMBER,
+    criticalChance = NUMBER, -- percentage value multiplier where 0.25 means 25%
+    criticalMultiplier = NUMBER, -- percentage value multplier where 0.25 means 25%
+    duration = NUMBER, -- duration in seconds
     modifiers = TABLE, -- key-value hash of properties
     statusIcon = STRING,
-    source = STRING -- multiple sources of the same type will get reapplied instead of stacked
+    source = STRING, -- multiple sources of the same type will get reapplied instead of stacked
+
+    shockStatus = NUMBER, -- amount enemy is shocked
+    fireStatus = NUMBER,
+    coldStatus = NUMBER
   }
 ]]
 M.CHARACTER_AGGRO = M.CHARACTER_HIT -- triggers aggro by trigger the `CHARACTER_HIT` event
@@ -53,7 +61,10 @@ M.CHARACTER_AGGRO = M.CHARACTER_HIT -- triggers aggro by trigger the `CHARACTER_
 M.EXPERIENCE_GAIN = 'EXPERIENCE_GAIN'
 M.PLAYER_ACTION_ERROR = 'PLAYER_ACTION_ERROR'
 M.PLAYER_HIT_RECEIVED = 'PLAYER_HIT_RECEIVED'
-M.PLAYER_ATTACK = 'PLAYER_ATTACK'
+M.PLAYER_WEAPON_MUZZLE_FLASH = 'PLAYER_WEAPON_MUZZLE_FLASH'
+M.PLAYER_WEAPON_ATTACK = 'PLAYER_WEAPON_ATTACK'
+M.PLAYER_WEAPON_RENDER_ATTACHMENT_ADD = 'PLAYER_WEAPON_RENDER_ATTACHMENT_ADD'
+M.PLAYER_WEAPON_RENDER_ATTACHMENT_REMOVE = 'PLAYER_WEAPON_RENDER_ATTACHMENT_REMOVE'
 M.PLAYER_LEVEL_UP = 'PLAYER_LEVEL_UP'
 M.PLAYER_STATS_NEW_MODIFIERS = 'PLAYER_STATS_NEW_MODIFIERS'
 M.PLAYER_STATS_ADD_MODIFIERS = 'PLAYER_STATS_ADD_MODIFIERS'
@@ -71,6 +82,9 @@ M.GENERATE_LOOT = 'GENERATE_LOOT'
 
 M.ENEMY_DESTROYED = 'ENEMY_DESTROYED'
 
+M.ITEM_CHECK_UPGRADE_AVAILABILITY = 'ITEM_CHECK_UPGRADE_AVAILABILITY'
+M.ITEM_EQUIPPED = 'ITEM_EQUIPPED'
+M.ITEM_UPGRADE_UNLOCKED = 'ITEM_UPGRADE_UNLOCKED'
 M.ITEM_HOVERED = 'ITEM_HOVERED'
 M.ITEM_PICKUP = 'ITEM_PICKUP' --[[ itemInstance ]]
 M.ITEM_PICKUP_SUCCESS = 'ITEM_PICKUP_SUCCESS'
@@ -112,5 +126,7 @@ M.PLAYER_DISABLE_ABILITIES = 'PLAYER_DISABLE_ABILITIES'
 ]]
 
 M.TOGGLE_MAIN_MENU = 'TOGGLE_MAIN_MENU'
+
+M.NOTIFIER_NEW_EVENT = 'NOTIFIER_NEW_EVENT'
 
 return M

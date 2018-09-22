@@ -17,12 +17,12 @@ local ActionError = {
 }
 
 function ActionError.init(self)
-  msgBus.subscribe(function(msgType, msgValue)
-    if self:isDeleted() then
-      return msgBus.CLEANUP
-    end
+  self.listeners = {
+    msgBus.on(msgBus.PLAYER_ACTION_ERROR, function(msgValue)
+      if self:isDeleted() then
+        return msgBus.CLEANUP
+      end
 
-    if msgBus.PLAYER_ACTION_ERROR == msgType then
       local Sound = require 'components.sound'
       love.audio.play(Sound.ACTION_ERROR)
       local textColor = {1,1,0,1}
@@ -32,9 +32,11 @@ function ActionError.init(self)
       }
       local endColor = {1,1,0,0} -- fade out
       self.errorMessage = subject
-      self.errorMessageTween = tween.new(1, textColor, endColor, tween.easing.inExpo)
-    end
-  end)
+      self.errorMessageTween = tween.new(2.5, textColor, endColor, tween.easing.inExpo)
+
+      return msgValue
+    end)
+  }
 end
 
 function ActionError.update(self, dt)
@@ -56,6 +58,10 @@ function ActionError.draw(self)
     local x = Position.boxCenterOffset(textWidth, textHeight, winWidth, winHeight)
     self.textLayer:add(errMsg.message, errMsg.color, x, winHeight - textHeight - 45)
   end
+end
+
+function ActionError.final(self)
+  msgBus.off(self.listeners)
 end
 
 return Component.createFactory(ActionError)

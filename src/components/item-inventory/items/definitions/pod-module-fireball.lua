@@ -1,8 +1,11 @@
-local config = require("components.item-inventory.items.config")
+local itemConfig = require("components.item-inventory.items.config")
+local config = require 'config.config'
 local msgBus = require("components.msg-bus")
 local itemDefs = require("components.item-inventory.items.item-definitions")
 local Color = require 'modules.color'
+local collisionGroups = require 'modules.collision-groups'
 local functional = require("utils.functional")
+local groups = require 'components.groups'
 
 local mathFloor = math.floor
 
@@ -17,6 +20,7 @@ local function onEnemyDestroyedIncreaseDamage(self)
 	if s.bonusDamage > maxBonusDamage then
 		s.bonusDamage = maxBonusDamage
 	end
+	self.flatDamage = s.bonusDamage
 end
 
 local function statValue(stat, color, type)
@@ -35,8 +39,13 @@ local function concatTable(a, b)
 	return a
 end
 
+local MUZZLE_FLASH_COLOR = {Color.rgba255(232, 187, 27, 1)}
+local muzzleFlashMessage = {
+	color = MUZZLE_FLASH_COLOR
+}
+
 return itemDefs.registerType({
-	type = "poison-blade",
+	type = 'pod-module-fireball',
 
 	create = function()
 		return {
@@ -51,24 +60,48 @@ return itemDefs.registerType({
 
 			-- static properties
 			weaponDamage = baseDamage,
+			experience = 0
 		}
 	end,
 
 	properties = {
 		sprite = "weapon-module-fireball",
 		title = 'tz-819 mortar',
-		rarity = config.rarity.LEGENDARY,
-		category = config.category.POD_MODULE,
+		rarity = itemConfig.rarity.LEGENDARY,
+		category = itemConfig.category.POD_MODULE,
 
+		levelRequirement = 3,
+		attackTime = 0.4,
 		energyCost = function(self)
 			return 2
 		end,
 
+		upgrades = {
+			{
+				sprite = 'item-upgrade-placeholder-unlocked',
+				title = 'Daze',
+				description = 'Attacks slow the target',
+				experienceRequired = 45,
+				props = {
+					knockBackDistance = 50
+				}
+			},
+			{
+				sprite = 'item-upgrade-placeholder-unlocked',
+				title = 'Scorch',
+				description = 'Chance to create an area of ground fire, dealing damage over time to those who step into it.',
+				experienceRequired = 135,
+				props = {
+					duration = 3,
+					minDamagePerSecond = 1,
+					maxDamagePerSecond = 3,
+				}
+			}
+		},
+
 		tooltip = function(self)
 			local _state = self.state
 			local stats = {
-				statValue(_state.baseDamage, Color.CYAN, ""), statValue(_state.bonusDamage, Color.CYAN, "damage \n"),
-				statValue(self.weaponDamage, Color.CYAN, "poison damage\n"),
 				{
 					Color.WHITE, '\nWhile equipped: \nPermanently gain +1 damage for every 10 enemies killed.\n',
 					Color.CYAN, _state.enemiesKilled, Color.WHITE, ' enemies killed'
@@ -79,6 +112,98 @@ return itemDefs.registerType({
 			end, {})
 		end,
 
+		onEquip = function(self)
+			local state = itemDefs.getState(self)
+			local definition = itemDefs.getDefinition(self)
+			local upgrades = definition.upgrades
+
+			local listeners = {
+				msgBus.on(msgBus.ENEMY_DESTROYED, function()
+					onEnemyDestroyedIncreaseDamage(self)
+				end)
+			}
+			msgBus.on(msgBus.EQUIPMENT_UNEQUIP, function(item)
+				if item == self then
+					msgBus.off(listeners)
+					return msgBus.CLEANUP
+				end
+			end)
+
+			state.onHit = function(attack, hitMessage)
+				local target = hitMessage.parent
+				local up1Ready = msgBus.send(msgBus.ITEM_CHECK_UPGRADE_AVAILABILITY, {
+					item = self,
+					level = 1
+				})
+				if up1Ready then
+					local up1 = upgrades[1]
+					msgBus.send(msgBus.CHARACTER_HIT, {
+						parent = target,
+						statusIcon = 'status-slow',
+						duration = 1,
+						modifiers = {
+							moveSpeed = function(t)
+								return t.moveSpeed * -0.5
+							end
+						},
+						source = definition.title
+					})
+				end
+				return hitMessage
+			end
+
+			local function handleUpgrade2(attack)
+				local up2Ready = msgBus.send(msgBus.ITEM_CHECK_UPGRADE_AVAILABILITY, {
+					item = self,
+					level = 2
+				})
+				if up2Ready then
+					local up2 = upgrades[2]
+					local GroundFlame = require 'components.particle.ground-flame'
+					local x, y = attack.x, attack.y
+					local width, height = 16, 16
+					GroundFlame.create({
+						group = groups.all,
+						x = x,
+						y = y,
+						width = width,
+						height = height,
+						gridSize = config.gridSize,
+						duration = up2.props.duration
+					})
+
+					local collisionWorlds = require 'components.collision-worlds'
+					local tick = require 'utils.tick'
+					local tickCount = 0
+					local timer
+					timer = tick.recur(function()
+						tickCount = tickCount + 1
+						if tickCount >= up2.props.duration then
+							timer:stop()
+						end
+						collisionWorlds.map:queryRect(
+							x - config.gridSize,
+							y - config.gridSize,
+							width * 2,
+							height * 2,
+							function(item)
+								if collisionGroups.matches(item.group, collisionGroups.create(collisionGroups.ai, collisionGroups.environment)) then
+									msgBus.send(msgBus.CHARACTER_HIT, {
+										parent = item.parent,
+										damage = math.random(
+											up2.props.minDamagePerSecond,
+											up2.props.maxDamagePerSecond
+										)
+									})
+								end
+							end
+						)
+					end, 1)
+				end
+			end
+			state.final = handleUpgrade2
+		end,
+
 		onActivate = function(self)
 			local toSlot = itemDefs.getDefinition(self).category
 			msgBus.send(msgBus.EQUIPMENT_SWAP, self)
@@ -86,22 +211,21 @@ return itemDefs.registerType({
 
 		onActivateWhenEquipped = function(self, props)
 			local Fireball = require 'components.fireball'
-			Fireball.minDamage = 0
-			Fireball.maxDamage = 0
+			local F = require 'utils.functional'
+			props.minDamage = 0
+			props.maxDamage = 0
+			props.cooldown = 0.7
+			props.startOffset = 26
+			props.onHit = itemDefs.getState(self).onHit
+			props.final = F.wrap(
+				props.final,
+				itemDefs.getState(self).final
+			)
+			msgBus.send(msgBus.PLAYER_WEAPON_MUZZLE_FLASH, muzzleFlashMessage)
+
+			local Sound = require 'components.sound'
+			love.audio.play(Sound.functions.fireBlast())
 			return Fireball.create(props)
-		end,
-
-		onMessage = function(self, msgType)
-			if msgBus.ENEMY_DESTROYED == msgType then
-				onEnemyDestroyedIncreaseDamage(self)
-			end
-		end,
-
-		modifier = function(self, msgType, msgValue)
-			if msgBus.PLAYER_ATTACK == msgType then
-				msgValue.flatDamage = self.state.bonusDamage
-			end
-			return msgValue
 		end
 	}
 })

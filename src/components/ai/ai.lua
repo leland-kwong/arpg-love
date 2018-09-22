@@ -2,7 +2,6 @@ local Component = require 'modules.component'
 local groups = require 'components.groups'
 local animationFactory = require 'components.animation-factory'
 local msgBus = require 'components.msg-bus'
-local PopupTextController = require 'components.popup-text'
 local getAdjacentWalkablePosition = require 'modules.get-adjacent-open-position'
 local collisionObject = require 'modules.collision'
 local uid = require'utils.uid'
@@ -20,6 +19,9 @@ local Map = require 'modules.map-generator.index'
 local Position = require 'utils.position'
 local noop = require 'utils.noop'
 local Lru = require 'utils.lru'
+local setElectricShockShader = require 'modules.shaders.shader-electric-shock'
+local Enum = require 'utils.enum'
+local collisionGroups = require 'modules.collision-groups'
 
 local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
 local shader = love.graphics.newShader(pixelOutlineShader)
@@ -27,39 +29,35 @@ local atlasData = animationFactory.atlasData
 shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
 shader:send('outline_width', 1)
 
-local DirectionalFlowFields = require 'modules.flow-field.directional-flow-fields'
-local subFlowFields = DirectionalFlowFields(function()
-  local playerX, playerY = (Component.get('PLAYER') or Component.get('TEST_PLAYER')):getPosition()
-  local config = require 'config.config'
-  return Position.pixelsToGridUnits(playerX, playerY, config.gridSize)
-end, Map.WALKABLE)
-local getSubFlowField = (function()
-  local index = 1
-  return function()
-    index = index + 1
-    if index > #subFlowFields then
-      index = 1
-    end
-    return subFlowFields[index]
-  end
-end)()
+local states = Enum({
+  'ATTACKING', -- attack has been triggered and character and character is still recovering from it
+  'IDLE',
+  'MOVING',
+  'FREE_MOVING'
+})
 
 local Ai = {
   group = groups.all,
 
+  state = states.IDLE,
+  attackRecoveryTime = 0,
+
   -- calculated base properties (properties that can be changed from external modifiers)
   silenced = false,
   moveSpeed = 100,
-  attackRange = 8,
+  attackRange = 8, -- distance in grid units from the player that the ai will stop moving
   sightRadius = 11,
   armor = 0,
   flatPhysicalDamageReduction = 0,
+  lightningResist = 0,
   maxHealth = 10,
   healthRegeneration = 0,
   damage = 0,
-  experience = 1,
+
+  experience = 1, -- amount of experience the ai grants when destroyed
 
   frameCount = 0,
+  clock = 0, -- amount of time the ai has been alive
 
   abilities = {},
   dataSheet = {
@@ -70,21 +68,24 @@ local Ai = {
   vx = 0,
   vy = 0,
 
+  -- elemental status effects
+  shocked = 0,
+  burning = 0,
+  cold = 0,
+
   isAggravated = false,
   gridSize = 1,
   fillColor = {1,1,1,1},
+  opacity = 1,
   facingDirectionX = 1,
   onInit = noop,
   onFinal = noop,
+  onDestroyStart = noop,
   onUpdateStart = nil,
   drawOrder = function(self)
-    return self.group.drawOrder(self) + 1
+    return self.group:drawOrder(self) + 1
   end
 }
-
-local popupText = PopupTextController.create({
-  font = require 'components.font'.primary.font
-})
 
 -- gets directions from grid position, adjusting vectors to handle wall collisions as needed
 local aiPathWithAstar = require'modules.flow-field.pathing-with-astar'
@@ -122,23 +123,13 @@ local function collisionFilter(item, other)
   return false
 end
 
-local function hitAnimation()
-  local frame = 0
-  local animationLength = 4
-  while frame < animationLength do
-    frame = frame + 1
-    coroutine.yield(false)
-  end
-  coroutine.yield(true)
-end
-
 local aggroMessageCache = Lru.new(200)
 
 local function spreadAggroToAllies(self)
   local c = self.collision
   local areaMultiplier = 10
   local function aggravationCollisionFilter(item)
-    return item.group == 'ai' and item ~= c
+    return collisionGroups.matches(item.group, collisionGroups.ai) and item ~= c
   end
   local items, len = self.collisionWorld:queryRect(
     c.x - c.ox * areaMultiplier,
@@ -163,49 +154,8 @@ local function spreadAggroToAllies(self)
   end
 end
 
-local max = math.max
-local round = require 'utils.math'.round
-local damageReductionPerArmor = 0.0001
-local function adjustedDamage(self, damage)
-  local damageAfterFlatReduction = damage - self.flatPhysicalDamageReduction
-  local finalDamage = damageAfterFlatReduction -
-    (damageAfterFlatReduction * self.armor * damageReductionPerArmor)
-  return round(
-    max(0, finalDamage)
-  )
-end
-
-local function onDamageTaken(self, damage)
-  local actualDamage = adjustedDamage(self, damage)
-  self.health = self.health - actualDamage
-  local getTextSize = require 'components.gui.gui-text'.getTextSize
-  local offsetCenter = -getTextSize(actualDamage, popupText.font) / 2
-  popupText:new(
-    actualDamage,
-    self.x + offsetCenter,
-    self.y - self.h
-  )
-  self.hitAnimation = coroutine.wrap(hitAnimation)
-
-  local Sound = require 'components.sound'
-  Sound.ENEMY_IMPACT:setFilter {
-    type = 'lowpass',
-    volume = .5,
-  }
-  love.audio.stop(Sound.ENEMY_IMPACT)
-  love.audio.play(Sound.ENEMY_IMPACT)
-
-  local isDestroyed = self.health <= 0
-  if isDestroyed then
-    msgBus.send(msgBus.ENEMY_DESTROYED, {
-      x = self.x,
-      y = self.y,
-      experience = self.experience
-    })
-    self:delete()
-    return
-  end
-end
+local max, random = math.max, math.random
+local onDamageTaken = require 'modules.handle-damage-taken'
 
 local function handleHits(self, dt)
   local hitManager = require 'modules.hit-manager'
@@ -279,7 +229,7 @@ local function computeSeparation(self, neighbors)
 end
 
 local function obstacleFilter(item)
-  return item.group == 'obstacle'
+  return collisionGroups.matches(item.group, collisionGroups.obstacle)
 end
 
 local function computeObstacleInfluence(self)
@@ -312,7 +262,7 @@ local function computeObstacleInfluence(self)
 end
 
 local function neighborFilter(item)
-  return item.group == 'ai'
+  return collisionGroups.matches(item.group, 'ai')
 end
 local function getNeighbors(agent, neighborOffset)
 	local b = agent
@@ -325,9 +275,14 @@ local function getNeighbors(agent, neighborOffset)
 	)
 end
 
-local function setNextPosition(self, dt, radius)
+local min = math.min
+local function setNextPosition(self, speed, radius)
+  local finiteState = self:getFiniteState()
+  if (finiteState ~= states.MOVING) and (finiteState ~= states.FREE_MOVING) then
+    return
+  end
+
   local neighbors = getNeighbors(self, 10)
-  local speed = self.moveSpeed * dt
 
 	-- These calcs are to get an adjustment for movement speed based on distance.
 	-- Don't take this as a complete solution as it only works based on the mouse target for
@@ -372,13 +327,46 @@ local function setNextPosition(self, dt, radius)
   self.collision:update(self.x, self.y)
 end
 
-function Ai._update2(self, grid, dt)
+function Ai.getFiniteState(self)
+  if self.modifiers.freelyMove > 0 then
+    return states.FREE_MOVING
+  end
+
+  if self.attackRecoveryTime > 0 then
+    return states.ATTACKING
+  end
+
+  if self.targetX ~= nil then
+    return states.MOVING
+  end
+
+  return states.IDLE
+end
+
+function Ai.getActualSpeed(self, dt)
+  return max(0, self:getCalculatedStat('moveSpeed') * dt)
+end
+
+function Ai.update(self, dt)
+  local grid = self.grid
+  self.clock = self.clock + dt
   self.frameCount = self.frameCount + 1
+  self.attackRecoveryTime = self.attackRecoveryTime - dt
+
+  handleHits(self, dt)
+  if self.destroyedAnimation then
+    local complete = self.destroyedAnimation:update(dt)
+    if complete then
+      self:delete()
+    end
+    return
+  end
+
+  self:setDrawDisabled(not self.isInViewOfPlayer)
 
   if self.onUpdateStart then
     self.onUpdateStart(self, dt)
   end
-  handleHits(self, dt)
 
   if (self.frameCount % 5 == 0) then
     local shouldFlipX = math.abs(self.vx) > 0.15
@@ -435,10 +423,15 @@ function Ai._update2(self, grid, dt)
       local abilities = self.abilities
       for i=1, #abilities do
         local ability = abilities[i]
-        if (distFromTarget <= ability.range * self.gridSize) then
+        local isInAbilityRange = distFromTarget <= ability.range * self.gridSize
+        local isRecoveringFromAttack = self.attackRecoveryTime > 0
+        local finiteState = self:getFiniteState()
+        local canUseAbility = isInAbilityRange and (finiteState == states.MOVING)
+        if (canUseAbility) then
+          self.attackRecoveryTime = ability.attackTime
           ability.use(self, targetX, targetY)
-          ability.updateCooldown(self, dt)
         end
+        ability.updateCooldown(self, dt)
       end
     end
 
@@ -453,10 +446,10 @@ function Ai._update2(self, grid, dt)
       local path = self.getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
       local targetPos = path[#path]
       self.targetX, self.targetY = targetPos.x * self.gridSize, targetPos.y * self.gridSize
-      setNextPosition(self, dt, 40)
+      setNextPosition(self, self:getActualSpeed(dt), 40)
     end
   elseif self.targetX then
-    setNextPosition(self, dt, 40)
+    setNextPosition(self, self:getActualSpeed(dt), 40)
   end
 
   if self.isInViewOfPlayer then
@@ -470,7 +463,7 @@ function Ai._update2(self, grid, dt)
 end
 
 local perf = require'utils.perf'
-Ai._update2 = perf({
+Ai.update = perf({
   enabled = false,
   done = function(_, totalTime, callCount)
     local avgTime = totalTime / callCount
@@ -478,11 +471,11 @@ Ai._update2 = perf({
       consoleLog('ai update -', avgTime)
     end
   end
-})(Ai._update2)
+})(Ai.update)
 
 local function drawShadow(self, h, w, ox, oy)
   local heightScaleDiff = self.z * 0.01
-  love.graphics.setColor(0,0,0,0.3)
+  love.graphics.setColor(0,0,0,0.3 * self.opacity)
   love.graphics.draw(
     animationFactory.atlas,
     self.animation.sprite,
@@ -523,30 +516,10 @@ local function drawStatusEffects(self, statusIcons)
   end
 end
 
-function Ai.draw(self)
-  if (not self.isInViewOfPlayer) then
-    return
-  end
-
-  local oBlendMode = love.graphics.getBlendMode()
-  local ox, oy = self.animation:getOffset()
-  local w, h = self.animation:getSourceSize()
-  drawShadow(self, h, w, ox, oy)
-
-  if (self.outlineColor) then
-    love.graphics.setShader(shader)
-    shader:send('outline_color', self.outlineColor)
-    shader:send('fill_color', self.fillColor)
-  end
-
-  if self.hitAnimation then
-    love.graphics.setBlendMode('add')
-    love.graphics.setColor(3,3,3)
-  end
-
-  love.graphics.setColor(self.fillColor)
+function drawSprite(self, ox, oy)
+  local atlas = animationFactory.atlas
   love.graphics.draw(
-    animationFactory.atlas,
+    atlas,
     self.animation.sprite,
     self.x,
     self.y - self.z,
@@ -556,18 +529,61 @@ function Ai.draw(self)
     ox,
     oy
   )
+end
+
+local textureW, textureH = animationFactory.atlas:getDimensions()
+local shockResolution = {
+  1 * 10,
+  (textureH/textureW) * 10
+}
+
+local function drawShockEffect(self, ox, oy)
+  setElectricShockShader(
+    math.pow(math.sin(self.clock + self.clockOffset), 2),
+    shockResolution
+  )
+  love.graphics.setColor(0.8,0.8,1,self.opacity)
+  drawSprite(self, ox, oy)
+end
+
+function Ai.draw(self)
+  local oBlendMode = love.graphics.getBlendMode()
+  local ox, oy = self.animation:getOffset()
+  local w, h = self.animation:getSourceSize()
+  drawShadow(self, h, w, ox, oy)
+
+  if (self.outlineColor) then
+    love.graphics.setShader(shader)
+    shader:send('outline_color', self.outlineColor)
+    shader:send('fill_color', self.fillColor)
+    shader:send('alpha', self.opacity)
+  end
+
+  if self.hitAnimation and (not self.destroyedAnimation) then
+    love.graphics.setBlendMode('add')
+    love.graphics.setColor(3,3,3)
+  end
+
+  local texture = animationFactory.atlas
+  local r,g,b,a = self.fillColor[1], self.fillColor[2], self.fillColor[3], self.fillColor[4]
+  love.graphics.setColor(r, g, b, a * self.opacity)
+  drawSprite(self, ox, oy)
+
+  local isShocked = self:getCalculatedStat('shocked') > 0
+  if (isShocked) then
+    drawShockEffect(self, ox, oy)
+  end
 
   love.graphics.setBlendMode(oBlendMode)
   love.graphics.setShader()
 
-  love.graphics.setColor(1,1,1)
+  love.graphics.setColor(1,1,1, self.opacity)
   drawStatusEffects(self, statusIcons)
-  -- self:debugLineOfSight()
 end
 
 local function adjustInitialPositionIfNeeded(self)
   -- check initial position and move if necessary
-  local actualX, actualY = self.collision:move(self.collision.x, self.collision.y - self.z, collisionFilter)
+  local actualX, actualY = self.collision:move(self.collision.x, self.collision.y, collisionFilter)
   self.x = actualX
   self.y = actualY
 end
@@ -583,12 +599,12 @@ function Ai.init(self)
 
   -- [[ BASE PROPERTIES ]]
   self.health = self.health or self.maxHealth
+  self.clockOffset = math.random(0, 100)
 
   self.direction = {
     x = 0,
     y = 0
   }
-  self.subFlowField = getSubFlowField()
   -- start idle animation at a random point to add variance to the ai's idle state
   self.animation = self.animations.idle:update(math.random(0, 20) * 1/60)
 
@@ -606,13 +622,13 @@ function Ai.init(self)
 
   local ox, oy = self.animation:getOffset()
   self.collision = self:addCollisionObject(
-      'ai',
+      collisionGroups.ai,
       self.x,
-      self.y - self.z,
+      self.y,
       self.w * self.scale,
       self.h * self.scale,
       ox * self.scale,
-      oy * self.scale
+      oy + self.z * self.scale
     )
     :addToWorld(self.collisionWorld)
   adjustInitialPositionIfNeeded(self)
@@ -626,23 +642,34 @@ function Ai.init(self)
     end
   })(aiPathWithAstar())
 
-  msgBus.subscribe(function(msgType, msgValue)
-    if self:isDeleted() then
-      return msgBus.CLEANUP
-    end
+  self.listeners = {
+    msgBus.on(msgBus.CHARACTER_HIT, function(msgValue)
+      if msgValue.parent ~= self then
+        return msgValue
+      end
 
-    if msgBus.CHARACTER_HIT == msgType and msgValue.parent == self then
       local uid = require 'utils.uid'
       local hitId = msgValue.source or uid()
       self.hits[hitId] = msgValue
-    end
-  end)
+
+      return msgValue
+    end),
+
+    msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
+      if msgValue.parent ~= self then
+        return msgValue
+      end
+
+      self:onDestroyStart()
+      return msgValue
+    end)
+  }
 
   self.onInit(self)
 end
 
 function Ai.final(self)
-  self.onFinal(self)
+  msgBus.off(self.listeners)
 end
 
 return Component.createFactory(Ai)

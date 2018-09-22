@@ -74,4 +74,15 @@ function M.compose(...)
 	end
 end
 
+function M.wrap(fnToWrap, fn)
+	local noop = require 'utils.noop'
+	if (not fnToWrap) or (fnToWrap == noop) then
+		return fn
+	end
+	return function(a, b, c, d, e, f, g)
+		fnToWrap(a, b, c, d, e, f, g)
+		return fn(a, b, c, d, e, f, g)
+	end
+end
+
 return M

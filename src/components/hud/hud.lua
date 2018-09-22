@@ -7,10 +7,14 @@ local ActiveSkillInfo = require 'components.hud.active-skill-info'
 local ActionError = require 'components.hud.action-error'
 local GuiText = require 'components.gui.gui-text'
 local NpcInfo = require 'components.hud.npc-info'
+local Notifier = require 'components.hud.notifier'
+local Minimap = require 'components.map.minimap'
+local camera = require 'components.camera'
 local msgBus = require 'components.msg-bus'
 local Position = require 'utils.position'
 local scale = require 'config.config'.scaleFactor
 local Color = require 'modules.color'
+local config = require 'config.config'
 local max = math.max
 
 local Hud = {
@@ -38,6 +42,18 @@ local function setupExperienceIndicator(self)
 end
 
 function Hud.init(self)
+  local minimapW, minimapH = 100, 100
+  local minimapMargin = 5
+  Minimap.create({
+    camera = camera,
+    grid = Component.get('MAIN_SCENE').mapGrid,
+    x = love.graphics.getWidth()/config.scale - minimapW - minimapMargin,
+    y = minimapH + minimapMargin,
+    w = minimapW,
+    h = minimapH,
+    scale = config.scale
+  }):setParent(self)
+
   self.hudTextLayer = GuiText.create({
     group = groups.hud,
     drawOrder = function()
@@ -51,6 +67,14 @@ function Hud.init(self)
     drawOrder = function()
       return 10
     end
+  }):setParent(self)
+
+  local notifierWidth, notifierHeight = 250, 200
+  Notifier.create({
+    x = love.graphics.getWidth()/config.scale - notifierWidth,
+    y = love.graphics.getHeight()/config.scale - notifierHeight,
+    h = notifierHeight,
+    w = notifierWidth
   }):setParent(self)
 
   local winWidth, winHeight = love.graphics.getWidth() / scale, love.graphics.getHeight() / scale
@@ -98,17 +122,15 @@ function Hud.init(self)
     end
   }):setParent(self)
 
-  msgBus.subscribe(function(msgType, msgValue)
-    if self:isDeleted() then
-      return msgBus.CLEANUP
-    end
-
-    if msgBus.PLAYER_HIT_RECEIVED == msgType then
+  self.listeners = {
+    msgBus.on(msgBus.PLAYER_HIT_RECEIVED, function(msgValue)
       self.rootStore:set('health', function(state)
         return max(0, state.health - msgValue)
       end)
-    end
-  end)
+
+      return msgValue
+    end)
+  }
 
   setupExperienceIndicator(self)
   ScreenFx.create({
@@ -178,6 +200,10 @@ function Hud.init(self)
       end
     }):setParent(self)
   end
+end
+
+function Hud.final(self)
+  msgBus.off(self.listeners)
 end
 
 return Component.createFactory(Hud)

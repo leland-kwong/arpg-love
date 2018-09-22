@@ -5,6 +5,7 @@ local objectUtils = require 'utils.object-utils'
 local groups = require 'components.groups'
 local mapBlueprint = require 'components.map.map-blueprint'
 local Map = require 'modules.map-generator.index'
+local collisionGroups = require 'modules.collision-groups'
 local MainMapSolidsFactory = require 'components.map.main-map-solids'
 local animationFactory = require 'components.animation-factory'
 local lru = require 'utils.lru'
@@ -22,7 +23,6 @@ end
 local function addWallTileEntity(self, positionIndex, animation, x, y, opacity)
   local wallTileEntity = self.wallObjectsPool:get()
     :changeTile(animation, x, y, opacity)
-    :setParent(self)
   self.wallTileCache:set(positionIndex, wallTileEntity)
 end
 
@@ -41,7 +41,7 @@ local function setupCollisionObjects(self, grid, gridSize)
       local gridSize = self.gridSize
       local tileX, tileY = x * gridSize, y * gridSize
       return self:addCollisionObject(
-        'obstacle',
+        collisionGroups.obstacle,
         tileX, tileY, gridSize, gridSize, gridSize/2 - 1, gridSize
       ):addToWorld(collisionWorlds.map)
     end
@@ -57,7 +57,7 @@ local function renderWallCollisionDebug(self)
         grid = self.grid,
         collisionObjectsHash = self.collisionObjectsHash,
         camera = self.camera
-      }):setParent(self)
+      }):setParent(Component.get('MAIN_SCENE'))
   elseif self.wallCollisionDebug then
     self.wallCollisionDebug:delete(true)
     self.wallCollisionDebug = nil
@@ -65,7 +65,7 @@ local function renderWallCollisionDebug(self)
 end
 
 local blueprint = objectUtils.assign({}, mapBlueprint, {
-  group = groups.all,
+  group = groups.firstLayer,
   tileRenderDefinition = {},
 
   init = function(self)

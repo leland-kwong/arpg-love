@@ -1,5 +1,6 @@
 local animationFactory = require 'components.animation-factory'
 local debounce = require 'modules.debounce'
+local collisionGroups = require 'modules.collision-groups'
 
 local blastSoundFilter = {
   type = 'lowpass',
@@ -13,6 +14,11 @@ local playblasterSound = debounce(function()
   love.audio.stop(source)
   love.audio.play(source)
 end, 0.2)
+
+local function onDestroyStart()
+  local Sound = require 'components.sound'
+  love.audio.play(Sound.functions.robotDestroyed())
+end
 
 return function()
   local animations = {
@@ -35,7 +41,8 @@ return function()
   local ability1 = (function()
     local curCooldown = 0
     local skill = {
-      range = 8
+      range = 8,
+      attackTime = 0.15
     }
 
     function skill.use(self, targetX, targetY)
@@ -51,7 +58,7 @@ return function()
           , y2 = targetY
           , speed = 125
           , cooldown = 0.4
-          , targetGroup = 'player'
+          , targetGroup = collisionGroups.create(collisionGroups.player, collisionGroups.obstacle)
         })
         curCooldown = projectile.cooldown
         playblasterSound()
@@ -79,7 +86,7 @@ return function()
 
   return {
     dataSheet = dataSheet,
-    armor = 100,
+    armor = 250,
     moveSpeed = 80,
     maxHealth = 20,
     experience = 1,
@@ -90,6 +97,7 @@ return function()
       ability1
     },
     attackRange = attackRange,
-    fillColor = fillColor
+    fillColor = fillColor,
+    onDestroyStart = onDestroyStart
   }
 end

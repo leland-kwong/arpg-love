@@ -12,33 +12,37 @@ local msgBus = require 'components.msg-bus'
 local groups = require 'components.groups'
 local boxCenterOffset = Position.boxCenterOffset
 local drawItem = require 'components.item-inventory.draw-item'
+local Lru = require 'utils.lru'
+
+local spriteCache = Lru.new(100)
+-- returns a static sprite for drawing
+local function getSprite(name)
+  local sprite = spriteCache:get(name)
+  if (not sprite) then
+    sprite = animationFactory:new({ name })
+    spriteCache:set(name, sprite)
+  end
+  return sprite
+end
 
 -- currently picked up item. We can only have one item picked up at a time
 local itemPickedUp = nil
 local isDropModeFloor = false
 
-msgBus.subscribe(function(msgType, message)
-  if msgBus.INVENTORY_DROP_MODE_INVENTORY == msgType or
-    msgBus.INVENTORY_DROP_MODE_FLOOR == msgType then
-      isDropModeFloor = msgBus.INVENTORY_DROP_MODE_FLOOR == msgType
-  end
+msgBus.on(msgBus.INVENTORY_DROP_MODE_INVENTORY, function()
+  isDropModeFloor = false
 end)
-
+msgBus.on(msgBus.INVENTORY_DROP_MODE_FLOOR, function()
+  isDropModeFloor = true
+end)
 -- handles dropping items on the floor when its in the floor drop mode
-Component.createFactory({
-  group = groups.gui,
-  init = function(self)
-    msgBus.subscribe(function(msgType, msgValue)
-      if isDropModeFloor and
-        msgBus.MOUSE_PRESSED == msgType and
-        itemPickedUp
-      then
-        msgBus.send(msgBus.DROP_ITEM_ON_FLOOR, itemPickedUp)
-        itemPickedUp = nil
-      end
-    end)
+local function handleItemDrop()
+  if (isDropModeFloor and itemPickedUp) then
+    msgBus.send(msgBus.DROP_ITEM_ON_FLOOR, itemPickedUp)
+    itemPickedUp = nil
   end
-}).create()
+end
+msgBus.on(msgBus.MOUSE_PRESSED, handleItemDrop)
 
 local function getSlotPosition(gridX, gridY, offsetX, offsetY, slotSize, margin)
   local posX, posY = ((gridX - 1) * slotSize) + (gridX * margin) + offsetX,
@@ -46,11 +50,163 @@ local function getSlotPosition(gridX, gridY, offsetX, offsetY, slotSize, margin)
   return posX, posY
 end
 
-local function drawTooltip(item, x, y, w2, h2)
+local signHumanized = function(v)
+  return v >= 0 and "+" or "-"
+end
+
+local modifierParsers = {
+  attackTimeReduction = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value..'%',
+      Color.WHITE, ' attack time reduction'
+    }
+  end,
+  maxEnergy = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' maximum energy'
+    }
+  end,
+  maxHealth = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' maximum health'
+    }
+  end,
+  healthRegeneration = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' health regeneration'
+    }
+  end,
+  energyRegeneration = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' energy regeneration'
+    }
+  end,
+  flatDamage = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..value,
+      Color.WHITE, ' physical damage'
+    }
+  end,
+  weaponDamage = function(value)
+    return {
+      Color.CYAN, value,
+      Color.WHITE, ' weapon damage'
+    }
+  end,
+  percentDamage = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, '% weapon damage'
+    }
+  end,
+  armor = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' armor'
+    }
+  end,
+  moveSpeed = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' movement speed'
+    }
+  end,
+  coldResist = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' cold reistance'
+    }
+  end,
+  lightningResist = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' lightning resistance'
+    }
+  end,
+  fireResist = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' fire resistance'
+    }
+  end,
+  flatPhysicalDamageReduction = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' physical damage reduction'
+    }
+  end,
+  cooldownReduction = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value..'%',
+      Color.WHITE, ' cooldown reduction'
+    }
+  end,
+  energyCostReduction = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value..'%',
+      Color.WHITE, ' energy cost reduction'
+    }
+  end,
+  experienceMultiplier = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value..'%',
+      Color.WHITE, ' experience gain'
+    }
+  end
+}
+
+local function concatTable(a, b)
+  if not b then
+    return a
+  end
+	for i=1, #b do
+		local elem = b[i]
+		table.insert(a, elem)
+	end
+	return a
+end
+
+local baseModifiers = require 'components.state.base-stat-modifiers'()
+local function parseItemModifiers(item)
+  local modifiers = {}
+  for k,_ in pairs(baseModifiers) do
+    local parser = modifierParsers[k]
+    if parser then
+      if item[k] then
+        local v = item[k]
+        local output = parser(v)
+        local length = #output
+        for i=1, length, 2 do
+          local color = output[i]
+          local str = output[i + 1]
+          local isLastItem = i == length - 1
+          if isLastItem then
+            str = str..'\n'
+          end
+          table.insert(modifiers, color)
+          table.insert(modifiers, str)
+        end
+      end
+    else
+      error('no parser for property '..k)
+    end
+  end
+  return modifiers
+end
+
+local function drawTooltip(item, x, y, w2, h2, rootStore)
   local posX, posY = x, y
   local padding = 12
   local itemDef = itemDefinition.getDefinition(item)
   local tooltipContent = itemDef.tooltip(item)
+  local tooltipItemUpgrade = itemDef.upgrades
+  local tooltipModifierValues = parseItemModifiers(item)
+  local levelRequirementText = itemDef.levelRequirement and 'Required level: '..itemDef.levelRequirement or nil
+  tooltipContent = concatTable(tooltipModifierValues, tooltipContent)
 
   --[[
     IMPORTANT: We must do the tooltip content dimension calculations first to see if the tooltip
@@ -69,20 +225,41 @@ local function drawTooltip(item, x, y, w2, h2)
     posY + padding + titleH + titleH
   local rarityW, rarityH = GuiText.getTextSize(rarityTextCopy, guiTextLayers.body.font)
 
+  local levelRequirementW, levelRequirementH = 0, 0
+  if levelRequirementText then
+    levelRequirementW, levelRequirementH = GuiText.getTextSize(itemDef.levelRequirement or '', guiTextLayers.body.font)
+  end
+
   -- body text and dimensions
   local bodyCopyW, bodyCopyH = GuiText.getTextSize(tooltipContent, guiTextLayers.body.font)
 
-  -- total tooltip height
-  local totalHeight = (titleH + titleH) + (rarityH + rarityH) + bodyCopyH + (padding * 2)
+  -- item upgrade content and dimensions
+  local itemUpgradeW, itemUpgradeH = 200, 200
+  if not tooltipItemUpgrade then
+    itemUpgradeW, itemUpgradeH = 0, 0
+  end
 
-  local isBottomOutOfView = posY + totalHeight > config.resolution.h
+  -- total tooltip height
+  local totalHeight = (titleH + titleH) +
+                      (rarityH * 2) +
+                      (levelRequirementH * 2) +
+                      bodyCopyH +
+                      itemUpgradeH +
+                      (padding * 2)
+  local maxWidth = math.min(
+    200,
+    math.max(titleW, rarityW, bodyCopyW, itemUpgradeW) -- include side padding
+  )
+  local bottomOutOfView = (posY + totalHeight) - config.resolution.h
+  local isBottomOutOfView = bottomOutOfView > 0
   if isBottomOutOfView then
-    -- flip the tooltip vertically so that its pivot is on the south side
-    return drawTooltip(item, x, y - totalHeight + h2, w2, h2)
+    -- shift tooltip vertically so that it stays within viewport
+    return drawTooltip(item, x, y - bottomOutOfView - 5, w2, h2)
   end
 
   -- title
-  guiTextLayers.title:add(itemDef.title, Color.WHITE, posX + padding, posY + padding)
+  local completeTitle = (item.prefixName and item.prefixName..' ' or '') .. itemDef.title .. (item.suffixName and item.suffixName..' ' or '')
+  guiTextLayers.title:add(completeTitle, Color.WHITE, posX + padding, posY + padding)
 
   -- rarity
   guiTextLayers.body:add(
@@ -91,34 +268,147 @@ local function drawTooltip(item, x, y, w2, h2)
     rarityX, rarityY
   )
 
+  local levelRequirementY = rarityY + (rarityH * 2)
+  local requirementNotMet = rootStore:get().level < (itemDef.levelRequirement or 0)
+  if requirementNotMet then
+    guiTextLayers.body:addf(
+      {
+        Color.WHITE, 'level requirement: ',
+        Color.RED, itemDef.levelRequirement
+      },
+      maxWidth,
+      'left',
+      posX + padding,
+      levelRequirementY
+    )
+  else
+    guiTextLayers.body:add(
+      levelRequirementText,
+      Color.WHITE,
+      posX + padding,
+      levelRequirementY
+    )
+  end
+
   -- stats
-  local tooltipContentY = rarityY + (rarityH * 2)
-  guiTextLayers.body:addTextGroup(
+  local tooltipContentY = levelRequirementY + (levelRequirementH * 2)
+  guiTextLayers.body:addf(
     tooltipContent,
+    maxWidth,
+    'left',
     posX + padding,
     tooltipContentY
   )
 
   -- background
-  local maxWidth = math.max(titleW, rarityW, bodyCopyW) + (padding * 2) -- include side padding
-
-  local bgColor = 0.15
-  love.graphics.setColor(bgColor, bgColor, bgColor)
+  local bgWidth = maxWidth + padding
+  local bgColor = 0
+  love.graphics.setColor(bgColor, bgColor, bgColor, 0.9)
   love.graphics.rectangle(
     'fill',
     posX, posY,
-    maxWidth,
+    bgWidth,
     totalHeight
   )
 
-  local outlineColor = bgColor * 2
-  love.graphics.setColor(outlineColor, outlineColor, outlineColor)
+  local outlineColor = 0.2
+  love.graphics.setColor(outlineColor, outlineColor, outlineColor, 0.9)
   love.graphics.rectangle(
     'line',
     posX, posY,
-    maxWidth,
+    bgWidth,
     totalHeight
   )
+
+  -- [item upgrades]
+  if tooltipItemUpgrade then
+    local tooltipStartX = posX + padding
+    local upgradePanelPosY = tooltipContentY + bodyCopyH + 20
+    local titleTextLayer = guiTextLayers.body
+    local titleW, titleH = GuiText.getTextSize('test title', titleTextLayer.font)
+
+    -- upgrade experience bar
+    local experienceBarWidth, experienceBarHeight = 10, 160
+    local iconWidth, iconHeight = 13, 13
+    local experienceBarPosY = upgradePanelPosY
+    local lastUpgrade = tooltipItemUpgrade[#tooltipItemUpgrade]
+    local expfillPercentage = item.experience / lastUpgrade.experienceRequired
+    local expBarPosX = tooltipStartX
+    expfillPercentage = expfillPercentage > 1 and 1 or expfillPercentage
+    -- experience bar unfilled background
+    love.graphics.setColor(0.1,0.1,0.1)
+    love.graphics.rectangle('fill', expBarPosX, experienceBarPosY, experienceBarWidth, experienceBarHeight)
+    -- experience progress fill
+    love.graphics.setColor(1,0.8,0)
+    love.graphics.rectangle(
+      'fill', expBarPosX, experienceBarPosY,
+      experienceBarWidth,
+      (experienceBarHeight * expfillPercentage)
+    )
+    -- experience bar border
+    love.graphics.setColor(0.4,0.4,0.4)
+    love.graphics.rectangle(
+      'line', expBarPosX, experienceBarPosY,
+      experienceBarWidth, experienceBarHeight
+    )
+
+    local upgradeCount = #tooltipItemUpgrade
+    for i=1, #tooltipItemUpgrade do
+      local upgradeItem = tooltipItemUpgrade[i]
+      local expReq = upgradeItem.experienceRequired
+      local percentReq = expReq / lastUpgrade.experienceRequired
+      local positionIndex = i - 1
+      local segmentY = math.ceil(experienceBarPosY + (percentReq * experienceBarHeight))
+      local isUnlocked = item.experience >= expReq
+
+      local isLastItem = i == upgradeCount
+      if not isLastItem then
+        -- exp requirement line
+        love.graphics.setLineWidth(1)
+        love.graphics.setColor(0.4,0.4,0.4)
+        love.graphics.line(expBarPosX + 1, segmentY, expBarPosX + experienceBarWidth - 1, segmentY)
+      end
+
+      -- upgrade graphic
+      local iconPosX = tooltipStartX + experienceBarWidth + 5
+      local iconPosY = segmentY - (iconHeight/2)
+      local opacity = isUnlocked and 1 or 0.4
+      local upgradeItemSprite = getSprite(
+        upgradeItem.sprite or 'item-upgrade-placeholder-unlocked'
+      ).sprite
+      love.graphics.setColor(1, 1, 1, opacity)
+      love.graphics.draw(
+        animationFactory.atlas,
+        upgradeItemSprite,
+        iconPosX,
+        iconPosY
+      )
+
+      -- upgrade title
+      local titlePosX = iconPosX + iconWidth + 5
+      local titlePosY = iconPosY + 2
+      titleTextLayer:add(
+        upgradeItem.title,
+        Color.WHITE,
+        titlePosX,
+        titlePosY
+      )
+
+      if (not isUnlocked) then
+        -- upgrade experience help text
+        local titleW, titleH = GuiText.getTextSize(upgradeItem.title, titleTextLayer.font)
+        local descPosX = titlePosX
+        local descPosY = titlePosY + titleH + 5
+        local expRequirementDiff = upgradeItem.experienceRequired - item.experience
+        guiTextLayers.body:add(
+          expRequirementDiff .. ' experience to unlock',
+          Color.MED_GRAY,
+          descPosX,
+          descPosY
+        )
+      end
+    end
+  end
 end
 
 -- handles the picked up item and makes it follow the cursor
@@ -169,7 +459,7 @@ local function setupSlotInteractions(
             x = posX + self.w,
             y = posY,
             draw = function(self)
-              drawTooltip(item, self.x, self.y, slotSize, slotSize)
+              drawTooltip(item, self.x, self.y, slotSize, slotSize, rootStore)
             end,
             drawOrder = function()
               return 6

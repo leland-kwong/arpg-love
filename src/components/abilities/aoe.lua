@@ -5,14 +5,15 @@ local AbilityBase = require 'components.abilities.base-class'
 local collisionWorlds = require 'components.collision-worlds'
 local tween = require 'modules.tween'
 
-local Aoe = AbilityBase()
-  :set('opacity', 1)
-  :set('area', 1)
-  :set('onHit', function(self)
-  end)
-  :set('drawOrder', function(self)
+local Aoe = AbilityBase({
+  opacity = 1,
+  area = 1,
+  onHit = function(self)
+  end,
+  drawOrder = function(self)
     return 3
-  end)
+  end
+})
 
 local animationEndState = {
   opacity = 0

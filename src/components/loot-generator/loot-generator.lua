@@ -12,6 +12,7 @@ local msgBus = require 'components.msg-bus'
 local tick = require 'utils.tick'
 local tween = require 'modules.tween'
 local bump = require 'modules.bump'
+local collisionGroups = require 'modules.collision-groups'
 
 local itemGroup = groups.all
 local tooltipCollisionWorld = bump.newWorld(16)
@@ -157,7 +158,7 @@ local LootGenerator = {
 
 local COLLISION_FLOOR_ITEM_TYPE = 'floorItem'
 local function collisionFilter(item, other)
-  if other.group == COLLISION_FLOOR_ITEM_TYPE or other.group == 'obstacle' then
+  if other.group == COLLISION_FLOOR_ITEM_TYPE or collisionGroups.matches(other.group, collisionGroups.obstacle) then
     return 'slide'
   end
   return false
@@ -172,7 +173,7 @@ end
 function LootGenerator.init(self)
   assert(self.item ~= nil, 'item must be provided')
 
-  local _self = self
+  local parent = self
   local rootStore = self.rootStore
   local screenX, screenY = self.x, self.y
   local item = self.item
@@ -182,12 +183,12 @@ function LootGenerator.init(self)
   })
 
   local sx, sy, sw, sh = animation.sprite:getViewport()
-
   local colObj = self:addCollisionObject(COLLISION_FLOOR_ITEM_TYPE, self.x, self.y, sw, sh)
     :addToWorld(collisionWorlds.map)
 
   Gui.create({
     group = itemGroup,
+    -- debug = true,
     x = self.x,
     y = self.y,
     w = sw,
@@ -207,13 +208,17 @@ function LootGenerator.init(self)
       -- check collision of position to make sure its at a droppable position
       local actualX, actualY, cols, len = colObj:move(endStateX.x, endStateY.y, collisionFilter)
       if len > 0 then
+        parent.x = actualX
+        parent.y = actualY
         endStateX.x = actualX
         -- update initial position to new initial position
-        self.y = actualY
-        endStateY.y = actualY + yOffset
+        self.y = actualY - yOffset
+        endStateY.y = actualY
       end
 
+      -- y-axis animation
       self.tween = tween.new(0.5, self, endStateY, flyoutEasing)
+      -- x-axis animation
       self.tween2 = tween.new(0.5, self, endStateX)
     end,
     getMousePosition = itemMousePosition,
@@ -224,16 +229,16 @@ function LootGenerator.init(self)
       msgBus.send(msgBus.ITEM_HOVERED, false)
     end,
     pickup = function()
-      if _self.pickupPending then
+      if parent.pickupPending then
         return
       end
       rootStore:addItemToInventory(item)
-      _self:delete(true)
+      parent:delete(true)
       -- --[[
       --   Add a slight delay for ITEM_PICKUP_SUCCESS since we disable the player's click events
       --   after pickup to prevent attack on pickup.
       -- ]]
-      _self.pickupPending = tick.delay(function()
+      parent.pickupPending = tick.delay(function()
         msgBus.send(msgBus.ITEM_PICKUP_SUCCESS)
       end, 0.2)
     end,

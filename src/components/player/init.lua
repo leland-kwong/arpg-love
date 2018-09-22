@@ -53,15 +53,19 @@ local Player = {
   pickupRadius = 5 * config.gridSize,
   moveSpeed = 100,
   flowFieldDistance = 30,
+  attackRecoveryTime = 0,
 
   -- collision properties
-  type = 'player',
   h = 1,
   w = 1,
   mapGrid = nil,
 
   init = function(self)
-    WeaponCore.create()
+    self.hitManagerOnDamageTaken = function(self, actualDamage, actualNonCritDamage, criticalMultiplier)
+      if (actualDamage > 0) then
+        msgBus.send(msgBus.PLAYER_HIT_RECEIVED, actualDamage)
+      end
+    end
     self.hits = {}
     self.getFlowField = FlowField(function (grid, x, y, dist)
       local row = grid[y]
@@ -112,7 +116,7 @@ local Player = {
     self.animation = self.animations.idle
 
     local collisionW, collisionH = self.animations.idle:getSourceSize()
-    local collisionOffX, collisionOffY = self.animations.idle:getOffset()
+    local collisionOffX, collisionOffY = self.animations.idle:getSourceOffset()
     self.colObj = self:addCollisionObject(
       'player',
       self.x,
@@ -121,22 +125,51 @@ local Player = {
       14,
       collisionOffX,
       5
-      -- (collisionH / 1.5)
-      -- collisionOffY / 2
     ):addToWorld(colMap)
 
-    local calcDist = require'utils.math'.dist
-    local function subscriber(msgType, msg)
-      if self:isDeleted() then
-        return msgBus.CLEANUP
-      end
+    WeaponCore.create({
+      x = self.x,
+      y = self.y
+    }):setParent(self)
 
-      if msgBus.PLAYER_DISABLE_ABILITIES == msgType then
+    self.listeners = {
+      msgBus.on(msgBus.PLAYER_DISABLE_ABILITIES, function(msg)
         self.clickDisabled = msg
-      end
+      end),
 
-      if msgBus.ITEM_PICKUP == msgType then
+      msgBus.on(msgBus.PLAYER_LEVEL_UP, function(msg)
+        local tick = require 'utils.tick'
+        local fx = ParticleFx.Basic.create({
+          x = self.x,
+          y = self.y + 10,
+          duration = 1,
+          width = 4
+        }):setParent(self)
+      end),
+
+      msgBus.on(msgBus.DROP_ITEM_ON_FLOOR, function(item)
+        msgBus.send(
+          msgBus.GENERATE_LOOT,
+          {self.x, self.y, item}
+        )
+      end),
+
+      msgBus.on(msgBus.ITEM_PICKUP_SUCCESS, function()
+        msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
+      end),
+
+      msgBus.on(msgBus.CHARACTER_HIT, function(msg)
+        if msg.parent == self then
+          local uid = require 'utils.uid'
+          local hitId = msg.source or uid()
+          self.hits[hitId] = msg
+        end
+        return msg
+      end),
+
+      msgBus.on(msgBus.ITEM_PICKUP, function(msg)
         local item = msg
+        local calcDist = require'utils.math'.dist
         local dist = calcDist(self.x, self.y, item.x, item.y)
         local outOfRange = dist > self.pickupRadius
         local gridX1, gridY1 = Position.pixelsToGridUnits(self.x, self.y, config.gridSize)
@@ -146,46 +179,18 @@ local Player = {
           msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, true)
           item:pickup()
         end
-      end
-
-      if msgBus.ITEM_PICKUP_SUCCESS == msgType then
-        msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
-      end
-
-      if msgBus.DROP_ITEM_ON_FLOOR == msgType then
-        msgBus.send(
-          msgBus.GENERATE_LOOT,
-          {self.x, self.y, msg}
-        )
-      end
-
-      if msgBus.PLAYER_LEVEL_UP == msgType then
-        local tick = require 'utils.tick'
-        local fx = ParticleFx.Basic.create({
-          x = self.x,
-          y = self.y + 10,
-          duration = 1,
-          width = 4
-        }):setParent(self)
-      end
-
-      if msgBus.CHARACTER_HIT == msgType and msg.parent == self then
-        local uid = require 'utils.uid'
-        local hitId = msg.source or uid()
-        self.hits[hitId] = msg
-
-        local damage = msg.damage or 0
-        if (damage > 0) then
-          msgBus.send(msgBus.PLAYER_HIT_RECEIVED, damage)
-        end
-      end
-    end
-    msgBus.subscribe(subscriber)
+      end)
+    }
   end
 }
 
 local function handleMovement(self, dt)
   local totalMoveSpeed = self:getCalculatedStat('moveSpeed')
+
+  if self.attackRecoveryTime > 0 then
+    totalMoveSpeed = 0
+  end
+
   local moveAmount = totalMoveSpeed * dt
   local origx, origy = self.x, self.y
   local mx, my = camera:getMousePosition()
@@ -301,8 +306,9 @@ local function updateHealthAndEnergy(rootStore)
 end
 
 function Player.update(self, dt)
+  self.attackRecoveryTime = self.attackRecoveryTime - dt
   self.equipmentModifiers = self.rootStore:get().statModifiers
-  hitManager(self, dt)
+  hitManager(self, dt, self.hitManagerOnDamageTaken)
   local nextX, nextY, totalMoveSpeed = handleMovement(self, dt)
   handleAnimation(self, dt, nextX, nextY, totalMoveSpeed)
   handleAbilities(self, dt)
@@ -368,7 +374,7 @@ local function drawDebug(self)
 end
 
 function Player.draw(self)
-  local ox, oy = self.animation:getOffset()
+  local ox, oy = self.animation:getSourceOffset()
   local scaleX, scaleY = 1 * self.dir, 1
 
   drawShadow(self, scaleX, scaleY, ox, oy)
@@ -389,7 +395,11 @@ function Player.draw(self)
 end
 
 Player.drawOrder = function(self)
-  return self.group.drawOrder(self) + 1
+  return self.group:drawOrder(self) + 1
+end
+
+Player.final = function(self)
+  msgBus.off(self.listeners)
 end
 
 return Component.createFactory(Player)

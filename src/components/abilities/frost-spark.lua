@@ -94,9 +94,9 @@ local FrostSpark = {
         for i=1, len do
           local col = cols[i]
           if (self.hits < self.maxHits) and (col.other.group == self.targetGroup) then
+            -- slow effect
             msgBus.send(msgBus.CHARACTER_HIT, {
               parent = col.other.parent,
-              damage = random(self.minDamage, self.maxDamage),
               duration = 1,
               modifiers = {
                 moveSpeed = function(target)
@@ -104,6 +104,11 @@ local FrostSpark = {
                 end,
               },
               source = 'FROST_SPARK_SLOW'
+            })
+            -- damage
+            msgBus.send(msgBus.CHARACTER_HIT, {
+              parent = col.other.parent,
+              damage = random(self.minDamage, self.maxDamage),
             })
             self.hits = self.hits + 1
           end
@@ -161,7 +166,7 @@ local FrostSpark = {
 }
 
 FrostSpark.drawOrder = function(self)
-  local order = self.group.drawOrder(self) + 2
+  local order = self.group:drawOrder(self) + 2
   return order
 end
 

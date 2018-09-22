@@ -39,22 +39,18 @@ function love.load()
   local console = Console.create()
   require 'components.profiler.component-groups'(console)
 
-  msgBusMainMenu.subscribe(function(msgType, msgValue)
-    if msgBusMainMenu.SCENE_SWITCH == msgType then
-      local nextScene = msgValue
-      if globalState.activeScene then
-        globalState.activeScene:delete(true)
-      end
-      globalState.activeScene = nextScene.scene.create(nextScene.props)
+  msgBusMainMenu.on(msgBusMainMenu.SCENE_SWITCH, function(msgValue)
+    local nextScene = msgValue
+    if globalState.activeScene then
+      globalState.activeScene:delete(true)
     end
+    globalState.activeScene = nextScene.scene.create(nextScene.props)
   end)
 
-  msgBus.subscribe(function(msgType, msgValue)
-    if msgBus.SET_CONFIG == msgType then
-      local configChanges = msgValue
-      local oUtils = require 'utils.object-utils'
-      oUtils.assign(config, configChanges)
-    end
+  msgBus.on(msgBus.SET_CONFIG, function(msgValue)
+    local configChanges = msgValue
+    local oUtils = require 'utils.object-utils'
+    oUtils.assign(config, configChanges)
   end)
 end
 
@@ -62,6 +58,7 @@ function love.update(dt)
   tick.update(dt)
 
   camera:update(dt)
+  groups.firstLayer.updateAll(dt)
   groups.all.updateAll(dt)
   groups.overlay.updateAll(dt)
   groups.debug.updateAll(dt)
@@ -100,7 +97,7 @@ end
 function love.mousepressed( x, y, button, istouch, presses )
   msgBus.send(
     msgBus.MOUSE_PRESSED,
-    { x, y, button, isTouch, presses }
+    { x, y, button, istouch, presses }
   )
 end
 
@@ -126,6 +123,7 @@ function love.draw()
   camera:attach()
   -- background
   love.graphics.clear(0.2,0.2,0.2)
+  groups.firstLayer.drawAll()
   groups.all.drawAll()
   groups.overlay.drawAll()
   groups.debug.drawAll()
@@ -147,4 +145,5 @@ end
 if config.isDebug then
   require 'modules.test.index'
   require 'utils.test.index'
+  require '_debug'
 end

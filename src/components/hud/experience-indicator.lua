@@ -29,25 +29,30 @@ local function getExpInfo(self)
 end
 
 function ExperienceIndicator.init(self)
-  msgBus.subscribe(function(msgType, msgValue)
+  msgBus.on(msgBus.EXPERIENCE_GAIN, function(msgValue)
     if self:isDeleted() then
       return msgBus.CLEANUP
     end
 
-    if msgBus.EXPERIENCE_GAIN == msgType then
-      self.rootStore:set('totalExperience', function(state)
-        return state.totalExperience + msgValue
+    self.rootStore:set('totalExperience', function(state)
+      return state.totalExperience + msgValue
+    end)
+    local totalExp, progress = getExpInfo(self)
+    local isLevelUp = progress >= 1
+    if isLevelUp then
+      self.rootStore:set('level', function(state)
+        return state.level + 1
       end)
-      local totalExp, progress = getExpInfo(self)
-      local isLevelUp = progress >= 1
-      if isLevelUp then
-        self.rootStore:set('level', function(state)
-          return state.level + 1
-        end)
-        love.audio.stop(Sound.levelUp)
-        love.audio.play(Sound.levelUp)
-        msgBus.send(msgBus.PLAYER_LEVEL_UP)
-      end
+      love.audio.stop(Sound.levelUp)
+      love.audio.play(Sound.levelUp)
+      msgBus.send(msgBus.PLAYER_LEVEL_UP)
+      msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
+        title = 'level up!',
+        description = {
+          Color.WHITE, 'you are now level ',
+          Color.CYAN, self.rootStore:get().level
+        }
+      })
     end
   end)
 end
