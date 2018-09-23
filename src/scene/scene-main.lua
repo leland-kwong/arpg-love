@@ -227,7 +227,6 @@ function MainScene.init(self)
     'room-2',
     'room-4',
   })
-  print(#mapGrid[1])
   local gridTileDefinitions = cloneGrid(mapGrid, function(v, x, y)
     local tileGroup = gridTileTypes[v]
     return tileGroup[math.random(1, #tileGroup)]
