@@ -18,6 +18,7 @@ local SpawnerAi = {
   x = 0,
   y = 0,
   moveSpeed = 0,
+  rarity = aiRarity, -- [FUNCTION]
   -- these need to be passed in
   grid = nil,
   WALKABLE = nil,
@@ -61,12 +62,17 @@ local function AiFactory(self, x, y, moveSpeed, scale)
   end
 
   return f.map(self.types, function(aiType)
-    local aiPrototype = setProp(aiTypes.typeDefs[aiType]())
+    local aiPrototype
+    if (type(aiType) == 'function') then
+      aiPrototype = setProp(aiType())
+    else
+      aiPrototype = setProp(aiTypes.typeDefs[aiType]())
+    end
     local spawnX, spawnY =
       self.x * self.gridSize + math.random(0, self.gridSize) * getRandomDirection(),
       self.y * self.gridSize + math.random(0, self.gridSize) * getRandomDirection()
     local ai = Ai.create(
-      aiRarity(aiPrototype)
+      self.rarity(aiPrototype)
         :set('x',                 spawnX)
         :set('y',                 spawnY)
         :set('collisionWorld',    self.colWorld)

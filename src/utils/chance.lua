@@ -1,15 +1,11 @@
-local function CallableObject(props)
-  assert(type(props.chance) == 'number')
-  assert(type(props.__call) == 'function', '__call property must be a function')
-  return setmetatable(props, {
-    __call = props.__call
-  })
-end
+local callableObject = require 'utils.callable-object'
 
 local function setupChanceFunctions(types)
   local list = {}
   for i=1, #types do
-    local t = CallableObject(types[i])
+    local props = types[i]
+    assert(type(props.chance) == 'number', 'chance must be a number')
+    local t = callableObject(props)
     for j=1, t.chance do
       table.insert(list, t)
     end

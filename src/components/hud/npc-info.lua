@@ -24,8 +24,10 @@ local function windowSize()
 end
 
 function NpcInfo.init(self)
-  local w, h = 200, 20
-  local y = 14
+  local textLayer = Component.get('HUD').hudTextLayer
+  local nameTextWidth, nameTextHeight = GuiText.getTextSize('Foobar', textLayer.font)
+  local w, h = 200, 15
+  local y = 20 + nameTextHeight + 2
   local windowW, windowH = windowSize()
   local x = Position.boxCenterOffset(w, h, windowW, windowH)
   self.statusBar = StatusBar.create({
@@ -78,22 +80,35 @@ function NpcInfo.update(self, dt)
     )
     textLayer:add(
       dataSheet.name,
-      itemHovered.outlineColor or Color.WHITE,
+      itemHovered.rarityColor or Color.WHITE,
       x,
       20
     )
     local props = dataSheet.properties
+    local propsText = ''
     for i=1, #props do
       local p = props[i]
-      local textWidth, textHeight = GuiText.getTextSize(p, textLayerSmall.font)
-      local x, y = Position.boxCenterOffset(
-        textWidth,
-        textHeight,
-        windowW,
-        windowH
-      )
-      textLayerSmall:add(p, Color.WHITE, x, 28 + (i * 8) + 2)
+      propsText = propsText..'  '..p
+      -- local textWidth, textHeight = GuiText.getTextSize(p, textLayerSmall.font)
+      -- local x, y = Position.boxCenterOffset(
+      --   textWidth,
+      --   textHeight,
+      --   windowW,
+      --   windowH
+      -- )
     end
+    local wrapLimit = 250
+    local propsTextWidth, propsTextHeight = GuiText.getTextSize(propsText, textLayerSmall.font, wrapLimit)
+    local windowW, windowH = windowSize()
+    local xPos = Position.boxCenterOffset(propsTextWidth, propsTextHeight, windowW, windowH)
+    local propsTextVerticalMargin = 5
+    textLayerSmall:addf(
+      {Color.WHITE, propsText},
+      wrapLimit,
+      'left',
+      xPos,
+      self.statusBar.y + self.statusBar.h + propsTextVerticalMargin
+    )
     self.target = itemHovered
   end
   self.statusBar:setDisabled(not itemHovered)
