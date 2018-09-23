@@ -141,9 +141,8 @@ local function generateAi(parent, player, mapGrid)
   local generated = 0
   local grid = mapGrid
   local rows, cols = #grid, #grid[1]
-  local minPos, maxPos = 3, cols - 2
   while generated < aiCount do
-    local posX, posY = math.random(minPos, maxPos), math.random(minPos, maxPos)
+    local posX, posY = math.random(10, cols - 1), math.random(10, rows - 1)
     local isValidPosition = grid[posY][posX] == Map.WALKABLE
     if isValidPosition then
       generated = generated + 1
