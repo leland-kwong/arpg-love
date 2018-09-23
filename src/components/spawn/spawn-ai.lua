@@ -8,8 +8,8 @@ local typeCheck = require 'utils.type-check'
 local Math = require 'utils.math'
 local animationFactory = require 'components.animation-factory'
 local setProp = require 'utils.set-prop'
-local aiTypes = require 'components.spawn.ai-types'
-local aiRarity = require 'components.spawn.ai-rarity'
+local aiTypes = require 'components.ai.types'
+local aiRarity = require 'components.ai.rarity'
 local f = require 'utils.functional'
 
 local SpawnerAi = {
