@@ -600,6 +600,7 @@
                 <false/>
             </struct>
             <key type="filename">custom-art/bullet-1.png</key>
+            <key type="filename">custom-art/characters/ai-legendaries/legendary-1/legendary-ai-1.png</key>
             <key type="filename">custom-art/characters/eyeball/eyeball.png</key>
             <key type="filename">custom-art/effects/floor-crack-1.png</key>
             <key type="filename">custom-art/effects/floor-crack-2.png</key>
@@ -922,6 +923,7 @@
             <filename>custom-art/spells</filename>
             <filename>custom-art/items/weapons/weapon-modules</filename>
             <filename>custom-art/effects</filename>
+            <filename>custom-art/characters/ai-legendaries</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
