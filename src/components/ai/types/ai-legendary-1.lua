@@ -7,7 +7,7 @@ local playFrostShotSound = debounce(function()
   local Sound = require 'components.sound'
   local source = Sound.FROST_SHOT
   source:setFilter(frostShotSoundFilter)
-  source:setVolume(0.1)
+  source:setVolume(0.4)
   love.audio.stop(source)
   love.audio.play(source)
 end, 0.5)
