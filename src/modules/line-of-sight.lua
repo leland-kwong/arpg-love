@@ -16,7 +16,6 @@ return function(grid, WALKABLE, debugFn, isDebug)
   local function callback(_, gridX, gridY, i, DONE)
     local gridRow = grid[prevY]
     local isBlocked = gridRow and gridRow[prevX] ~= WALKABLE
-    local isPrevPointBlocked = false
     local isLineBreak = false
 
     -- testing for walls at diagonal points
