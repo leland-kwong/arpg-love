@@ -402,11 +402,14 @@ function Ai.update(self, dt)
       self:aggravatedRadius() or
       self:getCalculatedStat('sightRadius')
 
-  local targetX, targetY = self.findNearestTarget(
-    self.x,
-    self.y,
-    40 * self.gridSize
-  )
+  local targetX, targetY
+  if self.isInViewOfPlayer then
+    targetX, targetY = self.findNearestTarget(
+      self.x,
+      self.y,
+      40 * self.gridSize
+    )
+  end
 
   local canSeeTarget = self.isInViewOfPlayer and self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY)
   local isInAggroRange = canSeeTarget and (gridDistFromPlayer <= (actualSightRadius / self.gridSize))
