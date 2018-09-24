@@ -46,7 +46,7 @@ local function setupCollisionObjects(self, grid, gridSize)
       local tileX, tileY = x * gridSize, y * gridSize
       return self:addCollisionObject(
         collisionGroups.obstacle,
-        tileX, tileY, gridSize, gridSize, ox, 0
+        tileX, tileY, gridSize, gridSize, ox - 1, 0
       ):addToWorld(collisionWorlds.map)
     end
   end)

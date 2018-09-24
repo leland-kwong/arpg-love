@@ -401,13 +401,15 @@ function Ai.update(self, dt)
   local actualSightRadius = self.isAggravated and
       self:aggravatedRadius() or
       self:getCalculatedStat('sightRadius')
+
   local targetX, targetY = self.findNearestTarget(
     self.x,
     self.y,
-    actualSightRadius
+    40 * self.gridSize
   )
 
   local canSeeTarget = self.isInViewOfPlayer and self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY)
+  local isInAggroRange = canSeeTarget and (gridDistFromPlayer <= (actualSightRadius / self.gridSize))
   local shouldGetNewPath = flowField and canSeeTarget
   local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or 99999
   local isInAttackRange = canSeeTarget and (distFromTarget <= self:getCalculatedStat('attackRange'))
@@ -415,7 +417,7 @@ function Ai.update(self, dt)
 
   self.canSeeTarget = canSeeTarget
 
-  if canSeeTarget then
+  if isInAggroRange then
     if shouldGetNewPath then
       local distanceToPlanAhead = actualSightRadius / self.gridSize
       local path = self.getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
