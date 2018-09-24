@@ -16,7 +16,8 @@ end
 
 local NpcInfo = {
   group = groups.hud,
-  target = nil -- hovered npc component
+  target = nil, -- hovered npc component
+  y = 15,
 }
 
 local function windowSize()
@@ -27,7 +28,7 @@ function NpcInfo.init(self)
   local textLayer = Component.get('HUD').hudTextLayer
   local nameTextWidth, nameTextHeight = GuiText.getTextSize('Foobar', textLayer.font)
   local w, h = 200, 15
-  local y = 20 + nameTextHeight + 2
+  local y = self.y + nameTextHeight + 2
   local windowW, windowH = windowSize()
   local x = Position.boxCenterOffset(w, h, windowW, windowH)
   self.statusBar = StatusBar.create({
@@ -82,7 +83,7 @@ function NpcInfo.update(self, dt)
       dataSheet.name,
       itemHovered.rarityColor or Color.WHITE,
       x,
-      20
+      self.y
     )
     local props = dataSheet.properties
     local propsText = ''
