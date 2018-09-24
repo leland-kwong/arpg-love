@@ -2,19 +2,70 @@
   Generates a dungeon from [Tiled](https://www.mapeditor.org/) layouts.
 ]]
 local iterateGrid = require 'utils.iterate-grid'
+local f = require 'utils.functional'
 
 local Dungeon = {}
+local function findLayerByName(layers, name)
+  for i=1, #layers do
+    if layers[i].name == name then
+      return layers[i]
+    end
+  end
+end
+
+local objectParsersByType = {
+  legendaryEnemy = function(obj, grid, origin)
+    local config = require 'config.config'
+    local Map = require 'modules.map-generator.index'
+    local SpawnerAi = require 'components.spawn.spawn-ai'
+    local aiType = require('components.ai.types.ai-'..obj.name)
+    local Component = require 'modules.component'
+    SpawnerAi.create({
+      grid = grid,
+      WALKABLE = Map.WALKABLE,
+      rarity = function(ai)
+        local Color = require 'modules.color'
+        return ai:set('rarityColor', Color.RARITY_LEGENDARY)
+          :set('armor', ai.armor * 1.2)
+          :set('moveSpeed', ai.moveSpeed * 1.5)
+          :set('maxHealth', ai.maxHealth * 8)
+      end,
+      target = function()
+        return Component.get('PLAYER')
+      end,
+      x = origin.x + (obj.x / config.gridSize),
+      y = origin.y + (obj.y / config.gridSize),
+      types = {
+        aiType
+      }
+    })
+    consoleLog('legendary', origin.x, origin.y)
+  end
+}
+
+local function parseObjectsLayer(grid, gridBlockOrigin, objectsLayer)
+  if (not objectsLayer) then
+    return
+  end
+  local objects = objectsLayer.objects
+  for i=1, #objects do
+    local obj = objects[i]
+    local parser = objectParsersByType[obj.type]
+    if parser then
+      parser(obj, grid, gridBlockOrigin)
+    end
+  end
+end
 
 local function loadGridBlock(file)
-  local gridBlock = require('built.maps.'..file)
-  local layer = gridBlock.layers[2]
-  return layer
+  return require('built.maps.'..file)
 end
 
 local function addGridBlock(grid, gridBlockToAdd, startX, startY, transformFn)
-  local data = gridBlockToAdd.data
+  local layer = findLayerByName(gridBlockToAdd.layers, 'walls')
+  local data = layer.data
   for i=0, (#data - 1) do
-    local numCols = gridBlockToAdd.width
+    local numCols = layer.width
     local y = math.floor(i/numCols) + 1
     local x = (i % numCols) + 1
     local actualX = startX + x
@@ -49,19 +100,21 @@ function Dungeon.new(gridBlockNames)
 
     local overlapAdjustment = -1 -- this is to prevent walls from doubling up between blocks
     local overlapAdjustmentX, overlapAdjustmentY = (overlapAdjustment * blockX), (overlapAdjustment * blockY)
-    local startX, startY = (blockX * gridBlock.width),
-      (blockY * gridBlock.height)
-    if startX > 0 then
-      startX = startX + overlapAdjustmentX
+    local origin = {
+      x = (blockX * gridBlock.width),
+      y = (blockY * gridBlock.height)
+    }
+    if origin.x > 0 then
+      origin.x = origin.x + overlapAdjustmentX
     end
-    if startY > 0 then
-      startY = startY + overlapAdjustmentY
+    if origin.y > 0 then
+      origin.y = origin.y + overlapAdjustmentY
     end
     addGridBlock(
       grid,
       gridBlock,
-      startX,
-      startY,
+      origin.x,
+      origin.y,
       function(v, localX, localY)
         local isEdge =
           (blockX == 0 and localX == 1) -- west side
@@ -75,6 +128,11 @@ function Dungeon.new(gridBlockNames)
 
         return cellTranslations[v] or v
       end
+    )
+    parseObjectsLayer(
+      grid,
+      origin,
+      findLayerByName(gridBlock.layers, 'objects')
     )
   end
   return grid

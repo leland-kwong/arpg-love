@@ -441,7 +441,6 @@ function Ai.update(self, dt)
         if canUseAbility then
           -- execute ability and get new attack recovery time
           local recoveryTime = ability:use(self, targetX, targetY, distFromTarget)
-          consoleLog(recoveryTime)
           self.attackRecoveryTime = recoveryTime
         end
       end

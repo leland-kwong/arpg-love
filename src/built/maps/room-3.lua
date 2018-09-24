@@ -342,8 +342,8 @@ return {
       objects = {
         {
           id = 1,
-          name = "legendary-enemy",
-          type = "legendary-1",
+          name = "legendary-1",
+          type = "legendaryEnemy",
           shape = "ellipse",
           x = 96,
           y = 560,

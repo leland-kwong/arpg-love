@@ -170,7 +170,7 @@
 </data>
  </layer>
  <objectgroup name="objects">
-  <object id="1" name="legendary-enemy" type="legendary-1" x="96" y="560" width="48" height="48">
+  <object id="1" name="legendary-1" type="legendaryEnemy" x="96" y="560" width="48" height="48">
    <ellipse/>
   </object>
  </objectgroup>

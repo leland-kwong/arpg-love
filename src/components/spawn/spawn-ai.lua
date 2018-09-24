@@ -43,14 +43,18 @@ local function getRandomDirection()
   return directions[math.random(1, 2)]
 end
 
-local function AiFactory(self, x, y, moveSpeed, scale)
+local function AiFactory(self)
+  assert(
+    type(self.target) == 'function',
+    'target property must be a function'
+  )
 
   local function findNearestTarget(otherX, otherY, otherSightRadius)
     if not self.target then
       return nil
     end
-
-    local tPosX, tPosY = self.target:getPosition()
+    local target = self.target()
+    local tPosX, tPosY = target:getPosition()
     local dist = Math.dist(tPosX, tPosY, otherX, otherY)
     local withinVision = dist <= otherSightRadius
 
