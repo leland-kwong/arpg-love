@@ -21,6 +21,35 @@ local function onDestroyStart()
   love.audio.play(Sound.functions.robotDestroyed())
 end
 
+-- deals damage with a chance to slow
+local FrostShot = {
+  range = 10,
+  attackTime = 0.2,
+  cooldown = 0.6
+}
+
+function FrostShot.use(self, _, targetX, targetY)
+  local Attack = require 'components.abilities.frost-spark'
+  local projectile = Attack.create({
+      debug = false
+    , x = self.x
+    , y = self.y - self.z
+    , x2 = targetX
+    , y2 = targetY
+    , speed = 115
+    , lifeTime = 2.5
+    , targetGroup = collisionGroups.player
+    , minDamage = 1
+    , maxDamage = 2
+    , drawOrder = function()
+      return self.drawOrder(self) + 1
+    end
+  })
+  playFrostShotSound()
+  return skill
+end
+
+
 return function()
   local animations = {
     idle = animationFactory:new({
@@ -30,49 +59,6 @@ return function()
       'eyeball'
     })
   }
-
-  -- deals damage with a chance to slow
-  local ability1 = (function()
-    local curCooldown = 0
-    local skill = {
-      range = 10,
-      attackTime = 0.2
-    }
-
-    function skill.use(self, targetX, targetY)
-      if curCooldown > 0 then
-        return skill
-      else
-        local Attack = require 'components.abilities.frost-spark'
-        local projectile = Attack.create({
-            debug = false
-          , x = self.x
-          , y = self.y - self.z
-          , x2 = targetX
-          , y2 = targetY
-          , speed = 115
-          , cooldown = 0.6
-          , lifeTime = 2.5
-          , targetGroup = collisionGroups.player
-          , minDamage = 1
-          , maxDamage = 2
-          , drawOrder = function()
-            return self.drawOrder(self) + 1
-          end
-        })
-        curCooldown = projectile.cooldown
-        playFrostShotSound()
-        return skill
-      end
-    end
-
-    function skill.updateCooldown(self, dt)
-      curCooldown = curCooldown - dt
-      return skill
-    end
-
-    return skill
-  end)()
 
   local spriteWidth, spriteHeight = animations.idle:getSourceSize()
 
@@ -99,7 +85,7 @@ return function()
     animations = animations,
     armor = 250,
     abilities = {
-      ability1
+      FrostShot
     },
     attackRange = 10,
     onUpdateStart = function(self, dt)

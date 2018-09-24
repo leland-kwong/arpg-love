@@ -20,6 +20,29 @@ local function onDestroyStart()
   love.audio.play(Sound.functions.robotDestroyed())
 end
 
+local PelletShot = {
+  range = 8,
+  attackTime = 0.15,
+  cooldown = 0.4
+}
+
+function PelletShot.use(self, _, targetX, targetY)
+  local Attack = require 'components.abilities.bullet'
+  local projectile = Attack.create({
+      debug = false
+    , x = self.x
+    , y = self.y
+    , x2 = targetX
+    , y2 = targetY
+    , speed = 125
+    , targetGroup = collisionGroups.create(collisionGroups.player, collisionGroups.obstacle)
+  })
+  playblasterSound()
+
+  return skill
+end
+
+
 return function()
   local animations = {
     moving = animationFactory:new({
@@ -37,43 +60,6 @@ return function()
       'ai-10'
     })
   }
-
-  local ability1 = (function()
-    local curCooldown = 0
-    local skill = {
-      range = 8,
-      attackTime = 0.15
-    }
-
-    function skill.use(self, targetX, targetY)
-      if curCooldown > 0 then
-        return skill
-      else
-        local Attack = require 'components.abilities.bullet'
-        local projectile = Attack.create({
-            debug = false
-          , x = self.x
-          , y = self.y
-          , x2 = targetX
-          , y2 = targetY
-          , speed = 125
-          , cooldown = 0.4
-          , targetGroup = collisionGroups.create(collisionGroups.player, collisionGroups.obstacle)
-        })
-        curCooldown = projectile.cooldown
-        playblasterSound()
-
-        return skill
-      end
-    end
-
-    function skill.updateCooldown(self, dt)
-      curCooldown = curCooldown - dt
-      return skill
-    end
-
-    return skill
-  end)()
 
   local attackRange = 8
   local spriteWidth, spriteHeight = animations.idle:getSourceSize()
@@ -94,7 +80,7 @@ return function()
     h = spriteHeight,
     animations = animations,
     abilities = {
-      ability1
+      PelletShot
     },
     attackRange = attackRange,
     fillColor = fillColor,

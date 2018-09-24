@@ -40,6 +40,69 @@ local function onDestroyStart()
   love.audio.play(Sound.functions.creatureDestroyed())
 end
 
+local DashAbility = {
+  range = 6,
+  attackTime = 0.2,
+  cooldown = 1
+}
+
+function DashAbility.use(self)
+  local Dash = require 'components.abilities.dash'
+  local projectile = Dash.create({
+      fromCaster = self
+    , duration = 7/60
+  })
+  return skill
+end
+
+local SlimeSlap =  {
+  range = 3,
+  attackTime = 0.4,
+  cooldown = 0.5
+}
+
+function SlimeSlap.use(self, state, targetX, targetY)
+  state.isNewAttack = true
+  local attack = SlimeAttack.create({
+      x = self.x
+    , y = self.y
+    , x2 = targetX
+    , y2 = targetY
+    , w = 64
+    , h = 36
+    , targetGroup = collisionGroups.player
+  })
+
+  local Sound = require 'components.sound'
+  love.audio.stop(Sound.SLIME_SPLAT)
+  love.audio.play(Sound.SLIME_SPLAT)
+  return skill
+end
+
+function SlimeSlap.update(self, state, dt)
+  local isNewAttack = curCooldown == initialCooldown
+  local attackAnimation = self.animations.attacking
+  if state.isNewAttack then
+    state.isNewAttack = false
+    state.isAnimationComplete = false
+    attackAnimation:setFrame(1)
+  end
+  if (not state.isAnimationComplete) then
+    self:set(
+      'animation',
+      attackAnimation
+    )
+    local animation, isLastFrame = attackAnimation:update(dt/2)
+    state.isAnimationComplete = isLastFrame
+  else
+    self:set(
+      'animation',
+      self.animations.idle
+    )
+  end
+  return skill
+end
+
 return function()
   local animations = {
     attacking = animationFactory:new({
@@ -71,93 +134,6 @@ return function()
     })
   }
 
-  local abilityDash = (function()
-    local curCooldown = 0
-    local skill = {
-      range = 6,
-      attackTime = 0.2,
-    }
-
-    function skill.use(self)
-      if curCooldown > 0 then
-        return skill
-      else
-        local Dash = require 'components.abilities.dash'
-        local projectile = Dash.create({
-            fromCaster = self
-          , cooldown = 0.5
-          , attackTime = skill.attackTime
-          , duration = 7/60
-          , range = skill.range
-        })
-        curCooldown = projectile.cooldown
-        return skill
-      end
-    end
-
-    function skill.updateCooldown(self, dt)
-      curCooldown = curCooldown - dt
-      return skill
-    end
-
-    return skill
-  end)()
-
-  local ability1 = (function()
-    local curCooldown = 0
-    local initialCooldown = 0
-    local skill = {
-      range = 3
-    }
-    local isAnimationComplete = false
-
-    function skill.use(self, targetX, targetY)
-      if curCooldown > 0 then
-        return skill
-      else
-        local attack = SlimeAttack.create({
-            x = self.x
-          , y = self.y
-          , x2 = targetX
-          , y2 = targetY
-          , w = 64
-          , h = 36
-          , cooldown = 0.5
-          , targetGroup = collisionGroups.player
-        })
-
-        local Sound = require 'components.sound'
-        love.audio.stop(Sound.SLIME_SPLAT)
-        love.audio.play(Sound.SLIME_SPLAT)
-
-        curCooldown = attack.cooldown
-        initialCooldown = attack.cooldown
-        return skill
-      end
-    end
-
-    function skill.updateCooldown(self, dt)
-      local isNewAttack = curCooldown == initialCooldown
-      local attackAnimation = animations.attacking
-      if isNewAttack then
-        isAnimationComplete = false
-      end
-      self:set(
-        'animation',
-        attackAnimation
-      )
-      if not isAnimationComplete then
-        local animation, isLastFrame = attackAnimation:update(dt/2)
-        isAnimationComplete = isLastFrame
-      end
-
-      curCooldown = curCooldown - dt
-      return skill
-    end
-
-    return skill
-  end)()
-
   local attackRange = 3
   local fillColor = {0,1,0.2,1}
   local spriteWidth, spriteHeight = animations.idle:getSourceSize()
@@ -180,8 +156,8 @@ return function()
     flatPhysicalDamageReduction = 1,
     animations = animations,
     abilities = {
-      ability1,
-      abilityDash
+      DashAbility,
+      SlimeSlap,
     },
     armor = 900,
     experience = 2,

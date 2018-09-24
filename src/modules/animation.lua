@@ -60,7 +60,7 @@ end
 local max = math.max
 -- sets the animation to the frame index and resets the time
 function meta:setFrame(index)
-  self.index = i
+  self.index = index
   self.time = 0
   return self
 end

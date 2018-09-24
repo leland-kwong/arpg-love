@@ -90,8 +90,6 @@ local Ai = {
 -- gets directions from grid position, adjusting vectors to handle wall collisions as needed
 local aiPathWithAstar = require'modules.flow-field.pathing-with-astar'
 
-Ai.debugLineOfSight = dynamic('components/ai/line-of-sight.debug.lua')
-
 function Ai:checkLineOfSight(grid, WALKABLE, targetX, targetY, debug)
   if not targetX then
     return false
@@ -418,20 +416,34 @@ function Ai.update(self, dt)
   self.canSeeTarget = canSeeTarget
 
   if canSeeTarget then
+    if shouldGetNewPath then
+      local distanceToPlanAhead = actualSightRadius / self.gridSize
+      local path = self.getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
+      if path then
+        local targetPos = path[#path]
+        if targetPos then
+          self.targetX, self.targetY = targetPos.x * self.gridSize, targetPos.y * self.gridSize
+        end
+      end
+    end
+
     -- use abilities
     if (not self.silenced) then
       local abilities = self.abilities
       for i=1, #abilities do
         local ability = abilities[i]
-        local isInAbilityRange = distFromTarget <= ability.range * self.gridSize
+        -- local isInAbilityRange = distFromTarget <= ability.range * self.gridSize
         local isRecoveringFromAttack = self.attackRecoveryTime > 0
         local finiteState = self:getFiniteState()
-        local canUseAbility = isInAbilityRange and (finiteState == states.MOVING)
-        if (canUseAbility) then
-          self.attackRecoveryTime = ability.attackTime
-          ability.use(self, targetX, targetY)
+        local canUseAbility = (not isRecoveringFromAttack)
+          and (finiteState == states.MOVING)
+        ability:update(self, dt)
+        if canUseAbility then
+          -- execute ability and get new attack recovery time
+          local recoveryTime = ability:use(self, targetX, targetY, distFromTarget)
+          consoleLog(recoveryTime)
+          self.attackRecoveryTime = recoveryTime
         end
-        ability.updateCooldown(self, dt)
       end
     end
 
@@ -441,14 +453,10 @@ function Ai.update(self, dt)
       return
     end
 
-    if shouldGetNewPath then
-      local distanceToPlanAhead = actualSightRadius / self.gridSize
-      local path = self.getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
-      local targetPos = path[#path]
-      self.targetX, self.targetY = targetPos.x * self.gridSize, targetPos.y * self.gridSize
+    if shouldGetNewPath and (self:getFiniteState() ~= states.ATTACKING) then
       setNextPosition(self, self:getActualSpeed(dt), 40)
     end
-  elseif self.targetX then
+  elseif self.targetX and (self:getFiniteState() ~= states.ATTACKING) then
     setNextPosition(self, self:getActualSpeed(dt), 40)
   end
 
@@ -588,6 +596,14 @@ local function adjustInitialPositionIfNeeded(self)
   self.y = actualY
 end
 
+local function setupAbilities(self)
+  local abilityManager = require 'components.abilities.manager'
+  for i=1, #self.abilities do
+    -- transform ability into a coroutine
+    self.abilities[i] = abilityManager.new(self.abilities[i])
+  end
+end
+
 function Ai.init(self)
   assert(self.WALKABLE ~= nil)
   assert(type(self.pxToGridUnits) == 'function')
@@ -607,6 +623,8 @@ function Ai.init(self)
   }
   -- start idle animation at a random point to add variance to the ai's idle state
   self.animation = self.animations.idle:update(math.random(0, 20) * 1/60)
+
+  setupAbilities(self)
 
   if scale % 1 == 0 then
     -- to prevent wall collision from getting stuck when pathing around corners, we'll adjust
