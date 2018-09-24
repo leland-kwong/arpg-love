@@ -133,7 +133,7 @@ local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', 
 love.mouse.setCursor(cursor)
 
 local keys = require 'utils.functional'.keys
-local aiTypes = require 'components.spawn.ai-types'
+local aiTypes = require 'components.ai.types'
 local aiTypesList = keys(aiTypes.types)
 
 local function generateAi(parent, player, mapGrid)
@@ -150,7 +150,9 @@ local function generateAi(parent, player, mapGrid)
         -- debug = true,
         grid = grid,
         WALKABLE = Map.WALKABLE,
-        target = player,
+        target = function()
+          return Component.get('PLAYER')
+        end,
         x = posX,
         y = posY,
         types = {
@@ -162,6 +164,56 @@ local function generateAi(parent, player, mapGrid)
       }):setParent(parent)
     end
   end
+end
+
+function initializeMap()
+  local Dungeon = require 'modules.dungeon'
+  local Chance = require 'utils.chance'
+  local mapBlockGenerator = Chance({
+    {
+      chance = 1,
+      value = 'room-1'
+    },
+    {
+      chance = 1,
+      value = 'room-2'
+    },
+    {
+      chance = 1,
+      value = 'room-3'
+    },
+    {
+      chance = 1,
+      value = 'room-4'
+    },
+    {
+      chance = 1,
+      value = 'room-5'
+    }
+  })
+
+  local function generateMapBlockDefinitions()
+    local blocks = {}
+    local mapDefinitions = {
+      function()
+        return 'room-3'
+      end,
+      mapBlockGenerator,
+      mapBlockGenerator,
+      mapBlockGenerator,
+      mapBlockGenerator,
+      mapBlockGenerator
+    }
+    while #mapDefinitions > 0 do
+      local index = math.random(1, #mapDefinitions)
+      local block = table.remove(mapDefinitions, index)()
+      table.insert(blocks, block)
+    end
+    return blocks
+  end
+
+  local mapGrid = Dungeon.new(generateMapBlockDefinitions())
+  return mapGrid
 end
 
 function MainScene.init(self)
@@ -217,15 +269,7 @@ function MainScene.init(self)
 
   self.rootStore = rootState
   local parent = self
-  local Dungeon = require 'modules.dungeon'
-  local mapGrid = Dungeon.new({
-    'room-4',
-    'room-1',
-    'room-5',
-    'room-3',
-    'room-2',
-    'room-4',
-  })
+  local mapGrid = initializeMap()
   local gridTileDefinitions = cloneGrid(mapGrid, function(v, x, y)
     local tileGroup = gridTileTypes[v]
     return tileGroup[math.random(1, #tileGroup)]
@@ -320,8 +364,8 @@ function MainScene.init(self)
   }
 
   local player = Player.create({
-    x = 2 * config.gridSize,
-    y = 2 * config.gridSize,
+    x = 3 * config.gridSize,
+    y = 3 * config.gridSize,
     mapGrid = mapGrid,
     rootStore = rootState
   }):setParent(parent)
