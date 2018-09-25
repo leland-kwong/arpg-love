@@ -403,6 +403,7 @@ function Ai.update(self, dt)
       self:getCalculatedStat('sightRadius')
 
   local targetX, targetY
+  -- only search for the target if its in view of player
   if self.isInViewOfPlayer then
     targetX, targetY = self.findNearestTarget(
       self.x,

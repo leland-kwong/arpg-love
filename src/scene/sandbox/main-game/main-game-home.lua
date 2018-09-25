@@ -59,6 +59,7 @@ function MainGameHomeScene.init(self)
     font = require 'components.font'.secondary.font
   }):setParent(self)
 
+  -- saved games list
   MenuList.create({
     x = self.menuX,
     y = self.menuY,
