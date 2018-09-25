@@ -14,7 +14,7 @@ return {
     {
       name = "action rpg",
       firstgid = 1,
-      filename = "../../../assets/action rpg.tsx",
+      filename = "../../../assets/maps/action rpg.tsx",
       tilewidth = 34,
       tileheight = 56,
       spacing = 0,
@@ -135,6 +135,41 @@ return {
           height = 28
         }
       }
+    },
+    {
+      name = "home-base",
+      firstgid = 26,
+      filename = "../../../assets/maps/home-base.tsx",
+      tilewidth = 960,
+      tileheight = 540,
+      spacing = 0,
+      margin = 0,
+      tileoffset = {
+        x = 0,
+        y = 0
+      },
+      grid = {
+        orientation = "orthogonal",
+        width = 1,
+        height = 1
+      },
+      properties = {},
+      terrains = {},
+      tilecount = 2,
+      tiles = {
+        {
+          id = 0,
+          image = "../../../assets/sprites/custom-art/mothership.png",
+          width = 960,
+          height = 540
+        },
+        {
+          id = 1,
+          image = "../../../assets/sprites/custom-art/fireball.png",
+          width = 26,
+          height = 18
+        }
+      }
     }
   },
   layers = {
@@ -245,7 +280,9 @@ return {
       opacity = 1,
       offsetx = 0,
       offsety = 0,
-      properties = {},
+      properties = {
+        ["blockType"] = "m"
+      },
       encoding = "lua",
       data = {
         12, 12, 12, 12, 0, 0, 0, 0, 0, 0, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 0, 0, 0, 0, 0, 0, 12, 12, 12, 12,
