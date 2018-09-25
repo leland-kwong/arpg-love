@@ -16,7 +16,6 @@ local msgBus = require 'components.msg-bus'
 local HealSource = require 'components.heal-source'
 local tick = require 'utils.tick'
 require 'components.item-inventory.items.equipment-base-subscriber'
-require 'modules.dungeon'
 
 local function setupTileTypes(types)
   local list = {}
