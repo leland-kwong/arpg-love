@@ -1,22 +1,16 @@
 local Component = require 'modules.component'
 local Color = require 'modules.color'
+local collisionGroups = require 'modules.collision-groups'
 local f = require 'utils.functional'
 local tileData = require 'built.maps.home-base'
 local iterateGrid = require 'utils.iterate-grid'
 local msgBus = require 'components.msg-bus'
 local groups = require 'components.groups'
+local Font = require 'components.font'
+local collisionWorlds = require 'components.collision-worlds'
 local config = require 'config.config'
-
-local imagesCache = {}
-local function loadImage(path)
-  local img = imagesCache[path]
-  if (not img) then
-    img = love.graphics.newImage(path)
-    img:setFilter('nearest')
-    imagesCache[path] = img
-  end
-  return img
-end
+local Portal = require 'components.portal'
+local loadImage = require 'modules.load-image'
 
 local function parseTileSets(tileSets)
   local tileById = {}
@@ -85,9 +79,16 @@ function HomeBase.init(self)
   self.player = Player.create({
     x = startPosition.x,
     y = startPosition.y,
-    drawOrder = function()
-      return 12
+    drawOrder = function(self)
+      return self.group:drawOrder(self) + 1
     end
+  }):setParent(self)
+
+  Portal.create({
+    x = startPosition.x,
+    y = startPosition.y,
+    scene = require 'scene.scene-main',
+    locationName = 'Mars'
   }):setParent(self)
 
   Component.create({
@@ -95,6 +96,7 @@ function HomeBase.init(self)
     x = self.x,
     y = self.y,
     draw = function()
+      love.graphics.setColor(1,1,1)
       local shipRoomBorderImage = loadImage('built/images/mothership/mothership-room-border.png')
       love.graphics.draw(
         shipRoomBorderImage,
@@ -106,8 +108,6 @@ function HomeBase.init(self)
     end
   }):setParent(self)
 
-  local collisionGroups = require 'modules.collision-groups'
-  local collisionWorlds = require 'components.collision-worlds'
   f.forEach(collisionObjectsLayer.objects, function(c)
     self:addCollisionObject(
       collisionGroups.obstacle,
