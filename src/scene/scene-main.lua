@@ -217,6 +217,7 @@ end
 
 function MainScene.init(self)
   msgBus.send(msgBus.NEW_GAME)
+  msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0,0,0,0})
 
   local rootState = CreateStore()
   local inventoryController = InventoryController(rootState)
