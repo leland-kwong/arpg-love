@@ -412,7 +412,7 @@ function Ai.update(self, dt)
     )
   end
 
-  local canSeeTarget = self.isInViewOfPlayer and self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY)
+  local canSeeTarget = self.isInViewOfPlayer and self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY, self.losDebug)
   local isInAggroRange = canSeeTarget and (gridDistFromPlayer <= (actualSightRadius / self.gridSize))
   local shouldGetNewPath = flowField and canSeeTarget
   local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or 99999
@@ -559,7 +559,23 @@ local function drawShockEffect(self, ox, oy)
   drawSprite(self, ox, oy)
 end
 
+local function debugLineOfSight(self)
+  if self.losPoints then
+    for i=1, #self.losPoints do
+      local pt = self.losPoints[i]
+      if pt.isBlocked then
+        love.graphics.setColor(1,0,0)
+      else
+        love.graphics.setColor(1,1,1)
+      end
+      love.graphics.rectangle('line', pt.x, pt.y, self.gridSize, self.gridSize)
+    end
+  end
+end
+
 function Ai.draw(self)
+  debugLineOfSight(self)
+
   local oBlendMode = love.graphics.getBlendMode()
   local ox, oy = self.animation:getOffset()
   local w, h = self.animation:getSourceSize()
@@ -621,6 +637,23 @@ function Ai.init(self)
   -- [[ BASE PROPERTIES ]]
   self.health = self.health or self.maxHealth
   self.clockOffset = math.random(0, 100)
+
+  if self.debug then
+    self.losDebug = function(x, y, isBlocked)
+      local isNewFrame = self.lastFrameCount ~= self.frameCount
+      if isNewFrame then
+        self.losPoints = {}
+        self.lastFrameCount = self.frameCount
+      end
+      table.insert(
+        self.losPoints, {
+          x = x * self.gridSize,
+          y = y * self.gridSize,
+          isBlocked = isBlocked
+        }
+      )
+    end
+  end
 
   self.direction = {
     x = 0,

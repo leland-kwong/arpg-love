@@ -22,6 +22,7 @@ local SpawnerAi = {
   -- these need to be passed in
   grid = nil,
   WALKABLE = nil,
+  -- debug = true,
 
   colWorld = collisionWorlds.map,
   pxToGridUnits = function(screenX, screenY, gridSize)
@@ -77,6 +78,7 @@ local function AiFactory(self)
       self.y * self.gridSize + math.random(0, self.gridSize) * getRandomDirection()
     local ai = Ai.create(
       self.rarity(aiPrototype)
+        :set('debug',             self.debug)
         :set('x',                 spawnX)
         :set('y',                 spawnY)
         :set('collisionWorld',    self.colWorld)

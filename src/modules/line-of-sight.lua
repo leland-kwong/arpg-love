@@ -14,8 +14,8 @@ return function(grid, WALKABLE, debugFn, isDebug)
   local prevX, prevY
 
   local function callback(_, gridX, gridY, i, DONE)
-    local gridRow = grid[prevY]
-    local isBlocked = gridRow and gridRow[prevX] ~= WALKABLE
+    local isBlocked = grid[prevY] and grid[prevY][prevX] ~= WALKABLE or
+      grid[gridY] and grid[gridY][gridX] ~= WALKABLE
     local isLineBreak = false
 
     -- testing for walls at diagonal points
@@ -26,8 +26,9 @@ return function(grid, WALKABLE, debugFn, isDebug)
       isLineBreak = slope == -1 or slope == 1
       if isLineBreak then
         -- check for walls that are in the opposite vector direction
-        local isBlockedNeighbor1 = grid[prevY] and (grid[prevY][prevX + vx] ~= WALKABLE)
-        local isBlockedNeighbor2 = grid[prevY + vy] and (grid[prevY + vy][prevX] ~= WALKABLE)
+        local x, y = prevX, prevY
+        local isBlockedNeighbor1 = grid[y] and (grid[y][x + vx] ~= WALKABLE)
+        local isBlockedNeighbor2 = grid[y + vy] and (grid[y + vy][x] ~= WALKABLE)
         isBlocked = isBlockedNeighbor1 and isBlockedNeighbor2
       end
     end
