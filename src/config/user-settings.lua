@@ -18,7 +18,8 @@ M.keyboard = {
   ACTIVE_ITEM_2 = '2',
   MOVE_BOOST = 'space',
   INVENTORY_TOGGLE = 'i',
-  MAIN_MENU = 'escape'
+  MAIN_MENU = 'escape',
+  PORTAL_OPEN = 't'
 }
 
 M.mouseInputMap = {

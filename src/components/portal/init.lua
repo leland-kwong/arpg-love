@@ -30,40 +30,67 @@ local guiText = GuiText.create({
   end
 })
 
+local function portalOpenSound()
+  local source = love.audio.newSource('built/sounds/portal.wav', 'static')
+  love.audio.play(source)
+end
+
+local function portalEnterSound()
+  local source = love.audio.newSource('built/sounds/portal-enter.wav', 'static')
+  love.audio.play(source)
+end
+
 local Portal = {
   group = groups.all,
-  locationName = nil, -- name of location
-  scene = nil, -- a scene component to load when clicked
+  locationName = '', -- name of location
+  scene = {}, -- a scene component to load when clicked
+  sceneProps = nil,
   posOffset = {
     x = 2,
     y = -18
   },
-  debug = true,
+  -- debug = true,
   init = function(self)
+    local root = self
     self.x = self.x + self.posOffset.x
     self.y = self.y + self.posOffset.y
 
     self.spiralStencil = function()
       love.graphics.circle('fill', self.x, self.y, spiralSize)
     end
-    local portalTooltipText = 'teleport to '..self.locationName
-    local textWidth, textHeight = GuiText.getTextSize(portalTooltipText, Font.primary.font)
+
+    portalOpenSound()
+
     local padding = 6
     self.teleportButton = Gui.create({
       type = Gui.types.BUTTON,
       group = groups.all,
       x = self.x,
       y = self.y - spiralSize,
-      w = textWidth + padding,
-      h = textHeight + padding,
+      w = 1,
+      h = 1,
       onClick = function()
         local msgBusMainMenu = require 'components.msg-bus-main-menu'
-        local Scene = require 'scene.scene-main'
         msgBusMainMenu.send(
           msgBusMainMenu.SCENE_SWITCH, {
-            scene = Scene
+            scene = self.scene,
+            props = self.sceneProps
           }
         )
+        portalEnterSound()
+      end,
+      onUpdate = function(self)
+        local portalTooltipText = 'teleport to '..(root.locationName or 'no location')
+        local textWidth, textHeight = GuiText.getTextSize(portalTooltipText, Font.primary.font)
+        self.w = textWidth + padding
+        self.h = textHeight + padding
+        self.portalTooltipText = portalTooltipText
+
+        local hasChangedPosition = self.x ~= self.prevX or self.y ~= self.prevY
+        if hasChangedPosition then
+          portalOpenSound()
+        end
+        self.prevX, self.prevY = self.x, self.y
       end,
       getMousePosition = function()
         local camera = require 'components.camera'
@@ -77,7 +104,7 @@ local Portal = {
         love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
         love.graphics.setColor(Color.BLACK)
         love.graphics.rectangle('line', self.x, self.y, self.w, self.h)
-        guiText:add(portalTooltipText, Color.BLACK, self.x + paddingOffset, self.y + paddingOffset + Font.primary.lineHeight)
+        guiText:add(self.portalTooltipText, Color.BLACK, self.x + paddingOffset, self.y + paddingOffset + Font.primary.lineHeight)
       end,
       drawOrder = guiDrawOrder
     }):setParent(self)
@@ -85,14 +112,16 @@ local Portal = {
     local offset = collisionSize/2
     self.collision = self:addCollisionObject(
       collisionGroups.hotSpot,
-      self.x - offset,
-      self.y - offset + offset * 0.6,
+      self.x,
+      self.y,
       collisionSize,
-      collisionSize
+      collisionSize,
+      offset,
+      offset - offset * 0.6
     ):addToWorld(collisionWorlds.map)
   end,
   update = function(self, dt)
-    self.angle = self.angle + dt * 6
+    self.angle = self.angle + dt * 20
     local collisionSize = spiralSize * 2
     local _, _, cols, len = self.collision:check(
       self.collision.x,
@@ -101,6 +130,7 @@ local Portal = {
     )
     local portalActionEnabled = len > 0
     self.teleportButton:setDisabled(not portalActionEnabled)
+    self.collision:update(self.x, self.y)
   end,
   draw = function(self)
     local scaleXDiff = 1 - scaleX
@@ -110,10 +140,12 @@ local Portal = {
     love.graphics.circle('fill', x, y, spiralSize)
     love.graphics.circle('fill', x, y, spiralSize * 0.8)
     love.graphics.circle('fill', x, y, spiralSize * 0.5)
+    love.graphics.setColor(0,0.3,0.5,0.3)
+    love.graphics.circle('fill', x, y, spiralSize * 0.2)
 
     love.graphics.stencil(self.spiralStencil, 'replace', 1)
     love.graphics.setStencilTest("greater", 0)
-    love.graphics.setColor(1,1,1)
+    love.graphics.setColor(1,1,1,0.3)
     local teleportSpiral = loadImage('built/images/fibonnaci-spiral.png')
     love.graphics.draw(
       teleportSpiral,

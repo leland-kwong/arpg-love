@@ -216,6 +216,17 @@ function initializeMap()
 end
 
 function MainScene.init(self)
+  msgBus.on(msgBus.PORTAL_OPEN, function()
+    local Portal = require 'components.portal'
+    self.portal = self.portal or Portal.create()
+    local playerRef = Component.get('PLAYER')
+    local x, y = playerRef:getPosition()
+    self.portal
+      :set('locationName', 'home')
+      :set('scene', require('scene.home-base'))
+      :setPosition(x, y)
+      :setParent(self)
+  end)
   msgBus.send(msgBus.NEW_GAME)
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0,0,0,0})
 
@@ -342,6 +353,10 @@ function MainScene.init(self)
           self.inventory = nil
           rootState:set('activeMenu', false)
         end
+      end
+
+      if config.keyboard.PORTAL_OPEN == key then
+        msgBus.send(msgBus.PORTAL_OPEN)
       end
     end),
 

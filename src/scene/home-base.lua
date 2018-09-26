@@ -88,6 +88,9 @@ function HomeBase.init(self)
     x = startPosition.x,
     y = startPosition.y,
     scene = require 'scene.scene-main',
+    sceneProps = {
+      autoSave = false
+    },
     locationName = 'Mars'
   }):setParent(self)
 
