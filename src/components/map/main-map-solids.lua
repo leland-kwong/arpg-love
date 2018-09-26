@@ -17,7 +17,7 @@ local MainMapSolidsBlueprint = {
 
 function MainMapSolidsBlueprint.changeTile(self, animation, x, y, opacity)
   local tileX, tileY = x * self.gridSize, y * self.gridSize
-  local ox, oy = animation:getSourceOffset()
+  local ox, oy = animation:getOffset()
 
   self.ox, self.oy = ox, oy
   self.animation = animation

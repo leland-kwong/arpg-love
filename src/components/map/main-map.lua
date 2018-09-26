@@ -46,7 +46,7 @@ local function setupCollisionObjects(self, grid, gridSize)
       local tileX, tileY = x * gridSize, y * gridSize
       return self:addCollisionObject(
         collisionGroups.obstacle,
-        tileX, tileY, gridSize, gridSize, ox - 1, 0
+        tileX, tileY, gridSize, gridSize, ox, 0
       ):addToWorld(collisionWorlds.map)
     end
   end)
@@ -118,7 +118,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   end,
 
   render = function(self, value, x, y, originX, originY)
-    if value == Map.WALKABLE then
+    -- if value == Map.WALKABLE then
       local index = GetIndexByCoordinate(self.grid)(x, y)
       if self.renderFloorCache[index] then
         return
@@ -143,7 +143,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
         ox,
         oy
       )
-    end
+    -- end
   end,
 
   renderEnd = function(self)
