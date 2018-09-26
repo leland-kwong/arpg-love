@@ -21,6 +21,7 @@ local scale = config.scaleFactor
 
 local globalState = {
   activeScene = nil,
+  backgroundColor = {0.2,0.2,0.2}
 }
 
 function love.load()
@@ -51,6 +52,10 @@ function love.load()
     local configChanges = msgValue
     local oUtils = require 'utils.object-utils'
     oUtils.assign(config, configChanges)
+  end)
+
+  msgBus.on(msgBus.SET_BACKGROUND_COLOR, function(color)
+    globalState.backgroundColor = color
   end)
 end
 
@@ -122,7 +127,7 @@ end
 function love.draw()
   camera:attach()
   -- background
-  love.graphics.clear(0.2,0.2,0.2)
+  love.graphics.clear(globalState.backgroundColor)
   groups.firstLayer.drawAll()
   groups.all.drawAll()
   groups.overlay.drawAll()

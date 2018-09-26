@@ -24,7 +24,7 @@ return itemDefs.registerType({
 			moveSpeed = 100,
 			fireResist = 20,
 
-			speedBoost = 100,
+			speedBoost = 300,
 			speedBoostDuration = 1
 		}
 	end,
