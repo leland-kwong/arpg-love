@@ -14,6 +14,7 @@ local fileSystem = require 'modules.file-system'
 local msgBus = require 'components.msg-bus'
 local HealSource = require 'components.heal-source'
 local tick = require 'utils.tick'
+require'components.item-inventory.equipment-change-handler'
 require 'components.item-inventory.items.equipment-base-subscriber'
 
 local function setupTileTypes(types)
@@ -312,11 +313,6 @@ function MainScene.init(self)
         item = item,
         rootStore = rootState
       }):setParent(parent)
-    end),
-
-    msgBus.on(msgBus.EQUIPMENT_CHANGE, function()
-      local equipmentChangeHandler = require'components.item-inventory.equipment-change-handler'
-      equipmentChangeHandler(rootState)
     end),
 
     msgBus.on(msgBus.KEY_PRESSED, function(v)

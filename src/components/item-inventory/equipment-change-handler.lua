@@ -1,3 +1,4 @@
+local Component = require 'modules.component'
 local itemDefinition = require'components.item-inventory.items.item-definitions'
 local msgBus = require'components.msg-bus'
 local noop = require'utils.noop'
@@ -28,7 +29,8 @@ local equipmentSubscribers = {
 	end
 }
 
-return function(rootStore)
+msgBus.on(msgBus.EQUIPMENT_CHANGE, function()
+	local rootStore = Component.get('MAIN_SCENE').rootStore
 	local curState, lastState = rootStore:get()
   --[[
     NOTE: we must unequip items before equipping new ones in order to make sure the newest modifiers
@@ -75,4 +77,4 @@ return function(rootStore)
 	local BaseStatModifiers = require'components.state.base-stat-modifiers'
 	local nextModifiers = BaseStatModifiers()
   msgBus.send(msgBus.PLAYER_STATS_NEW_MODIFIERS, nextModifiers)
-end
+end)
