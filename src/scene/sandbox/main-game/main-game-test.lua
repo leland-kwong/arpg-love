@@ -6,6 +6,7 @@ local config = require 'config.config'
 local msgBus = require 'components.msg-bus'
 local GroundFlame = require 'components.particle.ground-flame'
 local EnvironmentInteractable = require 'components.map.environment-interactable'
+local InventoryController = require 'components.item-inventory.controller'
 
 local MainGameTest = {
   group = groups.firstLayer
@@ -39,10 +40,13 @@ function MainGameTest.init(self)
   -- local scene = SceneMain.create({
   --   autoSave = false
   -- }):setParent(self)
-  -- insertTestItems(scene.rootStore)
 
   local HomeBase = require 'scene.home-base'
   HomeBase.create():setParent(self)
+
+  local rootStore = msgBus.send(msgBus.GAME_STATE_GET)
+  InventoryController(rootStore)
+  insertTestItems(rootStore)
 
   -- TreasureChest.create({
   --   x = 10 * config.gridSize,

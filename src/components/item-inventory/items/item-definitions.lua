@@ -203,7 +203,8 @@ function items.registerType(itemDefinition)
 			newItem.__type = def.type
 			newItem.__id = uid()
 
-			-- add default stackSize if needed
+			-- add default props if needed
+			newItem.experience = newItem.experience or 0
 			newItem.stackSize = newItem.stackSize == nil and 1 or newItem.stackSize
 			newItem.maxStackSize = newItem.maxStackSize == nil and 1 or newItem.maxStackSize
 			return newItem

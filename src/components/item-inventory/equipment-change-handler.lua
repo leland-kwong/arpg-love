@@ -1,7 +1,8 @@
 local Component = require 'modules.component'
-local itemDefinition = require'components.item-inventory.items.item-definitions'
-local msgBus = require'components.msg-bus'
-local noop = require'utils.noop'
+local Color = require 'modules.color'
+local itemDefinition = require 'components.item-inventory.items.item-definitions'
+local msgBus = require 'components.msg-bus'
+local noop = require 'utils.noop'
 
 local equipmentSubscribers = {
 	-- handle static props
@@ -28,6 +29,29 @@ local equipmentSubscribers = {
 		end
 	end
 }
+
+local function triggerUpgradeMessage(item, level)
+  msgBus.send(
+    msgBus.ITEM_UPGRADE_UNLOCKED, {
+      item = item,
+      level = level
+    }
+  )
+end
+
+local function getHighestUpgradeUnlocked(upgrades, item)
+	local highestUpgradeUnlocked = 0
+	local upgradeCount = upgrades and #upgrades or 0
+	for level=1, upgradeCount do
+		local up = upgrades[level]
+		if item.experience >= up.experienceRequired then
+			highestUpgradeUnlocked = level
+			triggerUpgradeMessage(item, level)
+		end
+	end
+
+	return highestUpgradeUnlocked
+end
 
 msgBus.on(msgBus.EQUIPMENT_CHANGE, function()
 	local rootStore = Component.get('MAIN_SCENE').rootStore
@@ -56,20 +80,45 @@ msgBus.on(msgBus.EQUIPMENT_CHANGE, function()
       local onMessage = definition.onMessage
       local final = definition.final
       local newlyEquipped = lastState.equipment[y][x] ~= item
-      if newlyEquipped then
+			if newlyEquipped then
+				local upgrades = definition.upgrades
+				local lastUpgradeUnlocked = getHighestUpgradeUnlocked(upgrades, item)
 				definition.onEquip(item)
-				msgBus.send(msgBus.ITEM_EQUIPPED, item)
-				msgBus.on(msgBus.ALL, equipmentSubscribers.staticModifiers(item), 1)
-				msgBus.on(msgBus.EQUIPMENT_UNEQUIP, function(_item)
-					if _item == item then
+				local itemState = itemDefinition.getState(item)
+				itemState.listeners = {
+					msgBus.send(msgBus.ITEM_EQUIPPED, item),
+					msgBus.on(msgBus.ENEMY_DESTROYED, function(v)
+						item.experience = item.experience + v.experience
+						local nextUpgradeLevel = getHighestUpgradeUnlocked(upgrades, item)
+						local newUpgradeUnlocked = nextUpgradeLevel > lastUpgradeUnlocked
+						lastUpgradeUnlocked = nextUpgradeLevel
+						if newUpgradeUnlocked then
+							local itemTitle = definition.title
+							msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
+								title = itemTitle..' upgraded',
+								icon = definition.sprite,
+								description = {
+									Color.CYAN, upgrades[nextUpgradeLevel].title,
+									Color.WHITE, ' is unlocked'
+								}
+							})
+							triggerUpgradeMessage(item, nextUpgradeLevel)
+						end
+					end),
+					msgBus.on(msgBus.ALL, equipmentSubscribers.staticModifiers(item), 1),
+					msgBus.on(msgBus.EQUIPMENT_UNEQUIP, function(_item)
+						if _item == item then
+							definition.final(item)
+							msgBus.off(itemState.listeners)
+							return msgBus.CLEANUP
+						end
+					end),
+					msgBus.on(msgBus.NEW_GAME, function()
 						definition.final(item)
+						msgBus.off(itemState.listeners)
 						return msgBus.CLEANUP
-					end
-				end)
-				msgBus.on(msgBus.NEW_GAME, function()
-					definition.final(item)
-					return msgBus.CLEANUP
-				end)
+					end)
+				}
       end
     end
   end)
@@ -77,4 +126,10 @@ msgBus.on(msgBus.EQUIPMENT_CHANGE, function()
 	local BaseStatModifiers = require'components.state.base-stat-modifiers'
 	local nextModifiers = BaseStatModifiers()
   msgBus.send(msgBus.PLAYER_STATS_NEW_MODIFIERS, nextModifiers)
+end)
+
+msgBus.on(msgBus.ITEM_CHECK_UPGRADE_AVAILABILITY, function(v)
+  local item, level = v.item, v.level
+  local upgrades = itemDefinition.getDefinition(item).upgrades
+  return item.experience >= upgrades[level].experienceRequired
 end)
