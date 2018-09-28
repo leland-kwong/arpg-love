@@ -4,6 +4,7 @@ local groups = require 'components.groups'
 local Gui = require 'components.gui.gui'
 local GuiText = require 'components.gui.gui-text'
 local Font = require 'components.font'
+local msgBus = require 'components.msg-bus'
 local collisionWorlds = require 'components.collision-worlds'
 local loadImage = require 'modules.load-image'
 local Color = require 'modules.color'
@@ -43,8 +44,6 @@ end
 local Portal = {
   group = groups.all,
   locationName = '', -- name of location
-  scene = {}, -- a scene component to load when clicked
-  sceneProps = nil,
   posOffset = {
     x = 2,
     y = -18
@@ -70,14 +69,8 @@ local Portal = {
       w = 1,
       h = 1,
       onClick = function()
-        local msgBusMainMenu = require 'components.msg-bus-main-menu'
-        msgBusMainMenu.send(
-          msgBusMainMenu.SCENE_SWITCH, {
-            scene = self.scene,
-            props = self.sceneProps
-          }
-        )
         portalEnterSound()
+        msgBus.send(msgBus.PORTAL_ENTER)
       end,
       onUpdate = function(self)
         local portalTooltipText = 'teleport to '..(root.locationName or 'no location')

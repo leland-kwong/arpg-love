@@ -40,13 +40,16 @@ local function setState(nextState)
   bitser.dumpLoveFile(stateFile, state)
 end
 
-local function loadScene(name, path)
+local function loadScene(name, path, sceneProps)
   if not path then
     print('no scene to load')
     return
   end
   local scene = require(path)
-  msgBusMainMenu.send(msgBusMainMenu.SCENE_SWITCH, { scene = scene })
+  msgBusMainMenu.send(msgBusMainMenu.SCENE_STACK_PUSH, {
+    scene = scene,
+    props = sceneProps
+  })
   setState({
     activeScene = name,
     activeScenePath = path
@@ -79,9 +82,10 @@ local function DebugMenuToggleButton(onToggle)
   })
 end
 
-local function menuOptionSceneLoad(name, path)
+local function menuOptionSceneLoad(name, path, props)
   return {
     name = name,
+    props = props,
     value = function()
       loadScene(name, path)
     end
@@ -93,10 +97,15 @@ local sceneOptions = {
     'main game home screen',
     'scene.sandbox.main-game.main-game-home'
   ),
-  menuOptionSceneLoad(
-    'main game sandbox',
-    'scene.sandbox.main-game.main-game-test'
-  ),
+  {
+    name = 'main game sandbox',
+    value = function()
+      local msgBus = require 'components.msg-bus'
+      local CreateStore = require 'components.state.state'
+      msgBus.send(msgBus.GAME_STATE_SET, CreateStore())
+      loadScene('main game sandbox', 'scene.sandbox.main-game.main-game-test')
+    end
+  },
   menuOptionSceneLoad(
     'sprite positioning',
     'scene.sandbox.sprite-positioning'
@@ -147,7 +156,7 @@ function Sandbox.init(self)
       activeSceneMenu = nil
     end
     setState({ menuOpened = enabled })
-  end
+end
 
   local errorFree, loadedState = pcall(function() return bitser.loadLoveFile(stateFile) end)
   state = (errorFree and loadedState) or state

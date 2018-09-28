@@ -9,7 +9,6 @@ local InventoryController = require 'components.item-inventory.controller'
 local config = require 'config.config'
 local camera = require 'components.camera'
 local cloneGrid = require 'utils.clone-grid'
-local CreateStore = require 'components.state.state'
 local Hud = require 'components.hud.hud'
 local fileSystem = require 'modules.file-system'
 local msgBus = require 'components.msg-bus'
@@ -102,7 +101,7 @@ local MainScene = {
   group = groups.firstLayer,
 
   -- options
-  initialGameState = nil,
+  isNewGame = false,
   autoSave = true
 }
 
@@ -216,17 +215,13 @@ function initializeMap()
 end
 
 function MainScene.init(self)
-  msgBus.send(msgBus.NEW_GAME)
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0,0,0,0})
 
-  local rootState = CreateStore()
+  local rootState = msgBus.send(msgBus.GAME_STATE_GET)
   local inventoryController = InventoryController(rootState)
-  if self.initialGameState then
-    for k,v in pairs(self.initialGameState) do
-      rootState:set(k, v)
-    end
-    -- setup defaults
-  else
+
+  -- add default weapons
+  if rootState:get().isNewGame then
     local defaultWeapon = require'components.item-inventory.items.definitions.pod-module-hammer'
     local canEquip, errorMsg = rootState:equipItem(defaultWeapon.create(), 1, 1)
     if not canEquip then
@@ -267,6 +262,9 @@ function MainScene.init(self)
     rootState:addItemToInventory(defaultWeapon3.create())
   end
 
+  local stateId = rootState:getId()
+  consoleLog(stateId)
+
   self.rootStore = rootState
   local parent = self
   local mapGrid = initializeMap()
@@ -277,10 +275,6 @@ function MainScene.init(self)
   self.mapGrid = mapGrid
 
   self.listeners = {
-    msgBus.on(msgBus.NEW_GAME, function()
-      self:delete(true)
-    end),
-
     -- setup default properties in case they don't exist
     msgBus.on(msgBus.CHARACTER_HIT, function(v)
       v.damage = v.damage or 0
@@ -373,9 +367,18 @@ function MainScene.init(self)
       local x, y = playerRef:getPosition()
       self.portal
         :set('locationName', 'home')
-        :set('scene', require('scene.home-base'))
         :setPosition(x, y)
         :setParent(self)
+    end),
+
+    msgBus.on(msgBus.PORTAL_ENTER, function()
+      local msgBusMainMenu = require 'components.msg-bus-main-menu'
+      local HomeBase = require('scene.home-base')
+      msgBusMainMenu.send(
+        msgBusMainMenu.SCENE_STACK_PUSH, {
+          scene = HomeBase
+        }
+      )
     end)
   }
 
@@ -406,6 +409,7 @@ function MainScene.init(self)
   if self.autoSave then
     local lastSavedState = nil
     local function saveState()
+      rootState:set('isNewGame', false)
       local state = rootState:get()
       local hasChanged = state ~= lastSavedState
       if hasChanged then
@@ -425,7 +429,6 @@ function MainScene.final(self)
   if self.autoSave then
     self.autoSaveTimer:stop()
   end
-  msgBus.send(msgBus.GAME_UNLOADED)
 end
 
 return Component.createFactory(MainScene)

@@ -87,10 +87,6 @@ function HomeBase.init(self)
   Portal.create({
     x = startPosition.x,
     y = startPosition.y,
-    scene = require 'scene.scene-main',
-    sceneProps = {
-      autoSave = false
-    },
     locationName = 'Mars'
   }):setParent(self)
 
@@ -123,6 +119,23 @@ function HomeBase.init(self)
 
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0,0,0,0})
   createStarField(self)
+
+  self.listeners = {
+    msgBus.on(msgBus.PORTAL_ENTER, function()
+      local msgBusMainMenu = require 'components.msg-bus-main-menu'
+      local sceneManager = require 'scene.manager'
+      if (not sceneManager:canPop()) then
+        msgBusMainMenu.send(msgBusMainMenu.SCENE_STACK_REPLACE, {
+          scene = require 'scene.scene-main'
+        })
+        return
+      end
+
+      msgBusMainMenu.send(
+        msgBusMainMenu.SCENE_STACK_POP
+      )
+    end)
+  }
 end
 
 function HomeBase.update(self, dt)
@@ -143,6 +156,10 @@ function HomeBase.draw(self)
     shipBodyImage,
     self.x, self.y
   )
+end
+
+function HomeBase.final(self)
+  msgBus.off(self.listeners)
 end
 
 return Component.createFactory(HomeBase)

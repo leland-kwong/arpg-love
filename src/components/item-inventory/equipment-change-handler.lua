@@ -6,7 +6,7 @@ local equipmentSubscribers = {
 	-- handle static props
 	staticModifiers = function(item)
 		return function(msgValue, msgType)
-			if msgBus.GAME_UNLOADED == msgType then
+			if msgBus.NEW_GAME == msgType then
 				return msgBus.CLEANUP
 			end
 
@@ -64,7 +64,7 @@ return function(rootStore)
 						return msgBus.CLEANUP
 					end
 				end)
-				msgBus.on(msgBus.GAME_UNLOADED, function()
+				msgBus.on(msgBus.NEW_GAME, function()
 					definition.final(item)
 					return msgBus.CLEANUP
 				end)
@@ -73,6 +73,6 @@ return function(rootStore)
   end)
 
 	local BaseStatModifiers = require'components.state.base-stat-modifiers'
-  local nextModifiers = BaseStatModifiers()
+	local nextModifiers = BaseStatModifiers()
   msgBus.send(msgBus.PLAYER_STATS_NEW_MODIFIERS, nextModifiers)
 end

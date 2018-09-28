@@ -39,7 +39,6 @@ local objectParsersByType = {
         aiType
       }
     })
-    consoleLog('legendary', origin.x, origin.y)
   end
 }
 
