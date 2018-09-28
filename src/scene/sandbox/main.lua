@@ -134,6 +134,21 @@ local sceneOptions = {
   }
 }
 
+msgBusMainMenu.on(msgBusMainMenu.MENU_ITEM_ADD, function(menuOption)
+  table.insert(sceneOptions, 1, menuOption)
+end)
+
+msgBusMainMenu.on(msgBusMainMenu.MENU_ITEM_REMOVE, function(menuOption)
+  for i=1, #sceneOptions do
+    local option= sceneOptions[i]
+    if option == menuOption then
+      table.remove(sceneOptions, i)
+    end
+  end
+end)
+
+require 'scene.light-test'
+
 local menuX, menuY = 200, 20
 
 function Sandbox.init(self)

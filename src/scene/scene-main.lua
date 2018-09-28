@@ -164,7 +164,7 @@ local function generateAi(parent, player, mapGrid)
   end
 end
 
-function initializeMap()
+local function initializeMap()
   local Dungeon = require 'modules.dungeon'
   local Chance = require 'utils.chance'
   local mapBlockGenerator = Chance({
@@ -214,8 +214,39 @@ function initializeMap()
   return mapGrid
 end
 
+local function setupLightWorld()
+  local LightWorld = require("shadows.LightWorld")
+  local newLightWorld = LightWorld:new()
+  local scale = require 'config.config'.scale
+  local ambientColor = 0.7
+  newLightWorld:SetColor(ambientColor*255,ambientColor*255,ambientColor*255)
+  local playerRef = Component.get('PLAYER')
+  return Component.create({
+    id = 'DUNGEON_LIGHT_WORLD',
+    group = groups.all,
+    init = function(self)
+      self.lightWorld = newLightWorld
+    end,
+    update = function(self)
+      local camera = require 'components.camera'
+      local x, y = camera:getPosition()
+      newLightWorld:SetPosition(x * scale, y * scale)
+      newLightWorld:Update()
+    end,
+    draw = function()
+      love.graphics.push()
+      newLightWorld:Draw()
+      love.graphics.pop()
+    end,
+    drawOrder = function()
+      return math.pow(10, 10)
+    end
+  })
+end
+
 function MainScene.init(self)
-  msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0,0,0,0})
+  self.lightWorld = setupLightWorld()
+  msgBus.send(msgBus.SET_BACKGROUND_COLOR, {1,1,1,1})
 
   local rootState = msgBus.send(msgBus.GAME_STATE_GET)
   local inventoryController = InventoryController(rootState)
@@ -267,6 +298,7 @@ function MainScene.init(self)
 
   self.rootStore = rootState
   local parent = self
+
   local mapGrid = initializeMap()
   local gridTileDefinitions = cloneGrid(mapGrid, function(v, x, y)
     local tileGroup = gridTileTypes[v]
@@ -383,6 +415,14 @@ function MainScene.init(self)
     mapGrid = mapGrid,
     rootStore = rootState
   }):setParent(parent)
+
+  local Lights = require 'components.lights'
+  Lights.create({
+    x = player.x,
+    y = player.y,
+    radius = 400,
+    lightWorld = 'DUNGEON_LIGHT_WORLD'
+  }):setParent(player)
 
   MainMap.create({
     camera = camera,

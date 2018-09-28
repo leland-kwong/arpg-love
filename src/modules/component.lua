@@ -126,7 +126,7 @@ function M.createFactory(blueprint)
       invalidPropsErrorMsg
     )
 
-    local id = blueprint.id or uid()
+    local id = blueprint.id or (props and props.id) or uid()
     c._id = id
 
     setmetatable(c, blueprint)
@@ -134,9 +134,6 @@ function M.createFactory(blueprint)
 
     -- type check
     if isDebug then
-      if (props and props.id) then
-        assert(uniqueIds[props.id], 'unique ids must be registered in the factory')
-      end
       assert(c.group ~= nil, 'a default `group` must be provided')
       tc.validate(c.x, tc.NUMBER, false) -- x-axis position
       tc.validate(c.y, tc.NUMBER, false) -- y-axis position

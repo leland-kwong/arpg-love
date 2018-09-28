@@ -355,7 +355,7 @@ function Ai.update(self, dt)
   if self.destroyedAnimation then
     local complete = self.destroyedAnimation:update(dt)
     if complete then
-      self:delete()
+      self:delete(true)
     end
     return
   end
@@ -633,6 +633,14 @@ function Ai.init(self)
   assert(type(self.gridSize) == 'number')
   local scale = self.scale
   local gridSize = self.gridSize
+
+  local Lights = require 'components.lights'
+  Lights.create({
+    x = self.x,
+    y = self.y,
+    radius = 100,
+    lightWorld = 'DUNGEON_LIGHT_WORLD'
+  }):setParent(self)
 
   -- [[ BASE PROPERTIES ]]
   self.health = self.health or self.maxHealth
