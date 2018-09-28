@@ -35,16 +35,6 @@ function WeaponCore.init(self)
       self.recoilDuration = msgValue.attackTime or 0.1
       self.recoilDurationRemaining = self.recoilDuration
     end),
-    msgBus.on(msgBus.PLAYER_WEAPON_RENDER_ATTACHMENT_ADD, function(msgValue)
-      self.renderAttachmentAnimationSpeed = msgValue.animationSpeed or 1
-      self.renderAttachmentAnimation = AnimationFactory:new(
-        msgValue.animationFrames
-      )
-    end),
-    msgBus.on(msgBus.PLAYER_WEAPON_RENDER_ATTACHMENT_REMOVE, function(msgValue)
-      self.renderAttachmentAnimationSpeed = nil
-      self.renderAttachmentAnimation = nil
-    end),
     msgBus.on(msgBus.PLAYER_WEAPON_MUZZLE_FLASH, function(msgValue)
       self.muzzleFlashDuration = 0.1
       self.muzzleFlashColor = msgValue.color
@@ -190,16 +180,19 @@ function WeaponCore.draw(self)
     )
   end
 
-  local gameState = msgBus.send(msgBus.GAME_STATE_GET):get()
-  iterateGrid(gameState.equipment, function(item)
-    local itemDef = require 'components.item-inventory.items.item-definitions'
-    local definition = itemDef.getDefinition(item)
-    local spriteName = definition and definition.renderAnimation
-    if spriteName then
-      local animation = AnimationFactory:newStaticSprite(spriteName)
-      drawEquipment(animation, posX, posY, self.angle)
-    end
-  end)
+  local rootStore = msgBus.send(msgBus.GAME_STATE_GET)
+  if rootStore then
+    local gameState = rootStore:get()
+    iterateGrid(gameState.equipment, function(item)
+      local itemDef = require 'components.item-inventory.items.item-definitions'
+      local definition = itemDef.getDefinition(item)
+      local spriteName = definition and definition.renderAnimation
+      if spriteName then
+        local animation = AnimationFactory:newStaticSprite(spriteName)
+        drawEquipment(animation, posX, posY, self.angle)
+      end
+    end)
+  end
 end
 
 function WeaponCore.final(self)
