@@ -64,6 +64,7 @@ function InventoryBlueprint.init(self)
       rootStore:removeItem(item)
       rootStore:equipItem(item, slotX, slotY)
       rootStore:addItemToInventory(equippedItem, {x, y})
+      msgBus.send(msgBus.EQUIPMENT_CHANGE)
     end
 
     if msgBus.INVENTORY_PICKUP == msgType or
