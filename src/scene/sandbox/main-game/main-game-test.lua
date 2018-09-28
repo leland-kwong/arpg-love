@@ -33,42 +33,46 @@ local function insertTestItems(rootStore)
 end
 
 function MainGameTest.init(self)
+  msgBus.send(msgBus.NEW_GAME)
   modifyLevelRequirements()
 
-  local scene = SceneMain.create({
-    autoSave = false
-  }):setParent(self)
-  insertTestItems(scene.rootStore)
+  -- local scene = SceneMain.create({
+  --   autoSave = false
+  -- }):setParent(self)
+  -- insertTestItems(scene.rootStore)
 
-  TreasureChest.create({
-    x = 10 * config.gridSize,
-    y = 5 * config.gridSize
-  }):setParent(self)
+  local HomeBase = require 'scene.home-base'
+  HomeBase.create():setParent(self)
 
-  local function randomTreasurePosition()
-    local mapGrid = Component.get('MAIN_SCENE').mapGrid
-    local rows, cols = #mapGrid, #mapGrid[1]
-    return math.random(10, cols) * config.gridSize,
-      math.random(10, rows) * config.gridSize
-  end
+  -- TreasureChest.create({
+  --   x = 10 * config.gridSize,
+  --   y = 5 * config.gridSize
+  -- }):setParent(self)
 
-  local chestCount = 3
-  for i=1, chestCount do
-    local x, y = randomTreasurePosition()
-    TreasureChest.create({
-      x = x,
-      y = y
-    }):setParent(self)
-  end
+  -- local function randomTreasurePosition()
+  --   local mapGrid = Component.get('MAIN_SCENE').mapGrid
+  --   local rows, cols = #mapGrid, #mapGrid[1]
+  --   return math.random(10, cols) * config.gridSize,
+  --     math.random(10, rows) * config.gridSize
+  -- end
 
-  local treasureCacheCount = 15
-  for i=1, treasureCacheCount do
-    local x, y = randomTreasurePosition()
-    EnvironmentInteractable.create({
-      x = x,
-      y = y
-    }):setParent(self)
-  end
+  -- local chestCount = 3
+  -- for i=1, chestCount do
+  --   local x, y = randomTreasurePosition()
+  --   TreasureChest.create({
+  --     x = x,
+  --     y = y
+  --   }):setParent(self)
+  -- end
+
+  -- local treasureCacheCount = 15
+  -- for i=1, treasureCacheCount do
+  --   local x, y = randomTreasurePosition()
+  --   EnvironmentInteractable.create({
+  --     x = x,
+  --     y = y
+  --   }):setParent(self)
+  -- end
 end
 
 return Component.createFactory(MainGameTest)

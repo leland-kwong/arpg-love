@@ -355,4 +355,7 @@ function M.get(id)
   return allComponentsById[id]
 end
 
+local NodeFactory = M.createFactory({})
+M.create = NodeFactory.create
+
 return M

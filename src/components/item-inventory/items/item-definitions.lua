@@ -55,6 +55,9 @@ end
 
 local noop = function() end
 local defaultProperties = {
+	-- static sprite to render when equipped
+	renderAnimation = nil,
+
 	onEquip = noop,
 
 	-- tooltip content to render

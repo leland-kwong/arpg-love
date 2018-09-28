@@ -9,7 +9,6 @@ local InventoryController = require 'components.item-inventory.controller'
 local config = require 'config.config'
 local camera = require 'components.camera'
 local cloneGrid = require 'utils.clone-grid'
-local CreateStore = require 'components.state.state'
 local Hud = require 'components.hud.hud'
 local fileSystem = require 'modules.file-system'
 local msgBus = require 'components.msg-bus'
@@ -102,7 +101,7 @@ local MainScene = {
   group = groups.firstLayer,
 
   -- options
-  initialGameState = nil,
+  isNewGame = false,
   autoSave = true
 }
 
@@ -114,7 +113,7 @@ local function getDroppablePosition(posX, posY, mapGrid, callCount)
 
   local dropX, dropY = posX + random(0, 16), posY + random(0, 16)
   local gridX, gridY = Position.pixelsToGridUnits(dropX, dropY, config.gridSize)
-  local isWalkable = mapGrid[gridX][gridY] == Map.WALKABLE
+  local isWalkable = mapGrid[gridY][gridX] == Map.WALKABLE
   if (not isWalkable) and (callCount < 10) then
     return getDroppablePosition(
       posX,
@@ -132,17 +131,16 @@ local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', 
 love.mouse.setCursor(cursor)
 
 local keys = require 'utils.functional'.keys
-local aiTypes = require 'components.spawn.ai-types'
+local aiTypes = require 'components.ai.types'
 local aiTypesList = keys(aiTypes.types)
 
-local function generateAi(parent, player, map)
-  local aiCount = 30
+local function generateAi(parent, player, mapGrid)
+  local aiCount = 20
   local generated = 0
-  local grid = map.grid
+  local grid = mapGrid
   local rows, cols = #grid, #grid[1]
-  local minPos, maxPos = 10, cols - 5
   while generated < aiCount do
-    local posX, posY = math.random(minPos, maxPos), math.random(minPos, maxPos)
+    local posX, posY = math.random(10, cols - 1), math.random(10, rows - 1)
     local isValidPosition = grid[posY][posX] == Map.WALKABLE
     if isValidPosition then
       generated = generated + 1
@@ -150,7 +148,9 @@ local function generateAi(parent, player, map)
         -- debug = true,
         grid = grid,
         WALKABLE = Map.WALKABLE,
-        target = player,
+        target = function()
+          return Component.get('PLAYER')
+        end,
         x = posX,
         y = posY,
         types = {
@@ -164,17 +164,64 @@ local function generateAi(parent, player, map)
   end
 end
 
-function MainScene.init(self)
-  msgBus.send(msgBus.NEW_GAME)
+function initializeMap()
+  local Dungeon = require 'modules.dungeon'
+  local Chance = require 'utils.chance'
+  local mapBlockGenerator = Chance({
+    {
+      chance = 1,
+      value = 'room-1'
+    },
+    {
+      chance = 1,
+      value = 'room-2'
+    },
+    {
+      chance = 1,
+      value = 'room-3'
+    },
+    {
+      chance = 1,
+      value = 'room-4'
+    },
+    {
+      chance = 1,
+      value = 'room-5'
+    }
+  })
 
-  local rootState = CreateStore()
-  local inventoryController = InventoryController(rootState)
-  if self.initialGameState then
-    for k,v in pairs(self.initialGameState) do
-      rootState:set(k, v)
+  local function generateMapBlockDefinitions()
+    local blocks = {}
+    local mapDefinitions = {
+      function()
+        return 'room-3'
+      end,
+      mapBlockGenerator,
+      mapBlockGenerator,
+      mapBlockGenerator,
+      mapBlockGenerator,
+      mapBlockGenerator
+    }
+    while #mapDefinitions > 0 do
+      local index = math.random(1, #mapDefinitions)
+      local block = table.remove(mapDefinitions, index)()
+      table.insert(blocks, block)
     end
-    -- setup defaults
-  else
+    return blocks
+  end
+
+  local mapGrid = Dungeon.new(generateMapBlockDefinitions())
+  return mapGrid
+end
+
+function MainScene.init(self)
+  msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0,0,0,0})
+
+  local rootState = msgBus.send(msgBus.GAME_STATE_GET)
+  local inventoryController = InventoryController(rootState)
+
+  -- add default weapons
+  if rootState:get().isNewGame then
     local defaultWeapon = require'components.item-inventory.items.definitions.pod-module-hammer'
     local canEquip, errorMsg = rootState:equipItem(defaultWeapon.create(), 1, 1)
     if not canEquip then
@@ -215,20 +262,19 @@ function MainScene.init(self)
     rootState:addItemToInventory(defaultWeapon3.create())
   end
 
+  local stateId = rootState:getId()
+  consoleLog(stateId)
+
   self.rootStore = rootState
   local parent = self
-  local map = Map.createAdjacentRooms(6, 20)
-  local gridTileDefinitions = cloneGrid(map.grid, function(v, x, y)
+  local mapGrid = initializeMap()
+  local gridTileDefinitions = cloneGrid(mapGrid, function(v, x, y)
     local tileGroup = gridTileTypes[v]
     return tileGroup[math.random(1, #tileGroup)]
   end)
-  self.mapGrid = map.grid
+  self.mapGrid = mapGrid
 
   self.listeners = {
-    msgBus.on(msgBus.NEW_GAME, function()
-      self:delete(true)
-    end),
-
     -- setup default properties in case they don't exist
     msgBus.on(msgBus.CHARACTER_HIT, function(v)
       v.damage = v.damage or 0
@@ -259,7 +305,7 @@ function MainScene.init(self)
       if not item then
         return
       end
-      local dropX, dropY = getDroppablePosition(x, y, map.grid)
+      local dropX, dropY = getDroppablePosition(x, y, mapGrid)
       LootGenerator.create({
         x = dropX,
         y = dropY,
@@ -291,6 +337,10 @@ function MainScene.init(self)
           rootState:set('activeMenu', false)
         end
       end
+
+      if config.keyboard.PORTAL_OPEN == key then
+        msgBus.send(msgBus.PORTAL_OPEN)
+      end
     end),
 
     msgBus.on(msgBus.PLAYER_HEAL_SOURCE_ADD, function(v)
@@ -308,17 +358,40 @@ function MainScene.init(self)
         msgBus.send(msgBus.GENERATE_LOOT, {msgValue.x, msgValue.y, randomItem})
       end
       msgBus.send(msgBus.EXPERIENCE_GAIN, math.floor(msgValue.experience))
+    end),
+
+    msgBus.on(msgBus.PORTAL_OPEN, function()
+      local Portal = require 'components.portal'
+      self.portal = self.portal or Portal.create()
+      local playerRef = Component.get('PLAYER')
+      local x, y = playerRef:getPosition()
+      self.portal
+        :set('locationName', 'home')
+        :setPosition(x, y)
+        :setParent(self)
+    end),
+
+    msgBus.on(msgBus.PORTAL_ENTER, function()
+      local msgBusMainMenu = require 'components.msg-bus-main-menu'
+      local HomeBase = require('scene.home-base')
+      msgBusMainMenu.send(
+        msgBusMainMenu.SCENE_STACK_PUSH, {
+          scene = HomeBase
+        }
+      )
     end)
   }
 
   local player = Player.create({
-    mapGrid = map.grid,
+    x = 3 * config.gridSize,
+    y = 3 * config.gridSize,
+    mapGrid = mapGrid,
     rootStore = rootState
   }):setParent(parent)
 
   MainMap.create({
     camera = camera,
-    grid = map.grid,
+    grid = mapGrid,
     tileRenderDefinition = gridTileDefinitions,
     walkable = Map.WALKABLE
   }):setParent(parent)
@@ -331,11 +404,12 @@ function MainScene.init(self)
     rootStore = rootState
   }):setParent(parent)
 
-  generateAi(parent, player, map)
+  generateAi(parent, player, mapGrid)
 
   if self.autoSave then
     local lastSavedState = nil
     local function saveState()
+      rootState:set('isNewGame', false)
       local state = rootState:get()
       local hasChanged = state ~= lastSavedState
       if hasChanged then
@@ -355,7 +429,6 @@ function MainScene.final(self)
   if self.autoSave then
     self.autoSaveTimer:stop()
   end
-  msgBus.send(msgBus.GAME_UNLOADED)
 end
 
 return Component.createFactory(MainScene)

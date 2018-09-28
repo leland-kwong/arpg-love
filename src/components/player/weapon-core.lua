@@ -3,6 +3,7 @@ local groups = require 'components.groups'
 local AnimationFactory = require 'components.animation-factory'
 local msgBus = require 'components.msg-bus'
 local Color = require 'modules.color'
+local iterateGrid = require 'utils.iterate-grid'
 local halfRad = math.pi/2
 
 local WeaponCore = {
@@ -96,19 +97,19 @@ local function drawMuzzleFlash(color, x, y, angle, radius)
   love.graphics.setBlendMode(oBlendMode)
 end
 
-local function drawRenderAttachment(self, x, y, angle)
-  if (not self.renderAttachmentAnimation) then
-    return
-  end
+local function drawEquipment(equipmentAnimation, x, y, angle)
+  -- if (not self.renderAttachmentAnimation) then
+  --   return
+  -- end
   local weaponLength = 26
-  local spriteOffsetX, spriteOffsetY = self.renderAttachmentAnimation:getSourceOffset()
+  local spriteOffsetX, spriteOffsetY = equipmentAnimation:getSourceOffset()
   local offsetX, offsetY = math.sin( -angle + halfRad ) * (weaponLength),
     math.cos( -angle + halfRad ) * (weaponLength)
 
   love.graphics.setColor(0,0,0,0.17)
   love.graphics.draw(
     AnimationFactory.atlas,
-    self.renderAttachmentAnimation.sprite,
+    equipmentAnimation.sprite,
     x + offsetX,
     y + offsetY + 15,
     angle,
@@ -120,7 +121,7 @@ local function drawRenderAttachment(self, x, y, angle)
   love.graphics.setColor(1,1,1)
   love.graphics.draw(
     AnimationFactory.atlas,
-    self.renderAttachmentAnimation.sprite,
+    equipmentAnimation.sprite,
     x + offsetX,
     y + offsetY,
     angle,
@@ -189,7 +190,16 @@ function WeaponCore.draw(self)
     )
   end
 
-  drawRenderAttachment(self, posX, posY, self.angle)
+  local gameState = msgBus.send(msgBus.GAME_STATE_GET):get()
+  iterateGrid(gameState.equipment, function(item)
+    local itemDef = require 'components.item-inventory.items.item-definitions'
+    local definition = itemDef.getDefinition(item)
+    local spriteName = definition and definition.renderAnimation
+    if spriteName then
+      local animation = AnimationFactory:newStaticSprite(spriteName)
+      drawEquipment(animation, posX, posY, self.angle)
+    end
+  end)
 end
 
 function WeaponCore.final(self)

@@ -600,14 +600,13 @@
                 <false/>
             </struct>
             <key type="filename">custom-art/bullet-1.png</key>
+            <key type="filename">custom-art/characters/ai-legendaries/legendary-1/legendary-ai-1.png</key>
             <key type="filename">custom-art/characters/eyeball/eyeball.png</key>
             <key type="filename">custom-art/effects/floor-crack-1.png</key>
             <key type="filename">custom-art/effects/floor-crack-2.png</key>
             <key type="filename">custom-art/effects/floor-crack-3.png</key>
             <key type="filename">custom-art/items/weapons/weapon-modules/item-upgrade-placeholder-locked.png</key>
             <key type="filename">custom-art/items/weapons/weapon-modules/item-upgrade-placeholder-unlocked.png</key>
-            <key type="filename">custom-art/tiles/floor-11.png</key>
-            <key type="filename">custom-art/tiles/floor-12.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -838,6 +837,8 @@
             </struct>
             <key type="filename">custom-art/tiles/floor-1.png</key>
             <key type="filename">custom-art/tiles/floor-10.png</key>
+            <key type="filename">custom-art/tiles/floor-11.png</key>
+            <key type="filename">custom-art/tiles/floor-12.png</key>
             <key type="filename">custom-art/tiles/floor-2.png</key>
             <key type="filename">custom-art/tiles/floor-3.png</key>
             <key type="filename">custom-art/tiles/floor-4.png</key>
@@ -848,7 +849,7 @@
             <key type="filename">custom-art/tiles/floor-9.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,1</point_f>
+                <point_f>0,0</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -877,7 +878,7 @@
             <key type="filename">custom-art/tiles/wall-4.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.75</point_f>
+                <point_f>0,0.464286</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -891,7 +892,7 @@
             <key type="filename">custom-art/tiles/wall-6.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.75</point_f>
+                <point_f>0,0.464286</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -922,6 +923,7 @@
             <filename>custom-art/spells</filename>
             <filename>custom-art/items/weapons/weapon-modules</filename>
             <filename>custom-art/effects</filename>
+            <filename>custom-art/characters/ai-legendaries</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

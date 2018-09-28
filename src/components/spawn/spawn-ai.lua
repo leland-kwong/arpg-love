@@ -8,8 +8,8 @@ local typeCheck = require 'utils.type-check'
 local Math = require 'utils.math'
 local animationFactory = require 'components.animation-factory'
 local setProp = require 'utils.set-prop'
-local aiTypes = require 'components.spawn.ai-types'
-local aiRarity = require 'components.spawn.ai-rarity'
+local aiTypes = require 'components.ai.types'
+local aiRarity = require 'components.ai.rarity'
 local f = require 'utils.functional'
 
 local SpawnerAi = {
@@ -18,9 +18,11 @@ local SpawnerAi = {
   x = 0,
   y = 0,
   moveSpeed = 0,
+  rarity = aiRarity, -- [FUNCTION]
   -- these need to be passed in
   grid = nil,
   WALKABLE = nil,
+  -- debug = true,
 
   colWorld = collisionWorlds.map,
   pxToGridUnits = function(screenX, screenY, gridSize)
@@ -42,14 +44,18 @@ local function getRandomDirection()
   return directions[math.random(1, 2)]
 end
 
-local function AiFactory(self, x, y, moveSpeed, scale)
+local function AiFactory(self)
+  assert(
+    type(self.target) == 'function',
+    'target property must be a function'
+  )
 
   local function findNearestTarget(otherX, otherY, otherSightRadius)
     if not self.target then
       return nil
     end
-
-    local tPosX, tPosY = self.target:getPosition()
+    local target = self.target()
+    local tPosX, tPosY = target:getPosition()
     local dist = Math.dist(tPosX, tPosY, otherX, otherY)
     local withinVision = dist <= otherSightRadius
 
@@ -61,12 +67,18 @@ local function AiFactory(self, x, y, moveSpeed, scale)
   end
 
   return f.map(self.types, function(aiType)
-    local aiPrototype = setProp(aiTypes.typeDefs[aiType]())
+    local aiPrototype
+    if (type(aiType) == 'function') then
+      aiPrototype = setProp(aiType())
+    else
+      aiPrototype = setProp(aiTypes.typeDefs[aiType]())
+    end
     local spawnX, spawnY =
       self.x * self.gridSize + math.random(0, self.gridSize) * getRandomDirection(),
       self.y * self.gridSize + math.random(0, self.gridSize) * getRandomDirection()
     local ai = Ai.create(
-      aiRarity(aiPrototype)
+      self.rarity(aiPrototype)
+        :set('debug',             self.debug)
         :set('x',                 spawnX)
         :set('y',                 spawnY)
         :set('collisionWorld',    self.colWorld)

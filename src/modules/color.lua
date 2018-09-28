@@ -37,7 +37,12 @@ local colors = {
   GOLDEN_PALE = {Color.rgba255(243, 156, 18)},
   RED = {1,0,0,1},
   DEEP_RED = {Color.rgba255(209, 43, 43)},
-  TRANSPARENT = {0,0,0,0}
+  TRANSPARENT = {0,0,0,0},
+
+  RARITY_MAGICAL = {Color.rgba255(107, 171, 255)}, -- blueish-purple
+  RARITY_RARE = {1,1,0,1}, -- yellow
+  RARITY_EPIC = {Color.rgba255(228, 96, 255)}, -- magenta
+  RARITY_LEGENDARY = {Color.rgba255(229, 140, 16)} -- gold
 }
 -- validate colors
 for name,color in pairs(colors) do

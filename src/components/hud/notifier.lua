@@ -21,7 +21,7 @@ local Notifier = {
 function Notifier.init(self)
   self.guiText = GuiText.create({
     font = font.primary.font,
-  })
+  }):setParent(self)
   self.eventLog = logger:new(4)
   self.listeners = {
     msgBus.on(msgBus.NOTIFIER_NEW_EVENT, function(msgValue)

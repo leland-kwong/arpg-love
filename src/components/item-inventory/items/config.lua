@@ -13,17 +13,12 @@ config.rarity = {
 	LEGENDARY = 4
 }
 
-local COLOR_MAGICAL = {Color.rgba255(107, 171, 255)} -- blueish-purple
-local COLOR_RARE = {1, 1, 0} -- yellow
-local COLOR_EPIC = {Color.rgba255(228, 96, 255)} -- magenta
-local COLOR_LEGENDARY = {Color.rgba255(255, 155, 33)} -- gold
-
 config.rarityColor = {
 	[config.rarity.NORMAL] = Color.WHITE,
-	[config.rarity.MAGICAL] = COLOR_MAGICAL,
-	[config.rarity.RARE] = COLOR_RARE,
-	[config.rarity.EPIC] = COLOR_EPIC,
-	[config.rarity.LEGENDARY] = COLOR_LEGENDARY
+	[config.rarity.MAGICAL] = Color.RARITY_MAGICAL,
+	[config.rarity.RARE] = Color.RARITY_RARE,
+	[config.rarity.EPIC] = Color.RARITY_EPIC,
+	[config.rarity.LEGENDARY] = Color.RARITY_LEGENDARY
 }
 
 config.rarityTitle = {

@@ -16,11 +16,15 @@ local camera = require 'components.camera'
 local SceneMain = require 'scene.scene-main'
 local RootScene = require 'scene.sandbox.main'
 local tick = require 'utils.tick'
+local sceneManager = require 'scene.manager'
 
 local scale = config.scaleFactor
 
 local globalState = {
   activeScene = nil,
+  backgroundColor = {0.2,0.2,0.2},
+  sceneStack = sceneManager,
+  gameState = nil
 }
 
 function love.load()
@@ -39,18 +43,50 @@ function love.load()
   local console = Console.create()
   require 'components.profiler.component-groups'(console)
 
-  msgBusMainMenu.on(msgBusMainMenu.SCENE_SWITCH, function(msgValue)
+  msgBusMainMenu.on(msgBusMainMenu.SCENE_STACK_PUSH, function(msgValue)
     local nextScene = msgValue
     if globalState.activeScene then
       globalState.activeScene:delete(true)
     end
-    globalState.activeScene = nextScene.scene.create(nextScene.props)
+    local sceneRef = nextScene.scene.create(nextScene.props)
+    globalState.activeScene = sceneRef
+    globalState.sceneStack:push(nextScene)
   end)
+
+  msgBusMainMenu.on(msgBusMainMenu.SCENE_STACK_POP, function()
+    if globalState.activeScene then
+      globalState.activeScene:delete(true)
+    end
+    local poppedScene = globalState.sceneStack:pop()
+    globalState.activeScene = poppedScene.scene.create(poppedScene.props)
+  end)
+
+  msgBusMainMenu.on(msgBusMainMenu.SCENE_STACK_REPLACE, function(nextScene)
+    globalState.sceneStack:clear()
+    msgBusMainMenu.send(msgBusMainMenu.SCENE_STACK_PUSH, nextScene)
+  end)
+
+  -- FIXME: this is only for debugging
+  msgBus.on(msgBus.PORTAL_ENTER, function()
+    consoleLog(#globalState.sceneStack)
+  end, 100)
 
   msgBus.on(msgBus.SET_CONFIG, function(msgValue)
     local configChanges = msgValue
     local oUtils = require 'utils.object-utils'
     oUtils.assign(config, configChanges)
+  end)
+
+  msgBus.on(msgBus.GAME_STATE_SET, function(state)
+    globalState.gameState = state
+  end)
+
+  msgBus.on(msgBus.GAME_STATE_GET, function()
+    return globalState.gameState
+  end)
+
+  msgBus.on(msgBus.SET_BACKGROUND_COLOR, function(color)
+    globalState.backgroundColor = color
   end)
 end
 
@@ -122,7 +158,7 @@ end
 function love.draw()
   camera:attach()
   -- background
-  love.graphics.clear(0.2,0.2,0.2)
+  love.graphics.clear(globalState.backgroundColor)
   groups.firstLayer.drawAll()
   groups.all.drawAll()
   groups.overlay.drawAll()

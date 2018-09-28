@@ -27,6 +27,7 @@ local function defaultState()
 	return {
 		__stateId = 'game-'..uid(),
 		playerName = '',
+		isNewGame = true,
 
 		level = 1,
 		totalExperience = 0,

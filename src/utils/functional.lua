@@ -18,11 +18,12 @@ function M.map(array, mapFn)
 	return list
 end
 
-function M.find(tbl, callback)
+function M.find(tbl, predicate)
 	local found = nil
 	local i = 1
-	while not found do
-		found = callback(tbl[i], i)
+	local length = #tbl
+	while (i <= length) and (not found) do
+		found = predicate(tbl[i], i)
 		if not found then
 			i = i + 1
 		else

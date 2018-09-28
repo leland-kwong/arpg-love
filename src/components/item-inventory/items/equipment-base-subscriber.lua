@@ -57,12 +57,23 @@ local function handleUpgrades(item)
     end)
   }
 
-  msgBus.on(msgBus.EQUIPMENT_UNEQUIP, function(v)
-    if v == self then
+  table.insert(
+    listeners,
+    msgBus.on(msgBus.EQUIPMENT_UNEQUIP, function(v)
+      if v == self then
+        msgBus.off(listeners)
+        return msgBus.CLEANUP
+      end
+    end)
+  )
+
+  table.insert(
+    listeners,
+    msgBus.on(msgBus.NEW_GAME, function()
       msgBus.off(listeners)
       return msgBus.CLEANUP
-    end
-  end)
+    end)
+  )
 end
 
 msgBus.on(msgBus.ITEM_EQUIPPED, handleUpgrades)

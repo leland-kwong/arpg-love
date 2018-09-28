@@ -311,6 +311,8 @@ return itemDefs.registerType({
 			return 2
 		end,
 
+		renderAnimation = 'weapon-hammer-attachment',
+
 		upgrades = {
 			{
 				title = 'force field',
@@ -339,9 +341,6 @@ return itemDefs.registerType({
 				property = 'health',
 				maxProperty = 'maxHealth'
 			})
-			msgBus.send(msgBus.PLAYER_WEAPON_RENDER_ATTACHMENT_ADD, {
-				animationFrames = {'weapon-hammer-attachment'}
-			})
 
 			local state = itemDefs.getState(self)
 			state.forceField = state.forceField or setupForceField():setDisabled(true)
@@ -358,7 +357,6 @@ return itemDefs.registerType({
 			msgBus.send(msgBus.PLAYER_HEAL_SOURCE_REMOVE, {
 				source = itemSource,
 			})
-			msgBus.send(msgBus.PLAYER_WEAPON_RENDER_ATTACHMENT_REMOVE)
 			local state = itemDefs.getState(self)
 			if state.forceField then
 				state.forceField:setDisabled(true)

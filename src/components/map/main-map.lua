@@ -37,12 +37,16 @@ local function setupCollisionObjects(self, grid, gridSize)
   local collisionWorlds = require 'components.collision-worlds'
   local collisionGrid = cloneGrid(grid, function(v, x, y)
     if v ~= Map.WALKABLE then
+      local animationName = self.tileRenderDefinition[y][x]
+      local animation = animationFactory:newStaticSprite(animationName)
+      local ox, oy = animation:getSourceOffset()
+
       -- setup collision world objects
       local gridSize = self.gridSize
       local tileX, tileY = x * gridSize, y * gridSize
       return self:addCollisionObject(
         collisionGroups.obstacle,
-        tileX, tileY, gridSize, gridSize, gridSize/2 - 1, gridSize
+        tileX, tileY, gridSize, gridSize, ox, 0
       ):addToWorld(collisionWorlds.map)
     end
   end)
@@ -83,6 +87,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     self.renderFloorCache = {}
     local rows, cols = #self.grid, #self.grid[1]
     self.floorCanvas = love.graphics.newCanvas(cols * self.gridSize, rows * self.gridSize)
+    self.wallsCanvas = love.graphics.newCanvas(cols * self.gridSize, rows * self.gridSize)
   end,
 
   onUpdate = function(self, value, x, y, originX, originY, isInViewport, dt)
@@ -108,38 +113,46 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   end,
 
   renderStart = function(self)
-    love.graphics.setCanvas(self.floorCanvas)
     love.graphics.push()
     love.graphics.origin()
   end,
 
   render = function(self, value, x, y, originX, originY)
-    if value == Map.WALKABLE then
-      local index = GetIndexByCoordinate(self.grid)(x, y)
-      if self.renderFloorCache[index] then
-        return
-      else
-        self.renderFloorCache[index] = true
-      end
-
-      local animationName = self.tileRenderDefinition[y][x]
-      local animation = getAnimation(self.animationCache, index, animationName)
-      local ox, oy = animation:getOffset()
-      local tileX, tileY = x * self.gridSize, y * self.gridSize
-
-      love.graphics.setColor(1,1,1)
-      love.graphics.draw(
-        animation.atlas,
-        animation.sprite,
-        tileX,
-        tileY,
-        0,
-        1,
-        1,
-        ox,
-        oy
-      )
+    local index = GetIndexByCoordinate(self.grid)(x, y)
+    if self.renderFloorCache[index] then
+      return
+    else
+      self.renderFloorCache[index] = true
     end
+
+    local animationName = self.tileRenderDefinition[y][x]
+    if value ~= Map.WALKABLE then
+      --[[
+        We must render walls onto a separate layer to get the correct
+        draw ordering. We also must render these before the actual walls
+        since the actual walls have some transparency which will otherwise reveal the game's
+        background color underneath.
+      ]]
+      love.graphics.setCanvas(self.wallsCanvas)
+    else
+      love.graphics.setCanvas(self.floorCanvas)
+    end
+    local animation = getAnimation(self.animationCache, index, animationName)
+    local ox, oy = animation:getOffset()
+    local tileX, tileY = x * self.gridSize, y * self.gridSize
+
+    love.graphics.setColor(0.8,0.8,0.8)
+    love.graphics.draw(
+      animation.atlas,
+      animation.sprite,
+      tileX,
+      tileY,
+      0,
+      1,
+      1,
+      ox,
+      oy
+    )
   end,
 
   renderEnd = function(self)
@@ -147,6 +160,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     love.graphics.setCanvas()
     love.graphics.setColor(1,1,1)
     love.graphics.draw(self.floorCanvas)
+    love.graphics.draw(self.wallsCanvas)
   end
 })
 
