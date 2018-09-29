@@ -92,11 +92,11 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   end,
 
   onUpdate = function(self, value, x, y, originX, originY, isInViewport, dt)
-    renderWallCollisionDebug(self)
+    local index = GetIndexByCoordinate(self.grid)(x, y)
 
     -- if its unwalkable, add a collision object and create wall tile
     if value ~= Map.WALKABLE then
-      local index = GetIndexByCoordinate(self.grid)(x, y)
+      renderWallCollisionDebug(self)
       local animationName = self.tileRenderDefinition[y][x]
       local animation = getAnimation(self.animationCache, index, animationName)
         :update(dt)
@@ -111,20 +111,16 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
         )
       end
     end
-  end,
 
-  renderStart = function(self)
-    love.graphics.push()
-    love.graphics.origin()
-  end,
-
-  render = function(self, value, x, y, originX, originY)
-    local index = GetIndexByCoordinate(self.grid)(x, y)
+    -- floor tiles
     if self.renderFloorCache[index] then
       return
     else
       self.renderFloorCache[index] = true
     end
+
+    love.graphics.push()
+    love.graphics.origin()
 
     local animationName = self.tileRenderDefinition[y][x]
     if value ~= Map.WALKABLE then
@@ -154,11 +150,12 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
       ox,
       oy
     )
+
+    love.graphics.pop()
+    love.graphics.setCanvas()
   end,
 
   renderEnd = function(self)
-    love.graphics.pop()
-    love.graphics.setCanvas()
     love.graphics.setColor(1,1,1)
     love.graphics.draw(self.floorCanvas)
     love.graphics.draw(self.wallsCanvas)
