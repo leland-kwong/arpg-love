@@ -12,18 +12,6 @@ local config = require 'config.config'
 local Portal = require 'components.portal'
 local loadImage = require 'modules.load-image'
 
-local function parseTileSets(tileSets)
-  local tileById = {}
-  f.forEach(tileSets, function(set)
-    local firstgid = set.firstgid
-    f.forEach(set.tiles, function(tileDefinition)
-      local actualId = tileDefinition.id + firstgid
-      tileById[actualId] = tileDefinition
-    end)
-  end)
-  return tileById
-end
-
 local inspect = require 'utils.inspect'
 
 local HomeBase = {
