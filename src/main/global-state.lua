@@ -1,4 +1,5 @@
 local sceneManager = require 'scene.manager'
+local groups = require 'components.groups'
 
 return {
   activeScene = nil,
