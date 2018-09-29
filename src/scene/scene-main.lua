@@ -132,7 +132,7 @@ local function generateAi(parent, player, mapGrid)
   local grid = mapGrid
   local rows, cols = #grid, #grid[1]
   while generated < aiCount do
-    local posX, posY = math.random(10, cols - 1), math.random(10, rows - 1)
+    local posX, posY = math.random(10, 50), math.random(10, 50)
     local isValidPosition = grid[posY][posX] == Map.WALKABLE
     if isValidPosition then
       generated = generated + 1
@@ -207,12 +207,10 @@ local function initializeMap()
 end
 
 local function setupLightWorld()
-  local LightWorld = require("shadows.LightWorld")
+  local LightWorld = require('shadows.LightWorld')
   local newLightWorld = LightWorld:new()
-  local scale = require 'config.config'.scale
   local ambientColor = 0.7
   newLightWorld:SetColor(ambientColor*255,ambientColor*255,ambientColor*255)
-  local playerRef = Component.get('PLAYER')
   return Component.create({
     id = 'DUNGEON_LIGHT_WORLD',
     group = groups.all,
@@ -220,6 +218,7 @@ local function setupLightWorld()
       self.lightWorld = newLightWorld
     end,
     update = function(self)
+      local scale = require 'config.config'.scale
       local camera = require 'components.camera'
       local x, y = camera:getPosition()
       newLightWorld:SetPosition(x * scale, y * scale)

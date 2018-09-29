@@ -147,19 +147,6 @@ local Player = {
 
   init = function(self)
     self.listeners = {
-      -- msgBus.on(msgBus.PLAYER_STATS_ADD_MODIFIERS, function(msgValue)
-      --   local curState = msgBus.send(msgBus.GAME_STATE_GET):get()
-      --   local curMods = curState.statModifiers
-      --   local nextModifiers = msgValue
-      --   for k,v in pairs(curMods) do
-      --     nextModifiers[k] = v + (nextModifiers[k] or 0)
-      --   end
-      --   rootState:set(
-      --     'statModifiers',
-      --     nextModifiers
-      --   )
-      -- end),
-
       msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function(msgValue)
         local newModifiers = msgValue
         msgBus.send(msgBus.GAME_STATE_GET):set('statModifiers', newModifiers)

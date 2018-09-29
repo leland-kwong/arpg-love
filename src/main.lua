@@ -16,60 +16,9 @@ local camera = require 'components.camera'
 local SceneMain = require 'scene.scene-main'
 local RootScene = require 'scene.sandbox.main'
 local tick = require 'utils.tick'
-local sceneManager = require 'scene.manager'
+local globalState = require 'main.global-state'
 
 local scale = config.scaleFactor
-
-local globalState = {
-  activeScene = nil,
-  backgroundColor = {0.2,0.2,0.2},
-  sceneStack = sceneManager,
-  gameState = {},
-  stateSnapshot = {
-    serializedState = nil,
-    serializeAll = function(self)
-      local statesByClass = {}
-      self.serializedState = statesByClass
-      local collisionGroups = require 'modules.collision-groups'
-      local f = require 'utils.functional'
-      local classesToMatch = collisionGroups.create(
-        collisionGroups.ai,
-        collisionGroups.floorItem,
-        collisionGroups.mainMap,
-        'portal'
-      )
-      local components = f.reduce({
-        groups.all.getAll(),
-        groups.firstLayer.getAll()
-      }, function(components, groupComponents)
-        for _,c in pairs(groupComponents) do
-          if collisionGroups.matches(c.class or '', classesToMatch) then
-            table.insert(components, c)
-          end
-        end
-        return components
-      end, {})
-
-      -- serialize states
-      for _,c in pairs(components) do
-        local list = statesByClass[c.class]
-        if (not list) then
-          list = {}
-          statesByClass[c.class] = list
-        end
-        table.insert(list, {
-          blueprint = getmetatable(c),
-          state = c:serialize()
-        })
-      end
-    end,
-    consumeSnapshot = function(self)
-      local serialized = self.serializedState
-      self.serializedState = nil
-      return serialized
-    end
-  }
-}
 
 function love.load()
   msgBus.send(msgBus.GAME_LOADED)
@@ -86,51 +35,7 @@ function love.load()
   -- console debugging
   local console = Console.create()
   require 'components.profiler.component-groups'(console)
-
-  msgBus.on(msgBus.SCENE_STACK_PUSH, function(msgValue)
-    local nextScene = msgValue
-    if globalState.activeScene then
-      globalState.activeScene:delete(true)
-    end
-    local sceneRef = nextScene.scene.create(nextScene.props)
-    globalState.activeScene = sceneRef
-    globalState.sceneStack:push(nextScene)
-  end)
-
-  msgBus.on(msgBus.SCENE_STACK_POP, function()
-    if globalState.activeScene then
-      globalState.activeScene:delete(true)
-    end
-    local poppedScene = globalState.sceneStack:pop()
-    globalState.activeScene = poppedScene.scene.create(poppedScene.props)
-  end)
-
-  msgBus.on(msgBus.SCENE_STACK_REPLACE, function(nextScene)
-    globalState.sceneStack:clear()
-    msgBus.send(msgBus.SCENE_STACK_PUSH, nextScene)
-  end)
-
-  msgBus.on(msgBus.SET_CONFIG, function(msgValue)
-    local configChanges = msgValue
-    local oUtils = require 'utils.object-utils'
-    oUtils.assign(config, configChanges)
-  end)
-
-  msgBus.on(msgBus.GAME_STATE_SET, function(state)
-    globalState.gameState = state
-  end)
-
-  msgBus.on(msgBus.GAME_STATE_GET, function()
-    return globalState.gameState
-  end)
-
-  msgBus.on(msgBus.SET_BACKGROUND_COLOR, function(color)
-    globalState.backgroundColor = color
-  end)
-
-  msgBus.on(msgBus.GLOBAL_STATE_GET, function()
-    return globalState
-  end)
+  require 'main.listeners'
 end
 
 function love.update(dt)

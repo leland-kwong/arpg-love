@@ -18,6 +18,9 @@ local baseProps = {
   z = 0, -- axis normal to the x-y plane
   angle = 0,
   scale = 1,
+  outOfBoundsX = 0,
+  outOfBoundsY = 0,
+  isOutsideViewport = false,
 
   drawOrder = function(self)
     return 1
@@ -250,6 +253,12 @@ function M.createFactory(blueprint)
     return self._ready
   end
 
+  function blueprint:checkOutOfBounds(threshold)
+    threshold = threshold or 0
+    return (self.outOfBoundsX > threshold) or
+      (self.outOfBoundsY > threshold)
+  end
+
   -- default methods
   for k,v in pairs(baseProps) do
     if not blueprint[k] then
@@ -283,9 +292,29 @@ function M.newGroup(groupDefinition)
   local count = 0
 
   function Group.updateAll(dt)
+    local camera = require 'components.camera'
+    local west, east, north, south = camera:getBounds()
     for id,c in pairs(componentsById) do
       if (not c._updatedDisabled) then
         c:_update(dt)
+
+        -- add bounds data
+        local x, y = c.x, c.y
+        local isOutsideViewport = false
+        if x < west then
+          isOutsideViewport = true
+          c.outOfBoundsX = west - x
+        elseif x > east then
+          isOutsideViewport = true
+          c.outOfBoundsX = x - east
+        elseif y < north then
+          isOutsideViewport = true
+          c.outOfBoundsY = north - y
+        elseif y > south then
+          isOutsideViewport = true
+          c.outOfBoundsY = y - south
+        end
+        c.isOutsideViewport = isOutsideViewport
       end
     end
 

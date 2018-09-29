@@ -29,6 +29,7 @@ local objectParsersByType = {
           :set('armor', ai.armor * 1.2)
           :set('moveSpeed', ai.moveSpeed * 1.5)
           :set('maxHealth', ai.maxHealth * 8)
+          :set('experience', 10)
       end,
       target = function()
         return Component.get('PLAYER')

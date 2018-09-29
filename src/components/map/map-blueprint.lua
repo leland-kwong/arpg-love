@@ -6,12 +6,12 @@ local Camera = require 'modules.camera'
 local floor, max = math.floor, math.max
 
 local function getGridBounds(gridSize, camera)
-  local w, e, n, s = camera:getBounds(false)
+  local w, e, n, s = camera:getBounds()
   local scale = config.scaleFactor
-  return w / scale / gridSize,
-    e / scale / gridSize,
-    n / scale / gridSize,
-    s / scale / gridSize
+  return w / gridSize,
+    e / gridSize,
+    n / gridSize,
+    s / gridSize
 end
 
 -- a,b,c are arguments to pass to the callback

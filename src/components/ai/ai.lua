@@ -382,7 +382,6 @@ function Ai.update(self, dt)
   local playerX, playerY = playerRef:getPosition()
   local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
   self.isInViewOfPlayer = gridDistFromPlayer <= 40
-  self.gridDistFromPlayer = gridDistFromPlayer
 
   if self:isDeleted() then
     return

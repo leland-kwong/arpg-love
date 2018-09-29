@@ -60,18 +60,19 @@ local itemNamesTooltipLayer = Gui.create({
     tooltip.lastX = x
     tooltip.lastY = y
 
+    local def = itemDefs.getDefinition(item)
+    local bgWidth, bgHeight = GuiText.getTextSize(def.title, itemNameTextLayer.font)
+    local ttWidth, ttHeight = bgWidth + self.tooltipPadding,
+      bgHeight + self.tooltipPadding
+
     if not hasChangedPosition then
       return
     else
-      tooltip.x = x
+      tooltip.x = x - ttWidth/2 + itemParent.w/2
       tooltip.y = y
     end
 
     if isNew then
-      local def = itemDefs.getDefinition(item)
-      local bgWidth, bgHeight = GuiText.getTextSize(def.title, itemNameTextLayer.font)
-      local ttWidth, ttHeight = bgWidth + self.tooltipPadding,
-        bgHeight + self.tooltipPadding
       tooltipCollisionWorld:add(
         tooltip,
         tooltip.x,
@@ -248,13 +249,9 @@ function LootGenerator.init(self)
       msgBus.send(msgBus.ITEM_PICKUP, self)
     end,
     onUpdate = function(self, dt)
-      local w,e,n,s = camera:getBounds(camera.scale)
-      local isOutOfBounds = self.x < w
-        or self.y < n
-        or self.x > e
-        or self.y > s
-      self.isOutOfBounds = isOutOfBounds
-      if isOutOfBounds then
+      local boundsThreshold = 32
+      self.isOutOfBounds = self:checkOutOfBounds(boundsThreshold)
+      if self.isOutOfBounds then
         itemNamesTooltipLayer:delete(item)
         return
       end
