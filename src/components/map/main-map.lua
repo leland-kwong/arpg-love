@@ -135,10 +135,11 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
       love.graphics.setCanvas(self.floorCanvas)
     end
     local animation = getAnimation(self.animationCache, index, animationName)
+      :update(dt)
     local ox, oy = animation:getOffset()
     local tileX, tileY = x * self.gridSize, y * self.gridSize
 
-    love.graphics.setColor(0.8,0.8,0.8)
+    love.graphics.setColor(1,1,1)
     love.graphics.draw(
       animation.atlas,
       animation.sprite,

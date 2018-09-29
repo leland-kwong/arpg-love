@@ -35,6 +35,7 @@ local function iterateActiveGrid(self, cb, a, b, c)
   local thresholdEast = 1
   local startX = w - self.offset - thresholdWest
   local endX = e + self.offset + thresholdEast
+
   local startY = n - self.offset
   local endY = (s + self.offset + thresholdSouth)
   local y = startY
@@ -80,6 +81,14 @@ local mapBlueprint = {
       iterateActiveGrid(self, self.onUpdate, dt)
     end
     self.onUpdateEnd(self, dt)
+  end,
+
+  draw = function(self)
+    self.renderStart(self)
+    if self.render then
+      iterateActiveGrid(self, self.render)
+    end
+    self.renderEnd(self)
   end
 }
 
