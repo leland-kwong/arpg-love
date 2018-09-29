@@ -32,7 +32,7 @@ local Camera = function(options)
     local isFarTransition = (dist / config.gridSize) > 50
     if isFarTransition then
       -- increase duration so that the screen doesn't scroll too fast, otherwise it looks too jarring
-      actualDuration = 2
+      actualDuration = 1
     end
     if reset then
       lerpTween = tween.new(actualDuration, camera, targetPosition, tween.easing.outExpo)

@@ -31,8 +31,8 @@ local function NewGameButton(parent)
     onClick = function(self)
       local CreateStore = require 'components.state.state'
       msgBus.send(msgBus.GAME_STATE_SET, CreateStore())
-      msgBusMainMenu.send(
-        msgBusMainMenu.SCENE_STACK_REPLACE,
+      msgBus.send(
+        msgBus.SCENE_STACK_REPLACE,
         {
           scene = HomeBase,
           props = {
@@ -86,8 +86,8 @@ function MainGameHomeScene.init(self)
             msgBus.GAME_STATE_SET,
             store
           )
-          msgBusMainMenu.send(
-            msgBusMainMenu.SCENE_STACK_REPLACE,
+          msgBus.send(
+            msgBus.SCENE_STACK_REPLACE,
             {
               scene = HomeBase
             }

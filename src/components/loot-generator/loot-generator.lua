@@ -152,6 +152,7 @@ local itemNamesTooltipLayer = Gui.create({
 local LootGenerator = {
   group = itemGroup,
   rootStore = CreateStore,
+  class = collisionGroups.floorItem,
   -- item to generate
   item = nil
 }
@@ -303,6 +304,14 @@ function LootGenerator.init(self)
       itemNamesTooltipLayer:delete(item)
     end
   }):setParent(self)
+end
+
+function LootGenerator.serialize(self)
+  local state = {}
+  for k,v in pairs(self) do
+    state[k] = v
+  end
+  return state
 end
 
 return Component.createFactory(LootGenerator)

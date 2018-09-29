@@ -24,7 +24,51 @@ local globalState = {
   activeScene = nil,
   backgroundColor = {0.2,0.2,0.2},
   sceneStack = sceneManager,
-  gameState = nil
+  gameState = {},
+  stateSnapshot = {
+    serializedState = nil,
+    serializeAll = function(self)
+      local statesByClass = {}
+      self.serializedState = statesByClass
+      local collisionGroups = require 'modules.collision-groups'
+      local f = require 'utils.functional'
+      local classesToMatch = collisionGroups.create(
+        collisionGroups.ai,
+        collisionGroups.floorItem,
+        collisionGroups.mainMap,
+        'portal'
+      )
+      local components = f.reduce({
+        groups.all.getAll(),
+        groups.firstLayer.getAll()
+      }, function(components, groupComponents)
+        for _,c in pairs(groupComponents) do
+          if collisionGroups.matches(c.class or '', classesToMatch) then
+            table.insert(components, c)
+          end
+        end
+        return components
+      end, {})
+
+      -- serialize states
+      for _,c in pairs(components) do
+        local list = statesByClass[c.class]
+        if (not list) then
+          list = {}
+          statesByClass[c.class] = list
+        end
+        table.insert(list, {
+          blueprint = getmetatable(c),
+          state = c:serialize()
+        })
+      end
+    end,
+    consumeSnapshot = function(self)
+      local serialized = self.serializedState
+      self.serializedState = nil
+      return serialized
+    end
+  }
 }
 
 function love.load()
@@ -43,7 +87,7 @@ function love.load()
   local console = Console.create()
   require 'components.profiler.component-groups'(console)
 
-  msgBusMainMenu.on(msgBusMainMenu.SCENE_STACK_PUSH, function(msgValue)
+  msgBus.on(msgBus.SCENE_STACK_PUSH, function(msgValue)
     local nextScene = msgValue
     if globalState.activeScene then
       globalState.activeScene:delete(true)
@@ -53,7 +97,7 @@ function love.load()
     globalState.sceneStack:push(nextScene)
   end)
 
-  msgBusMainMenu.on(msgBusMainMenu.SCENE_STACK_POP, function()
+  msgBus.on(msgBus.SCENE_STACK_POP, function()
     if globalState.activeScene then
       globalState.activeScene:delete(true)
     end
@@ -61,15 +105,10 @@ function love.load()
     globalState.activeScene = poppedScene.scene.create(poppedScene.props)
   end)
 
-  msgBusMainMenu.on(msgBusMainMenu.SCENE_STACK_REPLACE, function(nextScene)
+  msgBus.on(msgBus.SCENE_STACK_REPLACE, function(nextScene)
     globalState.sceneStack:clear()
-    msgBusMainMenu.send(msgBusMainMenu.SCENE_STACK_PUSH, nextScene)
+    msgBus.send(msgBus.SCENE_STACK_PUSH, nextScene)
   end)
-
-  -- FIXME: this is only for debugging
-  msgBus.on(msgBus.PORTAL_ENTER, function()
-    consoleLog(#globalState.sceneStack)
-  end, 100)
 
   msgBus.on(msgBus.SET_CONFIG, function(msgValue)
     local configChanges = msgValue
@@ -87,6 +126,10 @@ function love.load()
 
   msgBus.on(msgBus.SET_BACKGROUND_COLOR, function(color)
     globalState.backgroundColor = color
+  end)
+
+  msgBus.on(msgBus.GLOBAL_STATE_GET, function()
+    return globalState
   end)
 end
 

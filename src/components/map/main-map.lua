@@ -70,6 +70,7 @@ end
 
 local blueprint = objectUtils.assign({}, mapBlueprint, {
   group = groups.firstLayer,
+  class = collisionGroups.mainMap,
   tileRenderDefinition = {},
 
   init = function(self)
@@ -161,6 +162,10 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     love.graphics.setColor(1,1,1)
     love.graphics.draw(self.floorCanvas)
     love.graphics.draw(self.wallsCanvas)
+  end,
+
+  serialize = function(self)
+    return self.grid
   end
 })
 

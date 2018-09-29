@@ -38,6 +38,9 @@ local states = Enum({
 
 local Ai = {
   group = groups.all,
+  class = collisionGroups.ai,
+
+  baseProps = {}, -- initial properties used to create the ai
 
   state = states.IDLE,
   attackRecoveryTime = 0,
@@ -734,6 +737,18 @@ end
 
 function Ai.final(self)
   msgBus.off(self.listeners)
+end
+
+function Ai.serialize(self)
+  local objectUtils = require 'utils.object-utils'
+  local propsToSave = {'health', 'x', 'y'}
+  for i=1, #propsToSave do
+    local prop = propsToSave[i]
+    local val = self[prop]
+    self.baseProps:set(prop, val)
+  end
+  return self.baseProps
+    :set('baseProps', objectUtils.assign({}, self.baseProps))
 end
 
 return Component.createFactory(Ai)

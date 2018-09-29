@@ -45,6 +45,7 @@ end
 
 local Player = {
   id = 'PLAYER',
+  class = collisionGroups.player,
   group = groups.all,
   x = startPos.x,
   y = startPos.y,

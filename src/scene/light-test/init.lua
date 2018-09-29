@@ -65,7 +65,7 @@ local Factory = Component.createFactory(LightTest)
 msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
   name = 'lighting test',
   value = function()
-    msgBusMainMenu.send(msgBusMainMenu.SCENE_STACK_PUSH, {
+    msgBus.send(msgBus.SCENE_STACK_PUSH, {
       scene = Factory
     })
   end

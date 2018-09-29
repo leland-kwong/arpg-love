@@ -1,11 +1,13 @@
 local config = require 'config.config'
 
-local Ability = {}
+local Ability = {
+  isManager = true
+}
 Ability.__index = Ability
 
 function Ability.new(ability)
   local manager = {
-    ability = ability,
+    ability = ability.isManager and ability.ability or ability,
     cooldown = 0,
     state = {}
   }

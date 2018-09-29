@@ -11,6 +11,7 @@ local setProp = require 'utils.set-prop'
 local aiTypes = require 'components.ai.types'
 local aiRarity = require 'components.ai.rarity'
 local f = require 'utils.functional'
+local immutableApply = require 'utils.object-utils'.immutableApply
 
 local SpawnerAi = {
   -- debug = true,
@@ -76,19 +77,19 @@ local function AiFactory(self)
     local spawnX, spawnY =
       self.x * self.gridSize + math.random(0, self.gridSize) * getRandomDirection(),
       self.y * self.gridSize + math.random(0, self.gridSize) * getRandomDirection()
-    local ai = Ai.create(
-      self.rarity(aiPrototype)
-        :set('debug',             self.debug)
-        :set('x',                 spawnX)
-        :set('y',                 spawnY)
-        :set('collisionWorld',    self.colWorld)
-        :set('pxToGridUnits',     self.pxToGridUnits)
-        :set('findNearestTarget', findNearestTarget)
-        :set('grid',              self.grid)
-        :set('gridSize',          self.gridSize)
-        :set('WALKABLE',          self.WALKABLE)
-        :set('showAiPath',        self.showAiPath)
-    ):setParent(
+    local baseProps = self.rarity(aiPrototype)
+      :set('debug',             self.debug)
+      :set('x',                 spawnX)
+      :set('y',                 spawnY)
+      :set('collisionWorld',    self.colWorld)
+      :set('pxToGridUnits',     self.pxToGridUnits)
+      :set('findNearestTarget', findNearestTarget)
+      :set('grid',              self.grid)
+      :set('gridSize',          self.gridSize)
+      :set('WALKABLE',          self.WALKABLE)
+      :set('showAiPath',        self.showAiPath)
+    baseProps:set('baseProps', immutableApply({}, baseProps))
+    local ai = Ai.create(baseProps):setParent(
       Component.get('MAIN_SCENE')
     )
     return ai

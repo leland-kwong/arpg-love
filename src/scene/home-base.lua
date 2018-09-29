@@ -125,14 +125,14 @@ function HomeBase.init(self)
       local msgBusMainMenu = require 'components.msg-bus-main-menu'
       local sceneManager = require 'scene.manager'
       if (not sceneManager:canPop()) then
-        msgBusMainMenu.send(msgBusMainMenu.SCENE_STACK_REPLACE, {
+        msgBus.send(msgBus.SCENE_STACK_REPLACE, {
           scene = require 'scene.scene-main'
         })
         return
       end
 
-      msgBusMainMenu.send(
-        msgBusMainMenu.SCENE_STACK_POP
+      msgBus.send(
+        msgBus.SCENE_STACK_POP
       )
     end)
   }

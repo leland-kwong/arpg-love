@@ -245,7 +245,9 @@ local function setupLightWorld()
 end
 
 function MainScene.init(self)
-  self.lightWorld = setupLightWorld()
+  local serializedState = msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:consumeSnapshot()
+
+  self.lightWorld = setupLightWorld():setParent(self)
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, {1,1,1,1})
 
   local rootState = msgBus.send(msgBus.GAME_STATE_GET)
@@ -293,13 +295,10 @@ function MainScene.init(self)
     rootState:addItemToInventory(defaultWeapon3.create())
   end
 
-  local stateId = rootState:getId()
-  consoleLog(stateId)
-
   self.rootStore = rootState
   local parent = self
 
-  local mapGrid = initializeMap()
+  local mapGrid = serializedState and serializedState.mainMap[1].state or initializeMap()
   local gridTileDefinitions = cloneGrid(mapGrid, function(v, x, y)
     local tileGroup = gridTileTypes[v]
     return tileGroup[math.random(1, #tileGroup)]
@@ -307,6 +306,9 @@ function MainScene.init(self)
   self.mapGrid = mapGrid
 
   self.listeners = {
+    msgBus.on(msgBus.SCENE_STACK_PUSH, function(v)
+      msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:serializeAll()
+    end, 1),
     -- setup default properties in case they don't exist
     msgBus.on(msgBus.CHARACTER_HIT, function(v)
       v.damage = v.damage or 0
@@ -399,19 +401,22 @@ function MainScene.init(self)
     end),
 
     msgBus.on(msgBus.PORTAL_ENTER, function()
-      local msgBusMainMenu = require 'components.msg-bus-main-menu'
       local HomeBase = require('scene.home-base')
-      msgBusMainMenu.send(
-        msgBusMainMenu.SCENE_STACK_PUSH, {
+      local Vec2 = require 'modules.brinevector'
+      msgBus.send(
+        msgBus.SCENE_STACK_PUSH, {
           scene = HomeBase
         }
       )
     end)
   }
 
+  local playerStartPos = serializedState and
+    serializedState.portal[1].state.position or
+    {x = 3 * config.gridSize, y = 3 * config.gridSize}
   local player = Player.create({
-    x = 3 * config.gridSize,
-    y = 3 * config.gridSize,
+    x = playerStartPos.x,
+    y = playerStartPos.y,
     mapGrid = mapGrid,
     rootStore = rootState
   }):setParent(parent)
@@ -439,7 +444,20 @@ function MainScene.init(self)
     rootStore = rootState
   }):setParent(parent)
 
-  generateAi(parent, player, mapGrid)
+  if serializedState then
+    for i=1, #(serializedState.floorItem or {}) do
+      local item = serializedState.floorItem[i]
+      item.blueprint.create(item.state):setParent(self)
+    end
+
+    -- rebuild ai from previous state
+    for i=1, #(serializedState.ai or {}) do
+      local item = serializedState.ai[i]
+      item.blueprint.create(item.state):setParent(self)
+    end
+  else
+    generateAi(parent, player, mapGrid)
+  end
 
   if self.autoSave then
     local lastSavedState = nil

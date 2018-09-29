@@ -345,6 +345,10 @@ function M.newGroup(groupDefinition)
     return componentsById[component._id]
   end
 
+  function Group.getAll()
+    return componentsById
+  end
+
   return Group
 end
 

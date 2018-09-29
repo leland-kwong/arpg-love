@@ -5,6 +5,7 @@ local font = require 'components.font'
 local MenuList = require 'components.menu-list'
 local Component = require 'modules.component'
 local groups = require 'components.groups'
+local msgBus = require 'components.msg-bus'
 local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local config = require 'config.config'
 local objectUtils = require 'utils.object-utils'
@@ -46,7 +47,7 @@ local function loadScene(name, path, sceneProps)
     return
   end
   local scene = require(path)
-  msgBusMainMenu.send(msgBusMainMenu.SCENE_STACK_PUSH, {
+  msgBus.send(msgBus.SCENE_STACK_PUSH, {
     scene = scene,
     props = sceneProps
   })
