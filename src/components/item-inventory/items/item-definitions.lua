@@ -238,4 +238,8 @@ function items.getState(item)
 	return state
 end
 
+function items.resetState(item)
+	statesById:delete(item.__id)
+end
+
 return items

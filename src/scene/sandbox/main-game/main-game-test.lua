@@ -37,10 +37,6 @@ function MainGameTest.init(self)
   msgBus.send(msgBus.NEW_GAME)
   modifyLevelRequirements()
 
-  -- local scene = SceneMain.create({
-  --   autoSave = false
-  -- }):setParent(self)
-
   local HomeBase = require 'scene.home-base'
   HomeBase.create():setParent(self)
 

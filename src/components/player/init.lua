@@ -17,6 +17,10 @@ local Math = require 'utils.math'
 local getDist = memoize(require('utils.math').dist)
 local hitManager = require 'modules.hit-manager'
 local WeaponCore = require 'components.player.weapon-core'
+local InventoryController = require 'components.item-inventory.controller'
+local Inventory = require 'components.item-inventory.inventory'
+local HealSource = require 'components.heal-source'
+require'components.item-inventory.equipment-change-handler'
 
 local colMap = collisionWorlds.map
 local keyMap = config.keyboard
@@ -43,6 +47,86 @@ local function collisionFilter(item, other)
   return 'slide'
 end
 
+local function connectInventory()
+  local rootState = msgBus.send(msgBus.GAME_STATE_GET)
+  local inventoryController = InventoryController(rootState)
+
+  -- add default weapons
+  if rootState:get().isNewGame then
+    local defaultWeapon = require'components.item-inventory.items.definitions.pod-module-hammer'
+    local canEquip, errorMsg = rootState:equipItem(defaultWeapon.create(), 1, 1)
+    if not canEquip then
+      error(errorMsg)
+    end
+
+    local defaultHealthPotion = require'components.item-inventory.items.definitions.potion-health'
+    local canEquip, errorMsg = rootState:equipItem(defaultHealthPotion.create(), 1, 5)
+    if not canEquip then
+      error(errorMsg)
+    end
+
+    local defaultEnergyPotion = require'components.item-inventory.items.definitions.potion-energy'
+    local canEquip, errorMsg = rootState:equipItem(defaultEnergyPotion.create(), 2, 5)
+    if not canEquip then
+      error(errorMsg)
+    end
+
+    local defaultBoots = require'components.item-inventory.items.definitions.mock-shoes'
+    local canEquip, errorMsg = rootState:equipItem(defaultBoots.create(), 1, 4)
+    if not canEquip then
+      error(errorMsg)
+    end
+
+    local defaultWeapon2 = require'components.item-inventory.items.definitions.lightning-rod'
+    local canEquip, errorMsg = rootState:equipItem(defaultWeapon2.create(), 1, 2)
+    if not canEquip then
+      error(errorMsg)
+    end
+
+    local defaultArmor = require('components.item-inventory.items.definitions.mock-armor').create()
+    local canEquip, errorMsg = rootState:equipItem(defaultArmor, 2, 3)
+    if not canEquip then
+      error(errorMsg)
+    end
+
+    local defaultWeapon3 = require'components.item-inventory.items.definitions.pod-module-fireball'
+    rootState:addItemToInventory(defaultWeapon3.create())
+  end
+
+  -- trigger equipment change for items that were previously equipped from loading the state
+  msgBus.send(msgBus.EQUIPMENT_CHANGE)
+end
+
+local function connectAutoSave(parent)
+  local tick = require 'utils.tick'
+  local fileSystem = require 'modules.file-system'
+  local lastSavedState = nil
+  if (not config.autoSave) then
+    return
+  end
+
+  local function saveState()
+    local rootState = msgBus.send(msgBus.GAME_STATE_GET)
+    rootState:set('isNewGame', false)
+    local state = rootState:get()
+    local hasChanged = state ~= lastSavedState
+    if hasChanged then
+      fileSystem.saveFile(
+        rootState:getId(),
+        rootState:get()
+      )
+      lastSavedState = state
+    end
+  end
+  local autoSaveTimer = tick.recur(saveState, 0.5)
+  Component.create({
+    group = groups.system,
+    final = function()
+      autoSaveTimer:stop()
+    end
+  }):setParent(parent)
+end
+
 local Player = {
   id = 'PLAYER',
   class = collisionGroups.player,
@@ -62,78 +146,58 @@ local Player = {
   mapGrid = nil,
 
   init = function(self)
-    self.hitManagerOnDamageTaken = function(self, actualDamage, actualNonCritDamage, criticalMultiplier)
-      if (actualDamage > 0) then
-        msgBus.send(msgBus.PLAYER_HIT_RECEIVED, actualDamage)
-      end
-    end
-    self.hits = {}
-    self.getFlowField = FlowField(function (grid, x, y, dist)
-      local row = grid[y]
-      local cell = row and row[x]
-      return
-        (cell == Map.WALKABLE) and
-        (dist < self.flowFieldDistance)
-    end)
-    self.getFlowField = require'utils.perf'({
-      enabled = false,
-      done = function(_, totalTime, callCount)
-        consoleLog('flowfield', totalTime / callCount)
-      end
-    })(self.getFlowField)
-
-    local CreateStore = require'components.state.state'
-    self.rootStore = self.rootStore or CreateStore()
-    self.dir = DIRECTION_RIGHT
-    colMap:add(self, self.x, self.y, self.w, self.h)
-
-    local energyRegenerationDuration = 99999999
-    msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
-      source = 'BASE_ENERGY_REGENERATION',
-      amount = energyRegenerationDuration *
-        self.rootStore:get().statModifiers.energyRegeneration,
-      duration = energyRegenerationDuration,
-      property = 'energy',
-      maxProperty = 'maxEnergy'
-    })
-
-    self.animations = {
-      idle = animationFactory:new({
-        'character-1',
-        'character-8',
-        'character-9',
-        'character-10',
-        'character-11'
-      }),
-      run = animationFactory:new({
-        'character-15',
-        'character-16',
-        'character-17',
-        'character-18',
-      })
-    }
-
-    -- set default animation since its needed in the draw method
-    self.animation = self.animations.idle
-
-    local collisionW, collisionH = self.animations.idle:getSourceSize()
-    local collisionOffX, collisionOffY = self.animations.idle:getSourceOffset()
-    self.colObj = self:addCollisionObject(
-      'player',
-      self.x,
-      self.y,
-      collisionW,
-      14,
-      collisionOffX,
-      5
-    ):addToWorld(colMap)
-
-    WeaponCore.create({
-      x = self.x,
-      y = self.y
-    }):setParent(self)
-
     self.listeners = {
+      -- msgBus.on(msgBus.PLAYER_STATS_ADD_MODIFIERS, function(msgValue)
+      --   local curState = msgBus.send(msgBus.GAME_STATE_GET):get()
+      --   local curMods = curState.statModifiers
+      --   local nextModifiers = msgValue
+      --   for k,v in pairs(curMods) do
+      --     nextModifiers[k] = v + (nextModifiers[k] or 0)
+      --   end
+      --   rootState:set(
+      --     'statModifiers',
+      --     nextModifiers
+      --   )
+      -- end),
+
+      msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function(msgValue)
+        local newModifiers = msgValue
+        msgBus.send(msgBus.GAME_STATE_GET):set('statModifiers', newModifiers)
+      end),
+
+      msgBus.on(msgBus.KEY_PRESSED, function(v)
+        local key = v.key
+        local rootState = msgBus.send(msgBus.GAME_STATE_GET)
+        local isActive = rootState:get().activeMenu == 'INVENTORY'
+        if key == config.keyboard.INVENTORY_TOGGLE then
+          if not self.inventory then
+            self.inventory = Inventory.create({
+              rootStore = rootState,
+              slots = function()
+                return rootState:get().inventory
+              end
+            }):setParent(self.hudRoot)
+            rootState:set('activeMenu', 'INVENTORY')
+          else
+            self.inventory:delete(true)
+            self.inventory = nil
+            rootState:set('activeMenu', false)
+          end
+        end
+
+        if config.keyboard.PORTAL_OPEN == key then
+          msgBus.send(msgBus.PORTAL_OPEN)
+        end
+      end),
+
+      msgBus.on(msgBus.PLAYER_HEAL_SOURCE_ADD, function(v)
+        HealSource.add(self, v, msgBus.send(msgBus.GAME_STATE_GET))
+      end),
+
+      msgBus.on(msgBus.PLAYER_HEAL_SOURCE_REMOVE, function(v)
+        HealSource.remove(self, v.source)
+      end),
+
       msgBus.on(msgBus.PLAYER_DISABLE_ABILITIES, function(msg)
         self.clickDisabled = msg
       end),
@@ -182,6 +246,86 @@ local Player = {
         end
       end)
     }
+    connectAutoSave(self)
+    self.hudRoot = Component.create({
+      group = groups.hud
+    })
+    local Hud = require 'components.hud.hud'
+    Hud.create({
+      player = self,
+      rootStore = msgBus.send(msgBus.GAME_STATE_GET)
+    }):setParent(self.hudRoot)
+    connectInventory()
+    self.hitManagerOnDamageTaken = function(self, actualDamage, actualNonCritDamage, criticalMultiplier)
+      if (actualDamage > 0) then
+        msgBus.send(msgBus.PLAYER_HIT_RECEIVED, actualDamage)
+      end
+    end
+    self.hits = {}
+    self.getFlowField = FlowField(function (grid, x, y, dist)
+      local row = grid[y]
+      local cell = row and row[x]
+      return
+        (cell == Map.WALKABLE) and
+        (dist < self.flowFieldDistance)
+    end)
+    self.getFlowField = require'utils.perf'({
+      enabled = false,
+      done = function(_, totalTime, callCount)
+        consoleLog('flowfield', totalTime / callCount)
+      end
+    })(self.getFlowField)
+
+    local CreateStore = require'components.state.state'
+    self.rootStore = msgBus.send(msgBus.GAME_STATE_GET)
+    self.dir = DIRECTION_RIGHT
+    colMap:add(self, self.x, self.y, self.w, self.h)
+
+    local energyRegenerationDuration = 99999999
+    msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
+      source = 'BASE_ENERGY_REGENERATION',
+      amount = energyRegenerationDuration *
+        self.rootStore:get().statModifiers.energyRegeneration,
+      duration = energyRegenerationDuration,
+      property = 'energy',
+      maxProperty = 'maxEnergy'
+    })
+
+    self.animations = {
+      idle = animationFactory:new({
+        'character-1',
+        'character-8',
+        'character-9',
+        'character-10',
+        'character-11'
+      }),
+      run = animationFactory:new({
+        'character-15',
+        'character-16',
+        'character-17',
+        'character-18',
+      })
+    }
+
+    -- set default animation since its needed in the draw method
+    self.animation = self.animations.idle
+
+    local collisionW, collisionH = self.animations.idle:getSourceSize()
+    local collisionOffX, collisionOffY = self.animations.idle:getSourceOffset()
+    self.colObj = self:addCollisionObject(
+      'player',
+      self.x,
+      self.y,
+      collisionW,
+      14,
+      collisionOffX,
+      5
+    ):addToWorld(colMap)
+
+    WeaponCore.create({
+      x = self.x,
+      y = self.y
+    }):setParent(self)
   end
 }
 
@@ -401,6 +545,7 @@ end
 
 Player.final = function(self)
   msgBus.off(self.listeners)
+  self.hudRoot:delete(true)
 end
 
 return Component.createFactory(Player)

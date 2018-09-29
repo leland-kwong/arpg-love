@@ -42,17 +42,20 @@ local function setupExperienceIndicator(self)
 end
 
 function Hud.init(self)
-  local minimapW, minimapH = 100, 100
-  local minimapMargin = 5
-  Minimap.create({
-    camera = camera,
-    grid = Component.get('MAIN_SCENE').mapGrid,
-    x = love.graphics.getWidth()/config.scale - minimapW - minimapMargin,
-    y = minimapH + minimapMargin,
-    w = minimapW,
-    h = minimapH,
-    scale = config.scale
-  }):setParent(self)
+  local mainSceneRef = Component.get('MAIN_SCENE')
+  if mainSceneRef then
+    local minimapW, minimapH = 100, 100
+    local minimapMargin = 5
+    Minimap.create({
+      camera = camera,
+      grid = mainSceneRef.mapGrid,
+      x = love.graphics.getWidth()/config.scale - minimapW - minimapMargin,
+      y = minimapH + minimapMargin,
+      w = minimapW,
+      h = minimapH,
+      scale = config.scale
+    }):setParent(self)
+  end
 
   self.hudTextLayer = GuiText.create({
     group = groups.hud,

@@ -103,7 +103,7 @@ local sceneOptions = {
     value = function()
       local msgBus = require 'components.msg-bus'
       local CreateStore = require 'components.state.state'
-      msgBus.send(msgBus.GAME_STATE_SET, CreateStore())
+      msgBus.send(msgBus.GAME_STATE_SET, CreateStore(nil, {id = 'test-state'}))
       loadScene('main game sandbox', 'scene.sandbox.main-game.main-game-test')
     end
   },

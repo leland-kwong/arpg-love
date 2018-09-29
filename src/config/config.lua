@@ -20,6 +20,8 @@ M.levelExperienceRequirements = {}
   end
 end)()
 
+M.autoSave = true
+
 M.gridSize = 16
 M.scaleFactor = 2
 M.scale = M.scaleFactor

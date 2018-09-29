@@ -37,6 +37,9 @@ local function healRoutine(healSource, tickRate)
 end
 
 function HealSource.remove(self, source)
+	if not self.healSources then
+		return
+	end
 	self.healSources[source] = nil
 end
 

@@ -79,6 +79,10 @@ function M.new()
 	end
 
 	function msgBus.off(handlerRef)
+		if not handlerRef then
+			return
+		end
+
 		local isMultipleRefs = not handlerRef.isListener
 		if isMultipleRefs then
 			for i=1, #handlerRef do

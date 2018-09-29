@@ -295,7 +295,7 @@ return itemDefs.registerType({
 			healthRegeneration = 2,
 			maxHealth = 10,
 			weaponDamage = 2,
-			experience = 0
+			experience = 200
 		}
 	end,
 

@@ -3,18 +3,11 @@ local groups = require 'components.groups'
 local Map = require 'modules.map-generator.index'
 local Player = require 'components.player'
 local MainMap = require 'components.map.main-map'
-local Inventory = require 'components.item-inventory.inventory'
 local SpawnerAi = require 'components.spawn.spawn-ai'
-local InventoryController = require 'components.item-inventory.controller'
 local config = require 'config.config'
 local camera = require 'components.camera'
 local cloneGrid = require 'utils.clone-grid'
-local Hud = require 'components.hud.hud'
-local fileSystem = require 'modules.file-system'
 local msgBus = require 'components.msg-bus'
-local HealSource = require 'components.heal-source'
-local tick = require 'utils.tick'
-require'components.item-inventory.equipment-change-handler'
 
 local function setupTileTypes(types)
   local list = {}
@@ -101,8 +94,7 @@ local MainScene = {
   group = groups.firstLayer,
 
   -- options
-  isNewGame = false,
-  autoSave = true
+  isNewGame = false
 }
 
 local random = math.random
@@ -251,50 +243,6 @@ function MainScene.init(self)
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, {1,1,1,1})
 
   local rootState = msgBus.send(msgBus.GAME_STATE_GET)
-  local inventoryController = InventoryController(rootState)
-
-  -- add default weapons
-  if rootState:get().isNewGame then
-    local defaultWeapon = require'components.item-inventory.items.definitions.pod-module-hammer'
-    local canEquip, errorMsg = rootState:equipItem(defaultWeapon.create(), 1, 1)
-    if not canEquip then
-      error(errorMsg)
-    end
-
-    local defaultHealthPotion = require'components.item-inventory.items.definitions.potion-health'
-    local canEquip, errorMsg = rootState:equipItem(defaultHealthPotion.create(), 1, 5)
-    if not canEquip then
-      error(errorMsg)
-    end
-
-    local defaultEnergyPotion = require'components.item-inventory.items.definitions.potion-energy'
-    local canEquip, errorMsg = rootState:equipItem(defaultEnergyPotion.create(), 2, 5)
-    if not canEquip then
-      error(errorMsg)
-    end
-
-    local defaultBoots = require'components.item-inventory.items.definitions.mock-shoes'
-    local canEquip, errorMsg = rootState:equipItem(defaultBoots.create(), 1, 4)
-    if not canEquip then
-      error(errorMsg)
-    end
-
-    local defaultWeapon2 = require'components.item-inventory.items.definitions.lightning-rod'
-    local canEquip, errorMsg = rootState:equipItem(defaultWeapon2.create(), 1, 2)
-    if not canEquip then
-      error(errorMsg)
-    end
-
-    local defaultArmor = require('components.item-inventory.items.definitions.mock-armor').create()
-    local canEquip, errorMsg = rootState:equipItem(defaultArmor, 2, 3)
-    if not canEquip then
-      error(errorMsg)
-    end
-
-    local defaultWeapon3 = require'components.item-inventory.items.definitions.pod-module-fireball'
-    rootState:addItemToInventory(defaultWeapon3.create())
-  end
-
   self.rootStore = rootState
   local parent = self
 
@@ -315,24 +263,6 @@ function MainScene.init(self)
       return v
     end, 1),
 
-    msgBus.on(msgBus.PLAYER_STATS_ADD_MODIFIERS, function(msgValue)
-      local curState = rootState:get()
-      local curMods = curState.statModifiers
-      local nextModifiers = msgValue
-      for k,v in pairs(curMods) do
-        nextModifiers[k] = v + (nextModifiers[k] or 0)
-      end
-      rootState:set(
-        'statModifiers',
-        nextModifiers
-      )
-    end),
-
-    msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function(msgValue)
-      local newModifiers = msgValue
-      rootState:set('statModifiers', newModifiers)
-    end),
-
     msgBus.on(msgBus.GENERATE_LOOT, function(msgValue)
       local LootGenerator = require'components.loot-generator.loot-generator'
       local x, y, item = unpack(msgValue)
@@ -348,41 +278,9 @@ function MainScene.init(self)
       }):setParent(parent)
     end),
 
-    msgBus.on(msgBus.KEY_PRESSED, function(v)
-      local key = v.key
-      local isActive = rootState:get().activeMenu == 'INVENTORY'
-      if key == config.keyboard.INVENTORY_TOGGLE then
-        if not self.inventory then
-          self.inventory = Inventory.create({
-            rootStore = rootState,
-            slots = function()
-              return rootState:get().inventory
-            end
-          }):setParent(self)
-          rootState:set('activeMenu', 'INVENTORY')
-        else
-          self.inventory:delete(true)
-          self.inventory = nil
-          rootState:set('activeMenu', false)
-        end
-      end
-
-      if config.keyboard.PORTAL_OPEN == key then
-        msgBus.send(msgBus.PORTAL_OPEN)
-      end
-    end),
-
-    msgBus.on(msgBus.PLAYER_HEAL_SOURCE_ADD, function(v)
-      HealSource.add(self, v, rootState)
-    end),
-
-    msgBus.on(msgBus.PLAYER_HEAL_SOURCE_REMOVE, function(v)
-      HealSource.remove(self, v.source)
-    end),
-
     msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
       local lootAlgorithm = require 'components.loot-generator.algorithm-1'
-      local randomItem = lootAlgorithm()
+    local randomItem = lootAlgorithm()
       if randomItem then
         msgBus.send(msgBus.GENERATE_LOOT, {msgValue.x, msgValue.y, randomItem})
       end
@@ -413,12 +311,11 @@ function MainScene.init(self)
 
   local playerStartPos = serializedState and
     serializedState.portal[1].state.position or
-    {x = 3 * config.gridSize, y = 3 * config.gridSize}
+    {x = 6 * config.gridSize, y = 5 * config.gridSize}
   local player = Player.create({
     x = playerStartPos.x,
     y = playerStartPos.y,
     mapGrid = mapGrid,
-    rootStore = rootState
   }):setParent(parent)
 
   local Lights = require 'components.lights'
@@ -436,14 +333,6 @@ function MainScene.init(self)
     walkable = Map.WALKABLE
   }):setParent(parent)
 
-  -- trigger equipment change for items that were previously equipped from loading the state
-  msgBus.send(msgBus.EQUIPMENT_CHANGE)
-
-  Hud.create({
-    player = player,
-    rootStore = rootState
-  }):setParent(parent)
-
   if serializedState then
     for i=1, #(serializedState.floorItem or {}) do
       local item = serializedState.floorItem[i]
@@ -458,30 +347,10 @@ function MainScene.init(self)
   else
     generateAi(parent, player, mapGrid)
   end
-
-  if self.autoSave then
-    local lastSavedState = nil
-    local function saveState()
-      rootState:set('isNewGame', false)
-      local state = rootState:get()
-      local hasChanged = state ~= lastSavedState
-      if hasChanged then
-        fileSystem.saveFile(
-          rootState:getId(),
-          rootState:get()
-        )
-        lastSavedState = state
-      end
-    end
-    self.autoSaveTimer = tick.recur(saveState, 0.5)
-  end
 end
 
 function MainScene.final(self)
   msgBus.off(self.listeners)
-  if self.autoSave then
-    self.autoSaveTimer:stop()
-  end
 end
 
 return Component.createFactory(MainScene)

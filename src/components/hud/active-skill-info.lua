@@ -238,7 +238,6 @@ function ActiveSkillInfo.init(self)
     end)
   }
 
-  local playerRef = Component.get('PLAYER')
   self.itemRender = ItemRender.create({
     draw = function()
       love.graphics.setColor(1,1,1)
@@ -247,8 +246,7 @@ function ActiveSkillInfo.init(self)
     drawOrder = function(self)
       return self.group:drawOrder(self) + 3
     end
-  }):setPosition(playerRef:getPosition())
-    :setParent(playerRef)
+  })
 end
 
 function ActiveSkillInfo.update(self, dt)

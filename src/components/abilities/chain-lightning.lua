@@ -89,6 +89,11 @@ end
 
 local function getAllTargets(pointerX, pointerY, maxTargets, initialSeekRadius)
   local targets = {}
+  local mainSceneRef = Component.get('MAIN_SCENE')
+  if not mainSceneRef then
+    return targets
+  end
+  local mapGrid = mainSceneRef.mapGrid
   for i=1, maxTargets do
     local maxSeekRadius = 6 * config.gridSize
     local startX, startY
@@ -104,7 +109,6 @@ local function getAllTargets(pointerX, pointerY, maxTargets, initialSeekRadius)
       startX = lastTarget.x
       startY = lastTarget.y
     end
-    local mapGrid = Component.get('MAIN_SCENE').mapGrid
     local Map = require 'modules.map-generator.index'
     local losFn = LOS(mapGrid, Map.WALKABLE)
     local target = findNearestTarget(colMap, targets, startX, startY, maxSeekRadius, losFn, config.gridSize)
