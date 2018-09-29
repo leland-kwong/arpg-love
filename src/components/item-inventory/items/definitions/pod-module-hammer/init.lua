@@ -359,7 +359,7 @@ return itemDefs.registerType({
 			})
 			local state = itemDefs.getState(self)
 			if state.forceField then
-				state.forceField:setDisabled(true)
+				state.forceField:delete()
 			end
 			msgBus.off(state.listeners)
 		end,
