@@ -27,10 +27,10 @@ return function(dt)
         return
       end
       c.destroyedAnimation = tween.new(0.5, c, {opacity = 0}, tween.easing.outCubic)
-      Component.addToGroup(c, lootSystem)
+      Component.addToGroup(c, lootSystem, c.itemLevel)
       if c.onDestroyStart then
         c:onDestroyStart()
-      end      
+      end
       c.collision:delete()
       msgBus.send(msgBus.ENTITY_DESTROYED, {
         parent = c,

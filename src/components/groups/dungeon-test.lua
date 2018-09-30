@@ -4,8 +4,8 @@ local EnvironmentInteractable = require 'components.map.environment-interactable
 
 local function randomTreasurePosition(mapGrid)
   local rows, cols = #mapGrid, #mapGrid[1]
-  return math.random(10, cols) * config.gridSize,
-    math.random(10, rows) * config.gridSize
+  return math.random(10, 20) * config.gridSize,
+    math.random(10, 20) * config.gridSize
 end
 
 local function addTreasureCaches(scene)
@@ -15,7 +15,11 @@ local function addTreasureCaches(scene)
     local x, y = randomTreasurePosition(mapGrid)
     EnvironmentInteractable.create({
       x = x,
-      y = y
+      y = y,
+      itemData = {
+        level = 1,
+        dropRate = 20
+      },
     }):setParent(scene)
   end
 end

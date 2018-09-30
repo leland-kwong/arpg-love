@@ -33,6 +33,7 @@ end, {}))
 local EnvironmentInteractable = {
   -- debug = true,
   group = groups.all,
+  itemLevel = 0,
   maxHealth = 1,
   experience = 0,
   opacity = 1,

@@ -24,11 +24,10 @@ local function insertTestItems(rootStore)
   rootStore:addItemToInventory(require(itemsPath..'.pod-module-hammer').create())
   rootStore:addItemToInventory(require(itemsPath..'.pod-module-fireball').create())
 
-  local generateRandomItem = require 'components.loot-generator.algorithm-1'
-  for i=1, 10 do
-    rootStore:addItemToInventory(
-      generateRandomItem()
-    )
+  local generateRandomItems = require 'components.loot-generator.algorithm-1'
+  local items = generateRandomItems(1, 10 * 100)
+  for i=1, #items do
+    rootStore:addItemToInventory(items[i])
   end
 end
 

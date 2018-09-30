@@ -75,6 +75,10 @@ return function()
     -- debug = true,
     scale = 1,
     z = 10,
+    itemData = {
+      level = 1,
+      dropRate = 20
+    },
     heightOffset = math.random(0, heightChange),
     heightChange = heightChange,
     moveSpeed = 100,

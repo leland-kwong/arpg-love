@@ -76,6 +76,10 @@ return function()
     armor = 250,
     moveSpeed = 80,
     maxHealth = 20,
+    itemData = {
+      level = 1,
+      dropRate = 20
+    },
     experience = 1,
     w = spriteWidth,
     h = spriteHeight,

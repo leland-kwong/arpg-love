@@ -46,10 +46,11 @@ local Groups = {
   gui = Component.newGroup(),
   hud = Component.newGroup(),
   character = Component.newGroup({
-    onComponentEnter = function(_, c)      
+    onComponentEnter = function(_, c)
       local hitManager = require 'modules.hit-manager'
       hitManager.setup(c)
       c.isCharacter = true
+      c.itemLevel = c.itemLevel or 0
     end
   }),
   -- used for handling system/os related functionality

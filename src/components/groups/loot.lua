@@ -30,14 +30,18 @@ local function generateLoot(c, item)
   LootGenerator.create({
     x = dropX,
     y = dropY,
-    item = lootAlgorithm(),
+    item = item,
   }):setParent(parent)
 end
 
 return {
   system = Component.newSystem({
     onComponentEnter = function(_, c)
-      return generateLoot(c)
+      local iData = c.itemData
+      local items = lootAlgorithm(iData.level, iData.dropRate)
+      for i=1, #items do
+        generateLoot(c, items[i])
+      end
     end
   })
 }

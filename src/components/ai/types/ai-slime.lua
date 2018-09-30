@@ -13,6 +13,7 @@ local SlimeAttack = Component.createFactory({
   group = groups.all,
   minDamage = 5,
   maxDamage = 10,
+  itemLevel = 1,
   attackTime = 0.2,
   init = function(self)
     local items, len = collisionWorlds.map:queryRect(
@@ -148,6 +149,10 @@ return function()
 
   return {
     modifierNames = {},
+    itemData = {
+      level = 2,
+      dropRate = 30
+    },
     dataSheet = dataSheet,
     moveSpeed = 110,
     maxHealth = 30,

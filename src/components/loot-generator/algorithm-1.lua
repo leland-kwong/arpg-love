@@ -9,12 +9,6 @@ end
 
 local lootPool = setupChanceFunctions({
   {
-    chance = 20,
-    __call = function()
-      return nil
-    end
-  },
-  {
     chance = 3,
     __call = generator(itemsPath..'pod-module-fireball')
   },
@@ -44,4 +38,32 @@ local lootPool = setupChanceFunctions({
   }
 })
 
-return lootPool
+local function getRate(dropRate)
+  return (dropRate < 1) and dropRate or 1
+end
+
+local socket = require 'socket'
+math.randomseed(socket.gettime())
+
+local function generateRandomItem(itemLevel, dropRate)
+  assert(type(itemLevel) == 'number')
+  assert(type(dropRate) == 'number')
+
+  local lootList = {}
+  local multiplier = 100
+  local randMax = 100 * multiplier
+
+  -- if this is over 0 then that means we should roll again for a chance at more items
+  while getRate(dropRate) > 0 do
+    local rand = math.random(0, randMax)
+    local success = rand <= dropRate * multiplier
+    if success then
+      table.insert(lootList, lootPool())
+    end
+    dropRate = dropRate - multiplier
+  end
+
+  return lootList
+end
+
+return generateRandomItem
