@@ -5,7 +5,6 @@ local TreasureChest = require 'components.treasure-chest'
 local config = require 'config.config'
 local msgBus = require 'components.msg-bus'
 local GroundFlame = require 'components.particle.ground-flame'
-local EnvironmentInteractable = require 'components.map.environment-interactable'
 local InventoryController = require 'components.item-inventory.controller'
 
 local MainGameTest = {
@@ -49,12 +48,12 @@ function MainGameTest.init(self)
   --   y = 5 * config.gridSize
   -- }):setParent(self)
 
-  -- local function randomTreasurePosition()
-  --   local mapGrid = Component.get('MAIN_SCENE').mapGrid
-  --   local rows, cols = #mapGrid, #mapGrid[1]
-  --   return math.random(10, cols) * config.gridSize,
-  --     math.random(10, rows) * config.gridSize
-  -- end
+  local function randomTreasurePosition()
+    local mapGrid = Component.get('MAIN_SCENE').mapGrid
+    local rows, cols = #mapGrid, #mapGrid[1]
+    return math.random(10, cols) * config.gridSize,
+      math.random(10, rows) * config.gridSize
+  end
 
   -- local chestCount = 3
   -- for i=1, chestCount do
@@ -65,14 +64,14 @@ function MainGameTest.init(self)
   --   }):setParent(self)
   -- end
 
-  -- local treasureCacheCount = 15
-  -- for i=1, treasureCacheCount do
-  --   local x, y = randomTreasurePosition()
-  --   EnvironmentInteractable.create({
-  --     x = x,
-  --     y = y
-  --   }):setParent(self)
-  -- end
+  local function dungeonTest(sceneRef)
+    if getmetatable(sceneRef) == SceneMain then
+      local dungeonTestSystem = require 'components.groups.dungeon-test'.system
+      sceneRef:addToGroup(dungeonTestSystem)
+    end
+  end
+  msgBus.on(msgBus.SCENE_STACK_PUSH, dungeonTest, 2)
+  msgBus.on(msgBus.SCENE_STACK_REPLACE, dungeonTest, 2)
 end
 
 return Component.createFactory(MainGameTest)

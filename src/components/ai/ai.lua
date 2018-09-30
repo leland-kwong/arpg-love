@@ -352,10 +352,6 @@ function Ai.update(self, dt)
 
   handleAggro(self, dt)
   if self.destroyedAnimation then
-    local complete = self.destroyedAnimation:update(dt)
-    if complete then
-      self:delete(true)
-    end
     return
   end
 
@@ -707,22 +703,7 @@ function Ai.init(self)
     end
   })(aiPathWithAstar())
 
-  self.listeners = {
-    msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
-      if msgValue.parent ~= self then
-        return msgValue
-      end
-
-      self:onDestroyStart()
-      return msgValue
-    end)
-  }
-
   self.onInit(self)
-end
-
-function Ai.final(self)
-  msgBus.off(self.listeners)
 end
 
 function Ai.serialize(self)

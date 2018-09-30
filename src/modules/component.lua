@@ -9,7 +9,7 @@ local setProp = require 'utils.set-prop'
 
 local M = {}
 local allComponentsById = {}
-local EMPTY = {}
+local EMPTY = objectUtils.setReadOnly({})
 
 -- built-in defaults
 local floor = math.floor
@@ -215,9 +215,9 @@ function M.createFactory(blueprint)
     return self[prop]
   end
 
-  function blueprint:addToGroup(group)
+  function blueprint:addToGroup(group, data)
     self.groups = self.groups or {}
-    self.groups[group] = true
+    self.groups[group] = data or EMPTY
     group.addComponent(self)
     return self
   end
@@ -377,7 +377,17 @@ function M.newGroup(groupDefinition)
   return Group
 end
 
-function M.getGroups(groups)
+M.newSystem = M.newGroup
+M.systems = M.groups
+
+function M.addToGroup(component, group, data)
+  component:addToGroup(group, data)
+  return M
+end
+
+function M.removeFromGroup(component, group)
+  component:removeFromGroup(group, data)
+  return M
 end
 
 function M.get(id)

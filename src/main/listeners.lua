@@ -9,20 +9,23 @@ msgBus.on(msgBus.SCENE_STACK_PUSH, function(msgValue)
   local sceneRef = nextScene.scene.create(nextScene.props)
   globalState.activeScene = sceneRef
   globalState.sceneStack:push(nextScene)
-end)
+  return sceneRef
+end, 1)
 
 msgBus.on(msgBus.SCENE_STACK_POP, function()
   if globalState.activeScene then
     globalState.activeScene:delete(true)
   end
   local poppedScene = globalState.sceneStack:pop()
-  globalState.activeScene = poppedScene.scene.create(poppedScene.props)
-end)
+  local sceneRef = poppedScene.scene.create(poppedScene.props)
+  globalState.activeScene = sceneRef
+  return sceneRef
+end, 1)
 
 msgBus.on(msgBus.SCENE_STACK_REPLACE, function(nextScene)
   globalState.sceneStack:clear()
-  msgBus.send(msgBus.SCENE_STACK_PUSH, nextScene)
-end)
+  return msgBus.send(msgBus.SCENE_STACK_PUSH, nextScene)
+end, 1)
 
 msgBus.on(msgBus.SET_CONFIG, function(msgValue)
   local configChanges = msgValue

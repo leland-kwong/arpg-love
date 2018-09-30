@@ -97,26 +97,6 @@ local MainScene = {
   isNewGame = false
 }
 
-local random = math.random
-local Position = require 'utils.position'
-local function getDroppablePosition(posX, posY, mapGrid, callCount)
-  -- FIXME: prevent infinite recursion from freezing the game. This is a temporary fix.
-  callCount = (callCount or 0)
-
-  local dropX, dropY = posX + random(0, 16), posY + random(0, 16)
-  local gridX, gridY = Position.pixelsToGridUnits(dropX, dropY, config.gridSize)
-  local isWalkable = mapGrid[gridY][gridX] == Map.WALKABLE
-  if (not isWalkable) and (callCount < 10) then
-    return getDroppablePosition(
-      posX,
-      posY,
-      mapGrid,
-      (callCount + 1)
-    )
-  end
-  return dropX, dropY
-end
-
 -- custom cursor
 local cursorSize = 64
 local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', cursorSize/2, cursorSize/2)
@@ -278,8 +258,6 @@ function MainScene.init(self)
     end),
 
     msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
-      local lootAlgorithm = require 'components.loot-generator.algorithm-1'
-    local randomItem = lootAlgorithm()
       if randomItem then
         msgBus.send(msgBus.GENERATE_LOOT, {msgValue.x, msgValue.y, randomItem})
       end

@@ -97,11 +97,6 @@ end
 
 function EnvironmentInteractable.update(self, dt)
   if self.destroyedAnimation then
-    local complete = self.destroyedAnimation:update(dt)
-    self.state = complete and states.DESTROYED or states.DESTROYING
-    if self.state == states.DESTROYED then
-      self:delete()
-    end
     return
   end
 

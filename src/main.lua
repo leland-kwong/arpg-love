@@ -18,6 +18,7 @@ local RootScene = require 'scene.sandbox.main'
 local tick = require 'utils.tick'
 local globalState = require 'main.global-state'
 local systemsProfiler = require 'components.profiler.component-groups'
+require 'components.groups.dungeon-test'
 
 local scale = config.scaleFactor
 

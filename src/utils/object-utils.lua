@@ -56,7 +56,7 @@ Object.extend = Object.immutableApply
 
 local readOnlyMetatable = {
 	__newindex = function()
-		error('this data is read only')
+		error('table is read only')
 	end
 }
 function Object.setReadOnly(o)

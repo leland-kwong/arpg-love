@@ -176,7 +176,7 @@ function LootGenerator.init(self)
   assert(self.item ~= nil, 'item must be provided')
 
   local parent = self
-  local rootStore = self.rootStore
+  local rootStore = msgBus.send(msgBus.GAME_STATE_GET)
   local screenX, screenY = self.x, self.y
   local item = self.item
 
