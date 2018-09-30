@@ -23,25 +23,21 @@ local function getDroppablePosition(posX, posY, mapGrid, callCount)
   return dropX, dropY
 end
 
-local function generateLoot(x, y, item)
+local function generateLoot(c, item)
   local LootGenerator = require'components.loot-generator.loot-generator'
-  if not item then
-    return
-  end
   local mapGrid = Component.get('MAIN_SCENE').mapGrid
-  local dropX, dropY = getDroppablePosition(x, y, mapGrid)
+  local dropX, dropY = getDroppablePosition(c.x, c.y, mapGrid)
   LootGenerator.create({
     x = dropX,
     y = dropY,
-    item = item,
+    item = lootAlgorithm(),
   }):setParent(parent)
 end
 
 return {
   system = Component.newSystem({
     onComponentEnter = function(_, c)
-      local randomItem = lootAlgorithm()
-      return generateLoot(c.x, c.y, randomItem)
+      return generateLoot(c)
     end
   })
 }

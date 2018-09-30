@@ -19,7 +19,7 @@ return function(dt)
     local hitManager = require 'modules.hit-manager'
     local hitCount = hitManager(c, dt, c.onDamageTaken)
     if c.isDestroyed and (not c.destroyedAnimation) then
-      c.addToGroup(c, lootSystem)
+      Component.addToGroup(c, lootSystem)
       if c.onDestroyStart then
         c:onDestroyStart()
       end
