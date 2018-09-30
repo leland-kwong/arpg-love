@@ -18,12 +18,19 @@ return function(dt)
   for _,c in pairs(groups.character.getAll()) do
     local hitManager = require 'modules.hit-manager'
     local hitCount = hitManager(c, dt, c.onDamageTaken)
-    if c.isDestroyed and (not c.destroyedAnimation) then
+    if c.isDestroyed then
+      if c.destroyedAnimation then
+        local complete = c.destroyedAnimation:update(dt)
+        if complete then
+          c:delete(true)
+        end
+        return
+      end
+      c.destroyedAnimation = tween.new(0.5, c, {opacity = 0}, tween.easing.outCubic)
       Component.addToGroup(c, lootSystem)
       if c.onDestroyStart then
         c:onDestroyStart()
-      end
-      c.destroyedAnimation = tween.new(0.5, c, {opacity = 0}, tween.easing.outCubic)
+      end      
       c.collision:delete()
       msgBus.send(msgBus.ENTITY_DESTROYED, {
         parent = c,
@@ -31,12 +38,6 @@ return function(dt)
         y = c.y,
         experience = c.experience
       })
-    end
-    if c.destroyedAnimation then
-      local complete = c.destroyedAnimation:update(dt)
-      if complete then
-        c:delete(true)
-      end
     end
   end
 end
