@@ -157,9 +157,10 @@ end
 
 local max, random = math.max, math.random
 
-local function handleHits(self, dt)
+local function handleAggro(self, dt)
   local previouslyAggravated = self.isAggravated
-  if self.hasHits then
+  local hasHits = self.hitCount > 0
+  if hasHits then
     self.isAggravated = true
     if (not previouslyAggravated) then
       spreadAggroToAllies(self)
@@ -349,7 +350,7 @@ function Ai.update(self, dt)
   self.frameCount = self.frameCount + 1
   self.attackRecoveryTime = self.attackRecoveryTime - dt
 
-  handleHits(self, dt)
+  handleAggro(self, dt)
   if self.destroyedAnimation then
     local complete = self.destroyedAnimation:update(dt)
     if complete then
