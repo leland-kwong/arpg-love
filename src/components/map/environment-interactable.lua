@@ -83,7 +83,7 @@ function EnvironmentInteractable.init(self)
       end
     end),
 
-    msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
+    msgBus.on(msgBus.ENTITY_DESTROYED, function(msgValue)
       if msgValue.parent == self then
         local source = love.audio.newSource(
           'built/sounds/treasure-cache-demolish.wav',

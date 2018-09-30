@@ -25,6 +25,12 @@ return function(dt)
       end
       c.destroyedAnimation = tween.new(0.5, c, {opacity = 0}, tween.easing.outCubic)
       c.collision:delete()
+      msgBus.send(msgBus.ENTITY_DESTROYED, {
+        parent = c,
+        x = c.x,
+        y = c.y,
+        experience = c.experience
+      })
     end
     if c.destroyedAnimation then
       local complete = c.destroyedAnimation:update(dt)

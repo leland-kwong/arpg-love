@@ -43,7 +43,7 @@ Whenever an event occurs, it sends that information to the event bus. Each event
 - PLAYER_ADD_HEAL_SOURCE_RECEIVED
 - PLAYER_AURA_TRIGGER
 - ENEMY_ATTACK
-- ENEMY_DESTROYED
+- ENTITY_DESTROYED
 
 ## Static vs dynamic modifiers
 

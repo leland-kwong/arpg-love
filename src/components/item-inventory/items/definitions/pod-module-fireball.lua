@@ -118,7 +118,7 @@ return itemDefs.registerType({
 			local upgrades = definition.upgrades
 
 			local listeners = {
-				msgBus.on(msgBus.ENEMY_DESTROYED, function()
+				msgBus.on(msgBus.ENTITY_DESTROYED, function()
 					onEnemyDestroyedIncreaseDamage(self)
 				end)
 			}

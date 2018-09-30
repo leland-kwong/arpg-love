@@ -47,17 +47,7 @@ local function onDamageTaken(self, actualDamage, actualNonCritDamage, criticalMu
   )
   self.hitAnimation = coroutine.wrap(hitAnimation)
 
-  if self.isDestroyed then
-    msgBus.send(msgBus.ENEMY_DESTROYED, {
-      parent = self,
-      x = self.x,
-      y = self.y,
-      experience = self.experience
-    })
-    return
-  end
-
-if actualLightningDamage > 0 then
+  if actualLightningDamage > 0 then
     love.audio.stop(Sound.ELECTRIC_SHOCK_SHORT)
     love.audio.play(Sound.ELECTRIC_SHOCK_SHORT)
   end

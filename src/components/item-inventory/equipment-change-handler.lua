@@ -83,7 +83,7 @@ msgBus.on(msgBus.EQUIPMENT_CHANGE, function()
 		local itemState = itemDefinition.getState(item)
 		msgBus.send(msgBus.ITEM_EQUIPPED, item)
 		itemState.listeners = {
-			msgBus.on(msgBus.ENEMY_DESTROYED, function(v)
+			msgBus.on(msgBus.ENTITY_DESTROYED, function(v)
 				item.experience = item.experience + v.experience
 				local nextUpgradeLevel = getHighestUpgradeUnlocked(upgrades, item)
 				local newUpgradeUnlocked = nextUpgradeLevel > lastUpgradeUnlocked
