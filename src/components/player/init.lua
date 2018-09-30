@@ -15,7 +15,6 @@ local memoize = require 'utils.memoize'
 local LineOfSight = memoize(require'modules.line-of-sight')
 local Math = require 'utils.math'
 local getDist = memoize(require('utils.math').dist)
-local hitManager = require 'modules.hit-manager'
 local WeaponCore = require 'components.player.weapon-core'
 local InventoryController = require 'components.item-inventory.controller'
 local Inventory = require 'components.item-inventory.inventory'
@@ -120,7 +119,9 @@ local function connectAutoSave(parent)
   end
   local autoSaveTimer = tick.recur(saveState, 0.5)
   Component.create({
-    group = groups.system,
+    init = function(self)
+      self:addToGroup(groups.system)
+    end,
     final = function()
       autoSaveTimer:stop()
     end
@@ -146,6 +147,7 @@ local Player = {
   mapGrid = nil,
 
   init = function(self)
+    self:addToGroup(groups.character)
     self.listeners = {
       msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function(msgValue)
         local newModifiers = msgValue
@@ -210,15 +212,6 @@ local Player = {
         msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
       end),
 
-      msgBus.on(msgBus.CHARACTER_HIT, function(msg)
-        if msg.parent == self then
-          local uid = require 'utils.uid'
-          local hitId = msg.source or uid()
-          self.hits[hitId] = msg
-        end
-        return msg
-      end),
-
       msgBus.on(msgBus.ITEM_PICKUP, function(msg)
         local item = msg
         local calcDist = require'utils.math'.dist
@@ -243,12 +236,11 @@ local Player = {
       rootStore = msgBus.send(msgBus.GAME_STATE_GET)
     }):setParent(self.hudRoot)
     connectInventory()
-    self.hitManagerOnDamageTaken = function(self, actualDamage, actualNonCritDamage, criticalMultiplier)
+    self.onDamageTaken = function(self, actualDamage, actualNonCritDamage, criticalMultiplier)
       if (actualDamage > 0) then
         msgBus.send(msgBus.PLAYER_HIT_RECEIVED, actualDamage)
       end
     end
-    self.hits = {}
     self.getFlowField = FlowField(function (grid, x, y, dist)
       local row = grid[y]
       local cell = row and row[x]
@@ -440,7 +432,6 @@ end
 function Player.update(self, dt)
   self.attackRecoveryTime = self.attackRecoveryTime - dt
   self.equipmentModifiers = self.rootStore:get().statModifiers
-  hitManager(self, dt, self.hitManagerOnDamageTaken)
   local nextX, nextY, totalMoveSpeed = handleMovement(self, dt)
   handleAnimation(self, dt, nextX, nextY, totalMoveSpeed)
   handleAbilities(self, dt)

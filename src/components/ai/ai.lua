@@ -156,15 +156,10 @@ local function spreadAggroToAllies(self)
 end
 
 local max, random = math.max, math.random
-local onDamageTaken = require 'modules.handle-damage-taken'
 
 local function handleHits(self, dt)
-  local hitManager = require 'modules.hit-manager'
-  local hitCount = hitManager(self, dt, onDamageTaken)
-  local hasHits = hitCount > 0
-
   local previouslyAggravated = self.isAggravated
-  if hasHits then
+  if self.hasHits then
     self.isAggravated = true
     if (not previouslyAggravated) then
       spreadAggroToAllies(self)
@@ -518,7 +513,7 @@ local statusIconAnimations = getStatusIcons()
 local function drawStatusEffects(self, statusIcons)
   local offsetX = 0
   local iconSize = 20
-  for hitId,hit in pairs(self.hits) do
+  for hitId,hit in pairs(self.hitData) do
     if hit.statusIcon then
       love.graphics.draw(
         animationFactory.atlas,
@@ -636,6 +631,9 @@ function Ai.init(self)
   local scale = self.scale
   local gridSize = self.gridSize
 
+  self:addToGroup(groups.character)
+  self.onDamageTaken = require 'modules.handle-damage-taken'
+
   local Lights = require 'components.lights'
   Lights.create({
     x = self.x,
@@ -709,18 +707,6 @@ function Ai.init(self)
   })(aiPathWithAstar())
 
   self.listeners = {
-    msgBus.on(msgBus.CHARACTER_HIT, function(msgValue)
-      if msgValue.parent ~= self then
-        return msgValue
-      end
-
-      local uid = require 'utils.uid'
-      local hitId = msgValue.source or uid()
-      self.hits[hitId] = msgValue
-
-      return msgValue
-    end),
-
     msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
       if msgValue.parent ~= self then
         return msgValue

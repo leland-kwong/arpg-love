@@ -171,10 +171,12 @@ ChainLightning.init = function(self)
       self.polyLine[polyLineIndex + 4] = subject.y
 
       if animationDone then
-        msgBus.send(msgBus.CHARACTER_HIT, {
-          parent = currentTarget,
-          damage = math.random(self.minDamage, self.maxDamage)
-        })
+        if currentTarget.isComponent then
+          msgBus.send(msgBus.CHARACTER_HIT, {
+            parent = currentTarget,
+            damage = math.random(self.minDamage, self.maxDamage)
+          })
+        end
         previousTarget = currentTarget
         targetIndex = targetIndex + 1
       end

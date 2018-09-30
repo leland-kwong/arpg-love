@@ -37,7 +37,7 @@ function FrostShot.use(self, _, targetX, targetY)
     , x2 = targetX
     , y2 = targetY
     , speed = 115
-    , lifeTime = 2.5
+    , lifeTime = 60
     , targetGroup = collisionGroups.player
     , minDamage = 1
     , maxDamage = 2

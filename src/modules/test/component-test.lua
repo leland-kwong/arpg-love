@@ -59,7 +59,7 @@ local dt = 1
 group.updateAll(dt)
 group.drawAll()
 
-group.delete(component)
+component:delete()
 group.updateAll(dt)
 
 assert(#calls.init == 1)

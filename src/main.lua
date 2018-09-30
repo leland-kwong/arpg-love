@@ -17,6 +17,7 @@ local SceneMain = require 'scene.scene-main'
 local RootScene = require 'scene.sandbox.main'
 local tick = require 'utils.tick'
 local globalState = require 'main.global-state'
+local systemsProfiler = require 'components.profiler.component-groups'
 
 local scale = config.scaleFactor
 
@@ -34,14 +35,21 @@ function love.load()
 
   -- console debugging
   local console = Console.create()
-  require 'components.profiler.component-groups'(console)
   require 'main.listeners'
 end
 
+local characterSystem = msgBus.send(msgBus.PROFILE_FUNC, {
+  name = 'character',
+  call = require 'components.groups.character'
+})
+
 function love.update(dt)
+  systemsProfiler()
+
   tick.update(dt)
 
   camera:update(dt)
+  characterSystem(dt)
   groups.firstLayer.updateAll(dt)
   groups.all.updateAll(dt)
   groups.overlay.updateAll(dt)

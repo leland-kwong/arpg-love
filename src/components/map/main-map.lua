@@ -151,12 +151,11 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
       ox,
       oy
     )
-
     love.graphics.pop()
-    love.graphics.setCanvas()
   end,
 
   renderEnd = function(self)
+    love.graphics.setCanvas()
     love.graphics.setColor(1,1,1)
     love.graphics.draw(self.floorCanvas)
     love.graphics.draw(self.wallsCanvas)

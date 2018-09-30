@@ -45,7 +45,13 @@ local Groups = {
   debug = Component.newGroup(),
   gui = Component.newGroup(),
   hud = Component.newGroup(),
-
+  character = Component.newGroup({
+    onComponentEnter = function(_, c)
+      local hitManager = require 'modules.hit-manager'
+      hitManager.setup(c)
+      c.isCharacter = true
+    end
+  }),
   -- used for handling system/os related functionality
   system = Component.newGroup()
 }

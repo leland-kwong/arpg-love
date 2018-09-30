@@ -9,6 +9,7 @@ local setProp = require 'utils.set-prop'
 
 local M = {}
 local allComponentsById = {}
+local EMPTY = {}
 
 -- built-in defaults
 local floor = math.floor
@@ -89,7 +90,7 @@ local baseProps = {
       2
     )
   end,
-  _isComponent = true,
+  isComponent = true,
 }
 
 local function cleanupCollisionObjects(self)
@@ -125,7 +126,7 @@ function M.createFactory(blueprint)
     assert(type(props) == 'table' or props == nil, 'props must be of type `table` or `nil`')
     local c = setProp(props or {}, isDebug)
     assert(
-      not c._isComponent,
+      not c.isComponent,
       invalidPropsErrorMsg
     )
 
@@ -137,14 +138,15 @@ function M.createFactory(blueprint)
 
     -- type check
     if isDebug then
-      assert(c.group ~= nil, 'a default `group` must be provided')
       tc.validate(c.x, tc.NUMBER, false) -- x-axis position
       tc.validate(c.y, tc.NUMBER, false) -- y-axis position
       tc.validate(c.angle, tc.NUMBER, false)
     end
 
-    -- add component to default group first
-    c.group.addComponent(c)
+    -- add component to default group
+    if c.group then
+      c:addToGroup(c.group)
+    end
     c:init()
     return c
   end
@@ -213,12 +215,15 @@ function M.createFactory(blueprint)
     return self[prop]
   end
 
-  function blueprint:setGroup(group)
-    if self.group then
-      self.group.removeComponent(self)
-    end
+  function blueprint:addToGroup(group)
+    self.groups = self.groups or {}
+    self.groups[group] = true
     group.addComponent(self)
-    self.group = group
+    return self
+  end
+
+  function blueprint:removeFromGroup(group)
+    group.removeComponent(self)
     return self
   end
 
@@ -235,9 +240,14 @@ function M.createFactory(blueprint)
       self._children = nil
     end
 
-    self.group.delete(self)
     cleanupCollisionObjects(self)
     self._deleted = true
+    self:final()
+
+    -- remove from associated group
+    for group in pairs(self.groups or EMPTY) do
+      group.removeComponent(self)
+    end
     return self
   end
 
@@ -255,8 +265,24 @@ function M.createFactory(blueprint)
 
   function blueprint:checkOutOfBounds(threshold)
     threshold = threshold or 0
-    return (self.outOfBoundsX > threshold) or
-      (self.outOfBoundsY > threshold)
+    local camera = require 'components.camera'
+    local west, east, north, south = camera:getBounds()
+    -- add bounds data
+    local x, y = self.x, self.y
+    local outOfBoundsX, outOfBoundsY = 0, 0
+    if x < west then
+      outOfBoundsX = west - x
+    elseif x > east then
+      outOfBoundsX = x - east
+    end
+    if y < north then
+      outOfBoundsY = north - y
+    elseif y > south then
+      outOfBoundsY = y - south
+    end
+
+    return (outOfBoundsX > threshold) or
+      (outOfBoundsY > threshold)
   end
 
   -- default methods
@@ -277,6 +303,8 @@ function M.createFactory(blueprint)
   return blueprint
 end
 
+M.groups = {}
+
 function M.newGroup(groupDefinition)
   -- apply any missing default options to group definition
   groupDefinition = objectUtils.assign(
@@ -292,29 +320,9 @@ function M.newGroup(groupDefinition)
   local count = 0
 
   function Group.updateAll(dt)
-    local camera = require 'components.camera'
-    local west, east, north, south = camera:getBounds()
     for id,c in pairs(componentsById) do
       if (not c._updatedDisabled) then
         c:_update(dt)
-
-        -- add bounds data
-        local x, y = c.x, c.y
-        local isOutsideViewport = false
-        if x < west then
-          isOutsideViewport = true
-          c.outOfBoundsX = west - x
-        elseif x > east then
-          isOutsideViewport = true
-          c.outOfBoundsX = x - east
-        elseif y < north then
-          isOutsideViewport = true
-          c.outOfBoundsY = north - y
-        elseif y > south then
-          isOutsideViewport = true
-          c.outOfBoundsY = y - south
-        end
-        c.isOutsideViewport = isOutsideViewport
       end
     end
 
@@ -345,40 +353,31 @@ function M.newGroup(groupDefinition)
   function Group.addComponent(component)
     count = count + 1
     local id = component:getId()
-
     allComponentsById[id] = component
     componentsById[id] = component
+    if Group.onComponentEnter then
+      Group:onComponentEnter(component)
+    end
   end
 
   function Group.removeComponent(component)
     count = count - 1
     local id = component:getId()
     componentsById[id] = nil
-  end
-
-  function Group.delete(component)
-    if not Group.hasComponent(component) then
-      print('[WARNING] component already deleted:', component._id)
-      return
+    if Group.onComponentLeave then
+      Group:onComponentLeave(component)
     end
-
-    local id = component:getId()
-    componentsById[id] = nil
-    allComponentsById[id] = nil
-    count = count - 1
-    component:final()
-    return Group
-  end
-
-  function Group.hasComponent(component)
-    return componentsById[component._id]
   end
 
   function Group.getAll()
     return componentsById
   end
 
+  M.groups[Group] = Group
   return Group
+end
+
+function M.getGroups(groups)
 end
 
 function M.get(id)

@@ -34,6 +34,7 @@ function PelletShot.use(self, _, targetX, targetY)
     , y = self.y
     , x2 = targetX
     , y2 = targetY
+    , lifetime = 60
     , speed = 125
     , targetGroup = collisionGroups.create(collisionGroups.player, collisionGroups.obstacle)
   })

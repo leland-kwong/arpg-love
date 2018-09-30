@@ -52,6 +52,9 @@ for k,group in pairs(groups) do
 end
 
 return function()
+  if (not msgBus.send(msgBus.IS_CONSOLE_ENABLED)) then
+    return
+  end
   -- add total average execution time
   table.insert(profileData, Color.WHITE)
   table.insert(profileData, '\ntotal avg execution time: '..string.format('%0.2f', totalAverageExecutionTime))

@@ -50,6 +50,8 @@ local function hitAnimation()
 end
 
 function EnvironmentInteractable.init(self)
+  self:addToGroup(groups.character)
+  self.onDamageTaken = onDamageTaken
   self.health = self.maxHealth
 
   self.animation = AnimationFactory:newStaticSprite(
@@ -74,9 +76,6 @@ function EnvironmentInteractable.init(self)
     msgBus.on(msgBus.CHARACTER_HIT, function(msgValue)
       if msgValue.parent == self then
         self.hitAnimation = coroutine.wrap(hitAnimation)
-        local uid = require 'utils.uid'
-        local hitId = msgValue.source or uid()
-        self.hits[hitId] = msgValue
 
         local source = love.audio.newSource('built/sounds/attack-impact-1.wav', 'static')
         source:setVolume(0.4)
@@ -105,9 +104,6 @@ function EnvironmentInteractable.update(self, dt)
     end
     return
   end
-
-  local hitManager = require 'modules.hit-manager'
-  local hitCount = hitManager(self, dt, onDamageTaken)
 
   self.state = self.hitAnimation and states.HIT or states.IDLE
   if self.hitAnimation then
