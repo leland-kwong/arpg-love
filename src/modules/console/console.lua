@@ -51,6 +51,11 @@ msgBus.on(msgBus.KEY_PRESSED, function(v)
   return v
 end)
 
+msgBus.IS_CONSOLE_ENABLED = 'IS_CONSOLE_ENABLED'
+msgBus.on(msgBus.IS_CONSOLE_ENABLED, function()
+  return state.showConsole
+end)
+
 msgBus.on(msgBus.KEY_RELEASED, function(v)
   keysPressed[v.key] = false
   return v

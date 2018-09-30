@@ -1,5 +1,7 @@
+local Component = 'modules.component'
 local GuiText = require 'components.gui.gui-text'
 local groups = require 'components.groups'
+local msgBus = require 'components.msg-bus'
 local Color = require 'modules.color'
 
 local guiTextLayer = GuiText.create({
@@ -7,38 +9,56 @@ local guiTextLayer = GuiText.create({
   outline = false
 })
 
-return function(console)
-  local i = 0
-  local yStart = 210
+local profileData = {}
+local totalAverageExecutionTime = 0
 
-  for k,v in pairs(groups) do
-    i = i + 1
-    local y1 = i
-
-    local originalUpdateAll = groups[k].updateAll
-    local totalTimeUpdate = 0
-    local framesUpdate = 0
-    groups[k].updateAll = require'utils.perf'({
-      done = function(t)
-        totalTimeUpdate = totalTimeUpdate + t
-        framesUpdate = framesUpdate + 1
-        local averageTime = totalTimeUpdate / framesUpdate
-        guiTextLayer:add(k..' update: '..averageTime, Color.WHITE, 5, y1 * 10 + yStart)
+msgBus.PROFILE_FUNC = 'PROFILE_FUNC'
+msgBus.on(msgBus.PROFILE_FUNC, function(profileProps)
+  return require 'utils.perf'({
+    done = function(_, totalTime, callCount)
+      local averageTime = totalTime / callCount
+      totalAverageExecutionTime = totalAverageExecutionTime + averageTime
+      local passedThreshold = averageTime >= (profileProps.threshold or 0.1)
+      if passedThreshold and (not msgBus.send(msgBus.IS_CONSOLE_ENABLED)) then
+        return
       end
-    })(originalUpdateAll)
+      table.insert(profileData, Color.WHITE)
+      table.insert(profileData, '\n'..profileProps.name..' '..string.format('%0.2f', averageTime))
+    end
+  })(profileProps.call)
+end)
 
-    i = i + 1
-    local y2 = i
-    local totalTimeDraw = 0
-    local framesDraw = 0
-    local originalDrawAll = groups[k].drawAll
-    groups[k].drawAll = require'utils.perf'({
-      done = function(t)
-        totalTimeDraw = totalTimeDraw + t
-        framesDraw = framesDraw + 1
-        local averageTime = totalTimeDraw / framesDraw
-        guiTextLayer:add(k..' draw: '..averageTime, Color.WHITE, 5, y2 * 10 + yStart)
+local function profileFn(groupName, callback)
+  return require'utils.perf'({
+    done = function(_, totalTime, callCount)
+      if (not msgBus.send(msgBus.IS_CONSOLE_ENABLED)) then
+        return
       end
-    })(originalDrawAll)
-  end
+
+      local averageTime = totalTime / callCount
+      totalAverageExecutionTime = totalAverageExecutionTime + averageTime
+      if averageTime >= 0.1 then
+        table.insert(profileData, Color.WHITE)
+        table.insert(profileData, '\n'..groupName..': '..string.format('%0.2f', averageTime))
+      end
+    end
+  })(callback)
+end
+
+-- profile all systems
+for k,group in pairs(groups) do
+  group.updateAll = profileFn(k..' update', group.updateAll)
+  group.drawAll = profileFn(k..' draw', group.drawAll)
+end
+
+return function()
+  -- add total average execution time
+  table.insert(profileData, Color.WHITE)
+  table.insert(profileData, '\ntotal avg execution time: '..string.format('%0.2f', totalAverageExecutionTime))
+  -- reset
+  totalAverageExecutionTime = 0
+
+  guiTextLayer:addf(profileData, 200, 'left', 5, 210)
+  -- reset
+  profileData = {}
 end
