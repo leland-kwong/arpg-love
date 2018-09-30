@@ -58,7 +58,6 @@ end)
 
 local Console = {
   name = 'Console',
-  group = groups.system,
   stats = {
     accumulatedMemoryUsed = 0,
     currentMemoryUsed = 0,
@@ -108,6 +107,7 @@ end
 consoleLog = Console.debug
 
 function Console.init(self)
+  self:addToGroup(groups.system)
   local perf = require 'utils.perf'
   msgBus.send = perf({
     done = function(_, totalTime, callCount)
