@@ -14,7 +14,7 @@ local Light = {
     local w, h = camera.w, camera.h
     local scale = config.scale
     local x, y = self.x, self.y
-    if self:checkOutOfBounds(self.radius) then
+    if self:checkOutOfBounds(self.radius * scale) then
       if self.light then
         self.light:Remove()
       end
