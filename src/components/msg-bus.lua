@@ -17,6 +17,7 @@ if config.isDebug then
       return proxy[name]
     end,
     __newindex = function(_, eventName, eventType)
+      assert(not proxy[eventName], eventName..' is already registered')
       proxy[eventName] = {
         name = eventName,
         type = eventType
