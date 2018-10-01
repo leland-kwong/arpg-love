@@ -142,49 +142,84 @@ All of the following should have a unique id (hashed name) associated with them 
 
 ### Item data structure
 
-#### base item type
+#### base item type data structure
 
 ```lua
 local item = {
-  type = '', -- unique name for the item type
-  name = '', -- unique name for the item if its epic or legendary
+  type = '', -- unique type for the item (hashed for saving and loading)
 
-  onActivate = require 'inventory-active-method', -- active ability when right-clicked inside inventory. For equipment it swaps it with the compatible equipment slot. For consumables it will activate the item.
+  create = function()
+    return {
+      baseModifiers = {
+        -- instance-level base modifiers
+        armor =                         {0, 1}, -- min-max range to roll with
+        percentDamage =                 {0, 1}, -- percent damage increase to all damage types
+        flatDamage =                    {0, 1}, -- flat physical increase
+        weaponDamage =                  {0, 1},
+        moveSpeed =                     0,      -- fixed value to roll with
+        healthRegen =                   {0, 1},
+        maxHealth =                     {0, 1},
+        energyRegen =                   {0, 1},
+        maxEnergy =                     {0, 1},
+        lightningResist =               {0, 1},
+        fireResist =                    {0, 1},
+        coldResist =                    {0, 1},
+        attackTime =                    0,
+        energyCost =                    0,
+        flatPhysicalDamageReduced =     {0, 1},
+        attackTimeReduced =             {0, 1},  -- percent attack time reduction
+        cooldownReduced =               {0, 1},  -- percent cooldown reduction
+        energyCostReduced =             {0, 1},  -- percent energy cost reduction
+        extraExperience =               {0, 1}   -- percent extra experience
+      },
 
-  onActivateWhenEquipped = require 'equipped-active-method', -- active ability when the item is equipped. The ability appears in the hot bar.
+      extraModifiers = {}, -- additional instance-level properties: upgrades, and modifiers from magicals, rares, legendaries, ...
+      rarity = 1,
 
-  properties = { -- base properties that are inherent to the item type
-    armor =                         {0, 1}, -- min-max range to roll with
-    percentDamage =                 {0, 1}, -- percent damage increase to all damage types
-    flatDamage =                    {0, 1}, -- flat physical increase
-    weaponDamage =                  {0, 1},
-    moveSpeed =                     0,      -- fixed value to roll with
-    healthRegen =                   {0, 1},
-    maxHealth =                     {0, 1},
-    energyRegen =                   {0, 1},
-    maxEnergy =                     {0, 1},
-    lightningResist =               {0, 1},
-    fireResist =                    {0, 1},
-    coldResist =                    {0, 1},
-    attackTime =                    0,
-    energyCost =                    0,
-    flatPhysicalDamageReduced =     {0, 1},
-    attackTimeReduced =             {0, 1},  -- percent attack time reduction
-    cooldownReduced =               {0, 1},  -- percent cooldown reduction
-    energyCostReduced =             {0, 1},  -- percent energy cost reduction
-    extraExperience =               {0, 1}   -- percent extra experience
-  },
-  sprite = '', -- name of sprite to render when inside inventory
-  levelRequirement = 1,
-  renderAnimation = '', -- name of sprite to render when equipped
-  experience = 0, -- experience earned while this item was equipped
-  category = 1, -- type of item: "consumable", "weapon", "armor", ...
-  modifiers = { -- instance-level properties: upgrades, and modifiers from magicals, rares, legendaries, ...
-    {
-      type = '', -- hash of the modifier name (we can lookup the file based on this)
-      value = 1, -- the rolled value for the modifier (items with ranges like 1-10)
+      stackSize = 1, -- defaults to 1 (not stackable)
+      maxStackSize = 1, -- defaults to 1
+
+      onActivate = require 'inventory-active-method', -- active ability when right-clicked inside inventory. For equipment it swaps it with the compatible equipment slot. For consumables it will activate the item.
+
+      onActivateWhenEquipped = require 'equipped-active-method', -- active ability when the item is equipped. The ability appears in the hot bar.
     }
-  },
-  rarity = 1
+  end,
+
+  -- static item properties (these properties should only change if code has changed)
+  properties = {
+    title = '', -- unique title for the item
+    sprite = '', -- name of sprite to render when inside inventory
+    levelRequirement = 1,
+    renderAnimation = '', -- name of sprite to render when equipped
+    experience = 0, -- experience earned while this item was equipped
+    category = 1, -- type of item: "consumable", "weapon", "armor", ...
+  }
+}
+```
+
+#### module data structure
+
+```lua
+local module = {
+  type = '', -- unique type (hashed for saving and loading)
+  active = function(item) -- for items with an active ability
+  end,
+  tooltip = function(item) -- every module must have a tooltip
+    return '' or {} -- love formatted string
+  end
+}
+```
+
+#### modifier data structure
+
+```lua
+{
+  name = '', -- unique modifier name (we lookup the file based on this)
+  type = '', -- unique type (we lookup the file based on this)
+  value = 1, -- the rolled value for the modifier (items with ranges like 1-10)
+  onEquip = function()
+  end,
+  final = function()
+  end
 }
 ```

@@ -15,12 +15,17 @@ local tableUtils = require("utils.object-utils")
 local uid = require("utils.uid")
 local itemConfig = require("components.item-inventory.items.config")
 local msgBus = require("components.msg-bus")
+local Enum = require 'utils.enum'
 
 local isDebug = require'config.config'.isDebug
 
 local types = {}
 local items = {
 	types = types,
+	moduleTypes = Enum({
+		'EQUIPMENT_ACTIVE',
+		'INVENTORY_ACTIVE'
+	})
 }
 
 function items.isItem(value)
@@ -54,132 +59,6 @@ function items.getDefinition(item)
 end
 
 local noop = function() end
-local defaultProperties = {
-	-- static sprite to render when equipped
-	renderAnimation = nil,
-
-	onEquip = noop,
-
-	-- tooltip content to render
-	tooltip = noop,
-
-	-- tooltip info for upgrade path
-	tooltipItemUpgrade = noop,
-
-	-- item picked up from ground, given as a reward, etc...
-	onInventoryEnter = noop,
-
-	-- item picked up from inventory cell
-	onInventoryPickup = noop,
-
-	-- item dropped into inventory cell
-	onInventoryDrop = noop,
-
-	-- item is right-clicked in inventory
-	onActivate = noop,
-
-	-- item is equipped and item is in active skill slot
-	onActivateWhenEquipped = nil,
-
-	render = noop,
-
-	modifier = function(self, msgType, msgValue)
-		return msgValue
-	end,
-
-	-- item is unequipped, sold, or destroyed
-	final = noop,
-
-	energyCost = function()
-		return 0
-	end
-}
-
--- setup methods so we can call them with the item
-for method,_ in pairs(defaultProperties) do
-	items[method] = function(item, mainStore)
-		local definition = items.getDefinition(item)
-		if definition == nil then
-			return nil
-		end
-		return definition[method](item, mainStore)
-	end
-end
-
-local itemPropertiesPropTypes = {
-	sprite = {
-		required = true,
-		type = "string"
-	},
-	title = {
-		required = true,
-		type = "string"
-	},
-	rarity = {
-		required = true,
-		type = function(rarity)
-			local found = false
-			for _,v in pairs(itemConfig.rarity) do
-				if rarity == v then
-					found = true
-				end
-			end
-			if not found then
-				error("invalid `rarity` `"..rarity.."` received")
-			end
-		end
-	},
-	category = {
-		required = true,
-		type = function(category)
-			local found = false
-			for _,v in pairs(itemConfig.category) do
-				if category == v then
-					found = true
-				end
-			end
-			if not found then
-				error("invalid `category` `"..category.."` received")
-			end
-		end
-	},
-	upgrades = {
-		type = function(upgrades)
-			local forEach = require 'utils.functional'.forEach
-			forEach(upgrades, function(up)
-				assert(type(up.title) == 'string')
-				assert(type(up.description) == 'string')
-				assert(
-					type(up.props) == 'table' or (up.props == nil)
-				)
-				assert(type(up.experienceRequired) == 'number')
-				assert(
-					type(up.sprite) == 'string' or (up.sprite == nil)
-				)
-			end)
-		end
-	}
-}
-
-local function checkPropTypes(valueToCheck, scope, types)
-	local msgScope = "["..scope.."] "
-	for k,v in pairs(types) do
-
-		local valueAtKey = valueToCheck[k]
-		if v.required then
-			assert(valueAtKey ~= nil, msgScope.."prop `"..k.."` is required")
-		end
-		-- check type
-		if valueAtKey ~= nil then
-			if type(v.type) == "function" then
-				v.type(valueAtKey)
-			else
-				local msg = msgScope.."invalid propType `"..k.."`. Received `"..valueAtKey.."`, expected type "..v.type
-				assert(type(valueAtKey) == v.type, msg)
-			end
-		end
-	end
-end
 
 function items.registerType(itemDefinition)
 	local def = itemDefinition
@@ -192,14 +71,11 @@ function items.registerType(itemDefinition)
 	local isDuplicateType = types[def.type] ~= nil
 	assert(not isDuplicateType, "duplicate item type ".."\""..def.type.."\"")
 
-	types[def.type] = tableUtils.assign({
-		registered = true,
+	types[def.type] = tableUtils.assign(def.properties, {
 		-- factory function thats calls the item's create method
 		-- and returns instance-specific properties.
-		-- Instance-specific properties are static.
 		create = function()
 			local newItem = def.create()
-			-- TODO: nest these under `meta` property
 			newItem.__type = def.type
 			newItem.__id = uid()
 
@@ -209,7 +85,7 @@ function items.registerType(itemDefinition)
 			newItem.maxStackSize = newItem.maxStackSize == nil and 1 or newItem.maxStackSize
 			return newItem
 		end
-	}, defaultProperties, def.properties)
+	})
 
 	if isDebug then
 		assert(itemDefinition ~= nil, "item type missing")
@@ -218,10 +94,38 @@ function items.registerType(itemDefinition)
 			require(file) ~= nil,
 			'Invalid type `'..tostring(def.type)..'`. Type should match the name of the file since its needed for dynamic requires'
 		)
-		checkPropTypes(def.properties, def.type, itemPropertiesPropTypes)
 	end
 
 	return types[def.type]
+end
+
+local modulesById = {}
+
+function items.registerModule(module)
+	local id = module.type .. '_' .. module.name
+	assert(type(module.name) == 'string', 'modules must have a unique name')
+	assert(items.moduleTypes[module.type], 'invalid module type '..module.type)
+	assert(not modulesById[id], 'duplicate module with id '..id)
+	modulesById[id] = module
+	return id
+end
+
+local directoriesByModuleType = {
+	[items.moduleTypes.EQUIPMENT_ACTIVE] = 'equipment-actives',
+	[items.moduleTypes.INVENTORY_ACTIVE] = 'inventory-actives',
+}
+
+local function loadModuleById(id)
+	local start, _end = string.find(id, '[^_]*')
+	local fileName = string.sub(id, start, _end)
+	local type = string.sub(id, _end + 2)
+	local directory = 'components.item-inventory.items.' .. directoriesByModuleType[type]
+	local fullPath = directory.. '.' ..fileName
+	return require(fullPath)
+end
+
+function items.getModuleById(id)
+	return modulesById[id]
 end
 
 local Lru = require 'utils.lru'

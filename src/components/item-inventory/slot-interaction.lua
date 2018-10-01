@@ -176,8 +176,9 @@ local function parseItemModifiers(item)
   for k,_ in pairs(baseModifiers) do
     local parser = modifierParsers[k]
     if parser then
-      if item[k] then
-        local v = item[k]
+      local props = item.baseModifiers
+      local v = props[k]
+      if (v ~= nil) then
         local output = parser(v)
         local length = #output
         for i=1, length, 2 do
@@ -202,7 +203,7 @@ local function drawTooltip(item, x, y, w2, h2, rootStore)
   local posX, posY = x, y
   local padding = 12
   local itemDef = itemDefinition.getDefinition(item)
-  local tooltipContent = itemDef.tooltip(item)
+  local tooltipContent = {Color.WHITE, 'parse content'}
   local tooltipItemUpgrade = itemDef.upgrades
   local tooltipModifierValues = parseItemModifiers(item)
   local levelRequirementText = itemDef.levelRequirement and 'Required level: '..itemDef.levelRequirement or nil
@@ -218,7 +219,7 @@ local function drawTooltip(item, x, y, w2, h2, rootStore)
 
   -- rarity text and dimensions
   local itemGuiConfig = require'components.item-inventory.items.config'
-  local rarity = itemDef.rarity
+  local rarity = item.rarity
   local rarityTitle = itemGuiConfig.rarityTitle[rarity]
   local rarityTextCopy = (rarityTitle and rarityTitle ..' ' or '').. itemGuiConfig.categoryTitle[itemDef.category]
   local rarityX, rarityY = posX + padding,
