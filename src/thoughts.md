@@ -148,7 +148,6 @@ All of the following should have a unique id (hashed name) associated with them 
 local item = {
   type = '', -- unique name for the item type
   name = '', -- unique name for the item if its epic or legendary
-  -- item's active ability
 
   onActivate = require 'inventory-active-method', -- active ability when right-clicked inside inventory. For equipment it swaps it with the compatible equipment slot. For consumables it will activate the item.
 
