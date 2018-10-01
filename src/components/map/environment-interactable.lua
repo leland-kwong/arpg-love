@@ -51,7 +51,7 @@ local function hitAnimation()
 end
 
 function EnvironmentInteractable.init(self)
-  self:addToGroup(groups.character)
+  Component.addToGroup(self, groups.character)
   self.onDamageTaken = onDamageTaken
   self.health = self.maxHealth
 

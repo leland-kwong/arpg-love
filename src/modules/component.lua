@@ -105,6 +105,8 @@ end
 M.groups = {}
 
 function M.addToGroup(component, group, data)
+  component.groups = component.groups or {}
+  component.groups[group] = data or EMPTY
   group.addComponent(component, data)
   return M
 end
@@ -157,7 +159,7 @@ function M.createFactory(blueprint)
 
     -- add component to default group
     if c.group then
-      c:addToGroup(c.group)
+      M.addToGroup(c, c.group)
     end
     c:init()
     return c
@@ -227,18 +229,6 @@ function M.createFactory(blueprint)
     return self[prop]
   end
 
-  function blueprint:addToGroup(group, data)
-    self.groups = self.groups or {}
-    self.groups[group] = data or EMPTY
-    group.addComponent(self)
-    return self
-  end
-
-  function blueprint:removeFromGroup(group)
-    group.removeComponent(self)
-    return self
-  end
-
   function blueprint:delete(recursive)
     if self._deleted then
       return
@@ -257,7 +247,8 @@ function M.createFactory(blueprint)
     self:final()
 
     -- remove from associated group
-    for group in pairs(self.groups or EMPTY) do
+    local ownGroups = self.groups or EMPTY
+    for group in pairs(ownGroups) do
       group.removeComponent(self)
     end
     return self
@@ -374,6 +365,10 @@ function M.newGroup(groupDefinition)
     count = count - 1
     local id = component:getId()
     componentsById[id] = nil
+    -- remove global reference
+    if component._deleted then
+      allComponentsById[id] = nil
+    end
     if Group.onComponentLeave then
       Group:onComponentLeave(component)
     end

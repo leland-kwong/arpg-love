@@ -66,7 +66,7 @@ function MainGameTest.init(self)
   local function dungeonTest(sceneRef)
     if getmetatable(sceneRef) == SceneMain then
       local dungeonTestSystem = require 'components.groups.dungeon-test'.system
-      sceneRef:addToGroup(dungeonTestSystem)
+      Component.addToGroup(sceneRef, dungeonTestSystem)
     end
   end
   msgBus.on(msgBus.SCENE_STACK_PUSH, dungeonTest, 2)

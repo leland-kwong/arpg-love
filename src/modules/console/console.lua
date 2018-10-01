@@ -112,7 +112,7 @@ end
 consoleLog = Console.debug
 
 function Console.init(self)
-  self:addToGroup(groups.system)
+  Component.addToGroup(self, groups.system)
   local perf = require 'utils.perf'
   msgBus.send = perf({
     done = function(_, totalTime, callCount)

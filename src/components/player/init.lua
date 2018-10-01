@@ -122,7 +122,7 @@ local function connectAutoSave(parent)
   local autoSaveTimer = tick.recur(saveState, 0.5)
   Component.create({
     init = function(self)
-      self:addToGroup(groups.system)
+      Component.addToGroup(self, groups.system)
     end,
     final = function()
       autoSaveTimer:stop()
@@ -149,7 +149,7 @@ local Player = {
   mapGrid = nil,
 
   init = function(self)
-    self:addToGroup(groups.character)
+    Component.addToGroup(self, groups.character)
     self.listeners = {
       msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function(msgValue)
         local newModifiers = msgValue

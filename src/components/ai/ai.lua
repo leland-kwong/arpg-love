@@ -628,7 +628,7 @@ function Ai.init(self)
   local scale = self.scale
   local gridSize = self.gridSize
 
-  self:addToGroup(groups.character)
+  Component.addToGroup(self, groups.character)
   self.onDamageTaken = require 'modules.handle-damage-taken'
 
   local Lights = require 'components.lights'
