@@ -128,9 +128,13 @@ end
 
 function M.removeFromGroup(id, group)
   local isIdComponent = type(id) == 'table'
-  local id = isIdComponent and id:getId() or id
+  id = isIdComponent and id:getId() or id
   local name = getGroupName(group)
-  M.groups[name].removeComponent(id)
+  -- check if an entity has been added or not before removing
+  local hasEntity = M.entitiesById[id]
+  if hasEntity then
+    M.groups[name].removeComponent(id)
+  end
   return M
 end
 
