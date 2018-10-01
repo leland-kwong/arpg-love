@@ -6,11 +6,24 @@ local objectUtils = require("utils.object-utils")
 local config = {}
 
 config.rarity = {
+	-- normals roll with no special modifiers
 	NORMAL = 0,
+
+	-- magicals and rares are rolled as normal items with additional modifiers
 	MAGICAL = 1,
 	RARE = 2,
+
+	-- epics and legendaries have a fixed set of modifiers
 	EPIC = 3,
 	LEGENDARY = 4
+}
+
+config.baseDropChance = {
+	[config.rarity.NORMAL] = 40,
+	[config.rarity.MAGICAL] = 30,
+	[config.rarity.RARE] = 18,
+	[config.rarity.EPIC] = 7,
+	[config.rarity.LEGENDARY] = 5
 }
 
 config.rarityColor = {
