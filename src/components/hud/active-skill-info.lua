@@ -33,7 +33,7 @@ local function ActiveConsumableHandler()
     if (not activeItem) or (curCooldown > 0) then
       return skill
     else
-      local activateFn = itemDefinitions.getDefinition(activeItem).onActivateWhenEquipped
+      local activateFn = itemDefinitions.getModuleById(activeItem.onActivateWhenEquipped).active
       if not activateFn then
         return skill
       end

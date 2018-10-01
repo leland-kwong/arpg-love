@@ -112,8 +112,8 @@ function InventoryBlueprint.init(self)
   end
 
   local function inventoryOnItemActivate(item)
-    local d = itemDefs.getDefinition(item)
-    d.onActivate(item)
+    local onActivate = itemDefs.getModuleById(item.onActivate).active
+    onActivate(item)
   end
 
   setupSlotInteractions(
