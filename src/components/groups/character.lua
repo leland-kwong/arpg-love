@@ -24,20 +24,20 @@ return function(dt)
         if complete then
           c:delete(true)
         end
-        return
+      else
+        c.destroyedAnimation = tween.new(0.5, c, {opacity = 0}, tween.easing.outCubic)
+        Component.addToGroup(c, lootSystem, c.itemLevel)
+        if c.onDestroyStart then
+          c:onDestroyStart()
+        end
+        c.collision:delete()
+        msgBus.send(msgBus.ENTITY_DESTROYED, {
+          parent = c,
+          x = c.x,
+          y = c.y,
+          experience = c.experience
+        })
       end
-      c.destroyedAnimation = tween.new(0.5, c, {opacity = 0}, tween.easing.outCubic)
-      Component.addToGroup(c, lootSystem, c.itemLevel)
-      if c.onDestroyStart then
-        c:onDestroyStart()
-      end
-      c.collision:delete()
-      msgBus.send(msgBus.ENTITY_DESTROYED, {
-        parent = c,
-        x = c.x,
-        y = c.y,
-        experience = c.experience
-      })
     end
   end
 end
