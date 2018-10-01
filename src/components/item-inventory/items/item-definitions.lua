@@ -38,14 +38,10 @@ local loadedTypes = {}
 local function requireIfNecessary(item)
 	local iType = item.__type
 	if (not loadedTypes[iType]) then
-		local errorFree, loadedItem = pcall(function()
-			local requirePath = 'components.item-inventory.items.definitions.'..iType
-			local module = require(requirePath)
-			return module
-		end)
-		loadedTypes[iType] = true
+		local loadModule = require 'modules.load-module'
+		local errorFree, loadedItem = loadModule(require('alias').path.itemDefs, iType)
 		if (errorFree and loadedItem) then
-			return items.types[iType]
+			return items.registerType(loadedItem)
 		end
 	end
 	return nil
@@ -71,21 +67,7 @@ function items.registerType(itemDefinition)
 	local isDuplicateType = types[def.type] ~= nil
 	assert(not isDuplicateType, "duplicate item type ".."\""..def.type.."\"")
 
-	types[def.type] = tableUtils.assign(def.properties, {
-		-- factory function thats calls the item's create method
-		-- and returns instance-specific properties.
-		create = function()
-			local newItem = def.create()
-			newItem.__type = def.type
-			newItem.__id = uid()
-
-			-- add default props if needed
-			newItem.experience = newItem.experience or 0
-			newItem.stackSize = newItem.stackSize == nil and 1 or newItem.stackSize
-			newItem.maxStackSize = newItem.maxStackSize == nil and 1 or newItem.maxStackSize
-			return newItem
-		end
-	})
+	types[def.type] = def.properties
 
 	if isDebug then
 		assert(itemDefinition ~= nil, "item type missing")
@@ -97,6 +79,33 @@ function items.registerType(itemDefinition)
 	end
 
 	return types[def.type]
+end
+
+local factoriesByType = {}
+-- Factory function that creates a new instance based on the module's instance props.
+function items.create(module)
+	local createFn = factoriesByType[module.type]
+	if not createFn then
+		local ser = require 'utils.ser'
+		createFn = loadstring(ser(module.instanceProps))
+		factoriesByType[module.type] = createFn
+	end
+
+	local newItem = createFn()
+
+	-- set modifiers to value based on range parameters
+	for k,v in pairs(newItem.baseModifiers) do
+		newItem.baseModifiers[k] = math.random(v[1], v[2])
+	end
+
+	newItem.__type = module.type
+	newItem.__id = uid()
+
+	-- add default props if needed
+	newItem.experience = newItem.experience or 0
+	newItem.stackSize = newItem.stackSize == nil and 1 or newItem.stackSize
+	newItem.maxStackSize = newItem.maxStackSize == nil and 1 or newItem.maxStackSize
+	return newItem
 end
 
 local modulesById = {}

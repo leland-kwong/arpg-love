@@ -1,23 +1,23 @@
-local itemConfig = require("components.item-inventory.items.config")
-local itemDefs = require("components.item-inventory.items.item-definitions")
+local itemConfig = require(require('alias').path.itemConfig)
 
-return itemDefs.registerType({
+return {
 	type = "potion-health",
 
-	create = function()
-		return {
-			baseModifiers =  {
-				heal = {80, 100},
-				duration = 2,
-				armor = math.random(50, 100)
-			},
+	instanceProps = {
+		props = {
+			heal = {80, 100},
+			duration = 2,
+		},
 
-			rarity = itemConfig.rarity.RARE,
+		baseModifiers =  {
+			armor = {50, 100}
+		},
 
-			onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click',
-			onActivateWhenEquipped = require 'components.item-inventory.items.equipment-actives.heal',
-		}
-	end,
+		rarity = itemConfig.rarity.RARE,
+
+		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click',
+		onActivateWhenEquipped = require 'components.item-inventory.items.equipment-actives.heal',
+	},
 
 	properties = {
 		sprite = "potion_48",
@@ -25,4 +25,4 @@ return itemDefs.registerType({
 		baseDropChance = 1,
 		category = itemConfig.category.CONSUMABLE,
 	}
-})
+}
