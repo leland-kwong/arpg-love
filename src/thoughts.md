@@ -155,23 +155,23 @@ local item = {
   onActivateWhenEquipped = require 'equipped-active-method', -- active ability when the item is equipped. The ability appears in the hot bar.
 
   properties = { -- base properties that are inherent to the item type
-    armor = 0,
-    weaponDamage = 0,
-    moveSpeed = 0,
-    healthRegen = 2,
-    maxHealth = 0,
-    energyRegen = 1,
-    maxEnergy = 0,
-    lightningResist = 0,
-    fireResist = 0,
-    coldResist = 0,
-    attackTime = 1,
-    energyCost = 1,
+    armor =               {0, 1}, -- min-max range to roll with
+    weaponDamage =        {0, 1},
+    moveSpeed =           0,      -- fixed value to roll with
+    healthRegen =         {0, 1},
+    maxHealth =           {0, 1},
+    energyRegen =         {0, 1},
+    maxEnergy =           {0, 1},
+    lightningResist =     {0, 1},
+    fireResist =          {0, 1},
+    coldResist =          {0, 1},
+    attackTime =          0,
+    energyCost =          0,
   },
   sprite = '', -- name of sprite to render when inside inventory
   levelRequirement = 1,
   renderAnimation = '', -- name of sprite to render when equipped
-  experience = 0, -- experience earned while this item was equipped  
+  experience = 0, -- experience earned while this item was equipped
   category = 1, -- type of item: "consumable", "weapon", "armor", ...
   modifiers = { -- instance-level properties: upgrades, and modifiers from magicals, rares, legendaries, ...
     {
