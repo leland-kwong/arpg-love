@@ -103,16 +103,34 @@ local function cleanupCollisionObjects(self)
 end
 
 M.groups = {}
+M.entitiesById = {}
 
-function M.addToGroup(component, group, data)
-  component.groups = component.groups or {}
-  component.groups[group] = data or EMPTY
-  group.addComponent(component, data)
+local function getGroupName(group)
+  return type(group) == 'string' and group or group.name
+end
+
+function M.addToGroup(id, group, data)
+  -- backwards compatiblity with older component system
+  local isIdComponent = type(id) == 'table'
+  if (isIdComponent) then
+    data = id
+    id = id:getId()
+  end
+
+  local name = getGroupName(group)
+  if (not M.entitiesById[id]) then
+    M.entitiesById[id] = {}
+  end
+  M.entitiesById[id][name] = data or EMPTY
+  M.groups[name].addComponent(id, data)
   return M
 end
 
-function M.removeFromGroup(component, group)
-  group.removeComponent(component)
+function M.removeFromGroup(id, group)
+  local isIdComponent = type(id) == 'table'
+  local id = isIdComponent and id:getId() or id
+  local name = getGroupName(group)
+  M.groups[name].removeComponent(id)
   return M
 end
 
@@ -159,7 +177,7 @@ function M.createFactory(blueprint)
 
     -- add component to default group
     if c.group then
-      M.addToGroup(c, c.group)
+      M.addToGroup(id, c.group, c)
     end
     c:init()
     return c
@@ -247,9 +265,9 @@ function M.createFactory(blueprint)
     self:final()
 
     -- remove from associated group
-    local ownGroups = self.groups or EMPTY
+    local ownGroups = M.entitiesById[self:getId()] or EMPTY
     for group in pairs(ownGroups) do
-      group.removeComponent(self)
+      M.removeFromGroup(self, group)
     end
     return self
   end
@@ -307,6 +325,8 @@ function M.createFactory(blueprint)
 end
 
 function M.newGroup(groupDefinition)
+  assert(type(groupDefinition.name) == 'string', 'group name must be a string')
+
   -- apply any missing default options to group definition
   groupDefinition = objectUtils.assign(
     {},
@@ -351,20 +371,19 @@ function M.newGroup(groupDefinition)
     return count
   end
 
-  function Group.addComponent(component)
+  function Group.addComponent(id, data)
     count = count + 1
-    local id = component:getId()
-    allComponentsById[id] = component
-    componentsById[id] = component
+    allComponentsById[id] = data
+    componentsById[id] = data
     if Group.onComponentEnter then
-      Group:onComponentEnter(component)
+      Group:onComponentEnter(data)
     end
   end
 
-  function Group.removeComponent(component)
+  function Group.removeComponent(id)
     count = count - 1
-    local id = component:getId()
     componentsById[id] = nil
+    local component = M.entitiesById[id][Group.name]
     -- remove global reference
     if component._deleted then
       allComponentsById[id] = nil
@@ -378,7 +397,7 @@ function M.newGroup(groupDefinition)
     return componentsById
   end
 
-  M.groups[Group] = Group
+  M.groups[Group.name] = Group
   return Group
 end
 

@@ -26,8 +26,11 @@ local Groups = {
     spreading out too much. For example, if the main scene's draw order is 1, and the player's draw order is 10000, then
     the draw queue will have to skip 99999 iterations just to go from 1-10000.
   ]]
-  firstLayer = Component.newGroup(),
+  firstLayer = Component.newGroup({
+    name = 'firstLayer'
+  }),
   all = Component.newGroup({
+    name = 'all',
     drawLayersPerGridCell = 10,
     -- automatic draw-ordering based on y position
     drawOrder = function(self, component)
@@ -40,12 +43,21 @@ local Groups = {
     end,
   }),
 
-  overlay = Component.newGroup(),
+  overlay = Component.newGroup({
+    name = 'overlay',
+  }),
   -- used for in-game debugging, including things like collision object shapes, sprite border-boxes, etc...
-  debug = Component.newGroup(),
-  gui = Component.newGroup(),
-  hud = Component.newGroup(),
+  debug = Component.newGroup({
+    name = 'debug',
+  }),
+  gui = Component.newGroup({
+    name = 'gui',
+  }),
+  hud = Component.newGroup({
+    name = 'hud',
+  }),
   character = Component.newGroup({
+    name = 'character',
     onComponentEnter = function(_, c)
       local hitManager = require 'modules.hit-manager'
       hitManager.setup(c)
@@ -54,7 +66,9 @@ local Groups = {
     end
   }),
   -- used for handling system/os related functionality
-  system = Component.newGroup()
+  system = Component.newGroup({
+    name = 'system'
+  })
 }
 
 return Groups
