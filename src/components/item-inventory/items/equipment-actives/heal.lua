@@ -7,9 +7,9 @@ return itemDefs.registerModule({
   name = 'heal',
   type = itemDefs.moduleTypes.EQUIPMENT_ACTIVE,
   active = function(item)
-    local baseMods = item.baseModifiers
+    local props = item.props
     msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
-      amount = math.random(baseMods.heal[1], baseMods.heal[2]),
+      amount = math.random(props.heal[1], props.heal[2]),
       source = item.__id,
       duration = item.duration,
       property = 'health',
@@ -18,7 +18,7 @@ return itemDefs.registerModule({
     love.audio.stop(Sound.drinkPotion)
     love.audio.play(Sound.drinkPotion)
     return {
-      cooldown = baseMods.duration
+      cooldown = props.duration
     }
   end,
   tooltip = function(item)
