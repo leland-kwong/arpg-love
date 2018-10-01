@@ -1,6 +1,6 @@
 local config = require("components.item-inventory.items.config")
 local msgBus = require("components.msg-bus")
-local itemDefs = require("components.item-inventory.items.item-definitions")
+local itemSystem =require("components.item-inventory.items.item-system")
 local Color = require 'modules.color'
 local functional = require("utils.functional")
 local setProp = require 'utils.set-prop'
@@ -25,7 +25,7 @@ local function concatTable(a, b)
 	return a
 end
 
-return itemDefs.registerType({
+return itemSystem.registerType({
 	type = "lightning-rod",
 
 	create = function()
@@ -42,6 +42,7 @@ return itemDefs.registerType({
 		sprite = "weapon-module-lightning-rod",
 		title = 'The lightning rod',
 		rarity = config.rarity.LEGENDARY,
+		baseDropChance = 1,
 		category = config.category.POD_MODULE,
 
 		attackTime = 0.1,
@@ -65,7 +66,7 @@ return itemDefs.registerType({
 		end,
 
 		onActivate = function(self)
-			local toSlot = itemDefs.getDefinition(self).category
+			local toSlot = itemSystem.getDefinition(self).category
 			msgBus.send(msgBus.EQUIPMENT_SWAP, self)
 		end,
 

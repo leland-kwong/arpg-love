@@ -15,7 +15,7 @@ local function ActiveConsumableHandler()
   local skillCooldown = 0
   local activeItem = nil
   local max = math.max
-  local itemDefinitions = require("components.item-inventory.items.item-definitions")
+  local itemSystem = require("components.item-inventory.items.item-system")
   local skill = {
     type = 'CONSUMABLE'
   }
@@ -33,7 +33,7 @@ local function ActiveConsumableHandler()
     if (not activeItem) or (curCooldown > 0) then
       return skill
     else
-      local activateFn = itemDefinitions.getModuleById(activeItem.onActivateWhenEquipped).active
+      local activateFn = itemSystem.getModuleById(activeItem.onActivateWhenEquipped).active
       if not activateFn then
         return skill
       end
@@ -57,8 +57,8 @@ local function ActiveConsumableHandler()
     if (not activeItem) then
       return
     end
-    local itemDefinitions = require("components.item-inventory.items.item-definitions")
-    local renderFn = itemDefinitions.getDefinition(activeItem).render
+    local itemSystem = require("components.item-inventory.items.item-system")
+    local renderFn = itemSystem.getDefinition(activeItem).render
     if renderFn then
       renderFn(activeItem)
     end
@@ -75,7 +75,7 @@ local function ActiveEquipmentHandler()
   local skill = {
     type = 'EQUIPMENT'
   }
-  local itemDefinitions = require("components.item-inventory.items.item-definitions")
+  local itemSystem = require("components.item-inventory.items.item-system")
 
   local floor = math.floor
   local function modifyAbility(instance, modifiers)
@@ -109,9 +109,10 @@ local function ActiveEquipmentHandler()
     if (not activeItem) or (curCooldown > 0) or (playerRef.attackRecoveryTime > 0) then
       return skill
     else
-      local definition = itemDefinitions.getDefinition(activeItem)
-      local activateFn = definition.onActivateWhenEquipped
-      local energyCost = definition.energyCost(activeItem)
+      local definition = itemSystem.getDefinition(activeItem)
+      local activateModule = itemSystem.getModuleById(activeItem.onActivateWhenEquipped)
+      local activateFn = activateModule and activateModule.active
+      local energyCost = activeItem.baseModifiers.energyCost
       -- time an attack takes to finish (triggers a global cooldown)
       local curState = self.rootStore:get()
       local enoughEnergy = (energyCost == nil) or
@@ -160,7 +161,7 @@ local function ActiveEquipmentHandler()
   function skill.updateCooldown(dt)
     curCooldown = max(0, curCooldown - dt)
     if activeItem then
-      local itemUpdateFn = itemDefinitions.getDefinition(activeItem).update
+      local itemUpdateFn = itemSystem.getDefinition(activeItem).update
       if itemUpdateFn then
         itemUpdateFn(activeItem, dt)
       end
@@ -176,8 +177,8 @@ local function ActiveEquipmentHandler()
     if (not activeItem) then
       return skill
     end
-    local itemDefinitions = require("components.item-inventory.items.item-definitions")
-    local renderFn = itemDefinitions.getDefinition(activeItem).render
+    local itemSystem = require("components.item-inventory.items.item-system")
+    local renderFn = itemSystem.getDefinition(activeItem).render
     if renderFn then
       renderFn(activeItem)
     end

@@ -1,11 +1,11 @@
 local config = require("components.item-inventory.items.config")
 local functional = require("utils.functional")
-local itemDefs = require("components.item-inventory.items.item-definitions")
+local itemSystem =require("components.item-inventory.items.item-system")
 local Color = require('modules.color')
 local msgBus = require 'components.msg-bus'
 local category = config.category.BODY_ARMOR
 
-return itemDefs.registerType({
+return itemSystem.registerType({
 	type = "mock-armor",
 
 	create = function()
@@ -28,6 +28,7 @@ return itemDefs.registerType({
 		sprite = "armor_62",
 		title = 'Mock ARMOR',
 		rarity = config.rarity.NORMAL,
+		baseDropChance = 1,
 		category = category,
 
 		onEquip = function(self)

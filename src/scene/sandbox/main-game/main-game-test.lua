@@ -20,15 +20,15 @@ end
 
 local function insertTestItems(rootStore)
   local itemsPath = 'components.item-inventory.items.definitions'
-  rootStore:addItemToInventory(require(itemsPath..'.pod-module-initiate').create())
-  rootStore:addItemToInventory(require(itemsPath..'.pod-module-hammer').create())
-  rootStore:addItemToInventory(require(itemsPath..'.pod-module-fireball').create())
+  -- rootStore:addItemToInventory(require(itemsPath..'.pod-module-initiate').create())
+  -- rootStore:addItemToInventory(require(itemsPath..'.pod-module-hammer').create())
+  -- rootStore:addItemToInventory(require(itemsPath..'.pod-module-fireball').create())
 
-  local generateRandomItems = require 'components.loot-generator.algorithm-1'
-  local items = generateRandomItems(1, 10 * 100)
-  for i=1, #items do
-    rootStore:addItemToInventory(items[i])
-  end
+  -- local generateRandomItems = require 'components.loot-generator.algorithm-1'
+  -- local items = generateRandomItems(1, 10 * 100)
+  -- for i=1, #items do
+  --   rootStore:addItemToInventory(items[i])
+  -- end
 end
 
 function MainGameTest.init(self)

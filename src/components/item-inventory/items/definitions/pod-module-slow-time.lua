@@ -1,6 +1,6 @@
 local config = require("components.item-inventory.items.config")
 local functional = require("utils.functional")
-local itemDefs = require("components.item-inventory.items.item-definitions")
+local itemSystem =require("components.item-inventory.items.item-system")
 local Color = require('modules.color')
 local msgBus = require 'components.msg-bus'
 local Aoe = require 'components.abilities.aoe'
@@ -39,7 +39,7 @@ local function aoeOnHit(self)
 	}
 end
 
-return itemDefs.registerType({
+return itemSystem.registerType({
 	type = 'pod-module-slow-time',
 
 	create = function()
@@ -56,6 +56,7 @@ return itemDefs.registerType({
 		sprite = "weapon-module-slow-time",
 		title = 'x-1 time-bender',
 		rarity = config.rarity.EPIC,
+		baseDropChance = 1,
 		category = config.category.POD_MODULE,
 
 		levelRequirement = 4,
@@ -89,7 +90,7 @@ return itemDefs.registerType({
 		end,
 
 		onActivate = function(self)
-			local toSlot = itemDefs.getDefinition(self).category
+			local toSlot = itemSystem.getDefinition(self).category
 			msgBus.send(msgBus.EQUIPMENT_SWAP, self)
 		end,
 

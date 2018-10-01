@@ -148,42 +148,42 @@ All of the following should have a unique id (hashed name) associated with them 
 local item = {
   type = '', -- unique type for the item (hashed for saving and loading)
 
-  create = function()
-    return {
-      baseModifiers = {
-        -- instance-level base modifiers
-        armor =                         {0, 1}, -- min-max range to roll with
-        percentDamage =                 {0, 1}, -- percent damage increase to all damage types
-        flatDamage =                    {0, 1}, -- flat physical increase
-        weaponDamage =                  {0, 1},
-        moveSpeed =                     {0, 0},
-        healthRegen =                   {0, 1},
-        maxHealth =                     {0, 1},
-        energyRegen =                   {0, 1},
-        maxEnergy =                     {0, 1},
-        lightningResist =               {0, 1},
-        fireResist =                    {0, 1},
-        coldResist =                    {0, 1},
-        attackTime =                    {0, 0},
-        energyCost =                    {0, 0},
-        flatPhysicalDamageReduced =     {0, 1},
-        attackTimeReduced =             {0, 1},  -- percent attack time reduction
-        cooldownReduced =               {0, 1},  -- percent cooldown reduction
-        energyCostReduced =             {0, 1},  -- percent energy cost reduction
-        extraExperience =               {0, 1}   -- percent extra experience
-      },
+  instanceProps =  {
+    props = {}, -- item-specific props for use with active abilities
 
-      extraModifiers = {}, -- additional instance-level properties: upgrades, and modifiers from magicals, rares, legendaries... These modifiers are calculated on-top of the baseModifiers
-      rarity = 1,
+    baseModifiers = {
+      -- instance-level base modifiers
+      armor =                         {0, 1}, -- min-max range to roll with
+      percentDamage =                 {0, 1}, -- percent damage increase to all damage types
+      flatDamage =                    {0, 1}, -- flat physical increase
+      weaponDamage =                  {0, 1},
+      moveSpeed =                     {0, 0},
+      healthRegen =                   {0, 1},
+      maxHealth =                     {0, 1},
+      energyRegen =                   {0, 1},
+      maxEnergy =                     {0, 1},
+      lightningResist =               {0, 1},
+      fireResist =                    {0, 1},
+      coldResist =                    {0, 1},
+      attackTime =                    {0, 0},
+      energyCost =                    {0, 0},
+      flatPhysicalDamageReduced =     {0, 1},
+      attackTimeReduced =             {0, 1},  -- percent attack time reduction
+      cooldownReduced =               {0, 1},  -- percent cooldown reduction
+      energyCostReduced =             {0, 1},  -- percent energy cost reduction
+      extraExperience =               {0, 1}   -- percent extra experience
+    },
 
-      stackSize = 1, -- defaults to 1 (not stackable)
-      maxStackSize = 1, -- defaults to 1
+    extraModifiers = {}, -- additional instance-level properties: upgrades, and modifiers from magicals, rares, legendaries... These modifiers are calculated on-top of the baseModifiers
+    rarity = 1, -- defaults to NORMAL
 
-      onActivate = require 'inventory-active-method', -- active ability when right-clicked inside inventory. For equipment it swaps it with the compatible equipment slot. For consumables it will activate the item.
+    stackSize = 1, -- defaults to 1 (not stackable)
+    maxStackSize = 1, -- defaults to 1
 
-      onActivateWhenEquipped = require 'equipped-active-method', -- active ability when the item is equipped. The ability appears in the hot bar.
-    }
-  end,
+    onActivate = require 'inventory-active-method', -- active ability when right-clicked inside inventory. For equipment it swaps it with the compatible equipment slot. For consumables it will activate the item.
+
+    onActivateWhenEquipped = require 'equipped-active-method', -- active ability when the item is equipped. The ability appears in the hot bar.
+  },
 
   -- static item properties (these properties should only change if code has changed)
   properties = {
@@ -223,3 +223,9 @@ local module = {
   end
 }
 ```
+
+## Equipment system
+
+1. Item equipped -> add item to equipment system
+2. Item activate -> add ability entity to ability system
+3. Add ability to upgrade system

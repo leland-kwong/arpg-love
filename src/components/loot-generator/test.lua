@@ -1,5 +1,5 @@
 local randomItem = require 'components.loot-generator.algorithm-1'
-local itemDefinition = require 'components.item-inventory.items.item-definitions'
+local itemDefinition = require 'components.item-inventory.items.item-system'
 
 local items = randomItem(1, 10 * 100, 0, 2)
 for i=1, #items do

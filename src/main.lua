@@ -138,6 +138,6 @@ end
 if config.isDebug then
   require 'modules.test.index'
   require 'utils.test.index'
-  require 'components.loot-generator.test'
+  -- require 'components.loot-generator.test'
   require '_debug'
 end

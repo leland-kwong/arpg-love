@@ -13,8 +13,6 @@ return {
 			armor = {50, 100}
 		},
 
-		rarity = itemConfig.rarity.RARE,
-
 		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click',
 		onActivateWhenEquipped = require 'components.item-inventory.items.equipment-actives.heal',
 	},

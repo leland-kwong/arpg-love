@@ -1,6 +1,6 @@
 local Component = require 'modules.component'
 local Color = require 'modules.color'
-local itemDefinition = require 'components.item-inventory.items.item-definitions'
+local itemDefinition = require 'components.item-inventory.items.item-system'
 local msgBus = require 'components.msg-bus'
 local filterCall = require 'utils.filter-call'
 local noop = require 'utils.noop'
@@ -22,7 +22,7 @@ local equipmentSubscribers = {
 			if msgBus.PLAYER_STATS_NEW_MODIFIERS == msgType then
 				-- add up item properties with the new modifiers list
 				for k,v in pairs(msgValue) do
-					msgValue[k] = msgValue[k] + (item[k] or 0)
+					msgValue[k] = msgValue[k] + (item.baseModifiers[k] or 0)
 				end
 				return msgValue
 			end

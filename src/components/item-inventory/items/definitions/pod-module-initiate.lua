@@ -1,74 +1,39 @@
 local Component = require 'modules.component'
-local collisionGroups = require 'modules.collision-groups'
 local itemConfig = require("components.item-inventory.items.config")
 local gameConfig = require 'config.config'
 local msgBus = require("components.msg-bus")
-local itemDefs = require("components.item-inventory.items.item-definitions")
-local Color = require 'modules.color'
+local itemSystem =require("components.item-inventory.items.item-system")
 local functional = require("utils.functional")
 local AnimationFactory = require 'components.animation-factory'
-local setProp = require 'utils.set-prop'
-local Sound = require 'components.sound'
 local memoize = require 'utils.memoize'
 local LOS = memoize(require 'modules.line-of-sight')
 local extend = require 'utils.object-utils'.extend
 
-local bulletColor = {Color.rgba255(252, 122, 255)}
-
-local weaponLength = 26
 local weaponCooldown = 0.1
 
-local function CreateAttack(self, props)
-	local Projectile = require 'components.abilities.bullet'
-	local numBounces = props.numBounces and (props.numBounces + 1) or 0
-	return Projectile.create(
-		setProp(props)
-			:set('maxBounces', 1)
-			:set('numBounces', numBounces)
-			:set('minDamage', 1)
-			:set('maxDamage', 3)
-			:set('color', bulletColor)
-			:set('targetGroup', collisionGroups.create(
-				collisionGroups.ai,
-				collisionGroups.environment,
-				collisionGroups.obstacle
-			))
-			:set('startOffset', weaponLength)
-			:set('speed', 400)
-			:set('cooldown', weaponCooldown)
-			:set('onHit', itemDefs.getState(self).onHit)
-	)
-end
-
-local muzzleFlashMessage = {
-	color = bulletColor
-}
-
-return itemDefs.registerType({
+return {
 	type = "pod-module-initiate",
 
-	create = function()
-		local addPrefix = require 'components.item-inventory.items.modifier-prefixes'
-		return addPrefix({
-			stackSize = 1,
-			maxStackSize = 1,
+	instanceProps = {
+		props = {
+			weaponCooldown = weaponCooldown,
+			attackTime = weaponCooldown - 0.01
+		},
 
-			-- static properties
-			weaponDamage = 1,
-			experience = 0
-		})
-	end,
+		baseModifiers = {
+			weaponDamage = {1, 1},
+			energyCost = {1, 1}
+		},
+
+		onActivate = require(require('alias').path.items..'.inventory-actives.equip-on-click'),
+		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.plasma-shot')
+	},
 
 	properties = {
 		sprite = "weapon-module-initiate",
 		title = 'r-1 initiate',
-		rarity = itemConfig.rarity.NORMAL,
+		baseDropChance = 1,
 		category = itemConfig.category.POD_MODULE,
-
-		attackTime = weaponCooldown - 0.01,
-		energyCost = function(self)
-			return 1
-		end,
 
 		tooltipItemUpgrade = function(self)
 			return upgrades
@@ -106,8 +71,8 @@ return itemDefs.registerType({
 		},
 
 		onEquip = function(self)
-			local state = itemDefs.getState(self)
-			local definition = itemDefs.getDefinition(self)
+			local state = itemSystem.getState(self)
+			local definition = itemSystem.getDefinition(self)
 			local upgrades = definition.upgrades
 			state.onHit = function(attack, hitMessage)
 				local up1 = upgrades[1]
@@ -182,18 +147,6 @@ return itemDefs.registerType({
 
 				return hitMessage
 			end
-		end,
-
-		onActivate = function(self)
-			local toSlot = itemDefs.getDefinition(self).category
-			msgBus.send(msgBus.EQUIPMENT_SWAP, self)
-		end,
-
-		onActivateWhenEquipped = function(self, props)
-			love.audio.stop(Sound.PLASMA_SHOT)
-			love.audio.play(Sound.PLASMA_SHOT)
-			msgBus.send(msgBus.PLAYER_WEAPON_MUZZLE_FLASH, muzzleFlashMessage)
-			return CreateAttack(self, props)
 		end
 	}
-})
+}

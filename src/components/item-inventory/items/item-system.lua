@@ -102,6 +102,7 @@ function items.create(module)
 	newItem.__id = uid()
 
 	-- add default props if needed
+	newItem.rarity = newItem.rarity or itemConfig.rarity.NORMAL
 	newItem.experience = newItem.experience or 0
 	newItem.stackSize = newItem.stackSize == nil and 1 or newItem.stackSize
 	newItem.maxStackSize = newItem.maxStackSize == nil and 1 or newItem.maxStackSize

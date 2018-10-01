@@ -7,7 +7,7 @@ local config = require 'config.config'
 local guiTextLayers = require 'components.item-inventory.gui-text-layers'
 local setupSlotInteractions = require 'components.item-inventory.slot-interaction'
 local itemConfig = require 'components.item-inventory.items.config'
-local itemDefs = require("components.item-inventory.items.item-definitions")
+local itemSystem =require("components.item-inventory.items.item-system")
 local Sound = require 'components.sound'
 
 local InventoryBlueprint = {
@@ -50,7 +50,7 @@ function InventoryBlueprint.init(self)
 
     if msgBus.EQUIPMENT_SWAP == msgType then
       local item = msg
-      local category = itemDefs.getDefinition(item).category
+      local category = itemSystem.getDefinition(item).category
       local slotX, slotY = itemConfig.findEquipmentSlotByCategory(category)
       local currentlyEquipped = rootStore:getEquippedItem(slotX, slotY)
       local isAlreadyEquipped = currentlyEquipped == item
@@ -112,7 +112,7 @@ function InventoryBlueprint.init(self)
   end
 
   local function inventoryOnItemActivate(item)
-    local onActivate = itemDefs.getModuleById(item.onActivate).active
+    local onActivate = itemSystem.getModuleById(item.onActivate).active
     onActivate(item)
   end
 

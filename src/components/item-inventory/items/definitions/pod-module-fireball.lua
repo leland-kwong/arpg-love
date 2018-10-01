@@ -1,7 +1,7 @@
 local itemConfig = require("components.item-inventory.items.config")
 local config = require 'config.config'
 local msgBus = require("components.msg-bus")
-local itemDefs = require("components.item-inventory.items.item-definitions")
+local itemSystem =require("components.item-inventory.items.item-system")
 local Color = require 'modules.color'
 local collisionGroups = require 'modules.collision-groups'
 local functional = require("utils.functional")
@@ -44,7 +44,7 @@ local muzzleFlashMessage = {
 	color = MUZZLE_FLASH_COLOR
 }
 
-return itemDefs.registerType({
+return itemSystem.registerType({
 	type = 'pod-module-fireball',
 
 	create = function()
@@ -68,6 +68,7 @@ return itemDefs.registerType({
 		sprite = "weapon-module-fireball",
 		title = 'tz-819 mortar',
 		rarity = itemConfig.rarity.LEGENDARY,
+		baseDropChance = 1,
 		category = itemConfig.category.POD_MODULE,
 
 		levelRequirement = 3,
@@ -113,8 +114,8 @@ return itemDefs.registerType({
 		end,
 
 		onEquip = function(self)
-			local state = itemDefs.getState(self)
-			local definition = itemDefs.getDefinition(self)
+			local state = itemSystem.getState(self)
+			local definition = itemSystem.getDefinition(self)
 			local upgrades = definition.upgrades
 
 			local listeners = {
@@ -205,7 +206,7 @@ return itemDefs.registerType({
 		end,
 
 		onActivate = function(self)
-			local toSlot = itemDefs.getDefinition(self).category
+			local toSlot = itemSystem.getDefinition(self).category
 			msgBus.send(msgBus.EQUIPMENT_SWAP, self)
 		end,
 
@@ -216,10 +217,10 @@ return itemDefs.registerType({
 			props.maxDamage = 0
 			props.cooldown = 0.7
 			props.startOffset = 26
-			props.onHit = itemDefs.getState(self).onHit
+			props.onHit = itemSystem.getState(self).onHit
 			props.final = F.wrap(
 				props.final,
-				itemDefs.getState(self).final
+				itemSystem.getState(self).final
 			)
 			msgBus.send(msgBus.PLAYER_WEAPON_MUZZLE_FLASH, muzzleFlashMessage)
 

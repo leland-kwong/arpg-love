@@ -2,7 +2,7 @@ local Component = require 'modules.component'
 local AnimationFactory = require 'components.animation-factory'
 local collisionWorlds = require 'components.collision-worlds'
 local groups = require 'components.groups'
-local itemDefs = require 'components.item-inventory.items.item-definitions'
+local itemSystem =require 'components.item-inventory.items.item-system'
 local itemConfig = require 'components.item-inventory.items.config'
 local Gui = require 'components.gui.gui'
 local GuiText = require 'components.gui.gui-text'
@@ -60,7 +60,7 @@ local itemNamesTooltipLayer = Gui.create({
     tooltip.lastX = x
     tooltip.lastY = y
 
-    local def = itemDefs.getDefinition(item)
+    local def = itemSystem.getDefinition(item)
     local bgWidth, bgHeight = GuiText.getTextSize(def.title, itemNameTextLayer.font)
     local ttWidth, ttHeight = bgWidth + self.tooltipPadding,
       bgHeight + self.tooltipPadding
@@ -119,7 +119,7 @@ local itemNamesTooltipLayer = Gui.create({
   end,
   draw = function(self)
     for item, tooltip in pairs(self.cache) do
-      local def = itemDefs.getDefinition(item)
+      local def = itemSystem.getDefinition(item)
       local itemName = def.title
       local textColor = itemConfig.rarityColor[def.rarity]
       local bgWidth, bgHeight = GuiText.getTextSize(itemName, itemNameTextLayer.font)
@@ -181,7 +181,7 @@ function LootGenerator.init(self)
   local item = self.item
 
   local animation = AnimationFactory:new({
-    itemDefs.getDefinition(item).sprite
+    itemSystem.getDefinition(item).sprite
   })
 
   local sx, sy, sw, sh = animation.sprite:getViewport()

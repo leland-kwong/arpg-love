@@ -52,44 +52,46 @@ local function connectInventory()
 
   -- add default weapons
   if rootState:get().isNewGame then
-    local defaultWeapon = require'components.item-inventory.items.definitions.pod-module-hammer'
-    local canEquip, errorMsg = rootState:equipItem(defaultWeapon.create(), 1, 1)
+    local itemSystem = require(require('alias').path.itemSystem)
+
+    local defaultHealthPotion = require(require('alias').path.itemDefs..'.potion-health')
+    local canEquip, errorMsg = rootState:equipItem(itemSystem.create(defaultHealthPotion), 1, 5)
     if not canEquip then
       error(errorMsg)
     end
 
-    local defaultHealthPotion = require'components.item-inventory.items.definitions.potion-health'
-    local canEquip, errorMsg = rootState:equipItem(defaultHealthPotion.create(), 1, 5)
+    local defaultWeapon = require'components.item-inventory.items.definitions.pod-module-initiate'
+    local canEquip, errorMsg = rootState:equipItem(itemSystem.create(defaultWeapon), 1, 1)
     if not canEquip then
       error(errorMsg)
     end
 
-    local defaultEnergyPotion = require'components.item-inventory.items.definitions.potion-energy'
-    local canEquip, errorMsg = rootState:equipItem(defaultEnergyPotion.create(), 2, 5)
-    if not canEquip then
-      error(errorMsg)
-    end
+    -- local defaultEnergyPotion = require'components.item-inventory.items.definitions.potion-energy'
+    -- local canEquip, errorMsg = rootState:equipItem(defaultEnergyPotion.create(), 2, 5)
+    -- if not canEquip then
+    --   error(errorMsg)
+    -- end
 
     local defaultBoots = require'components.item-inventory.items.definitions.mock-shoes'
-    local canEquip, errorMsg = rootState:equipItem(defaultBoots.create(), 1, 4)
+    local canEquip, errorMsg = rootState:equipItem(itemSystem.create(defaultBoots), 1, 4)
     if not canEquip then
       error(errorMsg)
     end
 
-    local defaultWeapon2 = require'components.item-inventory.items.definitions.lightning-rod'
-    local canEquip, errorMsg = rootState:equipItem(defaultWeapon2.create(), 1, 2)
-    if not canEquip then
-      error(errorMsg)
-    end
+    -- local defaultWeapon2 = require'components.item-inventory.items.definitions.lightning-rod'
+    -- local canEquip, errorMsg = rootState:equipItem(defaultWeapon2.create(), 1, 2)
+    -- if not canEquip then
+    --   error(errorMsg)
+    -- end
 
-    local defaultArmor = require('components.item-inventory.items.definitions.mock-armor').create()
-    local canEquip, errorMsg = rootState:equipItem(defaultArmor, 2, 3)
-    if not canEquip then
-      error(errorMsg)
-    end
+    -- local defaultArmor = require('components.item-inventory.items.definitions.mock-armor').create()
+    -- local canEquip, errorMsg = rootState:equipItem(defaultArmor, 2, 3)
+    -- if not canEquip then
+    --   error(errorMsg)
+    -- end
 
-    local defaultWeapon3 = require'components.item-inventory.items.definitions.pod-module-fireball'
-    rootState:addItemToInventory(defaultWeapon3.create())
+    -- local defaultWeapon3 = require'components.item-inventory.items.definitions.pod-module-fireball'
+    -- rootState:addItemToInventory(defaultWeapon3.create())
   end
 
   -- trigger equipment change for items that were previously equipped from loading the state

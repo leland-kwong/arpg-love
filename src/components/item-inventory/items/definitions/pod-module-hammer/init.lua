@@ -303,6 +303,7 @@ return itemDefs.registerType({
 		sprite = "weapon-module-hammer",
 		title = 'h-2 hammer',
 		rarity = itemConfig.rarity.NORMAL,
+		baseDropChance = 1,
 		category = itemConfig.category.POD_MODULE,
 
 		levelRequirement = 1,

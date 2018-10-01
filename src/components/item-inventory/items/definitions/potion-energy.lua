@@ -1,12 +1,12 @@
 local config = require("components.item-inventory.items.config")
 local functional = require("utils.functional")
-local itemDefs = require("components.item-inventory.items.item-definitions")
+local itemSystem =require("components.item-inventory.items.item-system")
 local Color = require('modules.color')
 local msgBus = require("components.msg-bus")
 local Sound = require 'components.sound'
 local socket = require 'socket'
 
-return itemDefs.registerType({
+return itemSystem.registerType({
 	type = "potion-energy",
 
 	create = function()
@@ -25,6 +25,7 @@ return itemDefs.registerType({
 		sprite = "potion_40",
 		title = "Potion of Energy",
 		rarity = config.rarity.NORMAL,
+		baseDropChance = 1,
 		category = config.category.CONSUMABLE,
 
 		onActivate = function(self, mainState)

@@ -36,6 +36,7 @@ end
 
 return {
   system = Component.newSystem({
+    name = 'loot',
     onComponentEnter = function(_, c)
       local iData = c.itemData
       local items = lootAlgorithm(iData.level, iData.dropRate)

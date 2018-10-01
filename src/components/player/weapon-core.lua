@@ -184,7 +184,7 @@ function WeaponCore.draw(self)
   if rootStore then
     local gameState = rootStore:get()
     iterateGrid(gameState.equipment, function(item)
-      local itemDef = require 'components.item-inventory.items.item-definitions'
+      local itemDef = require 'components.item-inventory.items.item-system'
       local definition = itemDef.getDefinition(item)
       local spriteName = definition and definition.renderAnimation
       if spriteName then

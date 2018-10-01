@@ -17,7 +17,7 @@ function Test.run()
   end
 end
 
-local group = Component.newGroup()
+local group = Component.newGroup({ name = 'test-group' })
 local calls = {}
 
 local blueprint = {

@@ -26,6 +26,7 @@ end
 
 return {
   system = Component.newSystem({
+    name = 'dungeonTest',
     onComponentEnter = function(_, c)
       addTreasureCaches(c)
     end
