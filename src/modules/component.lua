@@ -102,6 +102,18 @@ local function cleanupCollisionObjects(self)
   end
 end
 
+M.groups = {}
+
+function M.addToGroup(component, group, data)
+  group.addComponent(component, data)
+  return M
+end
+
+function M.removeFromGroup(component, group)
+  group.removeComponent(component)
+  return M
+end
+
 --[[
   x[NUMBER]
   y[NUMBER]
@@ -303,8 +315,6 @@ function M.createFactory(blueprint)
   return blueprint
 end
 
-M.groups = {}
-
 function M.newGroup(groupDefinition)
   -- apply any missing default options to group definition
   groupDefinition = objectUtils.assign(
@@ -379,16 +389,6 @@ end
 
 M.newSystem = M.newGroup
 M.systems = M.groups
-
-function M.addToGroup(component, group, data)
-  component:addToGroup(group, data)
-  return M
-end
-
-function M.removeFromGroup(component, group)
-  component:removeFromGroup(group, data)
-  return M
-end
 
 function M.get(id)
   return allComponentsById[id]
