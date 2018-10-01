@@ -203,11 +203,11 @@ local function drawTooltip(item, x, y, w2, h2, rootStore)
   local posX, posY = x, y
   local padding = 12
   local itemDef = itemDefinition.getDefinition(item)
-  local tooltipContent = {Color.WHITE, 'parse content'}
+  local tooltipContent = parseItemModifiers(item)
+  local rightClickText = itemDefinition.getModuleById(item.onActivate).tooltip()
+  local rightClickTextH = select(2, GuiText.getTextSize(rightClickText, guiTextLayers.body.font))
   local tooltipItemUpgrade = itemDef.upgrades
-  local tooltipModifierValues = parseItemModifiers(item)
   local levelRequirementText = itemDef.levelRequirement and 'Required level: '..itemDef.levelRequirement or nil
-  tooltipContent = concatTable(tooltipModifierValues, tooltipContent)
 
   --[[
     IMPORTANT: We must do the tooltip content dimension calculations first to see if the tooltip
@@ -246,9 +246,10 @@ local function drawTooltip(item, x, y, w2, h2, rootStore)
                       (levelRequirementH * 2) +
                       bodyCopyH +
                       itemUpgradeH +
+                      rightClickTextH * 2 +
                       (padding * 2)
   local maxWidth = math.min(
-    200,
+    300,
     math.max(titleW, rarityW, bodyCopyW, itemUpgradeW) -- include side padding
   )
   local bottomOutOfView = (posY + totalHeight) - config.resolution.h
@@ -302,7 +303,7 @@ local function drawTooltip(item, x, y, w2, h2, rootStore)
   )
 
   -- background
-  local bgWidth = maxWidth + padding
+  local bgWidth = maxWidth + (padding * 2)
   local bgColor = 0
   love.graphics.setColor(bgColor, bgColor, bgColor, 0.9)
   love.graphics.rectangle(
@@ -410,6 +411,15 @@ local function drawTooltip(item, x, y, w2, h2, rootStore)
       end
     end
   end
+
+  -- right-click text
+  guiTextLayers.body:addf(
+    rightClickText,
+    maxWidth,
+    'right',
+    posX,
+    posY + totalHeight - rightClickTextH - padding
+  )
 end
 
 -- handles the picked up item and makes it follow the cursor

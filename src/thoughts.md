@@ -173,7 +173,7 @@ local item = {
         extraExperience =               {0, 1}   -- percent extra experience
       },
 
-      extraModifiers = {}, -- additional instance-level properties: upgrades, and modifiers from magicals, rares, legendaries, ...
+      extraModifiers = {}, -- additional instance-level properties: upgrades, and modifiers from magicals, rares, legendaries... These modifiers are calculated on-top of the baseModifiers
       rarity = 1,
 
       stackSize = 1, -- defaults to 1 (not stackable)

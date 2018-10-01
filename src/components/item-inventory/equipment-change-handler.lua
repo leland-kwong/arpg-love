@@ -73,7 +73,6 @@ msgBus.on(msgBus.EQUIPMENT_CHANGE, function()
 		msgBus.send(msgBus.EQUIPMENT_UNEQUIP, item)
 		local definition = itemDefinition.getDefinition(item)
 		itemDefinition.resetState(item)
-		definition.onEquip(item)
 		local category = definition.category
 		local modifier = definition.modifier
 		local onMessage = definition.onMessage
@@ -104,7 +103,6 @@ msgBus.on(msgBus.EQUIPMENT_CHANGE, function()
 			msgBus.on(msgBus.ALL, equipmentSubscribers.staticModifiers(item), 1),
 			msgBus.on(msgBus.EQUIPMENT_UNEQUIP, function(_item)
 				if _item == item then
-					definition.final(item)
 					msgBus.off(itemState.listeners)
 					return msgBus.CLEANUP
 				end
