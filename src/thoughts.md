@@ -120,3 +120,65 @@ Increases player's energy regeneration
 ### Reduced physical damage (armor only)
 
 Reduces physical damage taken by player
+
+## Loot chances
+
+1. Roll chance for dropping an item
+2. Roll chance for rarity of item drop
+3. Roll chance for item in pool based on rarity
+
+## Loot file structure
+
+All of the following should have a unique id (hashed name) associated with them so we can easily look them via a hash table.
+
+- base item types
+- prefix modifiers (shocking, flaming, midndful, etc...)
+- suffix modifiers (of the bear, of flight, etc...)
+- upgrades (modifiers that are gained after a certain amount of experience has been earned)
+- epic items that sub-class base item types
+- legendary items that sub-class base item types
+- consumable active methods
+- equipment active methods
+
+### Item data structure
+
+#### base item type
+
+```lua
+local item = {
+  type = '', -- unique name for the item type
+  name = '', -- unique name for the item if its epic or legendary
+  -- item's active ability
+
+  onActivate = require 'inventory-active-method', -- active ability when right-clicked inside inventory. For equipment it swaps it with the compatible equipment slot. For consumables it will activate the item.
+
+  onActivateWhenEquipped = require 'equipped-active-method', -- active ability when the item is equipped. The ability appears in the hot bar.
+
+  properties = { -- base properties that are inherent to the item type
+    armor = 0,
+    weaponDamage = 0,
+    moveSpeed = 0,
+    healthRegen = 2,
+    maxHealth = 0,
+    energyRegen = 1,
+    maxEnergy = 0,
+    lightningResist = 0,
+    fireResist = 0,
+    coldResist = 0,
+    attackTime = 1,
+    energyCost = 1,
+  },
+  sprite = '', -- name of sprite to render when inside inventory
+  levelRequirement = 1,
+  renderAnimation = '', -- name of sprite to render when equipped
+  experience = 0, -- experience earned while this item was equipped  
+  category = 1, -- type of item: "consumable", "weapon", "armor", ...
+  modifiers = { -- instance-level properties: upgrades, and modifiers from magicals, rares, legendaries, ...
+    {
+      type = '', -- hash of the modifier name (we can lookup the file based on this)
+      value = 1, -- the rolled value for the modifier (items with ranges like 1-10)
+    }
+  },
+  rarity = 1
+}
+```
