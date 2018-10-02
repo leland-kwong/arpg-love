@@ -1,7 +1,8 @@
 local M = {}
 
 function M.forEach(array, callback)
-	for i=1, #array do
+	local len = array and #array or 0
+	for i=1, len do
 		local value = array[i]
 		callback(value, i)
 	end
