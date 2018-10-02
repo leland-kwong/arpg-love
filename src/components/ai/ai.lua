@@ -106,8 +106,7 @@ function Ai:checkLineOfSight(grid, WALKABLE, targetX, targetY, debug)
 end
 
 function Ai:aggravatedRadius()
-  local playerFlowFieldDistance = Component.get('PLAYER')
-    :getProp('flowFieldDistance')
+  local playerFlowFieldDistance = Component.get('PLAYER').flowFieldDistance
   return (playerFlowFieldDistance - 3) * self.gridSize
 end
 
@@ -142,7 +141,7 @@ local function spreadAggroToAllies(self)
 
   for i=1, len do
     local ai = items[i].parent
-    local canSee = self:checkLineOfSight(self.grid, Map.WALKABLE, ai:getProp('x'), ai:getProp('y'))
+    local canSee = self:checkLineOfSight(self.grid, Map.WALKABLE, ai.x, ai.y)
     if canSee and (not ai.isAggravated) then
       local id = ai:getId()
       local message = aggroMessageCache:get(id)

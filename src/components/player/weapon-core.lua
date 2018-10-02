@@ -55,8 +55,8 @@ function WeaponCore.update(self, dt)
   self.animation:update(dt / 4)
 
   local playerRef = Component.get('PLAYER')
-  self.facingX, self.facingY = playerRef:getProp('facingDirectionX'),
-                               playerRef:getProp('facingDirectionY')
+  self.facingX, self.facingY = playerRef.facingDirectionX,
+                               playerRef.facingDirectionY
 end
 
 local function drawMuzzleFlash(color, x, y, angle, radius)

@@ -247,10 +247,6 @@ function M.createFactory(blueprint)
     return self
   end
 
-  function blueprint:getProp(prop)
-    return self[prop]
-  end
-
   function blueprint:delete(recursive)
     if self._deleted then
       return
