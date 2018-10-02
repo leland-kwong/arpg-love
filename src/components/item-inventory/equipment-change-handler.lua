@@ -71,48 +71,8 @@ msgBus.on(msgBus.EQUIPMENT_CHANGE, function()
 	iterateGrid(curState.equipment, filterCall(function(item, x, y)
 		-- refresh equipment by unequipping first
 		msgBus.send(msgBus.EQUIPMENT_UNEQUIP, item)
-		local definition = itemDefinition.getDefinition(item)
 		itemDefinition.resetState(item)
-		local category = definition.category
-		local modifier = definition.modifier
-		local onMessage = definition.onMessage
-		local final = definition.final
-		local upgrades = definition.upgrades
-		local lastUpgradeUnlocked = getHighestUpgradeUnlocked(upgrades, item)
-		local itemState = itemDefinition.getState(item)
 		msgBus.send(msgBus.ITEM_EQUIPPED, item)
-		itemState.listeners = {
-			msgBus.on(msgBus.ENTITY_DESTROYED, function(v)
-				item.experience = item.experience + v.experience
-				local nextUpgradeLevel = getHighestUpgradeUnlocked(upgrades, item)
-				local newUpgradeUnlocked = nextUpgradeLevel > lastUpgradeUnlocked
-				lastUpgradeUnlocked = nextUpgradeLevel
-				if newUpgradeUnlocked then
-					local itemTitle = definition.title
-					msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
-						title = itemTitle..' upgraded',
-						icon = definition.sprite,
-						description = {
-							Color.CYAN, upgrades[nextUpgradeLevel].title,
-							Color.WHITE, ' is unlocked'
-						}
-					})
-					triggerUpgradeMessage(item, nextUpgradeLevel)
-				end
-			end),
-			msgBus.on(msgBus.ALL, equipmentSubscribers.staticModifiers(item), 1),
-			msgBus.on(msgBus.EQUIPMENT_UNEQUIP, function(_item)
-				if _item == item then
-					msgBus.off(itemState.listeners)
-					return msgBus.CLEANUP
-				end
-			end),
-			msgBus.on(msgBus.NEW_GAME, function()
-				definition.final(item)
-				msgBus.off(itemState.listeners)
-				return msgBus.CLEANUP
-			end)
-		}
 	end, function(item)
 		return not not item
 	end))
@@ -121,6 +81,44 @@ msgBus.on(msgBus.EQUIPMENT_CHANGE, function()
 	local nextModifiers = BaseStatModifiers()
   msgBus.send(msgBus.PLAYER_STATS_NEW_MODIFIERS, nextModifiers)
 end)
+
+msgBus.on(msgBus.ITEM_EQUIPPED, function(item)
+	local definition = itemDefinition.getDefinition(item)
+	local upgrades = definition.upgrades
+	local lastUpgradeUnlocked = getHighestUpgradeUnlocked(upgrades, item)
+  local itemState = itemDefinition.getState(item)
+  itemState.listeners = {
+    msgBus.on(msgBus.ENTITY_DESTROYED, function(v)
+      item.experience = item.experience + v.experience
+      local nextUpgradeLevel = getHighestUpgradeUnlocked(upgrades, item)
+      local newUpgradeUnlocked = nextUpgradeLevel > lastUpgradeUnlocked
+      lastUpgradeUnlocked = nextUpgradeLevel
+      if newUpgradeUnlocked then
+        local itemTitle = definition.title
+        msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
+          title = itemTitle..' upgraded',
+          icon = definition.sprite,
+          description = {
+            Color.CYAN, upgrades[nextUpgradeLevel].title,
+            Color.WHITE, ' is unlocked'
+          }
+        })
+        triggerUpgradeMessage(item, nextUpgradeLevel)
+      end
+    end),
+    msgBus.on(msgBus.ALL, equipmentSubscribers.staticModifiers(item), 1),
+    msgBus.on(msgBus.NEW_GAME, function()
+      definition.final(item)
+      msgBus.off(itemState.listeners)
+      return msgBus.CLEANUP
+    end)
+  }
+end)
+
+msgBus.on(msgBus.EQUIPMENT_UNEQUIP, function(item)
+  local itemState = itemDefinition.getState(item)
+  msgBus.off(itemState.listeners)
+end, 1)
 
 msgBus.on(msgBus.ITEM_CHECK_UPGRADE_AVAILABILITY, function(v)
   local item, level = v.item, v.level
