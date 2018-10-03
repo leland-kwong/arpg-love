@@ -18,7 +18,8 @@ if config.isDebug then
     end,
     __newindex = function(_, eventName, eventType)
       assert(not proxy[eventName], eventName..' is already registered')
-      proxy[eventName] = {
+      local alias = type(eventType) == 'table' and proxy[eventType.name]
+      proxy[eventName] = alias or {
         name = eventName,
         type = eventType
       }
@@ -57,7 +58,6 @@ M.CHARACTER_HIT = 'CHARACTER_HIT'
     coldStatus = NUMBER
   }
 ]]
-M.CHARACTER_AGGRO = M.CHARACTER_HIT -- triggers aggro by trigger the `CHARACTER_HIT` event
 
 M.EXPERIENCE_GAIN = 'EXPERIENCE_GAIN'
 M.PLAYER_ACTION_ERROR = 'PLAYER_ACTION_ERROR'

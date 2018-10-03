@@ -129,7 +129,7 @@ local function spreadAggroToAllies(self)
   local c = self.collision
   local areaMultiplier = 10
   local function aggravationCollisionFilter(item)
-    return collisionGroups.matches(item.group, collisionGroups.ai) and item ~= c
+    return collisionGroups.matches(item.group, collisionGroups.ai) and (item ~= c)
   end
   local items, len = self.collisionWorld:queryRect(
     c.x - c.ox * areaMultiplier,
@@ -149,7 +149,8 @@ local function spreadAggroToAllies(self)
         message = {parent = ai}
         aggroMessageCache:set(id, message)
       end
-      msgBus.send(msgBus.CHARACTER_AGGRO, message)
+      -- trigger a hit message with no damage
+      msgBus.send(msgBus.CHARACTER_HIT, message)
     end
   end
 end
@@ -349,11 +350,11 @@ function Ai.update(self, dt)
   self.frameCount = self.frameCount + 1
   self.attackRecoveryTime = self.attackRecoveryTime - dt
 
-  handleAggro(self, dt)
   if self.destroyedAnimation then
     return
   end
 
+  handleAggro(self, dt)
   self:setDrawDisabled(not self.isInViewOfPlayer)
 
   if self.onUpdateStart then
@@ -407,17 +408,17 @@ function Ai.update(self, dt)
 
   local canSeeTarget = self.isInViewOfPlayer and self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY, self.losDebug)
   local isInAggroRange = canSeeTarget and (gridDistFromPlayer <= (actualSightRadius / self.gridSize))
-  local shouldGetNewPath = flowField and canSeeTarget
   local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or 99999
   local isInAttackRange = canSeeTarget and (distFromTarget <= self:getCalculatedStat('attackRange'))
   local originalX, originalY = self.x, self.y
 
   self.canSeeTarget = canSeeTarget
 
-  if isInAggroRange then
-    if shouldGetNewPath then
+  if isInAggroRange or self.isAggravated then
+    local path
+    if flowField then
       local distanceToPlanAhead = actualSightRadius / self.gridSize
-      local path = self.getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
+      path = self.getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
       if path then
         local targetPos = path[#path]
         if targetPos then
@@ -451,7 +452,7 @@ function Ai.update(self, dt)
       return
     end
 
-    if shouldGetNewPath and (self:getFiniteState() ~= states.ATTACKING) then
+    if path and (self:getFiniteState() ~= states.ATTACKING) then
       setNextPosition(self, self:getActualSpeed(dt), 40)
     end
   elseif self.targetX and (self:getFiniteState() ~= states.ATTACKING) then
