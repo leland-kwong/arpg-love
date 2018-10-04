@@ -66,11 +66,11 @@ local function connectInventory()
       error(errorMsg)
     end
 
-    -- local defaultEnergyPotion = require'components.item-inventory.items.definitions.potion-energy'
-    -- local canEquip, errorMsg = rootState:equipItem(defaultEnergyPotion.create(), 2, 5)
-    -- if not canEquip then
-    --   error(errorMsg)
-    -- end
+    local defaultEnergyPotion = require'components.item-inventory.items.definitions.potion-energy'
+    local canEquip, errorMsg = rootState:equipItem(itemSystem.create(defaultEnergyPotion), 2, 5)
+    if not canEquip then
+      error(errorMsg)
+    end
 
     local defaultBoots = require'components.item-inventory.items.definitions.mock-shoes'
     local canEquip, errorMsg = rootState:equipItem(itemSystem.create(defaultBoots), 1, 4)
