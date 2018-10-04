@@ -22,7 +22,20 @@ return {
 
 		extraModifiers = {
 			require(require('alias').path.items..'.modifiers.upgrade-shock')({
-				experienceRequired = 120
+				experienceRequired = 10,
+				duration = 0.4,
+				minDamage = 1,
+				maxDamage = 2
+			}),
+			require(require('alias').path.items..'.modifiers.upgrade-critical-hit')({
+				experienceRequired = 40,
+				chance = 0.25,
+				minMultiplier = 0.2,
+				maxMultiplier = 0.4
+			}),
+			require(require('alias').path.items..'.modifiers.upgrade-bouncing-strike')({
+				experienceRequired = 120,
+				maxBounces = 1
 			})
 		},
 

@@ -6,6 +6,7 @@ local Color = require 'modules.color'
 local drawItem = require 'components.item-inventory.draw-item'
 local config = require 'config.config'
 local setProp = require 'utils.set-prop'
+local extend = require 'utils.object-utils'.extend
 
 local keyMap = config.keyboard
 local mouseInputMap = config.mouseInputMap
@@ -136,14 +137,19 @@ local function ActiveEquipmentHandler()
 
       local mx, my = camera:getMousePosition()
       local playerX, playerY = self.player:getPosition()
-      local instance = modifyAbility(
-        activateFn(activeItem, setProp({
+      local abilityData = activateFn(activeItem)
+      local abilityEntity = abilityData.blueprint.create(
+        extend(
+          abilityData.props, {
             x = playerX
           , y = playerY
           , x2 = mx
           , y2 = my
           , source = activeItem.__id
-        })),
+        })
+      )
+      local instance = modifyAbility(
+        abilityEntity,
         curState.statModifiers
       )
       curCooldown = instance.cooldown

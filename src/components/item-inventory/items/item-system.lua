@@ -141,15 +141,26 @@ local function loadModuleById(id)
 	return require(fullPath)
 end
 
-function items.loadModule(module)
-	return modulesById[module.id]
+function items.loadModule(moduleDefinition)
+	local loadedModule = modulesById[moduleDefinition.id]
+	local copy = {}
+	for k,v in pairs(loadedModule) do
+		copy[k] = v
+		-- wrap method so that props are automatically passed in as second argument
+		if (type(v) == 'function') then
+			copy[k] = function(item)
+				return v(item, moduleDefinition.props)
+			end
+		end
+	end
+	return copy
 end
 
 function items.loadModules(item)
 	local f = require 'utils.functional'
 	f.forEach(item.extraModifiers, function(modifier)
 		local module = items.loadModule(modifier)
-		module.active(item, modifier.props)
+		module.active(item)
 	end)
 end
 

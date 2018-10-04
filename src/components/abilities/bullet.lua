@@ -52,9 +52,6 @@ local Bullet = {
   speed = 250,
   cooldown = 0.1,
   targetGroup = nil,
-  onHit = function(self, hitMessage)
-    return hitMessage
-  end,
   color = {Color.rgba255(244, 220, 66, 1)},
 
   init = function(self)

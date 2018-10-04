@@ -11,26 +11,6 @@ local muzzleFlashMessage = {
 	color = bulletColor
 }
 
-local function CreateAttack(item, props)
-	local Projectile = require 'components.abilities.bullet'
-	local numBounces = props.numBounces and (props.numBounces + 1) or 0
-	return Projectile.create(
-		setProp(props)
-			:set('minDamage', 1)
-			:set('maxDamage', 3)
-			:set('color', bulletColor)
-			:set('targetGroup', collisionGroups.create(
-				collisionGroups.ai,
-				collisionGroups.environment,
-				collisionGroups.obstacle
-			))
-			:set('startOffset', weaponLength)
-			:set('speed', 400)
-			:set('cooldown', item.props.weaponCooldown)
-			:set('onHit', itemSystem.getState(item).onHit)
-	)
-end
-
 return itemSystem.registerModule({
   name = 'plasma-shot',
   type = itemSystem.moduleTypes.EQUIPMENT_ACTIVE,
@@ -38,6 +18,21 @@ return itemSystem.registerModule({
     love.audio.stop(Sound.PLASMA_SHOT)
     love.audio.play(Sound.PLASMA_SHOT)
     msgBus.send(msgBus.PLAYER_WEAPON_MUZZLE_FLASH, muzzleFlashMessage)
-    return CreateAttack(item, props)
+    return {
+			blueprint = require 'components.abilities.bullet',
+			props = {
+				minDamage = 1,
+				maxDamage = 3,
+				color = bulletColor,
+				targetGroup = collisionGroups.create(
+					collisionGroups.ai,
+					collisionGroups.environment,
+					collisionGroups.obstacle
+				),
+				startOffset = weaponLength,
+				speed = 400,
+				cooldown = item.props.weaponCooldown
+			}
+		}
   end
 })
