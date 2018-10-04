@@ -88,7 +88,7 @@ function items.create(module)
 	local createFn = factoriesByType[module.type]
 	if not createFn then
 		local ser = require 'utils.ser'
-		createFn = loadstring(ser(module.instanceProps))
+		createFn = loadstring(ser(module.blueprint))
 		factoriesByType[module.type] = createFn
 	end
 
@@ -118,7 +118,12 @@ function items.registerModule(module)
 	assert(items.moduleTypes[module.type], 'invalid module type '..module.type)
 	assert(not modulesById[id], 'duplicate module with id '..id)
 	modulesById[id] = module
-	return id
+	return function(props)
+		return {
+			id = id,
+			props = props
+		}
+	end
 end
 
 local directoriesByModuleType = {
@@ -136,8 +141,16 @@ local function loadModuleById(id)
 	return require(fullPath)
 end
 
-function items.getModuleById(id)
-	return modulesById[id]
+function items.loadModule(module)
+	return modulesById[module.id]
+end
+
+function items.loadModules(item)
+	local f = require 'utils.functional'
+	f.forEach(item.extraModifiers, function(modifier)
+		local module = items.loadModule(modifier)
+		module.active(item, modifier.props)
+	end)
 end
 
 local Lru = require 'utils.lru'

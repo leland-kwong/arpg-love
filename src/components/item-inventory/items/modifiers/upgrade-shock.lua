@@ -39,80 +39,74 @@ local upgrades = {
 }
 
 local function triggerUpgrades(item, attack, hitMessage)
+  -- shock effect
   local up1 = upgrades[1]
-  local up1Ready = up1.experienceRequired <= item.experience
-  if up1Ready then
-    msgBus.send(msgBus.CHARACTER_HIT, {
-      parent = hitMessage.parent,
-      duration = up1.props.shockDuration,
-      modifiers = {
-        shocked = 1
-      },
-      source = 'INITIATE_SHOCK'
-    })
-    hitMessage.lightningDamage = math.random(
-      up1.props.minLightningDamage,
-      up1.props.maxLightningDamage
-    )
-  end
+  msgBus.send(msgBus.CHARACTER_HIT, {
+    parent = hitMessage.parent,
+    duration = up1.props.shockDuration,
+    modifiers = {
+      shocked = 1
+    },
+    source = 'INITIATE_SHOCK'
+  })
+  hitMessage.lightningDamage = math.random(
+    up1.props.minLightningDamage,
+    up1.props.maxLightningDamage
+  )
 
+  -- crit effect
   local up2 = upgrades[2]
-  local up2Ready = up2.experienceRequired <= item.experience
-  if up2Ready then
-    hitMessage.criticalChance = up2.props.critChance
-    hitMessage.criticalMultiplier = math.random(
-      up2.props.minCritMultiplier * 100,
-      up2.props.maxCritMultiplier * 100
-    ) / 100
-  end
+  hitMessage.criticalChance = up2.props.critChance
+  hitMessage.criticalMultiplier = math.random(
+    up2.props.minCritMultiplier * 100,
+    up2.props.maxCritMultiplier * 100
+  ) / 100
 
+  -- bounce effect
   local up3 = upgrades[3]
   local numBounces, maxBounces = (attack.numBounces or 0), (attack.maxBounces or 1)
-  local up3Ready = up3.experienceRequired <= item.experience
-  if up3Ready then
-    if numBounces >= maxBounces then
-      return hitMessage
-    end
-    local findNearestTarget = require 'modules.find-nearest-target'
-    local currentTarget = hitMessage.parent
+  if numBounces >= maxBounces then
+    return hitMessage
+  end
+  local findNearestTarget = require 'modules.find-nearest-target'
+  local currentTarget = hitMessage.parent
 
-    local mainSceneRef = Component.get('MAIN_SCENE')
-    local mapGrid = mainSceneRef.mapGrid
-    local gridSize = gameConfig.gridSize
-    local Map = require 'modules.map-generator.index'
-    local losFn = LOS(mapGrid, Map.WALKABLE)
+  local mainSceneRef = Component.get('MAIN_SCENE')
+  local mapGrid = mainSceneRef.mapGrid
+  local gridSize = gameConfig.gridSize
+  local Map = require 'modules.map-generator.index'
+  local losFn = LOS(mapGrid, Map.WALKABLE)
 
-    local target = findNearestTarget(
-      collisionWorlds.map,
-      {currentTarget},
-      currentTarget.x,
-      currentTarget.y,
-      6 * gridSize,
-      losFn,
-      gridSize
-    )
+  local target = findNearestTarget(
+    collisionWorlds.map,
+    {currentTarget},
+    currentTarget.x,
+    currentTarget.y,
+    6 * gridSize,
+    losFn,
+    gridSize
+  )
 
-    if target then
-      local targetsToIgnore = attack.targetsToIgnore or {}
-      targetsToIgnore[currentTarget] = true
+  if target then
+    local targetsToIgnore = attack.targetsToIgnore or {}
+    targetsToIgnore[currentTarget] = true
 
-      local blueprint = getmetatable(attack)
-      blueprint.create({
-        x = attack.x,
-        y = attack.y,
-        x2 = target.x,
-        y2 = target.y,
-        targetsToIgnore = targetsToIgnore,
-        source = attack.source,
-        maxBounces = maxBounces,
-        numBounces = numBounces + 1,
-        color = attack.color,
-        targetGroup = attack.targetGroup,
-        speed = attack.speed,
-        minDamage = attack.minDamage,
-        maxDamage = attack.maxDamage
-      })
-    end
+    local blueprint = getmetatable(attack)
+    blueprint.create({
+      x = attack.x,
+      y = attack.y,
+      x2 = target.x,
+      y2 = target.y,
+      targetsToIgnore = targetsToIgnore,
+      source = attack.source,
+      maxBounces = maxBounces,
+      numBounces = numBounces + 1,
+      color = attack.color,
+      targetGroup = attack.targetGroup,
+      speed = attack.speed,
+      minDamage = attack.minDamage,
+      maxDamage = attack.maxDamage
+    })
   end
 
   return hitMessage
@@ -121,18 +115,20 @@ end
 return itemSystem.registerModule({
   name = 'upgrade-shock',
   type = itemSystem.moduleTypes.MODIFIERS,
-  active = function(item)
+  active = function(item, props)
     local id = item.__id
     local itemState = itemSystem.getState(item)
     msgBus.on(msgBus.CHARACTER_HIT, function(msg)
       if (not itemState.equipped) then
         return msgBus.CLEANUP
       end
-      return triggerUpgrades(
-        item,
-        msg.collisionItem,
-        msg
-      )
+      if props.experienceRequired <= item.experience then
+        return triggerUpgrades(
+          item,
+          msg.collisionItem,
+          msg
+        )
+      end
     end, 1, function(msg)
       return msg.source == id
     end)

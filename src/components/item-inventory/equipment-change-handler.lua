@@ -86,7 +86,10 @@ msgBus.on(msgBus.ITEM_EQUIPPED, function(item)
 	local definition = itemDefinition.getDefinition(item)
 	local upgrades = definition.upgrades
 	local lastUpgradeUnlocked = getHighestUpgradeUnlocked(upgrades, item)
-  local itemState = itemDefinition.getState(item)
+	local itemState = itemDefinition.getState(item)
+	itemState.equipped = true
+	itemDefinition.loadModules(item)
+
   itemState.listeners = {
     msgBus.on(msgBus.ENTITY_DESTROYED, function(v)
       item.experience = item.experience + v.experience
@@ -116,7 +119,8 @@ msgBus.on(msgBus.ITEM_EQUIPPED, function(item)
 end)
 
 msgBus.on(msgBus.EQUIPMENT_UNEQUIP, function(item)
-  local itemState = itemDefinition.getState(item)
+	local itemState = itemDefinition.getState(item)
+	itemState.equipped = false
   msgBus.off(itemState.listeners)
 end, 1)
 

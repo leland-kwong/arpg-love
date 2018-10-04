@@ -204,7 +204,7 @@ local function drawTooltip(item, x, y, w2, h2, rootStore)
   local padding = 12
   local itemDef = itemDefinition.getDefinition(item)
   local tooltipContent = parseItemModifiers(item)
-  local rightClickText = itemDefinition.getModuleById(item.onActivate).tooltip()
+  local rightClickText = itemDefinition.loadModule(item.onActivate).tooltip()
   local rightClickTextH = select(2, GuiText.getTextSize(rightClickText, guiTextLayers.body.font))
   local tooltipItemUpgrade = itemDef.upgrades
   local levelRequirementText = itemDef.levelRequirement and 'Required level: '..itemDef.levelRequirement or nil

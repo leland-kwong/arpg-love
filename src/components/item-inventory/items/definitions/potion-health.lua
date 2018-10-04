@@ -3,7 +3,7 @@ local itemConfig = require(require('alias').path.itemConfig)
 return {
 	type = "potion-health",
 
-	instanceProps = {
+	blueprint = {
 		props = {
 			heal = {80, 100},
 			duration = 2,
@@ -13,8 +13,8 @@ return {
 			armor = {50, 100}
 		},
 
-		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click',
-		onActivateWhenEquipped = require 'components.item-inventory.items.equipment-actives.heal',
+		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'(),
+		onActivateWhenEquipped = require 'components.item-inventory.items.equipment-actives.heal'(),
 	},
 
 	properties = {

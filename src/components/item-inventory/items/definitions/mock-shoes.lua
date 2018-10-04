@@ -3,7 +3,7 @@ local itemConfig = require("components.item-inventory.items.config")
 return {
 	type = "mock-shoes",
 
-	instanceProps =  {
+	blueprint =  {
 		props = {
 			speedBoost = 300,
 			speedBoostDuration = 1
@@ -15,8 +15,8 @@ return {
 			fireResist = {20, 25},
 		},
 
-		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click',
-		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.movespeed-boost')
+		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'(),
+		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.movespeed-boost')()
 	},
 
 	properties = {

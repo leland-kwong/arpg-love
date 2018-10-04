@@ -33,7 +33,7 @@ local function ActiveConsumableHandler()
     if (not activeItem) or (curCooldown > 0) then
       return skill
     else
-      local activateFn = itemSystem.getModuleById(activeItem.onActivateWhenEquipped).active
+      local activateFn = itemSystem.loadModule(activeItem.onActivateWhenEquipped).active
       if not activateFn then
         return skill
       end
@@ -110,7 +110,7 @@ local function ActiveEquipmentHandler()
       return skill
     else
       local definition = itemSystem.getDefinition(activeItem)
-      local activateModule = itemSystem.getModuleById(activeItem.onActivateWhenEquipped)
+      local activateModule = itemSystem.loadModule(activeItem.onActivateWhenEquipped)
       local activateFn = activateModule and activateModule.active
       local energyCost = activeItem.baseModifiers.energyCost
       -- time an attack takes to finish (triggers a global cooldown)
