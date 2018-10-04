@@ -4,17 +4,18 @@ return {
 	type = "potion-health",
 
 	blueprint = {
-		props = {
-			heal = {80, 100},
-			duration = 2,
-		},
-
 		baseModifiers =  {
 			armor = {50, 100}
 		},
 
 		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'(),
-		onActivateWhenEquipped = require 'components.item-inventory.items.equipment-actives.heal'(),
+		onActivateWhenEquipped = require 'components.item-inventory.items.equipment-actives.heal'({
+			minHeal = 80,
+			maxHeal = 100,
+			duration = 2,
+			property = 'health',
+			maxProperty = 'maxHealth'
+		}),
 	},
 
 	properties = {

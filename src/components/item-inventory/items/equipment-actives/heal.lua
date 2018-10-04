@@ -6,14 +6,13 @@ local Color = require('modules.color')
 return itemSystem.registerModule({
   name = 'heal',
   type = itemSystem.moduleTypes.EQUIPMENT_ACTIVE,
-  active = function(item)
-    local props = item.props
+  active = function(item, props)
     msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
-      amount = math.random(props.heal[1], props.heal[2]),
+      amount = math.random(props.minHeal, props.maxHeal),
       source = item.__id,
-      duration = item.props.duration,
-      property = 'health',
-      maxProperty = 'maxHealth'
+      duration = props.duration,
+      property = props.property,
+      maxProperty = props.maxProperty,
     })
     love.audio.stop(Sound.drinkPotion)
     love.audio.play(Sound.drinkPotion)
@@ -21,11 +20,11 @@ return itemSystem.registerModule({
       cooldown = props.duration
     }
   end,
-  tooltip = function(item)
+  tooltip = function(item, props)
     local timeUnit = item.props.duration > 1 and "seconds" or "second"
     local tooltipString = {
       Color.WHITE, 'Restores ',
-      Color.LIME, item.props.heal[1] .. '-' .. item.props.heal[2] .. ' health ',
+      Color.LIME, item.props.minHeal .. '-' .. item.props.maxHeal .. ' '..props.property..' ',
       Color.WHITE, 'over ',
       Color.CYAN, item.props.duration .. ' ' .. timeUnit
     }
