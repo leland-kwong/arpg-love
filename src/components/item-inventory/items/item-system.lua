@@ -24,7 +24,8 @@ local items = {
 	types = types,
 	moduleTypes = Enum({
 		'EQUIPMENT_ACTIVE',
-		'INVENTORY_ACTIVE'
+		'INVENTORY_ACTIVE',
+		'MODIFIERS'
 	})
 }
 
@@ -123,6 +124,7 @@ end
 local directoriesByModuleType = {
 	[items.moduleTypes.EQUIPMENT_ACTIVE] = 'equipment-actives',
 	[items.moduleTypes.INVENTORY_ACTIVE] = 'inventory-actives',
+	[items.moduleTypes.MODIFIERS] = 'modifiers',
 }
 
 local function loadModuleById(id)

@@ -14,22 +14,20 @@ local random = math.random
 local collisionGroups = require 'modules.collision-groups'
 
 local colMap = collisionWorlds.map
+local EMPTY = {}
 
 local defaultFilters = {
   obstacle = true,
   obstacle2 = true,
 }
 
-local ColFilter = memoize(function(groupToMatch)
+local ColFilter = memoize(function(groupToMatch, targetsToIgnore)
+  targetsToIgnore = targetsToIgnore or EMPTY
   return function (item, other)
-    if collisionGroups.matches(other.group, groupToMatch) then
+    if collisionGroups.matches(other.group, groupToMatch) and (not targetsToIgnore[other.parent]) then
       return 'touch'
     end
     return false
-    -- if (other.group ~= groupToMatch) and not defaultFilters[other.group] then
-    --   return false
-    -- end
-    -- return 'touch'
   end
 end)
 
@@ -91,26 +89,35 @@ local Bullet = {
     self.x = self.x + dx
     self.y = self.y + dy
     self.animation:update(dt)
-    local cols, len = select(3, self.colObj:move(self.x, self.y, ColFilter(self.targetGroup)))
+    local cols, len = select(3, self.colObj:move(self.x, self.y, ColFilter(self.targetGroup, self.targetsToIgnore)))
     local hasCollisions = len > 0
     local isExpired = self.lifeTime <= 0
 
     if hasCollisions or isExpired then
+      local hitSuccess = false
       if hasCollisions then
         for i=1, len do
           local col = cols[i]
+          local collisionParent = col.other.parent
           if collisionGroups.matches(col.other.group, self.targetGroup) then
-            local msg = self.onHit(self, {
-              collision = col.other,
-              parent = col.other.parent,
-              damage = random(self.minDamage, self.maxDamage)
-            })
-            msgBus.send(msgBus.CHARACTER_HIT, msg)
+            local isObstacleCollision = collisionGroups.matches(col.other.group, collisionGroups.obstacle)
+            if (not isObstacleCollision) then
+              local msg = {
+                parent = collisionParent,
+                collisionItem = self,
+                source = self.source,
+                damage = random(self.minDamage, self.maxDamage)
+              }
+              msgBus.send(msgBus.CHARACTER_HIT, msg)
+            end
+            hitSuccess = true
           end
         end
       end
 
-      self:delete()
+      if isExpired or hitSuccess then
+        self:delete()
+      end
     end
   end,
 

@@ -142,6 +142,7 @@ local function ActiveEquipmentHandler()
           , y = playerY
           , x2 = mx
           , y2 = my
+          , source = activeItem.__id
         })),
         curState.statModifiers
       )

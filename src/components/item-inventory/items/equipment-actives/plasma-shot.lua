@@ -16,8 +16,6 @@ local function CreateAttack(item, props)
 	local numBounces = props.numBounces and (props.numBounces + 1) or 0
 	return Projectile.create(
 		setProp(props)
-			:set('maxBounces', 1)
-			:set('numBounces', numBounces)
 			:set('minDamage', 1)
 			:set('maxDamage', 3)
 			:set('color', bulletColor)
