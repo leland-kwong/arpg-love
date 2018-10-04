@@ -96,7 +96,8 @@ function items.create(module)
 
 	-- set modifiers to value based on range parameters
 	for k,v in pairs(newItem.baseModifiers) do
-		newItem.baseModifiers[k] = math.random(v[1], v[2])
+		local fancyRandom = require 'utils.fancy-random'
+		newItem.baseModifiers[k] = fancyRandom(v[1], v[2], 2)
 	end
 
 	newItem.__type = module.type

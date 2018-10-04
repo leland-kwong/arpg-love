@@ -248,10 +248,9 @@ function MainScene.init(self)
       if not item then
         return
       end
-      local dropX, dropY = getDroppablePosition(x, y, mapGrid)
       LootGenerator.create({
-        x = dropX,
-        y = dropY,
+        x = x,
+        y = y,
         item = item,
         rootStore = rootState
       }):setParent(parent)

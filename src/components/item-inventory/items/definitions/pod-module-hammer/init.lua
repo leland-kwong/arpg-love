@@ -23,12 +23,16 @@ return {
 		},
 
 		baseModifiers = {
+			attackTime = {0.3, 0.3},
 			healthRegeneration = {2, 2},
 			maxHealth = {10, 10},
 			weaponDamage = {2, 2},
 			energyCost = 2,
-			experience = 0
-		}
+		},
+
+		experience = 0,
+		onActivate = require(require('alias').path.items..'.inventory-actives.equip-on-click')(),
+		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.aoe-slam')()
 	},
 
 	properties = {

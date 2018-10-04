@@ -21,8 +21,8 @@ local HealSource = require 'components.heal-source'
 require'components.item-inventory.equipment-change-handler'
 
 local colMap = collisionWorlds.map
-local keyMap = config.keyboard
-local mouseInputMap = config.mouseInputMap
+local keyMap = config.userSettings.keyboard
+local mouseInputMap = config.userSettings.mouseInputMap
 
 local startPos = {
   x = config.gridSize * 3,
@@ -180,7 +180,7 @@ local Player = {
         local key = v.key
         local rootState = msgBus.send(msgBus.GAME_STATE_GET)
         local isActive = rootState:get().activeMenu == 'INVENTORY'
-        if key == config.keyboard.INVENTORY_TOGGLE then
+        if key == config.userSettings.keyboard.INVENTORY_TOGGLE then
           if not self.inventory then
             self.inventory = Inventory.create({
               rootStore = rootState,
@@ -196,7 +196,7 @@ local Player = {
           end
         end
 
-        if config.keyboard.PORTAL_OPEN == key then
+        if config.userSettings.keyboard.PORTAL_OPEN == key then
           msgBus.send(msgBus.PORTAL_OPEN)
         end
       end),
