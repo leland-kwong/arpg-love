@@ -67,7 +67,6 @@ function M.new()
 		ALL = MESSAGE_TYPE_ALL
 	}
 	local msgHandlersByMessageType = {}
-	local listenersById = {}
 	local queue = Q:new()
 
 	--[[
