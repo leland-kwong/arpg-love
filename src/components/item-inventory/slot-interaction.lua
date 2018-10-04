@@ -40,6 +40,7 @@ local function handleItemDrop()
   if (isDropModeFloor and itemPickedUp) then
     msgBus.send(msgBus.DROP_ITEM_ON_FLOOR, itemPickedUp)
     itemPickedUp = nil
+    msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, true)
   end
 end
 msgBus.on(msgBus.MOUSE_PRESSED, handleItemDrop)

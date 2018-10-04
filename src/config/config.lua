@@ -2,10 +2,11 @@
 
 local f = require 'utils.functional'
 local oUtils = require 'utils.object-utils'
-local settings = require 'config.user-settings'
+local userSettings = require 'config.user-settings'
 local M = {}
 
-oUtils.assign(M, settings)
+M.userSettings = userSettings
+oUtils.assign(M, userSettings)
 
 local xpDiff = 20
 M.levelExperienceRequirements = {}
@@ -29,6 +30,9 @@ M.resolution = {
   w = 640 * 1.5,
   h = 360 * 1.5
 }
+
+M.isDebug = true
+M.collisionDebug = false
 
 M.gameTitle = 'Citizen of Nowhere'
 

@@ -6,16 +6,18 @@ require 'components.run'
 -- NOTE: this is necessary for crisp pixel rendering
 love.graphics.setDefaultFilter('nearest', 'nearest')
 
+local msgBus = require 'components.msg-bus'
+msgBus.UPDATE = 'UPDATE'
+
 local Console = require 'modules.console.console'
 local groups = require 'components.groups'
-local msgBus = require 'components.msg-bus'
-local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local config = require 'config.config'
 local camera = require 'components.camera'
 local SceneMain = require 'scene.scene-main'
 local RootScene = require 'scene.sandbox.main'
 local tick = require 'utils.tick'
 local globalState = require 'main.global-state'
+require 'main.inputs'
 local systemsProfiler = require 'components.profiler.component-groups'
 require 'components.groups.dungeon-test'
 
@@ -43,8 +45,6 @@ local characterSystem = msgBus.send(msgBus.PROFILE_FUNC, {
   call = require 'components.groups.character'
 })
 
-msgBus.UPDATE = 'UPDATE'
-
 function love.update(dt)
   systemsProfiler()
 
@@ -60,58 +60,6 @@ function love.update(dt)
   groups.hud.updateAll(dt)
   groups.gui.updateAll(dt)
   groups.system.updateAll(dt)
-end
-
-local inputMsg = require 'utils.pooled-table'(function(t, key, scanCode, isRepeated)
-  t.key = key
-  t.code = scanCode
-  t.isRepeated = isRepeated
-  return t
-end)
-
-function love.keypressed(key, scanCode, isRepeated)
-  msgBus.send(
-    msgBus.KEY_PRESSED,
-    inputMsg(key, scanCode, isRepeated)
-  )
-
-  if config.keyboard.MAIN_MENU == key then
-    msgBusMainMenu.send(
-      msgBusMainMenu.TOGGLE_MAIN_MENU
-    )
-  end
-end
-
-function love.keyreleased(key, scanCode)
-  msgBus.send(
-    msgBus.KEY_RELEASED,
-    inputMsg(key, scanCode, false)
-  )
-end
-
-function love.mousepressed( x, y, button, istouch, presses )
-  msgBus.send(
-    msgBus.MOUSE_PRESSED,
-    { x, y, button, istouch, presses }
-  )
-end
-
-function love.mousereleased( x, y, button, istouch, presses )
-  msgBus.send(
-    msgBus.MOUSE_RELEASED,
-    { x, y, button, isTouch, presses }
-  )
-end
-
-function love.wheelmoved(x, y)
-  msgBus.send(msgBus.MOUSE_WHEEL_MOVED, {x, y})
-end
-
-function love.textinput(t)
-  msgBus.send(
-    msgBus.GUI_TEXT_INPUT,
-    t
-  )
 end
 
 function love.draw()

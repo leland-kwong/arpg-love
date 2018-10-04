@@ -14,7 +14,6 @@ local Color = require 'modules.color'
 local memoize = require 'utils.memoize'
 local LineOfSight = memoize(require'modules.line-of-sight')
 local Math = require 'utils.math'
-local getDist = memoize(require('utils.math').dist)
 local WeaponCore = require 'components.player.weapon-core'
 local InventoryController = require 'components.item-inventory.controller'
 local Inventory = require 'components.item-inventory.inventory'
@@ -46,52 +45,73 @@ local function collisionFilter(item, other)
   return 'slide'
 end
 
+local function setupDefaultInventory(items)
+  local itemSystem = require(require('alias').path.itemSystem)
+  local rootState = msgBus.send(msgBus.GAME_STATE_GET)
+
+  for i=1, #items do
+    local it = items[i]
+    local module = require(require('alias').path.itemDefs..'.'..it.type)
+    local canEquip, errorMsg = rootState:equipItem(itemSystem.create(module), it.position.x, it.position.y)
+    if not canEquip then
+      error(errorMsg)
+    end
+  end
+end
+
 local function connectInventory()
   local rootState = msgBus.send(msgBus.GAME_STATE_GET)
   local inventoryController = InventoryController(rootState)
 
   -- add default weapons
   if rootState:get().isNewGame then
-    local itemSystem = require(require('alias').path.itemSystem)
-
-    local defaultHealthPotion = require(require('alias').path.itemDefs..'.potion-health')
-    local canEquip, errorMsg = rootState:equipItem(itemSystem.create(defaultHealthPotion), 1, 5)
-    if not canEquip then
-      error(errorMsg)
-    end
-
-    local defaultWeapon = require'components.item-inventory.items.definitions.pod-module-initiate'
-    local canEquip, errorMsg = rootState:equipItem(itemSystem.create(defaultWeapon), 1, 1)
-    if not canEquip then
-      error(errorMsg)
-    end
-
-    local defaultEnergyPotion = require'components.item-inventory.items.definitions.potion-energy'
-    local canEquip, errorMsg = rootState:equipItem(itemSystem.create(defaultEnergyPotion), 2, 5)
-    if not canEquip then
-      error(errorMsg)
-    end
-
-    local defaultBoots = require'components.item-inventory.items.definitions.mock-shoes'
-    local canEquip, errorMsg = rootState:equipItem(itemSystem.create(defaultBoots), 1, 4)
-    if not canEquip then
-      error(errorMsg)
-    end
-
-    -- local defaultWeapon2 = require'components.item-inventory.items.definitions.lightning-rod'
-    -- local canEquip, errorMsg = rootState:equipItem(defaultWeapon2.create(), 1, 2)
-    -- if not canEquip then
-    --   error(errorMsg)
-    -- end
-
-    -- local defaultArmor = require('components.item-inventory.items.definitions.mock-armor').create()
-    -- local canEquip, errorMsg = rootState:equipItem(defaultArmor, 2, 3)
-    -- if not canEquip then
-    --   error(errorMsg)
-    -- end
-
-    -- local defaultWeapon3 = require'components.item-inventory.items.definitions.pod-module-fireball'
-    -- rootState:addItemToInventory(defaultWeapon3.create())
+    setupDefaultInventory({
+      {
+        type = 'potion-health',
+        position = {
+          x = 1,
+          y = 5
+        }
+      },
+      {
+        type = 'pod-module-initiate',
+        position = {
+          x = 1,
+          y = 1
+        }
+      },
+      {
+        type = 'potion-energy',
+        position = {
+          x = 2,
+          y = 5
+        }
+      },
+      {
+        type = 'mock-shoes',
+        position = {
+          x = 1,
+          y = 4
+        }
+      },
+      -- {
+      --   type = 'lightning-rod',
+      --   position = {
+      --     x = 1,
+      --     y = 2
+      --   }
+      -- },
+      -- {
+      --   type = 'mock-armor',
+      --   position = {
+      --     x = 2,
+      --     y = 3
+      --   }
+      -- },
+      -- {
+      --   type = 'pod-module-fireball'
+      -- }
+    })
   end
 
   -- trigger equipment change for items that were previously equipped from loading the state
@@ -210,7 +230,7 @@ local Player = {
         )
       end),
 
-      msgBus.on(msgBus.ITEM_PICKUP_SUCCESS, function()
+      msgBus.on(msgBus.MOUSE_CLICKED, function()
         msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
       end),
 

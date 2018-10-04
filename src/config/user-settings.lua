@@ -2,9 +2,6 @@
 
 local M = {}
 
-M.isDebug = true
-M.collisionDebug = false
-
 M.keyboard = {
   UP = 'w',
   RIGHT = 'd',
@@ -29,8 +26,10 @@ M.mouseInputMap = {
   SKILL4 = 4
 }
 
+M.mouseClickDelay = 0.12
+
 M.camera = {
-  speed = 0.4 -- lerp duration (larger value means slower movement)
+  speed = 0.4, -- lerp duration (larger value means slower movement)
 }
 
 return M

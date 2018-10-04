@@ -190,17 +190,21 @@ function Console.draw(self)
     startY + 12 * lineHeight
   )
 
-  gfx.print('msgBus '..self.msgBusAverageTime, edgeOffset, 720)
+  gfx.print('msgBus '..self.msgBusAverageTime, edgeOffset, 700)
 
   local logEntries = logger:get()
   gfx.setColor(Color.MED_GRAY)
   local loggerYPosition = 750
-  gfx.print('LOG', edgeOffset, loggerYPosition)
+  local logSectionTitle = 'LOG'
+  gfx.print(logSectionTitle, edgeOffset, loggerYPosition)
   gfx.setColor(Color.WHITE)
+  local output = {}
   for i=1, #logEntries do
-    local output = logEntries[i]
-    guiText:add(output, Color.WHITE, edgeOffset, loggerYPosition + (lineHeight * i))
+    local entry = logEntries[i]
+    table.insert(output, Color.WHITE)
+    table.insert(output, entry..'\n')
   end
+  guiText:addf(output, 300, 'left', edgeOffset, loggerYPosition + guiText.getTextSize(logSectionTitle, guiText.font))
 
   gfx.setCanvas()
   gfx.setBlendMode('alpha', 'premultiplied')

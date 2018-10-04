@@ -121,7 +121,7 @@ local itemNamesTooltipLayer = Gui.create({
     for item, tooltip in pairs(self.cache) do
       local def = itemSystem.getDefinition(item)
       local itemName = def.title
-      local textColor = itemConfig.rarityColor[def.rarity]
+      local textColor = itemConfig.rarityColor[item.rarity]
       local bgWidth, bgHeight = GuiText.getTextSize(itemName, itemNameTextLayer.font)
       local paddingX = self.tooltipPadding + 2
       local paddingY = self.tooltipPadding
@@ -236,13 +236,6 @@ function LootGenerator.init(self)
       end
       rootStore:addItemToInventory(item)
       parent:delete(true)
-      -- --[[
-      --   Add a slight delay for ITEM_PICKUP_SUCCESS since we disable the player's click events
-      --   after pickup to prevent attack on pickup.
-      -- ]]
-      parent.pickupPending = tick.delay(function()
-        msgBus.send(msgBus.ITEM_PICKUP_SUCCESS)
-      end, 0.2)
     end,
     onClick = function(self)
       self.selected = true
