@@ -33,7 +33,7 @@ function love.keypressed(key, scanCode, isRepeated)
     inputMsg(key, scanCode, isRepeated)
   )
 
-  if config.keyboard.MAIN_MENU == key then
+  if config.userSettings.keyboard.MAIN_MENU == key then
     msgBusMainMenu.send(
       msgBusMainMenu.TOGGLE_MAIN_MENU
     )

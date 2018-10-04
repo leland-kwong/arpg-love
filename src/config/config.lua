@@ -6,7 +6,6 @@ local userSettings = require 'config.user-settings'
 local M = {}
 
 M.userSettings = userSettings
-oUtils.assign(M, userSettings)
 
 local xpDiff = 20
 M.levelExperienceRequirements = {}

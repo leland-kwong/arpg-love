@@ -8,8 +8,8 @@ local config = require 'config.config'
 local setProp = require 'utils.set-prop'
 local extend = require 'utils.object-utils'.extend
 
-local keyMap = config.keyboard
-local mouseInputMap = config.mouseInputMap
+local keyMap = config.userSettings.keyboard
+local mouseInputMap = config.userSettings.mouseInputMap
 
 local function ActiveConsumableHandler()
   local curCooldown = 0
@@ -271,8 +271,8 @@ local mouseBtnToString = {
 }
 
 local function drawHotkEy(self)
-  local mouseBtn = config.mouseInputMap[self.skillId]
-  local keyboardKey = config.keyboard[self.skillId]
+  local mouseBtn = config.userSettings.mouseInputMap[self.skillId]
+  local keyboardKey = config.userSettings.keyboard[self.skillId]
   local hotKeyToShow = mouseBtn and mouseBtnToString[mouseBtn] or keyboardKey
   self.hudTextLayer:add(
     hotKeyToShow,
