@@ -81,18 +81,13 @@ function M.new()
 		return callSubscribersByTypeAndHandleCleanup(msgBus, msgType, queue, handlersByType, wildCardListeners, msgValue)
 	end
 
-	function msgBus.on(messageType, handler, priority, sourceId, filter)
+	function msgBus.on(messageType, handler, priority, filter)
 		assert(type(messageType) ~= nil, 'message type must be a non-nil value')
 
 		local handlersByType = tableIfNeeded(msgHandlersByMessageType, messageType)
 		local handlerRef = {handler, priority or 2, messageType, filter}
 		handlerRef.isListener = true
 		table.insert(handlersByType, handlerRef)
-
-		if sourceId then
-			local listeners = tableIfNeeded(listenersById, sourceId)
-			table.insert(listeners, handlerRef)
-		end
 
 		return handlerRef -- this can be used as the reference for removing a handler
 	end
@@ -120,10 +115,6 @@ function M.new()
 				return
 			end
 		end
-	end
-
-	function msgBus.getListenersById(id)
-		return listenersById[id] or EMPTY
 	end
 
 	-- this should be used for just debugging and performance monitoring
