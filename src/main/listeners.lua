@@ -1,6 +1,8 @@
 local globalState = require 'main.global-state'
 local msgBus = require 'components.msg-bus'
 
+local SCENE_STACK_MESSAGE_LAST_PRIORITY = 10
+
 msgBus.on(msgBus.SCENE_STACK_PUSH, function(msgValue)
   local nextScene = msgValue
   if globalState.activeScene then
@@ -10,7 +12,7 @@ msgBus.on(msgBus.SCENE_STACK_PUSH, function(msgValue)
   globalState.activeScene = sceneRef
   globalState.sceneStack:push(nextScene)
   return sceneRef
-end, 1)
+end, SCENE_STACK_MESSAGE_LAST_PRIORITY)
 
 msgBus.on(msgBus.SCENE_STACK_POP, function()
   if globalState.activeScene then
@@ -20,12 +22,12 @@ msgBus.on(msgBus.SCENE_STACK_POP, function()
   local sceneRef = poppedScene.scene.create(poppedScene.props)
   globalState.activeScene = sceneRef
   return sceneRef
-end, 1)
+end, SCENE_STACK_MESSAGE_LAST_PRIORITY)
 
 msgBus.on(msgBus.SCENE_STACK_REPLACE, function(nextScene)
   globalState.sceneStack:clear()
   return msgBus.send(msgBus.SCENE_STACK_PUSH, nextScene)
-end, 1)
+end, SCENE_STACK_MESSAGE_LAST_PRIORITY)
 
 msgBus.on(msgBus.SET_CONFIG, function(msgValue)
   local configChanges = msgValue
