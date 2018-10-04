@@ -4,19 +4,18 @@ return {
 	type = "mock-shoes",
 
 	blueprint =  {
-		props = {
-			speedBoost = 300,
-			speedBoostDuration = 1
-		},
-
 		baseModifiers = {
+			cooldown = {1, 1},
 			armor = {20, 30},
 			moveSpeed = {100, 100},
 			fireResist = {20, 25},
 		},
 
 		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'(),
-		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.movespeed-boost')()
+		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.movespeed-boost')({
+			speedBoost = 300,
+			speedBoostDuration = 1
+		})
 	},
 
 	properties = {

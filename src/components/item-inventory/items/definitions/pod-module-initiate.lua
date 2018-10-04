@@ -10,17 +10,20 @@ return {
 	type = "pod-module-initiate",
 
 	blueprint = {
-		props = {
-			weaponCooldown = weaponCooldown,
-			attackTime = weaponCooldown - 0.01
-		},
-
 		baseModifiers = {
+			cooldown = {0.1, 0.1},
+			attackTime = {0.1, 0.1},
 			weaponDamage = {1, 1},
 			energyCost = {1, 1}
 		},
 
 		extraModifiers = {
+			require(require('alias').path.items..'.modifiers.upgrade-force-field')({
+				experienceRequired = 120,
+				size = 17,
+				maxShieldHealth = 30,
+				unhitDurationRequirement = 1.5,
+			}),
 			require(require('alias').path.items..'.modifiers.upgrade-shock')({
 				experienceRequired = 10,
 				duration = 0.4,

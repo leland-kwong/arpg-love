@@ -1,3 +1,4 @@
+local itemSystem = require(require('alias').path.itemSystem)
 local Component = require 'modules.component'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
@@ -32,9 +33,6 @@ local function hitAnimation()
 end
 
 function ForceField.init(self)
-  self:setParent(
-    Component.get('PLAYER')
-  )
   msgBus.on(msgBus.PLAYER_HIT_RECEIVED, function(msgValue)
     if self:isDeleted() then
       return msgBus.CLEANUP
@@ -110,4 +108,46 @@ function ForceField.draw(self)
   love.graphics.setBlendMode(oBlendMode)
 end
 
-return Component.createFactory(ForceField)
+local Factory = Component.createFactory(ForceField)
+
+local forceFieldsByItemId = {}
+
+local function checkExpRequirement(item, props)
+  return item.experience <= props.experienceRequired
+end
+
+return itemSystem.registerModule({
+  name = 'upgrade-force-field',
+  type = itemSystem.moduleTypes.MODIFIERS,
+  active = function(item, props)
+    local id = item.__id
+    local itemState = itemSystem.getState(item)
+    msgBus.on(msgBus.UPDATE, function()
+      if (not itemState.equipped) then
+        local forceFieldRef = forceFieldsByItemId[id]
+        if forceFieldRef then
+          forceFieldRef:delete(true)
+        end
+        forceFieldsByItemId[id] = nil
+        return msgBus.CLEANUP
+      end
+      if (not forceFieldsByItemId[id]) then
+        local playerRef = Component.get('PLAYER')
+        local x, y = playerRef:getPosition()
+        forceFieldsByItemId[id] = ForceField.create({
+            x = x,
+            y = y,
+            size = props.size,
+            maxShieldHealth = props.maxShieldHealth,
+            unhitDurationRequirement = props.unhitDurationRequirement,
+          })
+          :set('drawOrder', function()
+            return playerRef:drawOrder() + 3
+          end)
+          :setParent(playerRef)
+      end
+    end, 100, function()
+      return checkExpRequirement(item, props)
+    end)
+  end
+})

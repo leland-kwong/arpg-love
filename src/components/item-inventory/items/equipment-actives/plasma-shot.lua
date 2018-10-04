@@ -31,7 +31,6 @@ return itemSystem.registerModule({
 				),
 				startOffset = weaponLength,
 				speed = 400,
-				cooldown = item.props.weaponCooldown
 			}
 		}
   end

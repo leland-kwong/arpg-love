@@ -5,6 +5,7 @@ return {
 
 	blueprint = {
 		baseModifiers =  {
+			cooldown = {2, 2},
 			armor = {50, 100}
 		},
 

@@ -16,9 +16,6 @@ return itemSystem.registerModule({
     })
     love.audio.stop(Sound.drinkPotion)
     love.audio.play(Sound.drinkPotion)
-    return {
-      cooldown = props.duration
-    }
   end,
   tooltip = function(item, props)
     local timeUnit = item.props.duration > 1 and "seconds" or "second"

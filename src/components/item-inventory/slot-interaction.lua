@@ -55,6 +55,24 @@ local signHumanized = function(v)
 end
 
 local modifierParsers = {
+  attackTime = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' attack time'
+    }
+  end,
+  cooldown = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' cooldown'
+    }
+  end,
+  energyCost = function(value)
+    return {
+      Color.CYAN, signHumanized(value)..' '..value,
+      Color.WHITE, ' energy cost'
+    }
+  end,
   attackTimeReduction = function(value)
     return {
       Color.CYAN, signHumanized(value)..' '..value..'%',
@@ -173,24 +191,20 @@ end
 local baseModifiers = require 'components.state.base-stat-modifiers'()
 local function parseItemModifiers(item)
   local modifiers = {}
-  for k,_ in pairs(baseModifiers) do
+  for k,v in pairs(item.baseModifiers) do
     local parser = modifierParsers[k]
     if parser then
-      local props = item.baseModifiers
-      local v = props[k]
-      if (v ~= nil) then
-        local output = parser(v)
-        local length = #output
-        for i=1, length, 2 do
-          local color = output[i]
-          local str = output[i + 1]
-          local isLastItem = i == length - 1
-          if isLastItem then
-            str = str..'\n'
-          end
-          table.insert(modifiers, color)
-          table.insert(modifiers, str)
+      local output = parser(v)
+      local length = #output
+      for i=1, length, 2 do
+        local color = output[i]
+        local str = output[i + 1]
+        local isLastItem = i == length - 1
+        if isLastItem then
+          str = str..'\n'
         end
+        table.insert(modifiers, color)
+        table.insert(modifiers, str)
       end
     else
       error('no parser for property '..k)

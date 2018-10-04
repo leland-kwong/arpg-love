@@ -12,16 +12,16 @@ local speedBoostSoundFilter = {
 return itemSystem.registerModule({
   name = 'movespeed-boost',
   type = itemSystem.moduleTypes.EQUIPMENT_ACTIVE,
-  active = function(item)
+  active = function(item, props)
     Sound.MOVE_SPEED_BOOST:setFilter(speedBoostSoundFilter)
     love.audio.stop(Sound.MOVE_SPEED_BOOST)
     love.audio.play(Sound.MOVE_SPEED_BOOST)
-    local buffDuration = item.props.speedBoostDuration
+    local buffDuration = props.speedBoostDuration
     msgBus.send(msgBus.CHARACTER_HIT, {
       parent = Component.get('PLAYER'),
       duration = buffDuration,
       modifiers = {
-        moveSpeed = item.props.speedBoost
+        moveSpeed = props.speedBoost
       },
       source = 'MOCK_SHOES'
     })
@@ -29,13 +29,13 @@ return itemSystem.registerModule({
       cooldown = buffDuration
     }
   end,
-  tooltip = function(item)
+  tooltip = function(item, props)
     return {
       Color.YELLOW, '\nactive skill:\n\n',
       Color.WHITE, 'Gain ',
-      Color.LIME, item.props.speedBoost..' extra move speed',
+      Color.LIME, props.speedBoost..' extra move speed',
       Color.WHITE, ' for ',
-      Color.CYAN, item.props.speedBoostDuration..' seconds'
+      Color.CYAN, props.speedBoostDuration..' seconds'
     }
   end
 })

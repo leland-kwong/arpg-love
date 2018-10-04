@@ -38,9 +38,12 @@ local function ActiveConsumableHandler()
       if not activateFn then
         return skill
       end
-      local instance = activateFn(activeItem)
-      curCooldown = instance.cooldown
-      skillCooldown = instance.cooldown
+      activateFn(activeItem)
+      local curState = self.rootStore:get()
+      local baseCooldown = activeItem.baseModifiers.cooldown or 0
+      local actualCooldown = baseCooldown - (baseCooldown * curState.statModifiers.cooldownReduction)
+      curCooldown = actualCooldown
+      skillCooldown = actualCooldown
       return skill
     end
   end
@@ -91,7 +94,6 @@ local function ActiveEquipmentHandler()
     -- update instance properties
     v:set('minDamage', min)
       :set('maxDamage', max)
-      :set('cooldown', v.cooldown - (v.cooldown * m.cooldownReduction))
 
     return v
   end
@@ -127,14 +129,6 @@ local function ActiveEquipmentHandler()
         return skill
       end
 
-      local attackTime = definition.attackTime or 0.1
-      local actualAttackTime = attackTime - (attackTime * curState.statModifiers.attackTimeReduction)
-      playerRef:set('attackRecoveryTime', actualAttackTime)
-      msgBus.send(
-        msgBus.PLAYER_WEAPON_ATTACK,
-        { attackTime = actualAttackTime }
-      )
-
       local mx, my = camera:getMousePosition()
       local playerX, playerY = self.player:getPosition()
       local abilityData = activateFn(activeItem)
@@ -152,8 +146,18 @@ local function ActiveEquipmentHandler()
         abilityEntity,
         curState.statModifiers
       )
-      curCooldown = instance.cooldown
-      skillCooldown = instance.cooldown
+      local baseCooldown = activeItem.baseModifiers.cooldown or 0
+      local actualCooldown = baseCooldown - (baseCooldown * curState.statModifiers.cooldownReduction)
+      curCooldown = actualCooldown
+      skillCooldown = actualCooldown
+
+      local attackTime = activeItem.baseModifiers.attackTime or 0
+      local actualAttackTime = attackTime - (attackTime * curState.statModifiers.attackTimeReduction)
+      playerRef:set('attackRecoveryTime', actualAttackTime)
+      msgBus.send(
+        msgBus.PLAYER_WEAPON_ATTACK,
+        { attackTime = actualAttackTime }
+      )
 
       local actualEnergyCost = energyCost -
         (energyCost * curState.statModifiers.energyCostReduction)

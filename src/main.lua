@@ -43,9 +43,12 @@ local characterSystem = msgBus.send(msgBus.PROFILE_FUNC, {
   call = require 'components.groups.character'
 })
 
+msgBus.UPDATE = 'UPDATE'
+
 function love.update(dt)
   systemsProfiler()
 
+  msgBus.send(msgBus.UPDATE, dt)
   tick.update(dt)
 
   camera:update(dt)
