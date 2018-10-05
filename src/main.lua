@@ -26,8 +26,7 @@ local scale = config.scaleFactor
 function love.load()
   msgBus.send(msgBus.GAME_LOADED)
   love.keyboard.setKeyRepeat(true)
-  local resolution = config.resolution
-  local vw, vh = resolution.w * scale, resolution.h * scale
+  local vw, vh = config.window.width, config.window.height
   love.window.setMode(vw, vh)
   camera
     :setSize(vw, vh)
