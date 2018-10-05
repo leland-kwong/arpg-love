@@ -219,7 +219,7 @@ local function drawTooltip(item, x, y, w2, h2, rootStore)
   local padding = 12
   local itemDef = itemDefinition.getDefinition(item)
   local tooltipContent = parseItemModifiers(item)
-  local rightClickText = itemDefinition.loadModule(item.onActivate).tooltip()
+  local rightClickText = itemDefinition.loadModule(item.onActivate).tooltip(item)
   local rightClickTextH = select(2, GuiText.getTextSize(rightClickText, guiTextLayers.body.font))
   local tooltipItemUpgrade = itemDef.upgrades
   local levelRequirementText = itemDef.levelRequirement and 'Required level: '..itemDef.levelRequirement or nil
@@ -234,12 +234,24 @@ local function drawTooltip(item, x, y, w2, h2, rootStore)
 
   -- rarity text and dimensions
   local itemGuiConfig = require'components.item-inventory.items.config'
+  local functional = require 'utils.functional'
   local rarity = item.rarity
   local rarityTitle = itemGuiConfig.rarityTitle[rarity]
   local rarityTextCopy = (rarityTitle and rarityTitle ..' ' or '').. itemGuiConfig.categoryTitle[itemDef.category]
   local rarityX, rarityY = posX + padding,
     posY + padding + titleH + titleH
   local rarityW, rarityH = GuiText.getTextSize(rarityTextCopy, guiTextLayers.body.font)
+
+  functional.forEach(item.extraModifiers, function(modifier)
+    local module = itemDefinition.loadModule(modifier)
+    local tooltip = module.tooltip
+    if tooltip then
+      local content = tooltip(item)
+      for i=1, #content do
+        table.insert(tooltipContent, content[i])
+      end
+    end
+  end)
 
   local levelRequirementW, levelRequirementH = 0, 0
   if levelRequirementText then

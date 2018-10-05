@@ -9,6 +9,12 @@ return {
 			armor = {50, 100}
 		},
 
+		extraModifiers = {
+			require 'components.item-inventory.items.modifiers.stat'({
+				healthRegeneration = {50, 100}
+			})
+		},
+
 		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'(),
 		onActivateWhenEquipped = require 'components.item-inventory.items.equipment-actives.heal'({
 			minHeal = 80,

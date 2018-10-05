@@ -3,6 +3,7 @@ local gameConfig = require 'config.config'
 local itemSystem = require("components.item-inventory.items.item-system")
 local msgBus = require 'components.msg-bus'
 local extend = require 'utils.object-utils'.extend
+local Color = require 'modules.color'
 
 return itemSystem.registerModule({
   name = 'upgrade-shock',
@@ -32,17 +33,23 @@ return itemSystem.registerModule({
         props.experienceRequired <= item.experience
     end)
   end,
-  tooltip = function(item)
+  tooltip = function(item, props)
     return {
-      sprite = 'item-upgrade-placeholder-unlocked',
-      title = 'Shock',
-      description = 'Attacks shock the target, dealing 1-2 lightning damage.',
-      experienceRequired = 10,
-      props = {
-        shockDuration = 0.4,
-        minLightningDamage = 1,
-        maxLightningDamage = 2
-      }
+      Color.YELLOW,
+      '\nupgrade:     ',
+
+      Color.LIGHT_GRAY,
+      props.experienceRequired..' experience required\n',
+
+      -- description
+      Color.WHITE,
+      'Attacks shock the target, dealing ',
+
+      Color.CYAN,
+      props.minDamage .. '-' .. props.maxDamage,
+
+      Color.WHITE,
+      ' lightning damage.'
     }
   end
 })

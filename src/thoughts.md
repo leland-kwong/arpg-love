@@ -213,14 +213,17 @@ local module = {
 #### modifier data structure
 
 ```lua
+-- [modifier props]
+-- These are modifier instance level props generated upon item creation
+{
+  experienceRequired = 0, -- all modifiers have a default experience requirement of 0
+}
+
+-- modifier blueprint
 {
   name = '', -- unique modifier name (we lookup the file based on this)
   type = '', -- unique type (we lookup the file based on this)
-  value = 1, -- the rolled value for the modifier (items with ranges like 1-10)
-  onEquip = function()
-  end,
-  final = function()
-  end
+  displayTitle = '', -- title to display for gui
 }
 ```
 

@@ -40,16 +40,22 @@ function PlayerStatsPanel.draw(self)
   local playerLevelOriginY = self.y + padding + (primaryFont.fontSize * primaryFont.lineHeight)
   self.guiText:add('Level: '..rootStore:get().level, Color.YELLOW, self.x + padding, playerLevelOriginY)
 
+  local statNames = {}
+  local statValues = {}
+  local camelCaseHumanized = require 'utils.camel-case-humanized'
   for stat,val in pairs(rootStore:get().statModifiers) do
-    local w, h = self.guiText:getSize()
-    local xPos, yPos = self.x + padding, self.y + originY + 16 + (h * i * primaryFont.lineHeight)
-    local statType = stat..': '
-    self.guiText:add(statType, Color.WHITE, xPos, yPos)
+    local statType = camelCaseHumanized(stat)..':\n'
     local statValue = val..'\n'
     local statValueColor = val > 0 and Color.LIME or Color.WHITE
-    self.guiText:add(statValue, statValueColor, xPos + 125, yPos)
-    i = i + 1
+    table.insert(statNames, Color.WHITE)
+    table.insert(statNames, statType)
+
+    table.insert(statValues, statValueColor)
+    table.insert(statValues, statValue)
   end
+  local wrapLimit = 155
+  self.guiText:addf(statNames, wrapLimit, 'left', self.x + padding, self.y + originY + 16)
+  self.guiText:addf(statValues, wrapLimit, 'right', self.x + padding, self.y + originY + 16)
 end
 
 return Component.createFactory(PlayerStatsPanel)
