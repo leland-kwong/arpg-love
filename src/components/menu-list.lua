@@ -21,13 +21,17 @@ local MenuList = {
   onSelect = nil
 }
 
-local itemFont = font.primary.font
-local guiTextBodyLayer = GuiText.create({
-  font = itemFont
-})
-
 function MenuList.init(self)
   assert(type(self.onSelect) == 'function', 'onSelect method required')
+
+  local parent = self
+  local itemFont = font.primary.font
+  self.guiTextBodyLayer = GuiText.create({
+    font = itemFont,
+    drawOrder = function()
+      return self:drawOrder()
+    end
+  })
 
   local onSelect = self.onSelect
   local menuX = self.x
@@ -64,10 +68,10 @@ function MenuList.init(self)
           local w = self.w + (sidePadding * 2)
           love.graphics.rectangle('fill', self.x - sidePadding, self.y - self.h/4, w, self.h)
         end
-        guiTextBodyLayer:add(name, Color.WHITE, self.x, self.y)
+        parent.guiTextBodyLayer:add(name, Color.WHITE, self.x, self.y)
       end,
       drawOrder = function()
-        return 5
+        return parent:drawOrder() - 1
       end
     }):setParent(self)
   end)

@@ -11,19 +11,25 @@ local config = require 'config.config'
 local objectUtils = require 'utils.object-utils'
 local bitser = require 'modules.bitser'
 
+local drawOrder = function()
+  return 1000
+end
+
 local guiTextBodyLayer = GuiText.create({
-  font = font.primary.font
+  font = font.primary.font,
+  drawOrder = drawOrder
 })
 
 local titleFont = font.secondary.font
 local guiTextTitleLayer = GuiText.create({
-  font = titleFont
+  font = titleFont,
+  drawOrder = drawOrder
 })
 
 local Sandbox = {
   group = groups.gui,
   drawOrder = function()
-    return 4
+    return drawOrder() - 1
   end
 }
 
@@ -55,10 +61,6 @@ local function loadScene(name, path, sceneProps)
     activeScene = name,
     activeScenePath = path
   })
-end
-
-local function drawOrder(self)
-  return 11
 end
 
 local function DebugMenuToggleButton(onToggle)
@@ -149,6 +151,7 @@ msgBusMainMenu.on(msgBusMainMenu.MENU_ITEM_REMOVE, function(menuOption)
 end)
 
 require 'scene.light-test'
+require 'scene.font-test'
 
 local menuX, menuY = 200, 20
 
@@ -165,7 +168,9 @@ function Sandbox.init(self)
           DebugMenu(false)
           value()
         end,
-        drawOrder = drawOrder
+        drawOrder = function()
+          return drawOrder() + 2
+        end
       })
     elseif activeSceneMenu then
       activeSceneMenu:delete(true)
@@ -203,7 +208,7 @@ function Sandbox.draw()
     guiTextTitleLayer:add('Sandbox scenes', Color.WHITE, menuX, menuY)
     -- background
     local w, h = love.graphics.getWidth() / config.scaleFactor, love.graphics.getHeight() / config.scaleFactor
-    love.graphics.setColor(0,0,0,0.7)
+    love.graphics.setColor(0,0,0,0.8)
     love.graphics.rectangle('fill', 0, 0, w, h)
   end
 end
