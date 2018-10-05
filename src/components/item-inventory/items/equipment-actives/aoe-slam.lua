@@ -9,7 +9,7 @@ local collisionGroups = require 'modules.collision-groups'
 local config = require 'config.config'
 local filter = require 'utils.filter-call'
 local itemSystem = require(require('alias').path.itemSystem)
-local calcDamage = require 'components.abilities.calc-damage'
+local calcDamage = require 'modules.abilities.calc-damage'
 
 local bump = require 'modules.bump'
 local hammerWorld = bump.newWorld(4)

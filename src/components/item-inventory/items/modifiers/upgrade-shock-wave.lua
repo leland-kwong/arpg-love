@@ -4,7 +4,7 @@ local itemSystem = require(require('alias').path.itemSystem)
 local AbilityBase = require 'components.abilities.base-class'
 local msgBus = require 'components.msg-bus'
 local collisionGroups = require 'modules.collision-groups'
-local calcDamage = require 'components.abilities.calc-damage'
+local calcDamage = require 'modules.abilities.calc-damage'
 
 local function angleFromDirection(dx, dy, startAngle)
 	return (math.atan2(dx, dy) * -1) + startAngle

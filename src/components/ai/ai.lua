@@ -612,7 +612,7 @@ local function adjustInitialPositionIfNeeded(self)
 end
 
 local function setupAbilities(self)
-  local abilityManager = require 'components.abilities.manager'
+  local abilityManager = require 'modules.abilities.manager'
   for i=1, #self.abilities do
     -- transform ability into a coroutine
     self.abilities[i] = abilityManager.new(self.abilities[i])
