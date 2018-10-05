@@ -1,8 +1,8 @@
 local function fontPrimary(fontSize)
   local font = love.graphics.newFont(
     -- 'built/fonts/semp_reg/SEMPRG__.TTF',
-    'built/fonts/pixelsix/pixelsix00fixed.ttf',
-    -- 'built/fonts/StarPerv.ttf',
+    -- 'built/fonts/pixelsix/pixelsix00fixed.ttf',
+    'built/fonts/StarPerv.ttf',
     fontSize
   )
   local lineHeight = 1.2
