@@ -107,6 +107,13 @@ end
 
 local modulesById = {}
 
+local modulePropValidators = {
+	experienceRequired = {
+		type = 'number',
+		defaultValue = 0
+	}
+}
+
 function items.registerModule(module)
 	local id = module.type .. '_' .. module.name
 	assert(type(module.name) == 'string', 'modules must have a unique name')
@@ -114,9 +121,19 @@ function items.registerModule(module)
 	assert(not modulesById[id], 'duplicate module with id '..id)
 	modulesById[id] = module
 	return function(props)
+		local actualProps = (type(props) == 'function') and props() or (props or {})
+
+		-- validate props
+		for k,validator in pairs(modulePropValidators) do
+			actualProps[k] = actualProps[k] or validator.defaultValue
+			local value = actualProps[k]
+			local valueType = type(value)
+			assert(valueType == validator.type, 'invalid item property '..k..'. Expected type `'..validator.type..'` received type `'..valueType..'`')
+		end
+
 		return {
 			id = id,
-			props = type(props) == 'function' and props() or props
+			props = actualProps
 		}
 	end
 end
