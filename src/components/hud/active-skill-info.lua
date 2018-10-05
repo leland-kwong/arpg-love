@@ -7,6 +7,7 @@ local drawItem = require 'components.item-inventory.draw-item'
 local config = require 'config.config'
 local setProp = require 'utils.set-prop'
 local extend = require 'utils.object-utils'.extend
+local Vec2 = require 'modules.brinevector'
 
 local keyMap = config.userSettings.keyboard
 local mouseInputMap = config.userSettings.mouseInputMap
@@ -156,7 +157,11 @@ local function ActiveEquipmentHandler()
       playerRef:set('attackRecoveryTime', actualAttackTime)
       msgBus.send(
         msgBus.PLAYER_WEAPON_ATTACK,
-        { attackTime = actualAttackTime }
+        {
+          attackTime = actualAttackTime,
+          fromPos = Vec2(playerX, playerY),
+          targetPos = Vec2(mx, my)
+        }
       )
 
       local actualEnergyCost = energyCost -

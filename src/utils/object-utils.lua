@@ -24,6 +24,7 @@ Assigns key-value pairs by iterating over a series of objects.
 Returns first input object
 --]]
 function Object.assign(t1, t2, t3, t4)
+	t1 = t1 or {}
 	apply(t1, t2)
 	if t3 then
 		apply(t1, t3)
@@ -41,6 +42,7 @@ end
 -- Does a shallow comparison of properties.
 -- If changes exist we return a new copy with the changes merged into the source table
 function Object.immutableApply(t1, t2)
+	t1 = t1 or {}
 	local copy = nil
 	for k,v in pairs(t2) do
 		local isNewValue = t1[k] ~= v

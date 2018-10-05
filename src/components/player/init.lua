@@ -52,9 +52,15 @@ local function setupDefaultInventory(items)
   for i=1, #items do
     local it = items[i]
     local module = require(require('alias').path.itemDefs..'.'..it.type)
-    local canEquip, errorMsg = rootState:equipItem(itemSystem.create(module), it.position.x, it.position.y)
-    if not canEquip then
-      error(errorMsg)
+    local position = it.position
+    local canEquip, errorMsg
+    if position then
+      canEquip, errorMsg = rootState:equipItem(itemSystem.create(module), position.x, position.y)
+      if not canEquip then
+        error(errorMsg)
+      end
+    else
+      rootState:addItemToInventory(itemSystem.create(module))
     end
   end
 end
@@ -93,6 +99,9 @@ local function connectInventory()
           x = 1,
           y = 4
         }
+      },
+      {
+        type = 'pod-module-hammer',
       },
       -- {
       --   type = 'lightning-rod',
@@ -290,6 +299,16 @@ local Player = {
       duration = energyRegenerationDuration,
       property = 'energy',
       maxProperty = 'maxEnergy'
+    })
+
+    local healthRegenerationDuration = math.pow(10, 10)
+    msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
+      source = 'PLAYER_INNATE_HEALTH_REGENERATION',
+      amount = healthRegenerationDuration *
+        self.rootStore:get().statModifiers.healthRegeneration,
+      duration = healthRegenerationDuration,
+      property = 'health',
+      maxProperty = 'maxHealth'
     })
 
     self.animations = {

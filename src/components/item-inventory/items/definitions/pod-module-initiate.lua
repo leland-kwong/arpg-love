@@ -18,12 +18,6 @@ return {
 		},
 
 		extraModifiers = {
-			require(require('alias').path.items..'.modifiers.upgrade-force-field')({
-				experienceRequired = 120,
-				size = 17,
-				maxShieldHealth = 30,
-				unhitDurationRequirement = 1.5,
-			}),
 			require(require('alias').path.items..'.modifiers.upgrade-shock')({
 				experienceRequired = 10,
 				duration = 0.4,

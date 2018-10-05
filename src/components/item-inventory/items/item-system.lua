@@ -29,12 +29,6 @@ local items = {
 	})
 }
 
-function items.isItem(value)
-	return type(value) == 'table'
-		-- check if type exists
-		and types[value.__type] ~= nil
-end
-
 local loadedTypes = {}
 local function requireIfNecessary(item)
 	local iType = item.__type
@@ -122,7 +116,7 @@ function items.registerModule(module)
 	return function(props)
 		return {
 			id = id,
-			props = props
+			props = type(props) == 'function' and props() or props
 		}
 	end
 end

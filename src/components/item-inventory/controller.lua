@@ -23,10 +23,6 @@ return function(rootStore)
 		if not item then
 			return
 		end
-		if config.isDebug then
-			local valid = itemSystem.isItem(item)
-			assert(valid, "item type does not exist")
-		end
 
 		local stackable = item.maxStackSize > 1
 		local emptyPosition = nil
