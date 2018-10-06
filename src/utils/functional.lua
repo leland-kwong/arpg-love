@@ -11,7 +11,7 @@ end
 function M.map(array, mapFn)
 	local i = 0
 	local list = {}
-	for i=1, #array do
+	for i=1, #(array or list) do
 		local value = array[i]
 		local mappedValue = mapFn(value, i)
 		table.insert(list, mappedValue)
@@ -46,6 +46,9 @@ function M.filter(t, filterFn)
 end
 
 function M.reduce(t, reducer, seed)
+	if not t then
+		return {}
+	end
 	local result = seed
 	for i=1, #t do
 		local v = t[i]
