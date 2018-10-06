@@ -152,6 +152,7 @@ end)
 
 require 'scene.light-test'
 require 'scene.font-test'
+require 'scene.tooltip-test'
 
 local menuX, menuY = 200, 20
 

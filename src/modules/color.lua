@@ -38,6 +38,7 @@ local colors = {
   RED = {1,0,0,1},
   DEEP_RED = {Color.rgba255(209, 43, 43)},
   TRANSPARENT = {0,0,0,0},
+  PURPLE = {Color.rgba255(107, 171, 255)},
 
   RARITY_MAGICAL = {Color.rgba255(107, 171, 255)}, -- blueish-purple
   RARITY_RARE = {1,1,0,1}, -- yellow
