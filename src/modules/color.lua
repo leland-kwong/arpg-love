@@ -27,6 +27,7 @@ local colors = {
   LIME = {0,1,0,1},
   WHITE = {1,1,1,1},
   LIME = {Color.rgba255(35, 219, 93)},
+  OFF_WHITE = {0.85,0.85,0.85,1},
   LIGHT_GRAY = {0.7,0.7,0.7,1},
   MED_GRAY = {0.5,0.5,0.5,1},
   MED_DARK_GRAY = {0.3,0.3,0.3,1},
