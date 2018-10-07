@@ -27,7 +27,8 @@ local function setupAndValidateProps(c, types)
 end
 
 local rowPropTypes = {
-  marginTop = 0
+  marginTop = 0,
+  marginBottom = 0,
 }
 
 return function(columns, rowProps)

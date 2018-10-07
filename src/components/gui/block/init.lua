@@ -2,32 +2,32 @@ local Component = require 'modules.component'
 local Row = require 'components.gui.block.row'
 local layout = require 'components.gui.block.layout'
 
-local Tooltip = {
+local Block = {
   group = Component.groups.gui,
   background = nil, -- background color of tooltip (includes padding)
   padding = 0 -- padding around tooltip content
 }
 
-Tooltip.Row = Row
+Block.Row = Row
 
-function Tooltip.init(self)
+function Block.init(self)
   assert(type(self.rows) == 'table', '`rows` are required')
   self.fonts = {}
   self.textLayers = {}
 end
 
-function Tooltip.update(self)
+function Block.update(self)
   local w, h = 0, 0
   for i=1, #self.rows do
     local row = self.rows[i]
     w = math.max(w, row.width)
-    h = h + row.height + row.marginTop
+    h = h + row.height + row.marginTop + row.marginBottom
   end
   self.width = w
   self.height = h
 end
 
-function Tooltip.draw(self)
+function Block.draw(self)
   if self.background then
     love.graphics.setColor(self.background)
     love.graphics.rectangle('fill', self.x - self.padding, self.y - self.padding, self.width + (self.padding * 2), self.height + (self.padding * 2))
@@ -71,7 +71,8 @@ function Tooltip.draw(self)
   love.graphics.setColor(1,1,1)
   for _,textLayer in pairs(self.textLayers) do
     love.graphics.draw(textLayer)
+    textLayer:clear()
   end
 end
 
-return Component.createFactory(Tooltip)
+return Component.createFactory(Block)

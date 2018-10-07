@@ -6,6 +6,7 @@ return function(rows, offsetX, offsetY, callback)
   for i=1, #rows do
     local row = rows[i]
     local marginTop = row.marginTop
+    local marginBottom = row.marginBottom
     local xPos = 0
 
     for j=1, #row.columns do
@@ -16,6 +17,6 @@ return function(rows, offsetX, offsetY, callback)
       xPos = xPos + col.width
     end
 
-    yPos = yPos + row.height + marginTop
+    yPos = yPos + row.height + marginTop + marginBottom
   end
 end
