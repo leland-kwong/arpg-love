@@ -15,10 +15,24 @@ function Tooltip.init(self)
   self.textLayers = {}
 end
 
+function Tooltip.update(self)
+  local w, h = 0, 0
+  for i=1, #self.rows do
+    local row = self.rows[i]
+    w = math.max(w, row.width)
+    h = h + row.height
+  end
+  self.width = w
+  self.height = h
+end
+
 function Tooltip.draw(self)
   local yPos = self.y
-  local totalWidth = 0
-  local totalHeight = 0
+
+  if self.background then
+    love.graphics.setColor(self.background)
+    love.graphics.rectangle('fill', self.x - self.padding, self.y - self.padding, self.width + (self.padding * 2), self.height + (self.padding * 2))
+  end
 
   for i=1, #self.rows do
     local row = self.rows[i]

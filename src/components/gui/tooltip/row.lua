@@ -5,6 +5,7 @@ local font = require 'components.font'
 local propTypes = {
   content = {}, -- love2d text object
   maxWidth = 100, -- content max width
+  width = nil, -- if defined, forces the container to the specified width, otherwise defaults to auto-width
   align = 'left',
   height = nil, -- if defined, forces the container to the specified height, otherwise defaults to auto-height
   font = nil, -- love2d font object
@@ -31,10 +32,11 @@ return function(columns)
   local parsedColumns = functional.map(columns, function(col)
     col = setupAndValidateColumn(col)
     col.__index = col
-    local textW, textH = GuiText.getTextSize(col.content, col.font, col.maxWidth)
+    local colWidth = col.width or col.maxWidth
+    local textW, textH = GuiText.getTextSize(col.content, col.font, colWidth)
     local heightAdjustment = math.max(0, (col.font:getLineHeight() - 0.8) * col.font:getHeight())
     local contentHeight = textH + (col.padding * 2) + (col.borderWidth * 2) - heightAdjustment
-    local contentWidth = textW + (col.padding * 2) + (col.borderWidth * 2)
+    local contentWidth = col.width or (textW + (col.padding * 2) + (col.borderWidth * 2))
     rowHeight = math.max(rowHeight, contentHeight)
     rowWidth = rowWidth + contentWidth
     return setmetatable({
