@@ -5,7 +5,7 @@ local parser = TemplateParser({
   delimiters = {'{', '}'}
 })
 
-local fragmentHandlers = {
+local upgradeFragmentHandlers = {
   title = function(title)
     return Color.YELLOW, title..'\n'
   end,
@@ -59,7 +59,7 @@ local modifierParsers = {
     local parsed = parser(template, data)
     local coloredText = {}
     for variable, data in parsed do
-      local color, value = fragmentHandlers[variable](data)
+      local color, value = upgradeFragmentHandlers[variable](data)
       local isFunc = type(color) == 'function'
       if isFunc then
         color(coloredText)
