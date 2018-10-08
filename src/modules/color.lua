@@ -24,6 +24,7 @@ end
 local colors = {
   PRIMARY = {Color.rgba255(81, 234, 241)},
   SKY_BLUE = {0.8,1,1,1},
+  DEEP_BLUE = {Color.rgba255(91, 181, 255)},
   LIME = {0,1,0,1},
   WHITE = {1,1,1,1},
   LIME = {Color.rgba255(35, 219, 93)},

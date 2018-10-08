@@ -42,7 +42,7 @@ return {
     name = 'loot',
     onComponentEnter = function(_, c)
       local iData = c.itemData
-      local items = lootAlgorithm(iData.level, iData.dropRate, itemConfig.rarity.NORMAL, itemConfig.rarity.RARE)
+      local items = lootAlgorithm(iData.level, iData.dropRate, iData.minRarity, iData.maxRarity)
       for i=1, #items do
         generateLoot(c, items[i])
       end

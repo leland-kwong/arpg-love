@@ -8,12 +8,7 @@ return {
 			cooldown = {2, 2},
 		},
 
-		extraModifiers = {
-			require 'components.item-inventory.items.modifiers.stat'({
-				armor = {50, 100},
-				healthRegeneration = {50, 100}
-			})
-		},
+		extraModifiers = {},
 
 		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'(),
 		onActivateWhenEquipped = require 'components.item-inventory.items.equipment-actives.heal'({

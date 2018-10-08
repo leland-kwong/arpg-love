@@ -69,6 +69,7 @@ Gui.create({
 })
 
 -- sets up interactable gui nodes and renders the contents in each slot
+local defaultSlotBackground = {0,0,0,0.5}
 local function setupSlotInteractions(
   self, getSlots, margin,
   onItemPickupFromSlot, onItemDropToSlot, onItemActivate,
@@ -103,7 +104,7 @@ local function setupSlotInteractions(
           local itemDef = itemDefinition.getDefinition(item)
           local rarityColor = itemConfig.rarityColor[item.rarity]
           local tooltipWidth = 250
-          local modifierBackgroundColor = {0.2,0.2,0.2}
+          local modifierBackgroundColor = {0.17,0.17,0.17}
           local titleBlock = {
             content = {
               rarityColor,
@@ -146,11 +147,9 @@ local function setupSlotInteractions(
                   width = tooltipWidth,
                   font = font.primary.font,
                   fontSize = font.primary.fontSize,
-                  background = modifierBackgroundColor,
-                  padding = blockPadding
                 }
               }, {
-                marginTop = 1
+                marginBottom = blockPadding
               })
             end
           end
@@ -181,15 +180,15 @@ local function setupSlotInteractions(
             width = tooltipWidth,
             font = font.primary.font,
             fontSize = font.primary.fontSize,
-            background = modifierBackgroundColor,
-            padding = blockPadding
+            -- background = modifierBackgroundColor,
+            -- padding = blockPadding
           }
           local rows = {
             Block.Row({
               titleBlock,
               levelBlock
             }, {
-              marginBottom = 8
+              marginBottom = 6
             }),
             Block.Row({
               itemTypeBlock
@@ -198,7 +197,10 @@ local function setupSlotInteractions(
             }),
             Block.Row({
               baseModifiersBlock
-            })
+            }, {
+              marginBottom = blockPadding
+            }),
+            activeAbilityBlock
           }
 
           local functional = require 'utils.functional'
@@ -244,7 +246,6 @@ local function setupSlotInteractions(
             end
           end)
 
-          table.insert(rows, activeAbilityBlock)
           table.insert(rows, rightClickActionBlock)
 
           self.tooltip = Block.create({
@@ -293,9 +294,22 @@ local function setupSlotInteractions(
         if self.hovered then
           love.graphics.setColor(1,1,1,0.5)
         else
-          love.graphics.setColor(0,0,0,0.5)
+          love.graphics.setColor(defaultSlotBackground)
         end
         love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
+
+        local itemInSlot = getItem()
+        if itemInSlot then
+          local itemConfig = require(require('alias').path.items..'.config')
+          if (itemInSlot.rarity ~= itemConfig.rarity.NORMAL) then
+            local baseColor = itemConfig.rarityColor[itemInSlot.rarity]
+            love.graphics.setColor(Color.multiply(baseColor, {1,1,1,0.4}))
+            local oLineWidth = love.graphics.getLineWidth()
+            love.graphics.setLineWidth(1)
+            love.graphics.rectangle('line', self.x, self.y, self.w, self.h)
+            love.graphics.setLineWidth(oLineWidth)
+          end
+        end
 
         local item = getItem()
         if slotRenderer then

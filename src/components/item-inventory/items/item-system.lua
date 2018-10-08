@@ -78,6 +78,13 @@ function items.registerType(itemDefinition)
 end
 
 local factoriesByType = {}
+local itemDefaults = {
+	rarity = itemConfig.rarity.NORMAL,
+	experience = 0,
+	stackSize = 1,
+	maxStackSize = 1,
+	extraModifiers = {}
+}
 -- Factory function that creates a new instance based on the module's instance props.
 function items.create(module)
 	local createFn = factoriesByType[module.type]
@@ -98,11 +105,8 @@ function items.create(module)
 	newItem.__type = module.type
 	newItem.__id = uid()
 
-	-- add default props if needed
-	newItem.rarity = newItem.rarity or itemConfig.rarity.NORMAL
-	newItem.experience = newItem.experience or 0
-	newItem.stackSize = newItem.stackSize == nil and 1 or newItem.stackSize
-	newItem.maxStackSize = newItem.maxStackSize == nil and 1 or newItem.maxStackSize
+	local propTypes = require 'utils.prop-types'
+	propTypes(newItem, itemDefaults)
 	return newItem
 end
 

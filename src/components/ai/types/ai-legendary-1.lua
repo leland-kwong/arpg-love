@@ -2,6 +2,7 @@ local AiEyeball = require 'components.ai.types.ai-eyeball'
 local collisionGroups = require 'modules.collision-groups'
 local debounce = require 'modules.debounce'
 local animationFactory = require 'components.animation-factory'
+local itemConfig = require(require('alias').path.items..'.config')
 
 local playFrostShotSound = debounce(function()
   local Sound = require 'components.sound'
@@ -70,6 +71,9 @@ return function(props)
     })
   }
   local spriteWidth, spriteHeight = animations.idle:getSourceSize()
+  aiProps.itemData.minRarity = itemConfig.rarity.RARE
+  aiProps.itemData.maxRarity = itemConfig.rarity.RARE
+
   aiProps.animations = animations
   aiProps.w = spriteWidth
   aiProps.h = spriteHeight

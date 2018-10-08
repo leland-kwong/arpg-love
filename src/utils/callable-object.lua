@@ -3,11 +3,11 @@ local function callableObject(props)
     type(props.__call) == 'function' or type(props.value) ~= nil,
     '`__call` or `value` property must be provided'
   )
-  return setmetatable(props, {
-    __call = props.__call or function()
-      return props.value
-    end
-  })
+  props.__call = props.__call or function()
+    return props.value
+  end
+  props.__index = props
+  return setmetatable(props, props)
 end
 
 return callableObject

@@ -121,11 +121,12 @@ return function(baseItemPool)
 
   --[[
     {itemLevel}
-    {dropRate} - out of 100%, where every 100% guarantees at least one item\
+    {dropRate} - out of 100%, where every 100% guarantees at least one item
   ]]
   local function generateRandomItem(itemLevel, dropRate, minRarity, maxRarity)
     assert(type(itemLevel) == 'number')
     assert(type(dropRate) == 'number')
+    assert(type(minRarity) == 'number' and type(maxRarity) == 'number')
 
     local lootList = {}
     local multiplier = 100

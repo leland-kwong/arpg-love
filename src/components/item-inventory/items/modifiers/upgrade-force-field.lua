@@ -154,8 +154,9 @@ return itemSystem.registerModule({
     return {
       type = 'upgrade',
       data = {
+        title = 'force-field',
         description = {
-          template = 'Gain a forcefield that blocks {maxShieldHealth} total damage. Recharges when your have not been hit for {unhitDurationRequirement} second(s).',
+          template = 'Gain a forcefield that blocks {maxShieldHealth} total damage. Recharges when you have not been hit for {unhitDurationRequirement} second(s).',
           data = props
         }
       }

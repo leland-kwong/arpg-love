@@ -2,6 +2,7 @@ local functional = require 'utils.functional'
 local GuiText = require 'components.gui.gui-text'
 local font = require 'components.font'
 local Vec2 = require 'modules.brinevector'
+local propTypes = require 'utils.prop-types'
 
 local columnPropTypes = {
   content = {}, -- love2d text object
@@ -17,22 +18,13 @@ local columnPropTypes = {
   borderWidth = 0
 }
 
-local function setupAndValidateProps(c, types)
-  for k,v in pairs(types) do
-    c[k] = c[k] or v
-    local isValid = type(c[k]) == type(v)
-    assert(isValid, 'invalid property `'..k..'`')
-  end
-  return c
-end
-
 local rowPropTypes = {
   marginTop = 0,
   marginBottom = 0,
 }
 
 return function(columns, rowProps)
-  rowProps = setupAndValidateProps(rowProps or {}, rowPropTypes)
+  rowProps = propTypes(rowProps or {}, rowPropTypes)
   rowProps.__index = rowProps
 
   assert(type(columns) == 'table', 'row function must be an array of columns')
@@ -43,7 +35,7 @@ return function(columns, rowProps)
   local rowHeight = 0 -- highest column height
   local rowWidth = 0 -- total width of all columns
   local parsedColumns = functional.map(columns, function(col)
-    col = setupAndValidateProps(col, columnPropTypes)
+    col = propTypes(col, columnPropTypes)
     col.__index = col
     local widthAdjustment = (col.padding * 2) + (col.borderWidth * 2)
     local textMaxWidth = (col.width or col.maxWidth) - widthAdjustment

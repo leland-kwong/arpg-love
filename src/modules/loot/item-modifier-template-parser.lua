@@ -1,6 +1,11 @@
 local TemplateParser = require 'utils.string-template'
 local Color = require 'modules.color'
 
+local colors = {
+  statBodyText = {0.8,0.8,0.8},
+  upgradeTitle = Color.WHITE
+}
+
 local parser = TemplateParser({
   delimiters = {'{', '}'}
 })
@@ -10,14 +15,14 @@ local upgradeFragmentHandlers = {
     if (not title) then
       return nil
     end
-    return Color.YELLOW, title..'\n'
+    return colors.upgradeTitle, title..': '
   end,
   description = function(description)
     local parsed = parser(description.template, description.data)
     return function(coloredText)
       for fragment, data in parsed do
         local isVariable = not not data
-        local color = isVariable and Color.WHITE or Color.OFF_WHITE
+        local color = isVariable and Color.WHITE or colors.statBodyText
         local value = isVariable and data or fragment
         table.insert(coloredText, color)
         table.insert(coloredText, value)
@@ -36,7 +41,7 @@ local modifierParsers = {
     local i = 0
     local modifierPropTypeDisplayMapper = require 'components.state.base-stat-modifiers'.propTypesDisplayValue
     for k,v in pairs(data) do
-      table.insert(coloredText, Color.OFF_WHITE)
+      table.insert(coloredText, colors.statBodyText)
       if i > 0 then
         table.insert(coloredText, '\n')
       end
@@ -45,7 +50,7 @@ local modifierParsers = {
       local mapperFn = modifierPropTypeDisplayMapper[k] or modifierPropTypeDisplayMapper.default
       table.insert(coloredText, mapperFn(v))
 
-      table.insert(coloredText, Color.OFF_WHITE)
+      table.insert(coloredText, colors.statBodyText)
       local camelCaseHumanized = require 'utils.camel-case-humanized'
       local displayKey = ' '..camelCaseHumanized(k)
       table.insert(coloredText, displayKey)
@@ -58,7 +63,7 @@ local modifierParsers = {
     local i = 0
     local modifierPropTypeDisplayMapper = require 'components.state.base-stat-modifiers'.propTypesDisplayValue
     for k,v in pairs(data) do
-      table.insert(coloredText, Color.OFF_WHITE)
+      table.insert(coloredText, colors.statBodyText)
       local sign = signHumanized(v)
       if i == 0 then
         table.insert(coloredText, sign)
@@ -70,7 +75,7 @@ local modifierParsers = {
       local mapperFn = modifierPropTypeDisplayMapper[k] or modifierPropTypeDisplayMapper.default
       table.insert(coloredText, mapperFn(v))
 
-      table.insert(coloredText, Color.OFF_WHITE)
+      table.insert(coloredText, colors.statBodyText)
       local camelCaseHumanized = require 'utils.camel-case-humanized'
       local displayKey = ' '..camelCaseHumanized(k)
       table.insert(coloredText, displayKey)
@@ -82,12 +87,12 @@ local modifierParsers = {
     local coloredText = {}
 
     table.insert(coloredText, Color.YELLOW)
-    table.insert(coloredText, 'active skill:\n\n')
+    table.insert(coloredText, 'active skill: ')
 
     local parsed = parser(data.template, data.data)
     for fragment, value in parsed do
       local isVariable = not not value
-      local color = isVariable and Color.WHITE or Color.OFF_WHITE
+      local color = isVariable and Color.WHITE or colors.statBodyText
       local displayValue = isVariable and value or fragment
       table.insert(coloredText, color)
       table.insert(coloredText, displayValue)
