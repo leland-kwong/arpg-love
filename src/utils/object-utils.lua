@@ -39,6 +39,18 @@ function Object.clone(t1)
 	return Object.assign({}, t1)
 end
 
+function Object.deepCopy(t1)
+	if (type(t1) ~= 'table') then
+		return t1
+	end
+
+	local copy = {}
+	for k,v in pairs(t1) do
+		copy[k] = Object.deepCopy(v)
+	end
+	return copy
+end
+
 -- Does a shallow comparison of properties.
 -- If changes exist we return a new copy with the changes merged into the source table
 function Object.immutableApply(t1, t2)
