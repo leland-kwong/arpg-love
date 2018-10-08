@@ -36,6 +36,10 @@ return function(columns, rowProps)
   rowProps.__index = rowProps
 
   assert(type(columns) == 'table', 'row function must be an array of columns')
+  if #columns > 0 then
+    assert(type(columns[1]) == 'table', 'a row must be a list of column objects')
+  end
+
   local rowHeight = 0 -- highest column height
   local rowWidth = 0 -- total width of all columns
   local parsedColumns = functional.map(columns, function(col)
@@ -45,12 +49,15 @@ return function(columns, rowProps)
     local textW, textH = GuiText.getTextSize(col.content, col.font, textMaxWidth)
     local heightAdjustment = math.max(0, (col.font:getLineHeight() - 0.8) * col.font:getHeight())
     local contentHeight = textH + (col.padding * 2) + (col.borderWidth * 2) - heightAdjustment
-    local contentWidth = col.width or (textW + (col.padding * 2) + (col.borderWidth * 2))
+    local widthAdjustment = (col.padding * 2) + (col.borderWidth * 2)
+    local contentWidth = col.width and (col.width - widthAdjustment) or (textW + widthAdjustment)
+    local actualWidth = col.width or contentWidth
     rowHeight = math.max(rowHeight, contentHeight)
-    rowWidth = rowWidth + contentWidth
+    rowWidth = rowWidth + actualWidth
     return setmetatable({
       height = contentHeight,
-      width = contentWidth
+      width = actualWidth,
+      contentWidth = contentWidth
     }, col)
   end)
 

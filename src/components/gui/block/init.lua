@@ -64,8 +64,8 @@ function Block.draw(self)
       love.graphics.rectangle('line', xPos - borderOffset, yPos - borderOffset, bgWidth + (borderOffset * 2), bgHeight + (borderOffset * 2))
     end
 
-    local textXOffset = col.align == 'left' and col.padding or -col.padding
-    textLayer:addf(col.content, col.width, col.align, col.position.x + textXOffset - borderOffset, col.position.y + col.padding - borderOffset)
+    local textXOffset = col.align == 'left' and col.padding or 0
+    textLayer:addf(col.content, col.contentWidth, col.align, col.position.x + textXOffset - borderOffset, col.position.y + col.padding - borderOffset)
   end)
 
   love.graphics.setColor(1,1,1)

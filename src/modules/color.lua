@@ -41,6 +41,7 @@ local colors = {
   TRANSPARENT = {0,0,0,0},
   PURPLE = {Color.rgba255(107, 171, 255)},
 
+  RARITY_NORMAL = {1,1,1,1},
   RARITY_MAGICAL = {Color.rgba255(107, 171, 255)}, -- blueish-purple
   RARITY_RARE = {1,1,0,1}, -- yellow
   RARITY_EPIC = {Color.rgba255(228, 96, 255)}, -- magenta

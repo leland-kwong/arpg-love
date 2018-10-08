@@ -7,13 +7,10 @@ local parser = TemplateParser({
 
 local upgradeFragmentHandlers = {
   title = function(title)
-    return Color.YELLOW, title..'\n'
-  end,
-  experienceRequired = function(exp)
-    if exp > 0 then
-      return Color.LIME, exp..' experience to unlock\n\n'
+    if (not title) then
+      return nil
     end
-    return Color.WHITE, '\n'
+    return Color.YELLOW, title..'\n'
   end,
   description = function(description)
     local parsed = parser(description.template, description.data)
@@ -55,7 +52,7 @@ local modifierParsers = {
     return coloredText
   end,
   upgrade = function(data)
-    local template = '{title}{experienceRequired}{description}'
+    local template = '{title}{description}'
     local parsed = parser(template, data)
     local coloredText = {}
     for variable, data in parsed do
@@ -63,7 +60,7 @@ local modifierParsers = {
       local isFunc = type(color) == 'function'
       if isFunc then
         color(coloredText)
-      else
+      elseif (color and value) then
         table.insert(coloredText, color)
         table.insert(coloredText, value)
       end

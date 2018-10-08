@@ -16,18 +16,22 @@ local module = itemSystem.registerModule({
     end, 1)
   end,
   tooltip = function(_, props)
-    local content = {}
-    for k,v in pairs(props) do
-      -- stat value
-      table.insert(content, Color.CYAN)
-      table.insert(content, '+ '..v)
+    return {
+      type = 'statsList',
+      data = props
+    }
+    -- local content = {}
+    -- for k,v in pairs(props) do
+    --   -- stat value
+    --   table.insert(content, Color.CYAN)
+    --   table.insert(content, '+ '..v)
 
-      -- state name
-      table.insert(content, Color.WHITE)
-      local camelCaseHumanized = require 'utils.camel-case-humanized'
-      table.insert(content, ' '..camelCaseHumanized(k))
-    end
-    return content
+    --   -- state name
+    --   table.insert(content, Color.WHITE)
+    --   local camelCaseHumanized = require 'utils.camel-case-humanized'
+    --   table.insert(content, ' '..camelCaseHumanized(k))
+    -- end
+    -- return content
   end
 })
 

@@ -11,13 +11,14 @@ local TooltipTest = {}
 function TooltipTest.init(self)
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, Color.LIGHT_GRAY)
   local blockPadding = 8
+  local tooltipWidth = 200
 
   local titleBlock = {
     content = {
       Color.RARITY_MAGICAL,
       'Fast Pod Initate of the Bear'
     },
-    width = 125,
+    width = tooltipWidth * 5/8,
     -- background = Color.WHITE,
     font = font.secondary.font,
     fontSize = font.secondary.fontSize,
@@ -27,7 +28,7 @@ function TooltipTest.init(self)
       Color.WHITE,
       'Level 1'
     },
-    width = 125,
+    width = tooltipWidth * 3/8,
     align = 'right',
     font = font.primary.font,
     fontSize = font.primary.fontSize,
@@ -37,7 +38,7 @@ function TooltipTest.init(self)
       Color.RARITY_MAGICAL,
       'Pod Module'
     },
-    width = 125,
+    width = tooltipWidth / 2,
     font = font.primary.font,
     fontSize = font.primary.fontSize
   }
@@ -56,7 +57,7 @@ function TooltipTest.init(self)
         }
       }
     }),
-    width = 250,
+    width = tooltipWidth,
     font = font.primary.font,
     fontSize = font.primary.fontSize,
     background = {0.3, 0.3, 0.3},
@@ -70,7 +71,7 @@ function TooltipTest.init(self)
         cooldownReduction = 5,
       }
     }),
-    width = 250,
+    width = tooltipWidth,
     font = font.primary.font,
     fontSize = font.primary.fontSize,
     background = {0.3, 0.3, 0.3},
@@ -84,7 +85,7 @@ function TooltipTest.init(self)
         cooldownReduction = 5,
       }
     }),
-    width = 250,
+    width = tooltipWidth,
     font = font.primary.font,
     fontSize = font.primary.fontSize,
     background = {0.3, 0.3, 0.3},
@@ -119,7 +120,7 @@ function TooltipTest.init(self)
     }),
   }
   Block.create({
-    x = 250,
+    x = tooltipWidth,
     y = 20,
     background = {0.2,0.2,0.2},
     padding = blockPadding,
