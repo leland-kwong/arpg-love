@@ -6,9 +6,14 @@ return {
 	blueprint =  {
 		baseModifiers = {
 			cooldown = {1, 1},
-			armor = {20, 30},
-			moveSpeed = {100, 100},
-			fireResist = {20, 25},
+		},
+
+		extraModifiers = {
+			require 'components.item-inventory.items.modifiers.stat'({
+				armor = {20, 30},
+				moveSpeed = {100, 100},
+				fireResist = {20, 25},
+			})
 		},
 
 		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'(),

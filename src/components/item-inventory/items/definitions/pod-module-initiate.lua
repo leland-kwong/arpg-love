@@ -38,7 +38,10 @@ return {
 
 		experience = 120,
 		onActivate = require(require('alias').path.items..'.inventory-actives.equip-on-click')(),
-		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.plasma-shot')()
+		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.plasma-shot')({
+			minDamage = 1,
+			maxDamage = 3
+		})
 	},
 
 	properties = {

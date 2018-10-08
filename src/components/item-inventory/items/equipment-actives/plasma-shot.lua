@@ -21,8 +21,8 @@ return itemSystem.registerModule({
     return {
 			blueprint = require 'components.abilities.bullet',
 			props = {
-				minDamage = 1,
-				maxDamage = 3,
+				minDamage = props.minDamage,
+				maxDamage = props.maxDamage,
 				color = bulletColor,
 				targetGroup = collisionGroups.create(
 					collisionGroups.ai,
@@ -33,5 +33,11 @@ return itemSystem.registerModule({
 				speed = 400,
 			}
 		}
-  end
+	end,
+	tooltip = function(item, props)
+		return {
+			template = 'Shoots a plasma shot dealing {minDamage} - {maxDamage} damage',
+			data = props
+		}
+	end
 })

@@ -45,17 +45,18 @@ return function(columns, rowProps)
   local parsedColumns = functional.map(columns, function(col)
     col = setupAndValidateProps(col, columnPropTypes)
     col.__index = col
-    local textMaxWidth = col.width or col.maxWidth
-    local textW, textH = GuiText.getTextSize(col.content, col.font, textMaxWidth)
-    local heightAdjustment = math.max(0, (col.font:getLineHeight() - 0.8) * col.font:getHeight())
-    local contentHeight = textH + (col.padding * 2) + (col.borderWidth * 2) - heightAdjustment
     local widthAdjustment = (col.padding * 2) + (col.borderWidth * 2)
+    local textMaxWidth = (col.width or col.maxWidth) - widthAdjustment
+    local textW, textH = GuiText.getTextSize(col.content, col.font, textMaxWidth)
     local contentWidth = col.width and (col.width - widthAdjustment) or (textW + widthAdjustment)
+    local heightAdjustment = math.max(0, (col.font:getLineHeight() - 0.8) * col.font:getHeight())
+    local actualHeight = textH + (col.padding * 2) + (col.borderWidth * 2) - heightAdjustment
     local actualWidth = col.width or contentWidth
-    rowHeight = math.max(rowHeight, contentHeight)
+    rowHeight = math.max(rowHeight, actualHeight)
     rowWidth = rowWidth + actualWidth
     return setmetatable({
-      height = contentHeight,
+      height = actualHeight,
+      contentHeight = textH,
       width = actualWidth,
       contentWidth = contentWidth
     }, col)

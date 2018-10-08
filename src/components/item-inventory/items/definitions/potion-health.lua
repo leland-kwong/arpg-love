@@ -6,11 +6,11 @@ return {
 	blueprint = {
 		baseModifiers =  {
 			cooldown = {2, 2},
-			armor = {50, 100}
 		},
 
 		extraModifiers = {
 			require 'components.item-inventory.items.modifiers.stat'({
+				armor = {50, 100},
 				healthRegeneration = {50, 100}
 			})
 		},

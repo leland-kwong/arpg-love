@@ -31,11 +31,8 @@ return itemSystem.registerModule({
   end,
   tooltip = function(item, props)
     return {
-      Color.YELLOW, '\nactive skill:\n\n',
-      Color.WHITE, 'Gain ',
-      Color.LIME, props.speedBoost..' extra move speed',
-      Color.WHITE, ' for ',
-      Color.CYAN, props.speedBoostDuration..' seconds'
+      template = 'Gain {speedBoost} extra move speed for {speedBoostDuration} seconds.',
+      data = props
     }
   end
 })

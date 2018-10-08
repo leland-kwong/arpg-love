@@ -214,241 +214,6 @@ local function parseItemModifiers(item)
   return modifiers
 end
 
-local function drawTooltip(item, x, y, w2, h2, rootStore)
-  -- local posX, posY = x, y
-  -- local padding = 12
-  -- local itemDef = itemDefinition.getDefinition(item)
-  -- local tooltipContent = parseItemModifiers(item)
-  -- local rightClickText = itemDefinition.loadModule(item.onActivate).tooltip(item)
-  -- local rightClickTextH = select(2, GuiText.getTextSize(rightClickText, guiTextLayers.body.font))
-  -- local tooltipItemUpgrade = itemDef.upgrades
-  -- local levelRequirementText = itemDef.levelRequirement and 'Required level: '..itemDef.levelRequirement or nil
-
-  -- --[[
-  --   IMPORTANT: We must do the tooltip content dimension calculations first to see if the tooltip
-  --     will go out of view. And if it does, we'll call this function again with the adjusted positions.
-  -- ]]
-
-  -- -- title text and dimensions
-  -- local titleW, titleH = GuiText.getTextSize(itemDef.title, guiTextLayers.title.font)
-
-  -- -- rarity text and dimensions
-  -- local itemGuiConfig = require'components.item-inventory.items.config'
-  -- local functional = require 'utils.functional'
-  -- local rarity = item.rarity
-  -- local rarityTitle = itemGuiConfig.rarityTitle[rarity]
-  -- local rarityTextCopy = (rarityTitle and rarityTitle ..' ' or '').. itemGuiConfig.categoryTitle[itemDef.category]
-  -- local rarityX, rarityY = posX + padding,
-  --   posY + padding + titleH + titleH
-  -- local rarityW, rarityH = GuiText.getTextSize(rarityTextCopy, guiTextLayers.body.font)
-
-  -- functional.forEach(item.extraModifiers, function(modifier)
-  --   local module = itemDefinition.loadModule(modifier)
-  --   local tooltip = module.tooltip
-  --   if tooltip then
-  --     local content = tooltip(item)
-  --     for i=1, #content do
-  --       table.insert(tooltipContent, content[i])
-  --     end
-  --   end
-  -- end)
-
-  -- local levelRequirementW, levelRequirementH = 0, 0
-  -- if levelRequirementText then
-  --   levelRequirementW, levelRequirementH = GuiText.getTextSize(itemDef.levelRequirement or '', guiTextLayers.body.font)
-  -- end
-
-  -- -- body text and dimensions
-  -- local bodyCopyW, bodyCopyH = GuiText.getTextSize(tooltipContent, guiTextLayers.body.font)
-
-  -- -- item upgrade content and dimensions
-  -- local itemUpgradeW, itemUpgradeH = 200, 200
-  -- if not tooltipItemUpgrade then
-  --   itemUpgradeW, itemUpgradeH = 0, 0
-  -- end
-
-  -- -- total tooltip height
-  -- local totalHeight = (titleH + titleH) +
-  --                     (rarityH * 2) +
-  --                     (levelRequirementH * 2) +
-  --                     bodyCopyH +
-  --                     itemUpgradeH +
-  --                     rightClickTextH * 2 +
-  --                     (padding * 2)
-  -- local maxWidth = math.min(
-  --   300,
-  --   math.max(titleW, rarityW, bodyCopyW, itemUpgradeW) -- include side padding
-  -- )
-  -- local bottomOutOfView = (posY + totalHeight) - config.resolution.h
-  -- local isBottomOutOfView = bottomOutOfView > 0
-  -- if isBottomOutOfView then
-  --   -- shift tooltip vertically so that it stays within viewport
-  --   return drawTooltip(item, x, y - bottomOutOfView - 5, w2, h2)
-  -- end
-
-  -- -- title
-  -- local completeTitle = (item.prefixName and item.prefixName..' ' or '') .. itemDef.title .. (item.suffixName and item.suffixName..' ' or '')
-  -- guiTextLayers.title:add(completeTitle, Color.WHITE, posX + padding, posY + padding)
-
-  -- -- rarity
-  -- guiTextLayers.body:add(
-  --   rarityTextCopy,
-  --   itemGuiConfig.rarityColor[rarity],
-  --   rarityX, rarityY
-  -- )
-
-  -- local levelRequirementY = rarityY + (rarityH * 2)
-  -- local requirementNotMet = rootStore:get().level < (itemDef.levelRequirement or 0)
-  -- if requirementNotMet then
-  --   guiTextLayers.body:addf(
-  --     {
-  --       Color.WHITE, 'level requirement: ',
-  --       Color.RED, itemDef.levelRequirement
-  --     },
-  --     maxWidth,
-  --     'left',
-  --     posX + padding,
-  --     levelRequirementY
-  --   )
-  -- else
-  --   guiTextLayers.body:add(
-  --     levelRequirementText,
-  --     Color.WHITE,
-  --     posX + padding,
-  --     levelRequirementY
-  --   )
-  -- end
-
-  -- -- stats
-  -- local tooltipContentY = levelRequirementY + (levelRequirementH * 2)
-  -- guiTextLayers.body:addf(
-  --   tooltipContent,
-  --   maxWidth,
-  --   'left',
-  --   posX + padding,
-  --   tooltipContentY
-  -- )
-
-  -- -- background
-  -- local bgWidth = maxWidth + (padding * 2)
-  -- local bgColor = 0
-  -- love.graphics.setColor(bgColor, bgColor, bgColor, 0.9)
-  -- love.graphics.rectangle(
-  --   'fill',
-  --   posX, posY,
-  --   bgWidth,
-  --   totalHeight
-  -- )
-
-  -- local outlineColor = 0.2
-  -- love.graphics.setColor(outlineColor, outlineColor, outlineColor, 0.9)
-  -- love.graphics.rectangle(
-  --   'line',
-  --   posX, posY,
-  --   bgWidth,
-  --   totalHeight
-  -- )
-
-  -- -- [item upgrades]
-  -- if tooltipItemUpgrade then
-  --   local tooltipStartX = posX + padding
-  --   local upgradePanelPosY = tooltipContentY + bodyCopyH + 20
-  --   local titleTextLayer = guiTextLayers.body
-  --   local titleW, titleH = GuiText.getTextSize('test title', titleTextLayer.font)
-
-  --   -- upgrade experience bar
-  --   local experienceBarWidth, experienceBarHeight = 10, 160
-  --   local iconWidth, iconHeight = 13, 13
-  --   local experienceBarPosY = upgradePanelPosY
-  --   local lastUpgrade = tooltipItemUpgrade[#tooltipItemUpgrade]
-  --   local expfillPercentage = item.experience / lastUpgrade.experienceRequired
-  --   local expBarPosX = tooltipStartX
-  --   expfillPercentage = expfillPercentage > 1 and 1 or expfillPercentage
-  --   -- experience bar unfilled background
-  --   love.graphics.setColor(0.1,0.1,0.1)
-  --   love.graphics.rectangle('fill', expBarPosX, experienceBarPosY, experienceBarWidth, experienceBarHeight)
-  --   -- experience progress fill
-  --   love.graphics.setColor(1,0.8,0)
-  --   love.graphics.rectangle(
-  --     'fill', expBarPosX, experienceBarPosY,
-  --     experienceBarWidth,
-  --     (experienceBarHeight * expfillPercentage)
-  --   )
-  --   -- experience bar border
-  --   love.graphics.setColor(0.4,0.4,0.4)
-  --   love.graphics.rectangle(
-  --     'line', expBarPosX, experienceBarPosY,
-  --     experienceBarWidth, experienceBarHeight
-  --   )
-
-  --   local upgradeCount = #tooltipItemUpgrade
-  --   for i=1, #tooltipItemUpgrade do
-  --     local upgradeItem = tooltipItemUpgrade[i]
-  --     local expReq = upgradeItem.experienceRequired
-  --     local percentReq = expReq / lastUpgrade.experienceRequired
-  --     local positionIndex = i - 1
-  --     local segmentY = math.ceil(experienceBarPosY + (percentReq * experienceBarHeight))
-  --     local isUnlocked = item.experience >= expReq
-
-  --     local isLastItem = i == upgradeCount
-  --     if not isLastItem then
-  --       -- exp requirement line
-  --       love.graphics.setLineWidth(1)
-  --       love.graphics.setColor(0.4,0.4,0.4)
-  --       love.graphics.line(expBarPosX + 1, segmentY, expBarPosX + experienceBarWidth - 1, segmentY)
-  --     end
-
-  --     -- upgrade graphic
-  --     local iconPosX = tooltipStartX + experienceBarWidth + 5
-  --     local iconPosY = segmentY - (iconHeight/2)
-  --     local opacity = isUnlocked and 1 or 0.4
-  --     local upgradeItemSprite = getSprite(
-  --       upgradeItem.sprite or 'item-upgrade-placeholder-unlocked'
-  --     ).sprite
-  --     love.graphics.setColor(1, 1, 1, opacity)
-  --     love.graphics.draw(
-  --       animationFactory.atlas,
-  --       upgradeItemSprite,
-  --       iconPosX,
-  --       iconPosY
-  --     )
-
-  --     -- upgrade title
-  --     local titlePosX = iconPosX + iconWidth + 5
-  --     local titlePosY = iconPosY + 2
-  --     titleTextLayer:add(
-  --       upgradeItem.title,
-  --       Color.WHITE,
-  --       titlePosX,
-  --       titlePosY
-  --     )
-
-  --     if (not isUnlocked) then
-  --       -- upgrade experience help text
-  --       local titleW, titleH = GuiText.getTextSize(upgradeItem.title, titleTextLayer.font)
-  --       local descPosX = titlePosX
-  --       local descPosY = titlePosY + titleH + 5
-  --       local expRequirementDiff = upgradeItem.experienceRequired - item.experience
-  --       guiTextLayers.body:add(
-  --         expRequirementDiff .. ' experience to unlock',
-  --         Color.MED_GRAY,
-  --         descPosX,
-  --         descPosY
-  --       )
-  --     end
-  --   end
-  -- end
-
-  -- -- right-click text
-  -- guiTextLayers.body:addf(
-  --   rightClickText,
-  --   maxWidth,
-  --   'right',
-  --   posX,
-  --   posY + totalHeight - rightClickTextH - padding
-  -- )
-end
-
 -- handles the picked up item and makes it follow the cursor
 Gui.create({
   type = Gui.types.INTERACT,
@@ -506,7 +271,7 @@ local function setupSlotInteractions(
               rarityColor,
               itemDef.title,
             },
-            width = tooltipWidth/2,
+            width = tooltipWidth * 5/8,
             font = font.secondary.font,
             fontSize = font.secondary.fontSize
           }
@@ -515,7 +280,7 @@ local function setupSlotInteractions(
               Color.WHITE,
               'Level '..(itemDef.levelRequirement or 1)
             },
-            width = tooltipWidth/2,
+            width = tooltipWidth * 3/8,
             align = 'right',
             font = font.primary.font,
             fontSize = font.primary.fontSize
@@ -529,9 +294,32 @@ local function setupSlotInteractions(
             font = font.primary.font,
             fontSize = font.primary.fontSize
           }
+
+          local activeAbilityBlock = nil
+          if item.onActivateWhenEquipped then
+            local module = itemDefinition.loadModule(item.onActivateWhenEquipped)
+            if module.tooltip then
+              activeAbilityBlock = Block.Row({
+                {
+                  content = modParser({
+                    type = 'activeAbility',
+                    data = module.tooltip(item)
+                  }),
+                  width = tooltipWidth,
+                  font = font.primary.font,
+                  fontSize = font.primary.fontSize,
+                  background = modifierBackgroundColor,
+                  padding = blockPadding
+                }
+              }, {
+                marginTop = 1
+              })
+            end
+          end
+
           local baseModifiersBlock = {
             content = modParser({
-              type = 'statsList',
+              type = 'baseStatsList',
               data = item.baseModifiers
             }),
             width = tooltipWidth,
@@ -550,7 +338,7 @@ local function setupSlotInteractions(
             Block.Row({
               itemTypeBlock
             }, {
-              marginBottom = 8
+              marginBottom = 12
             }),
             Block.Row({
               baseModifiersBlock
@@ -561,6 +349,7 @@ local function setupSlotInteractions(
           local extraModifiersRowProps = {
             marginTop = 1
           }
+          -- add extra modifiers to tooltip
           functional.forEach(item.extraModifiers, function(modifier)
             local module = itemDefinition.loadModule(modifier)
             local tooltip = module.tooltip
@@ -597,6 +386,8 @@ local function setupSlotInteractions(
               end
             end
           end)
+
+          table.insert(rows, activeAbilityBlock)
 
           self.tooltip = Block.create({
             x = posX + self.w,

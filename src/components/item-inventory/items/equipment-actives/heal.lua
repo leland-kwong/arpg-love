@@ -18,13 +18,15 @@ return itemSystem.registerModule({
     love.audio.play(Sound.drinkPotion)
   end,
   tooltip = function(item, props)
-    local timeUnit = item.props.duration > 1 and "seconds" or "second"
-    local tooltipString = {
-      Color.WHITE, 'Restores ',
-      Color.LIME, item.props.minHeal .. '-' .. item.props.maxHeal .. ' '..props.property..' ',
-      Color.WHITE, 'over ',
-      Color.CYAN, item.props.duration .. ' ' .. timeUnit
+    return {
+      template = 'Restores {minHeal} - {maxHeal} {property} over {duration} {timeUnit}',
+      data = {
+        minHeal = props.minHeal,
+        maxHeal = props.maxHeal,
+        property = props.property,
+        duration = props.duration,
+        timeUnit = props.duration > 1 and 'seconds' or 'second'
+      }
     }
-    return tooltipString
   end
 })

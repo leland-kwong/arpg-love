@@ -3,6 +3,7 @@ local Row = require 'components.gui.block.row'
 local layout = require 'components.gui.block.layout'
 
 local Block = {
+  debug = false,
   group = Component.groups.gui,
   background = nil, -- background color of tooltip (includes padding)
   padding = 0 -- padding around tooltip content
@@ -65,7 +66,12 @@ function Block.draw(self)
     end
 
     local textXOffset = col.align == 'left' and col.padding or 0
-    textLayer:addf(col.content, col.contentWidth, col.align, col.position.x + textXOffset - borderOffset, col.position.y + col.padding - borderOffset)
+    local textX, textY = col.position.x + textXOffset - borderOffset, col.position.y + col.padding - borderOffset
+    if self.debug then
+      love.graphics.setColor(1,1,0,1)
+      love.graphics.rectangle('line', textX, textY, col.contentWidth, col.contentHeight)
+    end
+    textLayer:addf(col.content, col.contentWidth, col.align, textX, textY)
   end)
 
   love.graphics.setColor(1,1,1)

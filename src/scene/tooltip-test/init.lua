@@ -11,7 +11,7 @@ local TooltipTest = {}
 function TooltipTest.init(self)
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, Color.LIGHT_GRAY)
   local blockPadding = 8
-  local tooltipWidth = 200
+  local tooltipWidth = 250
 
   local titleBlock = {
     content = {
@@ -49,10 +49,10 @@ function TooltipTest.init(self)
         title = 'Critical Strikes',
         experienceRequired = 20,
         description = {
-          template = '{chance} chance to deal {dmgMultiplier} damage.',
+          template = 'Gain {speedBoost} extra move speed for {speedBoostDuration} seconds.',
           data = {
-            chance = '25%',
-            dmgMultiplier = '1.2x - 1.4x'
+            speedBoost = 300,
+            speedBoostDuration = 1
           }
         }
       }
