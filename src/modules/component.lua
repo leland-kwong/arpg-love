@@ -408,6 +408,10 @@ function M.get(id)
   return allComponentsById[id]
 end
 
+function M.getBlueprint(component)
+  return getmetatable(component)
+end
+
 local NodeFactory = M.createFactory({})
 M.create = NodeFactory.create
 

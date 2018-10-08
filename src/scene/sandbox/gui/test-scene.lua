@@ -1,17 +1,15 @@
 local Component = require 'modules.component'
 local groups = require 'components.groups'
 local Gui = require 'components.gui.gui'
+local GuiTextInput = require 'components.gui.gui-text-input'
 local GuiTextLayer = require 'components.gui.gui-text'
+local GuiList = require 'components.gui.gui-list'
 local Color = require 'modules.color'
 local font = require 'components.font'
-local f = require 'utils.functional'
 local pprint = require 'utils.pprint'
 local scale = require 'config.config'.scaleFactor
 
 local guiText = GuiTextLayer.create({
-  group = groups.gui
-})
-local GuiNode = Component.createFactory({
   group = groups.gui
 })
 
@@ -21,7 +19,7 @@ local GuiTestBlueprint = {
   dy = 0
 }
 
-local COLOR_PRIMARY = {0.3,0.9,0.6,1}
+local COLOR_PRIMARY = Color.PRIMARY
 local COLOR_BUTTON_HOVER = {0,0.9,0.8,1}
 local COLOR_TOGGLE_BOX = Color.LIGHT_GRAY
 local COLOR_TOGGLE_UNCHECKED = {0,0,0,0}
@@ -117,218 +115,30 @@ local function guiToggle(x, y, toggleText)
   })
 end
 
-local function guiTextInput(x, y, w, h, scale, placeholderText)
-  local blinkCursorCo = function()
-    local show = true
-    local frame = 0
-    while true do
-      frame = frame + 1
-      if show and frame >= 28 then
-        show = false
-        frame = 0
-      elseif not show and frame >= 25 then
-        show = true
-        frame = 0
-      end
-      coroutine.yield(show)
-    end
-  end
-
-  local CURSOR_TEXT = love.mouse.getSystemCursor('ibeam')
-
-  return Gui.create({
-    x = x,
-    y = y,
-    w = w,
-    h = h,
-    type = Gui.types.TEXT_INPUT,
-    onFocus = function(self)
-      self.blinkCursor = coroutine.wrap(blinkCursorCo)
-    end,
-    onBlur = function(self)
-      self.blinkCursor = function() return false end
-    end,
-    render = function(self)
-      love.graphics.push()
-
-      local cursorType = self.hovered and CURSOR_TEXT or nil
-      love.mouse.setCursor(cursorType)
-
-      local posX, posY = self:getPosition()
-      local ctrlColor = self.focused and COLOR_PRIMARY or Color.LIGHT_GRAY
-
-      -- text box
-      love.graphics.setColor(ctrlColor)
-      local lineWidth = 2
-      love.graphics.setLineWidth(lineWidth)
-      local tx, ty = lineWidth / 2, lineWidth / 2
-      love.graphics.translate(tx, ty)
-      love.graphics.rectangle(
-        'line',
-        posX,
-        posY,
-        self.w - lineWidth * 2,
-        self.h - lineWidth * 2
-      )
-
-      -- adjust content to center of text box
-      local tx2, ty2 = 4, 5
-      love.graphics.translate(tx2, ty2)
-
-      -- placeholder text
-      local placeholderOffX, placeholderOffY = 0, 0
-      local hasContent = #self.text > 0
-      if self.focused or hasContent then
-        placeholderOffX, placeholderOffY = 0, -self.h + 2
-      end
-
-      guiText:add(
-        placeholderText,
-        ctrlColor,
-        posX + placeholderOffX + tx + tx2,
-        posY + placeholderOffY + ty + ty2
-      )
-
-      -- draw text
-      guiText:add(
-        self.text,
-        Color.WHITE,
-        posX + tx + tx2,
-        posY + ty + ty2
-      )
-
-      -- draw cursor
-      local isCursorVisible = self.focused and self.blinkCursor()
-      if isCursorVisible then
-        local w = getTextSize(self.text)
-        local h = font.secondary.fontSize + 2
-        love.graphics.setColor(COLOR_PRIMARY)
-        love.graphics.rectangle(
-          'fill',
-          posX + w,
-          posY - 1,
-          2,
-          h
-        )
-      end
-
-      love.graphics.pop()
-    end
-  })
-end
-
-local function guiList(parent, children)
-  local function scrollbars(self)
-    local scrollbarWidth = 5
-
-    if self.scrollHeight > 0 then
-      love.graphics.setColor(COLOR_PRIMARY)
-      love.graphics.rectangle(
-        'fill',
-        self.x + self.w - scrollbarWidth,
-        self.y - self.scrollTop,
-        scrollbarWidth,
-        self.h - self.scrollHeight
-      )
-    end
-
-    if self.scrollWidth > 0 then
-      love.graphics.setColor(COLOR_PRIMARY)
-      love.graphics.rectangle(
-        'fill',
-        self.x - self.scrollLeft,
-        self.y + self.h - scrollbarWidth,
-        self.w - self.scrollWidth,
-        scrollbarWidth
-      )
-    end
-  end
-
-  return Gui.create({
-    x = 180,
-    y = 30,
-    w = 240,
-    h = 300,
-    type = Gui.types.LIST,
-    children = children,
-    scrollHeight = 50,
-    scrollSpeed = 8,
-    onScroll = function(self)
-    end,
-    render = function(self)
-      love.graphics.setColor(0.1,0.1,0.1)
-
-      local posX, posY = self:getPosition()
-      love.graphics.rectangle(
-        'fill',
-        posX,
-        posY,
-        self.w,
-        self.h
-      )
-      scrollbars(self)
-    end,
-    drawOrder = function(self)
-      return 2
-    end
-  })
-end
-
-local function guiStencil()
-  love.graphics.rectangle(
-    'fill',
-    180,
-    30,
-    240,
-    300
-  )
-end
-
-local function preDrawNode()
-  return GuiNode.create({
-    draw = function()
-      love.graphics.push()
-      love.graphics.stencil(guiStencil, 'replace', 1)
-      love.graphics.setStencilTest('greater', 0)
-    end,
-    drawOrder = function()
-      return 1
-    end
-  })
-end
-
-local function postDrawNode()
-  return GuiNode.create({
-    draw = function()
-      love.graphics.setStencilTest()
-      love.graphics.pop()
-    end,
-    drawOrder = function()
-      return 7
-    end
-  })
-end
-
 function GuiTestBlueprint.init(self)
   local children = {
     guiButton(200, 50, 70, nil, 'Button 1'),
     guiButton(300, 50, 70, nil, 'Button 2'),
     guiToggle(200, 100, 'music'),
     guiToggle(200, 125, 'sound effects'),
-    guiTextInput(
-      200,
-      165,
-      200,
-      22,
-      2,
-      'player name'
-    )
+    GuiTextInput.create({
+      x = 200,
+      y = 165,
+      w = 200,
+      h = 22,
+      textLayer = guiText,
+      placeholderText = 'player name'
+    }),
+    guiText
   }
-  local list = guiList(self, children):setParent(self)
-  -- pre-process step. Sets up stenciling to cull child nodes when they scroll outside of view
-  preDrawNode():setParent(self)
-  -- post-process step. Restore graphic state to original state
-  postDrawNode():setParent(self)
+  local list = GuiList.create({
+    childNodes = children,
+    x = 180,
+    y = 30,
+    width = 240,
+    height = 100,
+    contentHeight = 200
+  }):setParent(self)
 end
 
 return Component.createFactory(GuiTestBlueprint)
