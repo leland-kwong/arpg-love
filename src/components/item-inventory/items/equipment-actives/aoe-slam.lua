@@ -77,8 +77,6 @@ end
 local Attack = Component.createFactory(
 	AbilityBase({
 		group = groups.all,
-		minDamage = 5,
-		maxDamage = 8,
 		weaponDamageScaling = 1.2,
 		w = 40,
 		h = 40,
@@ -121,7 +119,14 @@ return itemSystem.registerModule({
   type = itemSystem.moduleTypes.EQUIPMENT_ACTIVE,
   active = function(item, props)
     return {
-      blueprint = Attack
+			blueprint = Attack,
+			props = props
     }
-  end
+	end,
+	tooltip = function(item, props)
+		return {
+			template = 'deals {minDamage} - {maxDamage} area of effect damage in front of the player',
+			data = props
+		}
+	end
 })

@@ -113,7 +113,7 @@ local Factory = Component.createFactory(ForceField)
 local forceFieldsByItemId = {}
 
 local function checkExpRequirement(item, props)
-  return item.experience <= props.experienceRequired
+  return item.experience >= props.experienceRequired
 end
 
 return itemSystem.registerModule({
@@ -149,5 +149,16 @@ return itemSystem.registerModule({
     end, 100, function()
       return checkExpRequirement(item, props)
     end)
+  end,
+  tooltip = function(item, props)
+    return {
+      type = 'upgrade',
+      data = {
+        description = {
+          template = 'Gain a forcefield that blocks {maxShieldHealth} total damage. Recharges when your have not been hit for {unhitDurationRequirement} second(s).',
+          data = props
+        }
+      }
+    }
   end
 })

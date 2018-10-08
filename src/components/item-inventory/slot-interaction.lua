@@ -51,169 +51,6 @@ local function getSlotPosition(gridX, gridY, offsetX, offsetY, slotSize, margin)
   return posX, posY
 end
 
-local signHumanized = function(v)
-  return v >= 0 and "+" or "-"
-end
-
-local modifierParsers = {
-  attackTime = function(value)
-    return {
-      Color.CYAN, signHumanized(value)..' '..value,
-      Color.WHITE, ' attack time'
-    }
-  end,
-  cooldown = function(value)
-    return {
-      Color.CYAN, signHumanized(value)..' '..value,
-      Color.WHITE, ' cooldown'
-    }
-  end,
-  energyCost = function(value)
-    return {
-      Color.CYAN, signHumanized(value)..' '..value,
-      Color.WHITE, ' energy cost'
-    }
-  end,
-  attackTimeReduction = function(value)
-    return {
-      Color.CYAN, signHumanized(value)..' '..value..'%',
-      Color.WHITE, ' attack time reduction'
-    }
-  end,
-  maxEnergy = function(value)
-    return {
-      Color.CYAN, signHumanized(value)..' '..value,
-      Color.WHITE, ' maximum energy'
-    }
-  end,
-  maxHealth = function(value)
-    return {
-      Color.CYAN, signHumanized(value)..' '..value,
-      Color.WHITE, ' maximum health'
-    }
-  end,
-  healthRegeneration = function(value)
-    return {
-      Color.CYAN, signHumanized(value)..' '..value,
-      Color.WHITE, ' health regeneration'
-    }
-  end,
-  energyRegeneration = function(value)
-    return {
-      Color.CYAN, signHumanized(value)..' '..value,
-      Color.WHITE, ' energy regeneration'
-    }
-  end,
-  flatDamage = function(value)
-    return {
-      Color.CYAN, signHumanized(value)..value,
-      Color.WHITE, ' physical damage'
-    }
-  end,
-  weaponDamage = function(value)
-    return {
-      Color.CYAN, value,
-      Color.WHITE, ' weapon damage'
-    }
-  end,
-  percentDamage = function(value)
-    return {
-      Color.CYAN, signHumanized(value)..' '..value,
-      Color.WHITE, '% weapon damage'
-    }
-  end,
-  armor = function(value)
-    return {
-      Color.CYAN, signHumanized(value)..' '..value,
-      Color.WHITE, ' armor'
-    }
-  end,
-  moveSpeed = function(value)
-    return {
-      Color.CYAN, signHumanized(value)..' '..value,
-      Color.WHITE, ' movement speed'
-    }
-  end,
-  coldResist = function(value)
-    return {
-      Color.CYAN, signHumanized(value)..' '..value,
-      Color.WHITE, ' cold reistance'
-    }
-  end,
-  lightningResist = function(value)
-    return {
-      Color.CYAN, signHumanized(value)..' '..value,
-      Color.WHITE, ' lightning resistance'
-    }
-  end,
-  fireResist = function(value)
-    return {
-      Color.CYAN, signHumanized(value)..' '..value,
-      Color.WHITE, ' fire resistance'
-    }
-  end,
-  flatPhysicalDamageReduction = function(value)
-    return {
-      Color.CYAN, signHumanized(value)..' '..value,
-      Color.WHITE, ' physical damage reduction'
-    }
-  end,
-  cooldownReduction = function(value)
-    return {
-      Color.CYAN, signHumanized(value)..' '..value..'%',
-      Color.WHITE, ' cooldown reduction'
-    }
-  end,
-  energyCostReduction = function(value)
-    return {
-      Color.CYAN, signHumanized(value)..' '..value..'%',
-      Color.WHITE, ' energy cost reduction'
-    }
-  end,
-  experienceMultiplier = function(value)
-    return {
-      Color.CYAN, signHumanized(value)..' '..value..'%',
-      Color.WHITE, ' experience gain'
-    }
-  end
-}
-
-local function concatTable(a, b)
-  if not b then
-    return a
-  end
-	for i=1, #b do
-		local elem = b[i]
-		table.insert(a, elem)
-	end
-	return a
-end
-
-local baseModifiers = require 'components.state.base-stat-modifiers'()
-local function parseItemModifiers(item)
-  local modifiers = {}
-  for k,v in pairs(item.baseModifiers) do
-    local parser = modifierParsers[k]
-    if parser then
-      local output = parser(v)
-      local length = #output
-      for i=1, length, 2 do
-        local color = output[i]
-        local str = output[i + 1]
-        local isLastItem = i == length - 1
-        if isLastItem then
-          str = str..'\n'
-        end
-        table.insert(modifiers, color)
-        table.insert(modifiers, str)
-      end
-    else
-      error('no parser for property '..k)
-    end
-  end
-  return modifiers
-end
-
 -- handles the picked up item and makes it follow the cursor
 Gui.create({
   type = Gui.types.INTERACT,
@@ -317,6 +154,22 @@ local function setupSlotInteractions(
             end
           end
 
+          local rightClickModule = itemDefinition.loadModule(item.onActivate)
+          local rightClickActionBlock = Block.Row({
+            {
+              content = {
+                Color.PALE_YELLOW,
+                'right-click to '..rightClickModule.tooltip(item)
+              },
+              width = tooltipWidth,
+              align = 'right',
+              font = font.primary.font,
+              fontSize = font.primary.fontSize,
+            }
+          }, {
+            marginTop = blockPadding
+          })
+
           local baseModifiersBlock = {
             content = modParser({
               type = 'baseStatsList',
@@ -365,13 +218,14 @@ local function setupSlotInteractions(
                   padding = blockPadding,
                 }
               }, extraModifiersRowProps))
-              local experienceRequired = modifier.props and modifier.props.experienceRequired
-              if experienceRequired then
+              -- experience required help text
+              local experienceRequired = modifier.props and modifier.props.experienceRequired or 0
+              if (experienceRequired - item.experience) > 0 then
                 table.insert(rows, Block.Row({
                   {
                     content = {
                       Color.LIME,
-                      experienceRequired..' experience to unlock'
+                      item.experience..'/'..experienceRequired..' experience required'
                     },
                     align = 'right',
                     width = tooltipWidth,
@@ -388,6 +242,7 @@ local function setupSlotInteractions(
           end)
 
           table.insert(rows, activeAbilityBlock)
+          table.insert(rows, rightClickActionBlock)
 
           self.tooltip = Block.create({
             x = posX + self.w,

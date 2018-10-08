@@ -9,6 +9,6 @@ return itemSystem.registerModule({
     msgBus.send(msgBus.EQUIPMENT_SWAP, item)
   end,
   tooltip = function(item)
-    return {Color.LIGHT_GRAY, 'right-click to equip'}
+    return 'equip'
   end
 })

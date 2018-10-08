@@ -17,10 +17,14 @@ return itemSystem.registerModule({
     })
   end,
   tooltip = function(item, props)
-    local tooltipString = {
-      Color.CYAN, '+'..props.rate,
-      Color.WHITE, ' health regeneration'
+    return {
+      type = 'upgrade',
+      data = {
+        description = {
+          template = '+{rate} health regeneration',
+          data = props
+        }
+      }
     }
-    return tooltipString
   end
 })

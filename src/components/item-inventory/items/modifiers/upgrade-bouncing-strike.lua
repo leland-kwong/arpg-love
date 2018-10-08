@@ -71,7 +71,6 @@ return itemSystem.registerModule({
     return {
       type = 'upgrade',
       data = {
-        experienceRequired = 120,
         description = {
           template = 'Attacks bounce to {maxBounces} additional target(s)',
           data = {

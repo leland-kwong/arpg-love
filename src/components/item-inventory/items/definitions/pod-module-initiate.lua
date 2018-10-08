@@ -19,7 +19,7 @@ return {
 
 		extraModifiers = {
 			require(require('alias').path.items..'.modifiers.upgrade-shock')({
-				experienceRequired = 10,
+				experienceRequired = 20,
 				duration = 0.4,
 				minDamage = 1,
 				maxDamage = 2
@@ -36,11 +36,11 @@ return {
 			})
 		},
 
-		experience = 120,
+		experience = 0,
 		onActivate = require(require('alias').path.items..'.inventory-actives.equip-on-click')(),
 		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.plasma-shot')({
 			minDamage = 1,
-			maxDamage = 3
+			maxDamage = 2
 		})
 	},
 

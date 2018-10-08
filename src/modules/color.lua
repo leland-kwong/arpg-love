@@ -35,6 +35,7 @@ local colors = {
   CYAN = {0.2,1,1,1},
   BLACK = {0,0,0,1},
   YELLOW = {1,1,0,1},
+  PALE_YELLOW = {Color.rgba255(254, 250, 192)},
   GOLDEN_PALE = {Color.rgba255(243, 156, 18)},
   RED = {1,0,0,1},
   DEEP_RED = {Color.rgba255(209, 43, 43)},

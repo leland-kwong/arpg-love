@@ -48,8 +48,6 @@ end
 local Fissure = Component.createFactory(
 	AbilityBase({
 		group = groups.all,
-		minDamage = 3,
-		maxDamage = 5,
 		weaponDamageScaling = 1.3,
 		width = 10,
 		speed = 250,
@@ -139,14 +137,30 @@ return itemSystem.registerModule({
         return msgBus.CLEANUP
       end
       Fissure.create({
+				minDamage = props.minDamage,
+				maxDamage = props.maxDamage,
         x = msg.fromPos.x,
         y = msg.fromPos.y,
         x2 = msg.targetPos.x,
         y2 = msg.targetPos.y,
       })
-    end, nil, function()
+    end, nil, function(msg)
       return (not itemState.equipped)
-        or (item.experience >= props.experienceRequired)
+        or (
+					(item.experience >= props.experienceRequired) and
+					msg.source == item.__id
+				)
     end)
-  end
+	end,
+	tooltip = function(_, props)
+		return {
+			type = 'upgrade',
+			data = {
+				description = {
+					template = 'Release a shockwave, dealing {minDamage} - {maxDamage} in a line',
+					data = props
+				}
+			}
+		}
+	end
 })

@@ -29,7 +29,6 @@ return itemSystem.registerModule({
     return {
       type = 'upgrade',
       data = {
-        experienceRequired = 40,
         description = {
           template = 'Attacks have a {chance}% chance to deal {minMultiplier}x - {maxMultiplier}x damage',
           data = {

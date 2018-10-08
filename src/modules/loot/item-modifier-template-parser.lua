@@ -26,6 +26,10 @@ local upgradeFragmentHandlers = {
   end,
 }
 
+local signHumanized = function(v)
+  return v >= 0 and "+" or "-"
+end
+
 local modifierParsers = {
   baseStatsList = function(data)
     local coloredText = {}
@@ -55,10 +59,11 @@ local modifierParsers = {
     local modifierPropTypeDisplayMapper = require 'components.state.base-stat-modifiers'.propTypesDisplayValue
     for k,v in pairs(data) do
       table.insert(coloredText, Color.OFF_WHITE)
+      local sign = signHumanized(v)
       if i == 0 then
-        table.insert(coloredText, '+')
+        table.insert(coloredText, sign)
       else
-        table.insert(coloredText, '\n+')
+        table.insert(coloredText, '\n'..sign)
       end
 
       table.insert(coloredText, Color.WHITE)

@@ -6,7 +6,6 @@ return {
 	blueprint = {
 		baseModifiers =  {
 			cooldown = {2, 2},
-			armor = {50, 100}
 		},
 
 		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'(),
