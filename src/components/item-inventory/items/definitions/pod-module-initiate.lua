@@ -46,9 +46,5 @@ return {
 		title = 'r-1 initiate',
 		baseDropChance = 1,
 		category = itemConfig.category.POD_MODULE,
-
-		tooltipItemUpgrade = function(self)
-			return upgrades
-		end,
 	}
 }

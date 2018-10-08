@@ -69,10 +69,16 @@ return itemSystem.registerModule({
   end,
   tooltip = function()
     return {
-      sprite = 'item-upgrade-placeholder-unlocked',
-      title = 'Ricochet',
-      description = 'Attacks bounce to 1 other target, dealing 50% less damage each bounce.',
-      experienceRequired = 120
+      type = 'upgrade',
+      data = {
+        experienceRequired = 120,
+        description = {
+          template = 'Attacks bounce to {maxBounces} additional target(s)',
+          data = {
+            maxBounces = 1
+          }
+        },
+      }
     }
   end
 })

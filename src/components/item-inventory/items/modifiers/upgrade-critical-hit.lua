@@ -27,14 +27,17 @@ return itemSystem.registerModule({
   end,
   tooltip = function()
     return {
-      sprite = 'item-upgrade-placeholder-unlocked',
-      title = 'Critical Strikes',
-      description = 'Attacks have a 25% chance to deal 1.2 - 1.4x damage',
-      experienceRequired = 40,
-      props = {
-        minCritMultiplier = 0.2,
-        maxCritMultiplier = 0.4,
-        critChance = 0.25
+      type = 'upgrade',
+      data = {
+        experienceRequired = 40,
+        description = {
+          template = 'Attacks have a {chance}% chance to deal {minMultiplier}x - {maxMultiplier}x damage',
+          data = {
+            minMultiplier = 0.2,
+            maxMultiplier = 0.4,
+            chance = 0.25
+          }
+        }
       }
     }
   end

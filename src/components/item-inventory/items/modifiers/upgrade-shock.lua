@@ -35,21 +35,14 @@ return itemSystem.registerModule({
   end,
   tooltip = function(item, props)
     return {
-      Color.YELLOW,
-      '\nupgrade:     ',
-
-      Color.LIGHT_GRAY,
-      props.experienceRequired..' experience required\n',
-
-      -- description
-      Color.WHITE,
-      'Attacks shock the target, dealing ',
-
-      Color.CYAN,
-      props.minDamage .. '-' .. props.maxDamage,
-
-      Color.WHITE,
-      ' lightning damage.'
+      type = 'upgrade',
+      data = {
+        experienceRequired = props.experienceRequired,
+        description = {
+          template = 'Shocks target, dealing {minDamage} - {maxDamage} lightning damage',
+          data = props
+        }
+      }
     }
   end
 })
