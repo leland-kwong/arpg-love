@@ -95,6 +95,7 @@ local function setupSlotInteractions(
         -- create a tooltip
         local item = getItem()
         if self.hovered and item and (not self.tooltip) then
+          local itemState = itemDefinition.getState(item)
           local Block = require 'components.gui.block'
           local itemConfig = require'components.item-inventory.items.config'
           local modParser = require 'modules.loot.item-modifier-template-parser'
@@ -155,20 +156,22 @@ local function setupSlotInteractions(
           end
 
           local rightClickModule = itemDefinition.loadModule(item.onActivate)
-          local rightClickActionBlock = Block.Row({
-            {
-              content = {
-                Color.PALE_YELLOW,
-                'right-click to '..rightClickModule.tooltip(item)
-              },
-              width = tooltipWidth,
-              align = 'right',
-              font = font.primary.font,
-              fontSize = font.primary.fontSize,
-            }
-          }, {
-            marginTop = blockPadding
-          })
+          local rightClickActionBlock = (not itemState.equipped) and
+            Block.Row({
+              {
+                content = {
+                  Color.PALE_YELLOW,
+                  'right-click to '..rightClickModule.tooltip(item)
+                },
+                width = tooltipWidth,
+                align = 'right',
+                font = font.primary.font,
+                fontSize = font.primary.fontSize,
+              }
+            }, {
+              marginTop = blockPadding
+            }) or
+            nil
 
           local baseModifiersBlock = {
             content = modParser({

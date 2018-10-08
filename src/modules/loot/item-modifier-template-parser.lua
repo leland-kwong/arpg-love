@@ -27,7 +27,7 @@ local upgradeFragmentHandlers = {
 }
 
 local signHumanized = function(v)
-  return v >= 0 and "+" or "-"
+  return v >= 0 and '+' or '' -- minus sign is part of negative value
 end
 
 local modifierParsers = {

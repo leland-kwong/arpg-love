@@ -185,6 +185,20 @@ local Player = {
         msgBus.send(msgBus.GAME_STATE_GET):set('statModifiers', newModifiers)
       end),
 
+      msgBus.on(msgBus.GENERATE_LOOT, function(msgValue)
+        local LootGenerator = require'components.loot-generator.loot-generator'
+        local x, y, item = unpack(msgValue)
+        if not item then
+          return
+        end
+        LootGenerator.create({
+          x = x,
+          y = y,
+          item = item,
+          rootStore = rootState
+        }):setParent(parent)
+      end),
+
       msgBus.on(msgBus.KEY_PRESSED, function(v)
         local key = v.key
         local rootState = msgBus.send(msgBus.GAME_STATE_GET)
@@ -233,7 +247,7 @@ local Player = {
       end),
 
       msgBus.on(msgBus.DROP_ITEM_ON_FLOOR, function(item)
-        msgBus.send(
+        return msgBus.send(
           msgBus.GENERATE_LOOT,
           {self.x, self.y, item}
         )
@@ -250,7 +264,9 @@ local Player = {
         local outOfRange = dist > self.pickupRadius
         local gridX1, gridY1 = Position.pixelsToGridUnits(self.x, self.y, config.gridSize)
         local gridX2, gridY2 = Position.pixelsToGridUnits(item.x, item.y, config.gridSize)
-        local canWalkToItem = LineOfSight(self.mapGrid, Map.WALKABLE)(gridX1, gridY1, gridX2, gridY2)
+        local canWalkToItem = self.mapGrid and
+          LineOfSight(self.mapGrid, Map.WALKABLE)(gridX1, gridY1, gridX2, gridY2) or
+          true
         if canWalkToItem and (not outOfRange) then
           msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, true)
           item:pickup()

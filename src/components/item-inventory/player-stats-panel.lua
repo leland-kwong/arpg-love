@@ -45,7 +45,7 @@ function PlayerStatsPanel.draw(self)
   local camelCaseHumanized = require 'utils.camel-case-humanized'
   for stat,val in pairs(rootStore:get().statModifiers) do
     local statType = camelCaseHumanized(stat)..':\n'
-    local statValue = val..'\n'
+    local statValue = (val or 0)..'\n'
     local statValueColor = val > 0 and Color.LIME or Color.WHITE
     table.insert(statNames, Color.WHITE)
     table.insert(statNames, statType)

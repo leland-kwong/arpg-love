@@ -242,20 +242,6 @@ function MainScene.init(self)
       return v
     end, 1),
 
-    msgBus.on(msgBus.GENERATE_LOOT, function(msgValue)
-      local LootGenerator = require'components.loot-generator.loot-generator'
-      local x, y, item = unpack(msgValue)
-      if not item then
-        return
-      end
-      LootGenerator.create({
-        x = x,
-        y = y,
-        item = item,
-        rootStore = rootState
-      }):setParent(parent)
-    end),
-
     msgBus.on(msgBus.ENTITY_DESTROYED, function(msgValue)
       if randomItem then
         msgBus.send(msgBus.GENERATE_LOOT, {msgValue.x, msgValue.y, randomItem})

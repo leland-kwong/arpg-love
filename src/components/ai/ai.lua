@@ -26,8 +26,7 @@ local collisionGroups = require 'modules.collision-groups'
 local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
 local shader = love.graphics.newShader(pixelOutlineShader)
 local atlasData = animationFactory.atlasData
-shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
-shader:send('outline_width', 1)
+local shaderSpriteSize = {atlasData.meta.size.w, atlasData.meta.size.h}
 
 local states = Enum({
   'ATTACKING', -- attack has been triggered and character and character is still recovering from it
@@ -577,6 +576,8 @@ function Ai.draw(self)
 
   if (self.outlineColor) then
     love.graphics.setShader(shader)
+    shader:send('sprite_size', shaderSpriteSize)
+    shader:send('outline_width', 1)
     shader:send('outline_color', self.outlineColor)
     shader:send('fill_color', self.fillColor)
     shader:send('alpha', self.opacity)

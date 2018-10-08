@@ -159,6 +159,7 @@ local function ActiveEquipmentHandler()
         msgBus.PLAYER_WEAPON_ATTACK,
         {
           attackTime = actualAttackTime,
+          source = activeItem.__id,
           fromPos = Vec2(playerX, playerY),
           targetPos = Vec2(mx, my)
         }
