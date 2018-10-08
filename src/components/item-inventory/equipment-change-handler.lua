@@ -111,7 +111,6 @@ msgBus.on(msgBus.ITEM_EQUIPPED, function(item)
     end),
     msgBus.on(msgBus.ALL, equipmentSubscribers.staticModifiers(item), 1),
     msgBus.on(msgBus.NEW_GAME, function()
-      definition.final(item)
       msgBus.off(itemState.listeners)
       return msgBus.CLEANUP
     end)
