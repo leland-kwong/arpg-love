@@ -106,6 +106,22 @@ function items.create(module)
 	return newItem
 end
 
+items.item = {}
+function items.item.addModifier(item, modifier)
+	table.insert(item.extraModifiers, modifier)
+	return items
+end
+
+function items.item.setRarity(item, rarity)
+	item.rarity = rarity
+	return items
+end
+
+function items.item.setCustomTitle(item, title)
+	item.customTitle = title
+	return items
+end
+
 local modulesById = {}
 
 local modulePropValidators = {

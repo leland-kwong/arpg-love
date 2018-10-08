@@ -107,7 +107,7 @@ local function setupSlotInteractions(
           local titleBlock = {
             content = {
               rarityColor,
-              itemDef.title,
+              item.customTitle or itemDef.title,
             },
             width = tooltipWidth * 5/8,
             font = font.secondary.font,

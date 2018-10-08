@@ -1,7 +1,10 @@
 local Component = require 'modules.component'
-local lootAlgorithm = require 'components.loot-generator.algorithm-1'
+local RandomItem = require 'components.loot-generator.algorithm-1'
+local itemConfig = require(require('alias').path.items..'.config')
 local config = require 'config.config'
 local Map = require 'modules.map-generator.index'
+
+local lootAlgorithm = RandomItem()
 
 local random = math.random
 local Position = require 'utils.position'
@@ -39,7 +42,7 @@ return {
     name = 'loot',
     onComponentEnter = function(_, c)
       local iData = c.itemData
-      local items = lootAlgorithm(iData.level, iData.dropRate)
+      local items = lootAlgorithm(iData.level, iData.dropRate, itemConfig.rarity.NORMAL, itemConfig.rarity.RARE)
       for i=1, #items do
         generateLoot(c, items[i])
       end
