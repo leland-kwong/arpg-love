@@ -30,10 +30,10 @@ end
 function Block.draw(self)
   if self.background then
     love.graphics.setColor(self.background)
-    love.graphics.rectangle('fill', self.x - self.padding, self.y - self.padding, self.width + (self.padding * 2), self.height + (self.padding * 2))
+    love.graphics.rectangle('fill', self.x, self.y, self.width + (self.padding * 2), self.height + (self.padding * 2))
   end
 
-  layout(self.rows, self.x, self.y, function(col)
+  layout(self.rows, self.x + self.padding, self.y + self.padding, function(col)
     local xPos = col.position.x
     local yPos = col.position.y
     local font = self.fonts[col.font]
