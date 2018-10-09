@@ -23,10 +23,10 @@ local baseStatModifiers = require("components.state.base-stat-modifiers")
 local EMPTY_SLOT = sc.inventory.EMPTY_SLOT
 
 -- NOTE: This state is immutable, so we should keep the structure as flat as possible to avoid deep updates
-local function defaultState(stateId)
+local function defaultState(stateId, characterName)
 	return {
-		__stateId = stateId or 'game-'..uid(),
-		playerName = '',
+		__stateId = stateId,
+		characterName = characterName,
 		isNewGame = true,
 
 		level = 1,
@@ -60,7 +60,14 @@ end
 local function createStore(initialState, options)
 	options = options or {}
 	return Stateful:new(
-		(initialState or defaultState(options.id)),
+		(
+			initialState or
+
+			defaultState(
+				options.id or 'game-'..uid(),
+				options.characterName or ''
+			)
+		),
 		options
 	)
 end
