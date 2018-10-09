@@ -4,6 +4,7 @@ local GuiText = require 'components.gui.gui-text'
 local objectUtils = require 'utils.object-utils'
 local Color = require 'modules.color'
 local Position = require 'utils.position'
+local f = require 'utils.functional'
 
 local blinkCursorCo = function()
   local show = true
@@ -36,6 +37,7 @@ local callbacks = {
 }
 
 local GuiTextInput = objectUtils.extend(Gui, {
+  padding = 0,
   textColor = Color.WHITE,
   borderColor = Color.PRIMARY,
   cursorColor = Color.YELLOW,
@@ -58,7 +60,14 @@ local GuiTextInput = objectUtils.extend(Gui, {
   end,
   placeholderText = 'type to enter text',
   type = Gui.types.TEXT_INPUT,
+  update = f.wrap(Gui.update, function(self)
+    local textHeight = self.textLayer.font:getHeight()
+    self.h = textHeight + (self.padding * 2)
+    self.textHeight = textHeight
+  end),
   render = function(self)
+    local textHeight = self.textHeight
+
     love.graphics.push()
 
     local cursorType = self.hovered and CURSOR_TEXT or nil
@@ -66,6 +75,7 @@ local GuiTextInput = objectUtils.extend(Gui, {
 
     local posX, posY = self:getPosition()
     local ctrlColor = self.focused and self.borderColor or Color.LIGHT_GRAY
+    local boxHeight = self.h
 
     -- text box
     love.graphics.setColor(ctrlColor)
@@ -73,20 +83,19 @@ local GuiTextInput = objectUtils.extend(Gui, {
     love.graphics.setLineWidth(lineWidth)
     love.graphics.rectangle(
       'line',
-      posX,
-      posY,
-      self.w,
-      self.h
+      posX + lineWidth/2,
+      posY + lineWidth/2,
+      self.w - lineWidth,
+      boxHeight - lineWidth
     )
 
     -- placeholder text
     local placeholderOffX, placeholderOffY = 0, 0
-    local textHeight = self.textLayer.font:getHeight()
-    local cx, cy = Position.boxCenterOffset(self.w, textHeight, self.w + (lineWidth * 2), self.h + (lineWidth))
+    local cx, cy = Position.boxCenterOffset(self.w, textHeight, self.w + (lineWidth * 2), boxHeight + (lineWidth))
     local textX, textY = posX + lineWidth + 5, posY + cy
     local hasContent = #self.text > 0
     if self.focused or hasContent then
-      placeholderOffX, placeholderOffY = 0, -self.h
+      placeholderOffX, placeholderOffY = 0, -boxHeight
     end
 
     -- draw placeholder text

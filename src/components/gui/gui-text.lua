@@ -1,3 +1,8 @@
+--[[
+  NOTE: Some fonts may have incorrect outline rendering due to the author exporting it out poorly.
+  To fix this, we can re-export the font using [bit font maker](http://www.pentacom.jp/pentacom/bitfontmaker2/editfont.php).
+]]
+
 local Component = require 'modules.component'
 local groups = require 'components.groups'
 local font = require 'components.font'
@@ -57,14 +62,9 @@ local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.f
 local outlineColor = {0,0,0,1}
 local shader = love.graphics.newShader(pixelOutlineShader)
 local textW, textH = 16, 16
+local spriteSize = {textW, textH}
 
 function GuiTextLayer.init(self)
-  shader:send('sprite_size', {textW, textH})
-  shader:send('outline_width', 2/textW)
-  shader:send('outline_color', outlineColor)
-  shader:send('use_drawing_color', true)
-  shader:send('include_corners', true)
-
   self.textGraphic = love.graphics.newText(self.font, '')
   self.tablePool = {}
 end
@@ -76,6 +76,11 @@ end
 function GuiTextLayer.draw(self)
   if self.outline then
     love.graphics.setShader(shader)
+    shader:send('sprite_size', spriteSize)
+    shader:send('outline_width', 2/textW)
+    shader:send('outline_color', outlineColor)
+    shader:send('use_drawing_color', true)
+    shader:send('include_corners', true)
   end
 
   shader:send('alpha', self.color[4])
