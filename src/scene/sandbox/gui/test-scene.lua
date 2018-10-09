@@ -4,6 +4,7 @@ local Gui = require 'components.gui.gui'
 local GuiTextInput = require 'components.gui.gui-text-input'
 local GuiText = require 'components.gui.gui-text'
 local GuiList = require 'components.gui.gui-list'
+local Button = require 'components.gui.gui-button'
 local Color = require 'modules.color'
 local font = require 'components.font'
 local msgBus = require 'components.msg-bus'
@@ -28,37 +29,6 @@ function GuiTestBlueprint.init(self)
   local guiText = GuiText.create({
     group = groups.gui
   })
-
-  local function guiButton(x, y, w, h, buttonText)
-    local buttonW, buttonH = GuiText.getTextSize(buttonText, guiText.font)
-    w, h = w or buttonW, h or buttonH
-
-    return Gui.create({
-      type = Gui.types.BUTTON,
-      x = x,
-      y = y,
-      w = w + buttonPadding,
-      h = h + buttonPadding,
-      onClick = function(self)
-        print('clicked!', self:getId())
-      end,
-      render = function(self)
-        local x, y = self.x, self.y
-        love.graphics.setColor(self.hovered and COLOR_BUTTON_HOVER or COLOR_PRIMARY)
-        love.graphics.rectangle(
-          'fill',
-          x, y,
-          w + buttonPadding, h + buttonPadding
-        )
-        guiText:add(
-          buttonText,
-          Color.WHITE,
-          x + buttonPadding / 2,
-          y + buttonPadding / 2
-        )
-      end
-    })
-  end
 
   local function guiToggle(x, y, toggleText)
     local toggleBoxSize = 14
@@ -113,8 +83,28 @@ function GuiTestBlueprint.init(self)
   end
 
   local children = {
-    guiButton(200, 50, 70, nil, 'Button 1'),
-    guiButton(300, 50, 70, nil, 'Button 2'),
+    Button.create({
+      x = 200,
+      y = 50,
+      w = 70,
+      padding = 4,
+      text = 'Button 1',
+      textLayer = guiText,
+      onClick = function(self)
+        consoleLog(self.text..' clicked')
+      end
+    }),
+    Button.create({
+      x = 300,
+      y = 50,
+      w = 70,
+      padding = 4,
+      text = 'Button 2',
+      textLayer = guiText,
+      onClick = function(self)
+        consoleLog(self.text..' clicked')
+      end
+    }),
     guiToggle(200, 100, 'music'),
     guiToggle(200, 125, 'sound effects'),
     GuiTextInput.create({

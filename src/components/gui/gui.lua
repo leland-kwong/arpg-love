@@ -49,8 +49,6 @@ local Gui = {
   -- props
   x = 1,
   y = 1,
-  w = 1,
-  h = 1,
   onClick = noop,
   onKeyPress = noop,
   onChange = noop,
@@ -143,6 +141,8 @@ end
 
 function Gui.init(self)
   assert(guiType[self.type] ~= nil, 'invalid gui type'..tostring(self.type))
+
+  self.w, self.h = self.w or 1, self.h or 1
 
   if guiType.LIST == self.type then
     assert(self.h <= love.graphics.getHeight() / self.scale, 'scrollable list height should not be greater than window height')
