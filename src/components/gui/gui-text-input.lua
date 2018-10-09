@@ -3,6 +3,7 @@ local Gui = require 'components.gui.gui'
 local GuiText = require 'components.gui.gui-text'
 local objectUtils = require 'utils.object-utils'
 local Color = require 'modules.color'
+local Position = require 'utils.position'
 
 local blinkCursorCo = function()
   local show = true
@@ -23,6 +24,9 @@ end
 local CURSOR_TEXT = love.mouse.getSystemCursor('ibeam')
 
 local GuiTextInput = objectUtils.extend(Gui, {
+  textColor = Color.WHITE,
+  borderColor = Color.PRIMARY,
+  cursorColor = Color.YELLOW,
   init = function(self)
     assert(
       self.textLayer
@@ -46,60 +50,57 @@ local GuiTextInput = objectUtils.extend(Gui, {
     love.mouse.setCursor(cursorType)
 
     local posX, posY = self:getPosition()
-    local ctrlColor = self.focused and Color.PRIMARY or Color.LIGHT_GRAY
+    local ctrlColor = self.focused and self.borderColor or Color.LIGHT_GRAY
 
     -- text box
     love.graphics.setColor(ctrlColor)
     local lineWidth = 2
     love.graphics.setLineWidth(lineWidth)
-    local tx, ty = lineWidth / 2, lineWidth / 2
-    love.graphics.translate(tx, ty)
     love.graphics.rectangle(
       'line',
       posX,
       posY,
-      self.w - lineWidth * 2,
-      self.h - lineWidth * 2
+      self.w,
+      self.h
     )
-
-    -- adjust content to center of text box
-    local tx2, ty2 = 4, 5
-    love.graphics.translate(tx2, ty2)
 
     -- placeholder text
     local placeholderOffX, placeholderOffY = 0, 0
+    local textHeight = self.textLayer.font:getHeight()
+    local cx, cy = Position.boxCenterOffset(self.w, textHeight, self.w + (lineWidth * 2), self.h + (lineWidth))
+    local textX, textY = posX + lineWidth + 5, posY + cy
     local hasContent = #self.text > 0
     if self.focused or hasContent then
-      placeholderOffX, placeholderOffY = 0, -self.h + 2
+      placeholderOffX, placeholderOffY = 0, -self.h
     end
 
+    -- draw placeholder text
     self.textLayer:add(
       self.placeholderText,
       ctrlColor,
-      posX + placeholderOffX + tx + tx2,
-      posY + placeholderOffY + ty + ty2
+      textX + placeholderOffX,
+      textY + placeholderOffY
     )
 
     -- draw text
     self.textLayer:add(
       self.text,
-      Color.WHITE,
-      posX + tx + tx2,
-      posY + ty + ty2
+      self.textColor,
+      textX,
+      textY
     )
 
     -- draw cursor
     local isCursorVisible = self.focused and self.blinkCursor()
     if isCursorVisible then
       local w = GuiText.getTextSize(self.text, self.textLayer.font)
-      local h = self.textLayer.font:getHeight()
-      love.graphics.setColor(Color.PRIMARY)
+      love.graphics.setColor(self.cursorColor)
       love.graphics.rectangle(
         'fill',
-        posX + w,
-        posY - 1,
+        textX + w,
+        textY - 1,
         2,
-        h
+        textHeight
       )
     end
 
