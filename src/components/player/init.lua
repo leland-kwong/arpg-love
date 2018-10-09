@@ -199,7 +199,7 @@ local Player = {
         }):setParent(parent)
       end),
 
-      msgBus.on(msgBus.KEY_PRESSED, function(v)
+      msgBus.on(msgBus.KEY_DOWN, function(v)
         local key = v.key
         local rootState = msgBus.send(msgBus.GAME_STATE_GET)
         local isActive = rootState:get().activeMenu == 'INVENTORY'

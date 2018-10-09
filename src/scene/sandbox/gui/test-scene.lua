@@ -6,7 +6,6 @@ local GuiTextLayer = require 'components.gui.gui-text'
 local GuiList = require 'components.gui.gui-list'
 local Color = require 'modules.color'
 local font = require 'components.font'
-local pprint = require 'utils.pprint'
 local scale = require 'config.config'.scaleFactor
 
 local guiText = GuiTextLayer.create({
@@ -139,6 +138,10 @@ function GuiTestBlueprint.init(self)
     height = 100,
     contentHeight = 200
   }):setParent(self)
+end
+
+function GuiTestBlueprint.final()
+  consoleLog('scene deleted')
 end
 
 return Component.createFactory(GuiTestBlueprint)

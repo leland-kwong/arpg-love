@@ -1,7 +1,8 @@
 local sceneManager = require 'scene.manager'
 local groups = require 'components.groups'
+local msgBus = require 'components.msg-bus'
 
-return {
+local globalState = {
   activeScene = nil,
   backgroundColor = {0.2,0.2,0.2},
   sceneStack = sceneManager,
@@ -51,3 +52,9 @@ return {
     end
   }
 }
+
+msgBus.on(msgBus.NEW_GAME, function()
+  globalState.stateSnapshot:consumeSnapshot()
+end)
+
+return globalState

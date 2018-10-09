@@ -35,7 +35,7 @@ local function toggleCollisionDebug()
   config.collisionDebug = not config.collisionDebug
 end
 
-msgBus.on(msgBus.KEY_PRESSED, function(v)
+msgBus.on(msgBus.KEY_DOWN, function(v)
   keysPressed[v.key] = true
 
   if hasModifier() and not v.isRepeated then

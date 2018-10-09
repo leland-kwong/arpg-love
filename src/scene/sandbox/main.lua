@@ -53,7 +53,7 @@ local function loadScene(name, path, sceneProps)
     return
   end
   local scene = require(path)
-  msgBus.send(msgBus.SCENE_STACK_PUSH, {
+  msgBus.send(msgBus.SCENE_STACK_REPLACE, {
     scene = scene,
     props = sceneProps
   })
@@ -109,10 +109,6 @@ local sceneOptions = {
       loadScene('main game sandbox', 'scene.sandbox.main-game.main-game-test')
     end
   },
-  menuOptionSceneLoad(
-    'sprite positioning',
-    'scene.sandbox.sprite-positioning'
-  ),
   menuOptionSceneLoad(
     'ai',
     'scene.sandbox.ai.test-scene'

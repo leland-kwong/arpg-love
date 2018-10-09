@@ -3,6 +3,7 @@ local fileSystem = require 'modules.file-system'
 local Color = require 'modules.color'
 local f = require 'utils.functional'
 local Gui = require 'components.gui.gui'
+local GuiTextInput = require 'components.gui.gui-text-input'
 local GuiText = require 'components.gui.gui-text'
 local MenuList = require 'components.menu-list'
 local groups = require 'components.groups'
@@ -18,8 +19,47 @@ local MainGameHomeScene = {
   menuY = 40
 }
 
+local NewGameDialogBlueprint = {
+  group = groups.gui,
+  x = 300,
+  y = 100
+}
+
+function NewGameDialogBlueprint.init(self)
+  local textLayer = GuiText.create({
+    font = require 'components.font'.secondary.font
+  })
+
+  self.textInput = GuiTextInput.create({
+    x = self.x,
+    y = self.y,
+    w = 150,
+    h = 20,
+    textLayer = textLayer,
+    placeholderText = 'your name',
+    onKeyPress = function(self, ev)
+      if ev.key == 'return' then
+        consoleLog(ev.key, os.clock())
+      end
+
+    -- msgBus.send(
+    --   msgBus.SCENE_STACK_REPLACE,
+    --   {
+    --     scene = HomeBase,
+    --     props = {
+    --       isNewGame = true
+    --     }
+    --   }
+    -- )
+    end
+  }):setParent(self)
+  Gui.setFocus(self.textInput)
+end
+
+local NewGameDialog = Component.createFactory(NewGameDialogBlueprint)
+
 local function NewGameButton(parent)
-  local w, h = GuiText.getTextSize('New Game', parent.guiTextButtonLayer.font)
+  local w, h = GuiText.getTextSize('New Game', parent.guiTextLayer.font)
   local padding = 10
   local actualW, actualH = w + padding, h + padding
   return Gui.create({
@@ -32,12 +72,9 @@ local function NewGameButton(parent)
       local CreateStore = require 'components.state.state'
       msgBus.send(msgBus.GAME_STATE_SET, CreateStore())
       msgBus.send(
-        msgBus.SCENE_STACK_REPLACE,
+        msgBus.SCENE_STACK_PUSH,
         {
-          scene = HomeBase,
-          props = {
-            isNewGame = true
-          }
+          scene = NewGameDialog
         }
       )
       parent:delete(true)
@@ -51,7 +88,7 @@ local function NewGameButton(parent)
         self.w,
         self.h
       )
-      parent.guiTextButtonLayer:add('New game', Color.WHITE, self.x + padding/2, self.y + padding/2)
+      parent.guiTextLayer:add('New game', Color.WHITE, self.x + padding/2, self.y + padding/2)
     end
   }):setParent(parent)
 end
@@ -62,7 +99,7 @@ function MainGameHomeScene.init(self)
   self.guiTextTitleLayer = GuiText.create({
     font = require 'components.font'.secondaryLarge.font
   }):setParent(self)
-  self.guiTextButtonLayer = GuiText.create({
+  self.guiTextLayer = GuiText.create({
     font = require 'components.font'.secondary.font
   }):setParent(self)
 

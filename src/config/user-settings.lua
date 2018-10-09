@@ -27,6 +27,7 @@ M.mouseInputMap = {
 }
 
 M.mouseClickDelay = 0.12
+M.keyPressedDelay = 0.03 -- minimum time that should elapse to trigger a key press event
 
 M.camera = {
   speed = 0.4, -- lerp duration (larger value means slower movement)

@@ -20,6 +20,7 @@ local globalState = require 'main.global-state'
 require 'main.inputs'
 local systemsProfiler = require 'components.profiler.component-groups'
 require 'components.groups.dungeon-test'
+require 'components.groups.game-world'
 
 local scale = config.scaleFactor
 

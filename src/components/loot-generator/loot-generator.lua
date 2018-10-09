@@ -180,6 +180,8 @@ function LootGenerator.init(self)
   local screenX, screenY = self.x, self.y
   local item = self.item
 
+  Component.addToGroup(self, Component.groups.gameWorld)
+
   local animation = AnimationFactory:new({
     itemSystem.getDefinition(item).sprite
   })

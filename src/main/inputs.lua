@@ -13,6 +13,12 @@ local state = {
       y = 0
     },
     isDown = false,
+  },
+  keyboard = {
+    lastPressed = {
+      timeStamp = 0
+    },
+    isDown = false,
   }
 }
 
@@ -29,9 +35,14 @@ end)
 
 function love.keypressed(key, scanCode, isRepeated)
   msgBus.send(
-    msgBus.KEY_PRESSED,
+    msgBus.KEY_DOWN,
     inputMsg(key, scanCode, isRepeated)
   )
+
+  if (not state.keyboard.isDown) then
+    local lastPressed = state.keyboard.lastPressed
+    lastPressed.timeStamp = socket.gettime()
+  end
 
   if config.userSettings.keyboard.MAIN_MENU == key then
     msgBusMainMenu.send(
@@ -41,10 +52,16 @@ function love.keypressed(key, scanCode, isRepeated)
 end
 
 function love.keyreleased(key, scanCode)
+  local msg = inputMsg(key, scanCode, false)
   msgBus.send(
     msgBus.KEY_RELEASED,
-    inputMsg(key, scanCode, false)
+    msg
   )
+
+  local timeBetweenRelease = socket.gettime() - state.keyboard.lastPressed.timeStamp
+  if timeBetweenRelease >= config.userSettings.keyPressedDelay then
+    msgBus.send(msgBus.KEY_PRESSED, msg)
+  end
 end
 
 function love.mousepressed( x, y, button, istouch, presses )

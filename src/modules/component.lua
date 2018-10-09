@@ -224,6 +224,18 @@ function M.createFactory(blueprint)
       return self
     end
 
+    local id = self:getId()
+    -- dissasociate itself from previous parent
+    local previousParent = self.parent
+    if (previousParent and previousParent._children) then
+      previousParent._children[id] = nil
+    end
+
+    if (not parent) then
+      self.parent = nil
+      return
+    end
+
     --[[
       The child's position will now be relative to its parent,
       so we need to store the parent's initial position
@@ -231,13 +243,6 @@ function M.createFactory(blueprint)
     self.prevParentX = parent.x
     self.prevParentY = parent.y
     self.prevParentZ = parent.z
-
-    local id = self:getId()
-    -- dissasociate itself from previous parent
-    local previousParent = self.parent
-    if (previousParent and previousParent._children) then
-      previousParent._children[id] = nil
-    end
 
     -- set new parent
     self.parent = parent

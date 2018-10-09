@@ -28,13 +28,14 @@ end
 
 local function generateLoot(c, item)
   local LootGenerator = require'components.loot-generator.loot-generator'
-  local mapGrid = Component.get('MAIN_SCENE').mapGrid
+  local mainSceneRef = Component.get('MAIN_SCENE')
+  local mapGrid = mainSceneRef.mapGrid
   local dropX, dropY = getDroppablePosition(c.x, c.y, mapGrid)
   LootGenerator.create({
     x = dropX,
     y = dropY,
     item = item,
-  }):setParent(parent)
+  })
 end
 
 return {

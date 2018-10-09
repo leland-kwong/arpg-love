@@ -23,8 +23,6 @@ end
 local CURSOR_TEXT = love.mouse.getSystemCursor('ibeam')
 
 local GuiTextInput = objectUtils.extend(Gui, {
-  placeholderText = 'type to enter text',
-  type = Gui.types.TEXT_INPUT,
   init = function(self)
     assert(
       self.textLayer
@@ -33,6 +31,8 @@ local GuiTextInput = objectUtils.extend(Gui, {
     )
     Gui.init(self)
   end,
+  placeholderText = 'type to enter text',
+  type = Gui.types.TEXT_INPUT,
   onFocus = function(self)
     self.blinkCursor = coroutine.wrap(blinkCursorCo)
   end,

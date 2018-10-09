@@ -29,6 +29,21 @@ local guiType = {
   LIST = 'LIST',
 }
 
+local function getFocusedEntity()
+  for id,entity in pairs(Component.groups.gui.getAll()) do
+    if entity.focused then
+      return entity
+    end
+  end
+end
+
+msgBus.on(msgBus.KEY_PRESSED, function(msg)
+  local entity = getFocusedEntity()
+  if entity then
+    entity:onKeyPress(msg)
+  end
+end)
+
 local Gui = {
   group = groups.gui,
   -- props
@@ -37,6 +52,7 @@ local Gui = {
   w = 1,
   h = 1,
   onClick = noop,
+  onKeyPress = noop,
   onChange = noop,
   onCreate = noop,
   onFocus = noop,
@@ -79,8 +95,9 @@ local Gui = {
   types = guiType
 }
 
-local function handleFocusChange(self, origFocused)
-  local isFocusChange = origFocused ~= self.focused
+local function handleFocusChange(self, newFocusState)
+  local isFocusChange = self.focused ~= newFocusState
+  self.focused = newFocusState
   if isFocusChange then
     if self.focused then
       self.onFocus(self)
@@ -92,6 +109,14 @@ local function handleFocusChange(self, origFocused)
       msgBus.send(msgBus.SET_TEXT_INPUT, self.focused)
     end
   end
+end
+
+function Gui.setFocus(entity)
+  local focusedEntity = getFocusedEntity()
+  if focusedEntity then
+    handleFocusChange(focusedEntity, false)
+  end
+  handleFocusChange(entity, true)
 end
 
 local function handleScroll(self, dx, dy)
@@ -127,9 +152,6 @@ function Gui.init(self)
       initialX = self.x,
       initialY = self.y
     }):setParent(self)
-    f.forEach(self.children, function(child)
-      child:setParent(self.scrollNode)
-    end)
   end
 
   if guiType.TEXT_INPUT == self.type then
@@ -155,10 +177,7 @@ function Gui.init(self)
     end
 
     if msgBus.MOUSE_PRESSED == msgType then
-      local origFocused = self.focused
-      self.focused = self.hovered
-
-      handleFocusChange(self, origFocused)
+      handleFocusChange(self, self.hovered)
 
       if self.hovered then
         local isRightClick = msgValue[3] == 2
@@ -183,7 +202,7 @@ function Gui.init(self)
       end
 
       -- handle backspace for text input
-      if msgBus.KEY_PRESSED == msgType and msgValue.key == 'backspace' then
+      if msgBus.KEY_DOWN == msgType and msgValue.key == 'backspace' then
         self.text = string.sub(self.text, 1, #self.text - 1)
         self.onChange(self)
       end
@@ -252,6 +271,11 @@ function Gui.update(self, dt)
   end
 
   self.onUpdate(self, dt)
+
+  f.forEach(self.children, function(child)
+    child:setParent(self.scrollNode)
+  end)
+
   self.prevHovered = self.hovered
   self.prevColPosX = posX
   self.prevColPosY = posY
