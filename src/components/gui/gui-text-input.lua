@@ -23,6 +23,18 @@ end
 
 local CURSOR_TEXT = love.mouse.getSystemCursor('ibeam')
 
+local callbacks = {
+  onFocus = function(self)
+    self.blinkCursor = coroutine.wrap(blinkCursorCo)
+  end,
+  onKeyPress = function(self)
+    self.blinkCursor = coroutine.wrap(blinkCursorCo)
+  end,
+  onBlur = function(self)
+    self.blinkCursor = function() return false end
+  end,
+}
+
 local GuiTextInput = objectUtils.extend(Gui, {
   textColor = Color.WHITE,
   borderColor = Color.PRIMARY,
@@ -34,15 +46,18 @@ local GuiTextInput = objectUtils.extend(Gui, {
       'text layer must be provided'
     )
     Gui.init(self)
+
+    -- wrap callbacks
+    for ev,cb in pairs(callbacks) do
+      local originalCallback = self[ev]
+      self[ev] = function(...)
+        originalCallback(...)
+        cb(...)
+      end
+    end
   end,
   placeholderText = 'type to enter text',
   type = Gui.types.TEXT_INPUT,
-  onFocus = function(self)
-    self.blinkCursor = coroutine.wrap(blinkCursorCo)
-  end,
-  onBlur = function(self)
-    self.blinkCursor = function() return false end
-  end,
   render = function(self)
     love.graphics.push()
 
@@ -93,7 +108,7 @@ local GuiTextInput = objectUtils.extend(Gui, {
     -- draw cursor
     local isCursorVisible = self.focused and self.blinkCursor()
     if isCursorVisible then
-      local w = GuiText.getTextSize(self.text, self.textLayer.font)
+      local w = self.textLayer.font:getWidth(self.text)
       love.graphics.setColor(self.cursorColor)
       love.graphics.rectangle(
         'fill',
