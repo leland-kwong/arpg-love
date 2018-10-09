@@ -13,17 +13,17 @@ local function saveSavedGamesList()
   bitser.dumpLoveFile(SAVED_GAMES_LIST, savedGames)
 end
 
-local function addSavedFileToList(fileName)
+local function updateSavedGamesList(fileName, metadata)
   if savedGames[fileName] then
     return
   end
-  savedGames[fileName] = true
+  savedGames[fileName] = metadata
   saveSavedGamesList()
 end
 
 local bitser = require 'modules.bitser'
-function fileSystem.saveFile(fileName, data)
-  addSavedFileToList(fileName)
+function fileSystem.saveFile(fileName, data, metadata)
+  updateSavedGamesList(fileName, metadata)
   bitser.dumpLoveFile(
     fileName,
     data
@@ -43,7 +43,12 @@ function fileSystem.deleteSaveFile(fileName)
 end
 
 function fileSystem.listSavedFiles()
-  return f.keys(savedGames)
+  return f.map(f.keys(savedGames), function(fileName)
+    return {
+      id = fileName,
+      metadata = savedGames[fileName]
+    }
+  end)
 end
 
 return fileSystem

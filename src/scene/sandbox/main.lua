@@ -104,9 +104,14 @@ local sceneOptions = {
     name = 'main game sandbox',
     value = function()
       local msgBus = require 'components.msg-bus'
-      local CreateStore = require 'components.state.state'
-      msgBus.send(msgBus.GAME_STATE_SET, CreateStore(nil, {id = 'test-state'}))
-      loadScene('main game sandbox', 'scene.sandbox.main-game.main-game-test')
+      local Scene = require 'scene.sandbox.main-game.main-game-test'
+      msgBus.send(msgBus.NEW_GAME, {
+        scene = Scene,
+        props = {
+          id = 'test-state',
+          characterName = 'test character'
+        }
+      })
     end
   },
   menuOptionSceneLoad(
@@ -196,7 +201,8 @@ end
   self.listeners = {
     msgBusMainMenu.on(msgBusMainMenu.TOGGLE_MAIN_MENU, function()
       DebugMenu(not state.menuOpened)
-    end)
+      return state.menuOpened
+    end, 1)
   }
 end
 

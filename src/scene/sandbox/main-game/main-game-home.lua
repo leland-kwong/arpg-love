@@ -4,6 +4,7 @@ local Color = require 'modules.color'
 local f = require 'utils.functional'
 local Gui = require 'components.gui.gui'
 local GuiTextInput = require 'components.gui.gui-text-input'
+local GuiButton = require 'components.gui.gui-button'
 local GuiText = require 'components.gui.gui-text'
 local MenuList = require 'components.menu-list'
 local groups = require 'components.groups'
@@ -26,38 +27,64 @@ local NewGameDialogBlueprint = {
 }
 
 function NewGameDialogBlueprint.init(self)
+  local state = {
+    isValid = false,
+    characterName = ''
+  }
+
   local textLayer = GuiText.create({
     font = require 'components.font'.secondary.font
   })
 
-  self.textInput = GuiTextInput.create({
+  local function startNewGame()
+    if (not state.isValid) then
+      return
+    end
+
+    msgBus.send(msgBus.NEW_GAME, {
+      scene = HomeBase,
+      props = {
+        isNewGame = true,
+        characterName = state.characterName
+      }
+    })
+  end
+
+  local textInput = GuiTextInput.create({
     x = self.x,
     y = self.y,
     w = 250,
-    h = 20,
+    padding = 8,
     textLayer = textLayer,
     placeholderText = "what is your name?",
+    onUpdate = function(self)
+      state.characterName = self.text
+      state.isValid = #self.text > 0
+    end,
     onKeyPress = function(self, ev)
       local isSubmitEvent = ev.key == 'return'
       if isSubmitEvent then
-        local isValidName = #self.text > 0
         -- create new game
-        if isValidName then
-          msgBus.send(msgBus.NEW_GAME)
-          msgBus.send(
-            msgBus.SCENE_STACK_REPLACE,
-            {
-              scene = HomeBase,
-              props = {
-                isNewGame = true
-              }
-            }
-          )
-        end
+        startNewGame()
       end
     end
   }):setParent(self)
-  Gui.setFocus(self.textInput)
+
+  GuiButton.create({
+    padding = 8,
+    textLayer = textLayer,
+    text = 'start game',
+    onClick = function()
+      startNewGame()
+    end,
+    onUpdate = function(self)
+      self:setDrawDisabled(not state.isValid)
+      self.x = textInput.x + textInput.w - self.w
+      self.y = textInput.y + textInput.h + 1
+    end
+  }):setParent(self)
+
+  Gui.setFocus(textInput)
 end
 
 local NewGameDialog = Component.createFactory(NewGameDialogBlueprint)
@@ -73,8 +100,6 @@ local function NewGameButton(parent)
     h = actualH,
     type = Gui.types.BUTTON,
     onClick = function(self)
-      local CreateStore = require 'components.state.state'
-      msgBus.send(msgBus.GAME_STATE_SET, CreateStore())
       msgBus.send(
         msgBus.SCENE_STACK_PUSH,
         {
@@ -113,13 +138,13 @@ function MainGameHomeScene.init(self)
     x = self.menuX,
     y = self.menuY,
     width = 125,
-    options = f.map(fileSystem.listSavedFiles(), function(fileName)
+    options = f.map(fileSystem.listSavedFiles(), function(fileData)
       return {
-        name = fileName,
+        name = fileData.metadata.displayName,
         value = function()
           local CreateStore = require 'components.state.state'
           local store = CreateStore()
-          local loadedState = fileSystem.loadSaveFile(fileName)
+          local loadedState = fileSystem.loadSaveFile(fileData.id)
           -- FIXME: we currently update the store after creating it since some parts of the game
           -- check if there was a state change to trigger events at load time. If we create the store
           -- with the loaded state, then the previous state and new state will be the same.

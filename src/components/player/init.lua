@@ -1,6 +1,7 @@
 local Component = require 'modules.component'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
+local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local ParticleFx = require 'components.particle.particle'
 local config = require 'config.config'
 local animationFactory = require 'components.animation-factory'
@@ -143,7 +144,10 @@ local function connectAutoSave(parent)
     if hasChanged then
       fileSystem.saveFile(
         rootState:getId(),
-        rootState:get()
+        state,
+        {
+          displayName = state.characterName
+        }
       )
       lastSavedState = state
     end
@@ -158,6 +162,10 @@ local function connectAutoSave(parent)
     end
   }):setParent(parent)
 end
+
+msgBusMainMenu.on(msgBusMainMenu.TOGGLE_MAIN_MENU, function(menuOpened)
+  msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, menuOpened)
+end)
 
 local Player = {
   id = 'PLAYER',
@@ -253,10 +261,6 @@ local Player = {
         )
       end),
 
-      msgBus.on(msgBus.MOUSE_CLICKED, function()
-        msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
-      end),
-
       msgBus.on(msgBus.ITEM_PICKUP, function(msg)
         local item = msg
         local calcDist = require'utils.math'.dist
@@ -268,6 +272,10 @@ local Player = {
           LineOfSight(self.mapGrid, Map.WALKABLE)(gridX1, gridY1, gridX2, gridY2) or
           true
         if canWalkToItem and (not outOfRange) then
+          msgBus.on(msgBus.MOUSE_RELEASED, function()
+            msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
+            return msgBus.CLEANUP
+          end)
           msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, true)
           item:pickup()
         end

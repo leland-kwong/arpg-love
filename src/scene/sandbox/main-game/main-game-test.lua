@@ -32,7 +32,6 @@ local function insertTestItems(rootStore)
 end
 
 function MainGameTest.init(self)
-  msgBus.send(msgBus.NEW_GAME)
   modifyLevelRequirements()
 
   local HomeBase = require 'scene.home-base'

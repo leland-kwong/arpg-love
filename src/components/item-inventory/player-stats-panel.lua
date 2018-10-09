@@ -23,16 +23,16 @@ local function drawBackground(self)
   love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
 end
 
-local function drawTitle(self)
-  local characterName = 'Character Name'
+local function drawCharacterName(self, characterName)
   self.guiText:add(characterName, Color.SKY_BLUE, self.x + padding, self.y + padding)
 end
 
 function PlayerStatsPanel.draw(self)
-  drawBackground(self)
-  drawTitle(self)
-
   local rootStore = self.rootStore
+
+  drawBackground(self)
+  drawCharacterName(self, rootStore:get().characterName)
+
   local i = 0
   local originY = 25
 
