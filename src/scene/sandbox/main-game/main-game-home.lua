@@ -33,24 +33,28 @@ function NewGameDialogBlueprint.init(self)
   self.textInput = GuiTextInput.create({
     x = self.x,
     y = self.y,
-    w = 150,
+    w = 250,
     h = 20,
     textLayer = textLayer,
-    placeholderText = 'your name',
+    placeholderText = "what is your name?",
     onKeyPress = function(self, ev)
-      if ev.key == 'return' then
-        consoleLog(ev.key, os.clock())
+      local isSubmitEvent = ev.key == 'return'
+      if isSubmitEvent then
+        local isValidName = #self.text > 0
+        -- create new game
+        if isValidName then
+          msgBus.send(msgBus.NEW_GAME)
+          msgBus.send(
+            msgBus.SCENE_STACK_REPLACE,
+            {
+              scene = HomeBase,
+              props = {
+                isNewGame = true
+              }
+            }
+          )
+        end
       end
-
-    -- msgBus.send(
-    --   msgBus.SCENE_STACK_REPLACE,
-    --   {
-    --     scene = HomeBase,
-    --     props = {
-    --       isNewGame = true
-    --     }
-    --   }
-    -- )
     end
   }):setParent(self)
   Gui.setFocus(self.textInput)
@@ -94,7 +98,8 @@ local function NewGameButton(parent)
 end
 
 function MainGameHomeScene.init(self)
-  msgBus.send(msgBus.NEW_GAME)
+  msgBus.send(msgBus.SET_BACKGROUND_COLOR, Color.DARK_GRAY)
+
   local parent = self
   self.guiTextTitleLayer = GuiText.create({
     font = require 'components.font'.secondaryLarge.font
