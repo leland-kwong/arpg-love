@@ -2,7 +2,6 @@ local GuiText = require 'components.gui.gui-text'
 local Component = require 'modules.component'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
-local font = require 'components.font'
 local Color = require 'modules.color'
 local CollisionObject = require 'modules.collision'
 local config = require 'config.config'
@@ -25,8 +24,14 @@ local function hasModifier()
     or keysPressed[R_CTRL]
 end
 
+local font = love.graphics.newFont(
+  'built/fonts/StarPerv.ttf',
+  16
+)
+font:setLineHeight(1)
+
 local guiText = GuiText.create({
-  font = font.primaryLarge.font,
+  font = font,
   group = groups.system,
   outline = false
 })
@@ -141,9 +146,8 @@ function Console.draw(self)
   if not state.showConsole then
     return
   end
-  local primaryFont = font.primaryLarge
-  local lineHeight = primaryFont.lineHeight * primaryFont.fontSize
-  love.graphics.setFont(primaryFont.font)
+  love.graphics.setFont(font)
+  local charHeight = font:getLineHeight() * font:getHeight()
   local gfx = love.graphics
   local s = self.stats
 
@@ -158,25 +162,25 @@ function Console.draw(self)
     objects = getAllGameObjectStats().count,
     collisionObjects = CollisionObject.getStats()
   },
-    lineHeight,
+    charHeight,
     edgeOffset,
-    edgeOffset + lineHeight
+    edgeOffset + charHeight
   )
 
-  local startY = edgeOffset + (lineHeight * 4)
+  local startY = edgeOffset + (charHeight * 4)
   gfx.setColor(Color.MED_GRAY)
   gfx.print('GRAPHICS', edgeOffset, startY)
   gfx.setColor(Color.WHITE)
   -- print out each stat on its own line
   printTable(
     gfx.getStats(),
-    lineHeight,
+    charHeight,
     edgeOffset,
-    startY + lineHeight
+    startY + charHeight
   )
 
   gfx.setColor(Color.MED_GRAY)
-  gfx.print('SYSTEM', edgeOffset, startY + 11 * lineHeight)
+  gfx.print('SYSTEM', edgeOffset, startY + 11 * charHeight)
   gfx.setColor(Color.WHITE)
   printTable({
       memory = string.format('%0.2f', s.currentMemoryUsed / 1024),
@@ -185,9 +189,9 @@ function Console.draw(self)
       fps = love.timer.getFPS(),
       eventHandlers = calcMessageBusHandlers()
     },
-    lineHeight,
+    charHeight,
     edgeOffset,
-    startY + 12 * lineHeight
+    startY + 12 * charHeight
   )
 
   gfx.print('msgBus '..self.msgBusAverageTime, edgeOffset, 700)
