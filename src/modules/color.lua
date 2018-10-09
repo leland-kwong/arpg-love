@@ -21,6 +21,12 @@ function Color.multiply(a, b)
     a[4] * b[4]
 end
 
+local alphaColor = {1,1,1,1}
+function Color.multiplyAlpha(a, alpha)
+  alphaColor[4] = alpha
+  return Color.multiply(a, alphaColor)
+end
+
 local colors = {
   PRIMARY = {Color.rgba255(81, 234, 241)},
   SKY_BLUE = {0.8,1,1,1},
