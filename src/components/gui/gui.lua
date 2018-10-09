@@ -150,7 +150,10 @@ function Gui.init(self)
       x = self.x,
       y = self.y,
       initialX = self.x,
-      initialY = self.y
+      initialY = self.y,
+      final = function()
+        consoleLog('scroll node deleted')
+      end
     }):setParent(self)
   end
 
@@ -272,9 +275,11 @@ function Gui.update(self, dt)
 
   self.onUpdate(self, dt)
 
-  f.forEach(self.children, function(child)
-    child:setParent(self.scrollNode)
-  end)
+  if self.scrollNode then
+    f.forEach(self.children, function(child)
+      child:setParent(self.scrollNode)
+    end)
+  end
 
   self.prevHovered = self.hovered
   self.prevColPosX = posX

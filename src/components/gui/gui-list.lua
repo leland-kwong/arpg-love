@@ -79,9 +79,9 @@ function GuiList.init(self)
     drawOrder = function()
       return drawOrder() + #children + 1
     end
-  })
+  }):setParent(self)
 
-  return Gui.create({
+  Gui.create({
     x = self.x,
     y = self.y,
     w = width,
@@ -113,7 +113,7 @@ function GuiList.init(self)
       scrollbars(self)
     end,
     drawOrder = drawOrder
-  })
+  }):setParent(self)
 end
 
 return Component.createFactory(GuiList)
