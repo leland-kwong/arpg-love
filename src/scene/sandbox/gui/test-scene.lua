@@ -111,7 +111,7 @@ function GuiTestBlueprint.init(self)
       x = 200,
       y = 165,
       w = 200,
-      h = 22,
+      padding = 5,
       textLayer = guiText,
       placeholderText = 'player name'
     }),

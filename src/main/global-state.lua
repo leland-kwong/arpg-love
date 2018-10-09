@@ -55,6 +55,6 @@ local globalState = {
 
 msgBus.on(msgBus.NEW_GAME, function()
   globalState.stateSnapshot:consumeSnapshot()
-end)
+end, 1)
 
 return globalState

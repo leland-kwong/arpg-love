@@ -50,3 +50,23 @@ end)
 msgBus.on(msgBus.GLOBAL_STATE_GET, function()
   return globalState
 end)
+
+msgBus.on(msgBus.NEW_GAME, function(msg)
+  assert(type(msg) == 'table')
+  assert(msg.scene ~= nil)
+  assert(type(msg.props.characterName) == 'string', 'character name should be a string')
+
+  local CreateStore = require 'components.state.state'
+  local storeOptions = {
+    characterName = msg.props.characterName,
+    id = msg.props.id
+  }
+  msgBus.send(msgBus.GAME_STATE_SET, CreateStore(nil, storeOptions))
+  msgBus.send(
+    msgBus.SCENE_STACK_REPLACE,
+    {
+      scene = msg.scene,
+      props = msg.props
+    }
+  )
+end)
