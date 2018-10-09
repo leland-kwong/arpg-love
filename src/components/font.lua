@@ -1,12 +1,10 @@
 local function fontPrimary(fontSize)
   local font = love.graphics.newFont(
-    -- 'built/fonts/PolygonPixel5x7Cyrillic.ttf',
-    'built/fonts/StarPerv.ttf',
+    'built/fonts/bm_mini/bm_mini.ttf',
     fontSize
   )
   local lineHeight = 1.2
   font:setLineHeight(lineHeight)
-  -- font:setFilter('linear')
 
   return {
     fontSize = fontSize,
