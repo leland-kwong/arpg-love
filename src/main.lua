@@ -21,6 +21,7 @@ require 'main.inputs'
 local systemsProfiler = require 'components.profiler.component-groups'
 require 'components.groups.dungeon-test'
 require 'components.groups.game-world'
+require 'modules.file-system'
 
 local scale = config.scaleFactor
 

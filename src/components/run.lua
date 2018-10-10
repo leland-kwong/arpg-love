@@ -37,16 +37,17 @@ function love.run()
     end
 
 		-- Call update and draw
-    if love.update and
-      (config.isDebug and windowFocused)
-    then
-      love.update(dt)
+		if love.update then
+			if (config.isDebug) then
+				if windowFocused then
+					love.update(dt)
+				end
+			else
+				love.update(dt)
+			end
     end -- will pass 0 if love.timer is disabled
 
-    if love.graphics and
-      love.graphics.isActive() and
-      (config.isDebug and windowFocused)
-    then
+    if love.graphics and love.graphics.isActive() then
 			love.graphics.origin()
 			love.graphics.clear(love.graphics.getBackgroundColor())
 
