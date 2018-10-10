@@ -10,7 +10,6 @@ local function runTest(fs, saveState)
   local saveId = 'unit-test-save'
 
   local function saveSuccess()
-    print('save success')
     local saveList = fs.listSavedFiles(rootPath)
     assert(type(saveList) == 'table', 'save list should be a table')
     assert(#saveList == 1, 'save list should be 1 file')
@@ -23,15 +22,13 @@ local function runTest(fs, saveState)
     assert(type(savedState) == 'table')
 
     return fs.deleteFile(rootPath, save.id)
-      :next(function()
-        print('delete success')
-      end, function(err)
+      :next(nil, function(err)
         print(err)
       end)
   end
 
   local function saveError(err)
-    error(err)
+    print(err)
   end
 
   fs.saveFile(rootPath, saveId, saveState, { displayName = saveState.displayName })
