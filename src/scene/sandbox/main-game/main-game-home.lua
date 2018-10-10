@@ -141,8 +141,10 @@ function MainGameHomeScene.init(self)
     width = 125,
     options = f.map(fileSystem.listSavedFiles('saved-states'), function(fileData)
       local meta = fileData.metadata
-      local date = os.date('*t', meta.lastSaved)
-      local saveDateHumanized = date.month .. '-' .. date.day .. '-' .. date.year
+      local dateObject = os.date('*t', meta.lastSaved)
+      local extract = require 'utils.object-utils.extract'
+      local month, day, year = extract(dateObject, 'month', 'day', 'year')
+      local saveDateHumanized = month .. '-' .. day .. '-' .. year
       return {
         name = {
           Color.WHITE,
