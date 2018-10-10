@@ -256,7 +256,7 @@ function ActiveSkillInfo.init(self)
     end)
   }
 
-  self.itemRender = ItemRender.create({
+  local itemRenderRef = ItemRender.create({
     draw = function()
       love.graphics.setColor(1,1,1)
       skillHandlers[parent.skillId].draw(parent)
@@ -265,6 +265,7 @@ function ActiveSkillInfo.init(self)
       return self.group:drawOrder(self) + 3
     end
   })
+  Component.addToGroup(itemRenderRef:getId(), 'gameWorld', itemRenderRef)
 end
 
 function ActiveSkillInfo.update(self, dt)

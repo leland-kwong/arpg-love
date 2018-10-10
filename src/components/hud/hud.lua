@@ -111,7 +111,7 @@ function Hud.init(self)
     end
   }):setParent(self)
 
-  -- mana bar
+  -- -- mana bar
   StatusBar.create({
     x = offX + healthManaWidth / 2,
     y = winHeight - barHeight - 13,

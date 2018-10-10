@@ -35,6 +35,7 @@ function NewGameDialogBlueprint.init(self)
   local textLayer = GuiText.create({
     font = require 'components.font'.secondary.font
   })
+  Component.addToGroup(textLayer:getId(), 'gameWorld', textLayer)
 
   local function startNewGame()
     if (not state.isValid) then
