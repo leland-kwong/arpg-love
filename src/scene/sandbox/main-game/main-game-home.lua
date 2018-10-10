@@ -96,7 +96,7 @@ local function NewGameButton(parent)
   local actualW, actualH = w + padding, h + padding
   return Gui.create({
     x = parent.menuX,
-    y = parent.menuY + 150,
+    y = parent.menuY + 250,
     w = actualW,
     h = actualH,
     type = Gui.types.BUTTON,
@@ -141,13 +141,15 @@ function MainGameHomeScene.init(self)
     width = 125,
     options = f.map(fileSystem.listSavedFiles('saved-states'), function(fileData)
       local meta = fileData.metadata
+      local date = os.date('*t', meta.lastSaved)
+      local saveDateHumanized = date.month .. '-' .. date.day .. '-' .. date.year
       return {
         name = {
           Color.WHITE,
           meta.displayName..'\n',
 
           Color.LIGHT_GRAY,
-          meta.lastSaved
+          'last saved: '..saveDateHumanized
         },
         value = function()
           local CreateStore = require 'components.state.state'

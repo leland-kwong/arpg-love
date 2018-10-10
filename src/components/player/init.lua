@@ -148,7 +148,7 @@ local function connectAutoSave(parent)
         state,
         {
           displayName = state.characterName,
-          lastSaved = os.clock()
+          lastSaved = os.time(os.date("!*t"))
         }
       )
       lastSavedState = state
