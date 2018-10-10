@@ -139,24 +139,26 @@ function MainGameHomeScene.init(self)
     y = self.menuY,
     width = 125,
     options = f.map(fileSystem.listSavedFiles('saved-states'), function(fileData)
+      local meta = fileData.metadata
       return {
-        name = fileData.metadata.displayName,
+        name = {
+          Color.WHITE,
+          meta.displayName..'\n',
+
+          Color.LIGHT_GRAY,
+          meta.lastSaved
+        },
         value = function()
           local CreateStore = require 'components.state.state'
-          local store = CreateStore()
           local loadedState = fileSystem.loadSaveFile('saved-states', fileData.id)
           -- FIXME: we currently update the store after creating it since some parts of the game
           -- check if there was a state change to trigger events at load time. If we create the store
           -- with the loaded state, then the previous state and new state will be the same.
-          store:replaceState(loadedState)
           msgBus.send(
-            msgBus.GAME_STATE_SET,
-            store
-          )
-          msgBus.send(
-            msgBus.SCENE_STACK_REPLACE,
+            msgBus.NEW_GAME,
             {
-              scene = HomeBase
+              scene = HomeBase,
+              props = loadedState
             }
           )
           parent:delete(true)

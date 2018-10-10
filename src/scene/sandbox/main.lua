@@ -108,7 +108,7 @@ local sceneOptions = {
       msgBus.send(msgBus.NEW_GAME, {
         scene = Scene,
         props = {
-          id = 'test-state',
+          __stateId = 'test-state',
           characterName = 'test character'
         }
       })

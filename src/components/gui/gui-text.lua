@@ -7,6 +7,7 @@ local Component = require 'modules.component'
 local groups = require 'components.groups'
 local font = require 'components.font'
 local f = require 'utils.functional'
+local pixelOutlineShader = require 'modules.shaders.pixel-text-outline'
 
 local textForMeasuringCache = {}
 local function getTextForMeasuring(font)
@@ -58,12 +59,6 @@ function GuiTextLayer.addTextGroup(self, textGroup, x, y)
   return self
 end
 
-local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
-local outlineColor = {0,0,0,1}
-local shader = love.graphics.newShader(pixelOutlineShader)
-local textW, textH = 16, 16
-local spriteSize = {textW, textH}
-
 function GuiTextLayer.init(self)
   self.textGraphic = love.graphics.newText(self.font, '')
   self.tablePool = {}
@@ -75,21 +70,15 @@ end
 
 function GuiTextLayer.draw(self)
   if self.outline then
-    love.graphics.setShader(shader)
-    shader:send('sprite_size', spriteSize)
-    shader:send('outline_width', 2/textW)
-    shader:send('outline_color', outlineColor)
-    shader:send('use_drawing_color', true)
-    shader:send('include_corners', true)
+    pixelOutlineShader.attach(nil, self.color[4])
   end
 
-  shader:send('alpha', self.color[4])
   love.graphics.setColor(self.color)
   love.graphics.draw(self.textGraphic, x, y)
   self.textGraphic:clear()
 
   if self.outline then
-    love.graphics.setShader()
+    pixelOutlineShader.detach()
   end
 end
 

@@ -57,16 +57,11 @@ msgBus.on(msgBus.NEW_GAME, function(msg)
   assert(type(msg.props.characterName) == 'string', 'character name should be a string')
 
   local CreateStore = require 'components.state.state'
-  local storeOptions = {
-    characterName = msg.props.characterName,
-    id = msg.props.id
-  }
-  msgBus.send(msgBus.GAME_STATE_SET, CreateStore(nil, storeOptions))
+  msgBus.send(msgBus.GAME_STATE_SET, CreateStore(msg.props))
   msgBus.send(
     msgBus.SCENE_STACK_REPLACE,
     {
-      scene = msg.scene,
-      props = msg.props
+      scene = msg.scene
     }
   )
 end)

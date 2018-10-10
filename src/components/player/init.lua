@@ -147,7 +147,8 @@ local function connectAutoSave(parent)
         rootState:getId(),
         state,
         {
-          displayName = state.characterName
+          displayName = state.characterName,
+          lastSaved = os.clock()
         }
       )
       lastSavedState = state

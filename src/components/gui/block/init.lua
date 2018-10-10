@@ -6,7 +6,8 @@ local Block = {
   debug = false,
   group = Component.groups.gui,
   background = nil, -- background color of tooltip (includes padding)
-  padding = 0 -- padding around tooltip content
+  padding = 0, -- padding around tooltip content
+  textOutline = false
 }
 
 Block.Row = Row
@@ -34,9 +35,9 @@ function Block.draw(self)
     love.graphics.rectangle('fill', self.x, self.y, self.width + (self.padding * 2), self.height + (self.padding * 2))
   end
 
-  layout(self.rows, self.x + self.padding, self.y + self.padding, function(col)
-    local xPos = col.position.x
-    local yPos = col.position.y
+  layout(self.rows, self.x + self.padding, self.y + self.padding, function(_, _, col, colPosition)
+    local xPos = colPosition.x
+    local yPos = colPosition.y
     local font = self.fonts[col.font]
     if (not font) then
       font = type(col.font) == 'string' and
@@ -66,7 +67,7 @@ function Block.draw(self)
     end
 
     local textXOffset = col.align == 'left' and col.padding or 0
-    local textX, textY = col.position.x + textXOffset - borderOffset, col.position.y + col.padding - borderOffset
+    local textX, textY = xPos + textXOffset - borderOffset, yPos + col.padding - borderOffset
     if self.debug then
       love.graphics.setColor(1,1,0,1)
       love.graphics.rectangle('line', textX, textY, col.contentWidth, col.contentHeight)
@@ -74,10 +75,20 @@ function Block.draw(self)
     textLayer:addf(col.content, col.contentWidth, col.align, textX, textY)
   end)
 
+
+  local pixelOutlineShader = require 'modules.shaders.pixel-text-outline'
+  if self.textOutline then
+    pixelOutlineShader.attach()
+  end
+
   love.graphics.setColor(1,1,1)
   for _,textLayer in pairs(self.textLayers) do
     love.graphics.draw(textLayer)
     textLayer:clear()
+  end
+
+  if self.textOutline then
+    pixelOutlineShader.detach()
   end
 end
 

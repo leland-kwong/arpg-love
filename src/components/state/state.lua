@@ -19,11 +19,12 @@ local uid = require 'utils.uid'
 local config = require('config.config')
 local sc = require("components.state.constants")
 local baseStatModifiers = require("components.state.base-stat-modifiers")
+local objectUtils = require 'utils.object-utils'
 
 local EMPTY_SLOT = sc.inventory.EMPTY_SLOT
 
 -- NOTE: This state is immutable, so we should keep the structure as flat as possible to avoid deep updates
-local function defaultState(stateId, characterName)
+local function defaultState()
 	return {
 		__stateId = stateId,
 		characterName = characterName,
@@ -57,18 +58,15 @@ local function defaultState(stateId, characterName)
 	}
 end
 
-local function createStore(initialState, options)
-	options = options or {}
-	return Stateful:new(
-		(
-			initialState or
+local function createStore(initialState)
+	assert(type(initialState) == 'table', 'invalid initialState')
 
-			defaultState(
-				options.id or 'game-'..uid(),
-				options.characterName or ''
-			)
-		),
-		options
+	-- set a state id if one doesn't exist
+	initialState.__stateId = initialState.__stateId or 'game-'..uid()
+
+	local baseState = defaultState()
+	return Stateful:new(
+		objectUtils.assign(baseState, initialState)
 	)
 end
 

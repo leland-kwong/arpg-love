@@ -156,8 +156,9 @@ return itemSystem.registerModule({
 		return {
 			type = 'upgrade',
 			data = {
+				title = 'shockwave',
 				description = {
-					template = 'Release a shockwave, dealing {minDamage} - {maxDamage} in a line',
+					template = 'deals {minDamage} - {maxDamage} damage in a line',
 					data = props
 				}
 			}
