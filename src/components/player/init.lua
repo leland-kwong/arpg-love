@@ -143,6 +143,7 @@ local function connectAutoSave(parent)
     local hasChanged = state ~= lastSavedState
     if hasChanged then
       fileSystem.saveFile(
+        'saved-states',
         rootState:getId(),
         state,
         {
