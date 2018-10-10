@@ -43,6 +43,7 @@ function NpcInfo.init(self)
       return percentage
     end
   }):setDisabled(true)
+  Component.addToGroup(self.statusBar:getId(), 'gameWorld', self.statusBar)
 end
 
 function NpcInfo.update(self, dt)
