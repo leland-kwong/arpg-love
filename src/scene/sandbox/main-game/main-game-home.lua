@@ -152,9 +152,6 @@ function MainGameHomeScene.init(self)
         value = function()
           local CreateStore = require 'components.state.state'
           local loadedState = fileSystem.loadSaveFile('saved-states', fileData.id)
-          -- FIXME: we currently update the store after creating it since some parts of the game
-          -- check if there was a state change to trigger events at load time. If we create the store
-          -- with the loaded state, then the previous state and new state will be the same.
           msgBus.send(
             msgBus.NEW_GAME,
             {
