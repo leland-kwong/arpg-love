@@ -6,19 +6,30 @@ local base = {
 
 local valueTypeHandlers = {
 	percent = function(v)
-		return v..'%'
+		return (v * 100)..'%'
+	end,
+	time = function(v)
+		return v..'s'
 	end
 }
 
+local function passThrough(v)
+	return v
+end
+
 return setmetatable({
-	propTypesDisplayValue = {
-		default = function(v)
-			return v
-		end,
+	propTypesDisplayValue = setmetatable({
+		attackTime = valueTypeHandlers.time,
+		cooldown = valueTypeHandlers.time,
+		attackTimeReduction = valueTypeHandlers.percent,
 		percentDamage = valueTypeHandlers.percent,
 		energyCostReduction = valueTypeHandlers.percent,
 		cooldownReduction = valueTypeHandlers.percent,
-	}
+	}, {
+		__index = function()
+			return passThrough
+		end
+	})
 }, {
 	__call = function()
 		return {

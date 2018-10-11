@@ -43,9 +43,11 @@ function PlayerStatsPanel.draw(self)
   local statNames = {}
   local statValues = {}
   local camelCaseHumanized = require 'utils.camel-case-humanized'
+  local modifierPropTypeDisplayMapper = require 'components.state.base-stat-modifiers'.propTypesDisplayValue
   for stat,val in pairs(rootStore:get().statModifiers) do
     local statType = camelCaseHumanized(stat)..':\n'
-    local statValue = (val or 0)..'\n'
+    local displayValueMapper = modifierPropTypeDisplayMapper[stat]
+    local statValue = displayValueMapper(val or 0)..'\n'
     local statValueColor = val > 0 and Color.LIME or Color.WHITE
     table.insert(statNames, Color.WHITE)
     table.insert(statNames, statType)

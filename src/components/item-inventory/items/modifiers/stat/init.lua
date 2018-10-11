@@ -34,7 +34,7 @@ return function(props)
   for prop,value in pairs(props) do
     local isRange = type(value) == 'table'
     if isRange then
-      props[prop] = fancyRandom(value[1], value[2])
+      props[prop] = fancyRandom(value[1], value[2], 2)
     end
   end
   return module(props)

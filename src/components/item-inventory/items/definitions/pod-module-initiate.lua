@@ -13,7 +13,7 @@ return {
 		baseModifiers = {
 			cooldown = {0.1, 0.1},
 			attackTime = {0.1, 0.1},
-			weaponDamage = {1, 1},
+			weaponDamage = {2, 2},
 			energyCost = {1, 1}
 		},
 

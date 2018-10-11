@@ -33,18 +33,20 @@ return function(baseItemPool)
     )
   )
 
+  -- generates random stats
   local baseStatModifiers = require 'components.state.base-stat-modifiers'
-  local baseMods = baseStatModifiers()
+  local modRanges = require 'components.item-inventory.modifier-definitions'
   local randomStat = setupChanceFunctions(
     f.map(
-      f.keys(baseMods),
+      f.keys(modRanges),
       function(modName)
         return {
           chance = 1,
           __call = function()
+            local range = modRanges[modName].range
             return {
               modifier = modName,
-              range = {1, 10}
+              range = {range.x, range.y}
             }
           end
         }

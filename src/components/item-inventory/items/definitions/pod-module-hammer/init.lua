@@ -8,7 +8,8 @@ return {
 	blueprint = {
 		baseModifiers = {
 			attackTime = {0.3, 0.3},
-			weaponDamage = {2, 2},
+			cooldown = {0.1, 0.1},
+			weaponDamage = {4, 4},
 			energyCost = {2, 2},
 		},
 

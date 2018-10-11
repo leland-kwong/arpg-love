@@ -46,14 +46,16 @@ local modifierParsers = {
         table.insert(coloredText, '\n')
       end
 
-      table.insert(coloredText, Color.WHITE)
-      local mapperFn = modifierPropTypeDisplayMapper[k] or modifierPropTypeDisplayMapper.default
-      table.insert(coloredText, mapperFn(v))
-
+      -- stat name
       table.insert(coloredText, colors.statBodyText)
       local camelCaseHumanized = require 'utils.camel-case-humanized'
-      local displayKey = ' '..camelCaseHumanized(k)
+      local displayKey = camelCaseHumanized(k)..': '
       table.insert(coloredText, displayKey)
+
+      -- state value
+      table.insert(coloredText, Color.WHITE)
+      local mapperFn = modifierPropTypeDisplayMapper[k]
+      table.insert(coloredText, mapperFn(v))
       i = i + 1
     end
     return coloredText
@@ -72,7 +74,7 @@ local modifierParsers = {
       end
 
       table.insert(coloredText, Color.WHITE)
-      local mapperFn = modifierPropTypeDisplayMapper[k] or modifierPropTypeDisplayMapper.default
+      local mapperFn = modifierPropTypeDisplayMapper[k]
       table.insert(coloredText, mapperFn(v))
 
       table.insert(coloredText, colors.statBodyText)
