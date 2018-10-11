@@ -147,6 +147,16 @@ local invalidPropsErrorMsg = 'props cannot be a component object'
 
 local uniqueIds = {}
 
+local entityMt = {
+  __index = function(t, k)
+    local firstVal = t.initialProps[k]
+    if firstVal ~= nil then
+      return firstVal
+    end
+    return t.blueprint[k]
+  end
+}
+
 function M.createFactory(blueprint)
   if blueprint.id then
     local isUniqueId = not uniqueIds[blueprint.id]
@@ -159,8 +169,12 @@ function M.createFactory(blueprint)
   end
 
   function blueprint.create(props)
-    assert(type(props) == 'table' or props == nil, 'props must be of type `table` or `nil`')
-    local c = setProp(props or {}, isDebug)
+    props = props or {}
+    assert(type(props) == 'table', 'props must be of type `table` or `nil`')
+    local c = setProp({
+      initialProps = props,
+      blueprint = blueprint
+    }, isDebug)
     assert(
       not c.isComponent,
       invalidPropsErrorMsg
@@ -169,8 +183,7 @@ function M.createFactory(blueprint)
     local id = blueprint.id or (props and props.id) or uid()
     c._id = id
 
-    setmetatable(c, blueprint)
-    blueprint.__index = blueprint
+    setmetatable(c, entityMt)
 
     -- type check
     if isDebug then
@@ -414,7 +427,7 @@ function M.get(id)
 end
 
 function M.getBlueprint(component)
-  return getmetatable(component)
+  return component.blueprint
 end
 
 local NodeFactory = M.createFactory({})

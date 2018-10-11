@@ -63,17 +63,17 @@ component:delete()
 group.updateAll(dt)
 
 assert(#calls.init == 1)
-assert(calls.init[1][1] == props)
+assert(calls.init[1][1].initialProps == props)
 
 assert(#calls.update == 1)
-assert(calls.update[1][1] == props)
+assert(calls.update[1][1].initialProps == props)
 assert(calls.update[1][2] == dt)
 
 assert(#calls.draw == 1)
-assert(calls.draw[1][1] == props)
+assert(calls.draw[1][1].initialProps == props)
 
 assert(#calls.final == 1)
-assert(calls.final[1][1] == props)
+assert(calls.final[1][1].initialProps == props)
 
 Test.suite('recursiveDeleteTest', function()
   -- new test group

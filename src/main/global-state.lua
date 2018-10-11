@@ -1,3 +1,4 @@
+local Component = require 'modules.component'
 local sceneManager = require 'scene.manager'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
@@ -11,13 +12,13 @@ local globalState = {
     serializedState = nil,
     serializeAll = function(self)
       local statesByClass = {}
-      self.serializedState = statesByClass
       local collisionGroups = require 'modules.collision-groups'
       local f = require 'utils.functional'
       local classesToMatch = collisionGroups.create(
         collisionGroups.ai,
         collisionGroups.floorItem,
         collisionGroups.mainMap,
+        collisionGroups.environment,
         'portal'
       )
       local components = f.reduce({
@@ -40,10 +41,16 @@ local globalState = {
           statesByClass[c.class] = list
         end
         table.insert(list, {
-          blueprint = getmetatable(c),
+          blueprint = Component.getBlueprint(c),
           state = c:serialize()
         })
       end
+
+      self.serializedState = setmetatable(statesByClass, {
+        __index = function()
+          return {}
+        end
+      })
     end,
     consumeSnapshot = function(self)
       local serialized = self.serializedState

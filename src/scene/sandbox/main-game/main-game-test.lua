@@ -41,35 +41,13 @@ function MainGameTest.init(self)
   InventoryController(rootStore)
   insertTestItems(rootStore)
 
-  -- TreasureChest.create({
-  --   x = 10 * config.gridSize,
-  --   y = 5 * config.gridSize
-  -- }):setParent(self)
-
-  local function randomTreasurePosition()
-    local mapGrid = Component.get('MAIN_SCENE').mapGrid
-    local rows, cols = #mapGrid, #mapGrid[1]
-    return math.random(10, cols) * config.gridSize,
-      math.random(10, rows) * config.gridSize
-  end
-
-  -- local chestCount = 3
-  -- for i=1, chestCount do
-  --   local x, y = randomTreasurePosition()
-  --   TreasureChest.create({
-  --     x = x,
-  --     y = y
-  --   }):setParent(self)
+  -- local function dungeonTest(sceneRef)
+  --   if getmetatable(sceneRef) == SceneMain then
+  --     Component.addToGroup(sceneRef, 'dungeonTest')
+  --     return msgBus.CLEANUP
+  --   end
   -- end
-
-  local function dungeonTest(sceneRef)
-    if getmetatable(sceneRef) == SceneMain then
-      local dungeonTestSystem = require 'components.groups.dungeon-test'.system
-      Component.addToGroup(sceneRef, dungeonTestSystem)
-    end
-  end
-  msgBus.on(msgBus.SCENE_STACK_PUSH, dungeonTest, 2)
-  msgBus.on(msgBus.SCENE_STACK_REPLACE, dungeonTest, 2)
+  -- msgBus.on(msgBus.SCENE_STACK_PUSH, dungeonTest, 11)
 end
 
 return Component.createFactory(MainGameTest)

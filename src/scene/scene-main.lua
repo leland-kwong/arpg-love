@@ -298,6 +298,7 @@ function MainScene.init(self)
   }):setParent(parent)
 
   if serializedState then
+    -- rebuild loot from previous state
     for i=1, #(serializedState.floorItem or {}) do
       local item = serializedState.floorItem[i]
       item.blueprint.create(item.state):setParent(self)
@@ -308,8 +309,15 @@ function MainScene.init(self)
       local item = serializedState.ai[i]
       item.blueprint.create(item.state):setParent(self)
     end
+
+    -- rebuild treasure environment objects from previous state
+    for i=1, #(serializedState.environment) do
+      local item = serializedState.environment[i]
+      item.blueprint.create(item.state):setParent(self)
+    end
   else
     generateAi(parent, player, mapGrid)
+    Component.addToGroup(self:getId(), 'dungeonTest', self)
   end
 end
 
