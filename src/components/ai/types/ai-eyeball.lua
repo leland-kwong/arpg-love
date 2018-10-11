@@ -24,8 +24,8 @@ end
 -- deals damage with a chance to slow
 local FrostShot = {
   range = 10,
-  attackTime = 0.2,
-  cooldown = 0.6
+  attackTime = 0.3,
+  cooldown = 0.8
 }
 
 function FrostShot.use(self, _, targetX, targetY)

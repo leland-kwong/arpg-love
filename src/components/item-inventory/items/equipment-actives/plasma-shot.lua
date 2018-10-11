@@ -21,7 +21,6 @@ return itemSystem.registerModule({
     return {
 			blueprint = require 'components.abilities.bullet',
 			props = {
-				weaponDamageScaling = item.baseModifiers.weaponDamageScaling,
 				minDamage = props.minDamage,
 				maxDamage = props.maxDamage,
 				color = bulletColor,

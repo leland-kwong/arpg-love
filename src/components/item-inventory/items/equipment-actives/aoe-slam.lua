@@ -77,7 +77,6 @@ end
 local Attack = Component.createFactory(
 	AbilityBase({
 		group = groups.all,
-		weaponDamageScaling = 2,
 		w = 40,
 		h = 40,
 		impactAnimationDuration = 0.4,

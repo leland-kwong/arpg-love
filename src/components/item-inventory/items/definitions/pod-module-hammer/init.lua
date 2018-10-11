@@ -29,7 +29,7 @@ return {
 			}),
 			require(require('alias').path.items..'.modifiers.regeneration')(function()
 				return {
-					rate = 10,
+					rate = 2,
 					property = 'health',
 					maxProperty = 'maxHealth'
 				}

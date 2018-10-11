@@ -15,7 +15,6 @@ local baseClass = {
   y2 = 0,
   minDamage = 1,
   maxDamage = 2,
-  weaponDamageScaling = 1,
   lifeTime = 2,
   speed = 250,
   cooldown = 0.1,

@@ -109,7 +109,6 @@ local Fireball = {
   maxLifeTime = 2,
   speed = 400,
   startOffset = 0,
-  weaponDamageScaling = 1.2,
   cooldown = 0.15,
   animation = { 'fireball' },
 

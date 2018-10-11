@@ -48,7 +48,6 @@ end
 local Fissure = Component.createFactory(
 	AbilityBase({
 		group = groups.all,
-		weaponDamageScaling = 1.3,
 		width = 10,
 		speed = 250,
 		lifeTime = 0,

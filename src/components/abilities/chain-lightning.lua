@@ -48,7 +48,6 @@ local ChainLightning = {
   y2 = 0,
   minDamage = 1,
   maxDamage = 2,
-  weaponDamageScaling = 1,
   startOffset = 0,
   scale = 1,
   lifeTime = 5,
