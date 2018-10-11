@@ -295,11 +295,6 @@ local Player = {
 
       msgBus.on(msgBus.ITEM_PICKUP, function(msg)
         local item = msg
-        if (not item.x) then
-          print(
-            require 'utils.inspect'(item)
-          )
-        end
         local calcDist = require'utils.math'.dist
         local dist = calcDist(self.x, self.y, item.x, item.y)
         local outOfRange = dist > self.pickupRadius
@@ -307,7 +302,7 @@ local Player = {
         local gridX2, gridY2 = Position.pixelsToGridUnits(item.x, item.y, config.gridSize)
         local canWalkToItem = self.mapGrid and
           LineOfSight(self.mapGrid, Map.WALKABLE)(gridX1, gridY1, gridX2, gridY2) or
-          true
+          (not self.mapGrid and true)
         if canWalkToItem and (not outOfRange) then
           msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, true)
           item:pickup()
