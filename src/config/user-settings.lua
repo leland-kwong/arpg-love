@@ -33,4 +33,8 @@ M.camera = {
   speed = 0.4, -- lerp duration (larger value means slower movement)
 }
 
+M.sound = {
+  musicEnabled = false
+}
+
 return M

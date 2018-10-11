@@ -55,6 +55,10 @@ local Sound = {
       }
     })
   },
+  music = {
+    homeScreen = love.audio.newSource('built/music/Spartan_Secrets.mp3', 'stream'),
+    mainGame = love.audio.newSource('built/music/Infinite_Vortex.mp3', 'stream')
+  }
 }
 
 return Sound
