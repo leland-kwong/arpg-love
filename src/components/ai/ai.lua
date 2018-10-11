@@ -713,10 +713,9 @@ function Ai.serialize(self)
   for i=1, #propsToSave do
     local prop = propsToSave[i]
     local val = self[prop]
-    self.baseProps:set(prop, val)
+    self.initialProps:set(prop, val)
   end
-  return self.baseProps
-    :set('baseProps', objectUtils.assign({}, self.baseProps))
+  return self.initialProps
 end
 
 return Component.createFactory(Ai)

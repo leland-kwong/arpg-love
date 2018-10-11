@@ -77,7 +77,7 @@ local function AiFactory(self)
     local spawnX, spawnY =
       self.x * self.gridSize + math.random(0, self.gridSize) * getRandomDirection(),
       self.y * self.gridSize + math.random(0, self.gridSize) * getRandomDirection()
-    local baseProps = self.rarity(aiPrototype)
+    local props = self.rarity(aiPrototype)
       :set('debug',             self.debug)
       :set('x',                 spawnX)
       :set('y',                 spawnY)
@@ -88,8 +88,7 @@ local function AiFactory(self)
       :set('gridSize',          self.gridSize)
       :set('WALKABLE',          self.WALKABLE)
       :set('showAiPath',        self.showAiPath)
-    baseProps:set('baseProps', immutableApply({}, baseProps))
-    local ai = Ai.create(baseProps):setParent(
+    local ai = Ai.create(props):setParent(
       Component.get('MAIN_SCENE')
     )
     return ai
