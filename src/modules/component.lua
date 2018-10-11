@@ -172,6 +172,7 @@ function M.createFactory(blueprint)
     props = props or {}
     assert(type(props) == 'table', 'props must be of type `table` or `nil`')
     local c = setProp({
+      -- by keeping initial props as its own property, we can keep the input values immutable.
       initialProps = props,
       blueprint = blueprint
     }, isDebug)
