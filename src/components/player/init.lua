@@ -169,6 +169,18 @@ msgBusMainMenu.on(msgBusMainMenu.TOGGLE_MAIN_MENU, function(menuOpened)
   msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, menuOpened)
 end)
 
+msgBus.PLAYER_REVIVE = 'PLAYER_REVIVE'
+msgBus.on(msgBus.PLAYER_REVIVE, function()
+  local rootState = msgBus.send(msgBus.GAME_STATE_GET)
+  rootState
+    :set('health', function(state)
+      return state.maxHealth
+    end)
+    :set('energy', function(state)
+      return state.maxEnergy
+    end)
+end)
+
 local Player = {
   id = 'PLAYER',
   class = collisionGroups.player,
@@ -522,6 +534,16 @@ local function updateHealthAndEnergy(rootStore)
 end
 
 function Player.update(self, dt)
+  local hasPlayerLost = self.rootStore:get().health <= 0
+  if hasPlayerLost then
+    if Component.get('PLAYER_LOSE') then
+      return
+    end
+    local PlayerLose = require 'components.player-lose'
+    PlayerLose.create()
+    return
+  end
+
   self.attackRecoveryTime = self.attackRecoveryTime - dt
   self.equipmentModifiers = self.rootStore:get().statModifiers
   local nextX, nextY, totalMoveSpeed = handleMovement(self, dt)

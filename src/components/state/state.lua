@@ -35,7 +35,7 @@ local function defaultState()
 		enemyKillCount = 0,
 
 		--[[ base player stats ]]
-		health = 200,
+		health = 1,
 		maxHealth = 200,
 		energy = 100,
 		maxEnergy = 100,

@@ -18,11 +18,7 @@ if config.isDebug then
     end,
     __newindex = function(_, eventName, eventType)
       assert(not proxy[eventName], eventName..' is already registered')
-      local alias = type(eventType) == 'table' and proxy[eventType.name]
-      proxy[eventName] = alias or {
-        name = eventName,
-        type = eventType
-      }
+      proxy[eventName] = eventType
     end
   })
 end

@@ -262,7 +262,6 @@ function MainScene.init(self)
 
     msgBus.on(msgBus.PORTAL_ENTER, function()
       local HomeBase = require('scene.home-base')
-      local Vec2 = require 'modules.brinevector'
       msgBus.send(
         msgBus.SCENE_STACK_PUSH, {
           scene = HomeBase
@@ -271,8 +270,11 @@ function MainScene.init(self)
     end)
   }
 
-  local playerStartPos = serializedState and
+  local playerStartPos =
+    serializedState and
+    serializedState.portal and
     serializedState.portal[1].state.position or
+
     {x = 6 * config.gridSize, y = 5 * config.gridSize}
   local player = Player.create({
     x = playerStartPos.x,
