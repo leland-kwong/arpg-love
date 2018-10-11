@@ -131,7 +131,7 @@ local function setupSlotInteractions(
           local itemTypeBlock = {
             content = {
               rarityColor,
-              item.__type
+              itemConfig.categoryTitle[itemDef.category]
             },
             width = tooltipWidth,
             font = font.primary.font,

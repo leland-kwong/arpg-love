@@ -21,6 +21,7 @@ return itemSystem.registerModule({
     return {
 			blueprint = require 'components.abilities.bullet',
 			props = {
+				weaponDamageScaling = item.baseModifiers.weaponDamageScaling,
 				minDamage = props.minDamage,
 				maxDamage = props.maxDamage,
 				color = bulletColor,
@@ -36,7 +37,7 @@ return itemSystem.registerModule({
 	end,
 	tooltip = function(item, props)
 		return {
-			template = 'Shoots a plasma shot dealing {minDamage} - {maxDamage} damage',
+			template = 'Shoots a plasma shot dealing {minDamage} - {maxDamage} damage.',
 			data = props
 		}
 	end

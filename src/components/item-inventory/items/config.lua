@@ -52,7 +52,7 @@ local equipmentCategory = {
 	POD_MODULE = 'POD_MODULE',
 	SHOES = 'SHOES',
 	HELMET = 'HELMET',
-	RELIC = 'RELIC',
+	AUGMENTATION = 'AUGMENTATION',
 }
 config.equipmentCategory = equipmentCategory
 
@@ -67,7 +67,7 @@ config.categoryTitle = {
 	[equipmentCategory.HELMET] = 'helmet',
 	[equipmentCategory.BODY_ARMOR] = 'chest armor',
 	[equipmentCategory.SHOES] = 'shoes',
-	[equipmentCategory.RELIC] = 'relic'
+	[equipmentCategory.AUGMENTATION] = 'augmentation'
 }
 
 config.equipmentCategorySilhouette = {
@@ -76,7 +76,7 @@ config.equipmentCategorySilhouette = {
 	[equipmentCategory.HELMET] = 'helmet_106',
 	[equipmentCategory.BODY_ARMOR] = 'armor_121',
 	[equipmentCategory.SHOES] = 'shoe_1',
-	[equipmentCategory.RELIC] = 'amulet_13'
+	[equipmentCategory.AUGMENTATION] = 'amulet_13'
 }
 
 -- defines what gui node that equipment may be dropped into
@@ -95,7 +95,7 @@ config.equipmentGuiSlotMap = {
 	},
 	{
 		equipmentCategory.SHOES,
-		equipmentCategory.RELIC
+		equipmentCategory.AUGMENTATION
 	},
 	{
 		consumableCategory.CONSUMABLE,

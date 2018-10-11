@@ -87,11 +87,9 @@ local function ActiveEquipmentHandler()
   local function modifyAbility(instance, modifiers)
     local v = instance
     local m = modifiers
-    local totalFlatWeaponDamage = m.weaponDamage
-    local totalWeaponDmg = v.weaponDamageScaling * totalFlatWeaponDamage
     local dmgMultiplier = 1 + m.percentDamage
-    local min = floor((v.minDamage * dmgMultiplier) + m.flatDamage + totalWeaponDmg)
-    local max = floor((v.maxDamage * dmgMultiplier) + m.flatDamage + totalWeaponDmg)
+    local min = floor((v.minDamage * dmgMultiplier) + m.flatDamage)
+    local max = floor((v.maxDamage * dmgMultiplier) + m.flatDamage)
 
     -- update instance properties
     v:set('minDamage', min)

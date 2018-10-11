@@ -50,8 +50,7 @@ return setmetatable({
 	__call = function()
 		return {
 			flatDamage = 0,
-			percentDamage = 0,
-			weaponDamage = 0, -- total weapon damage from items
+			percentDamage = 0, -- total damage increase
 			energyCostReduction = 0, -- multiplier
 			maxHealth = 0,
 			maxEnergy = 0,

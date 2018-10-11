@@ -12,5 +12,11 @@ return {
   },
   armor = {
     range = Vec2(10,100)
+  },
+  maxHealth = {
+    range = Vec2(50, 100)
+  },
+  maxEnergy = {
+    range = Vec2(10, 20)
   }
 }

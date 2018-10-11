@@ -25,9 +25,6 @@ return itemSystem.registerModule({
       },
       source = 'MOCK_SHOES'
     })
-    return {
-      cooldown = buffDuration
-    }
   end,
   tooltip = function(item, props)
     return {
