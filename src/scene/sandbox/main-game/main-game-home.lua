@@ -80,7 +80,7 @@ function NewGameDialogBlueprint.init(self)
   GuiButton.create({
     padding = 8,
     textLayer = textLayer,
-    text = 'start game',
+    text = 'START GAME',
     onClick = function()
       startNewGame()
     end,
@@ -98,7 +98,7 @@ local NewGameDialog = Component.createFactory(NewGameDialogBlueprint)
 
 local function NewGameButton(parent)
   return GuiButton.create({
-    text = 'New Game',
+    text = 'NEW GAME',
     textLayer = parent.guiTextLayer,
     x = parent.menuX,
     y = parent.menuY + 250,
@@ -132,7 +132,7 @@ local function DeleteGameButton(parent, anchorEntity)
       parent.state.menuMode = mode
     end,
     onUpdate = function(self)
-      self.text = parent.state.menuMode == 'DELETE_GAME' and '< Back' or 'Delete game'
+      self.text = parent.state.menuMode == 'DELETE_GAME' and '< BACK' or 'DELETE GAME'
       self.x, self.y = anchorEntity.x + anchorEntity.w + 5, anchorEntity.y
     end
   }):setParent(parent)

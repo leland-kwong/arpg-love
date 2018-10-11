@@ -34,11 +34,11 @@ function love.load()
     :setSize(vw, vh)
     :setScale(scale)
 
-  RootScene.create()
-
   -- console debugging
   local console = Console.create()
   require 'main.listeners'
+
+  RootScene.create()
 end
 
 local characterSystem = msgBus.send(msgBus.PROFILE_FUNC, {
