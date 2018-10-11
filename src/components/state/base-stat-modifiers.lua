@@ -18,6 +18,9 @@ local function passThrough(v)
 end
 
 return setmetatable({
+	--[[
+		TODO: add prop type handlers for transforming values. This way we can easily see how properties are being calculated.
+	]]
 	propTypesDisplayValue = setmetatable({
 		attackTime = valueTypeHandlers.time,
 		cooldown = valueTypeHandlers.time,
@@ -25,6 +28,19 @@ return setmetatable({
 		percentDamage = valueTypeHandlers.percent,
 		energyCostReduction = valueTypeHandlers.percent,
 		cooldownReduction = valueTypeHandlers.percent,
+	}, {
+		__index = function()
+			return passThrough
+		end
+	}),
+
+	propTypesCalculator = setmetatable({
+		cooldownReduction = function(cooldown, reduction)
+			return cooldown - (cooldown * reduction)
+		end,
+		attackTimeReduction = function(attackTime, reduction)
+			return attackTime - (attackTime * reduction)
+		end
 	}, {
 		__index = function()
 			return passThrough

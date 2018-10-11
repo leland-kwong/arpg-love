@@ -73,7 +73,7 @@ Gui.create({
 })
 
 -- sets up interactable gui nodes and renders the contents in each slot
-local defaultSlotBackground = {0,0,0,0.5}
+local defaultSlotBackground = {0.1,0.1,0.1,1}
 local function setupSlotInteractions(
   self, getSlots, margin,
   onItemPickupFromSlot, onItemDropToSlot, onItemActivate,
@@ -300,6 +300,7 @@ local function setupSlotInteractions(
         else
           love.graphics.setColor(defaultSlotBackground)
         end
+        -- slot background
         love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
 
         local itemInSlot = getItem()

@@ -93,7 +93,7 @@ function EquipmentPanel.init(self)
 	setupSlotInteractions(
 		self,
 		getSlots,
-		25,
+		15,
 		onItemPickupFromSlot,
 		onItemDropToSlot,
 		nil,
@@ -104,8 +104,12 @@ end
 function EquipmentPanel.draw(self)
 	local x, y, w, h = self.x, self.y, self.w, self.h
 	guiTextLayers.title:add('Equipment', Color.WHITE, x, self.y - 15)
-	love.graphics.setColor(0.2,0.2,0.2, 0.8)
+
+	love.graphics.setColor(0.2,0.2,0.2, 1)
 	love.graphics.rectangle('fill', x, y, w, h)
+
+	love.graphics.setColor(Color.multiplyAlpha(Color.SKY_BLUE, 0.5))
+  love.graphics.rectangle('line', x, y, w, h)
 end
 
 return Component.createFactory(EquipmentPanel)

@@ -86,7 +86,7 @@ function InventoryBlueprint.init(self)
   local w, h = calcInventorySize(self.slots(), self.slotSize, self.slotMargin)
   local panelMargin = 5
   local statsWidth, statsHeight = 165, h
-  local equipmentWidth, equipmentHeight = 120, h
+  local equipmentWidth, equipmentHeight = 100, h
   self.w = w
   self.h = h
 
@@ -156,8 +156,10 @@ function InventoryBlueprint.draw(self)
   drawTitle(self, self.x, self.y - 15)
 
   -- inventory background
-  love.graphics.setColor(0.2, 0.2, 0.2, 0.8)
+  love.graphics.setColor(0.2, 0.2, 0.2, 1)
   love.graphics.rectangle('fill', self.x, self.y, w, h)
+  love.graphics.setColor(Color.multiplyAlpha(Color.SKY_BLUE, 0.5))
+  love.graphics.rectangle('line', self.x, self.y, w, h)
 end
 
 function InventoryBlueprint.final(self)

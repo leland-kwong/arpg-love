@@ -8,6 +8,7 @@ local config = require 'config.config'
 local setProp = require 'utils.set-prop'
 local extend = require 'utils.object-utils'.extend
 local Vec2 = require 'modules.brinevector'
+local propTypesCalculator = require 'components.state.base-stat-modifiers'.propTypesCalculator
 
 local keyMap = config.userSettings.keyboard
 local mouseInputMap = config.userSettings.mouseInputMap
@@ -42,7 +43,7 @@ local function ActiveConsumableHandler()
       activateFn(activeItem)
       local curState = self.rootStore:get()
       local baseCooldown = activeItem.baseModifiers.cooldown or 0
-      local actualCooldown = baseCooldown - (baseCooldown * curState.statModifiers.cooldownReduction)
+      local actualCooldown = propTypesCalculator.cooldownReduction(baseCooldown, curState.statModifiers.cooldownReduction)
       curCooldown = actualCooldown
       skillCooldown = actualCooldown
       return skill
@@ -148,12 +149,12 @@ local function ActiveEquipmentHandler()
         curState.statModifiers
       )
       local baseCooldown = activeItem.baseModifiers.cooldown or 0
-      local actualCooldown = baseCooldown - (baseCooldown * curState.statModifiers.cooldownReduction)
+      local actualCooldown = propTypesCalculator.cooldownReduction(baseCooldown, curState.statModifiers.cooldownReduction)
       curCooldown = actualCooldown
       skillCooldown = actualCooldown
 
       local attackTime = activeItem.baseModifiers.attackTime or 0
-      local actualAttackTime = attackTime - (attackTime * curState.statModifiers.attackTimeReduction)
+      local actualAttackTime = propTypesCalculator.attackTimeReduction(attackTime, curState.statModifiers.attackTimeReduction)
       playerRef:set('attackRecoveryTime', actualAttackTime)
       msgBus.send(
         msgBus.PLAYER_WEAPON_ATTACK,

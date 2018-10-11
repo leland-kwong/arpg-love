@@ -19,8 +19,10 @@ function PlayerStatsPanel.init(self)
 end
 
 local function drawBackground(self)
-  love.graphics.setColor(0.2, 0.2, 0.2, 0.8)
+  love.graphics.setColor(0.2, 0.2, 0.2, 1)
   love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
+  love.graphics.setColor(Color.multiplyAlpha(Color.SKY_BLUE, 0.5))
+  love.graphics.rectangle('line', self.x, self.y, self.w, self.h)
 end
 
 local function drawCharacterName(self, characterName)
