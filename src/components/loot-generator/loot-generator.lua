@@ -88,11 +88,14 @@ local itemNamesTooltipLayer = Gui.create({
         w = ttWidth,
         h = ttHeight,
         getMousePosition = itemMousePosition,
+        onPointerEnter = function()
+          msgBus.send(msgBus.ITEM_HOVERED, itemParent)
+        end,
+        onPointerLeave = function()
+          msgBus.send(msgBus.ITEM_HOVERED)
+        end,
         onUpdate = function(self)
           tooltip.hovered = self.hovered
-        end,
-        onClick = function()
-          msgBus.send(msgBus.ITEM_PICKUP, itemParent)
         end
       })
     end
@@ -226,22 +229,15 @@ function LootGenerator.init(self)
       self.tween2 = tween.new(0.5, self, endStateX)
     end,
     getMousePosition = itemMousePosition,
-    onPointerEnter = function()
-      msgBus.send(msgBus.ITEM_HOVERED, true)
+    onPointerEnter = function(self)
+      msgBus.send(msgBus.ITEM_HOVERED, self)
     end,
     onPointerLeave = function()
-      msgBus.send(msgBus.ITEM_HOVERED, false)
+      msgBus.send(msgBus.ITEM_HOVERED)
     end,
     pickup = function()
-      if parent.pickupPending then
-        return
-      end
       rootStore:addItemToInventory(item)
       parent:delete(true)
-    end,
-    onClick = function(self)
-      self.selected = true
-      msgBus.send(msgBus.ITEM_PICKUP, self)
     end,
     onUpdate = function(self, dt)
       local boundsThreshold = 32

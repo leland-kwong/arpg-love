@@ -188,6 +188,10 @@ local Player = {
   mapGrid = nil,
 
   init = function(self)
+    local state = {
+      itemHovered = nil
+    }
+
     Component.addToGroup(self, groups.character)
     self.listeners = {
       msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function(msgValue)
@@ -263,8 +267,27 @@ local Player = {
         )
       end),
 
+      msgBus.on(msgBus.ITEM_HOVERED, function(item)
+        state.itemHovered = item
+      end),
+
+      msgBus.on(msgBus.MOUSE_PRESSED, function(msg)
+        local isLeftClick = msg[3] == 1
+        if (isLeftClick and state.itemHovered) then
+          local pickupSuccess = msgBus.send(msgBus.ITEM_PICKUP, state.itemHovered)
+          if pickupSuccess then
+            state.itemHovered = nil
+          end
+        end
+      end),
+
       msgBus.on(msgBus.ITEM_PICKUP, function(msg)
         local item = msg
+        if (not item.x) then
+          print(
+            require 'utils.inspect'(item)
+          )
+        end
         local calcDist = require'utils.math'.dist
         local dist = calcDist(self.x, self.y, item.x, item.y)
         local outOfRange = dist > self.pickupRadius
@@ -274,13 +297,15 @@ local Player = {
           LineOfSight(self.mapGrid, Map.WALKABLE)(gridX1, gridY1, gridX2, gridY2) or
           true
         if canWalkToItem and (not outOfRange) then
-          msgBus.on(msgBus.MOUSE_RELEASED, function()
+          msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, true)
+          item:pickup()
+          msgBus.on(msgBus.MOUSE_CLICKED, function()
             msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
             return msgBus.CLEANUP
           end)
-          msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, true)
-          item:pickup()
+          return true
         end
+        return false
       end)
     }
     connectAutoSave(self)

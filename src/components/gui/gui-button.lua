@@ -5,12 +5,14 @@ local f = require 'utils.functional'
 local extend = require 'utils.object-utils'.extend
 local Color = require 'modules.color'
 
+local hoverColorMultiply = {0.8,0.8,0.8,1}
+
 local Button = extend(Gui, {
   type = Gui.types.BUTTON,
   color = Color.PRIMARY,
-  hoverColor = Color.LIME,
   textColor = Color.WHITE,
   disabled = false,
+  hidden = false,
   disabledStyle = {
     color = Color.LIGHT_GRAY,
     textColor = Color.OFF_WHITE,
@@ -25,18 +27,36 @@ Button.init = f.wrap(function(self)
     Component.getBlueprint(self.textLayer) == GuiText,
     '`textLayer` should be an instance of GuiText'
   )
-  local buttonW = GuiText.getTextSize(self.text, self.textLayer.font)
-  local buttonH = self.textLayer.font:getHeight()
-  self.w, self.h = (self.w or buttonW) + (self.padding * 2), (self.h or buttonH) + (self.padding * 2)
 end, Gui.init)
 
+Button.update = f.wrap(function(self)
+  local buttonW = GuiText.getTextSize(self.text, self.textLayer.font)
+  local buttonH = self.textLayer.font:getHeight()
+  if self.hidden then
+    self.w, self.h = 1, 1
+  else
+    self.w, self.h = buttonW + (self.padding * 2), buttonH + (self.padding * 2)
+  end
+end, Gui.update)
+
 function Button.draw(self)
+  if self.hidden then
+    return
+  end
+
   local w, h = self.w, self.h
   local buttonPadding = self.padding
   local styles = self.disabled and self.disabledStyle or self
-  local btnColor, textColor, hoverColor = styles.color, styles.textColor, styles.hoverColor
+  local btnColor, textColor = styles.color, styles.textColor
   local x, y = self.x, self.y
-  love.graphics.setColor(self.hovered and hoverColor or btnColor)
+  local tx, ty = 0, self.hovered and -2 or 0
+  if self.hovered then
+    love.graphics.push()
+    love.graphics.translate(0, ty)
+  end
+
+  love.graphics.setColor(btnColor)
+
   love.graphics.rectangle(
     'fill',
     x, y,
@@ -47,8 +67,12 @@ function Button.draw(self)
     self.text,
     textColor,
     x + buttonPadding,
-    y + buttonPadding
+    y + buttonPadding + ty
   )
+
+  if self.hovered then
+    love.graphics.pop()
+  end
 end
 
 return Component.createFactory(Button)

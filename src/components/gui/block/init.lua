@@ -1,13 +1,15 @@
 local Component = require 'modules.component'
 local Row = require 'components.gui.block.row'
 local layout = require 'components.gui.block.layout'
+local objectUtils = require 'utils.object-utils'
 
 local Block = {
   debug = false,
   group = Component.groups.gui,
   background = nil, -- background color of tooltip (includes padding)
   padding = 0, -- padding around tooltip content
-  textOutline = false
+  textOutline = false,
+  rows = objectUtils.setReadOnly({})
 }
 
 Block.Row = Row

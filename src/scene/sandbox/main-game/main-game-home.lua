@@ -13,6 +13,12 @@ local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local HomeBase = require 'scene.home-base'
 local config = require 'config.config'
 local tick = require 'utils.tick'
+local Enum = require 'utils.enum'
+
+local menuModes = Enum({
+  'NORMAL',
+  'DELETE_GAME'
+})
 
 local MainGameHomeScene = {
   group = groups.gui,
@@ -91,15 +97,12 @@ end
 local NewGameDialog = Component.createFactory(NewGameDialogBlueprint)
 
 local function NewGameButton(parent)
-  local w, h = GuiText.getTextSize('New Game', parent.guiTextLayer.font)
-  local padding = 10
-  local actualW, actualH = w + padding, h + padding
-  return Gui.create({
+  return GuiButton.create({
+    text = 'New Game',
+    textLayer = parent.guiTextLayer,
     x = parent.menuX,
     y = parent.menuY + 250,
-    w = actualW,
-    h = actualH,
-    type = Gui.types.BUTTON,
+    padding = 5,
     onClick = function(self)
       msgBus.send(
         msgBus.SCENE_STACK_PUSH,
@@ -109,51 +112,57 @@ local function NewGameButton(parent)
       )
       parent:delete(true)
     end,
-    draw = function(self)
-      love.graphics.setColor(Color.PRIMARY)
-      love.graphics.rectangle(
-        'fill',
-        self.x,
-        self.y,
-        self.w,
-        self.h
-      )
-      parent.guiTextLayer:add('New game', Color.WHITE, self.x + padding/2, self.y + padding/2)
+    onUpdate = function(self)
+      self.hidden = parent.state.menuMode == menuModes.DELETE_GAME
     end
   }):setParent(parent)
 end
 
-function MainGameHomeScene.init(self)
-  msgBus.send(msgBus.SET_BACKGROUND_COLOR, Color.DARK_GRAY)
+local function DeleteGameButton(parent, anchorEntity)
+  return GuiButton.create({
+    textLayer = parent.guiTextLayer,
+    x = x,
+    y = y,
+    padding = 5,
+    onClick = function()
+      -- toggle modes
+      local mode = parent.state.menuMode == menuModes.NORMAL and
+        menuModes.DELETE_GAME or
+        menuModes.NORMAL
+      parent.state.menuMode = mode
+    end,
+    onUpdate = function(self)
+      self.text = parent.state.menuMode == 'DELETE_GAME' and '< Back' or 'Delete game'
+      self.x, self.y = anchorEntity.x + anchorEntity.w + 5, anchorEntity.y
+    end
+  }):setParent(parent)
+end
 
-  local parent = self
-  self.guiTextTitleLayer = GuiText.create({
-    font = require 'components.font'.secondaryLarge.font
-  }):setParent(self)
-  self.guiTextLayer = GuiText.create({
-    font = require 'components.font'.secondary.font
-  }):setParent(self)
+local function getMenuOptions(parent)
+  return f.map(fileSystem.listSavedFiles('saved-states'), function(fileData)
+    local meta = fileData.metadata
+    local dateObject = os.date('*t', meta.lastSaved)
+    local extract = require 'utils.object-utils.extract'
+    local month, day, year = extract(dateObject, 'month', 'day', 'year')
+    local saveDateHumanized = month .. '-' .. day .. '-' .. year
+    return {
+      name = {
+        Color.WHITE,
+        meta.displayName..'\n',
 
-  -- saved games list
-  MenuList.create({
-    x = self.menuX,
-    y = self.menuY,
-    width = 125,
-    options = f.map(fileSystem.listSavedFiles('saved-states'), function(fileData)
-      local meta = fileData.metadata
-      local dateObject = os.date('*t', meta.lastSaved)
-      local extract = require 'utils.object-utils.extract'
-      local month, day, year = extract(dateObject, 'month', 'day', 'year')
-      local saveDateHumanized = month .. '-' .. day .. '-' .. year
-      return {
-        name = {
-          Color.WHITE,
-          meta.displayName..'\n',
-
-          Color.LIGHT_GRAY,
-          'last saved: '..saveDateHumanized
-        },
-        value = function()
+        Color.LIGHT_GRAY,
+        'last saved: '..saveDateHumanized
+      },
+      value = function()
+        if parent.state.menuMode == menuModes.DELETE_GAME then
+          fileSystem.deleteFile('saved-states', fileData.id)
+            :next(function()
+              parent.state.needsUpdate = true
+            end, function(err)
+              print('delete error')
+            end)
+        -- load game
+        else
           local CreateStore = require 'components.state.state'
           local loadedState = fileSystem.loadSaveFile('saved-states', fileData.id)
           msgBus.send(
@@ -164,24 +173,74 @@ function MainGameHomeScene.init(self)
             }
           )
           parent:delete(true)
-        end,
-      }
-    end),
+        end
+      end,
+    }
+  end)
+end
+
+function MainGameHomeScene.init(self)
+  self.state = {
+    menuMode = menuModes.NORMAL,
+    needsUpdate = true,
+  }
+
+  msgBus.send(msgBus.SET_BACKGROUND_COLOR, Color.DARK_GRAY)
+
+  local parent = self
+  self.guiTextTitleLayer = GuiText.create({
+    font = require 'components.font'.secondaryLarge.font
+  }):setParent(self)
+  self.guiTextLayer = GuiText.create({
+    font = require 'components.font'.primary.font
+  }):setParent(self)
+
+  -- saved games list
+  self.list = MenuList.create({
+    x = self.menuX,
+    y = self.menuY,
+    width = 125,
+    options = {},
     onSelect = function(name, value)
       value()
     end
   }):setParent(parent)
 
-  NewGameButton(parent)
+  local newGameBtn = NewGameButton(parent)
+  DeleteGameButton(parent, newGameBtn)
 end
 
-function MainGameHomeScene.draw(self)
+function MainGameHomeScene.update(self)
+  if self.state.needsUpdate then
+    self.list.options = getMenuOptions(self)
+  end
+  self.state.needsUpdate = false
+end
+
+local function renderTitle(self)
   self.guiTextTitleLayer:add(
     config.gameTitle,
     Color.SKY_BLUE,
     self.menuX,
     self.menuY - 20
   )
+end
+
+function MainGameHomeScene.draw(self)
+  renderTitle(self)
+
+  if self.state.menuMode == menuModes.DELETE_GAME then
+    self.guiTextLayer:addf(
+      {
+        Color.YELLOW,
+        'click a game to delete it',
+      },
+      300,
+      'left',
+      self.menuX,
+      self.menuY + 235
+    )
+  end
 end
 
 return Component.createFactory(MainGameHomeScene)

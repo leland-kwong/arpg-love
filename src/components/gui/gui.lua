@@ -179,9 +179,7 @@ function Gui.init(self)
       handleScroll(self, msgValue[1], msgValue[2])
     end
 
-    if msgBus.MOUSE_PRESSED == msgType then
-      handleFocusChange(self, self.hovered)
-
+    if msgBus.MOUSE_CLICKED == msgType then
       if self.hovered then
         local isRightClick = msgValue[3] == 2
         self.onClick(self, isRightClick)
@@ -193,8 +191,12 @@ function Gui.init(self)
       end
     end
 
+    if msgBus.MOUSE_PRESSED == msgType then
+      handleFocusChange(self, self.hovered)
+    end
+
     if self.hovered and love.mouse.isDown(1) then
-        self.onPointerDown(self)
+      self.onPointerDown(self)
     end
 
     if self.focused and guiType.TEXT_INPUT == self.type then
@@ -241,13 +243,7 @@ function Gui.update(self, dt)
 
   local mx, my = self.getMousePosition()
   local cacheKey = indexByMouseCoord(mx, my)
-  local items = mouseCollisionsCache:get(cacheKey)
-  local hasChangedPosition = isDifferent(self.x, self.prevX) or isDifferent(self.y, self.prevY)
-  local hasChanges = (not items) or hasChangedPosition
-  if hasChanges then
-    items = collisionWorlds.gui:queryPoint(mx, my, mouseCollisionFilter)
-    mouseCollisionsCache:set(cacheKey, items)
-  end
+  local items = collisionWorlds.gui:queryPoint(mx, my, mouseCollisionFilter)
 
   self.hovered = false
 

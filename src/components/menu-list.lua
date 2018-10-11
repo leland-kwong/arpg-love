@@ -27,67 +27,81 @@ function MenuList.init(self)
   assert(type(self.onSelect) == 'function', 'onSelect method required')
 
   local parent = self
-  local itemFont = font.primary.font
-
-  local onSelect = self.onSelect
-  local menuX = self.x
-  local menuY = self.y
-  local startYOffset = 10
-  local menuWidth = 300
-
-  local rows = f.map(self.options, function(options)
-    local name = options.name
-    local content = type(name) == 'table' and name or {Color.WHITE, name}
-    return GuiBlock.Row({
-      {
-        content = content,
-        width = menuWidth,
-        padding = 10,
-        font = itemFont,
-        fontSize = itemFont:getHeight()
-      }
-    })
-  end)
-  GuiBlock.create({
+  self.guiBlock = GuiBlock.create({
     x = self.x,
     y = self.y + 30,
-    rows = rows,
+    rows = {},
     drawOrder = function()
       return parent:drawOrder() + 1
     end,
     textOutline = true
   }):setParent(self)
+end
 
-  -- menu option gui nodes
-  guiBlockLayout(rows, self.x, self.y + 30, function(row, rowPosition, _, _, rowIndex)
-    local option = self.options[rowIndex]
-    local name = option.name
-    local optionValue = option.value
-    local textW, textH = GuiText.getTextSize(name, itemFont)
-    local lineHeight = 1.8
-    local h = (textH * lineHeight)
-    return Gui.create({
-      x = rowPosition.x,
-      y = rowPosition.y,
-      w = row.width,
-      h = row.height,
-      type = Gui.types.BUTTON,
-      onClick = function(self)
-        onSelect(name, optionValue)
-      end,
-      draw = function(self)
-        if self.hovered then
-          local sidePadding = 5
-          love.graphics.setColor(1,1,0,0.5)
-          local w = self.w + (sidePadding * 2)
-          love.graphics.rectangle('fill', self.x - sidePadding, self.y, w, self.h)
+function MenuList.update(self)
+  if self.prevOptions ~= self.options then
+    local parent = self
+    local itemFont = font.primary.font
+
+    local onSelect = self.onSelect
+    local menuX = self.x
+    local menuY = self.y
+    local startYOffset = 10
+    local menuWidth = 300
+
+    local rows = f.map(self.options, function(options)
+      local name = options.name
+      local content = type(name) == 'table' and name or {Color.WHITE, name}
+      return GuiBlock.Row({
+        {
+          content = content,
+          width = menuWidth,
+          padding = 10,
+          font = itemFont,
+          fontSize = itemFont:getHeight()
+        }
+      })
+    end)
+    self.guiBlock.rows = rows
+
+    f.forEach(self.interactNodes, function(node)
+      node:delete(true)
+    end)
+
+    self.interactNodes = {}
+    -- menu option gui nodes
+    guiBlockLayout(rows, self.x, self.y + 30, function(row, rowPosition, _, _, rowIndex)
+      local option = self.options[rowIndex]
+      local name = option.name
+      local optionValue = option.value
+      local textW, textH = GuiText.getTextSize(name, itemFont)
+      local lineHeight = 1.8
+      local h = (textH * lineHeight)
+      local node = Gui.create({
+        x = rowPosition.x,
+        y = rowPosition.y,
+        w = row.width,
+        h = row.height,
+        type = Gui.types.BUTTON,
+        onClick = function(self)
+          onSelect(name, optionValue)
+        end,
+        draw = function(self)
+          if self.hovered then
+            local sidePadding = 5
+            love.graphics.setColor(1,1,0,0.5)
+            local w = self.w + (sidePadding * 2)
+            love.graphics.rectangle('fill', self.x - sidePadding, self.y, w, self.h)
+          end
+        end,
+        drawOrder = function()
+          return parent:drawOrder() - 1
         end
-      end,
-      drawOrder = function()
-        return parent:drawOrder() - 1
-      end
-    }):setParent(self)
-  end)
+      }):setParent(self)
+      table.insert(self.interactNodes, node)
+    end)
+  end
+  self.prevOptions = self.options
 end
 
 return Component.createFactory(MenuList)

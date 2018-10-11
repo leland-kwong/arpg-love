@@ -77,14 +77,15 @@ function love.mousepressed( x, y, button, istouch, presses )
 end
 
 function love.mousereleased( x, y, button, istouch, presses )
+  local message = { x, y, button, isTouch, presses }
   msgBus.send(
     msgBus.MOUSE_RELEASED,
-    { x, y, button, isTouch, presses }
+    message
   )
 
   local timeBetweenRelease = socket.gettime() - state.mouse.lastPressed.timeStamp
   if timeBetweenRelease <= config.userSettings.mouseClickDelay then
-    msgBus.send(msgBus.MOUSE_CLICKED, state.mouse.lastPressed)
+    msgBus.send(msgBus.MOUSE_CLICKED, message)
   end
 end
 
