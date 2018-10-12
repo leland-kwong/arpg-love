@@ -45,7 +45,7 @@ return itemSystem.registerModule({
         local targetsToIgnore = attack.targetsToIgnore or {}
         targetsToIgnore[currentTarget] = true
 
-        local blueprint = getmetatable(attack)
+        local blueprint = Component.getBlueprint(attack)
         blueprint.create({
           x = attack.x,
           y = attack.y,
