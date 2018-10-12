@@ -8,7 +8,7 @@ return {
   height = 80,
   tilewidth = 16,
   tileheight = 16,
-  nextobjectid = 5,
+  nextobjectid = 40,
   properties = {},
   tilesets = {
     {
@@ -332,7 +332,7 @@ return {
     },
     {
       type = "objectgroup",
-      name = "objects",
+      name = "spawn-points",
       visible = true,
       opacity = 1,
       offsetx = 0,
@@ -341,12 +341,144 @@ return {
       properties = {},
       objects = {
         {
-          id = 1,
+          id = 29,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 243,
+          y = 641,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 30,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 205,
+          y = 109,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 32,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 597,
+          y = 94,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 33,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 58,
+          y = 811,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 34,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 322,
+          y = 1148,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 35,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 814,
+          y = 390,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 36,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 106,
+          y = 320,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 37,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 696,
+          y = 1094,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      name = "unique-enemies",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      draworder = "topdown",
+      properties = {},
+      objects = {
+        {
+          id = 39,
           name = "legendary-1",
           type = "legendaryEnemy",
           shape = "ellipse",
-          x = 96,
-          y = 560,
+          x = 86,
+          y = 552,
           width = 48,
           height = 48,
           rotation = 0,

@@ -102,40 +102,6 @@ local cursorSize = 64
 local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', cursorSize/2, cursorSize/2)
 love.mouse.setCursor(cursor)
 
-local keys = require 'utils.functional'.keys
-local aiTypes = require 'components.ai.types'
-local aiTypesList = keys(aiTypes.types)
-
-local function generateAi(parent, player, mapGrid)
-  local aiCount = 20
-  local generated = 0
-  local grid = mapGrid
-  local rows, cols = #grid, #grid[1]
-  while generated < aiCount do
-    local posX, posY = math.random(10, rows), math.random(10, cols)
-    local isValidPosition = grid[posY][posX] == Map.WALKABLE
-    if isValidPosition then
-      generated = generated + 1
-      SpawnerAi.create({
-        -- debug = true,
-        grid = grid,
-        WALKABLE = Map.WALKABLE,
-        target = function()
-          return Component.get('PLAYER')
-        end,
-        x = posX,
-        y = posY,
-        types = {
-          -- aiTypes.types.SLIME
-          aiTypesList[math.random(1, #aiTypesList)],
-          aiTypesList[math.random(1, #aiTypesList)],
-          aiTypesList[math.random(1, #aiTypesList)]
-        },
-      }):setParent(parent)
-    end
-  end
-end
-
 local function initializeMap()
   local Dungeon = require 'modules.dungeon'
   local Chance = require 'utils.chance'
@@ -316,7 +282,6 @@ function MainScene.init(self)
       item.blueprint.create(item.state):setParent(self)
     end
   else
-    generateAi(parent, player, mapGrid)
     Component.addToGroup(self:getId(), 'dungeonTest', self)
   end
 end

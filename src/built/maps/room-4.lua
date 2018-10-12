@@ -8,13 +8,13 @@ return {
   height = 80,
   tilewidth = 16,
   tileheight = 16,
-  nextobjectid = 1,
+  nextobjectid = 22,
   properties = {},
   tilesets = {
     {
       name = "action rpg",
       firstgid = 1,
-      filename = "../../../assets/action rpg.tsx",
+      filename = "../../../assets/maps/action rpg.tsx",
       tilewidth = 34,
       tileheight = 56,
       spacing = 0,
@@ -30,7 +30,7 @@ return {
       },
       properties = {},
       terrains = {},
-      tilecount = 20,
+      tilecount = 17,
       tiles = {
         {
           id = 0,
@@ -133,24 +133,6 @@ return {
           image = "../../../assets/sprites/custom-art/tiles/treasure-chest.png",
           width = 34,
           height = 28
-        },
-        {
-          id = 23,
-          image = "../../../assets/sprites/custom-art/tiles/environment-breakable-1.png",
-          width = 15,
-          height = 19
-        },
-        {
-          id = 24,
-          image = "../../../assets/sprites/custom-art/tiles/environment-breakable-2.png",
-          width = 15,
-          height = 19
-        },
-        {
-          id = 25,
-          image = "../../../assets/sprites/custom-art/tiles/environment-breakable-3.png",
-          width = 15,
-          height = 19
         }
       }
     }
@@ -346,6 +328,168 @@ return {
         12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12,
         12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12,
         12, 12, 12, 12, 0, 0, 0, 0, 0, 0, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 0, 0, 0, 0, 0, 0, 12, 12, 12, 12
+      }
+    },
+    {
+      type = "objectgroup",
+      name = "spawn-points",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      draworder = "topdown",
+      properties = {},
+      objects = {
+        {
+          id = 12,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 355,
+          y = 779,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 13,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 309,
+          y = 161,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 14,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 589,
+          y = 143,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 15,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 419,
+          y = 548,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 16,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 99,
+          y = 929,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 17,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 731,
+          y = 766,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 18,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 792,
+          y = 472,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 19,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 182,
+          y = 334,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 20,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 536,
+          y = 1014,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 21,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 62,
+          y = 528,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        }
       }
     }
   }

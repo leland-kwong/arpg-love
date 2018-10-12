@@ -8,7 +8,7 @@ return {
   height = 80,
   tilewidth = 16,
   tileheight = 16,
-  nextobjectid = 1,
+  nextobjectid = 12,
   properties = {},
   tilesets = {
     {
@@ -138,10 +138,10 @@ return {
     },
     {
       name = "home-base",
-      firstgid = 26,
+      firstgid = 24,
       filename = "../../../assets/maps/home-base.tsx",
       tilewidth = 960,
-      tileheight = 540,
+      tileheight = 800,
       spacing = 0,
       margin = 0,
       tileoffset = {
@@ -159,15 +159,15 @@ return {
       tiles = {
         {
           id = 0,
-          image = "../../../assets/sprites/custom-art/mothership.png",
+          image = "../../../assets/sprites/custom-art/mothership/mothership.png",
           width = 960,
-          height = 540
+          height = 800
         },
         {
           id = 1,
-          image = "../../../assets/sprites/custom-art/fireball.png",
-          width = 26,
-          height = 18
+          image = "../../../assets/sprites/custom-art/mothership/mothership-room-border.png",
+          width = 960,
+          height = 800
         }
       }
     }
@@ -365,6 +365,138 @@ return {
         12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12,
         12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12,
         12, 12, 12, 12, 0, 0, 0, 0, 0, 0, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 0, 0, 0, 0, 0, 0, 12, 12, 12, 12
+      }
+    },
+    {
+      type = "objectgroup",
+      name = "spawn-points",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      draworder = "topdown",
+      properties = {},
+      objects = {
+        {
+          id = 1,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 280,
+          y = 91,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 5,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 54,
+          y = 345,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 6,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 598,
+          y = 173,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 7,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 262,
+          y = 580,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 8,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 69,
+          y = 835,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 9,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 545,
+          y = 1052,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 10,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 807,
+          y = 536,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 11,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 304,
+          y = 723,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        }
       }
     }
   }

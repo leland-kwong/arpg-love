@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.6" orientation="orthogonal" renderorder="right-down" width="59" height="80" tilewidth="16" tileheight="16" infinite="0" nextobjectid="1">
+<map version="1.0" tiledversion="1.1.6" orientation="orthogonal" renderorder="right-down" width="59" height="80" tilewidth="16" tileheight="16" infinite="0" nextobjectid="12">
  <tileset firstgid="1" source="action rpg.tsx"/>
  <layer name="ground" width="59" height="80">
   <data encoding="csv">
@@ -169,4 +169,65 @@
 12,12,12,12,0,0,0,0,0,0,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,0,0,0,0,0,0,12,12,12,12
 </data>
  </layer>
+ <objectgroup color="#ffff00" name="spawn-points">
+  <object id="2" name="ai-group" type="aiGroup" x="645" y="475" width="53" height="53">
+   <properties>
+    <property name="groupSize" type="int" value="4"/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object id="3" template="ai-group.tx" x="309" y="81">
+   <properties>
+    <property name="groupSize" type="int" value="4"/>
+   </properties>
+  </object>
+  <object id="4" name="ai-group" type="aiGroup" x="781" y="228" width="53" height="53">
+   <properties>
+    <property name="groupSize" type="int" value="4"/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object id="5" name="ai-group" type="aiGroup" x="548" y="83" width="53" height="53">
+   <properties>
+    <property name="groupSize" type="int" value="4"/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object id="6" name="ai-group" type="aiGroup" x="231" y="1031" width="53" height="53">
+   <properties>
+    <property name="groupSize" type="int" value="4"/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object id="7" name="ai-group" type="aiGroup" x="405" y="1114" width="53" height="53">
+   <properties>
+    <property name="groupSize" type="int" value="4"/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object id="8" name="ai-group" type="aiGroup" x="645" y="1127" width="53" height="53">
+   <properties>
+    <property name="groupSize" type="int" value="4"/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object id="9" name="ai-group" type="aiGroup" x="104" y="270" width="53" height="53">
+   <properties>
+    <property name="groupSize" type="int" value="4"/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object id="10" name="ai-group" type="aiGroup" x="682" y="802" width="53" height="53">
+   <properties>
+    <property name="groupSize" type="int" value="4"/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object id="11" name="ai-group" type="aiGroup" x="153" y="516" width="53" height="53">
+   <properties>
+    <property name="groupSize" type="int" value="4"/>
+   </properties>
+   <ellipse/>
+  </object>
+ </objectgroup>
 </map>

@@ -40,10 +40,42 @@ local objectParsersByType = {
         aiType
       }
     })
+  end,
+  aiGroup = function(obj, grid, origin, blockData)
+    local config = require 'config.config'
+    local Map = require 'modules.map-generator.index'
+    local SpawnerAi = require 'components.spawn.spawn-ai'
+    local Component = require 'modules.component'
+
+    local aiTypes = require 'components.ai.types'
+    local chance = require 'utils.chance'
+    local AiTypeGen = chance(f.map(f.keys(aiTypes.types), function(k)
+      return {
+        chance = 1,
+        __call = function()
+          return aiTypes.types[k]
+        end
+      }
+    end))
+    local spawnTypes = {}
+    for i=1, obj.properties.groupSize do
+      table.insert(spawnTypes, AiTypeGen())
+    end
+
+    SpawnerAi.create({
+      grid = grid,
+      WALKABLE = Map.WALKABLE,
+      target = function()
+        return Component.get('PLAYER')
+      end,
+      x = origin.x + (obj.x / config.gridSize),
+      y = origin.y + (obj.y / config.gridSize),
+      types = spawnTypes
+    })
   end
 }
 
-local function parseObjectsLayer(grid, gridBlockOrigin, objectsLayer)
+local function parseObjectsLayer(grid, gridBlockOrigin, objectsLayer, blockData)
   if (not objectsLayer) then
     return
   end
@@ -52,7 +84,7 @@ local function parseObjectsLayer(grid, gridBlockOrigin, objectsLayer)
     local obj = objects[i]
     local parser = objectParsersByType[obj.type]
     if parser then
-      parser(obj, grid, gridBlockOrigin)
+      parser(obj, grid, gridBlockOrigin, blockData)
     end
   end
 end
@@ -129,10 +161,20 @@ function Dungeon.new(gridBlockNames)
         return cellTranslations[v] or v
       end
     )
+    local blockData = {
+      name = gridBlockName
+    }
     parseObjectsLayer(
       grid,
       origin,
-      findLayerByName(gridBlock.layers, 'objects')
+      findLayerByName(gridBlock.layers, 'spawn-points'),
+      blockData
+    )
+    parseObjectsLayer(
+      grid,
+      origin,
+      findLayerByName(gridBlock.layers, 'unique-enemies'),
+      blockData
     )
   end
   return grid
