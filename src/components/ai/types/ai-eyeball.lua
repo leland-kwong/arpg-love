@@ -2,6 +2,7 @@ local animationFactory = require 'components.animation-factory'
 local debounce = require 'modules.debounce'
 local tick = require 'utils.tick'
 local collisionGroups = require 'modules.collision-groups'
+local abs = math.abs
 
 local frostShotSoundFilter = {
   type = 'lowpass',
@@ -95,10 +96,10 @@ return function()
     onUpdateStart = function(self, dt)
       self.heightOffset = self.heightOffset + (dt * self.heightChange)
       if self.heightOffset >= 4 then
-        self.heightChange = math.abs(self.heightChange) * -1
+        self.heightChange = abs(self.heightChange) * -1
       end
       if self.heightOffset <= 0 then
-        self.heightChange = math.abs(self.heightChange)
+        self.heightChange = abs(self.heightChange)
       end
       -- update z position for levitation effect
       self:setPosition(
