@@ -451,7 +451,7 @@ function Light:Remove()
 		self.World.Changed = true
 		self.World = nil
 		self.ID = nil
-
+		self:DestroyCanvas()
 		self.Transform:SetParent(nil)
 
 	end
