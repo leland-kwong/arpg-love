@@ -299,10 +299,6 @@ function M.createFactory(blueprint)
     return self._deleted
   end
 
-  function blueprint:isReady()
-    return self._ready
-  end
-
   function blueprint:checkOutOfBounds(threshold)
     threshold = threshold or 0
     local camera = require 'components.camera'
@@ -372,7 +368,7 @@ function M.newGroup(groupDefinition)
   local max = math.max
   function Group.drawAll()
     for id,c in pairs(componentsById) do
-      if c:isReady() and (not c._drawDisabled) then
+      if c._ready and (not c._drawDisabled) then
         local drawFunc = (c.debug == true) and c._drawDebug or c.draw
         drawQueue:add(
           max(c:drawOrder(), 1),
