@@ -50,6 +50,7 @@ local Ai = {
   moveSpeed = 100,
   attackRange = 8, -- distance in grid units from the player that the ai will stop moving
   sightRadius = 11,
+  lightRadius = 100,
   armor = 0,
   flatPhysicalReduction = 0,
   lightningResist = 0,
@@ -489,9 +490,9 @@ Ai.update = perf({
   -- enabled = false,
   done = function(time, totalTime, callCount)
     local avgTime = totalTime / callCount
-    -- if (callCount % 1000) == 0 then
+    if (callCount % 1000) == 0 then
       consoleLog('ai update -', string.format('%0.3f', avgTime))
-    -- end
+    end
   end
 })(Ai.update)
 
@@ -648,13 +649,15 @@ function Ai.init(self)
   Component.addToGroup(self, groups.character)
   self.onDamageTaken = require 'modules.handle-damage-taken'
 
-  local Lights = require 'components.lights'
-  Lights.create({
-    x = self.x,
-    y = self.y,
-    radius = 100,
-    lightWorld = 'DUNGEON_LIGHT_WORLD'
-  }):setParent(self)
+  if self.lightRadius then
+    local Lights = require 'components.lights'
+    Lights.create({
+      x = self.x,
+      y = self.y,
+      radius = self.lightRadius,
+      lightWorld = 'DUNGEON_LIGHT_WORLD'
+    }):setParent(self)
+  end
 
   -- [[ BASE PROPERTIES ]]
   self.health = self.health or self.maxHealth
