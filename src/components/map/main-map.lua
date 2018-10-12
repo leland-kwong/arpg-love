@@ -152,6 +152,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
       oy
     )
     love.graphics.pop()
+    love.graphics.setCanvas()
   end,
 
   renderEnd = function(self)
