@@ -238,7 +238,7 @@ function MainScene.init(self)
 
   local playerStartPos =
     serializedState and
-    serializedState.portal and
+    serializedState.portal[1] and
     serializedState.portal[1].state.position or
 
     {x = 6 * config.gridSize, y = 5 * config.gridSize}
