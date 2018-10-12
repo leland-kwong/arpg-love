@@ -22,6 +22,7 @@ local Lru = require 'utils.lru'
 local setElectricShockShader = require 'modules.shaders.shader-electric-shock'
 local Enum = require 'utils.enum'
 local collisionGroups = require 'modules.collision-groups'
+local max, random, abs = math.max, math.random, math.abs
 
 local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
 local shader = love.graphics.newShader(pixelOutlineShader)
@@ -153,8 +154,6 @@ local function spreadAggroToAllies(self)
     end
   end
 end
-
-local max, random = math.max, math.random
 
 local function handleAggro(self, dt)
   local previouslyAggravated = self.isAggravated
@@ -354,17 +353,11 @@ function Ai.update(self, dt)
   end
 
   handleAggro(self, dt)
-  self:setDrawDisabled(not self.isInViewOfPlayer)
 
   if self.onUpdateStart then
     self.onUpdateStart(self, dt)
   end
 
-  if (self.frameCount % 5 == 0) then
-    local shouldFlipX = math.abs(self.vx) > 0.15
-    self.facingDirectionX = shouldFlipX and (self.vx > 0 and 1 or -1) or self.facingDirectionX
-    self.facingDirectionY = self.vy > 0 and 1 or -1
-  end
 
   local playerRef = Component.get('PLAYER') or Component.get('TEST_PLAYER')
   local flowField = playerRef.flowField
@@ -374,15 +367,36 @@ function Ai.update(self, dt)
   local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
   self.isInViewOfPlayer = gridDistFromPlayer <= 40
 
-  if self:isDeleted() then
-    return
+  local targetX, targetY
+
+  self:setDrawDisabled(not self.isInViewOfPlayer)
+  if (self.isInViewOfPlayer) then
+    -- update ai facing direction
+    if (self.frameCount % 5 == 0) then
+      local shouldFlipX = abs(self.vx) > 0.15
+      self.facingDirectionX = shouldFlipX and (self.vx > 0 and 1 or -1) or self.facingDirectionX
+      self.facingDirectionY = self.vy > 0 and 1 or -1
+    end
+
+    -- handle hit animation
+    if self.hitAnimation then
+      local done = self.hitAnimation()
+      if done then
+        self.hitAnimation = nil
+      end
+    end
+
+    targetX, targetY = self.findNearestTarget(
+      self.x,
+      self.y,
+      40 * self.gridSize
+    )
+
+    self.animation:update(dt / 12)
   end
 
-  if self.hitAnimation then
-    local done = self.hitAnimation()
-    if done then
-      self.hitAnimation = nil
-    end
+  if self:isDeleted() then
+    return
   end
 
   local centerOffset = self.padding
@@ -394,16 +408,6 @@ function Ai.update(self, dt)
   local actualSightRadius = self.isAggravated and
       self:aggravatedRadius() or
       self:getCalculatedStat('sightRadius')
-
-  local targetX, targetY
-  -- only search for the target if its in view of player
-  if self.isInViewOfPlayer then
-    targetX, targetY = self.findNearestTarget(
-      self.x,
-      self.y,
-      40 * self.gridSize
-    )
-  end
 
   local canSeeTarget = self.isInViewOfPlayer and self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY, self.losDebug)
   local isInAggroRange = canSeeTarget and (gridDistFromPlayer <= (actualSightRadius / self.gridSize))
@@ -456,10 +460,6 @@ function Ai.update(self, dt)
     end
   elseif self.targetX and (self:getFiniteState() ~= states.ATTACKING) then
     setNextPosition(self, self:getActualSpeed(dt), 40)
-  end
-
-  if self.isInViewOfPlayer then
-    self.animation:update(dt / 12)
   end
 
   local nextX, nextY = self.x, self.y
