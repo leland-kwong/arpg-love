@@ -11,7 +11,6 @@ local setProp = require 'utils.set-prop'
 local aiTypes = require 'components.ai.types'
 local aiRarity = require 'components.ai.rarity'
 local f = require 'utils.functional'
-local immutableApply = require 'utils.object-utils'.immutableApply
 
 local SpawnerAi = {
   -- debug = true,
