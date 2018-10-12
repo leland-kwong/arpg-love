@@ -22,7 +22,7 @@ local Lru = require 'utils.lru'
 local setElectricShockShader = require 'modules.shaders.shader-electric-shock'
 local Enum = require 'utils.enum'
 local collisionGroups = require 'modules.collision-groups'
-local max, random, abs = math.max, math.random, math.abs
+local max, random, abs, min = math.max, math.random, math.abs, math.min
 
 local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
 local shader = love.graphics.newShader(pixelOutlineShader)
@@ -270,7 +270,6 @@ local function getNeighbors(agent, neighborOffset)
 	)
 end
 
-local min = math.min
 local function setNextPosition(self, speed, radius)
   local finiteState = self:getFiniteState()
   if (finiteState ~= states.MOVING) and (finiteState ~= states.FREE_MOVING) then
@@ -287,7 +286,7 @@ local function setNextPosition(self, speed, radius)
   -- when they can hit the player, for example).
   local targetX, targetY = self.targetX, self.targetY
 	local targetDist = Math.dist(self.x, self.y, targetX, targetY)
-	local targetDistDamping = math.min(1.0, targetDist/radius)
+	local targetDistDamping = min(1.0, targetDist/radius)
 
 	-- Calculate direction influence vectors
 	-- Remember that you're not bound to the classical boids here. You can add influences from all sorts
@@ -315,6 +314,10 @@ local function setNextPosition(self, speed, radius)
 	-- Here I'm effectively lerping the direction just to smooth things out a bit. Completely optional/adjustable
 	self.vx = (self.vx + normVx) * 0.5
 	self.vy = (self.vy + normVy) * 0.5
+
+  -- local Vec2 = require 'modules.brinevector'
+  -- self.vecTotal = self.vecTotal or Vec2(0, 0)
+  -- self.vecTotal.x, self.vecTotal.y = self.vecTotal.x + self.vx, self.vecTotal.y + self.vy
 
   -- Apply direction with speed and our damping based on the target distance
 	self.x = self.x + self.vx * speed * targetDistDamping
@@ -358,11 +361,8 @@ function Ai.update(self, dt)
     self.onUpdateStart(self, dt)
   end
 
-
   local playerRef = Component.get('PLAYER') or Component.get('TEST_PLAYER')
   local flowField = playerRef.flowField
-
-  local playerRef = self.getPlayerRef and self.getPlayerRef() or Component.get('PLAYER')
   local playerX, playerY = playerRef:getPosition()
   local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
   self.isInViewOfPlayer = gridDistFromPlayer <= 40
@@ -370,6 +370,7 @@ function Ai.update(self, dt)
   local targetX, targetY
 
   self:setDrawDisabled(not self.isInViewOfPlayer)
+
   if (self.isInViewOfPlayer) then
     -- update ai facing direction
     if (self.frameCount % 5 == 0) then
@@ -395,20 +396,9 @@ function Ai.update(self, dt)
     self.animation:update(dt / 12)
   end
 
-  if self:isDeleted() then
-    return
-  end
-
-  local centerOffset = self.padding
-  local prevGridX, prevGridY = self.pxToGridUnits(self.prevX or 0, self.prevY or 0, self.gridSize)
-  local gridX, gridY = self.pxToGridUnits(self.x, self.y, self.gridSize)
-  -- we can use this detect whether the agent is stuck if the grid position has remained the same for several frames and was trying to move
-  local isNewGridPosition = prevGridX ~= gridX or prevGridY ~= gridY
-  local isNewFlowField = self.lastFlowField ~= flowField
   local actualSightRadius = self.isAggravated and
-      self:aggravatedRadius() or
-      self:getCalculatedStat('sightRadius')
-
+    self:aggravatedRadius() or
+    self:getCalculatedStat('sightRadius')
   local canSeeTarget = self.isInViewOfPlayer and self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY, self.losDebug)
   local isInAggroRange = canSeeTarget and (gridDistFromPlayer <= (actualSightRadius / self.gridSize))
   local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or 99999
@@ -419,6 +409,7 @@ function Ai.update(self, dt)
 
   if isInAggroRange or self.isAggravated then
     local path
+    local gridX, gridY = self.pxToGridUnits(self.x, self.y, self.gridSize)
     if flowField then
       local distanceToPlanAhead = actualSightRadius / self.gridSize
       path = self.getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
@@ -470,11 +461,11 @@ end
 
 local perf = require'utils.perf'
 Ai.update = perf({
-  enabled = false,
+  -- enabled = false,
   done = function(_, totalTime, callCount)
     local avgTime = totalTime / callCount
-    if (callCount % 100) == 0 then
-      consoleLog('ai update -', avgTime)
+    if (callCount % 1000) == 0 then
+      consoleLog('ai update -', string.format('%0.3f', avgTime))
     end
   end
 })(Ai.update)
