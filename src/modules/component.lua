@@ -39,9 +39,9 @@ local baseProps = {
     self:update(dt)
     local children = self._children
     if children then
-      local hasChangedPosition = self.x ~= self.prevX
-        or self.y ~= self.prevY
-        or self.z ~= self.prevZ
+      local hasChangedPosition = self.x ~= self._prevX
+        or self.y ~= self._prevY
+        or self.z ~= self._prevZ
 
       if hasChangedPosition then
         for _,child in pairs(children) do
@@ -56,9 +56,9 @@ local baseProps = {
           child.prevParentZ = self.z
         end
 
-        self.prevX = self.x
-        self.prevY = self.y
-        self.prevZ = self.z
+        self._prevX = self.x
+        self._prevY = self.y
+        self._prevZ = self.z
       end
     end
   end,

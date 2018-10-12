@@ -315,14 +315,15 @@ local function setNextPosition(self, speed, radius)
 	self.vx = (self.vx + normVx) * 0.5
 	self.vy = (self.vy + normVy) * 0.5
 
-  -- local Vec2 = require 'modules.brinevector'
-  -- self.vecTotal = self.vecTotal or Vec2(0, 0)
-  -- self.vecTotal.x, self.vecTotal.y = self.vecTotal.x + self.vx, self.vecTotal.y + self.vy
-
   -- Apply direction with speed and our damping based on the target distance
 	self.x = self.x + self.vx * speed * targetDistDamping
   self.y = self.y + self.vy * speed * targetDistDamping
   self.collision:update(self.x, self.y)
+
+  local Vec2 = require 'modules.brinevector'
+  self.prevX, self.prevY = self.prevX or 0, self.prevY or 0
+  self.dv = self.dv or Vec2(0, 0)
+  self.dv.x, self.dv.y = self.x - self.prevX, self.y - self.prevY
 end
 
 function Ai.getFiniteState(self)
@@ -346,6 +347,35 @@ function Ai.getActualSpeed(self, dt)
 end
 
 function Ai.update(self, dt)
+  if self:getFiniteState() == states.MOVING and self.dv and (not self.canSeeTarget) then
+    if self.isInAttackRange then
+      self.checkCount = 0
+    end
+
+    self.checkCount = (self.checkCount or 0) + 1
+    if self.checkCount >= 60 then
+      local isStuck = abs(self.dv.x) <= 2 and abs(self.dv.y) <= 2
+      if isStuck then
+        self.targetX = nil
+      end
+      self.checkCount = 0
+      self.dv = self.dv * 0
+    end
+  end
+
+  local playerRef = Component.get('PLAYER') or Component.get('TEST_PLAYER')
+  local playerX, playerY = playerRef:getPosition()
+  local dxFromPlayer, dyFromPlayer = abs(playerX - self.x) / self.gridSize, abs(playerY - self.y) / self.gridSize
+  local config = require 'config.config'
+  local centerXDist, centerYDist = (config.resolution.w / 2 / self.gridSize), (config.resolution.h / 2 / self.gridSize)
+  self.isInViewOfPlayer = (dxFromPlayer <= centerXDist + 2) and (dyFromPlayer <= centerYDist + 2)
+
+  self.prevX, self.prevY = self.x, self.y
+  self:setDrawDisabled(not self.isInViewOfPlayer)
+  if self:getFiniteState() ~= states.MOVING and (not self.isInViewOfPlayer) and (not self.isAggravated) then
+    return
+  end
+
   local grid = self.grid
   self.clock = self.clock + dt
   self.frameCount = self.frameCount + 1
@@ -361,17 +391,11 @@ function Ai.update(self, dt)
     self.onUpdateStart(self, dt)
   end
 
-  local playerRef = Component.get('PLAYER') or Component.get('TEST_PLAYER')
   local flowField = playerRef.flowField
-  local playerX, playerY = playerRef:getPosition()
-  local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
-  self.isInViewOfPlayer = gridDistFromPlayer <= 40
 
   local targetX, targetY
 
-  self:setDrawDisabled(not self.isInViewOfPlayer)
-
-  if (self.isInViewOfPlayer) then
+  if (self.isInViewOfPlayer or self.isAggravated) then
     -- update ai facing direction
     if (self.frameCount % 5 == 0) then
       local shouldFlipX = abs(self.vx) > 0.15
@@ -400,6 +424,7 @@ function Ai.update(self, dt)
     self:aggravatedRadius() or
     self:getCalculatedStat('sightRadius')
   local canSeeTarget = self.isInViewOfPlayer and self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY, self.losDebug)
+  local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
   local isInAggroRange = canSeeTarget and (gridDistFromPlayer <= (actualSightRadius / self.gridSize))
   local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or 99999
   local isInAttackRange = canSeeTarget and (distFromTarget <= self:getCalculatedStat('attackRange'))
@@ -462,11 +487,11 @@ end
 local perf = require'utils.perf'
 Ai.update = perf({
   -- enabled = false,
-  done = function(_, totalTime, callCount)
+  done = function(time, totalTime, callCount)
     local avgTime = totalTime / callCount
-    if (callCount % 1000) == 0 then
+    -- if (callCount % 1000) == 0 then
       consoleLog('ai update -', string.format('%0.3f', avgTime))
-    end
+    -- end
   end
 })(Ai.update)
 
