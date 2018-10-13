@@ -310,7 +310,7 @@ local Player = {
           local pickupSuccess = item:pickup()
           if pickupSuccess then
             msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, true)
-            msgBus.on(msgBus.MOUSE_CLICKED, function()
+            msgBus.on(msgBus.MOUSE_RELEASED, function()
               msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
               return msgBus.CLEANUP
             end)
