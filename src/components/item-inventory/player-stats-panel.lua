@@ -15,7 +15,7 @@ local primaryFont = require'components.font'.primary
 function PlayerStatsPanel.init(self)
   self.guiText = GuiText.create({
     font = primaryFont.font
-  })
+  }):setParent(self)
 end
 
 local function drawBackground(self)
