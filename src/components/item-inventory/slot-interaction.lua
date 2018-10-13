@@ -14,6 +14,12 @@ local boxCenterOffset = Position.boxCenterOffset
 local drawItem = require 'components.item-inventory.draw-item'
 local Lru = require 'utils.lru'
 
+local drawOrders = {
+  GUI_SLOT = 3,
+  GUI_SLOT_ITEM = 4,
+  GUI_SLOT_TOOLTIP = 5
+}
+
 local spriteCache = Lru.new(100)
 -- returns a static sprite for drawing
 local function getSprite(name)
@@ -90,7 +96,7 @@ local function setupSlotInteractions(
     end
 
     local slotSize = self.slotSize
-    Gui.create({
+    local guiSlot = Gui.create({
       x = posX,
       y = posY,
       w = slotSize,
@@ -259,7 +265,7 @@ local function setupSlotInteractions(
             rows = rows,
             padding = blockPadding,
             drawOrder = function()
-              return 4
+              return drawOrders.GUI_SLOT_TOOLTIP
             end
           }):setParent(self)
         end
@@ -292,7 +298,7 @@ local function setupSlotInteractions(
         end
       end,
       drawOrder = function(self)
-        return 3
+        return drawOrders.GUI_SLOT
       end,
       render = function(self)
         if self.hovered then
@@ -320,8 +326,19 @@ local function setupSlotInteractions(
         if slotRenderer then
           slotRenderer(item, self.x, self.y, gridX, gridY, self.w, self.h)
         end
+      end
+    }):setParent(self)
 
-        drawItem(item, self.x, self.y, self.w)
+    Component.create({
+      init = function(self)
+        Component.addToGroup(self:getId(), 'gui', self)
+      end,
+      draw = function()
+        local item = getItem()
+        drawItem(item, guiSlot.x, guiSlot.y, guiSlot.w)
+      end,
+      drawOrder = function()
+        return drawOrders.GUI_SLOT_ITEM
       end
     }):setParent(self)
   end)
