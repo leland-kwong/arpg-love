@@ -1,11 +1,12 @@
-local Component = 'modules.component'
+local Component = require 'modules.component'
 local GuiText = require 'components.gui.gui-text'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local Color = require 'modules.color'
 
 local guiTextLayer = GuiText.create({
-  font = require'components.font'.primary.font,
+  group = Component.groups.system,
+  font = require'components.font'.primaryLarge.font,
   outline = false
 })
 
@@ -63,7 +64,7 @@ return function()
   -- reset
   totalAverageExecutionTime = 0
 
-  guiTextLayer:addf(profileData, 200, 'left', 5, 210)
+  guiTextLayer:addf(profileData, 400, 'left', 10, 380)
   -- reset
   profileData = {}
 end
