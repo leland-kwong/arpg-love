@@ -37,7 +37,6 @@ local states = Enum({
 })
 
 local Ai = {
-  group = groups.all,
   class = collisionGroups.ai,
 
   baseProps = {}, -- initial properties used to create the ai
@@ -85,10 +84,7 @@ local Ai = {
   onInit = noop,
   onFinal = noop,
   onDestroyStart = noop,
-  onUpdateStart = nil,
-  drawOrder = function(self)
-    return self.group:drawOrder(self) + 1
-  end
+  onUpdateStart = nil
 }
 
 -- gets directions from grid position, adjusting vectors to handle wall collisions as needed
