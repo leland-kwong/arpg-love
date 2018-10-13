@@ -208,7 +208,7 @@ function Console.draw(self)
     table.insert(output, Color.WHITE)
     table.insert(output, entry..'\n')
   end
-  guiText:addf(output, 300, 'left', edgeOffset, loggerYPosition + guiText.getTextSize(logSectionTitle, guiText.font))
+  guiText:addf(output, 400, 'left', edgeOffset, loggerYPosition + guiText.getTextSize(logSectionTitle, guiText.font))
 
   gfx.setCanvas()
   gfx.setBlendMode('alpha', 'premultiplied')
