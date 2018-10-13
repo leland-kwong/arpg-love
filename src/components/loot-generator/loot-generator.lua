@@ -236,8 +236,13 @@ function LootGenerator.init(self)
       msgBus.send(msgBus.ITEM_HOVERED)
     end,
     pickup = function()
-      rootStore:addItemToInventory(item)
+      local _, errorMsg = rootStore:addItemToInventory(item)
+      if errorMsg then
+        msgBus.send(msgBus.PLAYER_ACTION_ERROR, errorMsg)
+        return false
+      end
       parent:delete(true)
+      return true
     end,
     onUpdate = function(self, dt)
       local boundsThreshold = 32

@@ -307,13 +307,15 @@ local Player = {
           LineOfSight(self.mapGrid, Map.WALKABLE)(gridX1, gridY1, gridX2, gridY2) or
           (not self.mapGrid and true)
         if canWalkToItem and (not outOfRange) then
-          msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, true)
-          item:pickup()
-          msgBus.on(msgBus.MOUSE_CLICKED, function()
-            msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
-            return msgBus.CLEANUP
-          end)
-          return true
+          local pickupSuccess = item:pickup()
+          if pickupSuccess then
+            msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, true)
+            msgBus.on(msgBus.MOUSE_CLICKED, function()
+              msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
+              return msgBus.CLEANUP
+            end)
+          end
+          return pickupSuccess
         end
         return false
       end)

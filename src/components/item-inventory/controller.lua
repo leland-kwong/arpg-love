@@ -94,10 +94,10 @@ return function(rootStore)
 			-- when a position is full
 			if position then
 				local x,y = unpack(position)
-				print("inventory at position {"..x..", "..y.."} is full")
+				return item, "Inventory position {"..x..", "..y.."} is full"
 				-- when entire inventory is full
 			else
-				print("inventory is full")
+				return item, "Your inventory is full"
 			end
 		end
 
