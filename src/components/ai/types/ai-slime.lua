@@ -104,6 +104,31 @@ function SlimeSlap.update(self, state, dt)
   return skill
 end
 
+local Chance = require 'utils.chance'
+local Color = require 'modules.color'
+local getRandomProps = Chance({
+  -- halloween style
+  {
+    chance = 5,
+    __call = function()
+      return {
+        color = {Color.rgba255(249, 157, 37)},
+        name = 'jack-o-slime-o'
+      }
+    end
+  },
+  {
+    chance = 1,
+    __call = function()
+      return {
+        -- green
+        color = {0,1,0.2,1},
+        name = 'slime'
+      }
+    end
+  }
+})
+
 return function()
   local animations = {
     attacking = animationFactory:new({
@@ -136,11 +161,11 @@ return function()
   }
 
   local attackRange = 3
-  local fillColor = {0,1,0.2,1}
   local spriteWidth, spriteHeight = animations.idle:getSourceSize()
 
+  local randomProps = getRandomProps()
   local dataSheet = {
-    name = 'slime',
+    name = randomProps.name,
     properties = {
       'melee',
       'dashes in when near'
@@ -167,7 +192,7 @@ return function()
     armor = 900,
     experience = 2,
     attackRange = attackRange,
-    fillColor = fillColor,
+    fillColor = randomProps.color,
     onDestroyStart = onDestroyStart
   }
 end
