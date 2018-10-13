@@ -2,7 +2,6 @@ local noop = require("utils.noop")
 local objectUtils = require("utils.object-utils")
 
 local defaultOptions = {
-	onCacheHit = noop,
 	resolver = function(lastArgs, input1, input2, input3, input4)
 		return (input1 ~= lastArgs[1])
 			or (input2 ~= lastArgs[2])
@@ -12,7 +11,7 @@ local defaultOptions = {
 }
 
 -- [table] options
--- [function] options.onCacheHit
+-- [function] options.resolver
 local function memoize(fn, options)
 	options = objectUtils.assign({}, defaultOptions, options)
 
@@ -30,13 +29,10 @@ local function memoize(fn, options)
 	local out3 = nil
 	local out4 = nil
 	local resolver = options.resolver
-	local onCacheHit = options.onCacheHit
 
 	return function(input1, input2, input3, input4)
 		local isNewInputs = resolver(lastArgs, input1, input2, input3, input4)
-		if not isNewInputs then
-			onCacheHit(input1, input2, input3, input4)
-		else
+		if isNewInputs then
 			lastArgs[1] = input1
 			lastArgs[2] = input2
 			lastArgs[3] = input3
