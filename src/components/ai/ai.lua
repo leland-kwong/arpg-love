@@ -84,7 +84,11 @@ local Ai = {
   onInit = noop,
   onFinal = noop,
   onDestroyStart = noop,
-  onUpdateStart = nil
+  onUpdateStart = nil,
+
+  drawOrder = function(self)
+    return Component.groups.all:drawOrder(self) + 1
+  end
 }
 
 -- gets directions from grid position, adjusting vectors to handle wall collisions as needed
@@ -108,13 +112,13 @@ function Ai:aggravatedRadius()
 end
 
 local COLLISION_SLIDE = 'slide'
-local collisionFilters = {
-  player = true,
-  ai = true,
-  obstacle = true
-}
+local collisionFilters = collisionGroups.create(
+  'player',
+  'ai',
+  'obstacle'
+)
 local function collisionFilter(item, other)
-  if collisionFilters[other.group] then
+  if collisionGroups.matches(other.group, collisionFilters) then
     return COLLISION_SLIDE
   end
   return false
