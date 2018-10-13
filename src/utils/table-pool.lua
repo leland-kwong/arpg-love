@@ -1,12 +1,12 @@
 local TablePool = {}
 
-function TablePool.new()
+function TablePool.new(createFn)
   local pool = {}
 
   function pool.get(id)
     local tbl = pool[id]
     if not tbl then
-      tbl = {}
+      tbl = createFn and createFn() or {}
       pool[id] = tbl
     end
     return tbl
