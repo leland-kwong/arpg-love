@@ -8,6 +8,7 @@ local defaultOptions = {
 	maxTime = 99999999999999999,
 	title = '',
 	enabled = true,
+	resetEvery = math.pow(100, 100), -- resets the stats after x calls
 	done = function()
 	end
 }
@@ -30,6 +31,11 @@ local function perf(func, options)
 	local callCount = 0
 	local totalExecutionTime = 0
 	return function(a, b, c, d, e, f, g, h)
+		if (callCount >= options.resetEvery) then
+			callCount = 0
+			totalExecutionTime = 0
+		end
+
 		local ts = getTime()
 
 		local out1, out2, out3 = func(a, b, c, d, e, f, g, h)
