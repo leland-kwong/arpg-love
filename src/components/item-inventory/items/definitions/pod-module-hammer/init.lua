@@ -39,8 +39,8 @@ return {
 		experience = 0,
 		onActivate = require(require('alias').path.items..'.inventory-actives.equip-on-click')(),
 		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.aoe-slam')({
-			minDamage = 5,
-			maxDamage = 8
+			minDamage = 3,
+			maxDamage = 5
 		})
 	},
 

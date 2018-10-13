@@ -11,7 +11,7 @@ return {
 
 	blueprint = {
 		baseModifiers = {
-			cooldown = {0.1, 0.1},
+			cooldown = {0.15, 0.15},
 			attackTime = {0.1, 0.1},
 			energyCost = {1, 1}
 		},

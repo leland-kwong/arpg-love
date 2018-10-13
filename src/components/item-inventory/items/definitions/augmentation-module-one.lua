@@ -5,7 +5,7 @@ return {
 
 	blueprint =  {
 		baseModifiers = {
-			percentDamage = {1, 1}
+			percentDamage = {0.5, 0.5}
 		},
 
 		extraModifiers = {},
