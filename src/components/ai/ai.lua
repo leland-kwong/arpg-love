@@ -214,7 +214,7 @@ local function computeSeparation(self, neighbors)
 		-- add separation vector, reducing strength by distance
 		-- this can be fancier with decay by the square or taking into account weight or whatever
 		local sepX, sepY = Math.normalizeVector(self.x - n.x, self.y - n.y)
-		local dist = math.max(0.01, Math.dist(self.x, self.y, n.x, n.y) - n.w*0.5 - self.w*0.5)
+		local dist = max(0.01, Math.dist(self.x, self.y, n.x, n.y) - n.w*0.5 - self.w*0.5)
 		sx = sx + (sepX/dist)
 		sy = sy + (sepY/dist)
 	end
@@ -251,7 +251,7 @@ local function computeObstacleInfluence(self)
   end
 	-- We'll just use the single nearest obstacle.
 	-- A lot of the time this is enough but more complex environments might need influences from all nearby obstacles
-  dist = math.max(0.01, dist - self.w*0.5)
+  dist = max(0.01, dist - self.w*0.5)
 	local sepX, sepY = Math.normalizeVector(self.x - no.x, self.y - no.y)
 
 	return sepX/dist, sepY/dist
@@ -385,6 +385,7 @@ function Ai.update(self, dt)
   local isIdle = self:getFiniteState() ~= states.MOVING and (not self.isInViewOfPlayer) and (not self.isAggravated)
   if isIdle then
     Component.removeFromGroup(self, 'all')
+    Component.removeFromGroup(self, 'character')
     if self.light then
       self.light:delete()
       self.light = nil
@@ -441,17 +442,18 @@ function Ai.update(self, dt)
     self:getCalculatedStat('sightRadius')
   local canSeeTarget = self.isInViewOfPlayer and self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY, self.losDebug)
   local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
-  local isInAggroRange = canSeeTarget and (gridDistFromPlayer <= (actualSightRadius / self.gridSize))
+  local isInAggroRange = gridDistFromPlayer <= (actualSightRadius / self.gridSize)
   local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or 99999
   local isInAttackRange = canSeeTarget and (distFromTarget <= self:getCalculatedStat('attackRange'))
   local originalX, originalY = self.x, self.y
 
   self.canSeeTarget = canSeeTarget
 
-  if isInAggroRange or self.isAggravated then
+  if canSeeTarget and (isInAggroRange or self.isAggravated) then
     local path
     local gridX, gridY = self.pxToGridUnits(self.x, self.y, self.gridSize)
-    if flowField then
+    local shouldGetNewPath = flowField
+    if shouldGetNewPath then
       local distanceToPlanAhead = actualSightRadius / self.gridSize
       path = self.getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
       if path then
@@ -723,8 +725,8 @@ function Ai.init(self)
   self.sightRadius = self.sightRadius * self.gridSize
   self.getPathWithAstar = Perf({
     enabled = false,
-    done = function(t)
-      consoleLog('ai path:', t)
+    done = function(_, totalTime, callCount)
+      consoleLog('ai path:', totalTime/callCount)
     end
   })(aiPathWithAstar())
 
