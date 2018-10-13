@@ -325,6 +325,7 @@ local function setNextPosition(self, speed, radius)
   self.prevX, self.prevY = self.prevX or 0, self.prevY or 0
   self.dv = self.dv or Vec2(0, 0)
   self.dv.x, self.dv.y = self.x - self.prevX, self.y - self.prevY
+  self.prevX, self.prevY = self.x, self.y
 end
 
 function Ai.getFiniteState(self)
@@ -347,7 +348,21 @@ function Ai.getActualSpeed(self, dt)
   return max(0, self:getCalculatedStat('moveSpeed') * dt)
 end
 
+local function createLight(self)
+  if self.lightRadius then
+    local Lights = require 'components.lights'
+    self.light = self.light or Lights.create({
+      x = self.x,
+      y = self.y,
+      radius = self.lightRadius,
+      lightWorld = 'DUNGEON_LIGHT_WORLD'
+    }):setParent(self)
+  end
+end
+
 function Ai.update(self, dt)
+  createLight(self)
+
   if self:getFiniteState() == states.MOVING and self.dv and (not self.canSeeTarget) then
     if self.isInAttackRange then
       self.checkCount = 0
@@ -366,14 +381,14 @@ function Ai.update(self, dt)
 
   local playerRef = Component.get('PLAYER') or Component.get('TEST_PLAYER')
   local playerX, playerY = playerRef:getPosition()
-  local dxFromPlayer, dyFromPlayer = abs(playerX - self.x) / self.gridSize, abs(playerY - self.y) / self.gridSize
-  local config = require 'config.config'
-  local centerXDist, centerYDist = (config.resolution.w / 2 / self.gridSize), (config.resolution.h / 2 / self.gridSize)
-  self.isInViewOfPlayer = (dxFromPlayer <= centerXDist + 2) and (dyFromPlayer <= centerYDist + 2)
 
-  self.prevX, self.prevY = self.x, self.y
-  self:setDrawDisabled(not self.isInViewOfPlayer)
-  if self:getFiniteState() ~= states.MOVING and (not self.isInViewOfPlayer) and (not self.isAggravated) then
+  local isIdle = self:getFiniteState() ~= states.MOVING and (not self.isInViewOfPlayer) and (not self.isAggravated)
+  if isIdle then
+    Component.removeFromGroup(self, 'all')
+    if self.light then
+      self.light:delete()
+      self.light = nil
+    end
     return
   end
 
@@ -487,7 +502,7 @@ end
 
 local perf = require'utils.perf'
 Ai.update = perf({
-  -- enabled = false,
+  enabled = false,
   done = function(time, totalTime, callCount)
     local avgTime = totalTime / callCount
     if (callCount % 1000) == 0 then
@@ -648,16 +663,6 @@ function Ai.init(self)
 
   Component.addToGroup(self, groups.character)
   self.onDamageTaken = require 'modules.handle-damage-taken'
-
-  if self.lightRadius then
-    local Lights = require 'components.lights'
-    Lights.create({
-      x = self.x,
-      y = self.y,
-      radius = self.lightRadius,
-      lightWorld = 'DUNGEON_LIGHT_WORLD'
-    }):setParent(self)
-  end
 
   -- [[ BASE PROPERTIES ]]
   self.health = self.health or self.maxHealth

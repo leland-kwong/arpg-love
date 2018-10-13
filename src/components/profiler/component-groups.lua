@@ -15,6 +15,7 @@ local totalAverageExecutionTime = 0
 msgBus.PROFILE_FUNC = 'PROFILE_FUNC'
 msgBus.on(msgBus.PROFILE_FUNC, function(profileProps)
   return require 'utils.perf'({
+    resetEvery = 1000,
     done = function(_, totalTime, callCount)
       local averageTime = totalTime / callCount
       totalAverageExecutionTime = totalAverageExecutionTime + averageTime
@@ -30,6 +31,7 @@ end)
 
 local function profileFn(groupName, callback)
   return require'utils.perf'({
+    resetEvery = 1000,
     done = function(_, totalTime, callCount)
       if (not msgBus.send(msgBus.IS_CONSOLE_ENABLED)) then
         return

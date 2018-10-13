@@ -185,7 +185,7 @@ function MainScene.init(self)
   local serializedState = msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:consumeSnapshot()
 
   self.lightWorld = setupLightWorld():setParent(self)
-  msgBus.send(msgBus.SET_BACKGROUND_COLOR, {1,1,1,1})
+  msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0,0,0,1})
 
   local rootState = msgBus.send(msgBus.GAME_STATE_GET)
   self.rootStore = rootState
@@ -248,13 +248,15 @@ function MainScene.init(self)
     mapGrid = mapGrid,
   }):setParent(parent)
 
-  local Lights = require 'components.lights'
-  Lights.create({
-    x = player.x,
-    y = player.y,
-    radius = 400,
-    lightWorld = 'DUNGEON_LIGHT_WORLD'
-  }):setParent(player)
+  if Component.get('DUNGEON_LIGHT_WORLD') then
+    local Lights = require 'components.lights'
+    Lights.create({
+      x = player.x,
+      y = player.y,
+      radius = 400,
+      lightWorld = 'DUNGEON_LIGHT_WORLD'
+    }):setParent(player)
+  end
 
   MainMap.create({
     camera = camera,
@@ -285,6 +287,55 @@ function MainScene.init(self)
     Component.addToGroup(self:getId(), 'dungeonTest', self)
   end
 end
+
+local function aiItemFilter(item)
+  local collisionGroups = require 'modules.collision-groups'
+  return collisionGroups.matches(item.group, collisionGroups.ai)
+end
+
+local floor = math.floor
+local function toggleAiVisibility(self)
+  local collisionWorlds = require 'components.collision-worlds'
+  local camera = require 'components.camera'
+  local threshold = config.gridSize * 2
+  local west, _, north = camera:getBounds()
+  local width, height = camera:getSize()
+  local items, len = collisionWorlds.map:queryRect(
+    west - threshold,
+    north - threshold, width + (threshold * 2),
+    height + (threshold * 2),
+    aiItemFilter
+  )
+  local allChars = Component.groups.character.getAll()
+  local activeEntities = {}
+  for i=1, len do
+    local entity = items[i].parent
+    local entityId = entity:getId()
+    Component.addToGroup(entityId, 'all', entity)
+    entity.isInViewOfPlayer = true
+    activeEntities[entityId] = true
+  end
+  for id,v in pairs(allChars) do
+    if v.class == 'ai' and (not activeEntities[id]) then
+      v.isInViewOfPlayer = false
+    end
+  end
+end
+
+function MainScene.update(self)
+  toggleAiVisibility(self)
+end
+
+local perf = require'utils.perf'
+MainScene.update = perf({
+  enabled = false,
+  done = function(time, totalTime, callCount)
+    local avgTime = totalTime / callCount
+    if (callCount % 100) == 0 then
+      consoleLog('main scene update -', string.format('%0.3f', avgTime))
+    end
+  end
+})(MainScene.update)
 
 function MainScene.final(self)
   msgBus.off(self.listeners)

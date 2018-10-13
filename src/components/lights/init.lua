@@ -9,26 +9,19 @@ local Light = {
   x = 0,
   y = 0,
   lightWorld = 'DUNGEON_LIGHT_WORLD',
+  init = function(self)
+    local LightWorld = Component.get(self.lightWorld)
+    self.light = Light:new(LightWorld.lightWorld, self.radius)
+      :SetColor(255, 255, 255, 255)
+  end,
   update = function(self)
     local camera = require 'components.camera'
     local w, h = camera.w, camera.h
     local scale = config.scale
     local x, y = self.x, self.y
     local hasChangedPosition = x ~= self.prevX or y ~= self.prevY
-    if self:checkOutOfBounds(self.radius) then
-      if self.light then
-        self.light:Remove()
-      end
-      self.light = nil
-    else
-      local LightWorld = Component.get(self.lightWorld)
-      local isNewLight = not self.light
-      self.light = self.light or
-        Light:new(LightWorld.lightWorld, self.radius)
-          :SetColor(255, 255, 255, 255)
-      if isNewLight or hasChangedPosition then
-        self.light:SetPosition(x * scale + w/scale, y * scale + h/scale)
-      end
+    if hasChangedPosition then
+      self.light:SetPosition(x * scale + w/scale, y * scale + h/scale)
     end
     self.prevX, self.prevY = self.x, self.y
   end,
