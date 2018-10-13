@@ -183,6 +183,7 @@ function LootGenerator.init(self)
   local screenX, screenY = self.x, self.y
   local item = self.item
 
+  self:setParent(Component.get('MAIN_SCENE'))
   Component.addToGroup(self, Component.groups.gameWorld)
 
   local animation = AnimationFactory:new({
@@ -300,11 +301,7 @@ function LootGenerator.init(self)
 end
 
 function LootGenerator.serialize(self)
-  local state = {}
-  for k,v in pairs(self) do
-    state[k] = v
-  end
-  return state
+  return self.initialProps
 end
 
 return Component.createFactory(LootGenerator)
