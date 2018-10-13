@@ -23,7 +23,7 @@ end
 local PelletShot = {
   range = 8,
   attackTime = 0.25,
-  cooldown = 0.5
+  cooldown = 0.8
 }
 
 function PelletShot.use(self, _, targetX, targetY)

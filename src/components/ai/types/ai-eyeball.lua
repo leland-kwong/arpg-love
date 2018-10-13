@@ -26,7 +26,7 @@ end
 local FrostShot = {
   range = 10,
   attackTime = 0.3,
-  cooldown = 0.8
+  cooldown = 1
 }
 
 function FrostShot.use(self, _, targetX, targetY)
