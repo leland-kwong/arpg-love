@@ -20,7 +20,7 @@ return {
     range = Vec2(50, 100)
   },
   healthRegeneration = {
-    range = Vec2(3, 6)
+    range = Vec2(1, 3)
   },
   maxEnergy = {
     range = Vec2(10, 20)
