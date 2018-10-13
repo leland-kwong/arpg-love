@@ -306,15 +306,16 @@ local function toggleAiVisibility(self)
     height + (threshold * 2),
     aiItemFilter
   )
-  local allChars = Component.groups.character.getAll()
   local activeEntities = {}
   for i=1, len do
     local entity = items[i].parent
     local entityId = entity:getId()
     Component.addToGroup(entityId, 'all', entity)
+    Component.addToGroup(entityId, 'character', entity)
     entity.isInViewOfPlayer = true
     activeEntities[entityId] = true
   end
+  local allChars = Component.groups.character.getAll()
   for id,v in pairs(allChars) do
     if v.class == 'ai' and (not activeEntities[id]) then
       v.isInViewOfPlayer = false
