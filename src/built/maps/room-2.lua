@@ -8,7 +8,7 @@ return {
   height = 80,
   tilewidth = 16,
   tileheight = 16,
-  nextobjectid = 13,
+  nextobjectid = 15,
   properties = {},
   tilesets = {
     {
@@ -405,8 +405,8 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 560,
-          y = 946,
+          x = 569,
+          y = 931,
           width = 53,
           height = 53,
           rotation = 0,
@@ -450,8 +450,8 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 744,
-          y = 1042,
+          x = 641,
+          y = 1019,
           width = 53,
           height = 53,
           rotation = 0,
@@ -467,6 +467,36 @@ return {
           shape = "ellipse",
           x = 288,
           y = 1158,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 13,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 693,
+          y = 919,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 4
+          }
+        },
+        {
+          id = 14,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 755,
+          y = 1019,
           width = 53,
           height = 53,
           rotation = 0,

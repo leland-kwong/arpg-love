@@ -216,7 +216,7 @@
    </properties>
    <ellipse/>
   </object>
-  <object id="11" name="ai-group" type="aiGroup" x="304" y="723" width="53" height="53">
+  <object id="11" name="ai-group" type="aiGroup" x="340" y="922" width="53" height="53">
    <properties>
     <property name="groupSize" type="int" value="4"/>
    </properties>
