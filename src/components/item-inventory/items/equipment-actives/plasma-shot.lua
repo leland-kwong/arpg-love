@@ -15,8 +15,8 @@ return itemSystem.registerModule({
   name = 'plasma-shot',
   type = itemSystem.moduleTypes.EQUIPMENT_ACTIVE,
   active = function(item, props)
-    love.audio.stop(Sound.PLASMA_SHOT)
-    love.audio.play(Sound.PLASMA_SHOT)
+    local source = love.audio.newSource('built/sounds/plasma-shot.wav', 'static')
+    love.audio.play(source)
     msgBus.send(msgBus.PLAYER_WEAPON_MUZZLE_FLASH, muzzleFlashMessage)
     return {
 			blueprint = require 'components.abilities.bullet',
