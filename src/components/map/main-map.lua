@@ -76,7 +76,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   init = function(self)
     self.collisionObjectsHash = setupCollisionObjects(self, self.grid, self.gridSize)
 
-    local cacheSize = 600
+    local cacheSize = 300
     self.wallObjectsPool = require 'components.map.wall-objects-pool'(self.gridSize, cacheSize)
 
     local function wallTilePruneCallback(key, entity)
