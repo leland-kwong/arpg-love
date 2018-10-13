@@ -4,7 +4,7 @@
         <key>fileFormatVersion</key>
         <int>4</int>
         <key>texturePackerVersion</key>
-        <string>4.8.3</string>
+        <string>4.9.0</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -722,6 +722,19 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/items/augmentations/augmentation-one.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>8,8,16,16</rect>
+                <key>scale9Paddings</key>
+                <rect>8,8,16,16</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/items/weapons/pods/pod-one-0.png</key>
             <key type="filename">custom-art/items/weapons/pods/pod-one-1.png</key>
             <key type="filename">custom-art/items/weapons/pods/pod-one-10.png</key>
@@ -924,6 +937,7 @@
             <filename>custom-art/items/weapons/weapon-modules</filename>
             <filename>custom-art/effects</filename>
             <filename>custom-art/characters/ai-legendaries</filename>
+            <filename>custom-art/items/augmentations</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

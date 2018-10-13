@@ -14,7 +14,7 @@ return {
 	},
 
 	properties = {
-		sprite = "amulet_10",
+		sprite = "augmentation-one",
 		title = 'Augmentation One',
 		baseDropChance = 1,
 		category = itemConfig.category.AUGMENTATION,

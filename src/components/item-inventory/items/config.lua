@@ -76,7 +76,7 @@ config.equipmentCategorySilhouette = {
 	[equipmentCategory.HELMET] = 'helmet_106',
 	[equipmentCategory.BODY_ARMOR] = 'armor_121',
 	[equipmentCategory.SHOES] = 'shoe_1',
-	[equipmentCategory.AUGMENTATION] = 'amulet_13'
+	[equipmentCategory.AUGMENTATION] = 'augmentation-one'
 }
 
 -- defines what gui node that equipment may be dropped into

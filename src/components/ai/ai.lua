@@ -572,10 +572,16 @@ function drawSprite(self, ox, oy)
 end
 
 local textureW, textureH = animationFactory.atlas:getDimensions()
-local shockResolution = {
-  1 * 10,
-  (textureH/textureW) * 10
-}
+local shockResMult = 10
+local shockResolution = textureH > textureW
+  and {
+    (textureW/textureH) * shockResMult,
+    1 * shockResMult,
+  }
+  or {
+    1 * shockResMult,
+    (textureH/textureW) * shockResMult,
+  }
 
 local function drawShockEffect(self, ox, oy)
   setElectricShockShader(
