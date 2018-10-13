@@ -118,10 +118,12 @@ function M.addToGroup(id, group, data)
   end
 
   local name = getGroupName(group)
-  if (not M.entitiesById[id]) then
-    M.entitiesById[id] = {}
+  local entity = M.entitiesById[id]
+  if (not entity) then
+    entity = {}
+    M.entitiesById[id] = entity
   end
-  M.entitiesById[id][name] = data or EMPTY
+  entity[name] = data or EMPTY
   M.groups[name].addComponent(id, data)
   return M
 end
@@ -247,7 +249,7 @@ function M.createFactory(blueprint)
 
     if (not parent) then
       self.parent = nil
-      return
+      return self
     end
 
     --[[
@@ -270,24 +272,7 @@ function M.createFactory(blueprint)
     if self._deleted then
       return
     end
-
-    local children = self._children
-    if (recursive and children) then
-      for _,child in pairs(children) do
-        child:delete(true)
-      end
-      self._children = nil
-    end
-
-    cleanupCollisionObjects(self)
-    self._deleted = true
-    self:final()
-
-    -- remove from associated group
-    local ownGroups = M.entitiesById[self:getId()] or EMPTY
-    for group in pairs(ownGroups) do
-      M.removeFromGroup(self, group)
-    end
+    M.remove(self:getId(), recursive)
     return self
   end
 
@@ -387,6 +372,10 @@ function M.newGroup(groupDefinition)
   end
 
   function Group.addComponent(id, data)
+    if Group.hasComponent(id) then
+      return
+    end
+
     count = count + 1
     allComponentsById[id] = data
     componentsById[id] = data
@@ -396,16 +385,25 @@ function M.newGroup(groupDefinition)
   end
 
   function Group.removeComponent(id)
+    if (not Group.hasComponent(id)) then
+      return
+    end
+
     count = count - 1
     componentsById[id] = nil
     local component = M.entitiesById[id][Group.name]
-    -- remove global reference
-    if component._deleted then
-      allComponentsById[id] = nil
-    end
     if Group.onComponentLeave then
       Group:onComponentLeave(component)
     end
+    -- remove global reference
+    M.entitiesById[id][Group.name] = nil
+    if component._deleted then
+      allComponentsById[id] = nil
+    end
+  end
+
+  function Group.hasComponent(id)
+    return not not componentsById[id]
   end
 
   function Group.getAll()
@@ -425,6 +423,31 @@ end
 
 function M.getBlueprint(component)
   return component.blueprint
+end
+
+function M.remove(entityId, recursive)
+  -- this is for legacy reasons when our entites weren't just plain tables
+  local entityAsComponent = allComponentsById[entityId]
+  if entityAsComponent then
+    local eAsC = entityAsComponent
+    local children = eAsC._children
+    if (recursive and children) then
+      for _,child in pairs(children) do
+        child:delete(true)
+      end
+      eAsC._children = nil
+    end
+
+    cleanupCollisionObjects(eAsC)
+    eAsC._deleted = true
+    eAsC:final()
+  end
+
+  local ownGroups = M.entitiesById[entityId] or EMPTY
+  for group in pairs(ownGroups) do
+    M.removeFromGroup(entityId, group)
+  end
+  M.entitiesById[entityId] = nil
 end
 
 local NodeFactory = M.createFactory({})
