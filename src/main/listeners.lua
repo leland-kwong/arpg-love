@@ -30,6 +30,7 @@ local function playBackgroundMusic(sceneBlueprint)
     love.audio.stop(currentBgMusic)
   end
   local function playSong()
+    love.audio.stop(bgMusic)
     love.audio.play(bgMusic)
   end
   local duration = bgMusic:getDuration('seconds')
