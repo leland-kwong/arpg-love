@@ -20,6 +20,32 @@ local function setupTileTypes(types)
   return list
 end
 
+local backgroundTypes = {
+  starField = function()
+    local StarField = require 'components.star-field'
+    local Color = require 'modules.color'
+    local starField = StarField.create({
+      particleBaseColor = {Color.rgba255(244, 66, 217)},
+      updateRate = 8,
+      direction = 0,
+      emissionRate = 4000,
+      speed = {0}
+    }):setParent(Component.get('MAIN_SCENE'))
+    msgBus.on(msgBus.UPDATE, function()
+      if starField:isDeleted() then
+        return msgBus.CLEANUP
+      end
+      local camera = require 'components.camera'
+      local x, y = camera:getPosition()
+      starField:setPosition(
+        x * 0.5,
+        y * 0.5
+      )
+    end)
+    return starField
+  end
+}
+
 local gridTileTypes = {
   -- unwalkable
   [0] = setupTileTypes({
@@ -116,10 +142,6 @@ local function initializeMap()
     },
     {
       chance = 1,
-      value = 'room-3'
-    },
-    {
-      chance = 1,
       value = 'room-4'
     },
     {
@@ -148,7 +170,7 @@ local function initializeMap()
     return blocks
   end
 
-  local mapGrid = Dungeon.new(generateMapBlockDefinitions())
+  local mapGrid = Dungeon.new(generateMapBlockDefinitions(), { columns = 2 })
   return mapGrid
 end
 
@@ -182,6 +204,7 @@ local function setupLightWorld()
 end
 
 function MainScene.init(self)
+  self.backgroundComponent = backgroundTypes.starField()
   local serializedState = msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:consumeSnapshot()
 
   self.lightWorld = setupLightWorld():setParent(self)
@@ -194,7 +217,9 @@ function MainScene.init(self)
   local mapGrid = serializedState and serializedState.mainMap[1].state or initializeMap()
   local gridTileDefinitions = cloneGrid(mapGrid, function(v, x, y)
     local tileGroup = gridTileTypes[v]
-    return tileGroup[math.random(1, #tileGroup)]
+    if tileGroup then
+      return tileGroup[math.random(1, #tileGroup)]
+    end
   end)
   self.mapGrid = mapGrid
 
@@ -262,7 +287,10 @@ function MainScene.init(self)
     camera = camera,
     grid = mapGrid,
     tileRenderDefinition = gridTileDefinitions,
-    walkable = Map.WALKABLE
+    walkable = Map.WALKABLE,
+    drawOrder = function()
+      return parent.backgroundComponent:drawOrder() + 1
+    end
   }):setParent(parent)
 
   if serializedState then
