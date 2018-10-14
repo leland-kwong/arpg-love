@@ -94,33 +94,42 @@ local function loadGridBlock(file)
 end
 
 local function addGridBlock(grid, gridBlockToAdd, startX, startY, transformFn)
-  local layer = findLayerByName(gridBlockToAdd.layers, 'walls')
-  local data = layer.data
-  for i=0, (#data - 1) do
-    local numCols = layer.width
+  local numCols = gridBlockToAdd.width
+  local area = gridBlockToAdd.width * gridBlockToAdd.height
+  for i=0, (area - 1) do
     local y = math.floor(i/numCols) + 1
     local x = (i % numCols) + 1
     local actualX = startX + x
     local actualY = startY + y
-    local cell = data[i + 1]
     grid[actualY] = grid[actualY] or {}
-    grid[actualY][actualX] = transformFn and transformFn(cell, x, y) or cell
+    grid[actualY][actualX] = transformFn((i + 1), x, y)
   end
   return grid
 end
 
-local cellTranslations = {
-  [0] = 1,
-  [12] = 0,
-  WALL = 0,
+local WALL_TILE = 0
+local cellTranslationsByLayer = {
+  walls = {
+    [12] = WALL_TILE
+  },
+  ground = {
+    [1] = 1
+  }
 }
 
-function Dungeon.new(gridBlockNames)
+local defaults = {
+  columns = 2
+}
+
+function Dungeon.new(gridBlockNames, options)
+  local assign = require 'utils.object-utils'.assign
+  options = assign({}, defaults, options or {})
+
   assert(#gridBlockNames%2 == 0, 'number of grid blocks must be an even number')
 
   local grid = {}
   local numBlocks = #gridBlockNames
-  local numCols = 2
+  local numCols = options.columns
   local numRows = numBlocks/numCols
   for blockIndex=0, (numBlocks - 1) do
     local gridBlockName = gridBlockNames[blockIndex + 1]
@@ -147,18 +156,27 @@ function Dungeon.new(gridBlockNames)
       gridBlock,
       origin.x,
       origin.y,
-      function(v, localX, localY)
+      function(index, localX, localY)
         local isEdge =
           (blockX == 0 and localX == 1) -- west side
           or ((blockX == numCols - 1) and localX == gridBlock.width) -- east side
           or (blockY == 0 and localY == 1) -- north side
           or ((blockY == numRows - 1) and localY == gridBlock.height) -- south side
+
         -- close up exits on the perimeter
         if isEdge then
-          return cellTranslations.WALL
+          return WALL_TILE
         end
 
-        return cellTranslations[v] or v
+        local wallLayer = findLayerByName(gridBlock.layers, 'walls')
+        local wallValue = wallLayer.data[index]
+        if wallValue ~= 0 then
+          return cellTranslationsByLayer.walls[wallValue]
+        end
+
+        local groundLayer = findLayerByName(gridBlock.layers, 'ground')
+        local groundValue = groundLayer.data[index]
+        return cellTranslationsByLayer.ground[groundValue]
       end
     )
     local blockData = {

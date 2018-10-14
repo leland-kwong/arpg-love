@@ -36,7 +36,7 @@ local function setupCollisionObjects(self, grid, gridSize)
   local cloneGrid = require 'utils.clone-grid'
   local collisionWorlds = require 'components.collision-worlds'
   local collisionGrid = cloneGrid(grid, function(v, x, y)
-    if v ~= Map.WALKABLE then
+    if (v ~= nil) and (v ~= Map.WALKABLE) then
       local animationName = self.tileRenderDefinition[y][x]
       local animation = animationFactory:newStaticSprite(animationName)
       local ox, oy = animation:getSourceOffset()
@@ -95,7 +95,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     local index = GetIndexByCoordinate(self.grid)(x, y)
 
     -- if its unwalkable, add a collision object and create wall tile
-    if value ~= Map.WALKABLE then
+    if (value ~= nil) and (value ~= Map.WALKABLE) then
       renderWallCollisionDebug(self)
       local animationName = self.tileRenderDefinition[y][x]
       local animation = getAnimation(self.animationCache, index, animationName)
