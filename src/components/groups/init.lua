@@ -5,6 +5,7 @@
 local Component = require 'modules.component'
 local msgBus = require 'components.msg-bus'
 local config = require 'config.config'
+require 'components.groups.disabled-entities'
 
 local gridSize = config.gridSize
 local floor = math.floor

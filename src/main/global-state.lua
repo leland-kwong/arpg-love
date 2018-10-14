@@ -23,11 +23,12 @@ local globalState = {
       )
       local components = f.reduce({
         groups.all.getAll(),
-        groups.firstLayer.getAll()
+        groups.firstLayer.getAll(),
+        Component.groups.disabled.getAll()
       }, function(components, groupComponents)
         for _,c in pairs(groupComponents) do
           if collisionGroups.matches(c.class or '', classesToMatch) then
-            table.insert(components, c)
+            components[c:getId()] = c
           end
         end
         return components

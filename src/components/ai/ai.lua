@@ -651,6 +651,7 @@ function Ai.init(self)
   local gridSize = self.gridSize
 
   Component.addToGroup(self, groups.character)
+  Component.addToGroup(self, 'disabled')
   self.onDamageTaken = require 'modules.handle-damage-taken'
 
   -- [[ BASE PROPERTIES ]]
