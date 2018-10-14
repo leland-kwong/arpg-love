@@ -1,3 +1,4 @@
+local Component = require 'modules.component'
 local Color = require 'modules.color'
 local PopupTextController = require 'components.popup-text'
 local Sound = require 'components.sound'
@@ -28,6 +29,8 @@ local function onDamageTaken(self, actualDamage, actualNonCritDamage, criticalMu
   if (actualDamage == 0) then
     return
   end
+
+  Component.addToGroup(self:getId(), 'all', self)
 
   local getTextSize = require 'components.gui.gui-text'.getTextSize
   local offsetCenter = -getTextSize(actualDamage, popupText.font) / 2
