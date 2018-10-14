@@ -42,7 +42,8 @@ function NpcInfo.init(self)
         self.target:getCalculatedStat('maxHealth')
       return percentage
     end
-  }):setDisabled(true)
+  }):setParent(self)
+    :setDisabled(true)
   Component.addToGroup(self.statusBar:getId(), 'gameWorld', self.statusBar)
 end
 
