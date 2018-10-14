@@ -83,7 +83,7 @@ local Bullet = {
     self.x = self.x + dx
     self.y = self.y + dy
     self.animation:update(dt)
-    local cols, len = select(3, self.colObj:move(self.x, self.y, ColFilter(self.targetGroup, self.targetsToIgnore)))
+    local _, _, cols, len = self.colObj:move(self.x, self.y, ColFilter(self.targetGroup, self.targetsToIgnore))
     local hasCollisions = len > 0
     local isExpired = self.lifeTime <= 0
 
