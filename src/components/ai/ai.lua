@@ -358,6 +358,7 @@ end
 
 function Ai.update(self, dt)
   createLight(self)
+  handleAggro(self, dt)
 
   local shouldCheckStuckStatus = self:getFiniteState() == states.MOVING and self.dv and (not self.canSeeTarget)
   if shouldCheckStuckStatus then
@@ -382,7 +383,6 @@ function Ai.update(self, dt)
   local isIdle = (self:getFiniteState() ~= states.MOVING) and (not self.isInViewOfPlayer) and (not self.isAggravated)
   if isIdle then
     Component.removeFromGroup(self, 'all')
-    Component.removeFromGroup(self, 'character')
     if self.light then
       self.light:delete()
       self.light = nil
@@ -398,8 +398,6 @@ function Ai.update(self, dt)
   if self.destroyedAnimation then
     return
   end
-
-  handleAggro(self, dt)
 
   if self.onUpdateStart then
     self.onUpdateStart(self, dt)

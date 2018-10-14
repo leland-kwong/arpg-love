@@ -340,7 +340,6 @@ local function toggleAiVisibility(self)
     local entity = items[i].parent
     local entityId = entity:getId()
     Component.addToGroup(entityId, 'all', entity)
-    Component.addToGroup(entityId, 'character', entity)
     entity.isInViewOfPlayer = true
     activeEntities[entityId] = true
   end
