@@ -47,7 +47,12 @@ local characterSystem = msgBus.send(msgBus.PROFILE_FUNC, {
   call = require 'components.groups.character'
 })
 
+PROF_CAPTURE = config.isDebug
+local jprof = require('jprof')
+Console.jprof = jprof
+
 function love.update(dt)
+
   systemsProfiler()
 
   msgBus.send(msgBus.UPDATE, dt)
@@ -56,12 +61,15 @@ function love.update(dt)
   camera:update(dt)
   characterSystem(dt)
   groups.firstLayer.updateAll(dt)
+  jprof.push('frame')
   groups.all.updateAll(dt)
+  jprof.pop('frame')
   groups.overlay.updateAll(dt)
   groups.debug.updateAll(dt)
   groups.hud.updateAll(dt)
   groups.gui.updateAll(dt)
   groups.system.updateAll(dt)
+
 end
 
 function love.draw()
@@ -81,6 +89,10 @@ function love.draw()
   love.graphics.pop()
 
   groups.system.drawAll()
+end
+
+function love.quit()
+  jprof.write('prof.mpack')
 end
 
 --[[
