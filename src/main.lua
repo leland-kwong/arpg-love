@@ -52,6 +52,7 @@ local jprof = require('jprof')
 Console.jprof = jprof
 
 function love.update(dt)
+  jprof.push('frame')
 
   systemsProfiler()
 
@@ -61,15 +62,12 @@ function love.update(dt)
   camera:update(dt)
   characterSystem(dt)
   groups.firstLayer.updateAll(dt)
-  jprof.push('frame')
   groups.all.updateAll(dt)
-  jprof.pop('frame')
   groups.overlay.updateAll(dt)
   groups.debug.updateAll(dt)
   groups.hud.updateAll(dt)
   groups.gui.updateAll(dt)
   groups.system.updateAll(dt)
-
 end
 
 function love.draw()
@@ -89,6 +87,8 @@ function love.draw()
   love.graphics.pop()
 
   groups.system.drawAll()
+
+  jprof.pop('frame')
 end
 
 function love.quit()
