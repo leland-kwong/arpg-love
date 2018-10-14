@@ -114,7 +114,9 @@ local function FlowFieldFactory(canVisitCallback, getter)
   local frontier = {}
   local start = {}
 
-  local function flowField(grid, startX, startY, includeDiagonalDirection)
+  local function flowField(grid, startX, startY, includeDiagonalDirection, iteratorGranularity)
+    iteratorGranularity = iteratorGranularity or 200
+
     start = setProp(start)
       :set('x', startX)
       :set('y', startY)
@@ -136,14 +138,20 @@ local function FlowFieldFactory(canVisitCallback, getter)
     -- {directionX, directionY, distance}
     cameFromList[startY][startX] = flowCellData(0, 0, 0, cameFromList._cellCount)
 
-    local i = 1
-    while i <= #frontier do
-      local current = frontier[i]
-      i = i + 1
-      visitNeighbors(grid, current, frontier, cameFromList, canVisitCallback, includeDiagonalDirection)
-    end
+    local Console = require 'modules.console.console'
+    return coroutine.wrap(function()
+      local i = 1
+      while i <= #frontier do
+        local current = frontier[i]
+        i = i + 1
+        visitNeighbors(grid, current, frontier, cameFromList, canVisitCallback, includeDiagonalDirection)
 
-    return cameFromList
+        if (i % iteratorGranularity) == 0 then
+          coroutine.yield(cameFromList)
+        end
+      end
+      coroutine.yield(cameFromList)
+    end)
   end
 
   return flowField
