@@ -6,6 +6,7 @@ local abs = math.abs
 local Lru = require 'utils.lru'
 
 local meta = {}
+local spriteCache = Lru.new(1000)
 
 local function createAnimationFactory(
   frameJson,
@@ -32,11 +33,10 @@ end
 
 function meta:new(aniFrames)
   local animation = {
-    maxFrames = #aniFrames,
+    numFrames = #aniFrames,
     aniFrames = aniFrames,
     timePerFrame = 1 / self.frameRate,
     frame = nil,
-    sprite = love.graphics.newQuad(0, 0, 0, 0, self.atlas:getDimensions()),
     time = 0, -- animation time
     index = 1 -- frame index
   }
@@ -105,25 +105,25 @@ end
 
 -- increments the animation by the time amount
 function meta:update(dt)
-  if self.maxFrames > 1 then
+  if self.numFrames > 1 then
     -- whether we should move forward or backward in the animation
     local direction = dt > 0 and 1 or -1
     if abs(self.time) >= self.timePerFrame then
       self.time = 0
       self.index = self.index + direction
       -- reset to the start
-      if (self.index > self.maxFrames) then
+      if (self.index > self.numFrames) then
         self.index = 1
       end
       -- reset to the end
       if (self.index < 1) then
-        self.index = self.maxFrames
+        self.index = self.numFrames
       end
     end
   end
 
   self.time = self.time + dt
-  local isLastFrame = frameKey == self.aniFrames[#self.aniFrames]
+  local isLastFrame = frameKey == self.aniFrames[self.numFrames]
   local isSameFrame = self.index == self.lastIndex
   if isSameFrame then
     return self, isLastFrame
@@ -132,12 +132,18 @@ function meta:update(dt)
   local frameKey = self.aniFrames[self.index]
   self.frame = self.frameData[frameKey]
   local pad = self.pad
-  self.sprite:setViewport(
-    self.frame.frame.x - pad,
-    self.frame.frame.y - pad,
-    self.frame.sourceSize.w + (pad * 2),
-    self.frame.spriteSourceSize.h + (pad * 2)
-  )
+  local sprite = spriteCache:get(frameKey)
+  if (not sprite) then
+    sprite = love.graphics.newQuad(
+      self.frame.frame.x - pad,
+      self.frame.frame.y - pad,
+      self.frame.sourceSize.w + (pad * 2),
+      self.frame.spriteSourceSize.h + (pad * 2),
+      self.atlas:getDimensions()
+    )
+    spriteCache:set(frameKey, sprite)
+  end
+  self.sprite = sprite
   self.lastIndex = self.index
   return self, isLastFrame
 end
