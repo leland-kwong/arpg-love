@@ -566,7 +566,9 @@ function Player.update(self, dt)
   -- update camera to follow player
   camera:setPosition(self.x, self.y)
 
-  local gridX, gridY = Position.pixelsToGridUnits(self.x, self.y, config.gridSize)
+  -- use collision positions as the point on which the flow field starts
+  local collisionX, collisionY = self.colObj:getPositionWithOffset()
+  local gridX, gridY = Position.pixelsToGridUnits(collisionX, collisionY, config.gridSize)
   -- update flowfield every x frames since it also considers ai in the way
   -- as blocked positions, so we need to keep this fresh
   local shouldUpdateFlowField = self.prevGridX ~= gridX or self.prevGridY ~= gridY
