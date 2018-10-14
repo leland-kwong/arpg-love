@@ -10,7 +10,6 @@ local collisionObject = require 'modules.collision'
 local camera = require 'components.camera'
 local Position = require 'utils.position'
 local Map = require 'modules.map-generator.index'
-local FlowField = require 'modules.flow-field.flow-field'
 local Color = require 'modules.color'
 local memoize = require 'utils.memoize'
 local LineOfSight = memoize(require'modules.line-of-sight')
@@ -194,7 +193,6 @@ local Player = {
   facingDirectionY = 1,
   pickupRadius = 5 * config.gridSize,
   moveSpeed = 100,
-  flowFieldDistance = 30,
   attackRecoveryTime = 0,
 
   -- collision properties
@@ -335,19 +333,6 @@ local Player = {
         msgBus.send(msgBus.PLAYER_HIT_RECEIVED, actualDamage)
       end
     end
-    self.getFlowField = FlowField(function (grid, x, y, dist)
-      local row = grid[y]
-      local cell = row and row[x]
-      return
-        (cell == Map.WALKABLE) and
-        (dist < self.flowFieldDistance)
-    end)
-    self.getFlowField = require'utils.perf'({
-      enabled = false,
-      done = function(_, totalTime, callCount)
-        consoleLog('flowfield', totalTime / callCount)
-      end
-    })(self.getFlowField)
 
     local CreateStore = require'components.state.state'
     self.rootStore = msgBus.send(msgBus.GAME_STATE_GET)
@@ -554,8 +539,6 @@ function Player.update(self, dt)
   -- dynamically get the current animation frame's height
   local sx, sy, sw, sh = self.animation.sprite:getViewport()
   local w,h = sw, sh
-  -- true center taking into account pivot
-  local oX, oY = self.animation:getSourceOffset()
 
   local actualX, actualY, cols, len = self.colObj:move(nextX, nextY, collisionFilter)
   self.x = actualX
@@ -565,19 +548,6 @@ function Player.update(self, dt)
 
   -- update camera to follow player
   camera:setPosition(self.x, self.y)
-
-  -- use collision positions as the point on which the flow field starts
-  local collisionX, collisionY = self.colObj:getPositionWithOffset()
-  local gridX, gridY = Position.pixelsToGridUnits(collisionX, collisionY, config.gridSize)
-  -- update flowfield every x frames since it also considers ai in the way
-  -- as blocked positions, so we need to keep this fresh
-  local shouldUpdateFlowField = self.prevGridX ~= gridX or self.prevGridY ~= gridY
-  if shouldUpdateFlowField and self.mapGrid then
-    local flowField, callCount = self.getFlowField(self.mapGrid, gridX, gridY)
-    self.flowField = flowField
-    self.prevGridX = gridX
-    self.prevGridY = gridY
-  end
 end
 
 local function drawShadow(self, sx, sy, ox, oy)

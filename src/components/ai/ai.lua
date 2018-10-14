@@ -107,11 +107,6 @@ function Ai:checkLineOfSight(grid, WALKABLE, targetX, targetY, debug)
   )
 end
 
-function Ai:aggravatedRadius()
-  local playerFlowFieldDistance = Component.get('PLAYER').flowFieldDistance
-  return (playerFlowFieldDistance - 3) * self.gridSize
-end
-
 local COLLISION_SLIDE = 'slide'
 local collisionFilters = collisionGroups.create(
   'player',
@@ -364,14 +359,15 @@ end
 function Ai.update(self, dt)
   createLight(self)
 
-  if self:getFiniteState() == states.MOVING and self.dv and (not self.canSeeTarget) then
+  local shouldCheckStuckStatus = self:getFiniteState() == states.MOVING and self.dv and (not self.canSeeTarget)
+  if shouldCheckStuckStatus then
     if self.isInAttackRange then
       self.checkCount = 0
     end
 
     self.checkCount = (self.checkCount or 0) + 1
     if self.checkCount >= 60 then
-      local isStuck = abs(self.dv.x) <= 2 and abs(self.dv.y) <= 2
+      local isStuck = abs(self.dv.x) <= 6 and abs(self.dv.y) <= 6
       if isStuck then
         self.targetX = nil
       end
@@ -383,7 +379,7 @@ function Ai.update(self, dt)
   local playerRef = Component.get('PLAYER') or Component.get('TEST_PLAYER')
   local playerX, playerY = playerRef:getPosition()
 
-  local isIdle = self:getFiniteState() ~= states.MOVING and (not self.isInViewOfPlayer) and (not self.isAggravated)
+  local isIdle = (self:getFiniteState() ~= states.MOVING) and (not self.isInViewOfPlayer) and (not self.isAggravated)
   if isIdle then
     Component.removeFromGroup(self, 'all')
     Component.removeFromGroup(self, 'character')
@@ -408,8 +404,6 @@ function Ai.update(self, dt)
   if self.onUpdateStart then
     self.onUpdateStart(self, dt)
   end
-
-  local flowField = playerRef.flowField
 
   local targetX, targetY
 
@@ -438,9 +432,7 @@ function Ai.update(self, dt)
     self.animation:update(dt / 12)
   end
 
-  local actualSightRadius = self.isAggravated and
-    self:aggravatedRadius() or
-    self:getCalculatedStat('sightRadius')
+  local actualSightRadius = self:getCalculatedStat('sightRadius')
   local canSeeTarget = self.isInViewOfPlayer and self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY, self.losDebug)
   local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
   local isInAggroRange = gridDistFromPlayer <= (actualSightRadius / self.gridSize)
@@ -453,17 +445,7 @@ function Ai.update(self, dt)
   if canSeeTarget and (isInAggroRange or self.isAggravated) then
     local path
     local gridX, gridY = self.pxToGridUnits(self.x, self.y, self.gridSize)
-    local shouldGetNewPath = flowField
-    if shouldGetNewPath then
-      local distanceToPlanAhead = actualSightRadius / self.gridSize
-      path = self.getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
-      if path then
-        local targetPos = path[#path]
-        if targetPos then
-          self.targetX, self.targetY = targetPos.x * self.gridSize, targetPos.y * self.gridSize
-        end
-      end
-    end
+    self.targetX, self.targetY = targetX, targetY
 
     -- use abilities
     if (not self.silenced) then
@@ -485,15 +467,13 @@ function Ai.update(self, dt)
     end
 
     self.isInAttackRange = isInAttackRange
-    if isInAttackRange then
+    local isTargetStillAtLastKnownPosition = self.targetX == targetX and self.targetY == targetY
+    if isInAttackRange and isTargetStillAtLastKnownPosition then
       -- we're already in attack range, so we can stop the update here since the rest of the update is just moving
       return
     end
-
-    if path and (self:getFiniteState() ~= states.ATTACKING) then
-      setNextPosition(self, self:getActualSpeed(dt), 40)
-    end
-  elseif self.targetX and (self:getFiniteState() ~= states.ATTACKING) then
+  end
+  if self.targetX and (self:getFiniteState() ~= states.ATTACKING) then
     setNextPosition(self, self:getActualSpeed(dt), 40)
   end
 
