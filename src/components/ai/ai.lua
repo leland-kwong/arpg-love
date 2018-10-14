@@ -22,6 +22,7 @@ local Lru = require 'utils.lru'
 local setElectricShockShader = require 'modules.shaders.shader-electric-shock'
 local Enum = require 'utils.enum'
 local collisionGroups = require 'modules.collision-groups'
+local Console = require 'modules.console.console'
 local max, random, abs, min = math.max, math.random, math.abs, math.min
 
 local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
@@ -505,11 +506,11 @@ end
 local perf = require'utils.perf'
 Ai.update = perf({
   enabled = false,
+  beforeCall = function()
+    Console.jprof.push('ai_update')
+  end,
   done = function(time, totalTime, callCount)
-    local avgTime = totalTime / callCount
-    if (callCount % 1000) == 0 then
-      consoleLog('ai update -', string.format('%0.3f', avgTime))
-    end
+    Console.jprof.pop('ai_update')
   end
 })(Ai.update)
 
