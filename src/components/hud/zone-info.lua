@@ -24,7 +24,10 @@ function ZoneInfo.init(self)
 end
 
 function ZoneInfo.update(self, dt)
-  self.tween:update(dt)
+  local complete = self.tween:update(dt)
+  if complete then
+    self:delete(true)
+  end
 end
 
 function ZoneInfo.draw(self)
