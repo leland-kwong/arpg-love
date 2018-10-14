@@ -133,6 +133,10 @@ function Hud.init(self)
       end)
 
       return msgValue
+    end),
+    msgBus.on(msgBus.SCENE_CHANGE, function(sceneRef)
+      local ZoneInfo = require 'components.hud.zone-info'
+      ZoneInfo.create()
     end)
   }
 

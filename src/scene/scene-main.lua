@@ -118,6 +118,7 @@ local gridTileTypes = {
 local MainScene = {
   id = 'MAIN_SCENE',
   group = groups.firstLayer,
+  zoneTitle = 'Aureus',
 
   -- options
   isNewGame = false

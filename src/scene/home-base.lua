@@ -16,6 +16,7 @@ local inspect = require 'utils.inspect'
 
 local HomeBase = {
   group = groups.all,
+  zoneTitle = 'Mothership',
   x = 0,
   y = 5,
   drawOrder = function()
@@ -48,7 +49,7 @@ function HomeBase.init(self)
   Portal.create({
     x = startPosition.x,
     y = startPosition.y,
-    locationName = 'Mars'
+    locationName = 'Aureus'
   }):setParent(self)
 
   Component.create({

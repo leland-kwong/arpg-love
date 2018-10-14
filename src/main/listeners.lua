@@ -50,6 +50,7 @@ msgBus.on(msgBus.SCENE_STACK_PUSH, function(msgValue)
   globalState.activeScene = sceneRef
   globalState.sceneStack:push(nextScene)
   playBackgroundMusic(nextScene.scene)
+  msgBus.send(msgBus.SCENE_CHANGE, sceneRef)
   return sceneRef
 end, SCENE_STACK_MESSAGE_LAST_PRIORITY)
 
@@ -61,6 +62,7 @@ msgBus.on(msgBus.SCENE_STACK_POP, function()
   local sceneRef = poppedScene.scene.create(poppedScene.props)
   globalState.activeScene = sceneRef
   playBackgroundMusic(poppedScene.scene)
+  msgBus.send(msgBus.SCENE_CHANGE, sceneRef)
   return sceneRef
 end, SCENE_STACK_MESSAGE_LAST_PRIORITY)
 
