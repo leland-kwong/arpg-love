@@ -64,9 +64,7 @@ local Bullet = {
     self.x = self.x + self.startOffset * dx
     self.y = self.y + self.startOffset * dy
 
-    self.animation = animationFactory:new({
-      'bullet-1'
-    })
+    self.animation = animationFactory:newStaticSprite('bullet-1')
 
     local w,h = select(3, self.animation.sprite:getViewport())
     local ox, oy = self.animation:getOffset()

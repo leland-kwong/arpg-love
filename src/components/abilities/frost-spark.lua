@@ -63,9 +63,7 @@ local FrostSpark = {
     self.x = self.x + self.startOffset * dx
     self.y = self.y + self.startOffset * dy
 
-    self.animation = animationFactory:new({
-      'frost-spark'
-    })
+    self.animation = animationFactory:newStaticSprite('frost-spark')
 
     local w,h = select(3, self.animation.sprite:getViewport())
     local ox, oy = self.animation:getOffset()
