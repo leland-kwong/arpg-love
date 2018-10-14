@@ -25,6 +25,10 @@ local objectParsersByType = {
       WALKABLE = Map.WALKABLE,
       rarity = function(ai)
         local Color = require 'modules.color'
+        local itemConfig = require 'components.item-inventory.items.config'
+        ai.itemData.minRarity = itemConfig.rarity.NORMAL
+        ai.itemData.maxRarity = itemConfig.rarity.RARE
+        ai.itemData.dropRate = ai.itemData.dropRate * 30
         return ai:set('rarityColor', Color.RARITY_LEGENDARY)
           :set('armor', ai.armor * 1.2)
           :set('moveSpeed', ai.moveSpeed * 1.5)
