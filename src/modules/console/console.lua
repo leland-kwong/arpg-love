@@ -37,21 +37,44 @@ local guiText = GuiText.create({
 })
 
 local function toggleCollisionDebug()
-  config.collisionDebug = not config.collisionDebug
+  msgBus.send(msgBus.SET_CONFIG, {
+    collisionDebug = (not config.collisionDebug)
+  })
 end
+
+local function toggleConsole()
+  state.showConsole = not state.showConsole
+end
+
+local function togglePerformanceProfiler()
+  local enabled = not config.performanceProfile
+
+  if (not enabled) then
+    local profile = require 'modules.profile'
+    profile.write('prof.mpack')
+  end
+
+  msgBus.send(msgBus.SET_CONFIG, {
+    performanceProfile = enabled
+  })
+end
+
+local keyActions = setmetatable({
+  o = toggleCollisionDebug,
+  p = togglePerformanceProfiler,
+  c = toggleConsole,
+}, {
+  __index = function()
+    local noop = require 'utils.noop'
+    return noop
+  end
+})
 
 msgBus.on(msgBus.KEY_DOWN, function(v)
   keysPressed[v.key] = true
 
   if hasModifier() and not v.isRepeated then
-    -- toggle collision debugger
-    if keysPressed.p then
-      toggleCollisionDebug()
-    end
-
-    if keysPressed.c then
-      state.showConsole = not state.showConsole
-    end
+    keyActions[v.key]()
   end
   return v
 end)
@@ -117,6 +140,10 @@ end
 consoleLog = Console.debug
 
 function Console.init(self)
+  if not config.isDebug then
+    return self:delete(true)
+  end
+
   Component.addToGroup(self, groups.system)
   local perf = require 'utils.perf'
   msgBus.send = perf({

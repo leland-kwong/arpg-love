@@ -1,9 +1,14 @@
-local Perf = require'utils.perf'
+local config = require 'config.config'
+local noop = require 'utils.noop'
 
-return function(fn)
-  return Perf({
-    done = function(_, totalTime, callCount)
-      consoleLog(totalTime/callCount)
+PROF_CAPTURE = true
+local jprof = require('jprof')
+
+return setmetatable({}, {
+  __index = function(_, method)
+    if config.performanceProfile then
+      return jprof[method]
     end
-  })(fn)
-end
+    return noop
+  end
+})
