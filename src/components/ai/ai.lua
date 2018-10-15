@@ -357,8 +357,16 @@ local function createLight(self)
 end
 
 function Ai.update(self, dt)
-  createLight(self)
   handleAggro(self, dt)
+  local isIdle = (self:getFiniteState() ~= states.MOVING) and (not self.isInViewOfPlayer) and (not self.isAggravated)
+  self:setDrawDisabled(isIdle)
+  if isIdle then
+    if self.light then
+      self.light:delete()
+      self.light = nil
+    end
+    return
+  end
 
   local shouldCheckStuckStatus = self:getFiniteState() == states.MOVING and self.dv and (not self.canSeeTarget)
   if shouldCheckStuckStatus then
@@ -377,18 +385,10 @@ function Ai.update(self, dt)
     end
   end
 
+  createLight(self)
+
   local playerRef = Component.get('PLAYER') or Component.get('TEST_PLAYER')
   local playerX, playerY = playerRef:getPosition()
-
-  local isIdle = (self:getFiniteState() ~= states.MOVING) and (not self.isInViewOfPlayer) and (not self.isAggravated)
-  if isIdle then
-    Component.removeFromGroup(self, 'all')
-    if self.light then
-      self.light:delete()
-      self.light = nil
-    end
-    return
-  end
 
   local grid = self.grid
   self.clock = self.clock + dt
@@ -648,6 +648,7 @@ function Ai.init(self)
   local scale = self.scale
   local gridSize = self.gridSize
 
+  Component.addToGroup(self, groups.all)
   Component.addToGroup(self, groups.character)
   Component.addToGroup(self, 'disabled')
   self.onDamageTaken = require 'modules.handle-damage-taken'

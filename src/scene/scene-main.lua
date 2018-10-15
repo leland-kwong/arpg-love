@@ -317,13 +317,19 @@ function MainScene.init(self)
   end
 end
 
-local function aiItemFilter(item)
-  local collisionGroups = require 'modules.collision-groups'
-  return collisionGroups.matches(item.group, collisionGroups.ai)
+local collisionGroups = require 'modules.collision-groups'
+local visibilityGroup = collisionGroups.create(
+  collisionGroups.ai,
+  collisionGroups.environment
+)
+local activeEntities = {}
+
+local function visibleItemFilter(item)
+  return collisionGroups.matches(item.group, visibilityGroup)
 end
 
 local floor = math.floor
-local function toggleAiVisibility(self)
+local function toggleEntityVisibility(self)
   local collisionWorlds = require 'components.collision-worlds'
   local camera = require 'components.camera'
   local threshold = config.gridSize * 2
@@ -333,26 +339,24 @@ local function toggleAiVisibility(self)
     west - threshold,
     north - threshold, width + (threshold * 2),
     height + (threshold * 2),
-    aiItemFilter
+    visibleItemFilter
   )
-  local activeEntities = {}
+
+  for _,entity in pairs(activeEntities) do
+    entity.isInViewOfPlayer = false
+  end
+  activeEntities = {}
+
   for i=1, len do
     local entity = items[i].parent
     local entityId = entity:getId()
-    Component.addToGroup(entityId, 'all', entity)
     entity.isInViewOfPlayer = true
-    activeEntities[entityId] = true
-  end
-  local allChars = Component.groups.character.getAll()
-  for id,v in pairs(allChars) do
-    if v.class == 'ai' and (not activeEntities[id]) then
-      v.isInViewOfPlayer = false
-    end
+    activeEntities[entityId] = entity
   end
 end
 
 function MainScene.update(self)
-  toggleAiVisibility(self)
+  toggleEntityVisibility(self)
 end
 
 local perf = require'utils.perf'

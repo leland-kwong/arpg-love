@@ -133,10 +133,7 @@ function M.removeFromGroup(id, group)
   id = isIdComponent and id:getId() or id
   local name = getGroupName(group)
   -- check if an entity has been added or not before removing
-  local hasEntity = M.entitiesById[id]
-  if hasEntity then
-    M.groups[name].removeComponent(id)
-  end
+  M.groups[name].removeComponent(id)
   return M
 end
 

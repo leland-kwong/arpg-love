@@ -97,6 +97,8 @@ function EnvironmentInteractable.init(self)
 end
 
 function EnvironmentInteractable.update(self, dt)
+  self:setDrawDisabled(not self.isInViewOfPlayer)
+
   if self.destroyedAnimation then
     return
   end
