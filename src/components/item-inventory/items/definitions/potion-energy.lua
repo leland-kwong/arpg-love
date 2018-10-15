@@ -12,7 +12,7 @@ return {
 		onActivateWhenEquipped = require 'components.item-inventory.items.equipment-actives.heal'({
 			minHeal = 50,
 			maxHeal = 60,
-			duration = 6,
+			duration = 5,
 			property = 'energy',
 			maxProperty = 'maxEnergy'
 		}),
