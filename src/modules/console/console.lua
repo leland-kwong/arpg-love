@@ -6,23 +6,9 @@ local Color = require 'modules.color'
 local CollisionObject = require 'modules.collision'
 local config = require 'config.config'
 
-local modifier = false
-local keysPressed = {}
-local L_SUPER = 'lgui'
-local R_SUPER = 'rgui'
-local L_CTRL = 'lctrl'
-local R_CTRL = 'rctrl'
-
 local state = {
   showConsole = true
 }
-
-local function hasModifier()
-  return keysPressed[L_SUPER]
-    or keysPressed[R_SUPER]
-    or keysPressed[L_CTRL]
-    or keysPressed[R_CTRL]
-end
 
 local font = love.graphics.newFont(
   'built/fonts/StarPerv.ttf',
@@ -73,9 +59,7 @@ local keyActions = setmetatable({
 })
 
 msgBus.on(msgBus.KEY_DOWN, function(v)
-  keysPressed[v.key] = true
-
-  if hasModifier() and not v.isRepeated then
+  if v.hasModifier and (not v.isRepeated) then
     keyActions[v.key]()
   end
   return v
@@ -84,11 +68,6 @@ end)
 msgBus.IS_CONSOLE_ENABLED = 'IS_CONSOLE_ENABLED'
 msgBus.on(msgBus.IS_CONSOLE_ENABLED, function()
   return config.enableConsole
-end)
-
-msgBus.on(msgBus.KEY_RELEASED, function(v)
-  keysPressed[v.key] = false
-  return v
 end)
 
 local Console = {
@@ -152,6 +131,9 @@ function Console.init(self)
 end
 
 function Console.update(self)
+  local noop = require 'utils.noop'
+  -- set logger function to noop if console is disabled
+  consoleLog = config.enableConsole and Console.debug or noop
   self:setDrawDisabled(not config.enableConsole)
   if (not config.enableConsole) then
     return

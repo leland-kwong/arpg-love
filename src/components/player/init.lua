@@ -232,9 +232,11 @@ local Player = {
 
       msgBus.on(msgBus.KEY_DOWN, function(v)
         local key = v.key
+        local keyMap = config.userSettings.keyboard
         local rootState = msgBus.send(msgBus.GAME_STATE_GET)
         local isActive = rootState:get().activeMenu == 'INVENTORY'
-        if key == config.userSettings.keyboard.INVENTORY_TOGGLE then
+
+        if (keyMap.INVENTORY_TOGGLE == key) and (not v.hasModifier) then
           if not self.inventory then
             self.inventory = Inventory.create({
               rootStore = rootState,
@@ -250,8 +252,12 @@ local Player = {
           end
         end
 
-        if config.userSettings.keyboard.PORTAL_OPEN == key then
+        if (keyMap.PORTAL_OPEN == key) and (not v.hasModifier) then
           msgBus.send(msgBus.PORTAL_OPEN)
+        end
+
+        if (keyMap.PAUSE_GAME == key) and (not v.hasModifier) then
+          msgBus.send(msgBus.PAUSE_GAME_TOGGLE)
         end
       end),
 

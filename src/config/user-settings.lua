@@ -1,3 +1,9 @@
+--[[
+  TODO:
+  * Save user settings to disk when settings have been updated
+  * Function for updating user settings. This is so that we can automatically update settings when they are changed.
+]]
+
 -- user configurable settings
 
 local M = {}
@@ -16,7 +22,9 @@ M.keyboard = {
   MOVE_BOOST = 'space',
   INVENTORY_TOGGLE = 'i',
   MAIN_MENU = 'escape',
-  PORTAL_OPEN = 't'
+  PORTAL_OPEN = 't',
+  PAUSE_GAME = 'p',
+  MUSIC_TOGGLE = 'm'
 }
 
 M.mouseInputMap = {
@@ -34,7 +42,8 @@ M.camera = {
 }
 
 M.sound = {
-  musicEnabled = false
+  musicEnabled = true,
+  musicVolume = 0.5
 }
 
 return M
