@@ -34,7 +34,8 @@ M.window = {
   height = M.resolution.h * M.scale
 }
 
-M.isDebug = true
+M.isDebug = false
+M.enableConsole = false
 M.performanceProfile = false
 M.debugDrawQueue = false
 M.collisionDebug = false

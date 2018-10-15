@@ -43,7 +43,9 @@ local function toggleCollisionDebug()
 end
 
 local function toggleConsole()
-  state.showConsole = not state.showConsole
+  msgBus.send(msgBus.SET_CONFIG, {
+    enableConsole = (not config.enableConsole)
+  })
 end
 
 local function togglePerformanceProfiler()
@@ -81,7 +83,7 @@ end)
 
 msgBus.IS_CONSOLE_ENABLED = 'IS_CONSOLE_ENABLED'
 msgBus.on(msgBus.IS_CONSOLE_ENABLED, function()
-  return state.showConsole
+  return config.enableConsole
 end)
 
 msgBus.on(msgBus.KEY_RELEASED, function(v)
@@ -140,10 +142,6 @@ end
 consoleLog = Console.debug
 
 function Console.init(self)
-  if not config.isDebug then
-    return self:delete(true)
-  end
-
   Component.addToGroup(self, groups.system)
   local perf = require 'utils.perf'
   msgBus.send = perf({
@@ -154,6 +152,11 @@ function Console.init(self)
 end
 
 function Console.update(self)
+  self:setDrawDisabled(not config.enableConsole)
+  if (not config.enableConsole) then
+    return
+  end
+
   local s = self.stats
   s.currentMemoryUsed = collectgarbage('count')
   s.frameCount = s.frameCount + 1
@@ -170,9 +173,6 @@ local function calcMessageBusHandlers()
 end
 
 function Console.draw(self)
-  if not state.showConsole then
-    return
-  end
   love.graphics.setFont(font)
   local charHeight = font:getLineHeight() * font:getHeight()
   local gfx = love.graphics
