@@ -27,14 +27,14 @@ return function(gridSize, cacheSize)
   function WallObjects.get(self)
     local obj = self[#self]
     self[#self] = nil
-    obj:setDisabled(false)
+    obj:enable()
     return obj
   end
 
   function WallObjects.release(self, obj)
     -- we should always insert to the beginning so we properly cycle through all the objects
     table.insert(self, 1, obj)
-    obj:setDisabled(true)
+    obj:disable()
   end
 
   return WallObjects

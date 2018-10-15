@@ -12,6 +12,7 @@ local lru = require 'utils.lru'
 local memoize = require'utils.memoize'
 local GetIndexByCoordinate = memoize(require 'utils.get-index-by-coordinate')
 local config = require'config.config'
+local Grid = require 'utils.grid'
 
 local animationTypes = {}
 
@@ -23,11 +24,6 @@ end
 local function addWallTileEntity(self, positionIndex, animation, x, y, opacity)
   local wallTileEntity = self.wallObjectsPool:get()
     :changeTile(animation, x, y, opacity)
-  self.wallTileCache:set(positionIndex, wallTileEntity)
-end
-
-local function getTile(grid, x, y)
-  return grid[y] and grid[y][x]
 end
 
 -- Generate all collision objects ahead of time since game elements
@@ -76,19 +72,22 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   init = function(self)
     self.collisionObjectsHash = setupCollisionObjects(self, self.grid, self.gridSize)
 
-    local cacheSize = 300
+    local cacheSize = 400
     self.wallObjectsPool = require 'components.map.wall-objects-pool'(self.gridSize, cacheSize)
 
-    local function wallTilePruneCallback(key, entity)
-      self.wallObjectsPool:release(entity)
-    end
     -- IMPORTANT: the cache size should be large enough to contain all the wall tiles on the screen
     -- otherwise we will get significant cache trashing
-    self.wallTileCache = lru.new(cacheSize, nil, wallTilePruneCallback)
     self.renderFloorCache = {}
     local rows, cols = #self.grid, #self.grid[1]
     self.floorCanvas = love.graphics.newCanvas(cols * self.gridSize, rows * self.gridSize)
     self.wallsCanvas = love.graphics.newCanvas(cols * self.gridSize, rows * self.gridSize)
+  end,
+
+  onUpdateStart = function(self)
+    -- release all all active entities (they will get used as needed)
+    for _,entity in pairs(Component.groups.activeWalls.getAll()) do
+      self.wallObjectsPool:release(entity)
+    end
   end,
 
   onUpdate = function(self, value, x, y, originX, originY, isInViewport, dt)
@@ -100,16 +99,13 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
       local animationName = self.tileRenderDefinition[y][x]
       local animation = getAnimation(self.animationCache, index, animationName)
         :update(dt)
-      local cached = self.wallTileCache:get(index)
-      if (not cached) then
-        local tileAbove = getTile(self.grid, x, y - 1)
-        addWallTileEntity(self, index,
-          animation,
-          x,
-          y,
-          tileAbove == Map.WALKABLE and 0.75 or 1
-        )
-      end
+      local tileAbove = Grid.get(self.grid, x, y - 1)
+      addWallTileEntity(self, index,
+        animation,
+        x,
+        y,
+        tileAbove == Map.WALKABLE and 0.75 or 1
+      )
     end
 
     -- floor tiles
