@@ -17,8 +17,6 @@ local itemConfig = require("components.item-inventory.items.config")
 local msgBus = require("components.msg-bus")
 local Enum = require 'utils.enum'
 
-local isDebug = require'config.config'.isDebug
-
 local types = {}
 local items = {
 	types = types,
@@ -65,14 +63,12 @@ function items.registerType(itemDefinition)
 
 	types[def.type] = def.properties
 
-	if isDebug then
-		assert(itemDefinition ~= nil, "item type missing")
-		local file = 'components/item-inventory/items/definitions/'..def.type
-		assert(
-			require(file) ~= nil,
-			'Invalid type `'..tostring(def.type)..'`. Type should match the name of the file since its needed for dynamic requires'
-		)
-	end
+	assert(itemDefinition ~= nil, "item type missing")
+	local file = 'components/item-inventory/items/definitions/'..def.type
+	assert(
+		require(file) ~= nil,
+		'Invalid type `'..tostring(def.type)..'`. Type should match the name of the file since its needed for dynamic requires'
+	)
 
 	return types[def.type]
 end
@@ -172,16 +168,24 @@ local directoriesByModuleType = {
 }
 
 local function loadModuleById(id)
+	local loadedModule = modulesById[id]
+	if loadedModule then
+		return loadedModule
+	end
+
 	local start, _end = string.find(id, '[^_]*')
-	local fileName = string.sub(id, start, _end)
-	local type = string.sub(id, _end + 2)
+	local type = string.sub(id, start, _end)
+	local fileName = string.sub(id, _end + 2)
 	local directory = 'components.item-inventory.items.' .. directoriesByModuleType[type]
 	local fullPath = directory.. '.' ..fileName
-	return require(fullPath)
+
+	require(fullPath)
+	-- modules register themselves via `registerModule` which adds the reference to `modulesById`
+	return modulesById[id]
 end
 
 function items.loadModule(moduleDefinition)
-	local loadedModule = modulesById[moduleDefinition.id]
+	local loadedModule = loadModuleById(moduleDefinition.id)
 	local copy = {}
 	for k,v in pairs(loadedModule) do
 		copy[k] = v
