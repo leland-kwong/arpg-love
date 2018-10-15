@@ -1,4 +1,5 @@
-local isDebug = require 'config.config'.isDebug
+local config = require 'config.config'
+local isDebug = config.isDebug
 local tc = require 'utils.type-check'
 local uid = require 'utils.uid'
 local noop = require 'utils.noop'
@@ -332,7 +333,7 @@ function M.newGroup(groupDefinition)
   )
 
   local Group = groupDefinition
-  local drawQueue = Q:new({development = isDebug})
+  local drawQueue = Q:new({development = config.debugDrawQueue})
   Group.drawQueue = drawQueue
   local componentsById = {}
   local count = 0

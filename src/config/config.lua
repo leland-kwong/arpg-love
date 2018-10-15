@@ -35,6 +35,8 @@ M.window = {
 }
 
 M.isDebug = true
+M.performanceProfile = false
+M.debugDrawQueue = false
 M.collisionDebug = false
 
 M.gameTitle = 'Citizen of Nowhere'
