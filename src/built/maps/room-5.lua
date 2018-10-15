@@ -360,14 +360,14 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 309,
-          y = 81,
+          x = 317,
+          y = 89,
           width = 53,
           height = 53,
           rotation = 0,
           visible = true,
           properties = {
-            ["groupSize"] = 4
+            ["groupSize"] = 3
           }
         },
         {
@@ -450,14 +450,14 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 164,
-          y = 481,
+          x = 116,
+          y = 472,
           width = 53,
           height = 53,
           rotation = 0,
           visible = true,
           properties = {
-            ["groupSize"] = 4
+            ["groupSize"] = 2
           }
         },
         {
@@ -487,7 +487,7 @@ return {
           rotation = 0,
           visible = true,
           properties = {
-            ["groupSize"] = 4
+            ["groupSize"] = 3
           }
         }
       }

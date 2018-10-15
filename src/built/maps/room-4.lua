@@ -367,7 +367,7 @@ return {
           rotation = 0,
           visible = true,
           properties = {
-            ["groupSize"] = 4
+            ["groupSize"] = 2
           }
         },
         {

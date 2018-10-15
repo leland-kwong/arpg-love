@@ -176,9 +176,9 @@
    </properties>
    <ellipse/>
   </object>
-  <object id="3" template="ai-group.tx" x="309" y="81">
+  <object id="3" template="ai-group.tx" x="317" y="89">
    <properties>
-    <property name="groupSize" type="int" value="4"/>
+    <property name="groupSize" type="int" value="3"/>
    </properties>
   </object>
   <object id="4" name="ai-group" type="aiGroup" x="781" y="228" width="53" height="53">
@@ -211,9 +211,9 @@
    </properties>
    <ellipse/>
   </object>
-  <object id="9" name="ai-group" type="aiGroup" x="164" y="481" width="53" height="53">
+  <object id="9" name="ai-group" type="aiGroup" x="116" y="472" width="53" height="53">
    <properties>
-    <property name="groupSize" type="int" value="4"/>
+    <property name="groupSize" type="int" value="2"/>
    </properties>
    <ellipse/>
   </object>
@@ -225,7 +225,7 @@
   </object>
   <object id="11" name="ai-group" type="aiGroup" x="43" y="785" width="53" height="53">
    <properties>
-    <property name="groupSize" type="int" value="4"/>
+    <property name="groupSize" type="int" value="3"/>
    </properties>
    <ellipse/>
   </object>
