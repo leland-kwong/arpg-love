@@ -7,7 +7,7 @@ return {
 
 	blueprint = {
 		baseModifiers = {
-			attackTime = {0.3, 0.3},
+			attackTime = {0.42, 0.42},
 			cooldown = {0.1, 0.1},
 			energyCost = {2, 2},
 		},
@@ -39,8 +39,8 @@ return {
 		experience = 0,
 		onActivate = require(require('alias').path.items..'.inventory-actives.equip-on-click')(),
 		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.aoe-slam')({
-			minDamage = 3,
-			maxDamage = 5
+			minDamage = 5,
+			maxDamage = 7
 		})
 	},
 

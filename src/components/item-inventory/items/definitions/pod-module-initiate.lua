@@ -11,8 +11,8 @@ return {
 
 	blueprint = {
 		baseModifiers = {
-			cooldown = {0.14, 0.14},
-			attackTime = {0.1, 0.1},
+			cooldown = {0.1, 0.1},
+			attackTime = {0.25, 0.25},
 			energyCost = {1, 1}
 		},
 
@@ -38,8 +38,8 @@ return {
 		experience = 0,
 		onActivate = require(require('alias').path.items..'.inventory-actives.equip-on-click')(),
 		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.plasma-shot')({
-			minDamage = 1,
-			maxDamage = 2
+			minDamage = 2,
+			maxDamage = 4
 		})
 	},
 
