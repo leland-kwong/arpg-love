@@ -18,8 +18,8 @@ function love.run()
 
 	-- Main loop time.
 	return function()
-		local isDebug = config.isDebug
-		local focused = (not isDebug) or (isDebug and windowFocused)
+		local isDevelopment = config.isDevelopment
+		local focused = (not isDevelopment) or (isDevelopment and windowFocused)
 
 		-- Process events.
 		if love.event then

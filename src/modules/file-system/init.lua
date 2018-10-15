@@ -104,7 +104,7 @@ function fileSystem.listSavedFiles(rootPath)
   end)
 end
 
-if config.isDebug then
+if config.isDevelopment then
   require 'modules.file-system.test'(fileSystem)
 end
 

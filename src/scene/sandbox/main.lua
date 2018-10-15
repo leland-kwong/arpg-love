@@ -178,7 +178,7 @@ function Sandbox.init(self)
       activeSceneMenu = MenuList.create({
         x = x,
         y = y,
-        options = config.isDebug and sceneOptionsDebug or sceneOptionsNormal,
+        options = config.isDevelopment and sceneOptionsDebug or sceneOptionsNormal,
         onSelect = function(name, value)
           DebugMenu(false)
           value()

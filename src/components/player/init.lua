@@ -104,7 +104,11 @@ local function connectInventory()
         type = 'pod-module-hammer',
       },
       {
-        type = 'augmentation-module-one'
+        type = 'augmentation-module-one',
+        position = {
+          x = 2,
+          y = 4
+        }
       }
       -- {
       --   type = 'lightning-rod',

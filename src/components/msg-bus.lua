@@ -3,7 +3,7 @@ local MessageBus = require 'utils.message-bus'
 
 local M = MessageBus.new()
 
-if config.isDebug then
+if config.isDevelopment then
   local proxy = {}
   setmetatable(M, {
     --[[

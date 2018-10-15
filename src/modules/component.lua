@@ -1,5 +1,5 @@
 local config = require 'config.config'
-local isDebug = config.isDebug
+local isDevelopment = config.isDevelopment
 local tc = require 'utils.type-check'
 local uid = require 'utils.uid'
 local noop = require 'utils.noop'
@@ -175,7 +175,7 @@ function M.createFactory(blueprint)
       -- by keeping initial props as its own property, we can keep the input values immutable.
       initialProps = props,
       blueprint = blueprint
-    }, isDebug)
+    }, isDevelopment)
     assert(
       not c.isComponent,
       invalidPropsErrorMsg
@@ -187,7 +187,7 @@ function M.createFactory(blueprint)
     setmetatable(c, entityMt)
 
     -- type check
-    if isDebug then
+    if isDevelopment then
       tc.validate(c.x, tc.NUMBER, false) -- x-axis position
       tc.validate(c.y, tc.NUMBER, false) -- y-axis position
       tc.validate(c.angle, tc.NUMBER, false)

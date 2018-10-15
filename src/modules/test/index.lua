@@ -1,6 +1,6 @@
-local isDebug = require 'config.config'.isDebug
+local isDevelopment = require 'config.config'.isDevelopment
 
-if isDebug then
+if isDevelopment then
   love.filesystem.load('modules/test/component-test.lua')()
   love.filesystem.load('modules/test/queue-test.lua')()
 end

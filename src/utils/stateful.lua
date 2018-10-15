@@ -4,7 +4,7 @@ A simple, but fast observable state store with set, get, and onChange callback
 
 ]]--
 
-local isDebug = require'config.config'.isDebug
+local isDevelopment = require'config.config'.isDevelopment
 local F = require("utils.functional")
 local objectUtils = require("utils.object-utils")
 local typeCheck = require("utils.type-check")
@@ -42,7 +42,7 @@ local __prevState = {}
 
 function Stateful:new(initialState, options)
 	options = options or {}
-	if not isDebug then
+	if not isDevelopment then
 		-- remove debug-only options
 		options.debug = nil
 	end
@@ -146,7 +146,7 @@ end
 
 function Stateful:replaceState(newState)
 	-- validate state shape to make sure its same as what it was initially
-	if isDebug then
+	if isDevelopment then
 		for k,v in pairs(self.initialState) do
 			if newState[k] == nil then
 				error("[stateful.replaceState] state shape is incorrect. Missing key `"..k.."`")

@@ -93,7 +93,7 @@ end
   run tests after everything is loaded since some tests
   since some of the tests rely on the game loop
 ]]
-if config.isDebug then
+if config.isDevelopment then
   require 'modules.test.index'
   require 'utils.test.index'
   require 'components.loot-generator.test'
