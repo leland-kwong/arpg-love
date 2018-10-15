@@ -20,8 +20,8 @@ msgBus.on(msgBus.PROFILE_FUNC, function(profileProps)
     done = function(_, totalTime, callCount)
       local averageTime = totalTime / callCount
       totalAverageExecutionTime = totalAverageExecutionTime + averageTime
-      local passedThreshold = averageTime >= (profileProps.threshold or 0.1)
-      if passedThreshold and (not msgBus.send(msgBus.IS_CONSOLE_ENABLED)) then
+      local passedThreshold = averageTime <= (profileProps.threshold or 0.1)
+      if passedThreshold then
         return
       end
       table.insert(profileData, Color.WHITE)

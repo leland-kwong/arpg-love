@@ -2,6 +2,13 @@ local config = require'config.config'
 local msgBus = require'components.msg-bus'
 local windowFocused = true
 
+local paused = false
+
+msgBus.PAUSE_GAME_TOGGLE = 'PAUSE_GAME_TOGGLE'
+msgBus.on(msgBus.PAUSE_GAME_TOGGLE, function()
+	paused = not paused
+end)
+
 function love.focus(focused)
   print('window '..(focused and 'focused' or 'unfocused'))
   windowFocused = focused
@@ -41,7 +48,7 @@ function love.run()
 
 		-- Call update and draw
 		if love.update then
-			if focused then
+			if focused and (not paused) then
 				love.update(dt)
 			end
     end -- will pass 0 if love.timer is disabled

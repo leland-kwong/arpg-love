@@ -485,10 +485,8 @@ local perf = require'utils.perf'
 Ai.update = perf({
   enabled = false,
   beforeCall = function()
-    Console.jprof.push('ai_update')
   end,
   done = function(time, totalTime, callCount)
-    Console.jprof.pop('ai_update')
   end
 })(Ai.update)
 
