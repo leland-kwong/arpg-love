@@ -346,13 +346,13 @@ end
 
 local function createLight(self)
   if self.lightRadius then
-    local Lights = require 'components.lights'
-    self.light = self.light or Lights.create({
-      x = self.x,
-      y = self.y,
-      radius = self.lightRadius,
-      lightWorld = 'DUNGEON_LIGHT_WORLD'
-    }):setParent(self)
+    local lightWorld = Component.get('MAIN_SCENE').lightWorld
+    lightWorld:addLight(
+      self.x,
+      self.y,
+      10,
+      self.rarityColor
+    )
   end
 end
 
@@ -361,10 +361,10 @@ function Ai.update(self, dt)
   local isIdle = (self:getFiniteState() ~= states.MOVING) and (not self.isInViewOfPlayer) and (not self.isAggravated)
   self:setDrawDisabled(isIdle)
   if isIdle then
-    if self.light then
-      self.light:delete()
-      self.light = nil
-    end
+    -- if self.light then
+    --   self.light:delete()
+    --   self.light = nil
+    -- end
     return
   end
 

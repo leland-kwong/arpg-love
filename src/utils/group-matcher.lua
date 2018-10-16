@@ -46,12 +46,7 @@ local function GroupMatcher(groupNames)
 
   -- checks if a group contains the given string
   function Matcher.contains(string, group)
-    for k in pairs(group) do
-      if string == k then
-        return true
-      end
-    end
-    return false
+    return group[string]
   end
 
   -- checks if at least one value in groupA exists in groupB

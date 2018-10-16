@@ -138,7 +138,7 @@ local function connectAutoSave(parent)
   local tick = require 'utils.tick'
   local fileSystem = require 'modules.file-system'
   local lastSavedState = nil
-  if (not config.autoSave) then
+  if (not parent.autoSave) then
     return
   end
 
@@ -189,6 +189,7 @@ end)
 
 local Player = {
   id = 'PLAYER',
+  autoSave = config.autoSave,
   class = collisionGroups.player,
   group = groups.all,
   x = startPos.x,

@@ -50,7 +50,7 @@ local characterSystem = msgBus.send(msgBus.PROFILE_FUNC, {
 local profile = require('modules.profile')
 
 function love.update(dt)
-  profile.push('frame')
+  profile.zoneStart('frame')
 
   systemsProfiler()
 
@@ -86,7 +86,7 @@ function love.draw()
 
   groups.system.drawAll()
 
-  profile.pop('frame')
+  profile.zoneEnd('frame')
 end
 
 --[[
