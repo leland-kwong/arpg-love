@@ -29,14 +29,28 @@ local guiType = {
   LIST = 'LIST',
 }
 
+local function getFocusedEntity()
+  for id,entity in pairs(Component.groups.gui.getAll()) do
+    if entity.focused then
+      return entity
+    end
+  end
+end
+
+msgBus.on(msgBus.KEY_PRESSED, function(msg)
+  local entity = getFocusedEntity()
+  if entity then
+    entity:onKeyPress(msg)
+  end
+end)
+
 local Gui = {
   group = groups.gui,
   -- props
   x = 1,
   y = 1,
-  w = 1,
-  h = 1,
   onClick = noop,
+  onKeyPress = noop,
   onChange = noop,
   onCreate = noop,
   onFocus = noop,
@@ -79,8 +93,9 @@ local Gui = {
   types = guiType
 }
 
-local function handleFocusChange(self, origFocused)
-  local isFocusChange = origFocused ~= self.focused
+local function handleFocusChange(self, newFocusState)
+  local isFocusChange = self.focused ~= newFocusState
+  self.focused = newFocusState
   if isFocusChange then
     if self.focused then
       self.onFocus(self)
@@ -92,6 +107,14 @@ local function handleFocusChange(self, origFocused)
       msgBus.send(msgBus.SET_TEXT_INPUT, self.focused)
     end
   end
+end
+
+function Gui.setFocus(entity)
+  local focusedEntity = getFocusedEntity()
+  if focusedEntity then
+    handleFocusChange(focusedEntity, false)
+  end
+  handleFocusChange(entity, true)
 end
 
 local function handleScroll(self, dx, dy)
@@ -119,17 +142,19 @@ end
 function Gui.init(self)
   assert(guiType[self.type] ~= nil, 'invalid gui type'..tostring(self.type))
 
+  self.w, self.h = self.w or 1, self.h or 1
+
   if guiType.LIST == self.type then
     assert(self.h <= love.graphics.getHeight() / self.scale, 'scrollable list height should not be greater than window height')
     self.scrollNode = GuiNode.create({
       x = self.x,
       y = self.y,
       initialX = self.x,
-      initialY = self.y
+      initialY = self.y,
+      final = function()
+        consoleLog('scroll node deleted')
+      end
     }):setParent(self)
-    f.forEach(self.children, function(child)
-      child:setParent(self.scrollNode)
-    end)
   end
 
   if guiType.TEXT_INPUT == self.type then
@@ -154,12 +179,7 @@ function Gui.init(self)
       handleScroll(self, msgValue[1], msgValue[2])
     end
 
-    if msgBus.MOUSE_PRESSED == msgType then
-      local origFocused = self.focused
-      self.focused = self.hovered
-
-      handleFocusChange(self, origFocused)
-
+    if msgBus.MOUSE_CLICKED == msgType then
       if self.hovered then
         local isRightClick = msgValue[3] == 2
         self.onClick(self, isRightClick)
@@ -171,8 +191,12 @@ function Gui.init(self)
       end
     end
 
+    if msgBus.MOUSE_PRESSED == msgType then
+      handleFocusChange(self, self.hovered)
+    end
+
     if self.hovered and love.mouse.isDown(1) then
-        self.onPointerDown(self)
+      self.onPointerDown(self)
     end
 
     if self.focused and guiType.TEXT_INPUT == self.type then
@@ -183,7 +207,7 @@ function Gui.init(self)
       end
 
       -- handle backspace for text input
-      if msgBus.KEY_PRESSED == msgType and msgValue.key == 'backspace' then
+      if msgBus.KEY_DOWN == msgType and msgValue.key == 'backspace' then
         self.text = string.sub(self.text, 1, #self.text - 1)
         self.onChange(self)
       end
@@ -219,13 +243,7 @@ function Gui.update(self, dt)
 
   local mx, my = self.getMousePosition()
   local cacheKey = indexByMouseCoord(mx, my)
-  local items = mouseCollisionsCache:get(cacheKey)
-  local hasChangedPosition = isDifferent(self.x, self.prevX) or isDifferent(self.y, self.prevY)
-  local hasChanges = (not items) or hasChangedPosition
-  if hasChanges then
-    items = collisionWorlds.gui:queryPoint(mx, my, mouseCollisionFilter)
-    mouseCollisionsCache:set(cacheKey, items)
-  end
+  local items = collisionWorlds.gui:queryPoint(mx, my, mouseCollisionFilter)
 
   self.hovered = false
 
@@ -252,6 +270,13 @@ function Gui.update(self, dt)
   end
 
   self.onUpdate(self, dt)
+
+  if self.scrollNode then
+    f.forEach(self.children, function(child)
+      child:setParent(self.scrollNode)
+    end)
+  end
+
   self.prevHovered = self.hovered
   self.prevColPosX = posX
   self.prevColPosY = posY

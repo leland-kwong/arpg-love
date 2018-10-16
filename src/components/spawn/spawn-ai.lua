@@ -76,19 +76,18 @@ local function AiFactory(self)
     local spawnX, spawnY =
       self.x * self.gridSize + math.random(0, self.gridSize) * getRandomDirection(),
       self.y * self.gridSize + math.random(0, self.gridSize) * getRandomDirection()
-    local ai = Ai.create(
-      self.rarity(aiPrototype)
-        :set('debug',             self.debug)
-        :set('x',                 spawnX)
-        :set('y',                 spawnY)
-        :set('collisionWorld',    self.colWorld)
-        :set('pxToGridUnits',     self.pxToGridUnits)
-        :set('findNearestTarget', findNearestTarget)
-        :set('grid',              self.grid)
-        :set('gridSize',          self.gridSize)
-        :set('WALKABLE',          self.WALKABLE)
-        :set('showAiPath',        self.showAiPath)
-    ):setParent(
+    local props = self.rarity(aiPrototype)
+      :set('debug',             self.debug)
+      :set('x',                 spawnX)
+      :set('y',                 spawnY)
+      :set('collisionWorld',    self.colWorld)
+      :set('pxToGridUnits',     self.pxToGridUnits)
+      :set('findNearestTarget', findNearestTarget)
+      :set('grid',              self.grid)
+      :set('gridSize',          self.gridSize)
+      :set('WALKABLE',          self.WALKABLE)
+      :set('showAiPath',        self.showAiPath)
+    local ai = Ai.create(props):setParent(
       Component.get('MAIN_SCENE')
     )
     return ai

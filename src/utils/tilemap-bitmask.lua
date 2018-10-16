@@ -35,7 +35,7 @@ local function iterateGrid(grid, filterCallbacks)
 end
 
 --[[
-if Global.isDebug then
+if Global.isDevelopment then
 	local grid = {
 		{0,0,0,0,0,0},
 		{0,0,1,1,0,0},

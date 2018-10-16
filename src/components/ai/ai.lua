@@ -22,12 +22,13 @@ local Lru = require 'utils.lru'
 local setElectricShockShader = require 'modules.shaders.shader-electric-shock'
 local Enum = require 'utils.enum'
 local collisionGroups = require 'modules.collision-groups'
+local Console = require 'modules.console.console'
+local max, random, abs, min = math.max, math.random, math.abs, math.min
 
 local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
 local shader = love.graphics.newShader(pixelOutlineShader)
 local atlasData = animationFactory.atlasData
-shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
-shader:send('outline_width', 1)
+local shaderSpriteSize = {atlasData.meta.size.w, atlasData.meta.size.h}
 
 local states = Enum({
   'ATTACKING', -- attack has been triggered and character and character is still recovering from it
@@ -37,7 +38,9 @@ local states = Enum({
 })
 
 local Ai = {
-  group = groups.all,
+  class = collisionGroups.ai,
+
+  baseProps = {}, -- initial properties used to create the ai
 
   state = states.IDLE,
   attackRecoveryTime = 0,
@@ -47,8 +50,9 @@ local Ai = {
   moveSpeed = 100,
   attackRange = 8, -- distance in grid units from the player that the ai will stop moving
   sightRadius = 11,
+  lightRadius = 100,
   armor = 0,
-  flatPhysicalDamageReduction = 0,
+  flatPhysicalReduction = 0,
   lightningResist = 0,
   maxHealth = 10,
   healthRegeneration = 0,
@@ -82,8 +86,9 @@ local Ai = {
   onFinal = noop,
   onDestroyStart = noop,
   onUpdateStart = nil,
+
   drawOrder = function(self)
-    return self.group:drawOrder(self) + 1
+    return Component.groups.all:drawOrder(self) + 1
   end
 }
 
@@ -102,20 +107,14 @@ function Ai:checkLineOfSight(grid, WALKABLE, targetX, targetY, debug)
   )
 end
 
-function Ai:aggravatedRadius()
-  local playerFlowFieldDistance = Component.get('PLAYER')
-    :getProp('flowFieldDistance')
-  return (playerFlowFieldDistance - 3) * self.gridSize
-end
-
 local COLLISION_SLIDE = 'slide'
-local collisionFilters = {
-  player = true,
-  ai = true,
-  obstacle = true
-}
+local collisionFilters = collisionGroups.create(
+  'player',
+  'ai',
+  'obstacle'
+)
 local function collisionFilter(item, other)
-  if collisionFilters[other.group] then
+  if collisionGroups.matches(other.group, collisionFilters) then
     return COLLISION_SLIDE
   end
   return false
@@ -127,7 +126,7 @@ local function spreadAggroToAllies(self)
   local c = self.collision
   local areaMultiplier = 10
   local function aggravationCollisionFilter(item)
-    return collisionGroups.matches(item.group, collisionGroups.ai) and item ~= c
+    return collisionGroups.matches(item.group, collisionGroups.ai) and (item ~= c)
   end
   local items, len = self.collisionWorld:queryRect(
     c.x - c.ox * areaMultiplier,
@@ -139,7 +138,7 @@ local function spreadAggroToAllies(self)
 
   for i=1, len do
     local ai = items[i].parent
-    local canSee = self:checkLineOfSight(self.grid, Map.WALKABLE, ai:getProp('x'), ai:getProp('y'))
+    local canSee = self:checkLineOfSight(self.grid, Map.WALKABLE, ai.x, ai.y)
     if canSee and (not ai.isAggravated) then
       local id = ai:getId()
       local message = aggroMessageCache:get(id)
@@ -147,20 +146,15 @@ local function spreadAggroToAllies(self)
         message = {parent = ai}
         aggroMessageCache:set(id, message)
       end
-      msgBus.send(msgBus.CHARACTER_AGGRO, message)
+      -- trigger a hit message with no damage
+      msgBus.send(msgBus.CHARACTER_HIT, message)
     end
   end
 end
 
-local max, random = math.max, math.random
-local onDamageTaken = require 'modules.handle-damage-taken'
-
-local function handleHits(self, dt)
-  local hitManager = require 'modules.hit-manager'
-  local hitCount = hitManager(self, dt, onDamageTaken)
-  local hasHits = hitCount > 0
-
+local function handleAggro(self, dt)
   local previouslyAggravated = self.isAggravated
+  local hasHits = self.hitCount > 0
   if hasHits then
     self.isAggravated = true
     if (not previouslyAggravated) then
@@ -216,7 +210,7 @@ local function computeSeparation(self, neighbors)
 		-- add separation vector, reducing strength by distance
 		-- this can be fancier with decay by the square or taking into account weight or whatever
 		local sepX, sepY = Math.normalizeVector(self.x - n.x, self.y - n.y)
-		local dist = math.max(0.01, Math.dist(self.x, self.y, n.x, n.y) - n.w*0.5 - self.w*0.5)
+		local dist = max(0.01, Math.dist(self.x, self.y, n.x, n.y) - n.w*0.5 - self.w*0.5)
 		sx = sx + (sepX/dist)
 		sy = sy + (sepY/dist)
 	end
@@ -253,7 +247,7 @@ local function computeObstacleInfluence(self)
   end
 	-- We'll just use the single nearest obstacle.
 	-- A lot of the time this is enough but more complex environments might need influences from all nearby obstacles
-  dist = math.max(0.01, dist - self.w*0.5)
+  dist = max(0.01, dist - self.w*0.5)
 	local sepX, sepY = Math.normalizeVector(self.x - no.x, self.y - no.y)
 
 	return sepX/dist, sepY/dist
@@ -273,7 +267,6 @@ local function getNeighbors(agent, neighborOffset)
 	)
 end
 
-local min = math.min
 local function setNextPosition(self, speed, radius)
   local finiteState = self:getFiniteState()
   if (finiteState ~= states.MOVING) and (finiteState ~= states.FREE_MOVING) then
@@ -290,7 +283,7 @@ local function setNextPosition(self, speed, radius)
   -- when they can hit the player, for example).
   local targetX, targetY = self.targetX, self.targetY
 	local targetDist = Math.dist(self.x, self.y, targetX, targetY)
-	local targetDistDamping = math.min(1.0, targetDist/radius)
+	local targetDistDamping = min(1.0, targetDist/radius)
 
 	-- Calculate direction influence vectors
 	-- Remember that you're not bound to the classical boids here. You can add influences from all sorts
@@ -323,6 +316,12 @@ local function setNextPosition(self, speed, radius)
 	self.x = self.x + self.vx * speed * targetDistDamping
   self.y = self.y + self.vy * speed * targetDistDamping
   self.collision:update(self.x, self.y)
+
+  local Vec2 = require 'modules.brinevector'
+  self.prevX, self.prevY = self.prevX or 0, self.prevY or 0
+  self.dv = self.dv or Vec2(0, 0)
+  self.dv.x, self.dv.y = self.x - self.prevX, self.y - self.prevY
+  self.prevX, self.prevY = self.x, self.y
 end
 
 function Ai.getFiniteState(self)
@@ -345,93 +344,106 @@ function Ai.getActualSpeed(self, dt)
   return max(0, self:getCalculatedStat('moveSpeed') * dt)
 end
 
+local function createLight(self)
+  if self.lightRadius then
+    local Lights = require 'components.lights'
+    self.light = self.light or Lights.create({
+      x = self.x,
+      y = self.y,
+      radius = self.lightRadius,
+      lightWorld = 'DUNGEON_LIGHT_WORLD'
+    }):setParent(self)
+  end
+end
+
 function Ai.update(self, dt)
+  handleAggro(self, dt)
+  local isIdle = (self:getFiniteState() ~= states.MOVING) and (not self.isInViewOfPlayer) and (not self.isAggravated)
+  self:setDrawDisabled(isIdle)
+  if isIdle then
+    if self.light then
+      self.light:delete()
+      self.light = nil
+    end
+    return
+  end
+
+  local shouldCheckStuckStatus = self:getFiniteState() == states.MOVING and self.dv and (not self.canSeeTarget)
+  if shouldCheckStuckStatus then
+    if self.isInAttackRange then
+      self.checkCount = 0
+    end
+
+    self.checkCount = (self.checkCount or 0) + 1
+    if self.checkCount >= 60 then
+      local isStuck = abs(self.dv.x) <= 6 and abs(self.dv.y) <= 6
+      if isStuck then
+        self.targetX = nil
+      end
+      self.checkCount = 0
+      self.dv = self.dv * 0
+    end
+  end
+
+  createLight(self)
+
+  local playerRef = Component.get('PLAYER') or Component.get('TEST_PLAYER')
+  local playerX, playerY = playerRef:getPosition()
+
   local grid = self.grid
   self.clock = self.clock + dt
   self.frameCount = self.frameCount + 1
   self.attackRecoveryTime = self.attackRecoveryTime - dt
 
-  handleHits(self, dt)
   if self.destroyedAnimation then
-    local complete = self.destroyedAnimation:update(dt)
-    if complete then
-      self:delete()
-    end
     return
   end
-
-  self:setDrawDisabled(not self.isInViewOfPlayer)
 
   if self.onUpdateStart then
     self.onUpdateStart(self, dt)
   end
 
-  if (self.frameCount % 5 == 0) then
-    local shouldFlipX = math.abs(self.vx) > 0.15
-    self.facingDirectionX = shouldFlipX and (self.vx > 0 and 1 or -1) or self.facingDirectionX
-    self.facingDirectionY = self.vy > 0 and 1 or -1
-  end
-
-  local playerRef = Component.get('PLAYER') or Component.get('TEST_PLAYER')
-  local flowField = playerRef.flowField
-
-  local playerRef = self.getPlayerRef and self.getPlayerRef() or Component.get('PLAYER')
-  local playerX, playerY = playerRef:getPosition()
-  local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
-  self.isInViewOfPlayer = gridDistFromPlayer <= 40
-  self.gridDistFromPlayer = gridDistFromPlayer
-
-  if self:isDeleted() then
-    return
-  end
-
-  if self.hitAnimation then
-    local done = self.hitAnimation()
-    if done then
-      self.hitAnimation = nil
-    end
-  end
-
-  local centerOffset = self.padding
-  local prevGridX, prevGridY = self.pxToGridUnits(self.prevX or 0, self.prevY or 0, self.gridSize)
-  local gridX, gridY = self.pxToGridUnits(self.x, self.y, self.gridSize)
-  -- we can use this detect whether the agent is stuck if the grid position has remained the same for several frames and was trying to move
-  local isNewGridPosition = prevGridX ~= gridX or prevGridY ~= gridY
-  local isNewFlowField = self.lastFlowField ~= flowField
-  local actualSightRadius = self.isAggravated and
-      self:aggravatedRadius() or
-      self:getCalculatedStat('sightRadius')
-
   local targetX, targetY
-  -- only search for the target if its in view of player
-  if self.isInViewOfPlayer then
+
+  if (self.isInViewOfPlayer or self.isAggravated) then
+    -- update ai facing direction
+    if (self.frameCount % 5 == 0) then
+      local shouldFlipX = abs(self.vx) > 0.15
+      self.facingDirectionX = shouldFlipX and (self.vx > 0 and 1 or -1) or self.facingDirectionX
+      self.facingDirectionY = self.vy > 0 and 1 or -1
+    end
+
+    -- handle hit animation
+    if self.hitAnimation then
+      local done = self.hitAnimation()
+      if done then
+        self.hitAnimation = nil
+      end
+    end
+
     targetX, targetY = self.findNearestTarget(
       self.x,
       self.y,
       40 * self.gridSize
     )
+
+    self.animation:update(dt / 12)
   end
 
+  local actualSightRadius = self:getCalculatedStat('sightRadius')
   local canSeeTarget = self.isInViewOfPlayer and self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY, self.losDebug)
-  local isInAggroRange = canSeeTarget and (gridDistFromPlayer <= (actualSightRadius / self.gridSize))
-  local shouldGetNewPath = flowField and canSeeTarget
+  local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
+  local isInAggroRange = gridDistFromPlayer <= (actualSightRadius / self.gridSize)
   local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or 99999
   local isInAttackRange = canSeeTarget and (distFromTarget <= self:getCalculatedStat('attackRange'))
   local originalX, originalY = self.x, self.y
 
   self.canSeeTarget = canSeeTarget
 
-  if isInAggroRange then
-    if shouldGetNewPath then
-      local distanceToPlanAhead = actualSightRadius / self.gridSize
-      local path = self.getPathWithAstar(flowField, grid, gridX, gridY, distanceToPlanAhead, self.WALKABLE, self.scale)
-      if path then
-        local targetPos = path[#path]
-        if targetPos then
-          self.targetX, self.targetY = targetPos.x * self.gridSize, targetPos.y * self.gridSize
-        end
-      end
-    end
+  if canSeeTarget and (isInAggroRange or self.isAggravated) then
+    local path
+    local gridX, gridY = self.pxToGridUnits(self.x, self.y, self.gridSize)
+    self.targetX, self.targetY = targetX, targetY
 
     -- use abilities
     if (not self.silenced) then
@@ -453,20 +465,14 @@ function Ai.update(self, dt)
     end
 
     self.isInAttackRange = isInAttackRange
-    if isInAttackRange then
+    local isTargetStillAtLastKnownPosition = self.targetX == targetX and self.targetY == targetY
+    if isInAttackRange and isTargetStillAtLastKnownPosition then
       -- we're already in attack range, so we can stop the update here since the rest of the update is just moving
       return
     end
-
-    if shouldGetNewPath and (self:getFiniteState() ~= states.ATTACKING) then
-      setNextPosition(self, self:getActualSpeed(dt), 40)
-    end
-  elseif self.targetX and (self:getFiniteState() ~= states.ATTACKING) then
-    setNextPosition(self, self:getActualSpeed(dt), 40)
   end
-
-  if self.isInViewOfPlayer then
-    self.animation:update(dt / 12)
+  if self.targetX and (self:getFiniteState() ~= states.ATTACKING) then
+    setNextPosition(self, self:getActualSpeed(dt), 40)
   end
 
   local nextX, nextY = self.x, self.y
@@ -478,11 +484,9 @@ end
 local perf = require'utils.perf'
 Ai.update = perf({
   enabled = false,
-  done = function(_, totalTime, callCount)
-    local avgTime = totalTime / callCount
-    if (callCount % 100) == 0 then
-      consoleLog('ai update -', avgTime)
-    end
+  beforeCall = function()
+  end,
+  done = function(time, totalTime, callCount)
   end
 })(Ai.update)
 
@@ -516,7 +520,7 @@ local statusIconAnimations = getStatusIcons()
 local function drawStatusEffects(self, statusIcons)
   local offsetX = 0
   local iconSize = 20
-  for hitId,hit in pairs(self.hits) do
+  for hitId,hit in pairs(self.hitData) do
     if hit.statusIcon then
       love.graphics.draw(
         animationFactory.atlas,
@@ -545,10 +549,16 @@ function drawSprite(self, ox, oy)
 end
 
 local textureW, textureH = animationFactory.atlas:getDimensions()
-local shockResolution = {
-  1 * 10,
-  (textureH/textureW) * 10
-}
+local shockResMult = 10
+local shockResolution = textureH > textureW
+  and {
+    (textureW/textureH) * shockResMult,
+    1 * shockResMult,
+  }
+  or {
+    1 * shockResMult,
+    (textureH/textureW) * shockResMult,
+  }
 
 local function drawShockEffect(self, ox, oy)
   setElectricShockShader(
@@ -583,6 +593,8 @@ function Ai.draw(self)
 
   if (self.outlineColor) then
     love.graphics.setShader(shader)
+    shader:send('sprite_size', shaderSpriteSize)
+    shader:send('outline_width', 1)
     shader:send('outline_color', self.outlineColor)
     shader:send('fill_color', self.fillColor)
     shader:send('alpha', self.opacity)
@@ -618,7 +630,7 @@ local function adjustInitialPositionIfNeeded(self)
 end
 
 local function setupAbilities(self)
-  local abilityManager = require 'components.abilities.manager'
+  local abilityManager = require 'modules.abilities.manager'
   for i=1, #self.abilities do
     -- transform ability into a coroutine
     self.abilities[i] = abilityManager.new(self.abilities[i])
@@ -633,6 +645,11 @@ function Ai.init(self)
   assert(type(self.gridSize) == 'number')
   local scale = self.scale
   local gridSize = self.gridSize
+
+  Component.addToGroup(self, groups.all)
+  Component.addToGroup(self, groups.character)
+  Component.addToGroup(self, 'disabled')
+  self.onDamageTaken = require 'modules.handle-damage-taken'
 
   -- [[ BASE PROPERTIES ]]
   self.health = self.health or self.maxHealth
@@ -693,39 +710,23 @@ function Ai.init(self)
   self.sightRadius = self.sightRadius * self.gridSize
   self.getPathWithAstar = Perf({
     enabled = false,
-    done = function(t)
-      consoleLog('ai path:', t)
+    done = function(_, totalTime, callCount)
+      consoleLog('ai path:', totalTime/callCount)
     end
   })(aiPathWithAstar())
-
-  self.listeners = {
-    msgBus.on(msgBus.CHARACTER_HIT, function(msgValue)
-      if msgValue.parent ~= self then
-        return msgValue
-      end
-
-      local uid = require 'utils.uid'
-      local hitId = msgValue.source or uid()
-      self.hits[hitId] = msgValue
-
-      return msgValue
-    end),
-
-    msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
-      if msgValue.parent ~= self then
-        return msgValue
-      end
-
-      self:onDestroyStart()
-      return msgValue
-    end)
-  }
 
   self.onInit(self)
 end
 
-function Ai.final(self)
-  msgBus.off(self.listeners)
+function Ai.serialize(self)
+  local objectUtils = require 'utils.object-utils'
+  local propsToSave = {'health', 'x', 'y'}
+  for i=1, #propsToSave do
+    local prop = propsToSave[i]
+    local val = self[prop]
+    self.initialProps:set(prop, val)
+  end
+  return self.initialProps
 end
 
 return Component.createFactory(Ai)

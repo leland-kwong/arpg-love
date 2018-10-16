@@ -32,7 +32,7 @@ local Camera = function(options)
     local isFarTransition = (dist / config.gridSize) > 50
     if isFarTransition then
       -- increase duration so that the screen doesn't scroll too fast, otherwise it looks too jarring
-      actualDuration = 2
+      actualDuration = 1
     end
     if reset then
       lerpTween = tween.new(actualDuration, camera, targetPosition, tween.easing.outExpo)
@@ -81,10 +81,11 @@ local Camera = function(options)
   function camera:getBounds(divisor)
     divisor = divisor or 1
     local scale = self.scale
-    local west = (self.x * scale) - self.w/2
-    local east = (self.x * scale) + self.w/2
-    local north = (self.y * scale) - self.h/2
-    local south = (self.y * scale) + self.h/2
+    local halfWidth, halfHeight = self.w/scale/2, self.h/scale/2
+    local west = self.x - halfWidth
+    local east = self.x + halfWidth
+    local north = self.y - halfHeight
+    local south = self.y + halfHeight
     return
       west / divisor,
       east / divisor,
@@ -92,18 +93,25 @@ local Camera = function(options)
       south / divisor
   end
 
+  function camera:getSize()
+    return self.w/self.scale, self.h/self.scale
+  end
+
   -- userful for debugging
   function camera:drawBounds()
-    local w,e,n,s = camera:getBounds()
+    local w,e,n,s = self:getBounds()
+    local width, height = self:getSize()
+    local oLineWidth = love.graphics.getLineWidth()
     love.graphics.setColor(1,1,1)
     love.graphics.setLineWidth(2)
     love.graphics.rectangle(
       'line',
-      w / camera.scale,
-      n / camera.scale,
-      camera.w / camera.scale,
-      camera.h / camera.scale
+      w,
+      n,
+      width,
+      height
     )
+    love.graphics.setLineWidth(oLineWidth)
   end
 
   function camera:setScale(scale)

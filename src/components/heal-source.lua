@@ -5,6 +5,7 @@ local function healRoutine(healSource, tickRate)
 	local amount = healSource.amount
 	local duration = healSource.duration
 	local amountPerTick = (amount / healSource.duration) * tickRate
+
 	-- we want to heal in integer amounts, so we store fractional remainders
 	local remainder = 0
 
@@ -37,6 +38,9 @@ local function healRoutine(healSource, tickRate)
 end
 
 function HealSource.remove(self, source)
+	if not self.healSources then
+		return
+	end
 	self.healSources[source] = nil
 end
 
@@ -46,7 +50,7 @@ local function updateProperty(rootStore, changeAmount, property, maxProperty)
   local curProp = state[property]
   local maxProp = state[maxProperty] + state.statModifiers[maxProperty]
 	local newProp = max(0, min(maxProp, curProp + changeAmount))
-  rootStore:set(property, newProp)
+	rootStore:set(property, newProp)
 end
 
 function HealSource.add(self, healSource, rootStore)

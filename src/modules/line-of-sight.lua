@@ -10,7 +10,7 @@ local function getSlope(x1, y1, x2, y2)
 end
 
 -- return [FUNCTION] - a line of sight checker based on the provided grid and walkable params
-return function(grid, WALKABLE, debugFn, isDebug)
+return function(grid, WALKABLE, debugFn, isDevelopment)
   local prevX, prevY
 
   local function callback(_, gridX, gridY, i, DONE)
@@ -44,7 +44,7 @@ return function(grid, WALKABLE, debugFn, isDebug)
   -- return [BOOLEAN] - true if line of sight is valid
   local function checkLineOfSight(x1, y1, x2, y2)
     -- if any values are not integers, we can assume that they're not grid positions
-    if (isDebug) then
+    if (isDevelopment) then
       local isGridCoordinates =
         grid[y1]      ~= nil and
         grid[y1][x1]  ~= nil and

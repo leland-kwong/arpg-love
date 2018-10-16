@@ -17,8 +17,8 @@ local function setWithUndefinedCheck(self, prop, value)
   return self
 end
 
-local function setProp(obj, isDebug)
-  obj.set = isDebug and setWithUndefinedCheck or set
+local function setProp(obj, isDevelopment)
+  obj.set = isDevelopment and setWithUndefinedCheck or set
   return obj
 end
 

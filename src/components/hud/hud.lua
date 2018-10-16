@@ -20,6 +20,7 @@ local max = math.max
 local Hud = {
   id = 'HUD',
   group = groups.hud,
+  minimapEnabled = true,
   rootStore = {}
 }
 
@@ -42,17 +43,20 @@ local function setupExperienceIndicator(self)
 end
 
 function Hud.init(self)
-  local minimapW, minimapH = 100, 100
-  local minimapMargin = 5
-  Minimap.create({
-    camera = camera,
-    grid = Component.get('MAIN_SCENE').mapGrid,
-    x = love.graphics.getWidth()/config.scale - minimapW - minimapMargin,
-    y = minimapH + minimapMargin,
-    w = minimapW,
-    h = minimapH,
-    scale = config.scale
-  }):setParent(self)
+  local mainSceneRef = Component.get('MAIN_SCENE')
+  if mainSceneRef and self.minimapEnabled then
+    local minimapW, minimapH = 100, 100
+    local minimapMargin = 5
+    Minimap.create({
+      camera = camera,
+      grid = mainSceneRef.mapGrid,
+      x = love.graphics.getWidth()/config.scale - minimapW - minimapMargin,
+      y = minimapH + minimapMargin,
+      w = minimapW,
+      h = minimapH,
+      scale = config.scale
+    }):setParent(self)
+  end
 
   self.hudTextLayer = GuiText.create({
     group = groups.hud,
@@ -108,7 +112,7 @@ function Hud.init(self)
     end
   }):setParent(self)
 
-  -- mana bar
+  -- -- mana bar
   StatusBar.create({
     x = offX + healthManaWidth / 2,
     y = winHeight - barHeight - 13,
@@ -129,6 +133,10 @@ function Hud.init(self)
       end)
 
       return msgValue
+    end),
+    msgBus.on(msgBus.SCENE_CHANGE, function(sceneRef)
+      local ZoneInfo = require 'components.hud.zone-info'
+      ZoneInfo.create()
     end)
   }
 

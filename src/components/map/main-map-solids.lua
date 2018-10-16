@@ -5,7 +5,6 @@ local collisionObject = require 'modules.collision'
 local f = require 'utils.functional'
 
 local MainMapSolidsBlueprint = {
-  group = groups.all,
   animation = nil,
   x = 0,
   y = 0,
@@ -13,7 +12,12 @@ local MainMapSolidsBlueprint = {
   oy = 0,
   opacity = 1,
   gridSize = 0,
+  disabled = true
 }
+
+Component.newGroup({
+  name = 'activeWalls'
+})
 
 function MainMapSolidsBlueprint.changeTile(self, animation, x, y, opacity)
   local tileX, tileY = x * self.gridSize, y * self.gridSize
@@ -25,6 +29,20 @@ function MainMapSolidsBlueprint.changeTile(self, animation, x, y, opacity)
   self.y = tileY
   self.opacity = opacity
 
+  return self
+end
+
+function MainMapSolidsBlueprint.disable(self)
+  self.disabled = true
+  Component.removeFromGroup(self, 'all')
+  Component.removeFromGroup(self, 'activeWalls')
+  return self
+end
+
+function MainMapSolidsBlueprint.enable(self)
+  self.disabled = false
+  Component.addToGroup(self, 'all')
+  Component.addToGroup(self, 'activeWalls')
   return self
 end
 
@@ -48,7 +66,7 @@ function MainMapSolidsBlueprint.draw(self)
 end
 
 function MainMapSolidsBlueprint.drawOrder(self)
-  return self.group:drawOrder(self)
+  return Component.groups.all:drawOrder(self)
 end
 
 return Component.createFactory(MainMapSolidsBlueprint)

@@ -1,8 +1,8 @@
+local Component = require 'modules.component'
 local Color = require 'modules.color'
 local PopupTextController = require 'components.popup-text'
 local Sound = require 'components.sound'
 local msgBus = require 'components.msg-bus'
-local tween = require 'modules.tween'
 
 local popupText = PopupTextController.create({
   font = require 'components.font'.secondary.font
@@ -24,11 +24,13 @@ end
 
 local function onDamageTaken(self, actualDamage, actualNonCritDamage, criticalMultiplier, actualLightningDamage)
   self.health = self.health - actualDamage
-  local isDestroyed = self.health <= 0
+  self.isDestroyed = self.health <= 0
 
   if (actualDamage == 0) then
     return
   end
+
+  Component.addToGroup(self:getId(), 'all', self)
 
   local getTextSize = require 'components.gui.gui-text'.getTextSize
   local offsetCenter = -getTextSize(actualDamage, popupText.font) / 2
@@ -48,20 +50,7 @@ local function onDamageTaken(self, actualDamage, actualNonCritDamage, criticalMu
   )
   self.hitAnimation = coroutine.wrap(hitAnimation)
 
-  if isDestroyed then
-    msgBus.send(msgBus.ENEMY_DESTROYED, {
-      parent = self,
-      x = self.x,
-      y = self.y,
-      experience = self.experience
-    })
-
-    self.destroyedAnimation = tween.new(0.5, self, {opacity = 0}, tween.easing.outCubic)
-    self.collision:delete()
-    return
-  end
-
-if actualLightningDamage > 0 then
+  if actualLightningDamage > 0 then
     love.audio.stop(Sound.ELECTRIC_SHOCK_SHORT)
     love.audio.play(Sound.ELECTRIC_SHOCK_SHORT)
   end

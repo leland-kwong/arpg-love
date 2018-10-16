@@ -6,5 +6,7 @@ return GroupMatcher({
   'player',
   'projectile',
   'environment',
-  'hotSpot'
+  'floorItem',
+  'hotSpot',
+  'mainMap'
 })

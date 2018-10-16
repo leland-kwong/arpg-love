@@ -6,16 +6,19 @@ local Color = require 'modules.color'
 local drawItem = require 'components.item-inventory.draw-item'
 local config = require 'config.config'
 local setProp = require 'utils.set-prop'
+local extend = require 'utils.object-utils'.extend
+local Vec2 = require 'modules.brinevector'
+local propTypesCalculator = require 'components.state.base-stat-modifiers'.propTypesCalculator
 
-local keyMap = config.keyboard
-local mouseInputMap = config.mouseInputMap
+local keyMap = config.userSettings.keyboard
+local mouseInputMap = config.userSettings.mouseInputMap
 
 local function ActiveConsumableHandler()
   local curCooldown = 0
   local skillCooldown = 0
   local activeItem = nil
   local max = math.max
-  local itemDefinitions = require("components.item-inventory.items.item-definitions")
+  local itemSystem = require("components.item-inventory.items.item-system")
   local skill = {
     type = 'CONSUMABLE'
   }
@@ -33,13 +36,16 @@ local function ActiveConsumableHandler()
     if (not activeItem) or (curCooldown > 0) then
       return skill
     else
-      local activateFn = itemDefinitions.getDefinition(activeItem).onActivateWhenEquipped
+      local activateFn = itemSystem.loadModule(activeItem.onActivateWhenEquipped).active
       if not activateFn then
         return skill
       end
-      local instance = activateFn(activeItem)
-      curCooldown = instance.cooldown
-      skillCooldown = instance.cooldown
+      activateFn(activeItem)
+      local curState = self.rootStore:get()
+      local baseCooldown = activeItem.baseModifiers.cooldown or 0
+      local actualCooldown = propTypesCalculator.cooldownReduction(baseCooldown, curState.statModifiers.cooldownReduction)
+      curCooldown = actualCooldown
+      skillCooldown = actualCooldown
       return skill
     end
   end
@@ -57,8 +63,8 @@ local function ActiveConsumableHandler()
     if (not activeItem) then
       return
     end
-    local itemDefinitions = require("components.item-inventory.items.item-definitions")
-    local renderFn = itemDefinitions.getDefinition(activeItem).render
+    local itemSystem = require("components.item-inventory.items.item-system")
+    local renderFn = itemSystem.getDefinition(activeItem).render
     if renderFn then
       renderFn(activeItem)
     end
@@ -75,22 +81,19 @@ local function ActiveEquipmentHandler()
   local skill = {
     type = 'EQUIPMENT'
   }
-  local itemDefinitions = require("components.item-inventory.items.item-definitions")
+  local itemSystem = require("components.item-inventory.items.item-system")
 
   local floor = math.floor
   local function modifyAbility(instance, modifiers)
     local v = instance
     local m = modifiers
-    local totalFlatWeaponDamage = m.weaponDamage
-    local totalWeaponDmg = v.weaponDamageScaling * totalFlatWeaponDamage
     local dmgMultiplier = 1 + m.percentDamage
-    local min = floor((v.minDamage * dmgMultiplier) + m.flatDamage + totalWeaponDmg)
-    local max = floor((v.maxDamage * dmgMultiplier) + m.flatDamage + totalWeaponDmg)
+    local min = floor((v.minDamage * dmgMultiplier) + m.flatDamage)
+    local max = floor((v.maxDamage * dmgMultiplier) + m.flatDamage)
 
     -- update instance properties
     v:set('minDamage', min)
       :set('maxDamage', max)
-      :set('cooldown', v.cooldown - (v.cooldown * m.cooldownReduction))
 
     return v
   end
@@ -109,9 +112,10 @@ local function ActiveEquipmentHandler()
     if (not activeItem) or (curCooldown > 0) or (playerRef.attackRecoveryTime > 0) then
       return skill
     else
-      local definition = itemDefinitions.getDefinition(activeItem)
-      local activateFn = definition.onActivateWhenEquipped
-      local energyCost = definition.energyCost(activeItem)
+      local definition = itemSystem.getDefinition(activeItem)
+      local activateModule = itemSystem.loadModule(activeItem.onActivateWhenEquipped)
+      local activateFn = activateModule and activateModule.active
+      local energyCost = activeItem.baseModifiers.energyCost
       -- time an attack takes to finish (triggers a global cooldown)
       local curState = self.rootStore:get()
       local enoughEnergy = (energyCost == nil) or
@@ -125,27 +129,40 @@ local function ActiveEquipmentHandler()
         return skill
       end
 
-      local attackTime = definition.attackTime or 0.1
-      local actualAttackTime = attackTime - (attackTime * curState.statModifiers.attackTimeReduction)
-      playerRef:set('attackRecoveryTime', actualAttackTime)
-      msgBus.send(
-        msgBus.PLAYER_WEAPON_ATTACK,
-        { attackTime = actualAttackTime }
-      )
-
       local mx, my = camera:getMousePosition()
       local playerX, playerY = self.player:getPosition()
-      local instance = modifyAbility(
-        activateFn(activeItem, setProp({
+      local abilityData = activateFn(activeItem)
+      local abilityEntity = abilityData.blueprint.create(
+        extend(
+          abilityData.props, {
             x = playerX
           , y = playerY
           , x2 = mx
           , y2 = my
-        })),
+          , source = activeItem.__id
+        })
+      )
+      local instance = modifyAbility(
+        abilityEntity,
         curState.statModifiers
       )
-      curCooldown = instance.cooldown
-      skillCooldown = instance.cooldown
+      local baseCooldown = activeItem.baseModifiers.cooldown or 0
+      local actualCooldown = propTypesCalculator.cooldownReduction(baseCooldown, curState.statModifiers.cooldownReduction)
+      curCooldown = actualCooldown
+      skillCooldown = actualCooldown
+
+      local attackTime = activeItem.baseModifiers.attackTime or 0
+      local actualAttackTime = propTypesCalculator.attackTimeReduction(attackTime, curState.statModifiers.attackTimeReduction)
+      playerRef:set('attackRecoveryTime', actualAttackTime)
+      msgBus.send(
+        msgBus.PLAYER_WEAPON_ATTACK,
+        {
+          attackTime = actualAttackTime,
+          source = activeItem.__id,
+          fromPos = Vec2(playerX, playerY),
+          targetPos = Vec2(mx, my)
+        }
+      )
 
       local actualEnergyCost = energyCost -
         (energyCost * curState.statModifiers.energyCostReduction)
@@ -160,7 +177,7 @@ local function ActiveEquipmentHandler()
   function skill.updateCooldown(dt)
     curCooldown = max(0, curCooldown - dt)
     if activeItem then
-      local itemUpdateFn = itemDefinitions.getDefinition(activeItem).update
+      local itemUpdateFn = itemSystem.getDefinition(activeItem).update
       if itemUpdateFn then
         itemUpdateFn(activeItem, dt)
       end
@@ -176,8 +193,8 @@ local function ActiveEquipmentHandler()
     if (not activeItem) then
       return skill
     end
-    local itemDefinitions = require("components.item-inventory.items.item-definitions")
-    local renderFn = itemDefinitions.getDefinition(activeItem).render
+    local itemSystem = require("components.item-inventory.items.item-system")
+    local renderFn = itemSystem.getDefinition(activeItem).render
     if renderFn then
       renderFn(activeItem)
     end
@@ -238,8 +255,7 @@ function ActiveSkillInfo.init(self)
     end)
   }
 
-  local playerRef = Component.get('PLAYER')
-  self.itemRender = ItemRender.create({
+  local itemRenderRef = ItemRender.create({
     draw = function()
       love.graphics.setColor(1,1,1)
       skillHandlers[parent.skillId].draw(parent)
@@ -247,8 +263,8 @@ function ActiveSkillInfo.init(self)
     drawOrder = function(self)
       return self.group:drawOrder(self) + 3
     end
-  }):setPosition(playerRef:getPosition())
-    :setParent(playerRef)
+  })
+  Component.addToGroup(itemRenderRef:getId(), 'gameWorld', itemRenderRef)
 end
 
 function ActiveSkillInfo.update(self, dt)
@@ -261,8 +277,8 @@ local mouseBtnToString = {
 }
 
 local function drawHotkEy(self)
-  local mouseBtn = config.mouseInputMap[self.skillId]
-  local keyboardKey = config.keyboard[self.skillId]
+  local mouseBtn = config.userSettings.mouseInputMap[self.skillId]
+  local keyboardKey = config.userSettings.keyboard[self.skillId]
   local hotKeyToShow = mouseBtn and mouseBtnToString[mouseBtn] or keyboardKey
   self.hudTextLayer:add(
     hotKeyToShow,

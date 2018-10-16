@@ -276,8 +276,8 @@ local function generateFlowField(self, dt)
   local ts = socket.gettime()
   self.dummyPlayer:setPosition(mx, my)
   self.targetPosition = {
-    x = self.dummyPlayer:getProp('x'),
-    y = self.dummyPlayer:getProp('y')
+    x = self.dummyPlayerx,
+    y = self.dummyPlayery
   }
 
   self.mainFlowField = self.getMainFlowField(grid, gridX, gridY)

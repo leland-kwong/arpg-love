@@ -43,6 +43,7 @@ end
 
 local Portal = {
   group = groups.all,
+  class = 'portal',
   locationName = '', -- name of location
   posOffset = {
     x = 2,
@@ -154,5 +155,12 @@ local Portal = {
     return self.group:drawOrder(self) + 1
   end
 }
+
+function Portal.serialize(self)
+  local Vec2 = require 'modules.brinevector'
+  return {
+    position = Vec2(self.x, self.y)
+  }
+end
 
 return Component.createFactory(Portal)

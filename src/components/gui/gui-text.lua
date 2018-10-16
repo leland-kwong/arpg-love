@@ -1,7 +1,13 @@
+--[[
+  NOTE: Some fonts may have incorrect outline rendering due to the author exporting it out poorly.
+  To fix this, we can re-export the font using [bit font maker](http://www.pentacom.jp/pentacom/bitfontmaker2/editfont.php).
+]]
+
 local Component = require 'modules.component'
 local groups = require 'components.groups'
 local font = require 'components.font'
 local f = require 'utils.functional'
+local pixelOutlineShader = require 'modules.shaders.pixel-text-outline'
 
 local textForMeasuringCache = {}
 local function getTextForMeasuring(font)
@@ -22,11 +28,15 @@ local GuiTextLayer = {
   -- statics
   getTextSize = function(text, font, wrapLimit, alignMode)
     local textForMeasuring = getTextForMeasuring(font)
-    textForMeasuring:setf(
-      text,
-      wrapLimit or 99999,
-      alignMode or 'left'
-    )
+    if type(text) == 'table' then
+      textForMeasuring:setf(
+        text,
+        wrapLimit or 99999,
+        alignMode or 'left'
+      )
+    else
+      textForMeasuring:set(text)
+    end
     return textForMeasuring:getWidth(), textForMeasuring:getHeight()
   end
 }
@@ -53,18 +63,7 @@ function GuiTextLayer.addTextGroup(self, textGroup, x, y)
   return self
 end
 
-local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
-local outlineColor = {0,0,0,1}
-local shader = love.graphics.newShader(pixelOutlineShader)
-local textW, textH = 16, 16
-
 function GuiTextLayer.init(self)
-  shader:send('sprite_size', {textW, textH})
-  shader:send('outline_width', 2/textW)
-  shader:send('outline_color', outlineColor)
-  shader:send('use_drawing_color', true)
-  shader:send('include_corners', true)
-
   self.textGraphic = love.graphics.newText(self.font, '')
   self.tablePool = {}
 end
@@ -75,16 +74,15 @@ end
 
 function GuiTextLayer.draw(self)
   if self.outline then
-    love.graphics.setShader(shader)
+    pixelOutlineShader.attach(nil, self.color[4])
   end
 
-  shader:send('alpha', self.color[4])
   love.graphics.setColor(self.color)
   love.graphics.draw(self.textGraphic, x, y)
   self.textGraphic:clear()
 
   if self.outline then
-    love.graphics.setShader()
+    pixelOutlineShader.detach()
   end
 end
 

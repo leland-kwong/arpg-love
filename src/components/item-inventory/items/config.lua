@@ -6,11 +6,24 @@ local objectUtils = require("utils.object-utils")
 local config = {}
 
 config.rarity = {
+	-- normals roll with no special modifiers
 	NORMAL = 0,
+
+	-- magicals and rares are rolled as normal items with additional modifiers
 	MAGICAL = 1,
 	RARE = 2,
+
+	-- epics and legendaries have a fixed set of modifiers
 	EPIC = 3,
 	LEGENDARY = 4
+}
+
+config.baseDropChance = {
+	[config.rarity.NORMAL] = 40,
+	[config.rarity.MAGICAL] = 30,
+	[config.rarity.RARE] = 18,
+	[config.rarity.EPIC] = 7,
+	[config.rarity.LEGENDARY] = 5
 }
 
 config.rarityColor = {
@@ -39,7 +52,7 @@ local equipmentCategory = {
 	POD_MODULE = 'POD_MODULE',
 	SHOES = 'SHOES',
 	HELMET = 'HELMET',
-	RELIC = 'RELIC',
+	AUGMENTATION = 'AUGMENTATION',
 }
 config.equipmentCategory = equipmentCategory
 
@@ -54,7 +67,7 @@ config.categoryTitle = {
 	[equipmentCategory.HELMET] = 'helmet',
 	[equipmentCategory.BODY_ARMOR] = 'chest armor',
 	[equipmentCategory.SHOES] = 'shoes',
-	[equipmentCategory.RELIC] = 'relic'
+	[equipmentCategory.AUGMENTATION] = 'augmentation'
 }
 
 config.equipmentCategorySilhouette = {
@@ -63,7 +76,7 @@ config.equipmentCategorySilhouette = {
 	[equipmentCategory.HELMET] = 'helmet_106',
 	[equipmentCategory.BODY_ARMOR] = 'armor_121',
 	[equipmentCategory.SHOES] = 'shoe_1',
-	[equipmentCategory.RELIC] = 'amulet_13'
+	[equipmentCategory.AUGMENTATION] = 'augmentation-one'
 }
 
 -- defines what gui node that equipment may be dropped into
@@ -82,7 +95,7 @@ config.equipmentGuiSlotMap = {
 	},
 	{
 		equipmentCategory.SHOES,
-		equipmentCategory.RELIC
+		equipmentCategory.AUGMENTATION
 	},
 	{
 		consumableCategory.CONSUMABLE,

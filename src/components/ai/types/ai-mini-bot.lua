@@ -22,8 +22,8 @@ end
 
 local PelletShot = {
   range = 8,
-  attackTime = 0.15,
-  cooldown = 0.4
+  attackTime = 0.25,
+  cooldown = 0.8
 }
 
 function PelletShot.use(self, _, targetX, targetY)
@@ -34,6 +34,7 @@ function PelletShot.use(self, _, targetX, targetY)
     , y = self.y
     , x2 = targetX
     , y2 = targetY
+    , lifetime = 60
     , speed = 125
     , targetGroup = collisionGroups.create(collisionGroups.player, collisionGroups.obstacle)
   })
@@ -75,6 +76,10 @@ return function()
     armor = 250,
     moveSpeed = 80,
     maxHealth = 20,
+    itemData = {
+      level = 1,
+      dropRate = 20
+    },
     experience = 1,
     w = spriteWidth,
     h = spriteHeight,

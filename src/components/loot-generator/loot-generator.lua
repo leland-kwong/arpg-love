@@ -2,7 +2,7 @@ local Component = require 'modules.component'
 local AnimationFactory = require 'components.animation-factory'
 local collisionWorlds = require 'components.collision-worlds'
 local groups = require 'components.groups'
-local itemDefs = require 'components.item-inventory.items.item-definitions'
+local itemSystem =require 'components.item-inventory.items.item-system'
 local itemConfig = require 'components.item-inventory.items.config'
 local Gui = require 'components.gui.gui'
 local GuiText = require 'components.gui.gui-text'
@@ -60,18 +60,19 @@ local itemNamesTooltipLayer = Gui.create({
     tooltip.lastX = x
     tooltip.lastY = y
 
+    local def = itemSystem.getDefinition(item)
+    local bgWidth, bgHeight = GuiText.getTextSize(def.title, itemNameTextLayer.font)
+    local ttWidth, ttHeight = bgWidth + self.tooltipPadding,
+      bgHeight + self.tooltipPadding
+
     if not hasChangedPosition then
       return
     else
-      tooltip.x = x
+      tooltip.x = x - ttWidth/2 + itemParent.w/2
       tooltip.y = y
     end
 
     if isNew then
-      local def = itemDefs.getDefinition(item)
-      local bgWidth, bgHeight = GuiText.getTextSize(def.title, itemNameTextLayer.font)
-      local ttWidth, ttHeight = bgWidth + self.tooltipPadding,
-        bgHeight + self.tooltipPadding
       tooltipCollisionWorld:add(
         tooltip,
         tooltip.x,
@@ -87,11 +88,14 @@ local itemNamesTooltipLayer = Gui.create({
         w = ttWidth,
         h = ttHeight,
         getMousePosition = itemMousePosition,
+        onPointerEnter = function()
+          msgBus.send(msgBus.ITEM_HOVERED, itemParent)
+        end,
+        onPointerLeave = function()
+          msgBus.send(msgBus.ITEM_HOVERED)
+        end,
         onUpdate = function(self)
           tooltip.hovered = self.hovered
-        end,
-        onClick = function()
-          msgBus.send(msgBus.ITEM_PICKUP, itemParent)
         end
       })
     end
@@ -118,9 +122,9 @@ local itemNamesTooltipLayer = Gui.create({
   end,
   draw = function(self)
     for item, tooltip in pairs(self.cache) do
-      local def = itemDefs.getDefinition(item)
+      local def = itemSystem.getDefinition(item)
       local itemName = def.title
-      local textColor = itemConfig.rarityColor[def.rarity]
+      local textColor = itemConfig.rarityColor[item.rarity]
       local bgWidth, bgHeight = GuiText.getTextSize(itemName, itemNameTextLayer.font)
       local paddingX = self.tooltipPadding + 2
       local paddingY = self.tooltipPadding
@@ -152,6 +156,7 @@ local itemNamesTooltipLayer = Gui.create({
 local LootGenerator = {
   group = itemGroup,
   rootStore = CreateStore,
+  class = collisionGroups.floorItem,
   -- item to generate
   item = nil
 }
@@ -174,12 +179,15 @@ function LootGenerator.init(self)
   assert(self.item ~= nil, 'item must be provided')
 
   local parent = self
-  local rootStore = self.rootStore
+  local rootStore = msgBus.send(msgBus.GAME_STATE_GET)
   local screenX, screenY = self.x, self.y
   local item = self.item
 
+  self:setParent(Component.get('MAIN_SCENE'))
+  Component.addToGroup(self, Component.groups.gameWorld)
+
   local animation = AnimationFactory:new({
-    itemDefs.getDefinition(item).sprite
+    itemSystem.getDefinition(item).sprite
   })
 
   local sx, sy, sw, sh = animation.sprite:getViewport()
@@ -222,38 +230,25 @@ function LootGenerator.init(self)
       self.tween2 = tween.new(0.5, self, endStateX)
     end,
     getMousePosition = itemMousePosition,
-    onPointerEnter = function()
-      msgBus.send(msgBus.ITEM_HOVERED, true)
+    onPointerEnter = function(self)
+      msgBus.send(msgBus.ITEM_HOVERED, self)
     end,
     onPointerLeave = function()
-      msgBus.send(msgBus.ITEM_HOVERED, false)
+      msgBus.send(msgBus.ITEM_HOVERED)
     end,
     pickup = function()
-      if parent.pickupPending then
-        return
+      local _, errorMsg = rootStore:addItemToInventory(item)
+      if errorMsg then
+        msgBus.send(msgBus.PLAYER_ACTION_ERROR, errorMsg)
+        return false
       end
-      rootStore:addItemToInventory(item)
       parent:delete(true)
-      -- --[[
-      --   Add a slight delay for ITEM_PICKUP_SUCCESS since we disable the player's click events
-      --   after pickup to prevent attack on pickup.
-      -- ]]
-      parent.pickupPending = tick.delay(function()
-        msgBus.send(msgBus.ITEM_PICKUP_SUCCESS)
-      end, 0.2)
-    end,
-    onClick = function(self)
-      self.selected = true
-      msgBus.send(msgBus.ITEM_PICKUP, self)
+      return true
     end,
     onUpdate = function(self, dt)
-      local w,e,n,s = camera:getBounds(camera.scale)
-      local isOutOfBounds = self.x < w
-        or self.y < n
-        or self.x > e
-        or self.y > s
-      self.isOutOfBounds = isOutOfBounds
-      if isOutOfBounds then
+      local boundsThreshold = 32
+      self.isOutOfBounds = self:checkOutOfBounds(boundsThreshold)
+      if self.isOutOfBounds then
         itemNamesTooltipLayer:delete(item)
         return
       end
@@ -303,6 +298,10 @@ function LootGenerator.init(self)
       itemNamesTooltipLayer:delete(item)
     end
   }):setParent(self)
+end
+
+function LootGenerator.serialize(self)
+  return self.initialProps
 end
 
 return Component.createFactory(LootGenerator)

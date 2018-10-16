@@ -12,21 +12,29 @@ function Color.multiply(a, b)
     return a[1],
       a[2],
       a[3],
-      a[4]
+      (a[4] or 1)
   end
   return
     a[1] * b[1],
     a[2] * b[2],
     a[3] * b[3],
-    a[4] * b[4]
+    (a[4] or 1) * (b[4] or 1)
+end
+
+local alphaColor = {1,1,1,1}
+function Color.multiplyAlpha(a, alpha)
+  alphaColor[4] = alpha
+  return Color.multiply(a, alphaColor)
 end
 
 local colors = {
   PRIMARY = {Color.rgba255(81, 234, 241)},
   SKY_BLUE = {0.8,1,1,1},
+  DEEP_BLUE = {Color.rgba255(91, 181, 255)},
   LIME = {0,1,0,1},
   WHITE = {1,1,1,1},
   LIME = {Color.rgba255(35, 219, 93)},
+  OFF_WHITE = {0.85,0.85,0.85,1},
   LIGHT_GRAY = {0.7,0.7,0.7,1},
   MED_GRAY = {0.5,0.5,0.5,1},
   MED_DARK_GRAY = {0.3,0.3,0.3,1},
@@ -34,11 +42,14 @@ local colors = {
   CYAN = {0.2,1,1,1},
   BLACK = {0,0,0,1},
   YELLOW = {1,1,0,1},
+  PALE_YELLOW = {Color.rgba255(254, 250, 192)},
   GOLDEN_PALE = {Color.rgba255(243, 156, 18)},
   RED = {1,0,0,1},
   DEEP_RED = {Color.rgba255(209, 43, 43)},
   TRANSPARENT = {0,0,0,0},
+  PURPLE = {Color.rgba255(107, 171, 255)},
 
+  RARITY_NORMAL = {1,1,1,1},
   RARITY_MAGICAL = {Color.rgba255(107, 171, 255)}, -- blueish-purple
   RARITY_RARE = {1,1,0,1}, -- yellow
   RARITY_EPIC = {Color.rgba255(228, 96, 255)}, -- magenta

@@ -7,7 +7,7 @@ local config = require 'config.config'
 local guiTextLayers = require 'components.item-inventory.gui-text-layers'
 local setupSlotInteractions = require 'components.item-inventory.slot-interaction'
 local itemConfig = require 'components.item-inventory.items.config'
-local itemDefs = require("components.item-inventory.items.item-definitions")
+local itemSystem =require("components.item-inventory.items.item-system")
 local Sound = require 'components.sound'
 
 local InventoryBlueprint = {
@@ -50,7 +50,7 @@ function InventoryBlueprint.init(self)
 
     if msgBus.EQUIPMENT_SWAP == msgType then
       local item = msg
-      local category = itemDefs.getDefinition(item).category
+      local category = itemSystem.getDefinition(item).category
       local slotX, slotY = itemConfig.findEquipmentSlotByCategory(category)
       local currentlyEquipped = rootStore:getEquippedItem(slotX, slotY)
       local isAlreadyEquipped = currentlyEquipped == item
@@ -64,6 +64,7 @@ function InventoryBlueprint.init(self)
       rootStore:removeItem(item)
       rootStore:equipItem(item, slotX, slotY)
       rootStore:addItemToInventory(equippedItem, {x, y})
+      msgBus.send(msgBus.EQUIPMENT_CHANGE)
     end
 
     if msgBus.INVENTORY_PICKUP == msgType or
@@ -85,7 +86,7 @@ function InventoryBlueprint.init(self)
   local w, h = calcInventorySize(self.slots(), self.slotSize, self.slotMargin)
   local panelMargin = 5
   local statsWidth, statsHeight = 165, h
-  local equipmentWidth, equipmentHeight = 120, h
+  local equipmentWidth, equipmentHeight = 100, h
   self.w = w
   self.h = h
 
@@ -111,8 +112,8 @@ function InventoryBlueprint.init(self)
   end
 
   local function inventoryOnItemActivate(item)
-    local d = itemDefs.getDefinition(item)
-    d.onActivate(item)
+    local onActivate = itemSystem.loadModule(item.onActivate).active
+    onActivate(item)
   end
 
   setupSlotInteractions(
@@ -155,8 +156,10 @@ function InventoryBlueprint.draw(self)
   drawTitle(self, self.x, self.y - 15)
 
   -- inventory background
-  love.graphics.setColor(0.2, 0.2, 0.2, 0.8)
+  love.graphics.setColor(0.2, 0.2, 0.2, 1)
   love.graphics.rectangle('fill', self.x, self.y, w, h)
+  love.graphics.setColor(Color.multiplyAlpha(Color.SKY_BLUE, 0.5))
+  love.graphics.rectangle('line', self.x, self.y, w, h)
 end
 
 function InventoryBlueprint.final(self)

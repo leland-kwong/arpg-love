@@ -2,6 +2,7 @@ local animationFactory = require 'components.animation-factory'
 local debounce = require 'modules.debounce'
 local tick = require 'utils.tick'
 local collisionGroups = require 'modules.collision-groups'
+local abs = math.abs
 
 local frostShotSoundFilter = {
   type = 'lowpass',
@@ -24,8 +25,8 @@ end
 -- deals damage with a chance to slow
 local FrostShot = {
   range = 10,
-  attackTime = 0.2,
-  cooldown = 0.6
+  attackTime = 0.3,
+  cooldown = 1
 }
 
 function FrostShot.use(self, _, targetX, targetY)
@@ -37,7 +38,7 @@ function FrostShot.use(self, _, targetX, targetY)
     , x2 = targetX
     , y2 = targetY
     , speed = 115
-    , lifeTime = 2.5
+    , lifeTime = 60
     , targetGroup = collisionGroups.player
     , minDamage = 1
     , maxDamage = 2
@@ -75,6 +76,10 @@ return function()
     -- debug = true,
     scale = 1,
     z = 10,
+    itemData = {
+      level = 1,
+      dropRate = 20
+    },
     heightOffset = math.random(0, heightChange),
     heightChange = heightChange,
     moveSpeed = 100,
@@ -91,10 +96,10 @@ return function()
     onUpdateStart = function(self, dt)
       self.heightOffset = self.heightOffset + (dt * self.heightChange)
       if self.heightOffset >= 4 then
-        self.heightChange = math.abs(self.heightChange) * -1
+        self.heightChange = abs(self.heightChange) * -1
       end
       if self.heightOffset <= 0 then
-        self.heightChange = math.abs(self.heightChange)
+        self.heightChange = abs(self.heightChange)
       end
       -- update z position for levitation effect
       self:setPosition(

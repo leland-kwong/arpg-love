@@ -48,7 +48,6 @@ local ChainLightning = {
   y2 = 0,
   minDamage = 1,
   maxDamage = 2,
-  weaponDamageScaling = 1,
   startOffset = 0,
   scale = 1,
   lifeTime = 5,
@@ -89,6 +88,11 @@ end
 
 local function getAllTargets(pointerX, pointerY, maxTargets, initialSeekRadius)
   local targets = {}
+  local mainSceneRef = Component.get('MAIN_SCENE')
+  if not mainSceneRef then
+    return targets
+  end
+  local mapGrid = mainSceneRef.mapGrid
   for i=1, maxTargets do
     local maxSeekRadius = 6 * config.gridSize
     local startX, startY
@@ -104,7 +108,6 @@ local function getAllTargets(pointerX, pointerY, maxTargets, initialSeekRadius)
       startX = lastTarget.x
       startY = lastTarget.y
     end
-    local mapGrid = Component.get('MAIN_SCENE').mapGrid
     local Map = require 'modules.map-generator.index'
     local losFn = LOS(mapGrid, Map.WALKABLE)
     local target = findNearestTarget(colMap, targets, startX, startY, maxSeekRadius, losFn, config.gridSize)
@@ -167,10 +170,12 @@ ChainLightning.init = function(self)
       self.polyLine[polyLineIndex + 4] = subject.y
 
       if animationDone then
-        msgBus.send(msgBus.CHARACTER_HIT, {
-          parent = currentTarget,
-          damage = math.random(self.minDamage, self.maxDamage)
-        })
+        if currentTarget.isComponent then
+          msgBus.send(msgBus.CHARACTER_HIT, {
+            parent = currentTarget,
+            damage = math.random(self.minDamage, self.maxDamage)
+          })
+        end
         previousTarget = currentTarget
         targetIndex = targetIndex + 1
       end

@@ -1,6 +1,7 @@
 local Component = require 'modules.component'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
+local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local ParticleFx = require 'components.particle.particle'
 local config = require 'config.config'
 local animationFactory = require 'components.animation-factory'
@@ -9,18 +10,19 @@ local collisionObject = require 'modules.collision'
 local camera = require 'components.camera'
 local Position = require 'utils.position'
 local Map = require 'modules.map-generator.index'
-local FlowField = require 'modules.flow-field.flow-field'
 local Color = require 'modules.color'
 local memoize = require 'utils.memoize'
 local LineOfSight = memoize(require'modules.line-of-sight')
 local Math = require 'utils.math'
-local getDist = memoize(require('utils.math').dist)
-local hitManager = require 'modules.hit-manager'
 local WeaponCore = require 'components.player.weapon-core'
+local InventoryController = require 'components.item-inventory.controller'
+local Inventory = require 'components.item-inventory.inventory'
+local HealSource = require 'components.heal-source'
+require'components.item-inventory.equipment-change-handler'
 
 local colMap = collisionWorlds.map
-local keyMap = config.keyboard
-local mouseInputMap = config.mouseInputMap
+local keyMap = config.userSettings.keyboard
+local mouseInputMap = config.userSettings.mouseInputMap
 
 local startPos = {
   x = config.gridSize * 3,
@@ -43,8 +45,151 @@ local function collisionFilter(item, other)
   return 'slide'
 end
 
+local function setupDefaultInventory(items)
+  local itemSystem = require(require('alias').path.itemSystem)
+  local rootState = msgBus.send(msgBus.GAME_STATE_GET)
+
+  for i=1, #items do
+    local it = items[i]
+    local module = require(require('alias').path.itemDefs..'.'..it.type)
+    local position = it.position
+    local canEquip, errorMsg
+    if position then
+      canEquip, errorMsg = rootState:equipItem(itemSystem.create(module), position.x, position.y)
+      if not canEquip then
+        error(errorMsg)
+      end
+    else
+      rootState:addItemToInventory(itemSystem.create(module))
+    end
+  end
+end
+
+local function connectInventory()
+  local rootState = msgBus.send(msgBus.GAME_STATE_GET)
+  local inventoryController = InventoryController(rootState)
+
+  -- add default weapons
+  if rootState:get().isNewGame then
+    setupDefaultInventory({
+      {
+        type = 'potion-health',
+        position = {
+          x = 1,
+          y = 5
+        }
+      },
+      {
+        type = 'pod-module-initiate',
+        position = {
+          x = 1,
+          y = 1
+        }
+      },
+      {
+        type = 'potion-energy',
+        position = {
+          x = 2,
+          y = 5
+        }
+      },
+      {
+        type = 'mock-shoes',
+        position = {
+          x = 1,
+          y = 4
+        }
+      },
+      {
+        type = 'pod-module-hammer',
+      },
+      {
+        type = 'augmentation-module-one',
+        position = {
+          x = 2,
+          y = 4
+        }
+      }
+      -- {
+      --   type = 'lightning-rod',
+      --   position = {
+      --     x = 1,
+      --     y = 2
+      --   }
+      -- },
+      -- {
+      --   type = 'mock-armor',
+      --   position = {
+      --     x = 2,
+      --     y = 3
+      --   }
+      -- },
+      -- {
+      --   type = 'pod-module-fireball'
+      -- }
+    })
+  end
+
+  -- trigger equipment change for items that were previously equipped from loading the state
+  msgBus.send(msgBus.EQUIPMENT_CHANGE)
+end
+
+local function connectAutoSave(parent)
+  local tick = require 'utils.tick'
+  local fileSystem = require 'modules.file-system'
+  local lastSavedState = nil
+  if (not config.autoSave) then
+    return
+  end
+
+  local function saveState()
+    local rootState = msgBus.send(msgBus.GAME_STATE_GET)
+    rootState:set('isNewGame', false)
+    local state = rootState:get()
+    local hasChanged = state ~= lastSavedState
+    if hasChanged then
+      fileSystem.saveFile(
+        'saved-states',
+        rootState:getId(),
+        state,
+        {
+          displayName = state.characterName,
+          lastSaved = os.time(os.date("!*t"))
+        }
+      )
+      lastSavedState = state
+    end
+  end
+  local autoSaveTimer = tick.recur(saveState, 0.5)
+  Component.create({
+    init = function(self)
+      Component.addToGroup(self, groups.system)
+    end,
+    final = function()
+      autoSaveTimer:stop()
+    end
+  }):setParent(parent)
+end
+
+msgBusMainMenu.on(msgBusMainMenu.TOGGLE_MAIN_MENU, function(menuOpened)
+  msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, menuOpened)
+end)
+
+msgBus.PLAYER_REVIVE = 'PLAYER_REVIVE'
+msgBus.on(msgBus.PLAYER_REVIVE, function()
+  local rootState = msgBus.send(msgBus.GAME_STATE_GET)
+  rootState
+    :set('health', function(state)
+      return state.maxHealth
+    end)
+    :set('energy', function(state)
+      return state.maxEnergy
+    end)
+end)
+
 local Player = {
   id = 'PLAYER',
+  class = collisionGroups.player,
   group = groups.all,
   x = startPos.x,
   y = startPos.y,
@@ -52,7 +197,6 @@ local Player = {
   facingDirectionY = 1,
   pickupRadius = 5 * config.gridSize,
   moveSpeed = 100,
-  flowFieldDistance = 30,
   attackRecoveryTime = 0,
 
   -- collision properties
@@ -61,28 +205,147 @@ local Player = {
   mapGrid = nil,
 
   init = function(self)
-    self.hitManagerOnDamageTaken = function(self, actualDamage, actualNonCritDamage, criticalMultiplier)
+    local state = {
+      itemHovered = nil
+    }
+
+    Component.addToGroup(self, groups.character)
+    self.listeners = {
+      msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function(msgValue)
+        local newModifiers = msgValue
+        msgBus.send(msgBus.GAME_STATE_GET):set('statModifiers', newModifiers)
+      end),
+
+      msgBus.on(msgBus.GENERATE_LOOT, function(msgValue)
+        local LootGenerator = require'components.loot-generator.loot-generator'
+        local x, y, item = unpack(msgValue)
+        if not item then
+          return
+        end
+        LootGenerator.create({
+          x = x,
+          y = y,
+          item = item,
+          rootStore = rootState
+        }):setParent(parent)
+      end),
+
+      msgBus.on(msgBus.KEY_DOWN, function(v)
+        local key = v.key
+        local keyMap = config.userSettings.keyboard
+        local rootState = msgBus.send(msgBus.GAME_STATE_GET)
+        local isActive = rootState:get().activeMenu == 'INVENTORY'
+
+        if (keyMap.INVENTORY_TOGGLE == key) and (not v.hasModifier) then
+          if not self.inventory then
+            self.inventory = Inventory.create({
+              rootStore = rootState,
+              slots = function()
+                return rootState:get().inventory
+              end
+            }):setParent(self.hudRoot)
+            rootState:set('activeMenu', 'INVENTORY')
+          else
+            self.inventory:delete(true)
+            self.inventory = nil
+            rootState:set('activeMenu', false)
+          end
+        end
+
+        if (keyMap.PORTAL_OPEN == key) and (not v.hasModifier) then
+          msgBus.send(msgBus.PORTAL_OPEN)
+        end
+
+        if (keyMap.PAUSE_GAME == key) and (not v.hasModifier) then
+          msgBus.send(msgBus.PAUSE_GAME_TOGGLE)
+        end
+      end),
+
+      msgBus.on(msgBus.PLAYER_HEAL_SOURCE_ADD, function(v)
+        HealSource.add(self, v, msgBus.send(msgBus.GAME_STATE_GET))
+      end),
+
+      msgBus.on(msgBus.PLAYER_HEAL_SOURCE_REMOVE, function(v)
+        HealSource.remove(self, v.source)
+      end),
+
+      msgBus.on(msgBus.PLAYER_DISABLE_ABILITIES, function(msg)
+        self.clickDisabled = msg
+      end),
+
+      msgBus.on(msgBus.PLAYER_LEVEL_UP, function(msg)
+        local tick = require 'utils.tick'
+        local fx = ParticleFx.Basic.create({
+          x = self.x,
+          y = self.y + 10,
+          duration = 1,
+          width = 4
+        }):setParent(self)
+      end),
+
+      msgBus.on(msgBus.DROP_ITEM_ON_FLOOR, function(item)
+        return msgBus.send(
+          msgBus.GENERATE_LOOT,
+          {self.x, self.y, item}
+        )
+      end),
+
+      msgBus.on(msgBus.ITEM_HOVERED, function(item)
+        state.itemHovered = item
+      end),
+
+      msgBus.on(msgBus.MOUSE_PRESSED, function(msg)
+        local isLeftClick = msg[3] == 1
+        if (isLeftClick and state.itemHovered) then
+          local pickupSuccess = msgBus.send(msgBus.ITEM_PICKUP, state.itemHovered)
+          if pickupSuccess then
+            state.itemHovered = nil
+          end
+        end
+      end),
+
+      msgBus.on(msgBus.ITEM_PICKUP, function(msg)
+        local item = msg
+        local calcDist = require'utils.math'.dist
+        local dist = calcDist(self.x, self.y, item.x, item.y)
+        local outOfRange = dist > self.pickupRadius
+        local gridX1, gridY1 = Position.pixelsToGridUnits(self.x, self.y, config.gridSize)
+        local gridX2, gridY2 = Position.pixelsToGridUnits(item.x, item.y, config.gridSize)
+        local canWalkToItem = self.mapGrid and
+          LineOfSight(self.mapGrid, Map.WALKABLE)(gridX1, gridY1, gridX2, gridY2) or
+          (not self.mapGrid and true)
+        if canWalkToItem and (not outOfRange) then
+          local pickupSuccess = item:pickup()
+          if pickupSuccess then
+            msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, true)
+            msgBus.on(msgBus.MOUSE_RELEASED, function()
+              msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
+              return msgBus.CLEANUP
+            end)
+          end
+          return pickupSuccess
+        end
+        return false
+      end)
+    }
+    connectAutoSave(self)
+    self.hudRoot = Component.create({
+      group = groups.hud
+    })
+    local Hud = require 'components.hud.hud'
+    Hud.create({
+      player = self,
+      rootStore = msgBus.send(msgBus.GAME_STATE_GET)
+    }):setParent(self.hudRoot)
+    connectInventory()
+    self.onDamageTaken = function(self, actualDamage, actualNonCritDamage, criticalMultiplier)
       if (actualDamage > 0) then
         msgBus.send(msgBus.PLAYER_HIT_RECEIVED, actualDamage)
       end
     end
-    self.hits = {}
-    self.getFlowField = FlowField(function (grid, x, y, dist)
-      local row = grid[y]
-      local cell = row and row[x]
-      return
-        (cell == Map.WALKABLE) and
-        (dist < self.flowFieldDistance)
-    end)
-    self.getFlowField = require'utils.perf'({
-      enabled = false,
-      done = function(_, totalTime, callCount)
-        consoleLog('flowfield', totalTime / callCount)
-      end
-    })(self.getFlowField)
 
     local CreateStore = require'components.state.state'
-    self.rootStore = self.rootStore or CreateStore()
+    self.rootStore = msgBus.send(msgBus.GAME_STATE_GET)
     self.dir = DIRECTION_RIGHT
     colMap:add(self, self.x, self.y, self.w, self.h)
 
@@ -94,6 +357,16 @@ local Player = {
       duration = energyRegenerationDuration,
       property = 'energy',
       maxProperty = 'maxEnergy'
+    })
+
+    local healthRegenerationDuration = math.pow(10, 10)
+    msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
+      source = 'PLAYER_INNATE_HEALTH_REGENERATION',
+      amount = healthRegenerationDuration *
+        self.rootStore:get().statModifiers.healthRegeneration,
+      duration = healthRegenerationDuration,
+      property = 'health',
+      maxProperty = 'maxHealth'
     })
 
     self.animations = {
@@ -131,56 +404,6 @@ local Player = {
       x = self.x,
       y = self.y
     }):setParent(self)
-
-    self.listeners = {
-      msgBus.on(msgBus.PLAYER_DISABLE_ABILITIES, function(msg)
-        self.clickDisabled = msg
-      end),
-
-      msgBus.on(msgBus.PLAYER_LEVEL_UP, function(msg)
-        local tick = require 'utils.tick'
-        local fx = ParticleFx.Basic.create({
-          x = self.x,
-          y = self.y + 10,
-          duration = 1,
-          width = 4
-        }):setParent(self)
-      end),
-
-      msgBus.on(msgBus.DROP_ITEM_ON_FLOOR, function(item)
-        msgBus.send(
-          msgBus.GENERATE_LOOT,
-          {self.x, self.y, item}
-        )
-      end),
-
-      msgBus.on(msgBus.ITEM_PICKUP_SUCCESS, function()
-        msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
-      end),
-
-      msgBus.on(msgBus.CHARACTER_HIT, function(msg)
-        if msg.parent == self then
-          local uid = require 'utils.uid'
-          local hitId = msg.source or uid()
-          self.hits[hitId] = msg
-        end
-        return msg
-      end),
-
-      msgBus.on(msgBus.ITEM_PICKUP, function(msg)
-        local item = msg
-        local calcDist = require'utils.math'.dist
-        local dist = calcDist(self.x, self.y, item.x, item.y)
-        local outOfRange = dist > self.pickupRadius
-        local gridX1, gridY1 = Position.pixelsToGridUnits(self.x, self.y, config.gridSize)
-        local gridX2, gridY2 = Position.pixelsToGridUnits(item.x, item.y, config.gridSize)
-        local canWalkToItem = LineOfSight(self.mapGrid, Map.WALKABLE)(gridX1, gridY1, gridX2, gridY2)
-        if canWalkToItem and (not outOfRange) then
-          msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, true)
-          item:pickup()
-        end
-      end)
-    }
   end
 }
 
@@ -306,9 +529,18 @@ local function updateHealthAndEnergy(rootStore)
 end
 
 function Player.update(self, dt)
+  local hasPlayerLost = self.rootStore:get().health <= 0
+  if hasPlayerLost then
+    if Component.get('PLAYER_LOSE') then
+      return
+    end
+    local PlayerLose = require 'components.player-lose'
+    PlayerLose.create()
+    return
+  end
+
   self.attackRecoveryTime = self.attackRecoveryTime - dt
   self.equipmentModifiers = self.rootStore:get().statModifiers
-  hitManager(self, dt, self.hitManagerOnDamageTaken)
   local nextX, nextY, totalMoveSpeed = handleMovement(self, dt)
   handleAnimation(self, dt, nextX, nextY, totalMoveSpeed)
   handleAbilities(self, dt)
@@ -317,8 +549,6 @@ function Player.update(self, dt)
   -- dynamically get the current animation frame's height
   local sx, sy, sw, sh = self.animation.sprite:getViewport()
   local w,h = sw, sh
-  -- true center taking into account pivot
-  local oX, oY = self.animation:getSourceOffset()
 
   local actualX, actualY, cols, len = self.colObj:move(nextX, nextY, collisionFilter)
   self.x = actualX
@@ -328,17 +558,6 @@ function Player.update(self, dt)
 
   -- update camera to follow player
   camera:setPosition(self.x, self.y)
-
-  local gridX, gridY = Position.pixelsToGridUnits(self.x, self.y, config.gridSize)
-  -- update flowfield every x frames since it also considers ai in the way
-  -- as blocked positions, so we need to keep this fresh
-  local shouldUpdateFlowField = self.prevGridX ~= gridX or self.prevGridY ~= gridY
-  if shouldUpdateFlowField and self.mapGrid then
-    local flowField, callCount = self.getFlowField(self.mapGrid, gridX, gridY)
-    self.flowField = flowField
-    self.prevGridX = gridX
-    self.prevGridY = gridY
-  end
 end
 
 local function drawShadow(self, sx, sy, ox, oy)
@@ -400,6 +619,7 @@ end
 
 Player.final = function(self)
   msgBus.off(self.listeners)
+  self.hudRoot:delete(true)
 end
 
 return Component.createFactory(Player)

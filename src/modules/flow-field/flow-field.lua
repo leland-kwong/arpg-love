@@ -57,7 +57,7 @@ local function FlowFieldFactory(canVisitCallback, getter)
     IMPORTANT: we should do the cardinal directions before the intercardinal directions. This way
     the directions are prioritised by the cardinal directions first.
   ]]
-  local function visitNeighbors(grid, start, frontier, cameFromList, canVisit)
+  local function visitNeighbors(grid, start, frontier, cameFromList, canVisit, includeDiagonalDirection)
     local x,y,dist = start.x, start.y, start.dist
 
     -- east
@@ -72,34 +72,35 @@ local function FlowFieldFactory(canVisitCallback, getter)
     -- north
     addCellData(grid, x, y-1, start, frontier, cameFromList, canVisit)
 
+    if includeDiagonalDirection then
+      local canWalkNorth = canVisit(grid, x, y-1, dist)
+      local canWalkEast = canVisit(grid, x+1, y, dist)
+      local canWalkSouth = canVisit(grid, x, y+1, dist)
+      local canWalkWest = canVisit(grid, x-1, y, dist)
 
-    local canWalkNorth = canVisit(grid, x, y-1, dist)
-    local canWalkEast = canVisit(grid, x+1, y, dist)
-    local canWalkSouth = canVisit(grid, x, y+1, dist)
-    local canWalkWest = canVisit(grid, x-1, y, dist)
+      --[[
+        NOTE: these `canVisit` checks are here to prevent diagonal movements from
+        cutting into corner walls.
+      ]]
+      -- north-east
+      if (canWalkNorth and canWalkEast) then
+        addCellData(grid, x+1, y-1, start, frontier, cameFromList, canVisit)
+      end
 
-    --[[
-      NOTE: these `canVisit` checks are here to prevent diagonal movements from
-      cutting into corner walls.
-    ]]
-    -- north-east
-    if (canWalkNorth and canWalkEast) then
-      addCellData(grid, x+1, y-1, start, frontier, cameFromList, canVisit)
-    end
+      -- south-west
+      if (canWalkSouth and canWalkWest) then
+        addCellData(grid, x-1, y+1, start, frontier, cameFromList, canVisit)
+      end
 
-    -- south-west
-    if (canWalkSouth and canWalkWest) then
-      addCellData(grid, x-1, y+1, start, frontier, cameFromList, canVisit)
-    end
+      -- south-east
+      if (canWalkSouth and canWalkEast) then
+        addCellData(grid, x+1, y+1, start, frontier, cameFromList, canVisit)
+      end
 
-    -- south-east
-    if (canWalkSouth and canWalkEast) then
-      addCellData(grid, x+1, y+1, start, frontier, cameFromList, canVisit)
-    end
-
-    -- north-west
-    if (canWalkNorth and canWalkWest) then
-      addCellData(grid, x-1, y-1, start, frontier, cameFromList, canVisit)
+      -- north-west
+      if (canWalkNorth and canWalkWest) then
+        addCellData(grid, x-1, y-1, start, frontier, cameFromList, canVisit)
+      end
     end
   end
 
@@ -113,7 +114,9 @@ local function FlowFieldFactory(canVisitCallback, getter)
   local frontier = {}
   local start = {}
 
-  local function flowField(grid, startX, startY)
+  local function flowField(grid, startX, startY, includeDiagonalDirection, iteratorGranularity)
+    iteratorGranularity = iteratorGranularity or 200
+
     start = setProp(start)
       :set('x', startX)
       :set('y', startY)
@@ -135,14 +138,20 @@ local function FlowFieldFactory(canVisitCallback, getter)
     -- {directionX, directionY, distance}
     cameFromList[startY][startX] = flowCellData(0, 0, 0, cameFromList._cellCount)
 
-    local i = 1
-    while i <= #frontier do
-      local current = frontier[i]
-      i = i + 1
-      visitNeighbors(grid, current, frontier, cameFromList, canVisitCallback)
-    end
+    local Console = require 'modules.console.console'
+    return coroutine.wrap(function()
+      local i = 1
+      while i <= #frontier do
+        local current = frontier[i]
+        i = i + 1
+        visitNeighbors(grid, current, frontier, cameFromList, canVisitCallback, includeDiagonalDirection)
 
-    return cameFromList
+        if (i % iteratorGranularity) == 0 then
+          coroutine.yield(cameFromList)
+        end
+      end
+      coroutine.yield(cameFromList)
+    end)
   end
 
   return flowField

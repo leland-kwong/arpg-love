@@ -1,4 +1,5 @@
-local isDebug = require 'config.config'.isDebug
+local config = require 'config.config'
+local isDevelopment = config.isDevelopment
 local tc = require 'utils.type-check'
 local uid = require 'utils.uid'
 local noop = require 'utils.noop'
@@ -9,6 +10,7 @@ local setProp = require 'utils.set-prop'
 
 local M = {}
 local allComponentsById = {}
+local EMPTY = objectUtils.setReadOnly({})
 
 -- built-in defaults
 local floor = math.floor
@@ -18,6 +20,9 @@ local baseProps = {
   z = 0, -- axis normal to the x-y plane
   angle = 0,
   scale = 1,
+  outOfBoundsX = 0,
+  outOfBoundsY = 0,
+  isOutsideViewport = false,
 
   drawOrder = function(self)
     return 1
@@ -35,9 +40,9 @@ local baseProps = {
     self:update(dt)
     local children = self._children
     if children then
-      local hasChangedPosition = self.x ~= self.prevX
-        or self.y ~= self.prevY
-        or self.z ~= self.prevZ
+      local hasChangedPosition = self.x ~= self._prevX
+        or self.y ~= self._prevY
+        or self.z ~= self._prevZ
 
       if hasChangedPosition then
         for _,child in pairs(children) do
@@ -52,9 +57,9 @@ local baseProps = {
           child.prevParentZ = self.z
         end
 
-        self.prevX = self.x
-        self.prevY = self.y
-        self.prevZ = self.z
+        self._prevX = self.x
+        self._prevY = self.y
+        self._prevZ = self.z
       end
     end
   end,
@@ -86,7 +91,7 @@ local baseProps = {
       2
     )
   end,
-  _isComponent = true,
+  isComponent = true,
 }
 
 local function cleanupCollisionObjects(self)
@@ -98,6 +103,41 @@ local function cleanupCollisionObjects(self)
   end
 end
 
+M.groups = {}
+M.entitiesById = {}
+
+local function getGroupName(group)
+  return type(group) == 'string' and group or group.name
+end
+
+function M.addToGroup(id, group, data)
+  -- backwards compatiblity with older component system
+  local isIdComponent = type(id) == 'table'
+  if (isIdComponent) then
+    data = id
+    id = id:getId()
+  end
+
+  local name = getGroupName(group)
+  local entity = M.entitiesById[id]
+  if (not entity) then
+    entity = {}
+    M.entitiesById[id] = entity
+  end
+  entity[name] = data or EMPTY
+  M.groups[name].addComponent(id, data)
+  return M
+end
+
+function M.removeFromGroup(id, group)
+  local isIdComponent = type(id) == 'table'
+  id = isIdComponent and id:getId() or id
+  local name = getGroupName(group)
+  -- check if an entity has been added or not before removing
+  M.groups[name].removeComponent(id)
+  return M
+end
+
 --[[
   x[NUMBER]
   y[NUMBER]
@@ -106,6 +146,16 @@ end
 local invalidPropsErrorMsg = 'props cannot be a component object'
 
 local uniqueIds = {}
+
+local entityMt = {
+  __index = function(t, k)
+    local firstVal = t.initialProps[k]
+    if firstVal ~= nil then
+      return firstVal
+    end
+    return t.blueprint[k]
+  end
+}
 
 function M.createFactory(blueprint)
   if blueprint.id then
@@ -119,32 +169,34 @@ function M.createFactory(blueprint)
   end
 
   function blueprint.create(props)
-    assert(type(props) == 'table' or props == nil, 'props must be of type `table` or `nil`')
-    local c = setProp(props or {}, isDebug)
+    props = props or {}
+    assert(type(props) == 'table', 'props must be of type `table` or `nil`')
+    local c = setProp({
+      -- by keeping initial props as its own property, we can keep the input values immutable.
+      initialProps = props,
+      blueprint = blueprint
+    }, isDevelopment)
     assert(
-      not c._isComponent,
+      not c.isComponent,
       invalidPropsErrorMsg
     )
 
-    local id = blueprint.id or uid()
+    local id = blueprint.id or (props and props.id) or uid()
     c._id = id
 
-    setmetatable(c, blueprint)
-    blueprint.__index = blueprint
+    setmetatable(c, entityMt)
 
     -- type check
-    if isDebug then
-      if (props and props.id) then
-        assert(uniqueIds[props.id], 'unique ids must be registered in the factory')
-      end
-      assert(c.group ~= nil, 'a default `group` must be provided')
+    if isDevelopment then
       tc.validate(c.x, tc.NUMBER, false) -- x-axis position
       tc.validate(c.y, tc.NUMBER, false) -- y-axis position
       tc.validate(c.angle, tc.NUMBER, false)
     end
 
-    -- add component to default group first
-    c.group.addComponent(c)
+    -- add component to default group
+    if c.group then
+      M.addToGroup(id, c.group, c)
+    end
     c:init()
     return c
   end
@@ -186,6 +238,18 @@ function M.createFactory(blueprint)
       return self
     end
 
+    local id = self:getId()
+    -- dissasociate itself from previous parent
+    local previousParent = self.parent
+    if (previousParent and previousParent._children) then
+      previousParent._children[id] = nil
+    end
+
+    if (not parent) then
+      self.parent = nil
+      return self
+    end
+
     --[[
       The child's position will now be relative to its parent,
       so we need to store the parent's initial position
@@ -193,13 +257,6 @@ function M.createFactory(blueprint)
     self.prevParentX = parent.x
     self.prevParentY = parent.y
     self.prevParentZ = parent.z
-
-    local id = self:getId()
-    -- dissasociate itself from previous parent
-    local previousParent = self.parent
-    if (previousParent and previousParent._children) then
-      previousParent._children[id] = nil
-    end
 
     -- set new parent
     self.parent = parent
@@ -209,35 +266,11 @@ function M.createFactory(blueprint)
     return self
   end
 
-  function blueprint:getProp(prop)
-    return self[prop]
-  end
-
-  function blueprint:setGroup(group)
-    if self.group then
-      self.group.removeComponent(self)
-    end
-    group.addComponent(self)
-    self.group = group
-    return self
-  end
-
   function blueprint:delete(recursive)
     if self._deleted then
       return
     end
-
-    local children = self._children
-    if (recursive and children) then
-      for _,child in pairs(children) do
-        child:delete(true)
-      end
-      self._children = nil
-    end
-
-    self.group.delete(self)
-    cleanupCollisionObjects(self)
-    self._deleted = true
+    M.remove(self:getId(), recursive)
     return self
   end
 
@@ -249,8 +282,26 @@ function M.createFactory(blueprint)
     return self._deleted
   end
 
-  function blueprint:isReady()
-    return self._ready
+  function blueprint:checkOutOfBounds(threshold)
+    threshold = threshold or 0
+    local camera = require 'components.camera'
+    local west, east, north, south = camera:getBounds()
+    -- add bounds data
+    local x, y = self.x, self.y
+    local outOfBoundsX, outOfBoundsY = 0, 0
+    if x < west then
+      outOfBoundsX = west - x
+    elseif x > east then
+      outOfBoundsX = x - east
+    end
+    if y < north then
+      outOfBoundsY = north - y
+    elseif y > south then
+      outOfBoundsY = y - south
+    end
+
+    return (outOfBoundsX > threshold) or
+      (outOfBoundsY > threshold)
   end
 
   -- default methods
@@ -272,6 +323,8 @@ function M.createFactory(blueprint)
 end
 
 function M.newGroup(groupDefinition)
+  assert(type(groupDefinition.name) == 'string', 'group name must be a string')
+
   -- apply any missing default options to group definition
   groupDefinition = objectUtils.assign(
     {},
@@ -280,7 +333,7 @@ function M.newGroup(groupDefinition)
   )
 
   local Group = groupDefinition
-  local drawQueue = Q:new({development = isDebug})
+  local drawQueue = Q:new({development = config.debugDrawQueue})
   Group.drawQueue = drawQueue
   local componentsById = {}
   local count = 0
@@ -298,7 +351,7 @@ function M.newGroup(groupDefinition)
   local max = math.max
   function Group.drawAll()
     for id,c in pairs(componentsById) do
-      if c:isReady() and (not c._drawDisabled) then
+      if c._ready and (not c._drawDisabled) then
         local drawFunc = (c.debug == true) and c._drawDebug or c.draw
         drawQueue:add(
           max(c:drawOrder(), 1),
@@ -316,43 +369,83 @@ function M.newGroup(groupDefinition)
     return count
   end
 
-  function Group.addComponent(component)
-    count = count + 1
-    local id = component:getId()
-
-    allComponentsById[id] = component
-    componentsById[id] = component
-  end
-
-  function Group.removeComponent(component)
-    count = count - 1
-    local id = component:getId()
-    componentsById[id] = nil
-  end
-
-  function Group.delete(component)
-    if not Group.hasComponent(component) then
-      print('[WARNING] component already deleted:', component._id)
+  function Group.addComponent(id, data)
+    if Group.hasComponent(id) then
       return
     end
 
-    local id = component:getId()
-    componentsById[id] = nil
-    allComponentsById[id] = nil
+    count = count + 1
+    allComponentsById[id] = data
+    componentsById[id] = data
+    if Group.onComponentEnter then
+      Group:onComponentEnter(data)
+    end
+  end
+
+  function Group.removeComponent(id)
+    if (not Group.hasComponent(id)) then
+      return
+    end
+
     count = count - 1
-    component:final()
-    return Group
+    componentsById[id] = nil
+    local component = M.entitiesById[id][Group.name]
+    if Group.onComponentLeave then
+      Group:onComponentLeave(component)
+    end
+    -- remove global reference
+    M.entitiesById[id][Group.name] = nil
+    if component._deleted then
+      allComponentsById[id] = nil
+    end
   end
 
-  function Group.hasComponent(component)
-    return componentsById[component._id]
+  function Group.hasComponent(id)
+    return not not componentsById[id]
   end
 
+  function Group.getAll()
+    return componentsById
+  end
+
+  M.groups[Group.name] = Group
   return Group
 end
 
+M.newSystem = M.newGroup
+M.systems = M.groups
+
 function M.get(id)
   return allComponentsById[id]
+end
+
+function M.getBlueprint(component)
+  return component.blueprint
+end
+
+function M.remove(entityId, recursive)
+  -- this is for legacy reasons when our entites weren't just plain tables
+  local entityAsComponent = allComponentsById[entityId]
+  if entityAsComponent then
+    local eAsC = entityAsComponent
+    local children = eAsC._children
+    if (recursive and children) then
+      for _,child in pairs(children) do
+        child:delete(true)
+      end
+      eAsC._children = nil
+    end
+
+    cleanupCollisionObjects(eAsC)
+    eAsC._deleted = true
+    eAsC:final()
+  end
+
+  local ownGroups = M.entitiesById[entityId] or EMPTY
+  for group in pairs(ownGroups) do
+    M.removeFromGroup(entityId, group)
+  end
+  M.entitiesById[entityId] = nil
 end
 
 local NodeFactory = M.createFactory({})

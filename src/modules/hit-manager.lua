@@ -12,7 +12,7 @@ end
 
 local function adjustedDamageTaken(self, damage, lightningDamage, criticalChance, criticalMultiplier)
   local damageReductionPerArmor = 0.0001
-  local damageAfterFlatReduction = damage - self:getCalculatedStat('flatPhysicalDamageReduction')
+  local damageAfterFlatReduction = damage - self:getCalculatedStat('flatPhysicalReduction')
   local reducedDamageFromArmorResistance = (damageAfterFlatReduction * self:getCalculatedStat('armor') * damageReductionPerArmor)
   local lightningDamageAfterResistance = lightningDamage - (lightningDamage * self:getCalculatedStat('lightningResist'))
   local totalDamage = damageAfterFlatReduction
@@ -68,20 +68,9 @@ end
   self [TABLE] - component instance
   dt [NUMBER] - dt from component.update
 ]]
-local function hitManager(self, dt, onDamageTaken)
-  local arePropertiesSetup = self.modifiers ~= nil
-  if not arePropertiesSetup then
-    self.modifiers = {
-      freelyMove = 0, -- if > 0 this allows the character to move regardless of any other states
-    }
-    self.modifiersApplied = {}
-    self.hits = {}
-    self.getCalculatedStat = getCalculatedStat
-    self.getBaseStat = getBaseStat
-  end
-
+local function hitManager(_, self, dt, onDamageTaken)
   local hitCount = 0
-  for hitId,hit in pairs(self.hits) do
+  for hitId,hit in pairs(self.hitData) do
     hitCount = hitCount + 1
 
     if onDamageTaken then
@@ -112,14 +101,27 @@ local function hitManager(self, dt, onDamageTaken)
     hit.duration = (hit.duration or 0) - dt
     local isEffectFinished = hit.duration <= 0
     if isEffectFinished then
-      self.hits[hitId] = nil
+      self.hitData[hitId] = nil
       self.modifiersApplied[hitId] = nil
       -- remove modifiers by negating them
       applyModifiers(self, hit.modifiers, -1)
     end
   end
 
+  self.hitCount = hitCount
   return hitCount
 end
 
-return hitManager
+return setmetatable({
+  setup = function(component)
+    component.modifiers = {
+      freelyMove = 0, -- if > 0 this allows the character to move regardless of any other states
+    }
+    component.modifiersApplied = {}
+    component.hitData = {}
+    component.getCalculatedStat = getCalculatedStat
+    component.getBaseStat = getBaseStat
+  end
+}, {
+  __call = hitManager
+})

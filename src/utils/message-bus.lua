@@ -8,6 +8,7 @@ local M = {}
 
 -- value that signifies the function is done and should be removed from the list
 local CLEANUP = {}
+local EMPTY = {}
 
 local function callSubscribersByTypeAndHandleCleanup(self, msgType, queue, msgHandlers, wildCardListeners, nextValue)
 	local handlerCount = msgHandlers and #msgHandlers or 0
@@ -18,7 +19,14 @@ local function callSubscribersByTypeAndHandleCleanup(self, msgType, queue, msgHa
 	end
 
 	local ret = nextValue
-	local callback = function(handler, handlerRef)
+	local callback = function(handler, handlerRef, filter)
+		if filter then
+			local shouldCall = filter and filter(ret)
+			if (not shouldCall) then
+				return
+			end
+		end
+
 		local result = handler(ret, msgType)
 		if result == CLEANUP then
 			self.off(handlerRef)
@@ -30,14 +38,14 @@ local function callSubscribersByTypeAndHandleCleanup(self, msgType, queue, msgHa
 
 	for i=1, handlerCount do
 		local h = msgHandlers[i]
-		local handler, priority = h[1], h[2]
-		queue:add(priority, callback, handler, h)
+		local handler, priority, filter = h[1], h[2], h[4]
+		queue:add(priority, callback, handler, h, filter)
 	end
 
 	for i=1, wildcardHandlerCount do
 		local h = wildCardListeners[i]
-		local handler, priority = h[1], h[2]
-		queue:add(priority, callback, handler, h)
+		local handler, priority, filter = h[1], h[2], h[4]
+		queue:add(priority, callback, handler, h, filter)
 	end
 
 	queue:flush()
@@ -45,6 +53,14 @@ local function callSubscribersByTypeAndHandleCleanup(self, msgType, queue, msgHa
 end
 
 local Q = require 'modules.queue'
+
+local function tableIfNeeded(t, key)
+	if (not t[key]) then
+		t[key] = {}
+	end
+	return t[key]
+end
+
 function M.new()
 	local msgBus = {
 		CLEANUP = CLEANUP,
@@ -64,21 +80,22 @@ function M.new()
 		return callSubscribersByTypeAndHandleCleanup(msgBus, msgType, queue, handlersByType, wildCardListeners, msgValue)
 	end
 
-	function msgBus.on(messageType, handler, priority)
+	function msgBus.on(messageType, handler, priority, filter)
 		assert(type(messageType) ~= nil, 'message type must be a non-nil value')
 
-		local handlersByType = msgHandlersByMessageType[messageType]
-		if (not handlersByType) then
-			handlersByType = {}
-			msgHandlersByMessageType[messageType] = handlersByType
-		end
-		local handlerRef = {handler, priority or 2, messageType}
+		local handlersByType = tableIfNeeded(msgHandlersByMessageType, messageType)
+		local handlerRef = {handler, priority or 2, messageType, filter}
 		handlerRef.isListener = true
 		table.insert(handlersByType, handlerRef)
+
 		return handlerRef -- this can be used as the reference for removing a handler
 	end
 
 	function msgBus.off(handlerRef)
+		if not handlerRef then
+			return
+		end
+
 		local isMultipleRefs = not handlerRef.isListener
 		if isMultipleRefs then
 			for i=1, #handlerRef do

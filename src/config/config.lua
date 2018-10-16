@@ -2,10 +2,10 @@
 
 local f = require 'utils.functional'
 local oUtils = require 'utils.object-utils'
-local settings = require 'config.user-settings'
+local userSettings = require 'config.user-settings'
 local M = {}
 
-oUtils.assign(M, settings)
+M.userSettings = userSettings
 
 local xpDiff = 20
 M.levelExperienceRequirements = {}
@@ -20,6 +20,8 @@ M.levelExperienceRequirements = {}
   end
 end)()
 
+M.autoSave = true
+
 M.gridSize = 16
 M.scaleFactor = 2
 M.scale = M.scaleFactor
@@ -27,6 +29,16 @@ M.resolution = {
   w = 640 * 1.5,
   h = 360 * 1.5
 }
+M.window = {
+  width = M.resolution.w * M.scale,
+  height = M.resolution.h * M.scale
+}
+
+M.isDevelopment = false
+M.enableConsole = false
+M.performanceProfile = false
+M.debugDrawQueue = false
+M.collisionDebug = false
 
 M.gameTitle = 'Citizen of Nowhere'
 

@@ -6,94 +6,59 @@ require 'components.run'
 -- NOTE: this is necessary for crisp pixel rendering
 love.graphics.setDefaultFilter('nearest', 'nearest')
 
-local Console = require 'modules.console.console'
-local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
-local msgBusMainMenu = require 'components.msg-bus-main-menu'
+msgBus.UPDATE = 'UPDATE'
+
+local Console = require 'modules.console.console'
 local groups = require 'components.groups'
 local config = require 'config.config'
 local camera = require 'components.camera'
 local SceneMain = require 'scene.scene-main'
 local RootScene = require 'scene.sandbox.main'
 local tick = require 'utils.tick'
-local sceneManager = require 'scene.manager'
+local globalState = require 'main.global-state'
+require 'main.inputs'
+local systemsProfiler = require 'components.profiler.component-groups'
+require 'components.groups.dungeon-test'
+require 'components.groups.game-world'
+require 'modules.file-system'
+require 'utils.time'
 
 local scale = config.scaleFactor
-
-local globalState = {
-  activeScene = nil,
-  backgroundColor = {0.2,0.2,0.2},
-  sceneStack = sceneManager,
-  gameState = nil
-}
 
 function love.load()
   msgBus.send(msgBus.GAME_LOADED)
   love.keyboard.setKeyRepeat(true)
-  local resolution = config.resolution
-  local vw, vh = resolution.w * scale, resolution.h * scale
+  local vw, vh = config.window.width, config.window.height
   love.window.setMode(vw, vh)
   camera
     :setSize(vw, vh)
     :setScale(scale)
 
-  RootScene.create()
-
   -- console debugging
   local console = Console.create()
-  require 'components.profiler.component-groups'(console)
+  require 'main.listeners'
 
-  msgBusMainMenu.on(msgBusMainMenu.SCENE_STACK_PUSH, function(msgValue)
-    local nextScene = msgValue
-    if globalState.activeScene then
-      globalState.activeScene:delete(true)
-    end
-    local sceneRef = nextScene.scene.create(nextScene.props)
-    globalState.activeScene = sceneRef
-    globalState.sceneStack:push(nextScene)
-  end)
-
-  msgBusMainMenu.on(msgBusMainMenu.SCENE_STACK_POP, function()
-    if globalState.activeScene then
-      globalState.activeScene:delete(true)
-    end
-    local poppedScene = globalState.sceneStack:pop()
-    globalState.activeScene = poppedScene.scene.create(poppedScene.props)
-  end)
-
-  msgBusMainMenu.on(msgBusMainMenu.SCENE_STACK_REPLACE, function(nextScene)
-    globalState.sceneStack:clear()
-    msgBusMainMenu.send(msgBusMainMenu.SCENE_STACK_PUSH, nextScene)
-  end)
-
-  -- FIXME: this is only for debugging
-  msgBus.on(msgBus.PORTAL_ENTER, function()
-    consoleLog(#globalState.sceneStack)
-  end, 100)
-
-  msgBus.on(msgBus.SET_CONFIG, function(msgValue)
-    local configChanges = msgValue
-    local oUtils = require 'utils.object-utils'
-    oUtils.assign(config, configChanges)
-  end)
-
-  msgBus.on(msgBus.GAME_STATE_SET, function(state)
-    globalState.gameState = state
-  end)
-
-  msgBus.on(msgBus.GAME_STATE_GET, function()
-    return globalState.gameState
-  end)
-
-  msgBus.on(msgBus.SET_BACKGROUND_COLOR, function(color)
-    globalState.backgroundColor = color
-  end)
+  RootScene.create()
 end
 
+local characterSystem = msgBus.send(msgBus.PROFILE_FUNC, {
+  name = 'character',
+  call = require 'components.groups.character'
+})
+
+local profile = require('modules.profile')
+
 function love.update(dt)
+  profile.push('frame')
+
+  systemsProfiler()
+
+  msgBus.send(msgBus.UPDATE, dt)
   tick.update(dt)
 
   camera:update(dt)
+  characterSystem(dt)
   groups.firstLayer.updateAll(dt)
   groups.all.updateAll(dt)
   groups.overlay.updateAll(dt)
@@ -101,58 +66,6 @@ function love.update(dt)
   groups.hud.updateAll(dt)
   groups.gui.updateAll(dt)
   groups.system.updateAll(dt)
-end
-
-local inputMsg = require 'utils.pooled-table'(function(t, key, scanCode, isRepeated)
-  t.key = key
-  t.code = scanCode
-  t.isRepeated = isRepeated
-  return t
-end)
-
-function love.keypressed(key, scanCode, isRepeated)
-  msgBus.send(
-    msgBus.KEY_PRESSED,
-    inputMsg(key, scanCode, isRepeated)
-  )
-
-  if config.keyboard.MAIN_MENU == key then
-    msgBusMainMenu.send(
-      msgBusMainMenu.TOGGLE_MAIN_MENU
-    )
-  end
-end
-
-function love.keyreleased(key, scanCode)
-  msgBus.send(
-    msgBus.KEY_RELEASED,
-    inputMsg(key, scanCode, false)
-  )
-end
-
-function love.mousepressed( x, y, button, istouch, presses )
-  msgBus.send(
-    msgBus.MOUSE_PRESSED,
-    { x, y, button, istouch, presses }
-  )
-end
-
-function love.mousereleased( x, y, button, istouch, presses )
-  msgBus.send(
-    msgBus.MOUSE_RELEASED,
-    { x, y, button, isTouch, presses }
-  )
-end
-
-function love.wheelmoved(x, y)
-  msgBus.send(msgBus.MOUSE_WHEEL_MOVED, {x, y})
-end
-
-function love.textinput(t)
-  msgBus.send(
-    msgBus.GUI_TEXT_INPUT,
-    t
-  )
 end
 
 function love.draw()
@@ -172,14 +85,17 @@ function love.draw()
   love.graphics.pop()
 
   groups.system.drawAll()
+
+  profile.pop('frame')
 end
 
 --[[
   run tests after everything is loaded since some tests
   since some of the tests rely on the game loop
 ]]
-if config.isDebug then
+if config.isDevelopment then
   require 'modules.test.index'
   require 'utils.test.index'
+  require 'components.loot-generator.test'
   require '_debug'
 end

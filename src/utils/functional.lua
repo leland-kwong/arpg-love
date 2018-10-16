@@ -1,7 +1,8 @@
 local M = {}
 
 function M.forEach(array, callback)
-	for i=1, #array do
+	local len = array and #array or 0
+	for i=1, len do
 		local value = array[i]
 		callback(value, i)
 	end
@@ -10,7 +11,7 @@ end
 function M.map(array, mapFn)
 	local i = 0
 	local list = {}
-	for i=1, #array do
+	for i=1, #(array or list) do
 		local value = array[i]
 		local mappedValue = mapFn(value, i)
 		table.insert(list, mappedValue)
@@ -45,6 +46,9 @@ function M.filter(t, filterFn)
 end
 
 function M.reduce(t, reducer, seed)
+	if not t then
+		return {}
+	end
 	local result = seed
 	for i=1, #t do
 		local v = t[i]
@@ -76,13 +80,9 @@ function M.compose(...)
 end
 
 function M.wrap(fnToWrap, fn)
-	local noop = require 'utils.noop'
-	if (not fnToWrap) or (fnToWrap == noop) then
-		return fn
-	end
-	return function(a, b, c, d, e, f, g)
-		fnToWrap(a, b, c, d, e, f, g)
-		return fn(a, b, c, d, e, f, g)
+	return function(...)
+		fnToWrap(...)
+		return fn(...)
 	end
 end
 

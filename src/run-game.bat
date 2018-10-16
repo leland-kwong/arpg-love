@@ -1,1 +1,1 @@
-"C:\Program Files\LOVE\love.exe" --console "C:\Users\lelandkwong\Projects\arpg-love\src"
+"C:\Program Files (x86)\LOVE\love.exe" --console "C:\Users\lelandkwong\Projects\arpg-love\src"

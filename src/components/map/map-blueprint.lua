@@ -6,17 +6,21 @@ local Camera = require 'modules.camera'
 local floor, max = math.floor, math.max
 
 local function getGridBounds(gridSize, camera)
-  local w, e, n, s = camera:getBounds(false)
+  local w, e, n, s = camera:getBounds()
   local scale = config.scaleFactor
-  return w / scale / gridSize,
-    e / scale / gridSize,
-    n / scale / gridSize,
-    s / scale / gridSize
+  return w / gridSize,
+    e / gridSize,
+    n / gridSize,
+    s / gridSize
 end
 
 -- a,b,c are arguments to pass to the callback
 local function iterateActiveGrid(self, cb, a, b, c)
   local w,e,n,s = getGridBounds(self.gridSize, self.camera)
+  w = floor(w)
+  e = floor(e)
+  n = floor(n)
+  s = floor(s)
 
   -- viewport origin
   local originX = max(1, w)
@@ -29,23 +33,25 @@ local function iterateActiveGrid(self, cb, a, b, c)
   local thresholdSouth = 3
   local thresholdWest = 0
   local thresholdEast = 1
+  local startX = w - self.offset - thresholdWest
+  local endX = e + self.offset + thresholdEast
 
-  local y = n - self.offset
-  while y < (s + self.offset + thresholdSouth) do
+  local startY = n - self.offset
+  local endY = (s + self.offset + thresholdSouth)
+  local y = startY
+  while y < endY do
     local isInRowViewport = y >= n and y <= s
-    local startX = w - self.offset - thresholdWest
-    local endX = e + self.offset + thresholdEast
-    local _y = floor(y)
-    local row = self.grid[_y]
-    for x=startX, endX do
-      -- adjust coordinates to be integer values since grid coordinates are integers
-      local _x = floor(x)
-      local value = row and row[_x]
-      local isInColViewport = x >= w and x <= e
-      local isInViewport = isInRowViewport and isInColViewport
-      local tileExists = value ~= nil
-      if tileExists then
-        cb(self, value, _x, _y, originX, originY, isInViewport, a, b, c)
+    local row = self.grid[y]
+    if row then
+      for x=startX, endX do
+        -- adjust coordinates to be integer values since grid coordinates are integers
+        local value = row[x]
+        local isInColViewport = x >= w and x <= e
+        local isInViewport = isInRowViewport and isInColViewport
+        local tileExists = value ~= nil
+        if tileExists then
+          cb(self, value, x, y, originX, originY, isInViewport, a, b, c)
+        end
       end
     end
     y = y + 1

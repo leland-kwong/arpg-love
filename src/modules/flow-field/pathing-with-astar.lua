@@ -1,4 +1,5 @@
 local pprint = require 'utils.pprint'
+local Vec2 = require 'modules.brinevector'
 
 local function getFlowFieldValue(flowField, gridX, gridY)
   if flowField.getValue then
@@ -153,7 +154,9 @@ end
 
 local function aiPath()
   local TablePool = require 'utils.table-pool'
-  local positionPool = TablePool.new()
+  local positionPool = TablePool.new(function()
+    return Vec2(0, 0)
+  end)
   local path = {}
 
   return function (flowField, grid, gridX, gridY, length, WALKABLE, clearance)

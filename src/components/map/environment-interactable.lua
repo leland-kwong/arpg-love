@@ -33,6 +33,7 @@ end, {}))
 local EnvironmentInteractable = {
   -- debug = true,
   group = groups.all,
+  itemLevel = 0,
   maxHealth = 1,
   experience = 0,
   opacity = 1,
@@ -50,6 +51,8 @@ local function hitAnimation()
 end
 
 function EnvironmentInteractable.init(self)
+  Component.addToGroup(self, groups.character)
+  self.onDamageTaken = onDamageTaken
   self.health = self.maxHealth
 
   self.animation = AnimationFactory:newStaticSprite(
@@ -74,9 +77,6 @@ function EnvironmentInteractable.init(self)
     msgBus.on(msgBus.CHARACTER_HIT, function(msgValue)
       if msgValue.parent == self then
         self.hitAnimation = coroutine.wrap(hitAnimation)
-        local uid = require 'utils.uid'
-        local hitId = msgValue.source or uid()
-        self.hits[hitId] = msgValue
 
         local source = love.audio.newSource('built/sounds/attack-impact-1.wav', 'static')
         source:setVolume(0.4)
@@ -84,7 +84,7 @@ function EnvironmentInteractable.init(self)
       end
     end),
 
-    msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
+    msgBus.on(msgBus.ENTITY_DESTROYED, function(msgValue)
       if msgValue.parent == self then
         local source = love.audio.newSource(
           'built/sounds/treasure-cache-demolish.wav',
@@ -98,16 +98,10 @@ end
 
 function EnvironmentInteractable.update(self, dt)
   if self.destroyedAnimation then
-    local complete = self.destroyedAnimation:update(dt)
-    self.state = complete and states.DESTROYED or states.DESTROYING
-    if self.state == states.DESTROYED then
-      self:delete()
-    end
     return
   end
 
-  local hitManager = require 'modules.hit-manager'
-  local hitCount = hitManager(self, dt, onDamageTaken)
+  self:setDrawDisabled(not self.isInViewOfPlayer)
 
   self.state = self.hitAnimation and states.HIT or states.IDLE
   if self.hitAnimation then

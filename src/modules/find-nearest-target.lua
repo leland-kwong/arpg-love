@@ -1,4 +1,5 @@
 local Position = require 'utils.position'
+local Math = require 'utils.math'
 local collisionGroups = require 'modules.collision-groups'
 
 local function hasItem(list, item)
@@ -21,6 +22,7 @@ local function findNearestTarget(
   local los = lineOfSightFn
 
   local nearestEnemyFound = nil
+  local shortestEnemyDist = 10 * 10
   local i = 1
 
   while (i <= maxSeekRadius) and (not nearestEnemyFound) do
@@ -32,7 +34,7 @@ local function findNearestTarget(
       width,
       height,
       function(item)
-        if (not nearestEnemyFound) and collisionGroups.matches(item.group, collisionGroups.create(collisionGroups.ai, collisionGroups.environment)) then
+        if collisionGroups.matches(item.group, collisionGroups.create(collisionGroups.ai, collisionGroups.environment)) then
           local target = item.parent
           local isAlreadyFound = ignoreTargets and hasItem(ignoreTargets, target)
           if los then
@@ -40,10 +42,12 @@ local function findNearestTarget(
             local gx2, gy2 = Position.pixelsToGridUnits(target.x, target.y, gridSize)
             local canSeeTarget = los(gx1, gy1, gx2, gy2)
             if (not isAlreadyFound) and canSeeTarget then
-              nearestEnemyFound = target
+              local dist = Math.dist(gx1, gy1, gx2, gy2)
+              if dist < shortestEnemyDist then
+                shortestEnemyDist = dist
+                nearestEnemyFound = target
+              end
             end
-          else
-            nearestEnemyFound = target
           end
         end
         return false

@@ -54,7 +54,6 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   y = 50,
   w = 100,
   h = 100,
-  clock = 0,
 
   init = function(self)
     self.canvas = love.graphics.newCanvas()
@@ -68,10 +67,6 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
         self.h
       )
     end
-  end,
-
-  onUpdateStart = function(self, dt)
-    self.clock = self.clock + dt
   end,
 
   renderStart = function(self)

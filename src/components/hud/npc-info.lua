@@ -42,7 +42,9 @@ function NpcInfo.init(self)
         self.target:getCalculatedStat('maxHealth')
       return percentage
     end
-  }):setDisabled(true)
+  }):setParent(self)
+    :setDisabled(true)
+  Component.addToGroup(self.statusBar:getId(), 'gameWorld', self.statusBar)
 end
 
 function NpcInfo.update(self, dt)
@@ -90,13 +92,6 @@ function NpcInfo.update(self, dt)
     for i=1, #props do
       local p = props[i]
       propsText = propsText..'  '..p
-      -- local textWidth, textHeight = GuiText.getTextSize(p, textLayerSmall.font)
-      -- local x, y = Position.boxCenterOffset(
-      --   textWidth,
-      --   textHeight,
-      --   windowW,
-      --   windowH
-      -- )
     end
     local wrapLimit = 250
     local propsTextWidth, propsTextHeight = GuiText.getTextSize(propsText, textLayerSmall.font, wrapLimit)

@@ -5,189 +5,219 @@ local font = require 'components.font'
 local MenuList = require 'components.menu-list'
 local Component = require 'modules.component'
 local groups = require 'components.groups'
+local msgBus = require 'components.msg-bus'
 local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local config = require 'config.config'
 local objectUtils = require 'utils.object-utils'
 local bitser = require 'modules.bitser'
 
+local drawOrder = function()
+  return 1000
+end
+
 local guiTextBodyLayer = GuiText.create({
-  font = font.primary.font
+  font = font.primary.font,
+  drawOrder = drawOrder
 })
 
 local titleFont = font.secondary.font
 local guiTextTitleLayer = GuiText.create({
-  font = titleFont
+  font = titleFont,
+  drawOrder = drawOrder
 })
 
 local Sandbox = {
   group = groups.gui,
   drawOrder = function()
-    return 4
+    return drawOrder() - 1
   end
 }
 
-local stateFile = 'debug_scene_state'
+local scenes = {
+  mainGameHome = {
+    name = 'main game home screen',
+    path = 'scene.sandbox.main-game.main-game-home'
+  },
+  aiTest = {
+    name = 'ai',
+    path = 'scene.sandbox.ai.test-scene'
+  },
+  guiTest = {
+    name = 'gui',
+    path = 'scene.sandbox.gui.test-scene'
+  },
+  particleTest = {
+    name = 'particle fx',
+    path = 'scene.sandbox.particle-fx.particle-test'
+  },
+  groundFlameTest = {
+    name = 'ground flame fx',
+    path = 'scene.sandbox.particle-fx.ground-flame-test'
+  }
+}
+
 local state = {
-  activeScene = nil,
-  activeScenePath = nil,
+  activeScenePath = scenes.mainGameHome.path,
   menuOpened = false
 }
--- reference to the loaded scene so we can cleanup when loading a new one
-local loadedScene = nil
 
 local function setState(nextState)
   objectUtils.assign(state, nextState)
-  bitser.dumpLoveFile(stateFile, state)
 end
 
-local function loadScene(name, path, sceneProps)
+local function loadScene(path)
   if not path then
     print('no scene to load')
     return
   end
   local scene = require(path)
-  msgBusMainMenu.send(msgBusMainMenu.SCENE_STACK_PUSH, {
-    scene = scene,
-    props = sceneProps
-  })
-  setState({
-    activeScene = name,
-    activeScenePath = path
+  msgBus.send(msgBus.SCENE_STACK_REPLACE, {
+    scene = scene
   })
 end
 
-local function drawOrder(self)
-  return 11
-end
-
-local function DebugMenuToggleButton(onToggle)
-  local buttonText = 'debug'
-  local buttonWidth, buttonHeight = GuiText.getTextSize(buttonText, guiTextBodyLayer.font)
-  local screenOffset = 5
-  local screenEastEdge = love.graphics.getWidth() / config.scaleFactor
-  local screenSouthEdge = love.graphics.getHeight() / config.scaleFactor
-  return Gui.create({
-    type = Gui.types.BUTTON,
-    x = screenOffset,
-    y = screenSouthEdge - screenOffset - buttonHeight,
-    w = buttonWidth,
-    h = buttonHeight,
-    onClick = function()
-      onToggle()
-    end,
-    draw = function(self)
-      guiTextBodyLayer:add(buttonText, Color.WHITE, self.x, self.y)
-    end,
-    drawOrder = drawOrder
-  })
-end
-
-local function menuOptionSceneLoad(name, path, props)
+local function menuOptionSceneLoad(props)
   return {
-    name = name,
-    props = props,
+    name = props.name,
     value = function()
-      loadScene(name, path)
+      loadScene(props.path)
     end
   }
 end
 
-local sceneOptions = {
-  menuOptionSceneLoad(
-    'main game home screen',
-    'scene.sandbox.main-game.main-game-home'
-  ),
+local menuOptionQuitGame = {
+  name = 'exit game',
+  value = function()
+    love.event.quit()
+  end
+}
+
+local sceneOptionsNormal = {
+  menuOptionSceneLoad(scenes.mainGameHome),
+  menuOptionQuitGame
+}
+
+local sceneOptionsDebug = {
+  menuOptionSceneLoad(scenes.mainGameHome),
   {
     name = 'main game sandbox',
     value = function()
       local msgBus = require 'components.msg-bus'
-      local CreateStore = require 'components.state.state'
-      msgBus.send(msgBus.GAME_STATE_SET, CreateStore())
-      loadScene('main game sandbox', 'scene.sandbox.main-game.main-game-test')
+      local Scene = require 'scene.sandbox.main-game.main-game-test'
+      msgBus.send(msgBus.NEW_GAME, {
+        scene = Scene,
+        props = {
+          __stateId = 'test-state',
+          characterName = 'test character'
+        }
+      })
     end
   },
-  menuOptionSceneLoad(
-    'sprite positioning',
-    'scene.sandbox.sprite-positioning'
-  ),
-  menuOptionSceneLoad(
-    'ai',
-    'scene.sandbox.ai.test-scene'
-  ),
-  menuOptionSceneLoad(
-    'gui',
-    'scene.sandbox.gui.test-scene'
-  ),
-  menuOptionSceneLoad(
-    'particle fx',
-    'scene.sandbox.particle-fx.particle-test'
-  ),
-  menuOptionSceneLoad(
-    'ground flame fx',
-    'scene.sandbox.particle-fx.ground-flame-test'
-  ),
-  {
-    name = 'exit game',
-    value = function()
-      love.event.quit()
-    end
-  }
+  menuOptionSceneLoad(scenes.aiTest),
+  menuOptionSceneLoad(scenes.guiTest),
+  menuOptionSceneLoad(scenes.particleTest),
+  menuOptionSceneLoad(scenes.groundFlameTest),
+  menuOptionQuitGame,
 }
 
-local menuX, menuY = 200, 20
+msgBusMainMenu.on(msgBusMainMenu.MENU_ITEM_ADD, function(menuOption)
+  table.insert(sceneOptionsDebug, #sceneOptionsDebug - 1, menuOption)
+end)
+
+msgBusMainMenu.on(msgBusMainMenu.MENU_ITEM_REMOVE, function(menuOption)
+  local options = sceneOptionsDebug
+  for i=1, #options do
+    local option= options[i]
+    if option == menuOption then
+      table.remove(options, i)
+    end
+  end
+end)
+
+require 'scene.light-test'
+require 'scene.font-test'
+require 'scene.tooltip-test'
+
+local function getMenuPosition()
+  return 200, 20
+end
+
+local function closeMenuButton(props)
+  local textContent = {
+    Color.WHITE,
+    'CLOSE'
+  }
+  local x, y = getMenuPosition()
+  return Gui.create({
+    x = x + 300,
+    y = y,
+    type = Gui.types.BUTTON,
+    onClick = props.onClick,
+    onUpdate = function(self)
+      local w, h = GuiText.getTextSize(textContent, guiTextBodyLayer.font)
+      self.w, self.h = w, h
+    end,
+    draw = function(self)
+      guiTextBodyLayer:addf(
+        textContent,
+        self.w,
+        'left',
+        self.x,
+        self.y
+      )
+    end
+  })
+end
 
 function Sandbox.init(self)
   local activeSceneMenu = nil
 
   local function DebugMenu(enabled)
     if enabled then
+      local x, y = getMenuPosition()
       activeSceneMenu = MenuList.create({
-        x = menuX,
-        y = menuY,
-        options = sceneOptions,
+        x = x,
+        y = y,
+        options = config.isDevelopment and sceneOptionsDebug or sceneOptionsNormal,
         onSelect = function(name, value)
           DebugMenu(false)
           value()
         end,
-        drawOrder = drawOrder
+        drawOrder = function()
+          return drawOrder() + 2
+        end
       })
+
+      closeMenuButton({
+        onClick = function()
+          DebugMenu(false)
+        end
+      }):setParent(activeSceneMenu)
     elseif activeSceneMenu then
       activeSceneMenu:delete(true)
       activeSceneMenu = nil
     end
     setState({ menuOpened = enabled })
-end
-
-  local errorFree, loadedState = pcall(function() return bitser.loadLoveFile(stateFile) end)
-  state = (errorFree and loadedState) or state
-
-  DebugMenu(state.menuOpened)
-
-  -- load last active scene
-  loadScene(state.activeScene, state.activeScenePath)
-
-  -- -- load menu if no active scene exists
-  if not state.activeScene then
-    DebugMenu(true)
   end
 
-  DebugMenuToggleButton(function()
-    DebugMenu(not state.menuOpened)
-  end)
+  -- load last active scene
+  loadScene(state.activeScenePath)
 
   self.listeners = {
     msgBusMainMenu.on(msgBusMainMenu.TOGGLE_MAIN_MENU, function()
       DebugMenu(not state.menuOpened)
-    end)
+      return state.menuOpened
+    end, 1)
   }
 end
 
 function Sandbox.draw()
   if state.menuOpened then
-    guiTextTitleLayer:add('Sandbox scenes', Color.WHITE, menuX, menuY)
+    local x, y = getMenuPosition()
+    guiTextTitleLayer:add(config.gameTitle, Color.WHITE, x, y)
     -- background
     local w, h = love.graphics.getWidth() / config.scaleFactor, love.graphics.getHeight() / config.scaleFactor
-    love.graphics.setColor(0,0,0,0.7)
+    love.graphics.setColor(0,0,0,0.9)
     love.graphics.rectangle('fill', 0, 0, w, h)
   end
 end

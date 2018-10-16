@@ -5,7 +5,7 @@ local TreasureChest = require 'components.treasure-chest'
 local config = require 'config.config'
 local msgBus = require 'components.msg-bus'
 local GroundFlame = require 'components.particle.ground-flame'
-local EnvironmentInteractable = require 'components.map.environment-interactable'
+local InventoryController = require 'components.item-inventory.controller'
 
 local MainGameTest = {
   group = groups.firstLayer
@@ -20,59 +20,34 @@ end
 
 local function insertTestItems(rootStore)
   local itemsPath = 'components.item-inventory.items.definitions'
-  rootStore:addItemToInventory(require(itemsPath..'.pod-module-initiate').create())
-  rootStore:addItemToInventory(require(itemsPath..'.pod-module-hammer').create())
-  rootStore:addItemToInventory(require(itemsPath..'.pod-module-fireball').create())
+  -- rootStore:addItemToInventory(require(itemsPath..'.pod-module-initiate').create())
+  -- rootStore:addItemToInventory(require(itemsPath..'.pod-module-hammer').create())
+  -- rootStore:addItemToInventory(require(itemsPath..'.pod-module-fireball').create())
 
-  local generateRandomItem = require 'components.loot-generator.algorithm-1'
-  for i=1, 10 do
-    rootStore:addItemToInventory(
-      generateRandomItem()
-    )
-  end
+  -- local generateRandomItems = require 'components.loot-generator.algorithm-1'
+  -- local items = generateRandomItems(1, 10 * 100)
+  -- for i=1, #items do
+  --   rootStore:addItemToInventory(items[i])
+  -- end
 end
 
 function MainGameTest.init(self)
-  msgBus.send(msgBus.NEW_GAME)
   modifyLevelRequirements()
-
-  -- local scene = SceneMain.create({
-  --   autoSave = false
-  -- }):setParent(self)
-  -- insertTestItems(scene.rootStore)
 
   local HomeBase = require 'scene.home-base'
   HomeBase.create():setParent(self)
 
-  -- TreasureChest.create({
-  --   x = 10 * config.gridSize,
-  --   y = 5 * config.gridSize
-  -- }):setParent(self)
+  local rootStore = msgBus.send(msgBus.GAME_STATE_GET)
+  InventoryController(rootStore)
+  insertTestItems(rootStore)
 
-  -- local function randomTreasurePosition()
-  --   local mapGrid = Component.get('MAIN_SCENE').mapGrid
-  --   local rows, cols = #mapGrid, #mapGrid[1]
-  --   return math.random(10, cols) * config.gridSize,
-  --     math.random(10, rows) * config.gridSize
+  -- local function dungeonTest(sceneRef)
+  --   if getmetatable(sceneRef) == SceneMain then
+  --     Component.addToGroup(sceneRef, 'dungeonTest')
+  --     return msgBus.CLEANUP
+  --   end
   -- end
-
-  -- local chestCount = 3
-  -- for i=1, chestCount do
-  --   local x, y = randomTreasurePosition()
-  --   TreasureChest.create({
-  --     x = x,
-  --     y = y
-  --   }):setParent(self)
-  -- end
-
-  -- local treasureCacheCount = 15
-  -- for i=1, treasureCacheCount do
-  --   local x, y = randomTreasurePosition()
-  --   EnvironmentInteractable.create({
-  --     x = x,
-  --     y = y
-  --   }):setParent(self)
-  -- end
+  -- msgBus.on(msgBus.SCENE_STACK_PUSH, dungeonTest, 11)
 end
 
 return Component.createFactory(MainGameTest)

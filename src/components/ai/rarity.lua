@@ -1,9 +1,11 @@
 -- rarity definitions and rarity chance function
 
+local itemConfig = require(require('alias').path.items..'.config')
 local setupChanceFunctions = require 'utils.chance'
 local f = require 'utils.functional'
 local Color = require 'modules.color'
 
+local iRarity = itemConfig.rarity
 local Rarity = {}
 
 -- enhances the ai's base stats and abilities with new random powers
@@ -26,6 +28,8 @@ local rarityTypes = {
     type = 'NORMAL',
     chance = 15,
     __call = function(self, ai)
+      ai.itemData.minRarity = iRarity.NORMAL
+      ai.itemData.maxRarity = iRarity.RARE
       return ai
     end
   },
@@ -35,6 +39,9 @@ local rarityTypes = {
     chance = 4,
     outlineColor = {0.5, 0.5, 1, 1},
     __call = function(self, ai)
+      ai.itemData.minRarity = iRarity.NORMAL
+      ai.itemData.maxRarity = iRarity.RARE
+      ai.itemData.dropRate = ai.itemData.dropRate * 1.8
       return ai:set('outlineColor', self.outlineColor)
         :set('rarityColor', Color.RARITY_MAGICAL)
         :set('maxHealth', ai.maxHealth * 2)
@@ -51,6 +58,9 @@ local rarityTypes = {
       ai:set(prop, value)
       table.insert(ai.dataSheet.properties, modType)
 
+      ai.itemData.minRarity = iRarity.MAGICAL
+      ai.itemData.maxRarity = iRarity.RARE
+      ai.itemData.dropRate = ai.itemData.dropRate * 4
       return ai:set('outlineColor', self.outlineColor)
         :set('rarityColor', Color.RARITY_RARE)
         :set('maxHealth', ai.maxHealth * 5)

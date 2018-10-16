@@ -12,6 +12,7 @@ local lru = require 'utils.lru'
 local memoize = require'utils.memoize'
 local GetIndexByCoordinate = memoize(require 'utils.get-index-by-coordinate')
 local config = require'config.config'
+local Grid = require 'utils.grid'
 
 local animationTypes = {}
 
@@ -23,11 +24,6 @@ end
 local function addWallTileEntity(self, positionIndex, animation, x, y, opacity)
   local wallTileEntity = self.wallObjectsPool:get()
     :changeTile(animation, x, y, opacity)
-  self.wallTileCache:set(positionIndex, wallTileEntity)
-end
-
-local function getTile(grid, x, y)
-  return grid[y] and grid[y][x]
 end
 
 -- Generate all collision objects ahead of time since game elements
@@ -36,7 +32,7 @@ local function setupCollisionObjects(self, grid, gridSize)
   local cloneGrid = require 'utils.clone-grid'
   local collisionWorlds = require 'components.collision-worlds'
   local collisionGrid = cloneGrid(grid, function(v, x, y)
-    if v ~= Map.WALKABLE then
+    if (v ~= nil) and (v ~= Map.WALKABLE) then
       local animationName = self.tileRenderDefinition[y][x]
       local animation = animationFactory:newStaticSprite(animationName)
       local ox, oy = animation:getSourceOffset()
@@ -70,60 +66,57 @@ end
 
 local blueprint = objectUtils.assign({}, mapBlueprint, {
   group = groups.firstLayer,
+  class = collisionGroups.mainMap,
   tileRenderDefinition = {},
 
   init = function(self)
     self.collisionObjectsHash = setupCollisionObjects(self, self.grid, self.gridSize)
 
-    local cacheSize = 600
+    local cacheSize = 400
     self.wallObjectsPool = require 'components.map.wall-objects-pool'(self.gridSize, cacheSize)
 
-    local function wallTilePruneCallback(key, entity)
-      self.wallObjectsPool:release(entity)
-    end
     -- IMPORTANT: the cache size should be large enough to contain all the wall tiles on the screen
     -- otherwise we will get significant cache trashing
-    self.wallTileCache = lru.new(cacheSize, nil, wallTilePruneCallback)
     self.renderFloorCache = {}
     local rows, cols = #self.grid, #self.grid[1]
     self.floorCanvas = love.graphics.newCanvas(cols * self.gridSize, rows * self.gridSize)
     self.wallsCanvas = love.graphics.newCanvas(cols * self.gridSize, rows * self.gridSize)
   end,
 
-  onUpdate = function(self, value, x, y, originX, originY, isInViewport, dt)
-    renderWallCollisionDebug(self)
-
-    -- if its unwalkable, add a collision object and create wall tile
-    if value ~= Map.WALKABLE then
-      local index = GetIndexByCoordinate(self.grid)(x, y)
-      local animationName = self.tileRenderDefinition[y][x]
-      local animation = getAnimation(self.animationCache, index, animationName)
-        :update(dt)
-      local cached = self.wallTileCache:get(index)
-      if (not cached) then
-        local tileAbove = getTile(self.grid, x, y - 1)
-        addWallTileEntity(self, index,
-          animation,
-          x,
-          y,
-          tileAbove == Map.WALKABLE and 0.75 or 1
-        )
-      end
+  onUpdateStart = function(self)
+    -- release all all active entities (they will get used as needed)
+    for _,entity in pairs(Component.groups.activeWalls.getAll()) do
+      self.wallObjectsPool:release(entity)
     end
   end,
 
-  renderStart = function(self)
-    love.graphics.push()
-    love.graphics.origin()
-  end,
-
-  render = function(self, value, x, y, originX, originY)
+  onUpdate = function(self, value, x, y, originX, originY, isInViewport, dt)
     local index = GetIndexByCoordinate(self.grid)(x, y)
+
+    -- if its unwalkable, add a collision object and create wall tile
+    if (value ~= nil) and (value ~= Map.WALKABLE) then
+      renderWallCollisionDebug(self)
+      local animationName = self.tileRenderDefinition[y][x]
+      local animation = getAnimation(self.animationCache, index, animationName)
+        :update(dt)
+      local tileAbove = Grid.get(self.grid, x, y - 1)
+      addWallTileEntity(self, index,
+        animation,
+        x,
+        y,
+        tileAbove == Map.WALKABLE and 0.75 or 1
+      )
+    end
+
+    -- floor tiles
     if self.renderFloorCache[index] then
       return
     else
       self.renderFloorCache[index] = true
     end
+
+    love.graphics.push()
+    love.graphics.origin()
 
     local animationName = self.tileRenderDefinition[y][x]
     if value ~= Map.WALKABLE then
@@ -138,10 +131,11 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
       love.graphics.setCanvas(self.floorCanvas)
     end
     local animation = getAnimation(self.animationCache, index, animationName)
+      :update(dt)
     local ox, oy = animation:getOffset()
     local tileX, tileY = x * self.gridSize, y * self.gridSize
 
-    love.graphics.setColor(0.8,0.8,0.8)
+    love.graphics.setColor(1,1,1)
     love.graphics.draw(
       animation.atlas,
       animation.sprite,
@@ -153,14 +147,19 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
       ox,
       oy
     )
+    love.graphics.pop()
+    love.graphics.setCanvas()
   end,
 
   renderEnd = function(self)
-    love.graphics.pop()
     love.graphics.setCanvas()
     love.graphics.setColor(1,1,1)
     love.graphics.draw(self.floorCanvas)
     love.graphics.draw(self.wallsCanvas)
+  end,
+
+  serialize = function(self)
+    return self.grid
   end
 })
 

@@ -2,6 +2,13 @@ local config = require'config.config'
 local msgBus = require'components.msg-bus'
 local windowFocused = true
 
+local paused = false
+
+msgBus.PAUSE_GAME_TOGGLE = 'PAUSE_GAME_TOGGLE'
+msgBus.on(msgBus.PAUSE_GAME_TOGGLE, function()
+	paused = not paused
+end)
+
 function love.focus(focused)
   print('window '..(focused and 'focused' or 'unfocused'))
   windowFocused = focused
@@ -17,7 +24,10 @@ function love.run()
 	local dt = 0
 
 	-- Main loop time.
-  return function()
+	return function()
+		local isDevelopment = config.isDevelopment
+		local focused = (not isDevelopment) or (isDevelopment and windowFocused)
+
 		-- Process events.
 		if love.event then
 			love.event.pump()
@@ -37,22 +47,21 @@ function love.run()
     end
 
 		-- Call update and draw
-    if love.update and
-      (config.isDebug and windowFocused)
-    then
-      love.update(dt)
+		if love.update then
+			if focused and (not paused) then
+				love.update(dt)
+			end
     end -- will pass 0 if love.timer is disabled
 
-    if love.graphics and
-      love.graphics.isActive() and
-      (config.isDebug and windowFocused)
-    then
-			love.graphics.origin()
-			love.graphics.clear(love.graphics.getBackgroundColor())
+		if love.graphics and love.graphics.isActive() then
+			if focused then
+				love.graphics.origin()
+				love.graphics.clear(love.graphics.getBackgroundColor())
 
-			if love.draw then love.draw() end
+				if love.draw then love.draw() end
 
-			love.graphics.present()
+				love.graphics.present()
+			end
 		end
 
 		if love.timer then love.timer.sleep(0.001) end

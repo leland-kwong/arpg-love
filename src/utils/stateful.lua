@@ -4,7 +4,7 @@ A simple, but fast observable state store with set, get, and onChange callback
 
 ]]--
 
-local isDebug = require'config.config'.isDebug
+local isDevelopment = require'config.config'.isDevelopment
 local F = require("utils.functional")
 local objectUtils = require("utils.object-utils")
 local typeCheck = require("utils.type-check")
@@ -30,6 +30,7 @@ local debugAction = {
 Stateful.debugAction = debugAction
 
 local defaultOptions = {
+	id = nil, -- [STRING] a unique id to create the state with
 	debounceRate = 0.016, -- seconds after a `set` call to trigger a callback
 	debug = noop, -- debug function that gets called after each action (SET_PENDING, SET_SUCCESS, etc...)
 	pure = true, -- if `set` call has no change in value, then no update will be triggered
@@ -40,13 +41,14 @@ local __state = {}
 local __prevState = {}
 
 function Stateful:new(initialState, options)
-	if not isDebug then
+	options = options or {}
+	if not isDevelopment then
 		-- remove debug-only options
 		options.debug = nil
 	end
 
 	initialState = initialState or {} -- create object if user does not provide one
-	initialState.__stateId = initialState.__stateId or make__stateId()
+	initialState.__stateId = initialState.__stateId or options.id or make__stateId()
 	local o = {
 		initialState = initialState,
 		[__state] = initialState,
@@ -144,7 +146,7 @@ end
 
 function Stateful:replaceState(newState)
 	-- validate state shape to make sure its same as what it was initially
-	if isDebug then
+	if isDevelopment then
 		for k,v in pairs(self.initialState) do
 			if newState[k] == nil then
 				error("[stateful.replaceState] state shape is incorrect. Missing key `"..k.."`")

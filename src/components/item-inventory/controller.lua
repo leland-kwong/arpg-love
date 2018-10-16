@@ -1,5 +1,5 @@
 local config = require('config.config')
-local itemDefs = require("components.item-inventory.items.item-definitions")
+local itemSystem =require("components.item-inventory.items.item-system")
 local itemConfig = require("components.item-inventory.items.config")
 local sc = require("components.state.constants")
 local cloneGrid = require('utils.clone-grid')
@@ -22,10 +22,6 @@ return function(rootStore)
 	function rootStore:addItemToInventory(item, position)
 		if not item then
 			return
-		end
-		if config.isDebug then
-			local valid = itemDefs.isItem(item)
-			assert(valid, "item type does not exist")
 		end
 
 		local stackable = item.maxStackSize > 1
@@ -98,10 +94,10 @@ return function(rootStore)
 			-- when a position is full
 			if position then
 				local x,y = unpack(position)
-				print("inventory at position {"..x..", "..y.."} is full")
+				return item, "Inventory position {"..x..", "..y.."} is full"
 				-- when entire inventory is full
 			else
-				print("inventory is full")
+				return item, "Your inventory is full"
 			end
 		end
 
@@ -211,7 +207,7 @@ return function(rootStore)
 			[TABLE] the current item in the slot
 	]]
 	function rootStore:equipItem(item, slotX, slotY)
-		local category = itemDefs.getDefinition(item).category
+		local category = itemSystem.getDefinition(item).category
 		local canEquip, errorMsg = self:canEquiptToSlot(item, slotX, slotY)
 		if not canEquip then
 			msgBus.send(msgBus.PLAYER_ACTION_ERROR, errorMsg)
@@ -236,7 +232,7 @@ return function(rootStore)
 		if not item then
 			return false
 		end
-		local itemDef = itemDefs.getDefinition(item)
+		local itemDef = itemSystem.getDefinition(item)
 		local category = itemDef.category
 		local levelRequirement = itemDef.levelRequirement or 0
 		local allowedSlotCategory = itemConfig.equipmentGuiSlotMap[slotY][slotX]

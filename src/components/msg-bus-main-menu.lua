@@ -3,7 +3,7 @@ local config = require 'config.config'
 
 local M = MessageBus.new()
 
-if config.isDebug then
+if config.isDevelopment then
   local proxy = {}
   setmetatable(M, {
     --[[
@@ -23,9 +23,8 @@ if config.isDebug then
 end
 
 M.TOGGLE_MAIN_MENU = 'TOGGLE_MAIN_MENU'
--- M.SCENE_SWITCH = 'SCENE_SWITCH'
-M.SCENE_STACK_PUSH = 'SCENE_STACK_PUSH'
-M.SCENE_STACK_POP = 'SCENE_STACK_POP'
-M.SCENE_STACK_REPLACE = 'SCENE_STACK_REPLACE'
+
+M.MENU_ITEM_ADD = 'MENU_ITEM_ADD'
+M.MENU_ITEM_REMOVE = 'MENU_ITEM_REMOVE'
 
 return M

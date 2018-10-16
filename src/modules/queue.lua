@@ -34,7 +34,7 @@ end
 local max, min = math.max, math.min
 
 -- insert callback with maximum 2 arguments
-function Q:add(order, cb, a, b)
+function Q:add(order, cb, a, b, c)
   local isNewQueue = not self.list
   if isNewQueue then
     self.list = {}
@@ -57,7 +57,7 @@ function Q:add(order, cb, a, b)
   end
 
   local itemIndex = self.length + 1
-  local item = {cb, a, b}
+  local item = {cb, a, b, c}
 
   list[#list + 1] = item
   self.length = self.length + 1
@@ -79,7 +79,7 @@ function Q:flush()
     local rowLen = row and #row or 0
     for j=1, rowLen do
       local item = row[j]
-      item[1](item[2], item[3])
+      item[1](item[2], item[3], item[4])
     end
   end
   self.length = 0
