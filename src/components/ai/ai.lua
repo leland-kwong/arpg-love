@@ -23,6 +23,8 @@ local setElectricShockShader = require 'modules.shaders.shader-electric-shock'
 local Enum = require 'utils.enum'
 local collisionGroups = require 'modules.collision-groups'
 local Console = require 'modules.console.console'
+local jprof = require 'modules.profile'
+
 local max, random, abs, min = math.max, math.random, math.abs, math.min
 
 local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
@@ -92,6 +94,20 @@ local Ai = {
   end
 }
 
+local function neighborFilter(item)
+  return collisionGroups.matches(item.group, 'ai')
+end
+local function getNeighbors(agent, neighborOffset)
+	local b = agent
+	return agent.collision.world:queryRect(
+		b.x - neighborOffset/2,
+		b.y - neighborOffset/2,
+		b.w + neighborOffset,
+    b.h + neighborOffset,
+    neighborFilter
+	)
+end
+
 -- gets directions from grid position, adjusting vectors to handle wall collisions as needed
 local aiPathWithAstar = require'modules.flow-field.pathing-with-astar'
 
@@ -120,45 +136,24 @@ local function collisionFilter(item, other)
   return false
 end
 
-local aggroMessageCache = Lru.new(200)
-
-local function spreadAggroToAllies(self)
-  local c = self.collision
-  local areaMultiplier = 10
-  local function aggravationCollisionFilter(item)
-    return collisionGroups.matches(item.group, collisionGroups.ai) and (item ~= c)
-  end
-  local items, len = self.collisionWorld:queryRect(
-    c.x - c.ox * areaMultiplier,
-    c.y - self.z - c.oy * areaMultiplier,
-    c.w * areaMultiplier,
-    c.h * areaMultiplier,
-    aggravationCollisionFilter
-  )
-
-  for i=1, len do
-    local ai = items[i].parent
-    local canSee = self:checkLineOfSight(self.grid, Map.WALKABLE, ai.x, ai.y)
-    if canSee and (not ai.isAggravated) then
-      local id = ai:getId()
-      local message = aggroMessageCache:get(id)
-      if (not message) then
-        message = {parent = ai}
-        aggroMessageCache:set(id, message)
-      end
-      -- trigger a hit message with no damage
+local function spreadAggroToAllies(neighbors)
+  for i=1, #neighbors do
+    local ai = neighbors[i].parent
+    if (not ai.isAggravated) then
+      local message = {parent = ai}
       msgBus.send(msgBus.CHARACTER_HIT, message)
     end
   end
 end
 
-local function handleAggro(self, dt)
+local function handleAggro(self)
   local previouslyAggravated = self.isAggravated
   local hasHits = self.hitCount > 0
   if hasHits then
     self.isAggravated = true
     if (not previouslyAggravated) then
-      spreadAggroToAllies(self)
+      self.neighbors = getNeighbors(self, 10)
+      spreadAggroToAllies(self.neighbors)
       -- put a short delay before setting `isAggravated` to false to prevent aggro spreading to cascade infinitely
       local tick = require 'utils.tick'
       tick.delay(function()
@@ -253,27 +248,14 @@ local function computeObstacleInfluence(self)
 	return sepX/dist, sepY/dist
 end
 
-local function neighborFilter(item)
-  return collisionGroups.matches(item.group, 'ai')
-end
-local function getNeighbors(agent, neighborOffset)
-	local b = agent
-	return agent.collision.world:queryRect(
-		b.x - neighborOffset/2,
-		b.y - neighborOffset/2,
-		b.w + neighborOffset,
-    b.h + neighborOffset,
-    neighborFilter
-	)
-end
-
 local function setNextPosition(self, speed, radius)
   local finiteState = self:getFiniteState()
   if (finiteState ~= states.MOVING) and (finiteState ~= states.FREE_MOVING) then
     return
   end
 
-  local neighbors = getNeighbors(self, 10)
+  self.neighbors = self.neighbors or getNeighbors(self, 10)
+  local neighbors = self.neighbors
 
 	-- These calcs are to get an adjustment for movement speed based on distance.
 	-- Don't take this as a complete solution as it only works based on the mouse target for
@@ -357,14 +339,15 @@ local function createLight(self)
 end
 
 function Ai.update(self, dt)
-  handleAggro(self, dt)
+  if self.destroyedAnimation then
+    return
+  end
+
+  handleAggro(self)
+
   local isIdle = (self:getFiniteState() ~= states.MOVING) and (not self.isInViewOfPlayer) and (not self.isAggravated)
   self:setDrawDisabled(isIdle)
   if isIdle then
-    -- if self.light then
-    --   self.light:delete()
-    --   self.light = nil
-    -- end
     return
   end
 
@@ -394,10 +377,6 @@ function Ai.update(self, dt)
   self.clock = self.clock + dt
   self.frameCount = self.frameCount + 1
   self.attackRecoveryTime = self.attackRecoveryTime - dt
-
-  if self.destroyedAnimation then
-    return
-  end
 
   if self.onUpdateStart then
     self.onUpdateStart(self, dt)
@@ -485,8 +464,10 @@ local perf = require'utils.perf'
 Ai.update = perf({
   enabled = false,
   beforeCall = function()
+    jprof.push('ai update')
   end,
   done = function(time, totalTime, callCount)
+    jprof.pop('ai update')
   end
 })(Ai.update)
 
