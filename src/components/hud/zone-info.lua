@@ -27,12 +27,18 @@ function ZoneInfo.update(self, dt)
   local complete = self.tween:update(dt)
   if complete then
     self:delete(true)
+    return
+  end
+  local globalState = msgBus.send(msgBus.GLOBAL_STATE_GET)
+  local zoneTitle = globalState.activeScene.zoneTitle
+  self.zoneTitle = zoneTitle
+  if (not zoneTitle) then
+    print('[WARNING] - zone title not found')
+    self:delete(true)
   end
 end
 
 function ZoneInfo.draw(self)
-  local globalState = msgBus.send(msgBus.GLOBAL_STATE_GET)
-  local zoneTitle = globalState.activeScene.zoneTitle
   local font = self.textLayer.font
   local oLineHeight = font:getLineHeight()
   font:setLineHeight(1)
