@@ -179,7 +179,7 @@ local function setupLightWorld()
   local LightWorld = require('components.light-world')
   local width, height = love.graphics.getDimensions()
   local newLightWorld = LightWorld:new(width, height)
-  local ambientColor = {0.3,0.3,0.3,1}
+  local ambientColor = {0.6,0.6,0.6,1}
   newLightWorld:setAmbientColor(ambientColor)
 
   Component.create({
@@ -203,9 +203,7 @@ local function setupLightWorld()
       love.graphics.origin()
       love.graphics.scale(2)
       local jprof = require 'modules.profile'
-      jprof.push('light draw')
       newLightWorld:draw()
-      jprof.pop('light draw')
       love.graphics.pop()
     end,
     drawOrder = function()
