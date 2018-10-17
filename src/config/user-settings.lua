@@ -31,7 +31,7 @@ M.mouseInputMap = {
   SKILL_1 = 1,
   SKILL_2 = 2,
   SKILL_3 = 3,
-  SKILL4 = 4
+  SKILL_4 = 4
 }
 
 M.mouseClickDelay = 0.12
