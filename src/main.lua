@@ -85,7 +85,7 @@ function love.draw()
   groups.hud.drawAll()
   groups.gui.drawAll()
   love.graphics.pop()
-  
+
   groups.system.drawAll()
 
   jprof.zoneEnd('frame')
