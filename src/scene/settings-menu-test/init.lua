@@ -8,11 +8,20 @@ local msgBus = require 'components.msg-bus'
 local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local f = require 'utils.functional'
 
+
 local guiTextTitle = GuiText.create({
   group = Component.groups.gui,
   font = font.secondary.font,
   drawOrder = function()
     return 4
+  end
+})
+
+local guiTextMenuTitle = GuiText.create({
+  group = Component.groups.gui,
+  font = font.secondary.font,
+  drawOrder = function()
+    return 2
   end
 })
 
@@ -32,9 +41,29 @@ function SettingsMenuTest.init()
   local menuPadding = 10
   local menuInnerX, menuInnerY = menuX + menuPadding, menuY + menuPadding
 
+  local menuTitle = Component.create({
+    x = menuX,
+    y = menuInnerY - 26,
+    init = function(self)
+      Component.addToGroup(self, 'gui')
+    end,
+    draw = function(self)
+      local title = 'SETTINGS'
+      local Position = require 'utils.position'
+      local textWidth = GuiText.getTextSize(title, guiTextTitle.font)
+      local ox, oy = Position.boxCenterOffset(textWidth, 1, menuWidth, 1)
+      love.graphics.setColor(0.1,0.1,0.1,1)
+      love.graphics.rectangle('fill', self.x, self.y - 6, menuWidth, 20)
+      guiTextMenuTitle:add(title, Color.WHITE, self.x + ox, self.y)
+    end,
+    drawOrder = function()
+      return 1
+    end
+  })
+
   local soundSectionTitle = Component.create({
     x = menuInnerX,
-    y = menuInnerY + 5,
+    y = menuInnerY,
     init = function(self)
       Component.addToGroup(self, 'gui')
     end,
@@ -112,7 +141,7 @@ function SettingsMenuTest.init()
 
   local hotkeySectionTitle = Component.create({
     x = menuInnerX,
-    y = soundSlider.y + 40,
+    y = soundSlider.y + 35,
     init = function(self)
       Component.addToGroup(self, 'gui')
     end,
@@ -148,6 +177,7 @@ function SettingsMenuTest.init()
       local state = {
         changeEnabled = false
       }
+      local isFixedAction = userSettings.keyboardFixedActions[actionType]
       local wrapLimit = 200
       local function changeHotKey(self, ev)
         state.changeEnabled = true
@@ -160,7 +190,7 @@ function SettingsMenuTest.init()
       local hotkeyNode = Gui.create({
         x = menuInnerX,
         y = hotkeySectionTitle.y + 30 + ((index - 1) * 20),
-        onClick = changeHotKey,
+        onClick = ((not isFixedAction) and changeHotKey or nil),
         onUpdate = function(self)
           local template = '{action}: {key}'
           local data = {
@@ -175,7 +205,12 @@ function SettingsMenuTest.init()
             if (not isStringFragment) and (fragment == 'action') then
               displayValue = actionTypeHumanized(value)
             end
-            local color = fragment == 'key' and (state.changeEnabled and Color.YELLOW or Color.LIME) or Color.WHITE
+
+            local color = (fragment == 'key') and (state.changeEnabled and Color.YELLOW or Color.LIME) or Color.WHITE
+            if (fragment == 'key') and isFixedAction then
+              color = Color.LIGHT_GRAY
+            end
+
             table.insert(coloredText, color)
             table.insert(coloredText, displayValue)
           end
@@ -210,7 +245,10 @@ function SettingsMenuTest.init()
     y = 30,
     width = menuWidth,
     height = 400,
-    contentHeight = 500
+    contentHeight = 500,
+    drawOrder = function()
+      return 3
+    end
   }):setParent(self)
 end
 

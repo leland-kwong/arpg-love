@@ -58,9 +58,7 @@ function GuiList.init(self)
     )
   end
 
-  local function baseDrawOrder()
-    return 2
-  end
+  local baseDrawOrder = self.drawOrder
 
   local noop = require 'utils.noop'
   f.forEach(children, function(child, index)
@@ -137,7 +135,6 @@ function GuiList.init(self)
     end,
     drawOrder = baseDrawOrder
   }):setParent(self)
-  self.drawOrder = stencilComponent.drawOrder
 end
 
 return Component.createFactory(GuiList)
