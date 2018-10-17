@@ -176,39 +176,49 @@ local function initializeMap()
 end
 
 local function setupLightWorld()
-  local LightWorld = require('shadows.LightWorld')
-  local newLightWorld = LightWorld:new()
-  local ambientColor = 0.7
-  newLightWorld:SetColor(ambientColor*255,ambientColor*255,ambientColor*255)
-  return Component.create({
-    id = 'DUNGEON_LIGHT_WORLD',
+  local LightWorld = require('components.light-world')
+  local width, height = love.graphics.getDimensions()
+  local newLightWorld = LightWorld:new(width, height)
+  local ambientColor = {0.6,0.6,0.6,1}
+  newLightWorld:setAmbientColor(ambientColor)
+
+  Component.create({
     group = groups.all,
-    init = function(self)
-      self.lightWorld = newLightWorld
-    end,
-    update = function(self)
-      local scale = require 'config.config'.scale
-      local camera = require 'components.camera'
-      local x, y = camera:getPosition()
-      newLightWorld:SetPosition(x * scale, y * scale)
-      newLightWorld:Update()
+    update = function()
+      local cameraTranslateX, cameraTranslateY = camera:getPosition()
+      local cWidth, cHeight = camera:getSize()
+      newLightWorld:setPosition(-cameraTranslateX + cWidth/2, -cameraTranslateY + cHeight/2)
+      local playerRef = Component.get('PLAYER')
+      local tx, ty = playerRef:getPosition()
+
+      -- draw light around player
+      newLightWorld:addLight(
+        tx, ty,
+        80,
+        {1,1,1}
+      )
     end,
     draw = function()
       love.graphics.push()
-      newLightWorld:Draw()
+      love.graphics.origin()
+      love.graphics.scale(2)
+      local jprof = require 'modules.profile'
+      newLightWorld:draw()
       love.graphics.pop()
     end,
     drawOrder = function()
-      return math.pow(10, 10)
+      return 100 * 100
     end
-  })
+  }):setParent(Component.get('MAIN_SCENE'))
+
+  return newLightWorld
 end
 
 function MainScene.init(self)
-  self.backgroundComponent = backgroundTypes.starField()
+  -- self.backgroundComponent = backgroundTypes.starField()
   local serializedState = msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:consumeSnapshot()
 
-  self.lightWorld = setupLightWorld():setParent(self)
+  self.lightWorld = setupLightWorld()
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0,0,0,1})
 
   local rootState = msgBus.send(msgBus.GAME_STATE_GET)
@@ -274,23 +284,14 @@ function MainScene.init(self)
     mapGrid = mapGrid,
   }):setParent(parent)
 
-  if Component.get('DUNGEON_LIGHT_WORLD') then
-    local Lights = require 'components.lights'
-    Lights.create({
-      x = player.x,
-      y = player.y,
-      radius = 400,
-      lightWorld = 'DUNGEON_LIGHT_WORLD'
-    }):setParent(player)
-  end
-
   MainMap.create({
     camera = camera,
     grid = mapGrid,
     tileRenderDefinition = gridTileDefinitions,
     walkable = Map.WALKABLE,
     drawOrder = function()
-      return parent.backgroundComponent:drawOrder() + 1
+      return 1
+      -- return parent.backgroundComponent:drawOrder() + 1
     end
   }):setParent(parent)
 
@@ -324,6 +325,11 @@ local visibilityGroup = collisionGroups.create(
 )
 local activeEntities = {}
 
+local matchers = {
+  [collisionGroups.ai] = true,
+  [collisionGroups.environment] = true
+}
+
 local function visibleItemFilter(item)
   return collisionGroups.matches(item.group, visibilityGroup)
 end
@@ -356,7 +362,10 @@ local function toggleEntityVisibility(self)
 end
 
 function MainScene.update(self)
+  local jprof = require 'modules.profile'
+  jprof.push('toggleEntityVisibility')
   toggleEntityVisibility(self)
+  jprof.pop('toggleEntityVisibility')
 end
 
 local perf = require'utils.perf'

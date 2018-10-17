@@ -42,7 +42,7 @@ M.camera = {
 }
 
 M.sound = {
-  musicEnabled = true,
+  musicEnabled = false,
   musicVolume = 0.5
 }
 

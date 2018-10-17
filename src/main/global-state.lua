@@ -2,12 +2,13 @@ local Component = require 'modules.component'
 local sceneManager = require 'scene.manager'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
+local CreateStore = require 'components.state.state'
 
 local globalState = {
   activeScene = nil,
   backgroundColor = {0.2,0.2,0.2},
   sceneStack = sceneManager,
-  gameState = {},
+  gameState = CreateStore(),
   stateSnapshot = {
     serializedState = nil,
     serializeAll = function(self)

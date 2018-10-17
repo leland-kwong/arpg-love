@@ -47,10 +47,10 @@ local characterSystem = msgBus.send(msgBus.PROFILE_FUNC, {
   call = require 'components.groups.character'
 })
 
-local profile = require('modules.profile')
+local jprof = require('modules.profile')
 
 function love.update(dt)
-  profile.push('frame')
+  jprof.zoneStart('frame')
 
   systemsProfiler()
 
@@ -58,7 +58,9 @@ function love.update(dt)
   tick.update(dt)
 
   camera:update(dt)
+
   characterSystem(dt)
+
   groups.firstLayer.updateAll(dt)
   groups.all.updateAll(dt)
   groups.overlay.updateAll(dt)
@@ -86,7 +88,7 @@ function love.draw()
 
   groups.system.drawAll()
 
-  profile.pop('frame')
+  jprof.zoneEnd('frame')
 end
 
 --[[
