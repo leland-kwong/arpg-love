@@ -4,12 +4,13 @@ local Sound = require 'components.sound'
 local HomeScene = require 'scene.sandbox.main-game.main-game-home'
 local tick = require 'utils.tick'
 local userSettings = require 'config.user-settings'
+local userSettingsState = require 'config.user-settings.state'
 
 local bgMusic = {
   songQueue = nil,
   currentlyPlaying = nil,
   getEnabled = function()
-    return userSettings.sound.musicEnabled
+    return userSettings.sound.musicVolume > 0
   end
 }
 
@@ -43,12 +44,6 @@ end
 
 -- song manager entry point. Handles playing/stopping based on states
 local function setSong(sceneRef)
-  if (not bgMusic.getEnabled()) then
-    consoleLog('stop song', os.clock())
-    stopSong()
-    return
-  end
-
   local Component = require 'modules.component'
   local sceneBluePrint = Component.getBlueprint(sceneRef)
   local song = songsByScene[sceneBluePrint]()
@@ -69,24 +64,9 @@ local function setSong(sceneRef)
   end, duration)
 end
 
-msgBus.MUSIC_TOGGLE = 'MUSIC_TOGGLE'
-msgBus.on(msgBus.MUSIC_TOGGLE, function()
-  userSettings.sound.musicEnabled = not userSettings.sound.musicEnabled
-  local sceneRef = userSettings.sound.musicEnabled and globalState.activeScene or nil
-  setSong(sceneRef)
-  setVolume(userSettings.sound.musicVolume)
-end)
-
-msgBus.MUSIC_SET_VOLUME = 'MUSIC_SET_VOLUME'
-msgBus.on(msgBus.MUSIC_SET_VOLUME, function(volume)
-  userSettings.sound.musicVolume = volume
-  setVolume(volume)
-end)
-
 msgBus.MUSIC_PLAY = 'MUSIC_PLAY'
 msgBus.on(msgBus.MUSIC_PLAY, function(sceneRef)
   setSong(sceneRef)
-  setVolume(userSettings.sound.musicVolume)
 end)
 
 msgBus.MUSIC_STOP = 'MUSIC_STOP'
@@ -100,4 +80,9 @@ msgBus.on(msgBus.KEY_DOWN, function (v)
   if keyMap.MUSIC_TOGGLE == v.key then
     msgBus.send(msgBus.MUSIC_TOGGLE)
   end
+end)
+
+msgBus.on(msgBus.UPDATE, function()
+  setVolume(userSettings.sound.musicVolume)
+  love.audio.setVolume(userSettings.sound.masterVolume)
 end)

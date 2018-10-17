@@ -24,7 +24,6 @@ M.keyboard = {
   MAIN_MENU = 'escape',
   PORTAL_OPEN = 't',
   PAUSE_GAME = 'p',
-  MUSIC_TOGGLE = 'm'
 }
 
 -- these actions may not be remapped
@@ -47,8 +46,7 @@ M.camera = {
 }
 
 M.sound = {
-  soundVolume = 1,
-  musicEnabled = false,
+  masterVolume = 1,
   musicVolume = 0.5
 }
 

@@ -6,7 +6,7 @@ local M = {}
 function M.set(setterFn)
   userSettings = setterFn(userSettings)
   local fs = require 'modules.file-system'
-  return fs.saveFile('/', 'settings', userSettings)
+  return fs.saveFile('', 'settings', userSettings)
     :next(function()
       print('settings saved!')
     end, function(err)
@@ -16,12 +16,14 @@ end
 
 function M.load()
   local fs = require 'modules.file-system'
-  local loadedSettings = fs.loadSaveFile('/', 'settings')
+  local loadedSettings, ok = fs.loadSaveFile('', 'settings')
   print(
     require('utils.inspect')(loadedSettings)
   )
-  assign(userSettings, loadedSettings)
-  return loadedSettings
+  if ok then
+    assign(userSettings, loadedSettings)
+  end
+  return userSettings
 end
 
 -- M.set()

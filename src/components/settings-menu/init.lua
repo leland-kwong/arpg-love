@@ -122,7 +122,7 @@ function SettingsMenu.init(self)
       local newVolume = self:getCalculatedValue() / 100
       sliderSoundAdjusted(newVolume)
       userSettingsState.set(function(settings)
-        settings.sound.soundVolume = newVolume
+        settings.sound.masterVolume = newVolume
         return settings
       end):next(function()
         consoleLog('settings saved')
@@ -147,9 +147,9 @@ function SettingsMenu.init(self)
       love.graphics.setFont(font.primary.font)
       local round = require 'utils.math'.round
       local displayValue = round(self:getCalculatedValue())
-      guiTextBody:add('Sound effects: '..displayValue, Color.WHITE, self.x, self.y - 15)
+      guiTextBody:add('Master: '..displayValue, Color.WHITE, self.x, self.y - 15)
     end
-  }):setCalculatedValue(userSettings.sound.soundVolume * 100)
+  }):setCalculatedValue(userSettings.sound.masterVolume * 100)
   local childNodes = {
     soundSectionTitle,
     musicSlider,
