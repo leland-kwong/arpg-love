@@ -6,18 +6,26 @@ local noop = require 'utils.noop'
 return Component.createFactory({
   value = 0,
   width = 100,
-  min = 0, -- minimum slider value
-  max = 100, -- maximum slider value
-  increment = 1, -- slider value increments
+  knobSize = 10,
+  resolutionScale = 2,
 
   -- internal props
   isDragStart = false,
   beforeDragValue = 0,
   onChange = noop,
 
+  -- returns the value relative to the component's rail size so that it is always out of 100
+  getCalculatedValue = function(self)
+    local scale = 100 / self.width
+    return self.value * scale
+  end,
+
   init = function(self)
+    self.rangeTotal = self.min + self.max
+    self.actualValue = self:getCalculatedValue()
+
     Component.addToGroup(self, 'gui')
-    local knobCollisionSize = 8
+    local knobCollisionSize = self.knobSize
     local knobOffsetX = knobCollisionSize/2
     self.railHeight = 4
     self.knob = Gui.create({
@@ -40,9 +48,8 @@ return Component.createFactory({
       msgBus.on(msgBus.MOUSE_DRAG, function(ev)
         local clamp = require 'utils.math'.clamp
         if self.knob.hovered or self.isDragStart then
-          self.value = clamp(self.beforeDragValue + ev.dx/2, 0, self.width)
+          self.value = clamp(self.beforeDragValue + ev.dx/self.resolutionScale, 0, self.width)
           self.isDragStart = true
-          -- local min, max = self.x - knobOffsetX, self.x + 100 - knobOffsetX
           local nextPos = self.x - knobOffsetX + self.value
           self.knob.x = nextPos
         end

@@ -90,32 +90,6 @@ function GuiTestBlueprint.init(self)
     })
   end
 
-  local GuiSlider = require 'components.gui.gui-slider'
-  local guiSlider = GuiSlider.create({
-    x = 200,
-    y = 220,
-    width = 150,
-    draw = function(self)
-      local railHeight = self.railHeight
-      -- slider rail
-      love.graphics.setColor(0.4,0.4,0.4)
-      love.graphics.rectangle('fill', self.x, self.y, self.width, railHeight)
-
-      -- slider control
-      if self.knob.hovered then
-        love.graphics.setColor(0,1,0)
-      else
-        love.graphics.setColor(1,1,0)
-      end
-      local offsetX, offsetY = self.knob.w/2, self.knob.w/2
-      love.graphics.circle('fill', self.knob.x + offsetX, self.knob.y + offsetY, self.knob.w/2)
-
-      love.graphics.setColor(1,1,1)
-      love.graphics.setFont(font.primary.font)
-      love.graphics.print('value: '..self.value, self.x, self.y - 20)
-    end
-  })
-
   local children = {
     Button.create({
       x = 200,
@@ -150,15 +124,14 @@ function GuiTestBlueprint.init(self)
       placeholderText = 'player name'
     }),
     guiText,
-    guiSlider
   }
   local list = GuiList.create({
     childNodes = children,
     x = 180,
     y = 30,
     width = 240,
-    height = 180,
-    contentHeight = 220
+    height = 200,
+    contentHeight = 280
   }):setParent(self)
 end
 

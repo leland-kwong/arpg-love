@@ -137,6 +137,7 @@ end)
 require 'scene.light-test'
 require 'scene.font-test'
 require 'scene.tooltip-test'
+require 'scene.settings-menu-test'
 
 local function getMenuPosition()
   return 200, 20

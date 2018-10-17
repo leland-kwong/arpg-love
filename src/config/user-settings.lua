@@ -27,6 +27,11 @@ M.keyboard = {
   MUSIC_TOGGLE = 'm'
 }
 
+-- these actions may not be remapped
+M.keyboardFixedActions = {
+  MAIN_MENU = true
+}
+
 M.mouseInputMap = {
   SKILL_1 = 1,
   SKILL_2 = 2,

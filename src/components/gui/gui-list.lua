@@ -58,18 +58,18 @@ function GuiList.init(self)
     )
   end
 
-  local function drawOrder()
+  local function baseDrawOrder()
     return 2
   end
 
   local noop = require 'utils.noop'
   f.forEach(children, function(child, index)
     child.drawOrder = function()
-      return drawOrder() + index
+      return baseDrawOrder() + index
     end
   end)
 
-  Component.create({
+  local stencilComponent = Component.create({
     group = Component.groups.gui,
     draw = function()
       -- remove stencil
@@ -77,7 +77,29 @@ function GuiList.init(self)
       love.graphics.pop()
     end,
     drawOrder = function()
-      return drawOrder() + #children + 1
+      return baseDrawOrder() + #children + 1
+    end
+  }):setParent(self)
+
+  -- border draw component
+  Component.create({
+    group = Component.groups.gui,
+    draw = function()
+      local borderWidth = 2
+      local oLineWidth = love.graphics.getLineWidth()
+      love.graphics.setLineWidth(borderWidth)
+      love.graphics.setColor(0,0,0,0.5)
+      love.graphics.rectangle(
+        'line',
+        self.x,
+        self.y,
+        width,
+        height
+      )
+      love.graphics.setLineWidth(oLineWidth)
+    end,
+    drawOrder = function()
+      return stencilComponent:drawOrder() + 1
     end
   }):setParent(self)
 
@@ -110,10 +132,12 @@ function GuiList.init(self)
         self.w,
         self.h
       )
+
       scrollbars(self)
     end,
-    drawOrder = drawOrder
+    drawOrder = baseDrawOrder
   }):setParent(self)
+  self.drawOrder = stencilComponent.drawOrder
 end
 
 return Component.createFactory(GuiList)
