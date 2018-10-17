@@ -7,17 +7,60 @@ msgBus.MOUSE_CLICKED = 'MOUSE_CLICKED'
 
 local state = {
   mouse = {
+    position = {
+      x = 0,
+      y = 0,
+    },
     lastPressed = {
       timeStamp = 0,
       x = 0,
       y = 0
     },
+    drag = {
+      isDragging = false,
+      start = {
+        x = 0,
+        y = 0
+      }
+    },
     isDown = false,
   }
 }
 
+msgBus.MOUSE_DRAG = 'MOUSE_DRAG'
+msgBus.MOUSE_DRAG_START = 'MOUSE_DRAG_START'
+local function handleDragEvent()
+  local isMouseDown = state.mouse.isDown
+  local dragState = state.mouse.drag
+  local isDragStart = isMouseDown and (not dragState.isDragging)
+  dragState.isDragging = isMouseDown
+  if isMouseDown then
+    local mx, my = love.mouse.getX(), love.mouse.getY()
+    if isDragStart then
+      dragState.start.x = mx
+      dragState.start.y = my
+      msgBus.send(msgBus.MOUSE_DRAG_START, {
+        startX = mx,
+        startY = my
+      })
+    end
+    local dx, dy = mx - dragState.start.x, my - dragState.start.y
+    if (dx ~= 0) or (dy ~= 0) then
+      local event = {
+        startX = dragState.start.x,
+        startY = dragState.start.y,
+        dx = dx,
+        dy = dy
+      }
+      msgBus.send(msgBus.MOUSE_DRAG, event)
+    end
+  end
+end
+
 msgBus.on(msgBus.UPDATE, function()
-  state.mouse.isDown = love.mouse.isDown()
+  local isMouseDown = love.mouse.isDown(1)
+  state.mouse.isDown = isMouseDown
+  handleDragEvent()
 end)
 
 function love.mousepressed( x, y, button, istouch, presses )
