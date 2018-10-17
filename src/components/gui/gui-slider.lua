@@ -20,9 +20,14 @@ return Component.createFactory({
     return self.value * scale
   end,
 
+  setCalculatedValue = function(self, value)
+    local scale = 100/self.width
+    self.value = value * scale
+    return self
+  end,
+
   init = function(self)
     self.rangeTotal = self.min + self.max
-    self.actualValue = self:getCalculatedValue()
 
     Component.addToGroup(self, 'gui')
     local knobCollisionSize = self.knobSize
@@ -55,6 +60,10 @@ return Component.createFactory({
         end
       end),
       msgBus.on(msgBus.MOUSE_RELEASED, function()
+        local wasDragging = self.isDragStart
+        if wasDragging then
+          self:onChange()
+        end
         self.isDragStart = false
       end)
     }
