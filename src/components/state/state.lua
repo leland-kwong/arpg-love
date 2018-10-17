@@ -50,11 +50,6 @@ local function defaultState()
 
 		--[[ equipped items ]]
 		equipment = require'utils.make-grid'(2, 5, EMPTY_SLOT),
-
-		--[[ game settings ]]
-		music = false,
-		-- curently active menu panel
-		activeMenu = false,
 	}
 end
 

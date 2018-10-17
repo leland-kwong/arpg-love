@@ -23,12 +23,15 @@ end
 
 local Groups = {
   --[[
-    This is for change that seldom change their draw order. This way we can prevent the min/max order queue from
+    This is for components that seldom change their draw order. This way we can prevent the min/max order queue from
     spreading out too much. For example, if the main scene's draw order is 1, and the player's draw order is 10000, then
     the draw queue will have to skip 99999 iterations just to go from 1-10000.
   ]]
   firstLayer = Component.newGroup({
     name = 'firstLayer'
+  }),
+  menu = Component.newGroup({
+    name = 'menu'
   }),
   all = Component.newGroup({
     name = 'all',

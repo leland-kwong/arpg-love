@@ -9,35 +9,37 @@ local f = require 'utils.functional'
 local userSettings = require 'config.user-settings'
 local userSettingsState = require 'config.user-settings.state'
 
-local guiTextTitle = GuiText.create({
-  group = Component.groups.gui,
-  font = font.secondary.font,
-  drawOrder = function()
-    return 4
-  end
-})
-
-local guiTextMenuTitle = GuiText.create({
-  group = Component.groups.gui,
-  font = font.secondary.font,
-  drawOrder = function()
-    return 2
-  end
-})
-
-local guiTextBody = GuiText.create({
-  group = Component.groups.gui,
-  font = font.primary.font,
-  drawOrder = guiTextTitle.drawOrder
-})
-
 local SettingsMenu = {}
 
 function SettingsMenu.init(self)
+  Component.addToGroup(self, 'menu')
+
   local menuX, menuY = self.x, self.y
   local menuWidth, menuHeight = self.width, self.height
   local menuPadding = 10
   local menuInnerX, menuInnerY = menuX + menuPadding, menuY + menuPadding
+
+  local guiTextTitle = GuiText.create({
+    group = Component.groups.gui,
+    font = font.secondary.font,
+    drawOrder = function()
+      return 4
+    end
+  })
+
+  local guiTextMenuTitle = GuiText.create({
+    group = Component.groups.gui,
+    font = font.secondary.font,
+    drawOrder = function()
+      return 2
+    end
+  })
+
+  local guiTextBody = GuiText.create({
+    group = Component.groups.gui,
+    font = font.primary.font,
+    drawOrder = guiTextTitle.drawOrder
+  })
 
   local menuTitle = Component.create({
     x = menuX,
@@ -285,7 +287,11 @@ function SettingsMenu.init(self)
     drawOrder = function()
       return 3
     end
-  }):setParent(self)
+  })
+end
+
+function SettingsMenu.final()
+  consoleLog('settings menu deleted')
 end
 
 return Component.createFactory(SettingsMenu)

@@ -236,21 +236,18 @@ local Player = {
         local key = v.key
         local keyMap = userSettings.keyboard
         local rootState = msgBus.send(msgBus.GAME_STATE_GET)
-        local isActive = rootState:get().activeMenu == 'INVENTORY'
 
         if (keyMap.INVENTORY_TOGGLE == key) and (not v.hasModifier) then
-          if not self.inventory then
-            self.inventory = Inventory.create({
+          local activeInventory = Component.get('MENU_INVENTORY')
+          if (not activeInventory) then
+            Inventory.create({
               rootStore = rootState,
               slots = function()
                 return rootState:get().inventory
               end
             }):setParent(self.hudRoot)
-            rootState:set('activeMenu', 'INVENTORY')
-          else
-            self.inventory:delete(true)
-            self.inventory = nil
-            rootState:set('activeMenu', false)
+          elseif activeInventory then
+            activeInventory:delete(true)
           end
         end
 

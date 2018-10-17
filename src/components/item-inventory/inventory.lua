@@ -11,6 +11,7 @@ local itemSystem =require("components.item-inventory.items.item-system")
 local Sound = require 'components.sound'
 
 local InventoryBlueprint = {
+  id = 'MENU_INVENTORY',
   rootStore = nil, -- game state
   slots = {},
   group = groups.gui,
@@ -40,6 +41,7 @@ local function InteractArea(self)
 end
 
 function InventoryBlueprint.init(self)
+  Component.addToGroup(self, 'menu')
 
   msgBus.on(msgBus.ALL, function(msg, msgType)
     local rootStore = self.rootStore

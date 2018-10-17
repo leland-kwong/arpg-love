@@ -43,6 +43,8 @@ local GuiList = {
 }
 
 function GuiList.init(self)
+  Component.addToGroup(self, 'menu')
+
   self.contentWidth = self.contentWidth or self.width
   self.contentHeight = self.contentHeight or self.height
   local children, width, height, contentWidth, contentHeight =
@@ -65,6 +67,7 @@ function GuiList.init(self)
     child.drawOrder = function()
       return baseDrawOrder() + index
     end
+    Component.addToGroup(child, 'menu')
   end)
 
   local stencilComponent = Component.create({
@@ -77,10 +80,11 @@ function GuiList.init(self)
     drawOrder = function()
       return baseDrawOrder() + #children + 1
     end
-  }):setParent(self)
+  })
+  Component.addToGroup(stencilComponent, 'menu')
 
   -- border draw component
-  Component.create({
+  local borderNode = Component.create({
     group = Component.groups.gui,
     draw = function()
       local borderWidth = 2
@@ -99,9 +103,10 @@ function GuiList.init(self)
     drawOrder = function()
       return stencilComponent:drawOrder() + 1
     end
-  }):setParent(self)
+  })
+  Component.addToGroup(borderNode, 'menu')
 
-  Gui.create({
+  local listNode = Gui.create({
     x = self.x,
     y = self.y,
     w = width,
@@ -134,7 +139,8 @@ function GuiList.init(self)
       scrollbars(self)
     end,
     drawOrder = baseDrawOrder
-  }):setParent(self)
+  })
+  Component.addToGroup(listNode, 'menu')
 end
 
 return Component.createFactory(GuiList)
