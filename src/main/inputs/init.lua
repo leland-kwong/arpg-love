@@ -1,6 +1,7 @@
 local socket = require 'socket'
 local msgBus = require 'components.msg-bus'
 local config = require 'config.config'
+local userSettings = require 'config.user-settings'
 require 'main.inputs.keyboard-manager'
 
 msgBus.MOUSE_CLICKED = 'MOUSE_CLICKED'
@@ -83,7 +84,7 @@ function love.mousereleased( x, y, button, istouch, presses )
   )
 
   local timeBetweenRelease = socket.gettime() - state.mouse.lastPressed.timeStamp
-  if timeBetweenRelease <= config.userSettings.mouseClickDelay then
+  if timeBetweenRelease <= userSettings.mouseClickDelay then
     msgBus.send(msgBus.MOUSE_CLICKED, message)
   end
 end

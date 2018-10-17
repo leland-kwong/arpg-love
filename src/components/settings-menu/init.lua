@@ -7,6 +7,7 @@ local font = require 'components.font'
 local msgBus = require 'components.msg-bus'
 local f = require 'utils.functional'
 local userSettings = require 'config.user-settings'
+local userSettingsState = require 'config.user-settings.state'
 
 local guiTextTitle = GuiText.create({
   group = Component.groups.gui,
@@ -80,11 +81,15 @@ function SettingsMenu.init(self)
     y = soundSectionTitle.y + 40,
     width = 150,
     knobSize = 10,
-    min = 0,
-    max = 100,
-    increment = 1,
     onChange = function(self)
-      sliderSoundAdjusted(self:getCalculatedValue() / 100)
+      local newVolume = self:getCalculatedValue() / 100
+      sliderSoundAdjusted(newVolume)
+      userSettingsState.set(function(settings)
+        settings.sound.musicVolume = newVolume
+        return settings
+      end):next(function()
+        consoleLog('settings saved!')
+      end)
     end,
     draw = function(self)
       local railHeight = self.railHeight
@@ -105,19 +110,23 @@ function SettingsMenu.init(self)
       love.graphics.setFont(font.primary.font)
       local round = require 'utils.math'.round
       local displayValue = round(self:getCalculatedValue())
-      guiTextBody:add('music: '..displayValue, Color.WHITE, self.x, self.y - 15)
+      guiTextBody:add('Music: '..displayValue, Color.WHITE, self.x, self.y - 15)
     end
-  }):setCalculatedValue(userSettings.sound.musicVolume)
+  }):setCalculatedValue(userSettings.sound.musicVolume * 100)
   local soundSlider = GuiSlider.create({
     x = menuInnerX,
     y = musicSlider.y + 30,
     width = 150,
     knobSize = 10,
-    min = 0,
-    max = 100,
-    increment = 1,
     onChange = function(self)
-      sliderSoundAdjusted(self:getCalculatedValue() / 100)
+      local newVolume = self:getCalculatedValue() / 100
+      sliderSoundAdjusted(newVolume)
+      userSettingsState.set(function(settings)
+        settings.sound.soundVolume = newVolume
+        return settings
+      end):next(function()
+        consoleLog('settings saved')
+      end)
     end,
     draw = function(self)
       local railHeight = self.railHeight
@@ -138,9 +147,9 @@ function SettingsMenu.init(self)
       love.graphics.setFont(font.primary.font)
       local round = require 'utils.math'.round
       local displayValue = round(self:getCalculatedValue())
-      guiTextBody:add('sound effects: '..displayValue, Color.WHITE, self.x, self.y - 15)
+      guiTextBody:add('Sound effects: '..displayValue, Color.WHITE, self.x, self.y - 15)
     end
-  }):setCalculatedValue(userSettings.sound.soundVolume)
+  }):setCalculatedValue(userSettings.sound.soundVolume * 100)
   local childNodes = {
     soundSectionTitle,
     musicSlider,
@@ -196,7 +205,14 @@ function SettingsMenu.init(self)
         )
         state.changeEnabled = true
         msgBus.on(msgBus.KEY_DOWN, function(ev)
-          userSettings.keyboard[actionType] = ev.key
+          userSettingsState.set(function(settings)
+            settings.keyboard[actionType] = ev.key
+            return settings
+          end):next(function()
+            consoleLog('settings saved!')
+          end, function(err)
+            print('settings save error')
+          end)
           state.changeEnabled = false
           love.audio.play(
             love.audio.newSource(

@@ -4,6 +4,7 @@ local msgBus = require 'components.msg-bus'
 local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local ParticleFx = require 'components.particle.particle'
 local config = require 'config.config'
+local userSettings = require 'config.user-settings'
 local animationFactory = require 'components.animation-factory'
 local collisionWorlds = require 'components.collision-worlds'
 local collisionObject = require 'modules.collision'
@@ -21,8 +22,8 @@ local HealSource = require 'components.heal-source'
 require'components.item-inventory.equipment-change-handler'
 
 local colMap = collisionWorlds.map
-local keyMap = config.userSettings.keyboard
-local mouseInputMap = config.userSettings.mouseInputMap
+local keyMap = userSettings.keyboard
+local mouseInputMap = userSettings.mouseInputMap
 
 local startPos = {
   x = config.gridSize * 3,
@@ -233,7 +234,7 @@ local Player = {
 
       msgBus.on(msgBus.KEY_DOWN, function(v)
         local key = v.key
-        local keyMap = config.userSettings.keyboard
+        local keyMap = userSettings.keyboard
         local rootState = msgBus.send(msgBus.GAME_STATE_GET)
         local isActive = rootState:get().activeMenu == 'INVENTORY'
 

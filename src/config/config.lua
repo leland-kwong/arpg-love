@@ -2,10 +2,7 @@
 
 local f = require 'utils.functional'
 local oUtils = require 'utils.object-utils'
-local userSettings = require 'config.user-settings'
 local M = {}
-
-M.userSettings = userSettings
 
 local xpDiff = 20
 M.levelExperienceRequirements = {}

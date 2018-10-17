@@ -3,7 +3,7 @@ local msgBus = require 'components.msg-bus'
 local Sound = require 'components.sound'
 local HomeScene = require 'scene.sandbox.main-game.main-game-home'
 local tick = require 'utils.tick'
-local userSettings = require 'config.config'.userSettings
+local userSettings = require 'config.user-settings'
 
 local bgMusic = {
   songQueue = nil,
@@ -96,7 +96,7 @@ end)
 
 msgBus.on(msgBus.KEY_DOWN, function (v)
   local config = require 'config.config'
-  local keyMap = config.userSettings.keyboard
+  local keyMap = userSettings.keyboard
   if keyMap.MUSIC_TOGGLE == v.key then
     msgBus.send(msgBus.MUSIC_TOGGLE)
   end
