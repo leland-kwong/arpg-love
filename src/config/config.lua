@@ -38,5 +38,6 @@ M.debugDrawQueue = false
 M.collisionDebug = false
 
 M.gameTitle = 'Citizen of Nowhere'
+M.version = '1.1.0-alpha'
 
 return M
