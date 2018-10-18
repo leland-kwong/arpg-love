@@ -485,7 +485,7 @@ local function handleAbilities(self, dt)
     return
   end
 
-  if InputContext.is('any') then
+  if InputContext.contains('any') then
     -- SKILL_1
     local isSkill1Activate = love.keyboard.isDown(keyMap.SKILL_1) or
       love.mouse.isDown(mouseInputMap.SKILL_1)

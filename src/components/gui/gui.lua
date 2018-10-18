@@ -171,7 +171,7 @@ function Gui.init(self)
       return msgBus.CLEANUP
     end
 
-    if InputContext.is(self.inputContext) then
+    if InputContext.contains(self.inputContext) then
       if guiType.LIST == self.type and
         msgBus.MOUSE_WHEEL_MOVED == msgType and
         self.hovered
@@ -272,7 +272,7 @@ function Gui.update(self, dt)
 
   self.hovered = false
 
-  if InputContext.is(self.inputContext) then
+  if InputContext.contains(self.inputContext) then
     handleEvents(self)
   end
 
