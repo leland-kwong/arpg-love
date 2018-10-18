@@ -17,16 +17,12 @@ end
 function M.load()
   local fs = require 'modules.file-system'
   local loadedSettings, ok = fs.loadSaveFile('', 'settings')
-  print(
-    require('utils.inspect')(loadedSettings)
-  )
   if ok then
     assign(userSettings, loadedSettings)
   end
   return userSettings
 end
 
--- M.set()
 M.load()
 
 return M

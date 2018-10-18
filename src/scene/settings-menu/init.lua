@@ -287,7 +287,7 @@ function SettingsMenu.init(self)
     height = menuHeight,
     contentHeight = 500,
     drawOrder = function()
-      return 3
+      return 1001
     end
   }):setParent(self)
 end

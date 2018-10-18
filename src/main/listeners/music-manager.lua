@@ -32,6 +32,11 @@ local function setVolume(volume)
   end
 end
 
+local function updateAllVolumes()
+  setVolume(userSettings.sound.musicVolume)
+  love.audio.setVolume(userSettings.sound.masterVolume)
+end
+
 local function stopSong()
   if bgMusic.currentlyPlaying then
     love.audio.stop(bgMusic.currentlyPlaying)
@@ -53,7 +58,7 @@ local function setSong(sceneRef)
   end
   stopSong()
   bgMusic.currentlyPlaying = song
-  consoleLog('play song', os.clock())
+  updateAllVolumes()
   love.audio.play(song)
 
   local duration = 5
@@ -82,7 +87,4 @@ msgBus.on(msgBus.KEY_DOWN, function (v)
   end
 end)
 
-msgBus.on(msgBus.UPDATE, function()
-  setVolume(userSettings.sound.musicVolume)
-  love.audio.setVolume(userSettings.sound.masterVolume)
-end)
+msgBus.on(msgBus.UPDATE, updateAllVolumes)

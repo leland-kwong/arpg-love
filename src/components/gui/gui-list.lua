@@ -39,10 +39,13 @@ local GuiList = {
   width = 0,
   height = 0,
   contentWidth = nil,
-  contentHeight = nil
+  contentHeight = nil,
+  borderWidth = 2,
+  borderColor = {Color.multiplyAlpha(Color.SKY_BLUE, 0.5)}
 }
 
 function GuiList.init(self)
+  local parent = self
   Component.addToGroup(self, 'gui')
 
   self.contentWidth = self.contentWidth or self.width
@@ -85,10 +88,9 @@ function GuiList.init(self)
   local borderNode = Component.create({
     group = Component.groups.gui,
     draw = function()
-      local borderWidth = 2
       local oLineWidth = love.graphics.getLineWidth()
-      love.graphics.setLineWidth(borderWidth)
-      love.graphics.setColor(0,0,0,0.5)
+      love.graphics.setLineWidth(parent.borderWidth)
+      love.graphics.setColor(parent.borderColor)
       love.graphics.rectangle(
         'line',
         self.x,
