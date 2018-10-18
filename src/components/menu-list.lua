@@ -12,6 +12,7 @@ local Position = require 'utils.position'
 local MenuList = {
   x = 0,
   y = 0,
+  width = 300,
   group = groups.gui,
   -- table of menu options
   options = {
@@ -29,7 +30,7 @@ function MenuList.init(self)
   local parent = self
   self.guiBlock = GuiBlock.create({
     x = self.x,
-    y = self.y + 30,
+    y = self.y,
     rows = {},
     drawOrder = function()
       return parent:drawOrder() + 1
@@ -47,7 +48,7 @@ function MenuList.update(self)
     local menuX = self.x
     local menuY = self.y
     local startYOffset = 10
-    local menuWidth = 300
+    local menuWidth = self.width
 
     local rows = f.map(self.options, function(options)
       local name = options.name
@@ -64,19 +65,22 @@ function MenuList.update(self)
     end)
     self.guiBlock.rows = rows
 
+    -- remove interact nodes each frame
     f.forEach(self.interactNodes, function(node)
       node:delete(true)
     end)
 
+    -- recreate interact nodes
     self.interactNodes = {}
+    local totalHeight = 0
+    local maxWidth = 1 -- needs to be at least 1 so the `bump` library doesn't complain
     -- menu option gui nodes
-    guiBlockLayout(rows, self.x, self.y + 30, function(row, rowPosition, _, _, rowIndex)
+    guiBlockLayout(rows, self.x, self.y, function(row, rowPosition, _, _, rowIndex)
       local option = self.options[rowIndex]
       local name = option.name
       local optionValue = option.value
       local textW, textH = GuiText.getTextSize(name, itemFont)
       local lineHeight = 1.8
-      local h = (textH * lineHeight)
       local node = Gui.create({
         x = rowPosition.x,
         y = rowPosition.y,
@@ -88,10 +92,8 @@ function MenuList.update(self)
         end,
         draw = function(self)
           if self.hovered then
-            local sidePadding = 5
             love.graphics.setColor(1,1,0,0.5)
-            local w = self.w + (sidePadding * 2)
-            love.graphics.rectangle('fill', self.x - sidePadding, self.y, w, self.h)
+            love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
           end
         end,
         drawOrder = function()
@@ -99,7 +101,11 @@ function MenuList.update(self)
         end
       }):setParent(self)
       table.insert(self.interactNodes, node)
+      totalHeight = totalHeight + row.height
+      maxWidth = math.max(maxWidth, row.width)
     end)
+    self.width = maxWidth
+    self.height = totalHeight
   end
   self.prevOptions = self.options
 end

@@ -10,9 +10,10 @@ local fileSystem = require 'modules.file-system'
 local HomeBase = require 'scene.home-base'
 local Color = require 'modules.color'
 local f = require 'utils.functional'
+local MenuManager = require 'modules.menu-manager'
 
 local PlayGameMenu = {
-  group = Component.groups.gui,
+  id = 'PlayGameMenu',
   x = 300,
   y = 40
 }
@@ -174,6 +175,10 @@ local function getMenuOptions(parent)
 end
 
 function PlayGameMenu.init(self)
+  Component.addToGroup(self, 'gui')
+  MenuManager.clearAll()
+  MenuManager.push(self)
+
   self.state = {
     menuMode = menuModes.NORMAL,
     needsUpdate = true,

@@ -11,18 +11,16 @@ local config = require 'config.config'
 local objectUtils = require 'utils.object-utils'
 local bitser = require 'modules.bitser'
 
+local function getMenuTabsPosition()
+  return 200, 60
+end
+
 local drawOrder = function()
   return 1000
 end
 
 local guiTextBodyLayer = GuiText.create({
   font = font.primary.font,
-  drawOrder = drawOrder
-})
-
-local titleFont = font.secondary.font
-local guiTextTitleLayer = GuiText.create({
-  font = titleFont,
   drawOrder = drawOrder
 })
 
@@ -107,35 +105,57 @@ msgBus.on(msgBus.SETTINGS_MENU_TOGGLE, function()
     activeMenu:delete(true)
   else
     -- create settings menu
-    local Position = require 'utils.position'
     local SettingsMenu = require 'scene.settings-menu'
-    local vWidth, vHeight = love.graphics.getDimensions()
     local width, height = 240, 400
-    local x = Position.boxCenterOffset(width, height, vWidth/2, vHeight/2)
+    local menuTabs = Component.get('MainMenuTabs')
     local menu = SettingsMenu.create({
-      x = x,
-      y = 60,
+      x = menuTabs.x + menuTabs.width,
+      y = menuTabs.y,
       width = width,
       height = height
     })
   end
 end)
+
 local menuOptionSettingsMenu = {
-  name = 'settings',
+  name = 'Settings',
   value = function()
     msgBus.send(msgBus.SETTINGS_MENU_TOGGLE)
   end
 }
 
+msgBus.PLAY_GAME_MENU_TOGGLE = 'PLAY_GAME_MENU_TOGGLE'
+msgBus.on(msgBus.PLAY_GAME_MENU_TOGGLE, function()
+  local activeMenu = Component.get('PlayGameMenu')
+  if activeMenu then
+    activeMenu:delete(true)
+  else
+    -- create settings menu
+    local PlayGameMenu = require 'scene.play-game-menu'
+    local menuTabs = Component.get('MainMenuTabs')
+    local menu = PlayGameMenu.create({
+      x = menuTabs.x + menuTabs.width,
+      y = menuTabs.y,
+    })
+  end
+end)
+
+local menuOptionPlayGameMenu = {
+  name = 'Play Game',
+  value = function()
+    msgBus.send(msgBus.PLAY_GAME_MENU_TOGGLE)
+  end
+}
+
 local sceneOptionsNormal = {
-  menuOptionSceneLoad(scenes.playGameMenu),
+  menuOptionPlayGameMenu,
   menuOptionSettingsMenu,
   menuOptionSceneLoad(scenes.mainGameHome),
   menuOptionQuitGame
 }
 
 local sceneOptionsDebug = {
-  menuOptionSceneLoad(scenes.playGameMenu),
+  menuOptionPlayGameMenu,
   menuOptionSettingsMenu,
   {
     name = 'main game sandbox',
@@ -177,16 +197,12 @@ require 'scene.light-test'
 require 'scene.font-test'
 require 'scene.tooltip-test'
 
-local function getMenuPosition()
-  return 200, 20
-end
-
 local function closeMenuButton(props)
   local textContent = {
     Color.WHITE,
     'CLOSE'
   }
-  local x, y = getMenuPosition()
+  local x, y = getMenuTabsPosition()
   return Gui.create({
     x = x + 300,
     y = y,
@@ -209,19 +225,20 @@ local function closeMenuButton(props)
 end
 
 function Sandbox.init(self)
-  local activeSceneMenu = nil
+  self.activeSceneMenu = nil
 
   local function DebugMenu(enabled)
     if enabled then
       local MenuManager = require 'modules.menu-manager'
       MenuManager.clearAll()
-      local x, y = getMenuPosition()
-      activeSceneMenu = MenuList.create({
+      local x, y = getMenuTabsPosition()
+      self.activeSceneMenu = MenuList.create({
+        id = 'MainMenuTabs',
         x = x,
         y = y,
+        width = 150,
         options = config.isDevelopment and sceneOptionsDebug or sceneOptionsNormal,
         onSelect = function(name, value)
-          DebugMenu(false)
           value()
         end,
         drawOrder = function()
@@ -233,10 +250,10 @@ function Sandbox.init(self)
         onClick = function()
           DebugMenu(false)
         end
-      }):setParent(activeSceneMenu)
-    elseif activeSceneMenu then
-      activeSceneMenu:delete(true)
-      activeSceneMenu = nil
+      }):setParent(self.activeSceneMenu)
+    elseif self.activeSceneMenu then
+      self.activeSceneMenu:delete(true)
+      self.activeSceneMenu = nil
     end
     setState({ menuOpened = enabled })
   end
@@ -250,16 +267,20 @@ function Sandbox.init(self)
       return state.menuOpened
     end, 1)
   }
+
+  DebugMenu(true)
 end
 
-function Sandbox.draw()
+function Sandbox.draw(self)
   if state.menuOpened then
-    local x, y = getMenuPosition()
-    guiTextTitleLayer:add(config.gameTitle, Color.WHITE, x, y)
+    local menu = self.activeSceneMenu
     -- background
-    local w, h = love.graphics.getWidth() / config.scaleFactor, love.graphics.getHeight() / config.scaleFactor
+    local x, y, w, h = menu.x, menu.y, menu.width, menu.height
     love.graphics.setColor(0,0,0,0.9)
-    love.graphics.rectangle('fill', 0, 0, w, h)
+    love.graphics.rectangle('fill', x, y, w, h)
+
+    love.graphics.setColor(Color.SKY_BLUE)
+    love.graphics.rectangle('line', x, y, w, h)
   end
 end
 

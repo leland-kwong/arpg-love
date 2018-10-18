@@ -42,7 +42,7 @@ end
 
 function MenuManager.popToFirst()
   while #stack.stack > 1 do
-    stack:pop()
+    MenuManager.pop()
   end
   return MenuManager
 end
