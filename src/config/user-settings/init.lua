@@ -9,10 +9,10 @@
 local M = {}
 
 M.keyboard = {
-  UP = 'w',
-  RIGHT = 'd',
-  DOWN = 's',
-  LEFT = 'a',
+  MOVE_UP = 'w',
+  MOVE_RIGHT = 'd',
+  MOVE_DOWN = 's',
+  MOVE_LEFT = 'a',
   SKILL_1 = '3',
   SKILL_2 = '4',
   SKILL_3 = 'q',
@@ -24,14 +24,18 @@ M.keyboard = {
   MAIN_MENU = 'escape',
   PORTAL_OPEN = 't',
   PAUSE_GAME = 'p',
-  MUSIC_TOGGLE = 'm'
+}
+
+-- these actions may not be remapped
+M.keyboardFixedActions = {
+  MAIN_MENU = true
 }
 
 M.mouseInputMap = {
   SKILL_1 = 1,
   SKILL_2 = 2,
   SKILL_3 = 3,
-  SKILL4 = 4
+  SKILL_4 = 4
 }
 
 M.mouseClickDelay = 0.12
@@ -42,7 +46,7 @@ M.camera = {
 }
 
 M.sound = {
-  musicEnabled = true,
+  masterVolume = 1,
   musicVolume = 0.5
 }
 

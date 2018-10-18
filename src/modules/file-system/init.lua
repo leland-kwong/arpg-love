@@ -87,10 +87,7 @@ function fileSystem.loadSaveFile(rootPath, saveId)
       )
     )
   end)
-  if (not ok) then
-    return error(result)
-  end
-  return result
+  return result, ok
 end
 
 function fileSystem.listSavedFiles(rootPath)

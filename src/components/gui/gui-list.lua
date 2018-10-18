@@ -39,10 +39,15 @@ local GuiList = {
   width = 0,
   height = 0,
   contentWidth = nil,
-  contentHeight = nil
+  contentHeight = nil,
+  borderWidth = 2,
+  borderColor = {Color.multiplyAlpha(Color.SKY_BLUE, 0.5)}
 }
 
 function GuiList.init(self)
+  local parent = self
+  Component.addToGroup(self, 'gui')
+
   self.contentWidth = self.contentWidth or self.width
   self.contentHeight = self.contentHeight or self.height
   local children, width, height, contentWidth, contentHeight =
@@ -58,18 +63,16 @@ function GuiList.init(self)
     )
   end
 
-  local function drawOrder()
-    return 2
-  end
+  local baseDrawOrder = self.drawOrder
 
   local noop = require 'utils.noop'
   f.forEach(children, function(child, index)
     child.drawOrder = function()
-      return drawOrder() + index
+      return baseDrawOrder() + index
     end
   end)
 
-  Component.create({
+  local stencilComponent = Component.create({
     group = Component.groups.gui,
     draw = function()
       -- remove stencil
@@ -77,13 +80,35 @@ function GuiList.init(self)
       love.graphics.pop()
     end,
     drawOrder = function()
-      return drawOrder() + #children + 1
+      return baseDrawOrder() + #children + 1
     end
   }):setParent(self)
 
-  Gui.create({
+  -- border draw component
+  local borderNode = Component.create({
+    group = Component.groups.gui,
+    draw = function()
+      local oLineWidth = love.graphics.getLineWidth()
+      love.graphics.setLineWidth(parent.borderWidth)
+      love.graphics.setColor(parent.borderColor)
+      love.graphics.rectangle(
+        'line',
+        self.x,
+        self.y,
+        width,
+        height
+      )
+      love.graphics.setLineWidth(oLineWidth)
+    end,
+    drawOrder = function()
+      return stencilComponent:drawOrder() + 1
+    end
+  }):setParent(self)
+
+  local listNode = Gui.create({
     x = self.x,
     y = self.y,
+    inputContext = self.inputContext,
     w = width,
     h = height,
     type = Gui.types.LIST,
@@ -110,10 +135,21 @@ function GuiList.init(self)
         self.w,
         self.h
       )
+
       scrollbars(self)
     end,
-    drawOrder = drawOrder
+    drawOrder = baseDrawOrder
   }):setParent(self)
+end
+
+local function removeChildren(self)
+  for i=1, #self.childNodes do
+    self.childNodes[i]:delete(true)
+  end
+end
+
+function GuiList.final(self)
+  removeChildren(self)
 end
 
 return Component.createFactory(GuiList)

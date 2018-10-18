@@ -50,21 +50,16 @@ local function defaultState()
 
 		--[[ equipped items ]]
 		equipment = require'utils.make-grid'(2, 5, EMPTY_SLOT),
-
-		--[[ game settings ]]
-		music = false,
-		-- curently active menu panel
-		activeMenu = false,
 	}
 end
 
 local function createStore(initialState)
-	assert(type(initialState) == 'table', 'invalid initialState')
+	assert((initialState == nil) or type(initialState) == 'table', 'invalid initialState')
 
-	-- set a state id if one doesn't exist
-	initialState.__stateId = initialState.__stateId or 'game-'..uid()
 
 	local baseState = defaultState()
+	-- set a state id if one doesn't exist
+	baseState.__stateId = initialState and initialState.__stateId or 'game-'..uid()
 	return Stateful:new(
 		objectUtils.assign(baseState, initialState)
 	)

@@ -8,6 +8,7 @@ local collisionObject = require 'modules.collision'
 local scale = require 'config.config'.scaleFactor
 local noop = require 'utils.noop'
 local f = require 'utils.functional'
+local InputContext = require 'modules.input-context'
 local min, max = math.min, math.max
 
 local COLLISION_CROSS = 'cross'
@@ -49,6 +50,7 @@ local Gui = {
   -- props
   x = 1,
   y = 1,
+  inputContext = 'any',
   onClick = noop,
   onKeyPress = noop,
   onChange = noop,
@@ -150,10 +152,7 @@ function Gui.init(self)
       x = self.x,
       y = self.y,
       initialX = self.x,
-      initialY = self.y,
-      final = function()
-        consoleLog('scroll node deleted')
-      end
+      initialY = self.y
     }):setParent(self)
   end
 
@@ -172,44 +171,46 @@ function Gui.init(self)
       return msgBus.CLEANUP
     end
 
-    if guiType.LIST == self.type and
-      msgBus.MOUSE_WHEEL_MOVED == msgType and
-      self.hovered
-    then
-      handleScroll(self, msgValue[1], msgValue[2])
-    end
+    if InputContext.contains(self.inputContext) then
+      if guiType.LIST == self.type and
+        msgBus.MOUSE_WHEEL_MOVED == msgType and
+        self.hovered
+      then
+        handleScroll(self, msgValue[1], msgValue[2])
+      end
 
-    if msgBus.MOUSE_CLICKED == msgType then
-      if self.hovered then
-        local isRightClick = msgValue[3] == 2
-        self.onClick(self, isRightClick)
+      if msgBus.MOUSE_CLICKED == msgType then
+        if self.hovered then
+          local isRightClick = msgValue[3] == 2
+          self.onClick(self, isRightClick)
 
-        if guiType.TOGGLE == self.type then
-          self.checked = not self.checked
-          self.onChange(self, self.checked)
+          if guiType.TOGGLE == self.type then
+            self.checked = not self.checked
+            self.onChange(self, self.checked)
+          end
         end
       end
-    end
 
-    if msgBus.MOUSE_PRESSED == msgType then
-      handleFocusChange(self, self.hovered)
-    end
-
-    if self.hovered and love.mouse.isDown(1) then
-      self.onPointerDown(self)
-    end
-
-    if self.focused and guiType.TEXT_INPUT == self.type then
-      if msgBus.GUI_TEXT_INPUT == msgType then
-        local txt = msgValue
-        self.text = self.text..txt
-        self.onChange(self)
+      if msgBus.MOUSE_PRESSED == msgType then
+        handleFocusChange(self, self.hovered)
       end
 
-      -- handle backspace for text input
-      if msgBus.KEY_DOWN == msgType and msgValue.key == 'backspace' then
-        self.text = string.sub(self.text, 1, #self.text - 1)
-        self.onChange(self)
+      if self.hovered and love.mouse.isDown(1) then
+        self.onPointerDown(self)
+      end
+
+      if self.focused and guiType.TEXT_INPUT == self.type then
+        if msgBus.GUI_TEXT_INPUT == msgType then
+          local txt = msgValue
+          self.text = self.text..txt
+          self.onChange(self)
+        end
+
+        -- handle backspace for text input
+        if msgBus.KEY_DOWN == msgType and msgValue.key == 'backspace' then
+          self.text = string.sub(self.text, 1, #self.text - 1)
+          self.onChange(self)
+        end
       end
     end
 
@@ -237,19 +238,14 @@ local function isDifferent(a, b)
   return a ~= b
 end
 
-function Gui.update(self, dt)
-  local posX, posY = self:getPosition()
-  self.colObj:update(posX, posY, self.w, self.h)
-
+local function handleEvents(self)
   local mx, my = self.getMousePosition()
   local cacheKey = indexByMouseCoord(mx, my)
-  local items = collisionWorlds.gui:queryPoint(mx, my, mouseCollisionFilter)
-
-  self.hovered = false
+  local mouseCollisions = collisionWorlds.gui:queryPoint(mx, my, mouseCollisionFilter)
 
   -- if the collided item is `self`, then we're hovered
-  for i=1, #items do
-    if items[i] == self.colObj then
+  for i=1, #mouseCollisions do
+    if mouseCollisions[i] == self.colObj then
       self.hovered = true
     end
   end
@@ -267,6 +263,17 @@ function Gui.update(self, dt)
     else
       self.onPointerLeave(self)
     end
+  end
+end
+
+function Gui.update(self, dt)
+  local posX, posY = self:getPosition()
+  self.colObj:update(posX, posY, self.w, self.h)
+
+  self.hovered = false
+
+  if InputContext.contains(self.inputContext) then
+    handleEvents(self)
   end
 
   self.onUpdate(self, dt)

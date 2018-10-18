@@ -4,6 +4,7 @@ local msgBus = require 'components.msg-bus'
 local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local ParticleFx = require 'components.particle.particle'
 local config = require 'config.config'
+local userSettings = require 'config.user-settings'
 local animationFactory = require 'components.animation-factory'
 local collisionWorlds = require 'components.collision-worlds'
 local collisionObject = require 'modules.collision'
@@ -19,10 +20,12 @@ local InventoryController = require 'components.item-inventory.controller'
 local Inventory = require 'components.item-inventory.inventory'
 local HealSource = require 'components.heal-source'
 require'components.item-inventory.equipment-change-handler'
+local MenuManager = require 'modules.menu-manager'
+local InputContext = require 'modules.input-context'
 
 local colMap = collisionWorlds.map
-local keyMap = config.userSettings.keyboard
-local mouseInputMap = config.userSettings.mouseInputMap
+local keyMap = userSettings.keyboard
+local mouseInputMap = userSettings.mouseInputMap
 
 local startPos = {
   x = config.gridSize * 3,
@@ -138,7 +141,7 @@ local function connectAutoSave(parent)
   local tick = require 'utils.tick'
   local fileSystem = require 'modules.file-system'
   local lastSavedState = nil
-  if (not config.autoSave) then
+  if (not parent.autoSave) then
     return
   end
 
@@ -189,6 +192,7 @@ end)
 
 local Player = {
   id = 'PLAYER',
+  autoSave = config.autoSave,
   class = collisionGroups.player,
   group = groups.all,
   x = startPos.x,
@@ -232,23 +236,21 @@ local Player = {
 
       msgBus.on(msgBus.KEY_DOWN, function(v)
         local key = v.key
-        local keyMap = config.userSettings.keyboard
+        local keyMap = userSettings.keyboard
         local rootState = msgBus.send(msgBus.GAME_STATE_GET)
-        local isActive = rootState:get().activeMenu == 'INVENTORY'
 
         if (keyMap.INVENTORY_TOGGLE == key) and (not v.hasModifier) then
-          if not self.inventory then
-            self.inventory = Inventory.create({
+          local activeInventory = Component.get('MENU_INVENTORY')
+          if (not activeInventory) then
+            Inventory.create({
               rootStore = rootState,
               slots = function()
                 return rootState:get().inventory
               end
             }):setParent(self.hudRoot)
-            rootState:set('activeMenu', 'INVENTORY')
-          else
-            self.inventory:delete(true)
-            self.inventory = nil
-            rootState:set('activeMenu', false)
+          elseif activeInventory then
+            local MenuManager = require 'modules.menu-manager'
+            MenuManager.pop()
           end
         end
 
@@ -424,19 +426,19 @@ local function handleMovement(self, dt)
 
   -- MOVEMENT
   local inputX, inputY = 0, 0
-  if love.keyboard.isDown(keyMap.RIGHT) then
+  if love.keyboard.isDown(keyMap.MOVE_RIGHT) then
     inputX = 1
   end
 
-  if love.keyboard.isDown(keyMap.LEFT) then
+  if love.keyboard.isDown(keyMap.MOVE_LEFT) then
     inputX = -1
   end
 
-  if love.keyboard.isDown(keyMap.UP) then
+  if love.keyboard.isDown(keyMap.MOVE_UP) then
     inputY = -1
   end
 
-  if love.keyboard.isDown(keyMap.DOWN) then
+  if love.keyboard.isDown(keyMap.MOVE_DOWN) then
     inputY = 1
   end
 
@@ -483,32 +485,34 @@ local function handleAbilities(self, dt)
     return
   end
 
-  -- SKILL_1
-  local isSkill1Activate = love.keyboard.isDown(keyMap.SKILL_1) or
-    love.mouse.isDown(mouseInputMap.SKILL_1)
-  if not self.clickDisabled and isSkill1Activate then
-    msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_1')
-  end
+  if InputContext.contains('any') then
+    -- SKILL_1
+    local isSkill1Activate = love.keyboard.isDown(keyMap.SKILL_1) or
+      love.mouse.isDown(mouseInputMap.SKILL_1)
+    if not self.clickDisabled and isSkill1Activate then
+      msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_1')
+    end
 
-  -- SKILL_2
-  local isSkill2Activate = love.keyboard.isDown(keyMap.SKILL_2) or
-    love.mouse.isDown(mouseInputMap.SKILL_2)
-  if not self.clickDisabled and isSkill2Activate then
-    msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_2')
-  end
+    -- SKILL_2
+    local isSkill2Activate = love.keyboard.isDown(keyMap.SKILL_2) or
+      love.mouse.isDown(mouseInputMap.SKILL_2)
+    if not self.clickDisabled and isSkill2Activate then
+      msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_2')
+    end
 
-  -- SKILL_3
-  local isSkill3Activate = love.keyboard.isDown(keyMap.SKILL_3) or
-    (mouseInputMap.SKILL_3 and love.mouse.isDown(mouseInputMap.SKILL_3))
-  if not self.clickDisabled and isSkill3Activate then
-    msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_3')
-  end
+    -- SKILL_3
+    local isSkill3Activate = love.keyboard.isDown(keyMap.SKILL_3) or
+      (mouseInputMap.SKILL_3 and love.mouse.isDown(mouseInputMap.SKILL_3))
+    if not self.clickDisabled and isSkill3Activate then
+      msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_3')
+    end
 
-  -- SKILL_4
-  local isSkill4Activate = love.keyboard.isDown(keyMap.SKILL_4) or
-    (mouseInputMap.SKILL_4 and love.mouse.isDown(mouseInputMap.SKILL_4))
-  if not self.clickDisabled and isSkill4Activate then
-    msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_4')
+    -- SKILL_4
+    local isSkill4Activate = love.keyboard.isDown(keyMap.SKILL_4) or
+      (mouseInputMap.SKILL_4 and love.mouse.isDown(mouseInputMap.SKILL_4))
+    if not self.clickDisabled and isSkill4Activate then
+      msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_4')
+    end
   end
 
   -- MOVE_BOOST

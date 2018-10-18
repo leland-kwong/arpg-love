@@ -47,10 +47,6 @@ local Camera = function(options)
   end
 
   function camera:setPosition(x, y)
-    -- force positions to be on full pixels to prevent artifacting due to sub-pixel rendering
-    x = round(x)
-    y = round(y)
-
     if (lerpDuration > 0) then
       targetPosition.x = x
       targetPosition.y = y

@@ -27,16 +27,22 @@ function ZoneInfo.update(self, dt)
   local complete = self.tween:update(dt)
   if complete then
     self:delete(true)
+    return
+  end
+  local globalState = msgBus.send(msgBus.GLOBAL_STATE_GET)
+  local zoneTitle = globalState.activeScene.zoneTitle
+  self.zoneTitle = zoneTitle
+  if (not zoneTitle) then
+    print('[WARNING] - zone title not found')
+    self:delete(true)
   end
 end
 
 function ZoneInfo.draw(self)
-  local globalState = msgBus.send(msgBus.GLOBAL_STATE_GET)
-  local zoneTitle = globalState.activeScene.zoneTitle
   local font = self.textLayer.font
   local oLineHeight = font:getLineHeight()
   font:setLineHeight(1)
-  local textW, textH = GuiText.getTextSize(zoneTitle, self.textLayer.font)
+  local textW, textH = GuiText.getTextSize(self.zoneTitle, self.textLayer.font)
   font:setLineHeight(oLineHeight)
   local scale = config.scale
   local winWidth, winHeight = love.graphics.getWidth() / scale, love.graphics.getHeight() / scale
@@ -47,7 +53,7 @@ function ZoneInfo.draw(self)
   love.graphics.rectangle('fill', x - padding/2, finalY - padding/2, textW + padding, textH + padding)
 
   local textColor = {1,1,1,self.opacity}
-  self.textLayer:add(zoneTitle, textColor, x, finalY)
+  self.textLayer:add(self.zoneTitle, textColor, x, finalY)
   self.textLayer.color = textColor
 end
 

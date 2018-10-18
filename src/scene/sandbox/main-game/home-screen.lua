@@ -224,6 +224,13 @@ local function renderTitle(self)
     self.menuX,
     self.menuY - 20
   )
+  local screenWidth, screenHeight = love.graphics.getDimensions()
+  self.guiTextLayer:add(
+    config.version,
+    Color.WHITE,
+    5,
+    (screenHeight / config.scale) - 14
+  )
 end
 
 function MainGameHomeScene.draw(self)

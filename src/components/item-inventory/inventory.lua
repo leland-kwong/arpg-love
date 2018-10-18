@@ -9,8 +9,12 @@ local setupSlotInteractions = require 'components.item-inventory.slot-interactio
 local itemConfig = require 'components.item-inventory.items.config'
 local itemSystem =require("components.item-inventory.items.item-system")
 local Sound = require 'components.sound'
+local InputContext = require 'modules.input-context'
+
+local iContext = 'InventoryMenu'
 
 local InventoryBlueprint = {
+  id = 'MENU_INVENTORY',
   rootStore = nil, -- game state
   slots = {},
   group = groups.gui,
@@ -29,7 +33,8 @@ local function InteractArea(self)
 		x = self.x,
 		y = self.y,
 		w = self.w,
-		h = self.h,
+    h = self.h,
+    inputContext = iContext,
     onPointerMove = function()
 			msgBus.send(msgBus.INVENTORY_DROP_MODE_INVENTORY)
 		end,
@@ -40,6 +45,13 @@ local function InteractArea(self)
 end
 
 function InventoryBlueprint.init(self)
+  self.originalInputContext = InputContext.get()
+  self.inputContext = iContext
+  InputContext.set(iContext)
+
+  local MenuManager = require 'modules.menu-manager'
+  MenuManager.clearAll()
+  MenuManager.push(self)
 
   msgBus.on(msgBus.ALL, function(msg, msgType)
     local rootStore = self.rootStore
@@ -127,6 +139,7 @@ function InventoryBlueprint.init(self)
 
   local EquipmentPanel = require 'components.item-inventory.equipment-panel'
   EquipmentPanel.create({
+    inputContext = icontext,
     rootStore = self.rootStore,
     x = self.x - equipmentWidth - panelMargin,
     y = self.y,
@@ -138,6 +151,7 @@ function InventoryBlueprint.init(self)
 
   local PlayerStatsPanel = require'components.item-inventory.player-stats-panel'
   PlayerStatsPanel.create({
+    inputContext = icontext,
     x = self.x - equipmentWidth - panelMargin - statsWidth - panelMargin,
     y = self.y,
     w = statsWidth,
@@ -164,6 +178,7 @@ end
 
 function InventoryBlueprint.final(self)
   msgBus.send(msgBus.INVENTORY_DROP_MODE_FLOOR)
+  InputContext.set(self.originalInputContext)
 end
 
 return Component.createFactory(InventoryBlueprint)

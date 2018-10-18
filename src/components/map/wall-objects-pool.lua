@@ -32,8 +32,7 @@ return function(gridSize, cacheSize)
   end
 
   function WallObjects.release(self, obj)
-    -- we should always insert to the beginning so we properly cycle through all the objects
-    table.insert(self, 1, obj)
+    table.insert(self, obj)
     obj:disable()
   end
 

@@ -2,10 +2,7 @@
 
 local f = require 'utils.functional'
 local oUtils = require 'utils.object-utils'
-local userSettings = require 'config.user-settings'
 local M = {}
-
-M.userSettings = userSettings
 
 local xpDiff = 20
 M.levelExperienceRequirements = {}
@@ -34,12 +31,13 @@ M.window = {
   height = M.resolution.h * M.scale
 }
 
-M.isDevelopment = false
+M.isDevelopment = true
 M.enableConsole = false
 M.performanceProfile = false
 M.debugDrawQueue = false
 M.collisionDebug = false
 
 M.gameTitle = 'Citizen of Nowhere'
+M.version = '1.1.0-alpha'
 
 return M

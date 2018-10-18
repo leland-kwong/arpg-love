@@ -11,6 +11,8 @@ local config = require 'config.config'
 local objectUtils = require 'utils.object-utils'
 local bitser = require 'modules.bitser'
 
+local menuInputContext = 'MainMenu'
+
 local drawOrder = function()
   return 1000
 end
@@ -36,7 +38,11 @@ local Sandbox = {
 local scenes = {
   mainGameHome = {
     name = 'main game home screen',
-    path = 'scene.sandbox.main-game.main-game-home'
+    path = 'scene.sandbox.main-game.home-screen'
+  },
+  settingsMenu = {
+    name = 'settings',
+    path = 'scene.settings-menu'
   },
   aiTest = {
     name = 'ai',
@@ -92,13 +98,32 @@ local menuOptionQuitGame = {
   end
 }
 
+local menuOptionSettingsMenu = {
+  name = 'settings',
+  value = function()
+    local Position = require 'utils.position'
+    local SettingsMenu = require 'scene.settings-menu'
+    local vWidth, vHeight = love.graphics.getDimensions()
+    local width, height = 240, 400
+    local x = Position.boxCenterOffset(width, height, vWidth/2, vHeight/2)
+    local menu = SettingsMenu.create({
+      x = x,
+      y = 60,
+      width = width,
+      height = height
+    })
+  end
+}
+
 local sceneOptionsNormal = {
   menuOptionSceneLoad(scenes.mainGameHome),
+  menuOptionSettingsMenu,
   menuOptionQuitGame
 }
 
 local sceneOptionsDebug = {
   menuOptionSceneLoad(scenes.mainGameHome),
+  menuOptionSettingsMenu,
   {
     name = 'main game sandbox',
     value = function()
@@ -152,6 +177,7 @@ local function closeMenuButton(props)
     x = x + 300,
     y = y,
     type = Gui.types.BUTTON,
+    inputContext = menuInputContext,
     onClick = props.onClick,
     onUpdate = function(self)
       local w, h = GuiText.getTextSize(textContent, guiTextBodyLayer.font)
@@ -170,14 +196,21 @@ local function closeMenuButton(props)
 end
 
 function Sandbox.init(self)
+  local InputContext = require 'modules.input-context'
+
+  -- Wildcard context to match anything
+  InputContext.set('any')
+
   local activeSceneMenu = nil
 
   local function DebugMenu(enabled)
     if enabled then
+      InputContext.set(menuInputContext)
       local x, y = getMenuPosition()
       activeSceneMenu = MenuList.create({
         x = x,
         y = y,
+        inputContext = menuInputContext,
         options = config.isDevelopment and sceneOptionsDebug or sceneOptionsNormal,
         onSelect = function(name, value)
           DebugMenu(false)
@@ -185,6 +218,9 @@ function Sandbox.init(self)
         end,
         drawOrder = function()
           return drawOrder() + 2
+        end,
+        final = function()
+          InputContext.set('any')
         end
       })
 
@@ -205,6 +241,12 @@ function Sandbox.init(self)
 
   self.listeners = {
     msgBusMainMenu.on(msgBusMainMenu.TOGGLE_MAIN_MENU, function()
+      local MenuManager = require 'modules.menu-manager'
+      if MenuManager.hasItems() then
+        MenuManager.clearAll()
+        return
+      end
+
       DebugMenu(not state.menuOpened)
       return state.menuOpened
     end, 1)

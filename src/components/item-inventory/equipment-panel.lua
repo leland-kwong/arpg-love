@@ -21,6 +21,7 @@ function EquipmentPanel.init(self)
 		y = self.y,
 		w = self.w,
 		h = self.h,
+		inputContext = self.inputContext,
 		onPointerMove = function()
 			msgBus.send(msgBus.INVENTORY_DROP_MODE_INVENTORY)
 		end,
