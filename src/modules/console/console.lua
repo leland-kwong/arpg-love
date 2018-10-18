@@ -5,6 +5,7 @@ local msgBus = require 'components.msg-bus'
 local Color = require 'modules.color'
 local CollisionObject = require 'modules.collision'
 local config = require 'config.config'
+local InputContext = require 'modules.input-context'
 
 local state = {
   showConsole = true
@@ -203,7 +204,18 @@ function Console.draw(self)
     startY + 12 * charHeight
   )
 
-  gfx.print('msgBus '..self.msgBusAverageTime, edgeOffset, 700)
+  gfx.printf(
+    {
+      Color.WHITE,
+      'msgBus '..string.format('%0.3f', self.msgBusAverageTime),
+      Color.WHITE,
+      '\ninput context: '..InputContext.get()
+    },
+    edgeOffset,
+    700,
+    400,
+    'left'
+  )
 
   local logEntries = logger:get()
   gfx.setColor(Color.MED_GRAY)
