@@ -38,6 +38,10 @@ local scenes = {
     name = 'main game home screen',
     path = 'scene.sandbox.main-game.home-screen'
   },
+  playGameMenu = {
+    name = 'play game',
+    path = 'scene.play-game-menu'
+  },
   settingsMenu = {
     name = 'settings',
     path = 'scene.settings-menu'
@@ -124,13 +128,14 @@ local menuOptionSettingsMenu = {
 }
 
 local sceneOptionsNormal = {
-  menuOptionSceneLoad(scenes.mainGameHome),
+  menuOptionSceneLoad(scenes.playGameMenu),
   menuOptionSettingsMenu,
+  menuOptionSceneLoad(scenes.mainGameHome),
   menuOptionQuitGame
 }
 
 local sceneOptionsDebug = {
-  menuOptionSceneLoad(scenes.mainGameHome),
+  menuOptionSceneLoad(scenes.playGameMenu),
   menuOptionSettingsMenu,
   {
     name = 'main game sandbox',
@@ -146,6 +151,7 @@ local sceneOptionsDebug = {
       })
     end
   },
+  menuOptionSceneLoad(scenes.mainGameHome),
   menuOptionSceneLoad(scenes.aiTest),
   menuOptionSceneLoad(scenes.guiTest),
   menuOptionSceneLoad(scenes.particleTest),
