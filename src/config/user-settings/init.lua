@@ -9,10 +9,10 @@
 local M = {}
 
 M.keyboard = {
-  UP = 'w',
-  RIGHT = 'd',
-  DOWN = 's',
-  LEFT = 'a',
+  MOVE_UP = 'w',
+  MOVE_RIGHT = 'd',
+  MOVE_DOWN = 's',
+  MOVE_LEFT = 'a',
   SKILL_1 = '3',
   SKILL_2 = '4',
   SKILL_3 = 'q',

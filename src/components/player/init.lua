@@ -426,19 +426,19 @@ local function handleMovement(self, dt)
 
   -- MOVEMENT
   local inputX, inputY = 0, 0
-  if love.keyboard.isDown(keyMap.RIGHT) then
+  if love.keyboard.isDown(keyMap.MOVE_RIGHT) then
     inputX = 1
   end
 
-  if love.keyboard.isDown(keyMap.LEFT) then
+  if love.keyboard.isDown(keyMap.MOVE_LEFT) then
     inputX = -1
   end
 
-  if love.keyboard.isDown(keyMap.UP) then
+  if love.keyboard.isDown(keyMap.MOVE_UP) then
     inputY = -1
   end
 
-  if love.keyboard.isDown(keyMap.DOWN) then
+  if love.keyboard.isDown(keyMap.MOVE_DOWN) then
     inputY = 1
   end
 
