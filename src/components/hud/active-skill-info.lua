@@ -5,13 +5,14 @@ local camera = require 'components.camera'
 local Color = require 'modules.color'
 local drawItem = require 'components.item-inventory.draw-item'
 local config = require 'config.config'
+local userSettings = require 'config.user-settings'
 local setProp = require 'utils.set-prop'
 local extend = require 'utils.object-utils'.extend
 local Vec2 = require 'modules.brinevector'
 local propTypesCalculator = require 'components.state.base-stat-modifiers'.propTypesCalculator
 
-local keyMap = config.userSettings.keyboard
-local mouseInputMap = config.userSettings.mouseInputMap
+local keyMap = userSettings.keyboard
+local mouseInputMap = userSettings.mouseInputMap
 
 local function ActiveConsumableHandler()
   local curCooldown = 0
@@ -277,8 +278,9 @@ local mouseBtnToString = {
 }
 
 local function drawHotkEy(self)
-  local mouseBtn = config.userSettings.mouseInputMap[self.skillId]
-  local keyboardKey = config.userSettings.keyboard[self.skillId]
+  local userSettings = require 'config.user-settings'
+  local mouseBtn = userSettings.mouseInputMap[self.skillId]
+  local keyboardKey = userSettings.keyboard[self.skillId]
   local hotKeyToShow = mouseBtn and mouseBtnToString[mouseBtn] or keyboardKey
   self.hudTextLayer:add(
     hotKeyToShow,

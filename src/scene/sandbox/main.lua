@@ -38,6 +38,10 @@ local scenes = {
     name = 'main game home screen',
     path = 'scene.sandbox.main-game.main-game-home'
   },
+  settingsMenu = {
+    name = 'settings',
+    path = 'scene.settings-menu'
+  },
   aiTest = {
     name = 'ai',
     path = 'scene.sandbox.ai.test-scene'
@@ -92,13 +96,32 @@ local menuOptionQuitGame = {
   end
 }
 
+local menuOptionSettingsMenu = {
+  name = 'settings',
+  value = function()
+    local Position = require 'utils.position'
+    local SettingsMenu = require 'scene.settings-menu'
+    local vWidth, vHeight = love.graphics.getDimensions()
+    local width, height = 240, 400
+    local x = Position.boxCenterOffset(width, height, vWidth/2, vHeight/2)
+    local menu = SettingsMenu.create({
+      x = x,
+      y = 60,
+      width = width,
+      height = height
+    })
+  end
+}
+
 local sceneOptionsNormal = {
   menuOptionSceneLoad(scenes.mainGameHome),
+  menuOptionSettingsMenu,
   menuOptionQuitGame
 }
 
 local sceneOptionsDebug = {
   menuOptionSceneLoad(scenes.mainGameHome),
+  menuOptionSettingsMenu,
   {
     name = 'main game sandbox',
     value = function()
@@ -205,6 +228,12 @@ function Sandbox.init(self)
 
   self.listeners = {
     msgBusMainMenu.on(msgBusMainMenu.TOGGLE_MAIN_MENU, function()
+      local MenuManager = require 'modules.menu-manager'
+      if MenuManager.hasItems() then
+        MenuManager.clearAll()
+        return
+      end
+
       DebugMenu(not state.menuOpened)
       return state.menuOpened
     end, 1)

@@ -4,6 +4,7 @@ local msgBus = require 'components.msg-bus'
 local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local ParticleFx = require 'components.particle.particle'
 local config = require 'config.config'
+local userSettings = require 'config.user-settings'
 local animationFactory = require 'components.animation-factory'
 local collisionWorlds = require 'components.collision-worlds'
 local collisionObject = require 'modules.collision'
@@ -19,10 +20,11 @@ local InventoryController = require 'components.item-inventory.controller'
 local Inventory = require 'components.item-inventory.inventory'
 local HealSource = require 'components.heal-source'
 require'components.item-inventory.equipment-change-handler'
+local MenuManager = require 'modules.menu-manager'
 
 local colMap = collisionWorlds.map
-local keyMap = config.userSettings.keyboard
-local mouseInputMap = config.userSettings.mouseInputMap
+local keyMap = userSettings.keyboard
+local mouseInputMap = userSettings.mouseInputMap
 
 local startPos = {
   x = config.gridSize * 3,
@@ -233,23 +235,21 @@ local Player = {
 
       msgBus.on(msgBus.KEY_DOWN, function(v)
         local key = v.key
-        local keyMap = config.userSettings.keyboard
+        local keyMap = userSettings.keyboard
         local rootState = msgBus.send(msgBus.GAME_STATE_GET)
-        local isActive = rootState:get().activeMenu == 'INVENTORY'
 
         if (keyMap.INVENTORY_TOGGLE == key) and (not v.hasModifier) then
-          if not self.inventory then
-            self.inventory = Inventory.create({
+          local activeInventory = Component.get('MENU_INVENTORY')
+          if (not activeInventory) then
+            Inventory.create({
               rootStore = rootState,
               slots = function()
                 return rootState:get().inventory
               end
             }):setParent(self.hudRoot)
-            rootState:set('activeMenu', 'INVENTORY')
-          else
-            self.inventory:delete(true)
-            self.inventory = nil
-            rootState:set('activeMenu', false)
+          elseif activeInventory then
+            local MenuManager = require 'modules.menu-manager'
+            MenuManager.pop()
           end
         end
 

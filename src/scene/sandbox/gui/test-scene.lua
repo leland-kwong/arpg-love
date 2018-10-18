@@ -24,6 +24,14 @@ local COLOR_TOGGLE_CHECKED = COLOR_PRIMARY
 local buttonPadding = 10
 
 function GuiTestBlueprint.init(self)
+  local guiState = {
+    slider = {
+      isDragStart = false,
+      beforeDragValue = 0,
+      value = 0
+    }
+  }
+
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0.5,0.5,0.5,})
 
   local guiText = GuiText.create({
@@ -115,15 +123,15 @@ function GuiTestBlueprint.init(self)
       textLayer = guiText,
       placeholderText = 'player name'
     }),
-    guiText
+    guiText,
   }
   local list = GuiList.create({
     childNodes = children,
     x = 180,
     y = 30,
     width = 240,
-    height = 150,
-    contentHeight = 200
+    height = 200,
+    contentHeight = 280
   }):setParent(self)
 end
 

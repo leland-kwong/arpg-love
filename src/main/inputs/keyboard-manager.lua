@@ -2,6 +2,7 @@ local msgBus = require 'components.msg-bus'
 local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local socket = require 'socket'
 local config = require 'config.config'
+local userSettings = require 'config.user-settings'
 
 local state = {
   keyboard = {
@@ -46,7 +47,7 @@ function love.keypressed(key, scanCode, isRepeated)
     lastPressed.timeStamp = socket.gettime()
   end
 
-  if config.userSettings.keyboard.MAIN_MENU == key then
+  if userSettings.keyboard.MAIN_MENU == key then
     msgBusMainMenu.send(
       msgBusMainMenu.TOGGLE_MAIN_MENU
     )
@@ -63,7 +64,7 @@ function love.keyreleased(key, scanCode)
   )
 
   local timeBetweenRelease = socket.gettime() - state.keyboard.lastPressed.timeStamp
-  if timeBetweenRelease >= config.userSettings.keyPressedDelay then
+  if timeBetweenRelease >= userSettings.keyPressedDelay then
     msgBus.send(msgBus.KEY_PRESSED, msg)
   end
 end
