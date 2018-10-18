@@ -64,6 +64,7 @@ end
 -- handles the picked up item and makes it follow the cursor
 Gui.create({
   type = Gui.types.INTERACT,
+  inputContext = 'InventoryMenu',
   draw = function()
     if itemPickedUp then
       local gameScale = config.scaleFactor
@@ -101,6 +102,7 @@ local function setupSlotInteractions(
       y = posY,
       w = slotSize,
       h = slotSize,
+      inputContext = self.inputContext,
       type = Gui.types.INTERACT,
       onUpdate = function(self)
         -- create a tooltip

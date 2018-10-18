@@ -209,7 +209,9 @@ function Console.draw(self)
       Color.WHITE,
       'msgBus '..string.format('%0.3f', self.msgBusAverageTime),
       Color.WHITE,
-      '\ninput context: '..InputContext.get()
+      '\ninput context: ',
+      Color.YELLOW,
+      InputContext.get()
     },
     edgeOffset,
     700,

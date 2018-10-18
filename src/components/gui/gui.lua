@@ -152,10 +152,7 @@ function Gui.init(self)
       x = self.x,
       y = self.y,
       initialX = self.x,
-      initialY = self.y,
-      final = function()
-        consoleLog('scroll node deleted')
-      end
+      initialY = self.y
     }):setParent(self)
   end
 
