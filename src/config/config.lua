@@ -1,5 +1,6 @@
 -- global game configuration
 
+local msgBus = require 'components.msg-bus'
 local f = require 'utils.functional'
 local oUtils = require 'utils.object-utils'
 local M = {}
@@ -31,7 +32,7 @@ M.window = {
   height = M.resolution.h * M.scale
 }
 
-M.isDevelopment = true
+M.isDevelopment = false
 M.enableConsole = false
 M.performanceProfile = false
 M.debugDrawQueue = false

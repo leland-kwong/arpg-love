@@ -186,6 +186,16 @@ function MainGameHomeScene.init(self)
   }
 
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, Color.DARK_GRAY)
+  msgBus.on(msgBus.KEY_PRESSED, function(ev)
+    local isToggleDevMode = ev.hasModifier and ev.key == '.'
+    if isToggleDevMode then
+      local userSettingsState = require 'config.user-settings.state'
+      userSettingsState.set(function(settings)
+        settings.isDevelopment = not settings.isDevelopment
+        return settings
+      end)
+    end
+  end)
 
   local parent = self
   self.guiTextTitleLayer = GuiText.create({

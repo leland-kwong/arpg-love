@@ -1,27 +1,24 @@
-local config = require 'config.config'
 local MessageBus = require 'utils.message-bus'
 
 local M = MessageBus.new()
 
-if config.isDevelopment then
-  local proxy = {}
-  setmetatable(M, {
-    --[[
-      If property doesn't exist, throw an error. This is to alert us about accessing properties that don't
-      exist. The main use case is when trying to access message type constants, ie `msgBus.PLAYER_HEAL_SOURCE_ADD` should not be a `nil` value.
-    ]]
-    __index = function(_, name)
-      if not proxy[name] then
-        error('[msgBus] property `'..name..'` not defined')
-      end
-      return proxy[name]
-    end,
-    __newindex = function(_, eventName, eventType)
-      assert(not proxy[eventName], eventName..' is already registered')
-      proxy[eventName] = eventType
+local proxy = {}
+setmetatable(M, {
+  --[[
+    If property doesn't exist, throw an error. This is to alert us about accessing properties that don't
+    exist. The main use case is when trying to access message type constants, ie `msgBus.PLAYER_HEAL_SOURCE_ADD` should not be a `nil` value.
+  ]]
+  __index = function(_, name)
+    if not proxy[name] then
+      error('[msgBus] property `'..name..'` not defined')
     end
-  })
-end
+    return proxy[name]
+  end,
+  __newindex = function(_, eventName, eventType)
+    assert(not proxy[eventName], eventName..' is already registered')
+    proxy[eventName] = eventType
+  end
+})
 
 M.GAME_LOADED = 'GAME_LOADED'
 M.NEW_GAME = 'NEW_GAME' -- this will be used whenever we exit the currently loaded game. Currently its being unused

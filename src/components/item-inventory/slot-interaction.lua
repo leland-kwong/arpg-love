@@ -316,11 +316,14 @@ local function setupSlotInteractions(
           local itemConfig = require(require('alias').path.items..'.config')
           if (itemInSlot.rarity ~= itemConfig.rarity.NORMAL) then
             local baseColor = itemConfig.rarityColor[itemInSlot.rarity]
-            love.graphics.setColor(Color.multiply(baseColor, {1,1,1,0.4}))
+            love.graphics.setColor(Color.multiplyAlpha(baseColor, 0.2))
             local oLineWidth = love.graphics.getLineWidth()
-            love.graphics.setLineWidth(1)
-            love.graphics.rectangle('line', self.x, self.y, self.w, self.h)
+            local lw = 1
+            love.graphics.setLineWidth(lw)
+            love.graphics.rectangle('line', self.x + lw/2, self.y + lw/2, self.w - lw, self.h - lw)
             love.graphics.setLineWidth(oLineWidth)
+            love.graphics.setColor(Color.multiplyAlpha(baseColor, 0.05))
+            love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
           end
         end
 

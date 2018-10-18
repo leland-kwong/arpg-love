@@ -50,4 +50,6 @@ M.sound = {
   musicVolume = 0.5
 }
 
+M.isDevelopment = false
+
 return M

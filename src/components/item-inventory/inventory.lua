@@ -139,7 +139,7 @@ function InventoryBlueprint.init(self)
 
   local EquipmentPanel = require 'components.item-inventory.equipment-panel'
   EquipmentPanel.create({
-    inputContext = icontext,
+    inputContext = iContext,
     rootStore = self.rootStore,
     x = self.x - equipmentWidth - panelMargin,
     y = self.y,
@@ -151,7 +151,7 @@ function InventoryBlueprint.init(self)
 
   local PlayerStatsPanel = require'components.item-inventory.player-stats-panel'
   PlayerStatsPanel.create({
-    inputContext = icontext,
+    inputContext = iContext,
     x = self.x - equipmentWidth - panelMargin - statsWidth - panelMargin,
     y = self.y,
     w = statsWidth,
