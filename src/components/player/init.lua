@@ -234,24 +234,27 @@ local Player = {
         }):setParent(parent)
       end),
 
+      msgBus.on(msgBus.INVENTORY_TOGGLE, function()
+        local activeInventory = Component.get('MENU_INVENTORY')
+        if (not activeInventory) then
+          local rootState = msgBus.send(msgBus.GAME_STATE_GET)
+          Inventory.create({
+            rootStore = rootState,
+            slots = function()
+              return rootState:get().inventory
+            end
+          }):setParent(self.hudRoot)
+        elseif activeInventory then
+          activeInventory:delete(true)
+        end
+      end),
+
       msgBus.on(msgBus.KEY_DOWN, function(v)
         local key = v.key
         local keyMap = userSettings.keyboard
-        local rootState = msgBus.send(msgBus.GAME_STATE_GET)
 
         if (keyMap.INVENTORY_TOGGLE == key) and (not v.hasModifier) then
-          local activeInventory = Component.get('MENU_INVENTORY')
-          if (not activeInventory) then
-            Inventory.create({
-              rootStore = rootState,
-              slots = function()
-                return rootState:get().inventory
-              end
-            }):setParent(self.hudRoot)
-          elseif activeInventory then
-            local MenuManager = require 'modules.menu-manager'
-            MenuManager.pop()
-          end
+          msgBus.send(msgBus.INVENTORY_TOGGLE)
         end
 
         if (keyMap.PORTAL_OPEN == key) and (not v.hasModifier) then

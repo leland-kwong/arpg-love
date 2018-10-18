@@ -8,9 +8,6 @@ local msgBus = require 'components.msg-bus'
 local collisionWorlds = require 'components.collision-worlds'
 local loadImage = require 'modules.load-image'
 local Color = require 'modules.color'
-local InputContext = require 'modules.input-context'
-
-local iContext = 'Portal'
 
 local spiralScale = 0.4
 local spiralSize = 62 * spiralScale
@@ -72,17 +69,9 @@ local Portal = {
       y = self.y - spiralSize,
       w = 1,
       h = 1,
-      inputContext = 'any '..iContext,
-      onPointerMove = function(self)
-        InputContext.set(iContext)
-      end,
-      onPointerLeave = function(self)
-        InputContext.set('any')
-      end,
       onClick = function()
         portalEnterSound()
         msgBus.send(msgBus.PORTAL_ENTER)
-        InputContext.set('any')
       end,
       onUpdate = function(self)
         local portalTooltipText = 'teleport to '..(root.locationName or 'no location')

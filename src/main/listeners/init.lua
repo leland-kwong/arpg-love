@@ -39,16 +39,6 @@ msgBus.on(msgBus.SET_CONFIG, function(msgValue)
   local oUtils = require 'utils.object-utils'
   local config = require 'config.config'
   oUtils.assign(config, configChanges)
-
-  local Color = require 'modules.color'
-  local inspect = require 'utils.inspect'
-  msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
-    title = 'config changed',
-    description = {
-      Color.WHITE,
-      inspect(configChanges)
-    }
-  })
 end)
 
 msgBus.on(msgBus.GAME_STATE_SET, function(state)

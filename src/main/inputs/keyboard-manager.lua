@@ -48,6 +48,11 @@ function love.keypressed(key, scanCode, isRepeated)
   end
 
   if userSettings.keyboard.MAIN_MENU == key then
+    local MenuManager = require 'modules.menu-manager'
+    if MenuManager.hasItems() then
+      MenuManager.clearAll()
+      return
+    end
     msgBusMainMenu.send(
       msgBusMainMenu.TOGGLE_MAIN_MENU
     )

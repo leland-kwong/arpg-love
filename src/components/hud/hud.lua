@@ -113,7 +113,7 @@ function Hud.init(self)
   }):setParent(self)
 
   -- -- mana bar
-  StatusBar.create({
+  local energyStatusBar = StatusBar.create({
     x = offX + healthManaWidth / 2,
     y = winHeight - barHeight - 13,
     w = healthManaWidth / 2,
@@ -199,7 +199,7 @@ function Hud.init(self)
       player = self.player,
       rootStore = self.rootStore,
       x = endXPos - (spacing * (i - 1)),
-      y = (love.graphics.getHeight() / scale) - 32 - 1,
+      y = winHeight - 32 - 1,
       slotX = skill.slotX,
       slotY = skill.slotY,
       hudTextLayer = self.hudTextSmallLayer,
@@ -208,6 +208,12 @@ function Hud.init(self)
       end
     }):setParent(self)
   end
+
+  local MenuButtons = require 'components.hud.menu-buttons'
+  MenuButtons.create({
+    x = energyStatusBar.x + energyStatusBar.w + 15,
+    y = winHeight - 30
+  }):setParent(self)
 end
 
 function Hud.final(self)

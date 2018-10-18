@@ -82,7 +82,6 @@ function MenuList.update(self)
         y = rowPosition.y,
         w = row.width,
         h = row.height,
-        inputContext = self.inputContext,
         type = Gui.types.BUTTON,
         onClick = function(self)
           onSelect(name, optionValue)
