@@ -218,6 +218,9 @@ function Sandbox.init(self)
         end,
         drawOrder = function()
           return drawOrder() + 2
+        end,
+        final = function()
+          InputContext.set('any')
         end
       })
 
@@ -227,7 +230,6 @@ function Sandbox.init(self)
         end
       }):setParent(activeSceneMenu)
     elseif activeSceneMenu then
-      InputContext.set('any')
       activeSceneMenu:delete(true)
       activeSceneMenu = nil
     end
