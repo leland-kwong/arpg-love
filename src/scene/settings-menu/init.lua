@@ -8,10 +8,14 @@ local msgBus = require 'components.msg-bus'
 local f = require 'utils.functional'
 local userSettings = require 'config.user-settings'
 local userSettingsState = require 'config.user-settings.state'
+local InputContext = require 'modules.input-context'
 
 local SettingsMenu = {}
+local menuInputContext = 'SettingsMenu'
 
 function SettingsMenu.init(self)
+  self.originalInputContext = InputContext.get()
+  InputContext.set(menuInputContext)
   Component.addToGroup(self, 'gui')
   local MenuManager = require 'modules.menu-manager'
   MenuManager.clearAll()
@@ -83,6 +87,7 @@ function SettingsMenu.init(self)
   local musicSlider = GuiSlider.create({
     x = menuInnerX,
     y = soundSectionTitle.y + 40,
+    inputContext = menuInputContext,
     width = 150,
     knobSize = 10,
     onChange = function(self)
@@ -120,6 +125,7 @@ function SettingsMenu.init(self)
   local soundSlider = GuiSlider.create({
     x = menuInnerX,
     y = musicSlider.y + 30,
+    inputContext = menuInputContext,
     width = 150,
     knobSize = 10,
     onChange = function(self)
@@ -230,6 +236,7 @@ function SettingsMenu.init(self)
       local hotkeyNode = Gui.create({
         x = menuInnerX,
         y = hotkeySectionTitle.y + 30 + ((index - 1) * 20),
+        inputContext = menuInputContext,
         onClick = ((not isFixedAction) and changeHotKey or nil),
         onUpdate = function(self)
           local template = '{action}: {key}'
@@ -283,6 +290,7 @@ function SettingsMenu.init(self)
     childNodes = childNodes,
     x = menuX,
     y = menuY,
+    inputContext = menuInputContext,
     width = menuWidth,
     height = menuHeight,
     contentHeight = 500,
@@ -290,6 +298,10 @@ function SettingsMenu.init(self)
       return 1001
     end
   }):setParent(self)
+end
+
+function SettingsMenu.final(self)
+  InputContext.set(self.originalInputContext)
 end
 
 return Component.createFactory(SettingsMenu)

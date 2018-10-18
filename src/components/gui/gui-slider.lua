@@ -37,6 +37,7 @@ return Component.createFactory({
 
     self.railHeight = 4
     self.knob = Gui.create({
+      inputContext = self.inputContext,
       x = getKnobX(self),
       y = self.y - self.knobSize/2 + self.railHeight/2,
       w = self.knobSize,

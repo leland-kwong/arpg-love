@@ -108,6 +108,7 @@ function GuiList.init(self)
   local listNode = Gui.create({
     x = self.x,
     y = self.y,
+    inputContext = self.inputContext,
     w = width,
     h = height,
     type = Gui.types.LIST,

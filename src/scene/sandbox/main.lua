@@ -11,6 +11,8 @@ local config = require 'config.config'
 local objectUtils = require 'utils.object-utils'
 local bitser = require 'modules.bitser'
 
+local menuInputContext = 'MainMenu'
+
 local drawOrder = function()
   return 1000
 end
@@ -175,6 +177,7 @@ local function closeMenuButton(props)
     x = x + 300,
     y = y,
     type = Gui.types.BUTTON,
+    inputContext = menuInputContext,
     onClick = props.onClick,
     onUpdate = function(self)
       local w, h = GuiText.getTextSize(textContent, guiTextBodyLayer.font)
@@ -193,14 +196,21 @@ local function closeMenuButton(props)
 end
 
 function Sandbox.init(self)
+  local InputContext = require 'modules.input-context'
+
+  -- Wildcard context to match anything
+  InputContext.set('any')
+
   local activeSceneMenu = nil
 
   local function DebugMenu(enabled)
     if enabled then
+      InputContext.set(menuInputContext)
       local x, y = getMenuPosition()
       activeSceneMenu = MenuList.create({
         x = x,
         y = y,
+        inputContext = menuInputContext,
         options = config.isDevelopment and sceneOptionsDebug or sceneOptionsNormal,
         onSelect = function(name, value)
           DebugMenu(false)
@@ -217,6 +227,7 @@ function Sandbox.init(self)
         end
       }):setParent(activeSceneMenu)
     elseif activeSceneMenu then
+      InputContext.set('any')
       activeSceneMenu:delete(true)
       activeSceneMenu = nil
     end
