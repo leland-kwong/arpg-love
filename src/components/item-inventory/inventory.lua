@@ -41,7 +41,9 @@ local function InteractArea(self)
 end
 
 function InventoryBlueprint.init(self)
-  Component.addToGroup(self, 'menu')
+  local MenuManager = require 'modules.menu-manager'
+  MenuManager.clearAll()
+  MenuManager.push(self)
 
   msgBus.on(msgBus.ALL, function(msg, msgType)
     local rootStore = self.rootStore

@@ -12,7 +12,10 @@ local userSettingsState = require 'config.user-settings.state'
 local SettingsMenu = {}
 
 function SettingsMenu.init(self)
-  Component.addToGroup(self, 'menu')
+  Component.addToGroup(self, 'gui')
+  local MenuManager = require 'modules.menu-manager'
+  MenuManager.clearAll()
+  MenuManager.push(self)
 
   local menuX, menuY = self.x, self.y
   local menuWidth, menuHeight = self.width, self.height
@@ -27,14 +30,6 @@ function SettingsMenu.init(self)
     end
   })
 
-  local guiTextMenuTitle = GuiText.create({
-    group = Component.groups.gui,
-    font = font.secondary.font,
-    drawOrder = function()
-      return 2
-    end
-  })
-
   local guiTextBody = GuiText.create({
     group = Component.groups.gui,
     font = font.primary.font,
@@ -46,6 +41,13 @@ function SettingsMenu.init(self)
     y = menuInnerY - 26,
     init = function(self)
       Component.addToGroup(self, 'gui')
+      self.guiTextMenuTitle = GuiText.create({
+        group = Component.groups.gui,
+        font = font.secondary.font,
+        drawOrder = function()
+          return 2
+        end
+      }):setParent(self)
     end,
     draw = function(self)
       local title = 'SETTINGS'
@@ -54,7 +56,7 @@ function SettingsMenu.init(self)
       local ox, oy = Position.boxCenterOffset(textWidth, 1, menuWidth, 1)
       love.graphics.setColor(0.1,0.1,0.1,1)
       love.graphics.rectangle('fill', self.x, self.y - 6, menuWidth, 20)
-      guiTextMenuTitle:add(title, Color.WHITE, self.x + ox, self.y)
+      self.guiTextMenuTitle:add(title, Color.WHITE, self.x + ox, self.y)
     end,
     drawOrder = function()
       return 1
@@ -287,11 +289,7 @@ function SettingsMenu.init(self)
     drawOrder = function()
       return 3
     end
-  })
-end
-
-function SettingsMenu.final()
-  consoleLog('settings menu deleted')
+  }):setParent(self)
 end
 
 return Component.createFactory(SettingsMenu)

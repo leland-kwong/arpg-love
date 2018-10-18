@@ -20,6 +20,7 @@ local InventoryController = require 'components.item-inventory.controller'
 local Inventory = require 'components.item-inventory.inventory'
 local HealSource = require 'components.heal-source'
 require'components.item-inventory.equipment-change-handler'
+local MenuManager = require 'modules.menu-manager'
 
 local colMap = collisionWorlds.map
 local keyMap = userSettings.keyboard
@@ -247,7 +248,8 @@ local Player = {
               end
             }):setParent(self.hudRoot)
           elseif activeInventory then
-            activeInventory:delete(true)
+            local MenuManager = require 'modules.menu-manager'
+            MenuManager.pop()
           end
         end
 

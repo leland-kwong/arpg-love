@@ -104,7 +104,7 @@ local menuOptionSettingsMenu = {
     local vWidth, vHeight = love.graphics.getDimensions()
     local width, height = 240, 400
     local x = Position.boxCenterOffset(width, height, vWidth/2, vHeight/2)
-    SettingsMenu.create({
+    local menu = SettingsMenu.create({
       x = x,
       y = 60,
       width = width,
@@ -228,14 +228,9 @@ function Sandbox.init(self)
 
   self.listeners = {
     msgBusMainMenu.on(msgBusMainMenu.TOGGLE_MAIN_MENU, function()
-      local Component = require 'modules.component'
-      local hasOpenedMenus = false
-      for _,component in pairs(Component.groups.menu.getAll()) do
-        hasOpenedMenus = true
-        component:delete(true)
-      end
-
-      if hasOpenedMenus then
+      local MenuManager = require 'modules.menu-manager'
+      if MenuManager.hasItems() then
+        MenuManager.clearAll()
         return
       end
 

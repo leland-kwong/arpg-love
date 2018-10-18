@@ -30,9 +30,6 @@ local Groups = {
   firstLayer = Component.newGroup({
     name = 'firstLayer'
   }),
-  menu = Component.newGroup({
-    name = 'menu'
-  }),
   all = Component.newGroup({
     name = 'all',
     drawLayersPerGridCell = 10,
