@@ -38,7 +38,7 @@ local Sandbox = {
 local scenes = {
   mainGameHome = {
     name = 'main game home screen',
-    path = 'scene.sandbox.main-game.main-game-home'
+    path = 'scene.sandbox.main-game.home-screen'
   },
   settingsMenu = {
     name = 'settings',

@@ -1,7 +1,7 @@
 local globalState = require 'main.global-state'
 local msgBus = require 'components.msg-bus'
 local Sound = require 'components.sound'
-local HomeScene = require 'scene.sandbox.main-game.main-game-home'
+local HomeScene = require 'scene.sandbox.main-game.home-screen'
 local tick = require 'utils.tick'
 local userSettings = require 'config.user-settings'
 local userSettingsState = require 'config.user-settings.state'
