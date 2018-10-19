@@ -33,16 +33,8 @@ local Sandbox = {
 
 local scenes = {
   mainGameHome = {
-    name = 'main game home screen',
+    name = 'Home Screen',
     path = 'scene.sandbox.main-game.home-screen'
-  },
-  playGameMenu = {
-    name = 'play game',
-    path = 'scene.play-game-menu'
-  },
-  settingsMenu = {
-    name = 'settings',
-    path = 'scene.settings-menu'
   },
   aiTest = {
     name = 'ai',

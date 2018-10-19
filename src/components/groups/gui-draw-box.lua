@@ -6,7 +6,7 @@ Component.newGroup({
 })
 
 local defaults = {
-  backgroundColor = Color.DARK_GRAY,
+  backgroundColor = {Color.multiplyAlpha(Color.DARK_GRAY, 0.94)},
   borderColor = Color.SKY_BLUE,
   borderWidth = 1
 }

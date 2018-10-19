@@ -11,6 +11,8 @@ local msgBus = require 'components.msg-bus'
 local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local config = require 'config.config'
 local tick = require 'utils.tick'
+local StarField = require 'components.star-field'
+local Camera = require 'components.camera'
 
 local MainGameHomeScene = {
   group = groups.gui,
@@ -19,6 +21,7 @@ local MainGameHomeScene = {
 }
 
 function MainGameHomeScene.init(self)
+  Camera:setPosition(0, 0, 0)
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, Color.DARK_GRAY)
   msgBus.on(msgBus.KEY_PRESSED, function(ev)
     local isToggleDevMode = ev.hasModifier and ev.key == '.'
@@ -31,6 +34,16 @@ function MainGameHomeScene.init(self)
     end
   end)
 
+  self.starField = StarField.create({
+    speed = {5, 30},
+    particleBaseColor = {Color.rgba255(244, 66, 155)},
+    preWarm = 0,
+  }):setParent(self)
+  self.initialMousePosition = {
+    x = love.mouse.getX(),
+    y = love.mouse.getY()
+  }
+
   local parent = self
   self.guiTextTitleLayer = GuiText.create({
     font = require 'components.font'.secondaryLarge.font
@@ -38,6 +51,13 @@ function MainGameHomeScene.init(self)
   self.guiTextLayer = GuiText.create({
     font = require 'components.font'.primary.font
   }):setParent(self)
+end
+
+function MainGameHomeScene.update(self)
+  local mx, my = love.mouse.getX(), love.mouse.getY()
+  local dx, dy = self.initialMousePosition.x - mx, self.initialMousePosition.y - my
+  local adjustment = 0.005
+  self.starField:setPosition(dx * adjustment, dy * adjustment)
 end
 
 local function renderTitle(self)

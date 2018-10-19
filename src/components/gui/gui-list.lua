@@ -102,17 +102,6 @@ function GuiList.init(self)
       love.graphics.stencil(guiStencil, 'replace', 1)
       love.graphics.setStencilTest('greater', 0)
 
-      love.graphics.setColor(0.1,0.1,0.1)
-
-      local posX, posY = self:getPosition()
-      love.graphics.rectangle(
-        'fill',
-        posX,
-        posY,
-        self.w,
-        self.h
-      )
-
       scrollbars(self)
     end,
     drawOrder = baseDrawOrder

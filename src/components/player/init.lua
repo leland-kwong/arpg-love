@@ -564,7 +564,7 @@ function Player.update(self, dt)
   self.w = w
 
   -- update camera to follow player
-  camera:setPosition(self.x, self.y)
+  camera:setPosition(self.x, self.y, userSettings.camera.speed)
 end
 
 local function drawShadow(self, sx, sy, ox, oy)

@@ -81,7 +81,8 @@ function HomeBase.init(self)
 
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0,0,0,0})
   self.starField = StarField.create({
-    direction = math.pi/2
+    direction = math.pi/2,
+    emissionRate = 250,
   }):setParent(self)
 
   self.listeners = {
