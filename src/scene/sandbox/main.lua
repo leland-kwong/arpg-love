@@ -84,7 +84,7 @@ local function menuOptionSceneLoad(props)
 end
 
 local menuOptionQuitGame = {
-  name = 'exit game',
+  name = 'Exit',
   value = function()
     love.event.quit()
   end
@@ -137,7 +137,7 @@ msgBus.on(msgBus.PLAY_GAME_MENU_TOGGLE, function()
 end)
 
 local menuOptionPlayGameMenu = {
-  name = 'Play Game',
+  name = 'New/Load Game',
   value = function()
     -- dont close it if it's already open
     if Component.get('PlayGameMenu') then
@@ -265,11 +265,12 @@ function Sandbox.init(self)
 
   self.listeners = {
     msgBusMainMenu.on(msgBusMainMenu.TOGGLE_MAIN_MENU, function(enabled)
+      local MenuManager = require 'modules.menu-manager'
       if (enabled ~= nil) then
-        local MenuManager = require 'modules.menu-manager'
         MenuManager.clearAll()
         DebugMenu(enabled)
       else
+        MenuManager.clearAll()
         DebugMenu(not state.menuOpened)
       end
       return state.menuOpened

@@ -107,8 +107,8 @@ function MenuList.update(self)
       totalHeight = totalHeight + row.height
       maxWidth = math.max(maxWidth, row.width)
     end)
-    self.width = maxWidth
-    self.height = totalHeight
+    self.width = math.max(self.width, maxWidth)
+    self.height = math.max(self.height, totalHeight)
   end
   self.prevOptions = self.options
 end

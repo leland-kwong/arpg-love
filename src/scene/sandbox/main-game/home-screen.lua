@@ -35,7 +35,9 @@ function MainGameHomeScene.init(self)
   end)
 
   self.starField = StarField.create({
-    speed = {5, 30},
+    speed = {3, 15},
+    size = {1, 2},
+    emissionRate = 400,
     particleBaseColor = {Color.rgba255(244, 66, 155)},
     preWarm = 0,
   }):setParent(self)

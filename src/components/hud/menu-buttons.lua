@@ -20,13 +20,6 @@ function MenuButtons.init(self)
       end
     },
     {
-      actionName = 'settings',
-      sprite = 'gui-home-button',
-      onClick = function()
-        msgBus.send(msgBus.SETTINGS_MENU_TOGGLE)
-      end
-    },
-    {
       actionName = 'inventory',
       sprite = 'gui-home-button',
       onClick = function()

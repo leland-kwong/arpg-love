@@ -32,6 +32,7 @@ local NewGameDialogBlueprint = {
 }
 
 function NewGameDialogBlueprint.init(self)
+  local parent = self
   local state = {
     isValid = false,
     characterName = ''
@@ -54,6 +55,7 @@ function NewGameDialogBlueprint.init(self)
         characterName = state.characterName
       }
     })
+    self:delete(true)
   end
 
   local textInput = GuiTextInput.create({
@@ -72,6 +74,7 @@ function NewGameDialogBlueprint.init(self)
       if isSubmitEvent then
         -- create new game
         startNewGame()
+        parent.onNewGameEnter()
       end
     end
   }):setParent(self)
@@ -103,13 +106,12 @@ local function NewGameButton(parent)
     y = parent.innerY + 250,
     padding = 5,
     onClick = function(self)
-      msgBus.send(
-        msgBus.SCENE_STACK_PUSH,
-        {
-          scene = NewGameDialog
-        }
-      )
-      parent:delete(true)
+      NewGameDialog.create({
+        onNewGameEnter = function()
+          parent:delete(true)
+        end
+      })
+      msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
     end,
     onUpdate = function(self)
       self.hidden = parent.state.menuMode == menuModes.DELETE_GAME

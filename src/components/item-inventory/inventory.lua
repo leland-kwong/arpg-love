@@ -44,6 +44,8 @@ local function InteractArea(self)
 end
 
 function InventoryBlueprint.init(self)
+  local msgBusMainMenu = require 'components.msg-bus-main-menu'
+  msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
   MenuManager.clearAll()
   MenuManager.push(self)
 
