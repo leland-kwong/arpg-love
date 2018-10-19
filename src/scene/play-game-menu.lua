@@ -5,6 +5,7 @@ local GuiButton = require 'components.gui.gui-button'
 local GuiTextInput = require 'components.gui.gui-text-input'
 local MenuList = require 'components.menu-list'
 local msgBus = require 'components.msg-bus'
+local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local Enum = require 'utils.enum'
 local fileSystem = require 'modules.file-system'
 local HomeBase = require 'scene.home-base'
@@ -15,7 +16,8 @@ local MenuManager = require 'modules.menu-manager'
 local PlayGameMenu = {
   id = 'PlayGameMenu',
   x = 300,
-  y = 40
+  y = 40,
+  padding = 10
 }
 
 local menuModes = Enum({
@@ -97,8 +99,8 @@ local function NewGameButton(parent)
   return GuiButton.create({
     text = 'NEW GAME',
     textLayer = parent.guiTextLayer,
-    x = parent.x,
-    y = parent.y + 250,
+    x = parent.innerX,
+    y = parent.innerY + 250,
     padding = 5,
     onClick = function(self)
       msgBus.send(
@@ -134,47 +136,55 @@ local function DeleteGameButton(parent, anchorEntity)
 end
 
 local function getMenuOptions(parent)
-  return f.map(fileSystem.listSavedFiles('saved-states'), function(fileData)
-    local meta = fileData.metadata
-    local dateObject = os.date('*t', meta.lastSaved)
-    local extract = require 'utils.object-utils.extract'
-    local month, day, year = extract(dateObject, 'month', 'day', 'year')
-    local saveDateHumanized = month .. '-' .. day .. '-' .. year
-    return {
-      name = {
-        Color.WHITE,
-        meta.displayName..'\n',
+  local files = fileSystem.listSavedFiles('saved-states')
+  local isNewFiles = files ~= parent.previousFiles
+  if (isNewFiles) then
+    parent.previousFiles = files
+    parent.previousFilesForDisplay = f.map(files, function(fileData)
+      local meta = fileData.metadata
+      local dateObject = os.date('*t', meta.lastSaved)
+      local extract = require 'utils.object-utils.extract'
+      local month, day, year = extract(dateObject, 'month', 'day', 'year')
+      local saveDateHumanized = month .. '-' .. day .. '-' .. year
+      return {
+        name = {
+          Color.WHITE,
+          meta.displayName..'\n',
 
-        Color.LIGHT_GRAY,
-        'last saved: '..saveDateHumanized
-      },
-      value = function()
-        if parent.state.menuMode == menuModes.DELETE_GAME then
-          fileSystem.deleteFile('saved-states', fileData.id)
-            :next(function()
-              parent.state.needsUpdate = true
-            end, function(err)
-              print('delete error')
-            end)
-        -- load game
-        else
-          local CreateStore = require 'components.state.state'
-          local loadedState = fileSystem.loadSaveFile('saved-states', fileData.id)
-          msgBus.send(
-            msgBus.NEW_GAME,
-            {
-              scene = HomeBase,
-              props = loadedState
-            }
-          )
-          parent:delete(true)
-        end
-      end,
-    }
-  end)
+          Color.LIGHT_GRAY,
+          'last saved: '..saveDateHumanized
+        },
+        value = function()
+          if parent.state.menuMode == menuModes.DELETE_GAME then
+            fileSystem.deleteFile('saved-states', fileData.id)
+              :next(nil, function(err)
+                print('delete error')
+              end)
+          -- load game
+          else
+            local CreateStore = require 'components.state.state'
+            local loadedState = fileSystem.loadSaveFile('saved-states', fileData.id)
+            msgBus.send(
+              msgBus.NEW_GAME,
+              {
+                scene = HomeBase,
+                props = loadedState
+              }
+            )
+            msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
+            parent:delete(true)
+          end
+        end,
+      }
+    end)
+  end
+  return parent.previousFilesForDisplay
 end
 
 function PlayGameMenu.init(self)
+  self.innerX = self.x + self.padding
+  self.innerY = self.y + self.padding
+
   Component.addToGroup(self, 'gui')
   MenuManager.clearAll()
   MenuManager.push(self)
@@ -190,24 +200,24 @@ function PlayGameMenu.init(self)
 
   -- saved games list
   self.list = MenuList.create({
-    x = self.x,
-    y = self.y,
+    x = self.innerX,
+    y = self.innerY,
     width = 125,
-    options = {},
+    options = getMenuOptions(self),
     onSelect = function(name, value)
       value()
     end
   }):setParent(self)
 
-  local newGameBtn = NewGameButton(self)
-  DeleteGameButton(self, newGameBtn)
+  self.newGameBtn = NewGameButton(self)
+  DeleteGameButton(self, self.newGameBtn)
 end
 
 function PlayGameMenu.update(self)
-  if self.state.needsUpdate then
-    self.list.options = getMenuOptions(self)
-  end
-  self.state.needsUpdate = false
+  self.list.options = getMenuOptions(self)
+  self.width = self.list.width + (self.padding * 2)
+  self.height = self.newGameBtn.y - self.innerY + self.newGameBtn.h + (self.padding * 2)
+  Component.addToGroup(self, 'guiDrawBox')
 end
 
 function PlayGameMenu.draw(self)

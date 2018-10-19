@@ -109,7 +109,7 @@ msgBus.on(msgBus.SETTINGS_MENU_TOGGLE, function()
     local width, height = 240, 400
     local menuTabs = Component.get('MainMenuTabs')
     local menu = SettingsMenu.create({
-      x = menuTabs.x + menuTabs.width,
+      x = menuTabs.x + menuTabs.width + 2,
       y = menuTabs.y,
       width = width,
       height = height
@@ -120,6 +120,10 @@ end)
 local menuOptionSettingsMenu = {
   name = 'Settings',
   value = function()
+    -- dont close it if it's already open
+    if Component.get('SettingsMenu') then
+      return
+    end
     msgBus.send(msgBus.SETTINGS_MENU_TOGGLE)
   end
 }
@@ -134,7 +138,7 @@ msgBus.on(msgBus.PLAY_GAME_MENU_TOGGLE, function()
     local PlayGameMenu = require 'scene.play-game-menu'
     local menuTabs = Component.get('MainMenuTabs')
     local menu = PlayGameMenu.create({
-      x = menuTabs.x + menuTabs.width,
+      x = menuTabs.x + menuTabs.width + 2,
       y = menuTabs.y,
     })
   end
@@ -143,6 +147,10 @@ end)
 local menuOptionPlayGameMenu = {
   name = 'Play Game',
   value = function()
+    -- dont close it if it's already open
+    if Component.get('PlayGameMenu') then
+      return
+    end
     msgBus.send(msgBus.PLAY_GAME_MENU_TOGGLE)
   end
 }
@@ -204,7 +212,7 @@ local function closeMenuButton(props)
   }
   local x, y = getMenuTabsPosition()
   return Gui.create({
-    x = x + 300,
+    x = x + 400,
     y = y,
     type = Gui.types.BUTTON,
     onClick = props.onClick,
@@ -245,9 +253,11 @@ function Sandbox.init(self)
           return drawOrder() + 2
         end
       })
+      msgBus.send(msgBus.PLAY_GAME_MENU_TOGGLE)
 
       closeMenuButton({
         onClick = function()
+          MenuManager.clearAll()
           DebugMenu(false)
         end
       }):setParent(self.activeSceneMenu)
@@ -262,8 +272,14 @@ function Sandbox.init(self)
   loadScene(state.activeScenePath)
 
   self.listeners = {
-    msgBusMainMenu.on(msgBusMainMenu.TOGGLE_MAIN_MENU, function()
-      DebugMenu(not state.menuOpened)
+    msgBusMainMenu.on(msgBusMainMenu.TOGGLE_MAIN_MENU, function(enabled)
+      if (enabled ~= nil) then
+        local MenuManager = require 'modules.menu-manager'
+        MenuManager.clearAll()
+        DebugMenu(enabled)
+      else
+        DebugMenu(not state.menuOpened)
+      end
       return state.menuOpened
     end, 1)
   }
@@ -271,16 +287,11 @@ function Sandbox.init(self)
   DebugMenu(true)
 end
 
-function Sandbox.draw(self)
+function Sandbox.update(self)
   if state.menuOpened then
-    local menu = self.activeSceneMenu
-    -- background
-    local x, y, w, h = menu.x, menu.y, menu.width, menu.height
-    love.graphics.setColor(0,0,0,0.9)
-    love.graphics.rectangle('fill', x, y, w, h)
-
-    love.graphics.setColor(Color.SKY_BLUE)
-    love.graphics.rectangle('line', x, y, w, h)
+    Component.addToGroup(self.activeSceneMenu, 'guiDrawBox')
+  else
+    Component.removeFromGroup(self.activeSceneMenu, 'guiDrawBox')
   end
 end
 

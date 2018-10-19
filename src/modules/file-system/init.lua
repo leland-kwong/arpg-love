@@ -10,6 +10,10 @@ local path = require 'modules.file-system.path'
 local Observable = require 'modules.observable'
 
 local fileSystem = {}
+local fileListCache = nil
+local function invalidateFileListCache()
+  fileListCache = nil
+end
 
 local function init()
   -- start async write thread
@@ -48,6 +52,7 @@ function fileSystem.saveFile(rootPath, saveId, saveState, metadata)
 
     local success = love.thread.getChannel('saveStateSuccess'):pop()
     if success then
+      invalidateFileListCache()
       return true
     end
   end)
@@ -73,6 +78,7 @@ function fileSystem.deleteFile(rootPath, saveId)
 
     local success = love.thread.getChannel('saveStateDeleteSuccess'):pop()
     if success then
+      invalidateFileListCache()
       return true
     end
   end)
@@ -91,14 +97,17 @@ function fileSystem.loadSaveFile(rootPath, saveId)
 end
 
 function fileSystem.listSavedFiles(rootPath)
-  checkRootPath(rootPath)
-  local saves = love.filesystem.getDirectoryItems(rootPath)
-  return f.map(saves, function(saveId)
-    return {
-      id = saveId,
-      metadata = bitser.loadLoveFile(path.getMetadataPath(rootPath, saveId))
-    }
-  end)
+  if (not fileListCache) then
+    checkRootPath(rootPath)
+    local saves = love.filesystem.getDirectoryItems(rootPath)
+    fileListCache = f.map(saves, function(saveId)
+      return {
+        id = saveId,
+        metadata = bitser.loadLoveFile(path.getMetadataPath(rootPath, saveId))
+      }
+    end)
+  end
+  return fileListCache
 end
 
 if config.isDevelopment then

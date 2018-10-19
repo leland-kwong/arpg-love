@@ -13,6 +13,8 @@ local MenuList = {
   x = 0,
   y = 0,
   width = 300,
+  height = 1,
+  padding = 10,
   group = groups.gui,
   -- table of menu options
   options = {
@@ -40,7 +42,8 @@ function MenuList.init(self)
 end
 
 function MenuList.update(self)
-  if self.prevOptions ~= self.options then
+  local isNewOptions = self.prevOptions ~= self.options
+  if isNewOptions then
     local parent = self
     local itemFont = font.primary.font
 
@@ -57,7 +60,7 @@ function MenuList.update(self)
         {
           content = content,
           width = menuWidth,
-          padding = 10,
+          padding = self.padding,
           font = itemFont,
           fontSize = itemFont:getHeight()
         }

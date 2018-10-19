@@ -85,6 +85,7 @@ function love.draw()
   love.graphics.push()
   love.graphics.scale(config.scaleFactor)
   groups.hud.drawAll()
+  require 'components.groups.gui-draw-box'()
   groups.gui.drawAll()
   love.graphics.pop()
 
