@@ -152,7 +152,7 @@ function Hud.init(self)
   }):setParent(self)
 
   local spacing = 32
-  local endXPos = 350
+  local endXPos = 355
 
   local skillSetup = {
     {
