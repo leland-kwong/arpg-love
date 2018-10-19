@@ -82,7 +82,8 @@ local menuOptionQuitGame = {
   name = 'Exit',
   value = function()
     love.event.quit()
-  end
+  end,
+  onSelectSoundEnabled = false
 }
 
 msgBus.SETTINGS_MENU_TOGGLE = 'SETTINGS_MENU_TOGGLE'

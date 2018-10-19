@@ -96,9 +96,11 @@ function MenuList.update(self)
         type = Gui.types.BUTTON,
         onClick = function(self)
           onSelect(name, optionValue)
-          love.audio.play(
-            love.audio.newSource(parent.onSelectSound, 'static')
-          )
+          if (option.onSelectSoundEnabled ~= false) then
+            love.audio.play(
+              love.audio.newSource(parent.onSelectSound, 'static')
+            )
+          end
           parent.value = option.value
         end,
         draw = function(self)
