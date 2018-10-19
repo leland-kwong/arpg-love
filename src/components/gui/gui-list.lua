@@ -39,9 +39,7 @@ local GuiList = {
   width = 0,
   height = 0,
   contentWidth = nil,
-  contentHeight = nil,
-  borderWidth = 2,
-  borderColor = {Color.multiplyAlpha(Color.SKY_BLUE, 0.5)}
+  contentHeight = nil
 }
 
 function GuiList.init(self)
@@ -84,27 +82,6 @@ function GuiList.init(self)
     end
   }):setParent(self)
 
-  -- border draw component
-  local borderNode = Component.create({
-    group = Component.groups.gui,
-    draw = function()
-      local oLineWidth = love.graphics.getLineWidth()
-      love.graphics.setLineWidth(parent.borderWidth)
-      love.graphics.setColor(parent.borderColor)
-      love.graphics.rectangle(
-        'line',
-        self.x,
-        self.y,
-        width,
-        height
-      )
-      love.graphics.setLineWidth(oLineWidth)
-    end,
-    drawOrder = function()
-      return stencilComponent:drawOrder() + 1
-    end
-  }):setParent(self)
-
   local listNode = Gui.create({
     x = self.x,
     y = self.y,
@@ -124,17 +101,6 @@ function GuiList.init(self)
       love.graphics.push()
       love.graphics.stencil(guiStencil, 'replace', 1)
       love.graphics.setStencilTest('greater', 0)
-
-      love.graphics.setColor(0.1,0.1,0.1)
-
-      local posX, posY = self:getPosition()
-      love.graphics.rectangle(
-        'fill',
-        posX,
-        posY,
-        self.w,
-        self.h
-      )
 
       scrollbars(self)
     end,

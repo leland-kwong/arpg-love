@@ -125,7 +125,10 @@ function M.addToGroup(id, group, data)
     M.entitiesById[id] = entity
   end
   entity[name] = data or EMPTY
-  M.groups[name].addComponent(id, data)
+  local group = M.groups[name]
+  if group then
+    group.addComponent(id, data)
+  end
   return M
 end
 
@@ -133,8 +136,11 @@ function M.removeFromGroup(id, group)
   local isIdComponent = type(id) == 'table'
   id = isIdComponent and id:getId() or id
   local name = getGroupName(group)
-  -- check if an entity has been added or not before removing
-  M.groups[name].removeComponent(id)
+  local group = M.groups[name]
+  if group then
+    -- check if an entity has been added or not before removing
+    group.removeComponent(id)
+  end
   return M
 end
 

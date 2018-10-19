@@ -8,16 +8,14 @@ local msgBus = require 'components.msg-bus'
 local f = require 'utils.functional'
 local userSettings = require 'config.user-settings'
 local userSettingsState = require 'config.user-settings.state'
-local InputContext = require 'modules.input-context'
+local MenuManager = require 'modules.menu-manager'
 
-local SettingsMenu = {}
-local menuInputContext = 'SettingsMenu'
+local SettingsMenu = {
+  id = 'SettingsMenu'
+}
 
 function SettingsMenu.init(self)
-  self.originalInputContext = InputContext.get()
-  InputContext.set(menuInputContext)
   Component.addToGroup(self, 'gui')
-  local MenuManager = require 'modules.menu-manager'
   MenuManager.clearAll()
   MenuManager.push(self)
 
@@ -40,33 +38,6 @@ function SettingsMenu.init(self)
     drawOrder = guiTextTitle.drawOrder
   })
 
-  local menuTitle = Component.create({
-    x = menuX,
-    y = menuInnerY - 26,
-    init = function(self)
-      Component.addToGroup(self, 'gui')
-      self.guiTextMenuTitle = GuiText.create({
-        group = Component.groups.gui,
-        font = font.secondary.font,
-        drawOrder = function()
-          return 2
-        end
-      }):setParent(self)
-    end,
-    draw = function(self)
-      local title = 'SETTINGS'
-      local Position = require 'utils.position'
-      local textWidth = GuiText.getTextSize(title, guiTextTitle.font)
-      local ox, oy = Position.boxCenterOffset(textWidth, 1, menuWidth, 1)
-      love.graphics.setColor(0.1,0.1,0.1,1)
-      love.graphics.rectangle('fill', self.x, self.y - 6, menuWidth, 20)
-      self.guiTextMenuTitle:add(title, Color.WHITE, self.x + ox, self.y)
-    end,
-    drawOrder = function()
-      return 1
-    end
-  }):setParent(self)
-
   local soundSectionTitle = Component.create({
     x = menuInnerX,
     y = menuInnerY,
@@ -87,7 +58,6 @@ function SettingsMenu.init(self)
   local musicSlider = GuiSlider.create({
     x = menuInnerX,
     y = soundSectionTitle.y + 40,
-    inputContext = menuInputContext,
     width = 150,
     knobSize = 10,
     onChange = function(self)
@@ -125,7 +95,6 @@ function SettingsMenu.init(self)
   local soundSlider = GuiSlider.create({
     x = menuInnerX,
     y = musicSlider.y + 30,
-    inputContext = menuInputContext,
     width = 150,
     knobSize = 10,
     onChange = function(self)
@@ -236,7 +205,6 @@ function SettingsMenu.init(self)
       local hotkeyNode = Gui.create({
         x = menuInnerX,
         y = hotkeySectionTitle.y + 30 + ((index - 1) * 20),
-        inputContext = menuInputContext,
         onClick = ((not isFixedAction) and changeHotKey or nil),
         onUpdate = function(self)
           local template = '{action}: {key}'
@@ -290,18 +258,18 @@ function SettingsMenu.init(self)
     childNodes = childNodes,
     x = menuX,
     y = menuY,
-    inputContext = menuInputContext,
     width = menuWidth,
     height = menuHeight,
     contentHeight = 500,
     drawOrder = function()
-      return 1001
+      return 1100
     end
   }):setParent(self)
+  Component.addToGroup(list, 'guiDrawBox')
 end
 
 function SettingsMenu.final(self)
-  InputContext.set(self.originalInputContext)
+  MenuManager.pop()
 end
 
 return Component.createFactory(SettingsMenu)

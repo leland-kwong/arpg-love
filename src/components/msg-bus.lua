@@ -1,27 +1,24 @@
-local config = require 'config.config'
 local MessageBus = require 'utils.message-bus'
 
 local M = MessageBus.new()
 
-if config.isDevelopment then
-  local proxy = {}
-  setmetatable(M, {
-    --[[
-      If property doesn't exist, throw an error. This is to alert us about accessing properties that don't
-      exist. The main use case is when trying to access message type constants, ie `msgBus.PLAYER_HEAL_SOURCE_ADD` should not be a `nil` value.
-    ]]
-    __index = function(_, name)
-      if not proxy[name] then
-        error('[msgBus] property `'..name..'` not defined')
-      end
-      return proxy[name]
-    end,
-    __newindex = function(_, eventName, eventType)
-      assert(not proxy[eventName], eventName..' is already registered')
-      proxy[eventName] = eventType
+local proxy = {}
+setmetatable(M, {
+  --[[
+    If property doesn't exist, throw an error. This is to alert us about accessing properties that don't
+    exist. The main use case is when trying to access message type constants, ie `msgBus.PLAYER_HEAL_SOURCE_ADD` should not be a `nil` value.
+  ]]
+  __index = function(_, name)
+    if not proxy[name] then
+      error('[msgBus] property `'..name..'` not defined')
     end
-  })
-end
+    return proxy[name]
+  end,
+  __newindex = function(_, eventName, eventType)
+    assert(not proxy[eventName], eventName..' is already registered')
+    proxy[eventName] = eventType
+  end
+})
 
 M.GAME_LOADED = 'GAME_LOADED'
 M.NEW_GAME = 'NEW_GAME' -- this will be used whenever we exit the currently loaded game. Currently its being unused
@@ -99,6 +96,7 @@ M.INVENTORY_DROP = 'INVENTORY_DROP'
 -- when clicked outside of the screen, we drop the item on the floor
 M.INVENTORY_DROP_MODE_FLOOR = 'INVENTORY_DROP_MODE_FLOOR'
 M.INVENTORY_DROP_MODE_INVENTORY = 'INVENTORY_DROP_MODE_INVENTORY'
+M.INVENTORY_TOGGLE = 'INVENTORY_TOGGLE'
 
 M.EQUIPMENT_SWAP = 'EQUIPMENT_SWAP'
 M.EQUIPMENT_CHANGE = 'EQUIPMENT_CHANGE'
@@ -128,8 +126,6 @@ M.PLAYER_DISABLE_ABILITIES = 'PLAYER_DISABLE_ABILITIES'
   Disables/enables clicks for the player. This is used for situations where
   the player is trying to pick up an item and it shouldn't attack while picking it up.
 ]]
-
-M.TOGGLE_MAIN_MENU = 'TOGGLE_MAIN_MENU'
 
 M.NOTIFIER_NEW_EVENT = 'NOTIFIER_NEW_EVENT'
 

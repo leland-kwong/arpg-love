@@ -8,6 +8,9 @@ love.graphics.setDefaultFilter('nearest', 'nearest')
 
 local msgBus = require 'components.msg-bus'
 msgBus.UPDATE = 'UPDATE'
+require 'main.listeners'
+local userSettingsState = require 'config.user-settings.state'
+userSettingsState.load()
 
 local Console = require 'modules.console.console'
 local groups = require 'components.groups'
@@ -37,7 +40,6 @@ function love.load()
 
   -- console debugging
   local console = Console.create()
-  require 'main.listeners'
 
   RootScene.create()
 end
@@ -83,6 +85,7 @@ function love.draw()
   love.graphics.push()
   love.graphics.scale(config.scaleFactor)
   groups.hud.drawAll()
+  require 'components.groups.gui-draw-box'()
   groups.gui.drawAll()
   love.graphics.pop()
 

@@ -11,7 +11,9 @@ local config = require 'config.config'
 local objectUtils = require 'utils.object-utils'
 local bitser = require 'modules.bitser'
 
-local menuInputContext = 'MainMenu'
+local function getMenuTabsPosition()
+  return 200, 60
+end
 
 local drawOrder = function()
   return 1000
@@ -19,12 +21,6 @@ end
 
 local guiTextBodyLayer = GuiText.create({
   font = font.primary.font,
-  drawOrder = drawOrder
-})
-
-local titleFont = font.secondary.font
-local guiTextTitleLayer = GuiText.create({
-  font = titleFont,
   drawOrder = drawOrder
 })
 
@@ -36,14 +32,6 @@ local Sandbox = {
 }
 
 local scenes = {
-  mainGameHome = {
-    name = 'main game home screen',
-    path = 'scene.sandbox.main-game.home-screen'
-  },
-  settingsMenu = {
-    name = 'settings',
-    path = 'scene.settings-menu'
-  },
   aiTest = {
     name = 'ai',
     path = 'scene.sandbox.ai.test-scene'
@@ -63,7 +51,6 @@ local scenes = {
 }
 
 local state = {
-  activeScenePath = scenes.mainGameHome.path,
   menuOpened = false
 }
 
@@ -92,37 +79,94 @@ local function menuOptionSceneLoad(props)
 end
 
 local menuOptionQuitGame = {
-  name = 'exit game',
+  name = 'Exit',
   value = function()
     love.event.quit()
-  end
+  end,
+  onSelectSoundEnabled = false
 }
 
-local menuOptionSettingsMenu = {
-  name = 'settings',
-  value = function()
-    local Position = require 'utils.position'
+msgBus.SETTINGS_MENU_TOGGLE = 'SETTINGS_MENU_TOGGLE'
+msgBus.on(msgBus.SETTINGS_MENU_TOGGLE, function()
+  local activeMenu = Component.get('SettingsMenu')
+  if activeMenu then
+    activeMenu:delete(true)
+  else
+    -- create settings menu
     local SettingsMenu = require 'scene.settings-menu'
-    local vWidth, vHeight = love.graphics.getDimensions()
     local width, height = 240, 400
-    local x = Position.boxCenterOffset(width, height, vWidth/2, vHeight/2)
+    local menuTabs = Component.get('MainMenuTabs')
     local menu = SettingsMenu.create({
-      x = x,
-      y = 60,
+      x = menuTabs.x + menuTabs.width + 2,
+      y = menuTabs.y,
       width = width,
       height = height
     })
   end
+end)
+
+local menuOptionHomeScreen = {
+  name = 'Home Screen',
+  value = function()
+    local HomeScreen = require 'scene.sandbox.main-game.home-screen'
+    msgBus.send(msgBus.SCENE_STACK_REPLACE, {
+      scene = HomeScreen
+    })
+    msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
+    msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, true)
+  end
 }
 
+local menuOptionSettingsMenu = {
+  name = 'Settings',
+  value = function()
+    -- dont close it if it's already open
+    if Component.get('SettingsMenu') then
+      return
+    end
+    msgBus.send(msgBus.SETTINGS_MENU_TOGGLE)
+  end
+}
+
+local menuOptionPlayGameMenu = {
+  name = 'New/Load Game',
+  value = function()
+    -- dont close it if it's already open
+    if Component.get('PlayGameMenu') then
+      return
+    end
+    msgBus.send(msgBus.PLAY_GAME_MENU_TOGGLE)
+  end
+}
+
+msgBus.PLAY_GAME_MENU_TOGGLE = 'PLAY_GAME_MENU_TOGGLE'
+msgBus.on(msgBus.PLAY_GAME_MENU_TOGGLE, function()
+  local activeMenu = Component.get('PlayGameMenu')
+  if activeMenu then
+    activeMenu:delete(true)
+  else
+    -- set selected tab
+    Component.get('MainMenuTabs').value = menuOptionPlayGameMenu.value
+
+    -- create menu
+    local PlayGameMenu = require 'scene.play-game-menu'
+    local menuTabs = Component.get('MainMenuTabs')
+    local menu = PlayGameMenu.create({
+      x = menuTabs.x + menuTabs.width + 2,
+      y = menuTabs.y,
+    })
+  end
+end)
+
 local sceneOptionsNormal = {
-  menuOptionSceneLoad(scenes.mainGameHome),
+  menuOptionPlayGameMenu,
   menuOptionSettingsMenu,
+  menuOptionHomeScreen,
   menuOptionQuitGame
 }
 
 local sceneOptionsDebug = {
-  menuOptionSceneLoad(scenes.mainGameHome),
+  menuOptionPlayGameMenu,
   menuOptionSettingsMenu,
   {
     name = 'main game sandbox',
@@ -138,6 +182,7 @@ local sceneOptionsDebug = {
       })
     end
   },
+  menuOptionHomeScreen,
   menuOptionSceneLoad(scenes.aiTest),
   menuOptionSceneLoad(scenes.guiTest),
   menuOptionSceneLoad(scenes.particleTest),
@@ -163,104 +208,59 @@ require 'scene.light-test'
 require 'scene.font-test'
 require 'scene.tooltip-test'
 
-local function getMenuPosition()
-  return 200, 20
-end
-
-local function closeMenuButton(props)
-  local textContent = {
-    Color.WHITE,
-    'CLOSE'
-  }
-  local x, y = getMenuPosition()
-  return Gui.create({
-    x = x + 300,
-    y = y,
-    type = Gui.types.BUTTON,
-    inputContext = menuInputContext,
-    onClick = props.onClick,
-    onUpdate = function(self)
-      local w, h = GuiText.getTextSize(textContent, guiTextBodyLayer.font)
-      self.w, self.h = w, h
-    end,
-    draw = function(self)
-      guiTextBodyLayer:addf(
-        textContent,
-        self.w,
-        'left',
-        self.x,
-        self.y
-      )
-    end
-  })
-end
-
 function Sandbox.init(self)
-  local InputContext = require 'modules.input-context'
-
-  -- Wildcard context to match anything
-  InputContext.set('any')
-
-  local activeSceneMenu = nil
+  self.activeSceneMenu = nil
 
   local function DebugMenu(enabled)
     if enabled then
-      InputContext.set(menuInputContext)
-      local x, y = getMenuPosition()
-      activeSceneMenu = MenuList.create({
+      local MenuManager = require 'modules.menu-manager'
+      MenuManager.clearAll()
+      local x, y = getMenuTabsPosition()
+      self.activeSceneMenu = MenuList.create({
+        id = 'MainMenuTabs',
         x = x,
         y = y,
-        inputContext = menuInputContext,
+        width = 150,
         options = config.isDevelopment and sceneOptionsDebug or sceneOptionsNormal,
         onSelect = function(name, value)
-          DebugMenu(false)
           value()
         end,
         drawOrder = function()
           return drawOrder() + 2
-        end,
-        final = function()
-          InputContext.set('any')
         end
       })
-
-      closeMenuButton({
-        onClick = function()
-          DebugMenu(false)
-        end
-      }):setParent(activeSceneMenu)
-    elseif activeSceneMenu then
-      activeSceneMenu:delete(true)
-      activeSceneMenu = nil
+      msgBus.send(msgBus.PLAY_GAME_MENU_TOGGLE)
+    elseif self.activeSceneMenu then
+      self.activeSceneMenu:delete(true)
+      self.activeSceneMenu = nil
     end
     setState({ menuOpened = enabled })
   end
 
-  -- load last active scene
-  loadScene(state.activeScenePath)
+  menuOptionHomeScreen.value()
 
   self.listeners = {
-    msgBusMainMenu.on(msgBusMainMenu.TOGGLE_MAIN_MENU, function()
+    msgBusMainMenu.on(msgBusMainMenu.TOGGLE_MAIN_MENU, function(enabled)
       local MenuManager = require 'modules.menu-manager'
-      if MenuManager.hasItems() then
+      if (enabled ~= nil) then
         MenuManager.clearAll()
-        return
+        DebugMenu(enabled)
+      else
+        MenuManager.clearAll()
+        DebugMenu(not state.menuOpened)
       end
-
-      DebugMenu(not state.menuOpened)
       return state.menuOpened
     end, 1)
   }
+
+  DebugMenu(true)
 end
 
-function Sandbox.draw()
+function Sandbox.update(self)
   if state.menuOpened then
-    local x, y = getMenuPosition()
-    guiTextTitleLayer:add(config.gameTitle, Color.WHITE, x, y)
-    -- background
-    local w, h = love.graphics.getWidth() / config.scaleFactor, love.graphics.getHeight() / config.scaleFactor
-    love.graphics.setColor(0,0,0,0.9)
-    love.graphics.rectangle('fill', 0, 0, w, h)
+    Component.addToGroup(self.activeSceneMenu, 'guiDrawBox')
+  else
+    Component.removeFromGroup(self.activeSceneMenu, 'guiDrawBox')
   end
 end
 

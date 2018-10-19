@@ -50,7 +50,7 @@ local Gui = {
   -- props
   x = 1,
   y = 1,
-  inputContext = 'any',
+  inputContext = 'gui', -- the input context to set when the entity is hovered
   onClick = noop,
   onKeyPress = noop,
   onChange = noop,
@@ -171,51 +171,49 @@ function Gui.init(self)
       return msgBus.CLEANUP
     end
 
-    if InputContext.contains(self.inputContext) then
-      if guiType.LIST == self.type and
-        msgBus.MOUSE_WHEEL_MOVED == msgType and
-        self.hovered
-      then
-        handleScroll(self, msgValue[1], msgValue[2])
-      end
+    if guiType.LIST == self.type and
+      msgBus.MOUSE_WHEEL_MOVED == msgType and
+      self.hovered
+    then
+      handleScroll(self, msgValue[1], msgValue[2])
+    end
 
-      if msgBus.MOUSE_CLICKED == msgType then
-        if self.hovered then
-          local isRightClick = msgValue[3] == 2
-          self.onClick(self, isRightClick)
+    if msgBus.MOUSE_CLICKED == msgType then
+      if self.hovered then
+        local isRightClick = msgValue[3] == 2
+        self.onClick(self, isRightClick)
 
-          if guiType.TOGGLE == self.type then
-            self.checked = not self.checked
-            self.onChange(self, self.checked)
-          end
-        end
-      end
-
-      if msgBus.MOUSE_PRESSED == msgType then
-        handleFocusChange(self, self.hovered)
-      end
-
-      if self.hovered and love.mouse.isDown(1) then
-        self.onPointerDown(self)
-      end
-
-      if self.focused and guiType.TEXT_INPUT == self.type then
-        if msgBus.GUI_TEXT_INPUT == msgType then
-          local txt = msgValue
-          self.text = self.text..txt
-          self.onChange(self)
-        end
-
-        -- handle backspace for text input
-        if msgBus.KEY_DOWN == msgType and msgValue.key == 'backspace' then
-          self.text = string.sub(self.text, 1, #self.text - 1)
-          self.onChange(self)
+        if guiType.TOGGLE == self.type then
+          self.checked = not self.checked
+          self.onChange(self, self.checked)
         end
       end
     end
 
+    if msgBus.MOUSE_PRESSED == msgType then
+      handleFocusChange(self, self.hovered)
+    end
+
+    if self.hovered and love.mouse.isDown(1) then
+      self.onPointerDown(self)
+    end
+
+    if self.focused and guiType.TEXT_INPUT == self.type then
+      if msgBus.GUI_TEXT_INPUT == msgType then
+        local txt = msgValue
+        self.text = self.text..txt
+        self.onChange(self)
+      end
+
+      -- handle backspace for text input
+      if msgBus.KEY_DOWN == msgType and msgValue.key == 'backspace' then
+        self.text = string.sub(self.text, 1, #self.text - 1)
+        self.onChange(self)
+      end
+    end
+
     return msgValue
-  end)
+  end, 1)
 
   local posX, posY = self:getPosition()
   self.colObj = self:addCollisionObject(
@@ -254,6 +252,7 @@ local function handleEvents(self)
   local hasPointerPositionChanged = posX ~= self.prevColPosX or posY ~= self.prevColPosY
   if isPointerMove then
     self.onPointerMove(self, posX, posY)
+    InputContext.set(self.inputContext)
   end
 
   local hoverStateChanged = self.hovered ~= self.prevHovered
@@ -262,6 +261,7 @@ local function handleEvents(self)
       self.onPointerEnter(self)
     else
       self.onPointerLeave(self)
+      InputContext.set('any')
     end
   end
 end
@@ -271,10 +271,7 @@ function Gui.update(self, dt)
   self.colObj:update(posX, posY, self.w, self.h)
 
   self.hovered = false
-
-  if InputContext.contains(self.inputContext) then
-    handleEvents(self)
-  end
+  handleEvents(self)
 
   self.onUpdate(self, dt)
 
@@ -297,6 +294,7 @@ end
 
 function Gui.final(self)
   self.onFinal(self)
+  InputContext.set('any')
 end
 
 local drawOrderByType = {

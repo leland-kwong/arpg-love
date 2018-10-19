@@ -7,19 +7,24 @@ local Console = require 'modules.console.console'
 local color = Color.GOLDEN_PALE
 
 local StarField = {
-  speed = {5, 90},
-  sizes = {1, 2, 3, 4},
+  speed = {5, 50},
+  sizes = {1, 2, 3},
+  x = 0,
+  y = 0,
   direction = 0,
-  emissionRate = 2000,
+  emissionRate = 500,
   updateRate = 1, -- [INT] Updates the system every {x} frames. Larger values means less frequent updates
   particleLifeTime = {3, 10},
   drawColor = {1,1,1,1},
   particleBaseColor = Color.GOLDEN_PALE,
-  frameCount = 0
+  frameCount = 0,
+  preWarm = 120, -- number of frames to pre warm
 }
 
 function StarField.init(self)
   Component.addToGroup(self, 'firstLayer')
+  self.width = self.width or (love.graphics.getWidth() / config.scale)
+  self.height = self.width or (love.graphics.getHeight() / config.scale)
 
   local color = self.particleBaseColor
   self.particleColors = {
@@ -37,20 +42,19 @@ function StarField.init(self)
   psystem:setDirection(self.direction)
   psystem:setSpeed(unpack(self.speed))
   psystem:setSizes(unpack(self.sizes))
-  -- full-screen starfield
-  psystem:setEmissionArea(
-    'ellipse',
-    love.graphics.getWidth(config.gridSize) * 2,
-    love.graphics.getHeight(config.gridSize) * 4,
-    0,
-    false
-  )
   psystem:setSizeVariation(1)
   psystem:setLinearAcceleration(0, 0, 0, 0) -- Random movement in all directions.
   psystem:setColors(unpack(self.particleColors))
+  self.psystem:setEmissionArea(
+    'ellipse',
+    self.width,
+    self.height,
+    0,
+    false
+  )
 
   -- pre-warm the starfield
-  for i=1, 120 do
+  for i=1, self.preWarm do
     psystem:update(0.16)
   end
 end

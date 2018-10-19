@@ -12,7 +12,11 @@ local Position = require 'utils.position'
 local MenuList = {
   x = 0,
   y = 0,
+  width = 300,
+  height = 1,
+  padding = 10,
   group = groups.gui,
+  onSelectSound = 'built/sounds/gui/UI_SCI-FI_Tone_Deep_Dry_05_stereo.wav',
   -- table of menu options
   options = {
     {
@@ -20,7 +24,9 @@ local MenuList = {
       value = {} -- [ANY]
     }
   },
-  onSelect = nil
+  value = nil, -- selected value
+  onSelect = nil,
+  selectedBackgroundColor = {Color.multiplyAlpha(Color.PURPLE, 0.5)}
 }
 
 function MenuList.init(self)
@@ -29,7 +35,7 @@ function MenuList.init(self)
   local parent = self
   self.guiBlock = GuiBlock.create({
     x = self.x,
-    y = self.y + 30,
+    y = self.y,
     rows = {},
     drawOrder = function()
       return parent:drawOrder() + 1
@@ -39,15 +45,16 @@ function MenuList.init(self)
 end
 
 function MenuList.update(self)
-  if self.prevOptions ~= self.options then
-    local parent = self
+  local parent = self
+  local isNewOptions = self.prevOptions ~= self.options
+  if isNewOptions then
     local itemFont = font.primary.font
 
     local onSelect = self.onSelect
     local menuX = self.x
     local menuY = self.y
     local startYOffset = 10
-    local menuWidth = 300
+    local menuWidth = self.width
 
     local rows = f.map(self.options, function(options)
       local name = options.name
@@ -56,7 +63,7 @@ function MenuList.update(self)
         {
           content = content,
           width = menuWidth,
-          padding = 10,
+          padding = self.padding,
           font = itemFont,
           fontSize = itemFont:getHeight()
         }
@@ -64,35 +71,46 @@ function MenuList.update(self)
     end)
     self.guiBlock.rows = rows
 
+    -- remove interact nodes each frame
     f.forEach(self.interactNodes, function(node)
       node:delete(true)
     end)
 
+    -- recreate interact nodes
     self.interactNodes = {}
+    local totalHeight = 0
+    local maxWidth = 1 -- needs to be at least 1 so the `bump` library doesn't complain
+
     -- menu option gui nodes
-    guiBlockLayout(rows, self.x, self.y + 30, function(row, rowPosition, _, _, rowIndex)
+    guiBlockLayout(rows, self.x, self.y, function(row, rowPosition, _, _, rowIndex)
       local option = self.options[rowIndex]
       local name = option.name
       local optionValue = option.value
       local textW, textH = GuiText.getTextSize(name, itemFont)
       local lineHeight = 1.8
-      local h = (textH * lineHeight)
       local node = Gui.create({
         x = rowPosition.x,
         y = rowPosition.y,
         w = row.width,
         h = row.height,
-        inputContext = self.inputContext,
         type = Gui.types.BUTTON,
         onClick = function(self)
           onSelect(name, optionValue)
+          if (option.onSelectSoundEnabled ~= false) then
+            love.audio.play(
+              love.audio.newSource(parent.onSelectSound, 'static')
+            )
+          end
+          parent.value = option.value
         end,
         draw = function(self)
+          if (parent.value == option.value) then
+            love.graphics.setColor(parent.selectedBackgroundColor)
+            love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
+          end
           if self.hovered then
-            local sidePadding = 5
             love.graphics.setColor(1,1,0,0.5)
-            local w = self.w + (sidePadding * 2)
-            love.graphics.rectangle('fill', self.x - sidePadding, self.y, w, self.h)
+            love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
           end
         end,
         drawOrder = function()
@@ -100,7 +118,11 @@ function MenuList.update(self)
         end
       }):setParent(self)
       table.insert(self.interactNodes, node)
+      totalHeight = totalHeight + row.height
+      maxWidth = math.max(maxWidth, row.width)
     end)
+    self.width = math.max(self.width, maxWidth)
+    self.height = math.max(self.height, totalHeight)
   end
   self.prevOptions = self.options
 end

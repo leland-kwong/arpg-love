@@ -88,6 +88,7 @@ local itemNamesTooltipLayer = Gui.create({
         w = ttWidth,
         h = ttHeight,
         getMousePosition = itemMousePosition,
+        inputContext = 'loot',
         onPointerEnter = function()
           msgBus.send(msgBus.ITEM_HOVERED, itemParent)
         end,
@@ -201,6 +202,7 @@ function LootGenerator.init(self)
     y = self.y,
     w = sw,
     h = sh,
+    inputContext = 'loot',
     selected = false,
     animationComplete = false,
     onCreate = function(self)
