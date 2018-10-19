@@ -32,10 +32,6 @@ local Sandbox = {
 }
 
 local scenes = {
-  mainGameHome = {
-    name = 'Home Screen',
-    path = 'scene.sandbox.main-game.home-screen'
-  },
   aiTest = {
     name = 'ai',
     path = 'scene.sandbox.ai.test-scene'
@@ -55,7 +51,6 @@ local scenes = {
 }
 
 local state = {
-  activeScenePath = scenes.mainGameHome.path,
   menuOpened = false
 }
 
@@ -109,6 +104,18 @@ msgBus.on(msgBus.SETTINGS_MENU_TOGGLE, function()
   end
 end)
 
+local menuOptionHomeScreen = {
+  name = 'Home Screen',
+  value = function()
+    local HomeScreen = require 'scene.sandbox.main-game.home-screen'
+    msgBus.send(msgBus.SCENE_STACK_REPLACE, {
+      scene = HomeScreen
+    })
+    msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
+    msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, true)
+  end
+}
+
 local menuOptionSettingsMenu = {
   name = 'Settings',
   value = function()
@@ -119,22 +126,6 @@ local menuOptionSettingsMenu = {
     msgBus.send(msgBus.SETTINGS_MENU_TOGGLE)
   end
 }
-
-msgBus.PLAY_GAME_MENU_TOGGLE = 'PLAY_GAME_MENU_TOGGLE'
-msgBus.on(msgBus.PLAY_GAME_MENU_TOGGLE, function()
-  local activeMenu = Component.get('PlayGameMenu')
-  if activeMenu then
-    activeMenu:delete(true)
-  else
-    -- create settings menu
-    local PlayGameMenu = require 'scene.play-game-menu'
-    local menuTabs = Component.get('MainMenuTabs')
-    local menu = PlayGameMenu.create({
-      x = menuTabs.x + menuTabs.width + 2,
-      y = menuTabs.y,
-    })
-  end
-end)
 
 local menuOptionPlayGameMenu = {
   name = 'New/Load Game',
@@ -147,10 +138,29 @@ local menuOptionPlayGameMenu = {
   end
 }
 
+msgBus.PLAY_GAME_MENU_TOGGLE = 'PLAY_GAME_MENU_TOGGLE'
+msgBus.on(msgBus.PLAY_GAME_MENU_TOGGLE, function()
+  local activeMenu = Component.get('PlayGameMenu')
+  if activeMenu then
+    activeMenu:delete(true)
+  else
+    -- set selected tab
+    Component.get('MainMenuTabs').value = menuOptionPlayGameMenu.value
+
+    -- create menu
+    local PlayGameMenu = require 'scene.play-game-menu'
+    local menuTabs = Component.get('MainMenuTabs')
+    local menu = PlayGameMenu.create({
+      x = menuTabs.x + menuTabs.width + 2,
+      y = menuTabs.y,
+    })
+  end
+end)
+
 local sceneOptionsNormal = {
   menuOptionPlayGameMenu,
   menuOptionSettingsMenu,
-  menuOptionSceneLoad(scenes.mainGameHome),
+  menuOptionHomeScreen,
   menuOptionQuitGame
 }
 
@@ -171,7 +181,7 @@ local sceneOptionsDebug = {
       })
     end
   },
-  menuOptionSceneLoad(scenes.mainGameHome),
+  menuOptionHomeScreen,
   menuOptionSceneLoad(scenes.aiTest),
   menuOptionSceneLoad(scenes.guiTest),
   menuOptionSceneLoad(scenes.particleTest),
@@ -260,8 +270,7 @@ function Sandbox.init(self)
     setState({ menuOpened = enabled })
   end
 
-  -- load last active scene
-  loadScene(state.activeScenePath)
+  menuOptionHomeScreen.value()
 
   self.listeners = {
     msgBusMainMenu.on(msgBusMainMenu.TOGGLE_MAIN_MENU, function(enabled)

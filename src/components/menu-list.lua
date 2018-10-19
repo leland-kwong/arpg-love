@@ -16,6 +16,7 @@ local MenuList = {
   height = 1,
   padding = 10,
   group = groups.gui,
+  onSelectSound = 'built/sounds/gui/UI_SCI-FI_Tone_Deep_Dry_05_stereo.wav',
   -- table of menu options
   options = {
     {
@@ -23,7 +24,9 @@ local MenuList = {
       value = {} -- [ANY]
     }
   },
-  onSelect = nil
+  value = nil, -- selected value
+  onSelect = nil,
+  selectedBackgroundColor = {Color.multiplyAlpha(Color.PURPLE, 0.5)}
 }
 
 function MenuList.init(self)
@@ -42,9 +45,9 @@ function MenuList.init(self)
 end
 
 function MenuList.update(self)
+  local parent = self
   local isNewOptions = self.prevOptions ~= self.options
   if isNewOptions then
-    local parent = self
     local itemFont = font.primary.font
 
     local onSelect = self.onSelect
@@ -77,6 +80,7 @@ function MenuList.update(self)
     self.interactNodes = {}
     local totalHeight = 0
     local maxWidth = 1 -- needs to be at least 1 so the `bump` library doesn't complain
+
     -- menu option gui nodes
     guiBlockLayout(rows, self.x, self.y, function(row, rowPosition, _, _, rowIndex)
       local option = self.options[rowIndex]
@@ -92,8 +96,16 @@ function MenuList.update(self)
         type = Gui.types.BUTTON,
         onClick = function(self)
           onSelect(name, optionValue)
+          love.audio.play(
+            love.audio.newSource(parent.onSelectSound, 'static')
+          )
+          parent.value = option.value
         end,
         draw = function(self)
+          if (parent.value == option.value) then
+            love.graphics.setColor(parent.selectedBackgroundColor)
+            love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
+          end
           if self.hovered then
             love.graphics.setColor(1,1,0,0.5)
             love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
