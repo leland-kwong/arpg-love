@@ -17,16 +17,14 @@ local StarField = {
   particleLifeTime = {3, 10},
   drawColor = {1,1,1,1},
   particleBaseColor = Color.GOLDEN_PALE,
-  width = 0,
-  height = 0,
   frameCount = 0,
   preWarm = 120, -- number of frames to pre warm
 }
 
 function StarField.init(self)
   Component.addToGroup(self, 'firstLayer')
-  self.width = love.graphics.getWidth() / config.scale
-  self.height = love.graphics.getHeight() / config.scale
+  self.width = self.width or (love.graphics.getWidth() / config.scale)
+  self.height = self.width or (love.graphics.getHeight() / config.scale)
 
   local color = self.particleBaseColor
   self.particleColors = {

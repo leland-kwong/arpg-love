@@ -190,6 +190,24 @@ msgBus.on(msgBus.PLAYER_REVIVE, function()
     end)
 end)
 
+local function canPickupItem(self, item)
+  if (not item) then
+    return false
+  end
+  local calcDist = require'utils.math'.dist
+  local dist = calcDist(self.x, self.y, item.x, item.y)
+  local outOfRange = dist > self.pickupRadius
+  if outOfRange then
+    return false
+  end
+  local gridX1, gridY1 = Position.pixelsToGridUnits(self.x, self.y, config.gridSize)
+  local gridX2, gridY2 = Position.pixelsToGridUnits(item.x, item.y, config.gridSize)
+  local canWalkToItem = self.mapGrid and
+    LineOfSight(self.mapGrid, Map.WALKABLE)(gridX1, gridY1, gridX2, gridY2) or
+    (not self.mapGrid and true)
+  return canWalkToItem
+end
+
 local Player = {
   id = 'PLAYER',
   autoSave = config.autoSave,
@@ -212,6 +230,7 @@ local Player = {
     local state = {
       itemHovered = nil
     }
+    self.state = state
 
     Component.addToGroup(self, groups.character)
     self.listeners = {
@@ -311,15 +330,7 @@ local Player = {
 
       msgBus.on(msgBus.ITEM_PICKUP, function(msg)
         local item = msg
-        local calcDist = require'utils.math'.dist
-        local dist = calcDist(self.x, self.y, item.x, item.y)
-        local outOfRange = dist > self.pickupRadius
-        local gridX1, gridY1 = Position.pixelsToGridUnits(self.x, self.y, config.gridSize)
-        local gridX2, gridY2 = Position.pixelsToGridUnits(item.x, item.y, config.gridSize)
-        local canWalkToItem = self.mapGrid and
-          LineOfSight(self.mapGrid, Map.WALKABLE)(gridX1, gridY1, gridX2, gridY2) or
-          (not self.mapGrid and true)
-        if canWalkToItem and (not outOfRange) then
+        if canPickupItem(self, item) then
           local pickupSuccess = item:pickup()
           if pickupSuccess then
             msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, true)
@@ -488,7 +499,12 @@ local function handleAbilities(self, dt)
     return
   end
 
-  if InputContext.contains('any') then
+  local canUseAbility = InputContext.contains('any') or
+    (
+      InputContext.contains('loot') and
+      (not canPickupItem(self, self.state.itemHovered))
+    )
+  if canUseAbility then
     -- SKILL_1
     local isSkill1Activate = love.keyboard.isDown(keyMap.SKILL_1) or
       love.mouse.isDown(mouseInputMap.SKILL_1)

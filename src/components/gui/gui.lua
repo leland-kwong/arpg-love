@@ -50,6 +50,7 @@ local Gui = {
   -- props
   x = 1,
   y = 1,
+  inputContext = 'gui', -- the input context to set when the entity is hovered
   onClick = noop,
   onKeyPress = noop,
   onChange = noop,
@@ -251,7 +252,7 @@ local function handleEvents(self)
   local hasPointerPositionChanged = posX ~= self.prevColPosX or posY ~= self.prevColPosY
   if isPointerMove then
     self.onPointerMove(self, posX, posY)
-    InputContext.set('gui')
+    InputContext.set(self.inputContext)
   end
 
   local hoverStateChanged = self.hovered ~= self.prevHovered

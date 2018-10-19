@@ -208,33 +208,6 @@ require 'scene.light-test'
 require 'scene.font-test'
 require 'scene.tooltip-test'
 
-local function closeMenuButton(props)
-  local textContent = {
-    Color.WHITE,
-    'CLOSE'
-  }
-  local x, y = getMenuTabsPosition()
-  return Gui.create({
-    x = x + 400,
-    y = y,
-    type = Gui.types.BUTTON,
-    onClick = props.onClick,
-    onUpdate = function(self)
-      local w, h = GuiText.getTextSize(textContent, guiTextBodyLayer.font)
-      self.w, self.h = w, h
-    end,
-    draw = function(self)
-      guiTextBodyLayer:addf(
-        textContent,
-        self.w,
-        'left',
-        self.x,
-        self.y
-      )
-    end
-  })
-end
-
 function Sandbox.init(self)
   self.activeSceneMenu = nil
 
@@ -257,13 +230,6 @@ function Sandbox.init(self)
         end
       })
       msgBus.send(msgBus.PLAY_GAME_MENU_TOGGLE)
-
-      closeMenuButton({
-        onClick = function()
-          MenuManager.clearAll()
-          DebugMenu(false)
-        end
-      }):setParent(self.activeSceneMenu)
     elseif self.activeSceneMenu then
       self.activeSceneMenu:delete(true)
       self.activeSceneMenu = nil
