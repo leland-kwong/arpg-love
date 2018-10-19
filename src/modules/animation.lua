@@ -131,6 +131,12 @@ function meta:update(dt)
 
   local frameKey = self.aniFrames[self.index]
   self.frame = self.frameData[frameKey]
+
+  local missingFrame = not self.frame
+  if (missingFrame) then
+    error('missing animation frame `'..frameKey..'`')
+  end
+
   local pad = self.pad
   local sprite = spriteCache:get(frameKey)
   if (not sprite) then

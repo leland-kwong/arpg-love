@@ -106,6 +106,10 @@ local function NewGameButton(parent)
     y = parent.innerY + 250,
     padding = 5,
     onClick = function(self)
+      local HomeScreen = require('scene.sandbox.main-game.home-screen')
+      msgBus.send(msgBus.SCENE_STACK_REPLACE, {
+        scene = HomeScreen
+      })
       NewGameDialog.create({
         onNewGameEnter = function()
           parent:delete(true)

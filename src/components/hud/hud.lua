@@ -152,7 +152,7 @@ function Hud.init(self)
   }):setParent(self)
 
   local spacing = 32
-  local endXPos = 340
+  local endXPos = 350
 
   local skillSetup = {
     {
@@ -211,7 +211,7 @@ function Hud.init(self)
 
   local MenuButtons = require 'components.hud.menu-buttons'
   MenuButtons.create({
-    x = energyStatusBar.x + energyStatusBar.w + 15,
+    x = energyStatusBar.x + energyStatusBar.w + 5,
     y = winHeight - 30
   }):setParent(self)
 end
