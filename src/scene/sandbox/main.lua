@@ -129,7 +129,7 @@ local menuOptionSettingsMenu = {
 }
 
 local menuOptionPlayGameMenu = {
-  name = 'New/Load Game',
+  name = 'Play Game',
   value = function()
     -- dont close it if it's already open
     if Component.get('PlayGameMenu') then
