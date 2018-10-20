@@ -39,6 +39,8 @@ local Camera = function()
   end
 
   function camera:setPosition(x, y, _lerpDuration)
+    local round = require 'utils.math'.round
+    x, y = round(x), round(y)
     lerpDuration = _lerpDuration or 0
     if (lerpDuration > 0) then
       targetPosition.x = x

@@ -84,27 +84,25 @@ end
 return function()
   local animations = {
     moving = animationFactory:new({
+      'melee-bot/melee-bot-0',
       'melee-bot/melee-bot-1',
       'melee-bot/melee-bot-2',
       'melee-bot/melee-bot-3',
       'melee-bot/melee-bot-4',
       'melee-bot/melee-bot-5',
       'melee-bot/melee-bot-6',
-      'melee-bot/melee-bot-7',
     }),
     idle = animationFactory:new({
+      'melee-bot/melee-bot-7',
       'melee-bot/melee-bot-8',
       'melee-bot/melee-bot-9',
       'melee-bot/melee-bot-10',
+    }),
+    attacking = animationFactory:new({
       'melee-bot/melee-bot-11',
       'melee-bot/melee-bot-12',
       'melee-bot/melee-bot-13',
-    }),
-    attacking = animationFactory:new({
       'melee-bot/melee-bot-14',
-      'melee-bot/melee-bot-15',
-      'melee-bot/melee-bot-16',
-      'melee-bot/melee-bot-17',
     })
   }
 

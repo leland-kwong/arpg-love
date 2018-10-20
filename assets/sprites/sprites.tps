@@ -652,8 +652,6 @@
             <key type="filename">custom-art/characters/melee-bot/melee-bot-12.png</key>
             <key type="filename">custom-art/characters/melee-bot/melee-bot-13.png</key>
             <key type="filename">custom-art/characters/melee-bot/melee-bot-14.png</key>
-            <key type="filename">custom-art/characters/melee-bot/melee-bot-15.png</key>
-            <key type="filename">custom-art/characters/melee-bot/melee-bot-16.png</key>
             <key type="filename">custom-art/characters/melee-bot/melee-bot-2.png</key>
             <key type="filename">custom-art/characters/melee-bot/melee-bot-3.png</key>
             <key type="filename">custom-art/characters/melee-bot/melee-bot-4.png</key>
@@ -704,7 +702,7 @@
             <key type="filename">custom-art/characters/player/character-9.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
+                <point_f>0.5,0.666667</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>

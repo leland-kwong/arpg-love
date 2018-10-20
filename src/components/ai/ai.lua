@@ -406,7 +406,7 @@ function Ai.update(self, dt)
       40 * self.gridSize
     )
 
-    self.animation:update(dt / 12)
+    self.animation:update(dt / 6)
   end
 
   local actualSightRadius = self:getCalculatedStat('sightRadius')
@@ -478,9 +478,9 @@ local function drawShadow(self, h, w, ox, oy)
     animationFactory.atlas,
     self.animation.sprite,
     self.x,
-    self.y + (h * self.scale / 1.3),
+    self.y + (h * self.scale / 1.5),
     0,
-    self.scale*0.9 * self.facingDirectionX - heightScaleDiff,
+    self.scale*0.8 * self.facingDirectionX - heightScaleDiff,
     -self.scale/2 + heightScaleDiff,
     ox,
     oy
@@ -515,17 +515,18 @@ local function drawStatusEffects(self, statusIcons)
 end
 
 function drawSprite(self, ox, oy)
+  local round = require 'utils.math'.round
   local atlas = animationFactory.atlas
   love.graphics.draw(
     atlas,
     self.animation.sprite,
-    self.x,
-    self.y - self.z,
+    round(self.x),
+    round(self.y - self.z),
     0,
     self.scale * self.facingDirectionX,
     self.scale,
-    ox,
-    oy
+    round(ox),
+    round(oy)
   )
 end
 
@@ -661,18 +662,6 @@ function Ai.init(self)
   self.animation = self.animations.idle:update(math.random(0, 20) * 1/60)
 
   setupAbilities(self)
-
-  if scale % 1 == 0 then
-    -- to prevent wall collision from getting stuck when pathing around corners, we'll adjust
-    -- the agent size so its slightly smaller than the grid size.
-    scale = scale - (2 / gridSize)
-  end
-
-  local scale = scale or 1
-  local size = gridSize * scale
-  if self.scale % 1 == 0 then
-    self.scale = self.scale - 0.1
-  end
 
   local ox, oy = self.animation:getOffset()
   self.collision = self:addCollisionObject(
