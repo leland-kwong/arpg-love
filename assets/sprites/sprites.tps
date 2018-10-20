@@ -605,6 +605,10 @@
             <key type="filename">custom-art/effects/floor-crack-1.png</key>
             <key type="filename">custom-art/effects/floor-crack-2.png</key>
             <key type="filename">custom-art/effects/floor-crack-3.png</key>
+            <key type="filename">custom-art/gui/gui-home-button--hover.png</key>
+            <key type="filename">custom-art/gui/gui-home-button.png</key>
+            <key type="filename">custom-art/gui/gui-inventory-button--hover.png</key>
+            <key type="filename">custom-art/gui/gui-inventory-button.png</key>
             <key type="filename">custom-art/items/weapons/weapon-modules/item-upgrade-placeholder-locked.png</key>
             <key type="filename">custom-art/items/weapons/weapon-modules/item-upgrade-placeholder-unlocked.png</key>
             <struct type="IndividualSpriteSettings">
@@ -631,13 +635,42 @@
             <key type="filename">custom-art/characters/ai-1/ai-9.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.45</point_f>
+                <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>6,6,12,11</rect>
+                <rect>6,5,12,10</rect>
                 <key>scale9Paddings</key>
-                <rect>6,6,12,11</rect>
+                <rect>6,5,12,10</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-0.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-1.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-10.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-11.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-12.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-13.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-14.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-15.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-16.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-2.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-3.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-4.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-5.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-6.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-7.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-8.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-9.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>7,8,14,16</rect>
+                <key>scale9Paddings</key>
+                <rect>7,8,14,16</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -671,7 +704,7 @@
             <key type="filename">custom-art/characters/player/character-9.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.666667</point_f>
+                <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -699,13 +732,26 @@
             <key type="filename">custom-art/characters/slime/slime9.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.203125,0.555556</point_f>
+                <point_f>0.25,0.611111</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>18,10,35,20</rect>
+                <rect>16,9,32,18</rect>
                 <key>scale9Paddings</key>
-                <rect>18,10,35,20</rect>
+                <rect>16,9,32,18</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/characters/turret/turret.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>7,11,14,22</rect>
+                <key>scale9Paddings</key>
+                <rect>7,11,14,22</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -918,7 +964,6 @@
         </map>
         <key>fileList</key>
         <array>
-            <filename>custom-art/characters/player</filename>
             <filename>custom-art/fireball.png</filename>
             <filename>custom-art/tiles</filename>
             <filename>custom-art/primitives</filename>
@@ -929,15 +974,13 @@
             <filename>custom-art/bullet-1.png</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/amulets</filename>
             <filename>custom-art/items/weapons/pods</filename>
-            <filename>custom-art/characters/ai-1</filename>
-            <filename>custom-art/characters/slime</filename>
-            <filename>custom-art/characters/eyeball</filename>
             <filename>custom-art/status-effect-icons</filename>
             <filename>custom-art/spells</filename>
             <filename>custom-art/items/weapons/weapon-modules</filename>
             <filename>custom-art/effects</filename>
-            <filename>custom-art/characters/ai-legendaries</filename>
             <filename>custom-art/items/augmentations</filename>
+            <filename>custom-art/characters</filename>
+            <filename>custom-art/gui</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

@@ -132,31 +132,31 @@ local getRandomProps = Chance({
 return function()
   local animations = {
     attacking = animationFactory:new({
-      'slime1',
-      'slime2',
-      'slime3',
-      'slime4',
-      'slime5',
-      'slime6',
-      'slime7',
-      'slime8',
-      'slime9',
-      'slime10',
-      'slime11',
+      'slime/slime1',
+      'slime/slime2',
+      'slime/slime3',
+      'slime/slime4',
+      'slime/slime5',
+      'slime/slime6',
+      'slime/slime7',
+      'slime/slime8',
+      'slime/slime9',
+      'slime/slime10',
+      'slime/slime11',
     }),
     idle = animationFactory:new({
-      'slime12',
-      'slime13',
-      'slime14',
-      'slime15',
-      'slime16'
+      'slime/slime12',
+      'slime/slime13',
+      'slime/slime14',
+      'slime/slime15',
+      'slime/slime16'
     }),
     moving = animationFactory:new({
-      'slime12',
-      'slime13',
-      'slime14',
-      'slime15',
-      'slime16'
+      'slime/slime12',
+      'slime/slime13',
+      'slime/slime14',
+      'slime/slime15',
+      'slime/slime16'
     })
   }
 

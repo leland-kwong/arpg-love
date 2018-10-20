@@ -387,17 +387,17 @@ local Player = {
 
     self.animations = {
       idle = animationFactory:new({
-        'character-1',
-        'character-8',
-        'character-9',
-        'character-10',
-        'character-11'
+        'player/character-1',
+        'player/character-8',
+        'player/character-9',
+        'player/character-10',
+        'player/character-11'
       }),
       run = animationFactory:new({
-        'character-15',
-        'character-16',
-        'character-17',
-        'character-18',
+        'player/character-15',
+        'player/character-16',
+        'player/character-17',
+        'player/character-18',
       })
     }
 

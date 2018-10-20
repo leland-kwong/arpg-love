@@ -64,10 +64,10 @@ return function(props)
 
   local animations = {
     idle = animationFactory:new({
-      'legendary-1/legendary-ai-1'
+      'ai-legendaries/legendary-1/legendary-ai-1'
     }),
     moving = animationFactory:new({
-      'legendary-1/legendary-ai-1'
+      'ai-legendaries/legendary-1/legendary-ai-1'
     })
   }
   local spriteWidth, spriteHeight = animations.idle:getSourceSize()

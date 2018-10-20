@@ -54,10 +54,10 @@ end
 return function()
   local animations = {
     idle = animationFactory:new({
-      'eyeball'
+      'eyeball/eyeball'
     }),
     moving = animationFactory:new({
-      'eyeball'
+      'eyeball/eyeball'
     })
   }
 

@@ -47,18 +47,18 @@ end
 return function()
   local animations = {
     moving = animationFactory:new({
-      'ai-1',
-      'ai-2',
-      'ai-3',
-      'ai-4',
-      'ai-5',
-      'ai-6',
+      'ai-1/ai-1',
+      'ai-1/ai-2',
+      'ai-1/ai-3',
+      'ai-1/ai-4',
+      'ai-1/ai-5',
+      'ai-1/ai-6',
     }),
     idle = animationFactory:new({
-      'ai-7',
-      'ai-8',
-      'ai-9',
-      'ai-10'
+      'ai-1/ai-7',
+      'ai-1/ai-8',
+      'ai-1/ai-9',
+      'ai-1/ai-10'
     })
   }
 
