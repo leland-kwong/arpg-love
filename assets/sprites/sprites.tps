@@ -715,11 +715,6 @@
             <key type="filename">custom-art/characters/slime/slime1.png</key>
             <key type="filename">custom-art/characters/slime/slime10.png</key>
             <key type="filename">custom-art/characters/slime/slime11.png</key>
-            <key type="filename">custom-art/characters/slime/slime12.png</key>
-            <key type="filename">custom-art/characters/slime/slime13.png</key>
-            <key type="filename">custom-art/characters/slime/slime14.png</key>
-            <key type="filename">custom-art/characters/slime/slime15.png</key>
-            <key type="filename">custom-art/characters/slime/slime16.png</key>
             <key type="filename">custom-art/characters/slime/slime2.png</key>
             <key type="filename">custom-art/characters/slime/slime3.png</key>
             <key type="filename">custom-art/characters/slime/slime4.png</key>
@@ -731,6 +726,23 @@
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.25,0.611111</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,9,32,18</rect>
+                <key>scale9Paddings</key>
+                <rect>16,9,32,18</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/characters/slime/slime12.png</key>
+            <key type="filename">custom-art/characters/slime/slime13.png</key>
+            <key type="filename">custom-art/characters/slime/slime14.png</key>
+            <key type="filename">custom-art/characters/slime/slime15.png</key>
+            <key type="filename">custom-art/characters/slime/slime16.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.234375,0.611111</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>

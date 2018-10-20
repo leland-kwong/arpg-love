@@ -51,7 +51,8 @@ function DashAbility.use(self)
   local Dash = require 'components.abilities.dash'
   local projectile = Dash.create({
       fromCaster = self
-    , duration = 7/60
+    , duration = 10/60
+    , speed = 200
   })
   return skill
 end
@@ -59,7 +60,7 @@ end
 local SlimeSlap =  {
   range = 3,
   attackTime = 0.4,
-  cooldown = 0.5
+  cooldown = 0.6
 }
 
 function SlimeSlap.use(self, state, targetX, targetY)
@@ -179,7 +180,7 @@ return function()
       dropRate = 30
     },
     dataSheet = dataSheet,
-    moveSpeed = 105,
+    moveSpeed = 100,
     maxHealth = 25,
     w = spriteWidth,
     h = spriteHeight,

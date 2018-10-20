@@ -1,6 +1,8 @@
 local Component = require 'modules.component'
 local animationFactory = require 'components.animation-factory'
 local debounce = require 'modules.debounce'
+local msgBus = require 'components.msg-bus'
+local collisionWorlds = require 'components.collision-worlds'
 local collisionGroups = require 'modules.collision-groups'
 
 local function onDestroyStart()
@@ -14,10 +16,8 @@ end
 
 local PunchAttack = Component.createFactory({
   group = Component.groups.all,
-  minDamage = 5,
-  maxDamage = 10,
-  itemLevel = 1,
-  attackTime = 0.2,
+  minDamage = 2,
+  maxDamage = 4,
   init = function(self)
     local items, len = collisionWorlds.map:queryRect(
       self.x2 - self.w/2,
@@ -39,7 +39,13 @@ local PunchAttack = Component.createFactory({
   end
 })
 
-function PunchAttack.use(self, state, targetX, targetY)
+local PunchAbility = {
+  range = 1.5,
+  attackTime = 0.3,
+  cooldown = 0.5
+}
+
+function PunchAbility.use(self, state, targetX, targetY)
   state.isNewAttack = true
   local attack = PunchAttack.create({
       x = self.x
@@ -51,13 +57,11 @@ function PunchAttack.use(self, state, targetX, targetY)
     , targetGroup = collisionGroups.player
   })
 
-  local Sound = require 'components.sound'
-  love.audio.stop(Sound.SLIME_SPLAT)
-  love.audio.play(Sound.SLIME_SPLAT)
-  return skill
+  local sound = love.audio.newSource('built/sounds/ROBOTIC_Servo_Medium_Mid-Movement_mono.wav', 'static')
+  love.audio.play(sound)
 end
 
-function PunchAttack.update(self, state, dt)
+function PunchAbility.update(self, state, dt)
   local isNewAttack = curCooldown == initialCooldown
   local attackAnimation = self.animations.attacking
   if state.isNewAttack then
@@ -70,7 +74,7 @@ function PunchAttack.update(self, state, dt)
       'animation',
       attackAnimation
     )
-    local animation, isLastFrame = attackAnimation:update(dt/2)
+    local animation, isLastFrame = attackAnimation:update(dt/24)
     state.isAnimationComplete = isLastFrame
   else
     self:set(
@@ -78,7 +82,6 @@ function PunchAttack.update(self, state, dt)
       self.animations.idle
     )
   end
-  return skill
 end
 
 return function()
@@ -106,7 +109,7 @@ return function()
     })
   }
 
-  local attackRange = 8
+  local attackRange = 1.5
   local spriteWidth, spriteHeight = animations.idle:getSourceSize()
   local dataSheet = {
     name = 'punch-bot',
@@ -118,7 +121,7 @@ return function()
   return {
     dataSheet = dataSheet,
     armor = 250,
-    moveSpeed = 120,
+    moveSpeed = 130,
     maxHealth = 20,
     itemData = {
       level = 1,
@@ -129,7 +132,7 @@ return function()
     h = spriteHeight,
     animations = animations,
     abilities = {
-      -- PunchAttack
+      PunchAbility
     },
     attackRange = attackRange,
     fillColor = fillColor,

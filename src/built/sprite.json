@@ -4588,7 +4588,7 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":9,"w":27,"h":27},
 	"sourceSize": {"w":27,"h":27},
-	"pivot": {"x":0.592593,"y":0.481481}
+	"pivot": {"x":0.555556,"y":0.481481}
 },
 "slime/slime13":
 {
@@ -4597,7 +4597,7 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":10,"w":27,"h":26},
 	"sourceSize": {"w":27,"h":26},
-	"pivot": {"x":0.592593,"y":0.461538}
+	"pivot": {"x":0.555556,"y":0.461538}
 },
 "slime/slime14":
 {
@@ -4606,7 +4606,7 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":9,"w":27,"h":27},
 	"sourceSize": {"w":27,"h":27},
-	"pivot": {"x":0.592593,"y":0.481481}
+	"pivot": {"x":0.555556,"y":0.481481}
 },
 "slime/slime15":
 {
@@ -4615,7 +4615,7 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":8,"w":27,"h":28},
 	"sourceSize": {"w":27,"h":28},
-	"pivot": {"x":0.592593,"y":0.5}
+	"pivot": {"x":0.555556,"y":0.5}
 },
 "slime/slime16":
 {
@@ -4624,7 +4624,7 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":7,"w":27,"h":29},
 	"sourceSize": {"w":27,"h":29},
-	"pivot": {"x":0.592593,"y":0.517241}
+	"pivot": {"x":0.555556,"y":0.517241}
 },
 "status-slow":
 {
@@ -4849,6 +4849,6 @@
 	"format": "RGBA8888",
 	"size": {"w":128,"h":1402},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:79c8d5b681321f9f39a9c1303b82deef:5a22b9ed1ff9e296a4035ce30cf8b4e2:68d88b3cf7eafc9b5accfffdfb2fda91$"
+	"smartupdate": "$TexturePacker:SmartUpdate:3010005ec9b9c371ecf1b4b394012f4f:5a22b9ed1ff9e296a4035ce30cf8b4e2:68d88b3cf7eafc9b5accfffdfb2fda91$"
 }
 }

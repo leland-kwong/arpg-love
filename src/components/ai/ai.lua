@@ -343,6 +343,8 @@ function Ai.update(self, dt)
     return
   end
 
+  -- reset list of neighbors each frame
+  self.neighbors = nil
   handleAggro(self)
 
   local isIdle = (self:getFiniteState() ~= states.MOVING) and (not self.isInViewOfPlayer) and (not self.isAggravated)

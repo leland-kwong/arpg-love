@@ -47,7 +47,6 @@ function FrostShot.use(self, _, targetX, targetY)
     end
   })
   playFrostShotSound()
-  return skill
 end
 
 
@@ -82,7 +81,7 @@ return function()
     },
     heightOffset = math.random(0, heightChange),
     heightChange = heightChange,
-    moveSpeed = 100,
+    moveSpeed = 115,
     maxHealth = 17,
     experience = 1,
     w = spriteWidth,
