@@ -431,15 +431,17 @@ function Ai.update(self, dt)
     local ability = abilities[i]
     ability:update(self, dt)
     if (not self.silenced) then
-      if ability.isRecovering then
-        self.isAbilityRecovering = true
-      end
-      local canUseAbility = (not self.abilityIsRecovering)
+      local canUseAbility = (not self.isAbilityRecovering)
         and (self:getFiniteState() == states.MOVING)
       if canUseAbility then
         -- execute ability and get new attack recovery time
         ability:use(self, targetX, targetY, distFromTarget)
       end
+    end
+    -- we must check for this after using the ability so the recovery state is set
+    -- for the next ability
+    if ability.isRecovering then
+      self.isAbilityRecovering = true
     end
   end
 
