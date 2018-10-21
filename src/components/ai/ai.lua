@@ -311,7 +311,7 @@ function Ai.getFiniteState(self)
     return states.FREE_MOVING
   end
 
-  if self.attackRecoveryTime > 0 then
+  if self.isAbilityRecovering then
     return states.ATTACKING
   end
 
@@ -378,7 +378,6 @@ function Ai.update(self, dt)
   local grid = self.grid
   self.clock = self.clock + dt
   self.frameCount = self.frameCount + 1
-  self.attackRecoveryTime = self.attackRecoveryTime - dt
 
   if self.onUpdateStart then
     self.onUpdateStart(self, dt)
@@ -408,7 +407,7 @@ function Ai.update(self, dt)
       40 * self.gridSize
     )
 
-    self.animation:update(dt / 6)
+    self.animation:update(dt)
   end
 
   local actualSightRadius = self:getCalculatedStat('sightRadius')
@@ -422,44 +421,46 @@ function Ai.update(self, dt)
   self.canSeeTarget = canSeeTarget
 
   if canSeeTarget and (isInAggroRange or self.isAggravated) then
-    local path
-    local gridX, gridY = self.pxToGridUnits(self.x, self.y, self.gridSize)
     self.targetX, self.targetY = targetX, targetY
+  end
 
-    -- use abilities
+  -- use abilities
+  self.isAbilityRecovering = false
+  local abilities = self.abilities
+  for i=1, #abilities do
+    local ability = abilities[i]
+    ability:update(self, dt)
     if (not self.silenced) then
-      local abilities = self.abilities
-      for i=1, #abilities do
-        local ability = abilities[i]
-        -- local isInAbilityRange = distFromTarget <= ability.range * self.gridSize
-        local isRecoveringFromAttack = self.attackRecoveryTime > 0
-        local finiteState = self:getFiniteState()
-        local canUseAbility = (not isRecoveringFromAttack)
-          and (finiteState == states.MOVING)
-        ability:update(self, dt)
-        if canUseAbility then
-          -- execute ability and get new attack recovery time
-          local recoveryTime = ability:use(self, targetX, targetY, distFromTarget)
-          self.attackRecoveryTime = recoveryTime
-        end
+      if ability.isRecovering then
+        self.isAbilityRecovering = true
+      end
+      local canUseAbility = (not self.abilityIsRecovering)
+        and (self:getFiniteState() == states.MOVING)
+      if canUseAbility then
+        -- execute ability and get new attack recovery time
+        ability:use(self, targetX, targetY, distFromTarget)
       end
     end
-
-    self.isInAttackRange = isInAttackRange
-    local isTargetStillAtLastKnownPosition = self.targetX == targetX and self.targetY == targetY
-    if isInAttackRange and isTargetStillAtLastKnownPosition then
-      -- we're already in attack range, so we can stop the update here since the rest of the update is just moving
-      return
-    end
   end
-  if self.targetX and (self:getFiniteState() ~= states.ATTACKING) then
+
+  self.isInAttackRange = isInAttackRange
+  local isTargetStillAtLastKnownPosition = self.targetX == targetX and self.targetY == targetY
+  if isInAttackRange and isTargetStillAtLastKnownPosition then
+    -- we're already in attack range, so we can stop the update here since the rest of the update is just moving
+    return
+  end
+
+  local hasTarget = not not self.targetX
+  if hasTarget and (self:getFiniteState() ~= states.ATTACKING) then
     setNextPosition(self, self:getActualSpeed(dt), 40)
   end
 
   local nextX, nextY = self.x, self.y
 
-  local isMoving = originalX ~= nextX or originalY ~= nextY
-  self.animation = isMoving and self.animations.moving or self.animations.idle
+  if (self:getFiniteState() ~= states.ATTACKING) then
+    local isMoving = originalX ~= nextX or originalY ~= nextY
+    self.animation = isMoving and self.animations.moving or self.animations.idle
+  end
 end
 
 local perf = require'utils.perf'
@@ -665,7 +666,7 @@ function Ai.init(self)
 
   setupAbilities(self)
 
-  local ox, oy = self.animation:getOffset()
+  local ox, oy = self.animation:getSourceOffset()
   self.collision = self:addCollisionObject(
       collisionGroups.ai,
       self.x,

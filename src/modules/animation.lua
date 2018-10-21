@@ -38,13 +38,13 @@ function meta:new(aniFrames)
     timePerFrame = 1 / self.frameRate,
     frame = nil,
     time = 0, -- animation time
-    index = 1 -- frame index
+    index = 1, -- frame index
   }
   setmetatable(animation, self)
   self.__index = self
 
   -- set initial frame
-  animation:update(0)
+  animation:setFrame(1)
   return animation
 end
 
@@ -62,6 +62,35 @@ local max = math.max
 function meta:setFrame(index)
   self.index = index
   self.time = 0
+
+  local frameKey = self.aniFrames[self.index]
+  self.frame = self.frameData[frameKey]
+
+  local missingFrame = not self.frame
+  if (missingFrame) then
+    error('missing animation frame `'..frameKey..'`')
+  end
+
+  local pad = self.pad
+  local sprite = spriteCache:get(frameKey)
+  if (not sprite) then
+    sprite = love.graphics.newQuad(
+      self.frame.frame.x - pad,
+      self.frame.frame.y - pad,
+      self.frame.sourceSize.w + (pad * 2),
+      self.frame.spriteSourceSize.h + (pad * 2),
+      self.atlas:getDimensions()
+    )
+    spriteCache:set(frameKey, sprite)
+  end
+  self.sprite = sprite
+  self.lastIndex = self.index
+
+  return self
+end
+
+function meta:setDuration(duration)
+  self.timePerFrame = duration / self.numFrames
   return self
 end
 
@@ -103,8 +132,14 @@ function meta:getWidth()
   return self.frame.sourceSize.w
 end
 
+function meta:isLastFrame()
+  return self.index == self.numFrames
+end
+
 -- increments the animation by the time amount
-function meta:update(dt)
+function meta:update(dt, data)
+  self.time = self.time + dt
+
   if self.numFrames > 1 then
     -- whether we should move forward or backward in the animation
     local direction = dt > 0 and 1 or -1
@@ -122,36 +157,13 @@ function meta:update(dt)
     end
   end
 
-  self.time = self.time + dt
-  local isLastFrame = frameKey == self.aniFrames[self.numFrames]
   local isSameFrame = self.index == self.lastIndex
   if isSameFrame then
-    return self, isLastFrame
+    return self
   end
 
-  local frameKey = self.aniFrames[self.index]
-  self.frame = self.frameData[frameKey]
-
-  local missingFrame = not self.frame
-  if (missingFrame) then
-    error('missing animation frame `'..frameKey..'`')
-  end
-
-  local pad = self.pad
-  local sprite = spriteCache:get(frameKey)
-  if (not sprite) then
-    sprite = love.graphics.newQuad(
-      self.frame.frame.x - pad,
-      self.frame.frame.y - pad,
-      self.frame.sourceSize.w + (pad * 2),
-      self.frame.spriteSourceSize.h + (pad * 2),
-      self.atlas:getDimensions()
-    )
-    spriteCache:set(frameKey, sprite)
-  end
-  self.sprite = sprite
-  self.lastIndex = self.index
-  return self, isLastFrame
+  self:setFrame(self.index)
+  return self
 end
 
 function meta:getSpriteSize(spriteName, includePadding)

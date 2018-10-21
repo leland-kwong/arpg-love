@@ -41,47 +41,54 @@ local PunchAttack = Component.createFactory({
 
 local PunchAbility = {
   range = 1.5,
-  attackTime = 0.3,
-  cooldown = 0.5
+  attackTime = 0.5,
+  cooldown = 0.3
 }
 
 function PunchAbility.use(self, state, targetX, targetY)
+  state.targetX = targetX
+  state.targetY = targetY
   state.isNewAttack = true
-  local attack = PunchAttack.create({
-      x = self.x
-    , y = self.y
-    , x2 = targetX
-    , y2 = targetY
-    , w = 64
-    , h = 36
-    , targetGroup = collisionGroups.player
-  })
-
   local sound = love.audio.newSource('built/sounds/ROBOTIC_Servo_Medium_Mid-Movement_mono.wav', 'static')
   love.audio.play(sound)
 end
 
+-- returns [BOOLEAN] - status about whether ability is still animating
 function PunchAbility.update(self, state, dt)
-  local isNewAttack = curCooldown == initialCooldown
   local attackAnimation = self.animations.attacking
   if state.isNewAttack then
-    state.isNewAttack = false
-    state.isAnimationComplete = false
+    state.hasHit = false
     attackAnimation:setFrame(1)
   end
-  if (not state.isAnimationComplete) then
+  if (state.isNewAttack or state.isAnimating) then
+    state.isNewAttack = false
     self:set(
       'animation',
       attackAnimation
     )
-    local animation, isLastFrame = attackAnimation:update(dt/24)
-    state.isAnimationComplete = isLastFrame
+    local isLastFrame = attackAnimation:isLastFrame()
+    local isHitFrame = attackAnimation.index == 4
+    if isHitFrame and (not state.hasHit) then
+      state.hasHit = true
+      local attack = PunchAttack.create({
+          x = self.x
+        , y = self.y
+        , x2 = state.targetX
+        , y2 = state.targetY
+        , w = 16
+        , h = 16
+        , targetGroup = collisionGroups.player
+      })
+    end
+    state.isAnimating = (not isLastFrame)
+    return state.isAnimating
   else
     self:set(
       'animation',
       self.animations.idle
     )
   end
+  return false
 end
 
 return function()
@@ -94,19 +101,24 @@ return function()
       'melee-bot/melee-bot-4',
       'melee-bot/melee-bot-5',
       'melee-bot/melee-bot-6',
-    }),
+    }):setDuration(0.5),
     idle = animationFactory:new({
       'melee-bot/melee-bot-7',
       'melee-bot/melee-bot-8',
       'melee-bot/melee-bot-9',
       'melee-bot/melee-bot-10',
-    }),
+    }):setDuration(1),
     attacking = animationFactory:new({
       'melee-bot/melee-bot-11',
       'melee-bot/melee-bot-12',
       'melee-bot/melee-bot-13',
+      -- hit frame
       'melee-bot/melee-bot-14',
-    })
+      'melee-bot/melee-bot-14',
+      -- recovery frames
+      'melee-bot/melee-bot-13',
+      'melee-bot/melee-bot-12',
+    }):setDuration(PunchAbility.attackTime)
   }
 
   local attackRange = 1.5
