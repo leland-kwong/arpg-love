@@ -168,6 +168,17 @@ local function getMenuOptions(parent)
               end)
           -- load game
           else
+            local msgFilters = {
+              PLAYER_FULL_HEAL = true,
+              EQUIPMENT_CHANGED = true,
+              ITEM_EQUIPPED = true
+            }
+            msgBus.on('*', function(_, msgType)
+              if msgFilters[msgType] then
+                print(msgType, Time())
+              end
+            end)
+
             local CreateStore = require 'components.state.state'
             local loadedState = fileSystem.loadSaveFile('saved-states', fileData.id)
             msgBus.send(
@@ -177,6 +188,7 @@ local function getMenuOptions(parent)
                 props = loadedState
               }
             )
+            msgBus.send(msgBus.PLAYER_FULL_HEAL)
             msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
             parent:delete(true)
           end

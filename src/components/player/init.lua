@@ -178,16 +178,24 @@ msgBusMainMenu.on(msgBusMainMenu.TOGGLE_MAIN_MENU, function(menuOpened)
   msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, menuOpened)
 end)
 
-msgBus.PLAYER_REVIVE = 'PLAYER_REVIVE'
-msgBus.on(msgBus.PLAYER_REVIVE, function()
+msgBus.PLAYER_FULL_HEAL = 'PLAYER_FULL_HEAL'
+msgBus.on(msgBus.PLAYER_FULL_HEAL, function()
   local rootState = msgBus.send(msgBus.GAME_STATE_GET)
-  rootState
-    :set('health', function(state)
-      return state.maxHealth
-    end)
-    :set('energy', function(state)
-      return state.maxEnergy
-    end)
+  msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
+    amount = math.pow(10, 10),
+    source = 'PLAYER_FULL_HEALTH',
+    duration = 0,
+    property = 'health',
+    maxProperty = 'maxHealth'
+  })
+  
+  msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
+    amount = math.pow(10, 10),
+    source = 'PLAYER_FULL_ENERGY',
+    duration = 0,
+    property = 'energy',
+    maxProperty = 'maxEnergy'
+  })
 end)
 
 local function canPickupItem(self, item)
@@ -207,6 +215,8 @@ local function canPickupItem(self, item)
     (not self.mapGrid and true)
   return canWalkToItem
 end
+
+msgBus.PLAYER_INITIALIZED = 'PLAYER_INITIALIZED'
 
 local Player = {
   id = 'PLAYER',
@@ -420,6 +430,8 @@ local Player = {
       x = self.x,
       y = self.y
     }):setParent(self)
+
+    msgBus.send(msgBus.PLAYER_INITIALIZED)
   end
 }
 
