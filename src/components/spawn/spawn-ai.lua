@@ -13,6 +13,7 @@ local aiRarity = require 'components.ai.rarity'
 local f = require 'utils.functional'
 
 local SpawnerAi = {
+  -- debug = true,
   group = groups.firstLayer,
   x = 0,
   y = 0,
@@ -21,7 +22,6 @@ local SpawnerAi = {
   -- these need to be passed in
   grid = nil,
   WALKABLE = nil,
-  -- debug = true,
 
   colWorld = collisionWorlds.map,
   pxToGridUnits = function(screenX, screenY, gridSize)
