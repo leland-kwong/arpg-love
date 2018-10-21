@@ -188,7 +188,7 @@ msgBus.on(msgBus.PLAYER_FULL_HEAL, function()
     property = 'health',
     maxProperty = 'maxHealth'
   })
-  
+
   msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
     amount = math.pow(10, 10),
     source = 'PLAYER_FULL_ENERGY',
