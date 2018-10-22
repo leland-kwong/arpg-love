@@ -52,7 +52,7 @@ local Ai = {
   moveSpeed = 100,
   attackRange = 8, -- distance in grid units from the player that the ai will stop moving
   sightRadius = 11,
-  lightRadius = 100,
+  lightRadius = 10,
   armor = 0,
   flatPhysicalReduction = 0,
   lightningResist = 0,
@@ -329,11 +329,12 @@ end
 local function createLight(self)
   if self.lightRadius then
     local lightWorld = Component.get('MAIN_SCENE').lightWorld
+    local lightColor = self.lightColor or self.rarityColor
     lightWorld:addLight(
       self.x,
       self.y,
-      10,
-      self.rarityColor
+      self.lightRadius,
+      lightColor
     )
   end
 end
