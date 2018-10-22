@@ -73,6 +73,7 @@ return function(props)
   local spriteWidth, spriteHeight = animations.idle:getSourceSize()
   aiProps.itemData.minRarity = itemConfig.rarity.RARE
   aiProps.itemData.maxRarity = itemConfig.rarity.RARE
+  aiProps.maxHealth = aiProps.maxHealth * 8
 
   aiProps.animations = animations
   aiProps.w = spriteWidth
