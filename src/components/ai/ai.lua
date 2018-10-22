@@ -49,6 +49,7 @@ local Ai = {
 
   -- calculated base properties (properties that can be changed from external modifiers)
   silenced = false,
+  invulnerable = false,
   moveSpeed = 100,
   attackRange = 8, -- distance in grid units from the player that the ai will stop moving
   sightRadius = 11,
@@ -148,7 +149,7 @@ end
 
 local function handleAggro(self)
   local previouslyAggravated = self.isAggravated
-  local hasHits = self.hitCount > 0
+  local hasHits = (self.hitCount or 0) > 0
   if hasHits then
     self.isAggravated = true
     if (not previouslyAggravated) then
@@ -411,7 +412,7 @@ function Ai.update(self, dt)
     self.animation:update(dt)
   end
 
-  local actualSightRadius = self:getCalculatedStat('sightRadius')
+  local actualSightRadius = self:getCalculatedStat('sightRadius') * self.gridSize
   local canSeeTarget = self.isInViewOfPlayer and self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY, self.losDebug)
   local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
   local isInAggroRange = gridDistFromPlayer <= (actualSightRadius / self.gridSize)
@@ -683,7 +684,6 @@ function Ai.init(self)
   adjustInitialPositionIfNeeded(self)
 
   self.attackRange = self.attackRange * self.gridSize
-  self.sightRadius = self.sightRadius * self.gridSize
   self.getPathWithAstar = Perf({
     enabled = false,
     done = function(_, totalTime, callCount)

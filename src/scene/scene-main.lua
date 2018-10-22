@@ -3,7 +3,6 @@ local groups = require 'components.groups'
 local Map = require 'modules.map-generator.index'
 local Player = require 'components.player'
 local MainMap = require 'components.map.main-map'
-local SpawnerAi = require 'components.spawn.spawn-ai'
 local config = require 'config.config'
 local camera = require 'components.camera'
 local cloneGrid = require 'utils.clone-grid'
@@ -152,12 +151,16 @@ local function initializeMap()
   })
 
   local function generateMapBlockDefinitions()
-    local blocks = {}
+    local blocks = {
+      'room-boss-1'
+    }
     local mapDefinitions = {
       function()
         return 'room-3'
       end,
-      mapBlockGenerator,
+      -- function()
+      --   return 'room-boss-1'
+      -- end,
       mapBlockGenerator,
       mapBlockGenerator,
       mapBlockGenerator,

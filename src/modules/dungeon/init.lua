@@ -20,7 +20,7 @@ local objectParsersByType = {
     local SpawnerAi = require 'components.spawn.spawn-ai'
     local aiType = require('components.ai.types.ai-'..obj.name)
     local Component = require 'modules.component'
-    SpawnerAi.create({
+    SpawnerAi({
       grid = grid,
       WALKABLE = Map.WALKABLE,
       rarity = function(ai)
@@ -65,7 +65,7 @@ local objectParsersByType = {
       table.insert(spawnTypes, AiTypeGen())
     end
 
-    SpawnerAi.create({
+    SpawnerAi({
       grid = grid,
       WALKABLE = Map.WALKABLE,
       target = function()

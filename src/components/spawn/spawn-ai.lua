@@ -35,6 +35,7 @@ local SpawnerAi = {
   end,
   gridSize = config.gridSize,
 }
+SpawnerAi.__index = SpawnerAi
 
 local directions = {
   1, -1
@@ -43,7 +44,8 @@ local function getRandomDirection()
   return directions[math.random(1, 2)]
 end
 
-local function AiFactory(self)
+local function AiFactory(props)
+  local self = setmetatable(props, SpawnerAi)
   assert(
     type(self.target) == 'function',
     'target property must be a function'
@@ -93,9 +95,4 @@ local function AiFactory(self)
   end)
 end
 
-function SpawnerAi.init(self)
-  AiFactory(self)
-  self:delete()
-end
-
-return Component.createFactory(SpawnerAi)
+return AiFactory

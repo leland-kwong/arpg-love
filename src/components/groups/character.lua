@@ -9,6 +9,9 @@ msgBus.on(msgBus.CHARACTER_HIT, function(msg)
   local hitId = msg.source or uid()
   -- FIXME: sometimes chain lightning triggers a hit for a non-character component
   if msg.parent.isCharacter then
+    if msg.parent.invulnerable then
+      return nil
+    end
     msg.parent.hitData[hitId] = msg
   end
   return msg
