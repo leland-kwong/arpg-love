@@ -6,6 +6,8 @@ local itemConfig = require(require('alias').path.items..'.config')
 local Component = require 'modules.component'
 local BeamStrike = require 'components.abilities.beam-strike'
 local calcDist = require 'utils.math'.dist
+local config = require 'config.config'
+local Vec2 = require 'modules.brinevector'
 
 local AbilityBeamStrike = {
   attackTime = 0.8,
@@ -22,52 +24,58 @@ local function randomSign()
   return math.random() == 0 and 1 or -1
 end
 
+local function getRandomBeamPosition(activeBeamPositions, targetX, targetY)
+  local spread = 4 * config.gridSize
+  local x, y = targetX + math.random(0, 2) * randomSign() * spread,
+    targetY + math.random(0, 2) * randomSign() * spread
+  local dist = calcDist(targetX, targetY, x, y)
+  local F = require 'utils.functional'
+  local isNewPosition = not F.find(activeBeamPositions, function(pos)
+    return (pos.x == x) and (pos.y == y)
+  end)
+  if (isNewPosition) then
+    local position = Vec2(x, y)
+    return position
+  end
+  return getRandomBeamPosition(activeBeamPositions, targetX, targetY)
+end
+
 function AbilityBeamStrike.use(self, state, targetX, targetY)
   local char = Component.get('Erion')
   local healthRemaining = char.health / char:getCalculatedStat('maxHealth')
-  local config = require 'config.config'
-  local spread = 4 * config.gridSize
   local socket = require 'socket'
   math.randomseed(socket.gettime())
-  local Vec2 = require 'modules.brinevector'
   local maxNumBeams = healthRemaining <= 0.5 and 5 or 3
-  local beamPositions = {
-    Vec2(targetX, targetY)
-  }
-  state.beamPositions = beamPositions
-  while (#beamPositions < maxNumBeams) do
-    local x, y = targetX + math.random(0, 2) * randomSign() * spread,
-      targetY + math.random(0, 2) * randomSign() * spread
-    local dist = calcDist(targetX, targetY, x, y)
-    local F = require 'utils.functional'
-    local isNewPosition = not F.find(beamPositions, function(pos)
-      return (pos.x == x) and (pos.y == y)
-    end)
-    if (isNewPosition) then
-      table.insert(beamPositions, Vec2(x, y))
-    end
-  end
-  for i=1, #beamPositions do
-    local p = beamPositions[i]
-    local bs = BeamStrike.create({
-      group = Component.groups.all,
-      x = p.x,
-      y = p.y,
-      delay = AbilityBeamStrike.beamDelay,
-      onHit = function(self)
-        local playerRef = Component.get('PLAYER')
-        local distFromPlayer = calcDist(self.x, self.y, playerRef.x, playerRef.y)
-        local hitSize = 2 * config.gridSize
-        if (distFromPlayer <= hitSize) then
-          local msgBus = require 'components.msg-bus'
-          msgBus.send(msgBus.CHARACTER_HIT, {
-            parent = playerRef,
-            damage = 60
-          })
+  local beamPositions = {}
+  local tick = require 'utils.tick'
+  for i=1, maxNumBeams do
+    local timeSpacing = i * 0.2
+    tick.delay(function()
+      local p = (i == 1)
+        -- first position should be directly on top of player
+        and Vec2(targetX, targetY)
+        or getRandomBeamPosition(beamPositions, targetX, targetY)
+      table.insert(beamPositions, p)
+      local bs = BeamStrike.create({
+        group = Component.groups.all,
+        x = p.x,
+        y = p.y,
+        delay = AbilityBeamStrike.beamDelay,
+        onHit = function(self)
+          local playerRef = Component.get('PLAYER')
+          local distFromPlayer = calcDist(self.x, self.y, playerRef.x, playerRef.y)
+          local hitSize = 2 * config.gridSize
+          if (distFromPlayer <= hitSize) then
+            local msgBus = require 'components.msg-bus'
+            msgBus.send(msgBus.CHARACTER_HIT, {
+              parent = playerRef,
+              damage = 60
+            })
+          end
         end
-      end
-    })
-    Component.addToGroup(bs, 'bossActiveBeams')
+      })
+      Component.addToGroup(bs, 'bossActiveBeams')
+    end, timeSpacing)
   end
   state.clock = 0
 end
