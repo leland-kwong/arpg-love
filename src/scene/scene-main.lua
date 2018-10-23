@@ -171,7 +171,7 @@ local function initializeMap()
     return blocks
   end
 
-  local mapGrid = Dungeon.new(generateMapBlockDefinitions(), { columns = 2 })
+  local mapGrid = Dungeon.new(generateMapBlockDefinitions(), { columns = 3 })
   return mapGrid
 end
 
