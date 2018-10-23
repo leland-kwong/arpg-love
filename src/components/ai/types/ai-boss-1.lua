@@ -5,6 +5,7 @@ local animationFactory = require 'components.animation-factory'
 local itemConfig = require(require('alias').path.items..'.config')
 local Component = require 'modules.component'
 local BeamStrike = require 'components.abilities.beam-strike'
+local calcDist = require 'utils.math'.dist
 
 local AbilityBeamStrike = {
   attackTime = 0.8,
@@ -37,7 +38,6 @@ function AbilityBeamStrike.use(self, state, targetX, targetY)
   while (#beamPositions < maxNumBeams) do
     local x, y = targetX + math.random(0, 2) * randomSign() * spread,
       targetY + math.random(0, 2) * randomSign() * spread
-    local calcDist = require 'utils.math'.dist
     local dist = calcDist(targetX, targetY, x, y)
     local F = require 'utils.functional'
     local isNewPosition = not F.find(beamPositions, function(pos)
@@ -55,7 +55,16 @@ function AbilityBeamStrike.use(self, state, targetX, targetY)
       y = p.y,
       delay = AbilityBeamStrike.beamDelay,
       onHit = function(self)
-        consoleLog(self.x, self.y)
+        local playerRef = Component.get('PLAYER')
+        local distFromPlayer = calcDist(self.x, self.y, playerRef.x, playerRef.y)
+        local hitSize = 2 * config.gridSize
+        if (distFromPlayer <= hitSize) then
+          local msgBus = require 'components.msg-bus'
+          msgBus.send(msgBus.CHARACTER_HIT, {
+            parent = playerRef,
+            damage = 60
+          })
+        end
       end
     })
     Component.addToGroup(bs, 'bossActiveBeams')
