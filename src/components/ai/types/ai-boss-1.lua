@@ -278,7 +278,7 @@ return function(props)
   local Color = require 'modules.color'
   aiProps.lightColor = Color.SKY_BLUE
   aiProps.attackRange = 12
-  aiProps.maxHealth = 50
+  aiProps.maxHealth = 500
 
   local animations = {
     idle = animationFactory:new({
