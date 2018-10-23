@@ -614,16 +614,8 @@ end
 local function drawDebug(self)
   if config.collisionDebug then
     local c = self.colObj
-    love.graphics.setColor(1,1,1,0.5)
-    local debug = require 'modules.debug'
-    debug.boundingBox(
-      'fill',
-      c.x - c.ox,
-      c.y - c.oy,
-      c.w,
-      c.h,
-      false
-    )
+    love.graphics.setColor(1,1,0,0.8)
+    love.graphics.circle('fill', self.x, self.y, 4)
   end
 end
 
@@ -632,7 +624,6 @@ function Player.draw(self)
   local scaleX, scaleY = 1 * self.dir, 1
 
   drawShadow(self, scaleX, scaleY, ox, oy)
-  drawDebug(self)
 
   love.graphics.setColor(1,1,1)
   love.graphics.draw(
@@ -646,6 +637,8 @@ function Player.draw(self)
     ox,
     oy
   )
+
+  drawDebug(self)
 end
 
 Player.drawOrder = function(self)
