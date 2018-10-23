@@ -11,7 +11,11 @@ local Camera = function()
     y = 0,
     w = love.graphics.getWidth(),
     h = love.graphics.getHeight(),
-    scale = 1
+    scale = 1,
+    shakeOffset = {
+      x = 0,
+      y = 0
+    }
   }
 
   local targetPosition = {x = 0, y = 0}
@@ -66,6 +70,17 @@ local Camera = function()
       self.lastTargetPositionY = targetPosition.y
       lerp(dt, hasChangedPosition)
     end
+
+    if self.shakeComponents then
+      if (not self.shakeComponents.x.isShaking) then
+        self.shakeComponents = nil
+        return
+      end
+      self.shakeComponents.x:update(dt)
+      self.shakeComponents.y:update(dt)
+      self.shakeOffset.x = self.shakeComponents.x:amplitude()
+      self.shakeOffset.y = self.shakeComponents.y:amplitude()
+    end
   end
 
   function camera:getBounds(divisor)
@@ -113,10 +128,12 @@ local Camera = function()
     love.graphics.push()
     love.graphics.translate(self.w/2, self.h/2)
     love.graphics.scale(self.scale)
-    love.graphics.translate(
-      -self.x,
-      -self.y
-    )
+    local tx, ty = -self.x, -self.y
+    if self.shakeComponents then
+      tx = tx + (self.shakeOffset.x * self.shakeComponents.amplitude)
+      ty = ty + (self.shakeOffset.y * self.shakeComponents.amplitude)
+    end
+    love.graphics.translate(tx, ty)
     return self
   end
 
@@ -133,6 +150,17 @@ local Camera = function()
 
   function camera:getMousePosition()
     return self:toWorldCoords(love.mouse.getPosition())
+  end
+
+  function camera:shake(duration, frequency, amplitude)
+    local Shake = require 'modules.shake'
+    self.shakeComponents = {
+      amplitude = amplitude or 1,
+      x = Shake(duration, frequency),
+      y = Shake(duration, frequency)
+    }
+    self.shakeComponents.x:start()
+    self.shakeComponents.y:start()
   end
 
   return camera

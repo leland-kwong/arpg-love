@@ -71,8 +71,9 @@ return function(props)
     })
   }
   local spriteWidth, spriteHeight = animations.idle:getSourceSize()
-  aiProps.itemData.minRarity = itemConfig.rarity.RARE
+  aiProps.itemData.minRarity = itemConfig.rarity.NORMAL
   aiProps.itemData.maxRarity = itemConfig.rarity.RARE
+  aiProps.itemData.dropRate = aiProps.itemData.dropRate * 30
   aiProps.maxHealth = aiProps.maxHealth * 8
 
   aiProps.animations = animations

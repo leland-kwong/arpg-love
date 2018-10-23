@@ -430,6 +430,12 @@ function M.getBlueprint(component)
 end
 
 function M.remove(entityId, recursive)
+  local idType = type(entityId)
+  assert(
+    idType == 'string' or idType == 'number',
+    'entity id must be a number or string'
+  )
+
   -- this is for legacy reasons when our entites weren't just plain tables
   local entityAsComponent = allComponentsById[entityId]
   if entityAsComponent then

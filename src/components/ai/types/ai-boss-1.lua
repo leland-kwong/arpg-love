@@ -255,14 +255,30 @@ function SpawnMinions.update(_, state, dt)
 end
 
 return function(props)
+  local bossId = 'Erion'
+
+  local function handleBossDeath(msg)
+    local isBoss = msg.parent == Component.get(bossId)
+    if isBoss then
+      local camera = require 'components.camera'
+      camera:shake(4, 60, 5)
+
+      for _,minion in pairs(Component.groups.boss1Minions.getAll()) do
+        Component.remove(minion:getId(), true)
+      end
+    end
+  end
+  local msgBus = require 'components.msg-bus'
+  msgBus.on(msgBus.ENTITY_DESTROYED, handleBossDeath)
+
   local aiProps = AiEyeball()
-  aiProps.id = 'Erion'
+  aiProps.id = bossId
   aiProps.lightRadius = 40
   aiProps.sightRadius = 20
   local Color = require 'modules.color'
   aiProps.lightColor = Color.SKY_BLUE
   aiProps.attackRange = 12
-  aiProps.maxHealth = 500
+  aiProps.maxHealth = 50
 
   local animations = {
     idle = animationFactory:new({
@@ -273,8 +289,9 @@ return function(props)
     })
   }
   local spriteWidth, spriteHeight = animations.idle:getSourceSize()
-  aiProps.itemData.minRarity = itemConfig.rarity.RARE
+  aiProps.itemData.minRarity = itemConfig.rarity.MAGICAL
   aiProps.itemData.maxRarity = itemConfig.rarity.RARE
+  aiProps.itemData.dropRate = aiProps.itemData.dropRate * 30
 
   aiProps.animations = animations
   aiProps.w = spriteWidth
