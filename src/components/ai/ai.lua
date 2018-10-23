@@ -431,10 +431,10 @@ function Ai.update(self, dt)
   local abilities = self.abilities
   for i=1, #abilities do
     local ability = abilities[i]
-    ability:update(self, dt)
     if (not self.silenced) then
       local canUseAbility = (not self.isAbilityRecovering)
-        and (self:getFiniteState() == states.MOVING)
+      and (self:getFiniteState() == states.MOVING)
+      ability:update(self, dt)
       if canUseAbility then
         -- execute ability and get new attack recovery time
         ability:use(self, targetX, targetY, distFromTarget)

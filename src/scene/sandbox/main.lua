@@ -207,6 +207,7 @@ end)
 require 'scene.light-test'
 require 'scene.font-test'
 require 'scene.tooltip-test'
+require 'scene.skew-rotate-test'
 
 function Sandbox.init(self)
   self.activeSceneMenu = nil

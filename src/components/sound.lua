@@ -60,4 +60,15 @@ local Sound = {
   }
 }
 
+local defaultModifier = function(v)
+  return v
+end
+
+function Sound.playEffect(file, modifier)
+  modifier = modifier or defaultModifier
+  local source = love.audio.newSource('built/sounds/'..file, 'static')
+  modifier(source)
+  love.audio.play(source)
+end
+
 return Sound

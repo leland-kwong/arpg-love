@@ -101,7 +101,7 @@ function NpcInfo.update(self, dt)
     textLayerSmall:addf(
       {Color.WHITE, propsText},
       wrapLimit,
-      'left',
+      'center',
       xPos,
       self.statusBar.y + self.statusBar.h + propsTextVerticalMargin
     )

@@ -4,6 +4,77 @@ local debounce = require 'modules.debounce'
 local animationFactory = require 'components.animation-factory'
 local itemConfig = require(require('alias').path.items..'.config')
 local Component = require 'modules.component'
+local BeamStrike = require 'components.abilities.beam-strike'
+
+local AbilityBeamStrike = {
+  attackTime = 0.8,
+  range = 20,
+  cooldown = 3,
+  beamDelay = 1
+}
+
+Component.newGroup({
+  name = 'bossActiveBeams'
+})
+
+local function randomSign()
+  return math.random() == 0 and 1 or -1
+end
+
+function AbilityBeamStrike.use(self, state, targetX, targetY)
+  local char = Component.get('Erion')
+  local healthRemaining = char.health / char:getCalculatedStat('maxHealth')
+  local config = require 'config.config'
+  local spread = 4 * config.gridSize
+  local socket = require 'socket'
+  math.randomseed(socket.gettime())
+  local Vec2 = require 'modules.brinevector'
+  local maxNumBeams = healthRemaining <= 0.5 and 5 or 3
+  local beamPositions = {
+    Vec2(targetX, targetY)
+  }
+  state.beamPositions = beamPositions
+  while (#beamPositions < maxNumBeams) do
+    local x, y = targetX + math.random(0, 2) * randomSign() * spread,
+      targetY + math.random(0, 2) * randomSign() * spread
+    local calcDist = require 'utils.math'.dist
+    local dist = calcDist(targetX, targetY, x, y)
+    local F = require 'utils.functional'
+    local isNewPosition = not F.find(beamPositions, function(pos)
+      return (pos.x == x) and (pos.y == y)
+    end)
+    if (isNewPosition) then
+      table.insert(beamPositions, Vec2(x, y))
+    end
+  end
+  for i=1, #beamPositions do
+    local p = beamPositions[i]
+    local bs = BeamStrike.create({
+      group = Component.groups.all,
+      x = p.x,
+      y = p.y,
+      delay = AbilityBeamStrike.beamDelay,
+      onHit = function(self)
+        consoleLog(self.x, self.y)
+      end
+    })
+    Component.addToGroup(bs, 'bossActiveBeams')
+  end
+  state.clock = 0
+end
+
+function AbilityBeamStrike.update(self, state, dt)
+  for _,beam in pairs(Component.groups.bossActiveBeams.getAll()) do
+    local lw = Component.get('MAIN_SCENE').lightWorld
+    lw:addLight(beam.x, beam.y, 20)
+  end
+
+  state.clock = (state.clock or 0) + dt
+  if (state.clock > AbilityBeamStrike.attackTime) then
+    return false
+  end
+  return true
+end
 
 local playFrostShotSound = debounce(function()
   local Sound = require 'components.sound'
@@ -36,8 +107,8 @@ end
 
 local MultiShot = {
   range = 14,
-  attackTime = 0.5,
-  cooldown = 0.4
+  attackTime = 0.4,
+  cooldown = 1
 }
 
 function MultiShot.use(self, state, targetX, targetY)
@@ -78,8 +149,9 @@ end
 
 local SpawnMinions = {
   range = 40,
-  attackTime = 1,
-  cooldown = 3
+  attackTime = 0.3,
+  cooldown = 2,
+  maxMinions = 8
 }
 
 Component.newGroup({
@@ -121,7 +193,7 @@ end
 function SpawnMinions.update(_, state, dt)
   fadeInMinions()
   local minionCount = countMinions()
-  local maxNumMinions = 12
+  local maxNumMinions = SpawnMinions.maxMinions
   if state.isNewSpawn and (minionCount < maxNumMinions) then
     if (state.clock == 0) then
       local Spawn = require 'components.spawn.spawn-ai'
@@ -137,8 +209,6 @@ function SpawnMinions.update(_, state, dt)
         x = playerRef.x / config.gridSize,
         y = playerRef.y / config.gridSize - 4,
         types = {
-          minionType,
-          minionType,
           minionType
         }
       })
@@ -177,6 +247,7 @@ end
 
 return function(props)
   local aiProps = AiEyeball()
+  aiProps.id = 'Erion'
   aiProps.lightRadius = 40
   aiProps.sightRadius = 20
   local Color = require 'modules.color'
@@ -203,10 +274,13 @@ return function(props)
     name = 'Erion, Guardian of Aureus',
     properties = {
       'ranged',
+      'beam-strike',
+      'minion-spawn',
       'slow-on-hit',
       'multi-shot'
     }
   }
+  table.insert(aiProps.abilities, AbilityBeamStrike)
   table.insert(aiProps.abilities, SpawnMinions)
   table.insert(aiProps.abilities, MultiShot)
   return aiProps

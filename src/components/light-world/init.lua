@@ -3,9 +3,10 @@ local lightBlurImg = loadImage('built/images/light-blur.png')
 local imageHeight = lightBlurImg:getHeight()
 local scaleAdjustment = imageHeight / 100
 local Vec2 = require 'modules.brinevector'
+local config = require 'config.config'
 
 local defaultLightColor = {1,1,1}
-local defaultAmbientColor = {0.4,0.4,0.4,0.1}
+local defaultAmbientColor = {0.1,0.1,0.1,1}
 
 local LightWorld = {}
 LightWorld.__index = LightWorld
@@ -23,7 +24,7 @@ function LightWorld:new(width, height)
 end
 
 function LightWorld:addLight(x, y, radius, color)
-  table.insert(self.lights, {x, y, radius, color})
+  table.insert(self.lights, {x, y, radius, color or defaultLightColor})
   return self
 end
 
@@ -51,8 +52,9 @@ function drawLights(self)
   for i=1, #self.lights do
     local light = self.lights[i]
     local x, y, radius, color = light[1], light[2], light[3], light[4]
-    local lightSize = (radius * 2 * scaleAdjustment) / imageHeight
-    local offset = (radius * 2 * scaleAdjustment) / 2
+    local diameter = radius * 2
+    local lightSize = (diameter * scaleAdjustment) / imageHeight
+    local offset = (diameter * scaleAdjustment) / config.scale
 
     love.graphics.setColor(color or defaultLightColor)
     love.graphics.draw(lightBlurImg, x - offset, y - offset, 0, lightSize, lightSize)
