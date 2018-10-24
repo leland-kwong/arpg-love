@@ -8,7 +8,7 @@ return {
   height = 80,
   tilewidth = 16,
   tileheight = 16,
-  nextobjectid = 42,
+  nextobjectid = 50,
   properties = {},
   tilesets = {
     {
@@ -489,6 +489,122 @@ return {
           properties = {
             ["groupSize"] = 4
           }
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      name = "environment",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      draworder = "topdown",
+      properties = {},
+      objects = {
+        {
+          id = 42,
+          name = "door",
+          type = "environment-door",
+          shape = "rectangle",
+          x = 800,
+          y = 0,
+          width = 96,
+          height = 16,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 43,
+          name = "door",
+          type = "environment-door",
+          shape = "rectangle",
+          x = 960,
+          y = 64,
+          width = 96,
+          height = 16,
+          rotation = 90,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 44,
+          name = "door",
+          type = "environment-door",
+          shape = "rectangle",
+          x = 960,
+          y = 1120,
+          width = 96,
+          height = 16,
+          rotation = 90,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 45,
+          name = "door",
+          type = "environment-door",
+          shape = "rectangle",
+          x = 16,
+          y = 1120,
+          width = 96,
+          height = 16,
+          rotation = 90,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 46,
+          name = "door",
+          type = "environment-door",
+          shape = "rectangle",
+          x = 64,
+          y = 0,
+          width = 96,
+          height = 16,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 47,
+          name = "door",
+          type = "environment-door",
+          shape = "rectangle",
+          x = 64,
+          y = 1264,
+          width = 96,
+          height = 16,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 48,
+          name = "door",
+          type = "environment-door",
+          shape = "rectangle",
+          x = 800,
+          y = 1264,
+          width = 96,
+          height = 16,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 49,
+          name = "door",
+          type = "environment-door",
+          shape = "rectangle",
+          x = 16,
+          y = 64,
+          width = 96,
+          height = 16,
+          rotation = 90,
+          visible = true,
+          properties = {}
         }
       }
     },

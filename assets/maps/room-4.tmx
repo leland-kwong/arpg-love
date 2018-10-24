@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.6" orientation="orthogonal" renderorder="right-down" width="60" height="80" tilewidth="16" tileheight="16" infinite="0" nextobjectid="22">
+<map version="1.0" tiledversion="1.1.6" orientation="orthogonal" renderorder="right-down" width="60" height="80" tilewidth="16" tileheight="16" infinite="0" nextobjectid="30">
  <tileset firstgid="1" source="action rpg.tsx"/>
  <layer name="ground" width="60" height="80">
   <data encoding="csv">
@@ -224,5 +224,15 @@
    </properties>
    <ellipse/>
   </object>
+ </objectgroup>
+ <objectgroup name="environment">
+  <object id="22" name="door" type="environment-door" x="800" y="0" width="96" height="16"/>
+  <object id="23" name="door" type="environment-door" x="960" y="64" width="96" height="16" rotation="90"/>
+  <object id="24" name="door" type="environment-door" x="960" y="1120" width="96" height="16" rotation="90"/>
+  <object id="25" name="door" type="environment-door" x="16" y="1120" width="96" height="16" rotation="90"/>
+  <object id="26" name="door" type="environment-door" x="64" y="0" width="96" height="16"/>
+  <object id="27" name="door" type="environment-door" x="64" y="1264" width="96" height="16"/>
+  <object id="28" name="door" type="environment-door" x="800" y="1264" width="96" height="16"/>
+  <object id="29" name="door" type="environment-door" x="16" y="64" width="96" height="16" rotation="90"/>
  </objectgroup>
 </map>
