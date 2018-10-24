@@ -133,7 +133,7 @@ return function()
   return {
     dataSheet = dataSheet,
     armor = 250,
-    moveSpeed = 130,
+    moveSpeed = 120,
     maxHealth = 20,
     itemData = {
       level = 1,
