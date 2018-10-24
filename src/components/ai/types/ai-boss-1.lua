@@ -224,7 +224,7 @@ function SpawnMinions.update(_, state, dt)
         grid = Component.get('MAIN_SCENE').mapGrid,
         WALKABLE = require 'modules.map-generator.index'.WALKABLE,
         target = function()
-          return playerRef
+          return Component.get('PLAYER')
         end,
         x = playerRef.x / config.gridSize,
         y = playerRef.y / config.gridSize - 4,
