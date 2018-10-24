@@ -8,6 +8,9 @@ local BeamStrike = require 'components.abilities.beam-strike'
 local calcDist = require 'utils.math'.dist
 local config = require 'config.config'
 local Vec2 = require 'modules.brinevector'
+local msgBus = require 'components.msg-bus'
+
+local bossId = 'Erion'
 
 local AbilityBeamStrike = {
   attackTime = 0.8,
@@ -241,7 +244,6 @@ function SpawnMinions.update(_, state, dt)
         local Color = require 'modules.color'
         m.outlineColor = {Color.multiplyAlpha(Color.SKY_BLUE, 0.4)}
         m.fillColor = {Color.multiplyAlpha(Color.WHITE, 0)}
-        local msgBus = require 'components.msg-bus'
         msgBus.send(msgBus.CHARACTER_HIT, {
           parent = m,
           damage = 0,
@@ -262,9 +264,27 @@ function SpawnMinions.update(_, state, dt)
   return false
 end
 
-return function(props)
-  local bossId = 'Erion'
+-- continuously checks distance between player even when out of view
+local function lockDoorsWhenPlayerIsNear()
+  local playerRef = Component.get('PLAYER')
+  local bossRef = Component.get(bossId)
+  local isBossDestroyed = not bossRef
+  if isBossDestroyed then
+    return msgBus.CLEANUP
+  end
+  local bossDistFromPlayer = calcDist(playerRef.x, playerRef.y, bossRef.x, bossRef.y)
+  local isNearPlayer = bossDistFromPlayer < (60 * config.gridSize)
+  if isNearPlayer then
+    msgBus.send(msgBus.CHARACTER_HIT, {
+      parent = bossRef,
+      damage = 0,
+      source = 'BOSS_NEAR_PLAYER_AGGRO'
+    })
+  end
+end
+msgBus.on(msgBus.UPDATE, lockDoorsWhenPlayerIsNear)
 
+return function(props)
   local function handleBossDeath(msg)
     local isBoss = msg.parent == Component.get(bossId)
     if isBoss then
@@ -282,7 +302,7 @@ return function(props)
   local aiProps = AiEyeball()
   aiProps.id = bossId
   aiProps.lightRadius = 40
-  aiProps.sightRadius = 20
+  aiProps.sightRadius = 80
   local Color = require 'modules.color'
   aiProps.lightColor = Color.SKY_BLUE
   aiProps.attackRange = 12
