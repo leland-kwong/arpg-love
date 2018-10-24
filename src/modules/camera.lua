@@ -24,12 +24,7 @@ local Camera = function()
 
   local function lerp(dt, reset)
     local dist = mathUtils.dist(camera.x, camera.y, targetPosition.x, targetPosition.y)
-    local actualDuration = lerpDuration
-    local isFarTransition = (dist / config.gridSize) > 50
-    if isFarTransition then
-      -- increase duration so that the screen doesn't scroll too fast, otherwise it looks too jarring
-      actualDuration = 0.5
-    end
+    local actualDuration = lerpDuration    
     if reset then
       lerpTween = tween.new(actualDuration, camera, targetPosition, tween.easing.outExpo)
     end

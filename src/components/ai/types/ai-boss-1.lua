@@ -78,6 +78,7 @@ function AbilityBeamStrike.use(self, state, targetX, targetY)
         end
       })
       Component.addToGroup(bs, 'bossActiveBeams')
+      Component.addToGroup(bs, 'gameWorld')
     end, timeSpacing)
   end
   state.clock = 0
@@ -297,6 +298,26 @@ local function lockDoorsWhenPlayerIsInBossRoom()
   end
 end
 
+local function cameraActionOnBossEncounter(bossRef, playerRef)
+  playerRef:setUpdateDisabled(true)
+  bossRef.silenced = true
+  local bossOriginalMoveSpeed = bossRef.moveSpeed
+  bossRef.moveSpeed = 0
+  local tick = require 'utils.tick'
+  local camera = require 'components.camera'
+  local cameraInDuration = 1.5
+  local cameraOutDuration = 0.5
+  camera:setPosition(bossRef.x, bossRef.y, cameraInDuration)
+  tick.delay(function()
+    camera:setPosition(playerRef.x, playerRef.y, cameraOutDuration)
+    tick.delay(function()
+      playerRef:setUpdateDisabled(false)
+      bossRef.silenced = false
+      bossRef.moveSpeed = bossOriginalMoveSpeed
+    end, cameraOutDuration)
+  end, cameraInDuration)
+end
+
 -- continuously checks distance between player even when out of view
 local function keepBossActive()
   local playerRef = Component.get('PLAYER')
@@ -318,6 +339,11 @@ local function keepBossActive()
   local bossDistFromPlayer = calcDist(playerRef.x, playerRef.y, bossRef.x, bossRef.y)
   local isNearPlayer = bossDistFromPlayer < (30 * config.gridSize)
   if isNearPlayer then
+    if (not bossRef.encountered) then
+      bossRef.encountered = true
+      cameraActionOnBossEncounter(bossRef, playerRef)
+    end
+
     msgBus.send(msgBus.CHARACTER_HIT, {
       parent = bossRef,
       damage = 0,
