@@ -1,12 +1,16 @@
 local Component = require 'modules.component'
 local msgBus = require 'components.msg-bus'
+local collisionWorlds = require 'components.collision-worlds'
 
 Component.newGroup({
   name = 'gameWorld'
 })
 
-msgBus.on(msgBus.NEW_GAME, function()
+local function resetGameWorld()
   for _,component in pairs(Component.groups.gameWorld.getAll()) do
     component:delete(true)
   end
-end)
+end
+
+msgBus.on(msgBus.NEW_GAME, resetGameWorld)
+msgBus.on(msgBus.GAME_UNLOADED, resetGameWorld)

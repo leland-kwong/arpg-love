@@ -264,16 +264,59 @@ function SpawnMinions.update(_, state, dt)
   return false
 end
 
--- continuously checks distance between player even when out of view
-local function lockDoorsWhenPlayerIsNear()
+local function isPlayerInRoom()
+  local playerRef = Component.get('PLAYER')
+  local F = require 'utils.functional'
+  return F.find(playerRef.zones, function(z)
+    return z.name == 'room-boss-1'
+  end)
+end
+
+local function forEachDoor(callback)
+  for _,door in pairs(Component.groups.bossDoors.getAll()) do
+    callback(door)
+  end
+end
+
+local function lockDoorsWhenPlayerIsInBossRoom()
   local playerRef = Component.get('PLAYER')
   local bossRef = Component.get(bossId)
   local isBossDestroyed = not bossRef
   if isBossDestroyed then
     return msgBus.CLEANUP
   end
+
   local bossDistFromPlayer = calcDist(playerRef.x, playerRef.y, bossRef.x, bossRef.y)
-  local isNearPlayer = bossDistFromPlayer < (60 * config.gridSize)
+  local shouldLockDoors = bossDistFromPlayer < (30 * config.gridSize)
+  if shouldLockDoors then
+    -- show doors
+    forEachDoor(function(door)
+      door:enable()
+    end)
+    return msgBus.CLEANUP
+  end
+end
+
+-- continuously checks distance between player even when out of view
+local function keepBossActive()
+  local playerRef = Component.get('PLAYER')
+  local bossRef = Component.get(bossId)
+  local isBossDestroyed = not bossRef
+  if isBossDestroyed then
+    -- remove doors
+    forEachDoor(function(door)
+      door:disable()
+    end)
+    return msgBus.CLEANUP
+  end
+
+  if (not isPlayerInRoom()) then
+    return
+  end
+
+  -- keep boss active even when it is outside of the viewport
+  local bossDistFromPlayer = calcDist(playerRef.x, playerRef.y, bossRef.x, bossRef.y)
+  local isNearPlayer = bossDistFromPlayer < (30 * config.gridSize)
   if isNearPlayer then
     msgBus.send(msgBus.CHARACTER_HIT, {
       parent = bossRef,
@@ -282,9 +325,11 @@ local function lockDoorsWhenPlayerIsNear()
     })
   end
 end
-msgBus.on(msgBus.UPDATE, lockDoorsWhenPlayerIsNear)
 
 return function(props)
+  msgBus.on(msgBus.UPDATE, keepBossActive)
+  msgBus.on(msgBus.UPDATE, lockDoorsWhenPlayerIsInBossRoom)
+
   local function handleBossDeath(msg)
     local isBoss = msg.parent == Component.get(bossId)
     if isBoss then
@@ -306,7 +351,7 @@ return function(props)
   local Color = require 'modules.color'
   aiProps.lightColor = Color.SKY_BLUE
   aiProps.attackRange = 12
-  aiProps.maxHealth = 500
+  aiProps.maxHealth = 400
 
   local animations = {
     idle = animationFactory:new({

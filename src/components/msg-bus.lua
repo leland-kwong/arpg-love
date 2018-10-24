@@ -21,6 +21,7 @@ setmetatable(M, {
 })
 
 M.GAME_LOADED = 'GAME_LOADED'
+M.GAME_UNLOADED = 'GAME_UNLOADED'
 M.NEW_GAME = 'NEW_GAME' -- this will be used whenever we exit the currently loaded game. Currently its being unused
 M.SET_CONFIG = 'SET_CONFIG' -- makes updates to the game config
 M.SET_BACKGROUND_COLOR = 'SET_BACKGROUND_COLOR'

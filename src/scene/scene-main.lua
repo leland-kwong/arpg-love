@@ -151,7 +151,9 @@ local function initializeMap()
   })
 
   local function generateMapBlockDefinitions()
-    local blocks = {}
+    local blocks = {
+      -- 'room-boss-1'
+    }
     local mapDefinitions = {
       function()
         return 'room-3'
@@ -166,8 +168,10 @@ local function initializeMap()
       local block = table.remove(mapDefinitions, index)()
       table.insert(blocks, block)
     end
-    local bossRoomIndex = math.random(#blocks - 1, #blocks)
-    table.insert(blocks, bossRoomIndex, 'room-boss-1')
+
+    -- local bossRoomIndex = math.random(#blocks - 1, #blocks)
+    table.insert(blocks, 2, 'room-boss-1')
+
     return blocks
   end
 
@@ -348,11 +352,13 @@ local function toggleEntityVisibility(self)
     visibleItemFilter
   )
 
+  -- reset active entities
   for _,entity in pairs(activeEntities) do
     entity.isInViewOfPlayer = false
   end
   activeEntities = {}
 
+  -- set new list of active entities
   for i=1, len do
     local entity = items[i].parent
     local entityId = entity:getId()

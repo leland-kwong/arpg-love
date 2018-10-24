@@ -230,14 +230,4 @@
    <ellipse/>
   </object>
  </objectgroup>
- <objectgroup name="environment">
-  <object id="12" name="door" type="environment-door" x="800" y="0" width="96" height="16"/>
-  <object id="13" name="door" type="environment-door" x="960" y="64" width="96" height="16" rotation="90"/>
-  <object id="14" name="door" type="environment-door" x="960" y="1120" width="96" height="16" rotation="90"/>
-  <object id="15" name="door" type="environment-door" x="16" y="1120" width="96" height="16" rotation="90"/>
-  <object id="16" name="door" type="environment-door" x="64" y="0" width="96" height="16"/>
-  <object id="17" name="door" type="environment-door" x="64" y="1264" width="96" height="16"/>
-  <object id="18" name="door" type="environment-door" x="800" y="1264" width="96" height="16"/>
-  <object id="19" name="door" type="environment-door" x="16" y="64" width="96" height="16" rotation="90"/>
- </objectgroup>
 </map>

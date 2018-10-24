@@ -3,6 +3,7 @@
 ]]
 local iterateGrid = require 'utils.iterate-grid'
 local f = require 'utils.functional'
+local collisionWorlds = require 'components.collision-worlds'
 
 local Dungeon = {}
 local function findLayerByName(layers, name)
@@ -72,16 +73,85 @@ local objectParsersByType = {
       y = origin.y + (obj.y / config.gridSize),
       types = spawnTypes
     })
+  end,
+  environmentDoor = function(obj, grid, origin, blockData)
+    local config = require 'config.config'
+    local Component = require 'modules.component'
+    local AnimationFactory = require 'components.animation-factory'
+    local doorGridWidth, doorGridHeight = obj.width / config.gridSize, obj.height / config.gridSize
+
+    if (not Component.groups.bossDoors) then
+      Component.newGroup({
+        name = 'bossDoors'
+      })
+    end
+    for x=1, doorGridWidth do
+      for y=1, doorGridHeight do
+        local door = Component.create({
+          x = (origin.x * config.gridSize) + obj.x + ((x - 1) * config.gridSize),
+          y = (origin.y * config.gridSize) + obj.y + ((y - 1) * config.gridSize),
+          enable = function(self)
+            local collisionWorlds = require 'components.collision-worlds'
+            self.collisionObject = self:addCollisionObject(
+              'obstacle',
+              self.x,
+              self.y,
+              config.gridSize,
+              config.gridSize
+            ):addToWorld(collisionWorlds.map)
+            Component.addToGroup(self, 'all')
+          end,
+          disable = function(self)
+            self.collisionObject:delete()
+            self.collisionObject = nil
+            Component.removeFromGroup(self, 'all')
+          end,
+          update = function(self)
+            local Map = require 'modules.map-generator.index'
+            local mapGrid = Component.get('MAIN_SCENE').mapGrid
+            local Grid = require 'utils.grid'
+            local isTraversable = Grid.get(mapGrid, self.x / config.gridSize, self.y / config.gridSize) == Map.WALKABLE
+            self:setDrawDisabled(not isTraversable)
+          end,
+          draw = function(self)
+            local animation = AnimationFactory:newStaticSprite('environment-door')
+            local ox, oy = animation:getOffset()
+            love.graphics.setColor(1,1,1)
+            love.graphics.draw(
+              AnimationFactory.atlas,
+              animation.sprite,
+              self.x,
+              self.y,
+              0,
+              1,
+              1,
+              ox,
+              oy
+            )
+          end,
+          drawOrder = function(self)
+            return Component.groups.all:drawOrder(self)
+          end
+        })
+        Component.addToGroup(door, 'bossDoors')
+        Component.addToGroup(door, 'gameWorld')
+      end
+    end
   end
 }
 
-local function parseObjectsLayer(grid, gridBlockOrigin, objectsLayer, blockData)
+local function parseObjectsLayer(grid, gridBlockOrigin, objectsLayer, blockData, gridBlock)
   if (not objectsLayer) then
     return
   end
   local objects = objectsLayer.objects
   for i=1, #objects do
     local obj = objects[i]
+
+    -- shift positions by 1 since lua indexes start at 1
+    obj.x = obj.x + gridBlock.tilewidth
+    obj.y = obj.y + gridBlock.tileheight
+
     local parser = objectParsersByType[obj.type]
     if parser then
       parser(obj, grid, gridBlockOrigin, blockData)
@@ -90,15 +160,28 @@ local function parseObjectsLayer(grid, gridBlockOrigin, objectsLayer, blockData)
 end
 
 local function loadGridBlock(file)
-  return require('built.maps.'..file)
+  local dynamicModule = require 'modules.dynamic-module'
+  --[[
+    Note: we use filesystem load instead of `require` so that we're not loading a cached instance.
+    This is important because we are mutating the dataset, so we need a fresh dataset each time.
+  ]]
+  return dynamicModule('built/maps/'..file..'.lua')
 end
 
-local function addGridBlock(grid, gridBlockToAdd, startX, startY, transformFn)
+local function addGridBlock(grid, gridBlockToAdd, startX, startY, transformFn, blockData)
+  collisionWorlds.zones:add(
+    blockData,
+    startX,
+    startY,
+    gridBlockToAdd.width,
+    gridBlockToAdd.height
+  )
   local numCols = gridBlockToAdd.width
   local area = gridBlockToAdd.width * gridBlockToAdd.height
   for i=0, (area - 1) do
     local y = math.floor(i/numCols) + 1
     local x = (i % numCols) + 1
+    -- local coordinates
     local actualX = startX + x
     local actualY = startY + y
     grid[actualY] = grid[actualY] or {}
@@ -122,6 +205,7 @@ local defaults = {
 }
 
 function Dungeon.new(gridBlockNames, options)
+  collisionWorlds.reset(collisionWorlds.zones)
   local assign = require 'utils.object-utils'.assign
   options = assign({}, defaults, options or {})
 
@@ -138,12 +222,13 @@ function Dungeon.new(gridBlockNames, options)
     -- block-level coordinates
     local blockX = (blockIndex % numCols)
     local blockY = math.floor(blockIndex/numCols)
+    local blockWidth, blockHeight = gridBlock.width, gridBlock.height
 
     local overlapAdjustment = -1 -- this is to prevent walls from doubling up between blocks
     local overlapAdjustmentX, overlapAdjustmentY = (overlapAdjustment * blockX), (overlapAdjustment * blockY)
     local origin = {
-      x = (blockX * gridBlock.width),
-      y = (blockY * gridBlock.height)
+      x = (blockX * blockWidth),
+      y = (blockY * blockHeight)
     }
     if origin.x > 0 then
       origin.x = origin.x + overlapAdjustmentX
@@ -151,6 +236,9 @@ function Dungeon.new(gridBlockNames, options)
     if origin.y > 0 then
       origin.y = origin.y + overlapAdjustmentY
     end
+    local blockData = {
+      name = gridBlockName
+    }
     addGridBlock(
       grid,
       gridBlock,
@@ -159,9 +247,9 @@ function Dungeon.new(gridBlockNames, options)
       function(index, localX, localY)
         local isEdge =
           (blockX == 0 and localX == 1) -- west side
-          or ((blockX == numCols - 1) and localX == gridBlock.width) -- east side
+          or ((blockX == numCols - 1) and localX == blockWidth) -- east side
           or (blockY == 0 and localY == 1) -- north side
-          or ((blockY == numRows - 1) and localY == gridBlock.height) -- south side
+          or ((blockY == numRows - 1) and localY == blockHeight) -- south side
 
         -- close up exits on the perimeter
         if isEdge then
@@ -177,23 +265,23 @@ function Dungeon.new(gridBlockNames, options)
         local groundLayer = findLayerByName(gridBlock.layers, 'ground')
         local groundValue = groundLayer.data[index]
         return cellTranslationsByLayer.ground[groundValue]
-      end
+      end,
+      blockData
     )
-    local blockData = {
-      name = gridBlockName
+    local layersToParse = {
+      'spawn-points',
+      'unique-enemies',
+      'environment'
     }
-    parseObjectsLayer(
-      grid,
-      origin,
-      findLayerByName(gridBlock.layers, 'spawn-points'),
-      blockData
-    )
-    parseObjectsLayer(
-      grid,
-      origin,
-      findLayerByName(gridBlock.layers, 'unique-enemies'),
-      blockData
-    )
+    f.forEach(layersToParse, function(layerName)
+      parseObjectsLayer(
+        grid,
+        origin,
+        findLayerByName(gridBlock.layers, layerName),
+        blockData,
+        gridBlock
+      )
+    end)
   end
   return grid
 end

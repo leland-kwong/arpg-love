@@ -231,6 +231,8 @@ local Player = {
   moveSpeed = 100,
   attackRecoveryTime = 0,
 
+  zones = {},
+
   -- collision properties
   h = 1,
   w = 1,
@@ -425,6 +427,13 @@ local Player = {
       collisionOffX,
       5
     ):addToWorld(colMap)
+    self.zoneCollision = self:addCollisionObject(
+      'player',
+      1,
+      1,
+      1,
+      1
+    ):addToWorld(collisionWorlds.zones)
 
     WeaponCore.create({
       x = self.x,
@@ -563,6 +572,31 @@ local function updateHealthAndEnergy(rootStore)
   rootStore:set('energy', min(state.energy, state.maxEnergy + mods.maxEnergy))
 end
 
+function Player.handleMapCollision(self, nextX, nextY)
+  -- dynamically get the current animation frame's height
+  local sx, sy, sw, sh = self.animation.sprite:getViewport()
+  local w,h = sw, sh
+
+  local actualX, actualY, cols, len = self.colObj:move(nextX, nextY, collisionFilter)
+  self.x = actualX
+  self.y = actualY
+  self.h = h
+  self.w = w
+end
+
+local function zoneCollisionFilter()
+  return 'cross'
+end
+
+function Player.handleZoneCollision(self)
+  local x, y = math.floor(self.x / config.gridSize), math.floor(self.y / config.gridSize)
+  local _, _, zones, len = self.zoneCollision:move(x, y, zoneCollisionFilter)
+  self.zones = zones
+  for i=1, len do
+    zones[i] = zones[i].other
+  end
+end
+
 function Player.update(self, dt)
   local hasPlayerLost = self.rootStore:get().health <= 0
   if hasPlayerLost then
@@ -581,15 +615,8 @@ function Player.update(self, dt)
   handleAbilities(self, dt)
   updateHealthAndEnergy(self.rootStore)
 
-  -- dynamically get the current animation frame's height
-  local sx, sy, sw, sh = self.animation.sprite:getViewport()
-  local w,h = sw, sh
-
-  local actualX, actualY, cols, len = self.colObj:move(nextX, nextY, collisionFilter)
-  self.x = actualX
-  self.y = actualY
-  self.h = h
-  self.w = w
+  self:handleMapCollision(nextX, nextY)
+  self:handleZoneCollision()
 
   -- update camera to follow player
   camera:setPosition(self.x, self.y, userSettings.camera.speed)

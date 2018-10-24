@@ -112,6 +112,7 @@ local menuOptionHomeScreen = {
     msgBus.send(msgBus.SCENE_STACK_REPLACE, {
       scene = HomeScreen
     })
+    msgBus.send(msgBus.GAME_UNLOADED)
     msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
     msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, true)
   end

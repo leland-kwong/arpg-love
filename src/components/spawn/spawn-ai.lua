@@ -56,7 +56,7 @@ local function AiFactory(props)
       return nil
     end
     local target = self.target()
-    local tPosX, tPosY = target:getPosition()
+    local tPosX, tPosY = target.x, target.y
     local dist = Math.dist(tPosX, tPosY, otherX, otherY)
     local withinVision = dist <= otherSightRadius
 
@@ -83,7 +83,7 @@ local function AiFactory(props)
       :set('y',                 spawnY)
       :set('collisionWorld',    self.colWorld)
       :set('pxToGridUnits',     self.pxToGridUnits)
-      :set('findNearestTarget', findNearestTarget)
+      :set('findNearestTarget', aiPrototype.findNearestTarget or findNearestTarget)
       :set('grid',              self.grid)
       :set('gridSize',          self.gridSize)
       :set('WALKABLE',          self.WALKABLE)

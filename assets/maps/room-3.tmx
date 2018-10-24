@@ -87,7 +87,7 @@
  </layer>
  <layer name="walls" width="60" height="80">
   <data encoding="csv">
-12,12,12,12,0,0,0,0,0,0,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,0,0,0,0,0,0,0,12,12,12,12,
+12,12,12,12,0,0,0,0,0,0,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,0,0,0,0,0,0,12,12,12,12,
 12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,
 12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,
 12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,
@@ -230,16 +230,6 @@
    </properties>
    <ellipse/>
   </object>
- </objectgroup>
- <objectgroup name="environment">
-  <object id="42" name="door" type="environment-door" x="800" y="0" width="96" height="16"/>
-  <object id="43" name="door" type="environment-door" x="960" y="64" width="96" height="16" rotation="90"/>
-  <object id="44" name="door" type="environment-door" x="960" y="1120" width="96" height="16" rotation="90"/>
-  <object id="45" name="door" type="environment-door" x="16" y="1120" width="96" height="16" rotation="90"/>
-  <object id="46" name="door" type="environment-door" x="64" y="0" width="96" height="16"/>
-  <object id="47" name="door" type="environment-door" x="64" y="1264" width="96" height="16"/>
-  <object id="48" name="door" type="environment-door" x="800" y="1264" width="96" height="16"/>
-  <object id="49" name="door" type="environment-door" x="16" y="64" width="96" height="16" rotation="90"/>
  </objectgroup>
  <objectgroup color="#ff007f" name="unique-enemies">
   <object id="39" template="ai-legendary.tx" x="86" y="552"/>

@@ -941,6 +941,19 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/nova.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>25,25,50,50</rect>
+                <key>scale9Paddings</key>
+                <rect>25,25,50,50</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/primitives/pixel-white-1x1.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -992,6 +1005,21 @@
                 <rect>4,5,7,9</rect>
                 <key>scale9Paddings</key>
                 <rect>4,5,7,9</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/environment-door.png</key>
+            <key type="filename">custom-art/tiles/wall-5.png</key>
+            <key type="filename">custom-art/tiles/wall-6.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0.464286</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,14,8,28</rect>
+                <key>scale9Paddings</key>
+                <rect>4,14,8,28</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -1048,20 +1076,6 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/tiles/wall-5.png</key>
-            <key type="filename">custom-art/tiles/wall-6.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0,0.464286</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,14,8,28</rect>
-                <key>scale9Paddings</key>
-                <rect>4,14,8,28</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
         </map>
         <key>fileList</key>
         <array>
@@ -1082,6 +1096,7 @@
             <filename>custom-art/items/augmentations</filename>
             <filename>custom-art/characters</filename>
             <filename>custom-art/gui</filename>
+            <filename>custom-art/nova.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
