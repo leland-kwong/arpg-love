@@ -80,7 +80,7 @@ local Ai = {
   burning = 0,
   cold = 0,
 
-  isAggravated = false,
+  isAggravated = false, -- gets triggered whenever the ai is hit by anything
   gridSize = 1,
   fillColor = {1,1,1,1},
   opacity = 1,
@@ -372,8 +372,6 @@ function Ai.update(self, dt)
     end
   end
 
-  createLight(self)
-
   local playerRef = Component.get('PLAYER') or Component.get('TEST_PLAYER')
   local playerX, playerY = playerRef:getPosition()
 
@@ -386,6 +384,8 @@ function Ai.update(self, dt)
   end
 
   local targetX, targetY
+  local extraSightRadiusFromAggro = (self.isAggravated and 20 or 0) * self.gridSize
+  local actualSightRadius = self:getCalculatedStat('sightRadius') * self.gridSize + extraSightRadiusFromAggro
 
   if (self.isInViewOfPlayer or self.isAggravated) then
     -- update ai facing direction
@@ -406,14 +406,13 @@ function Ai.update(self, dt)
     targetX, targetY = self.findNearestTarget(
       self.x,
       self.y,
-      40 * self.gridSize
+      actualSightRadius
     )
 
     self.animation:update(dt)
   end
 
-  local actualSightRadius = self:getCalculatedStat('sightRadius') * self.gridSize
-  local canSeeTarget = self.isInViewOfPlayer and self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY, self.losDebug)
+  local canSeeTarget = self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY, self.losDebug)
   local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
   local isInAggroRange = gridDistFromPlayer <= (actualSightRadius / self.gridSize)
   local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or 99999
@@ -433,7 +432,7 @@ function Ai.update(self, dt)
     local ability = abilities[i]
     if (not self.silenced) then
       local canUseAbility = (not self.isAbilityRecovering)
-      and (self:getFiniteState() == states.MOVING)
+        and (self:getFiniteState() == states.MOVING)
       ability:update(self, dt)
       if canUseAbility then
         -- execute ability and get new attack recovery time
@@ -574,6 +573,8 @@ end
 
 function Ai.draw(self)
   debugLineOfSight(self)
+
+  createLight(self)
 
   local oBlendMode = love.graphics.getBlendMode()
   local ox, oy = self.animation:getOffset()
