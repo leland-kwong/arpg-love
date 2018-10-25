@@ -102,7 +102,9 @@ local objectParsersByType = {
             Component.addToGroup(self, 'all')
           end,
           disable = function(self)
-            self.collisionObject:delete()
+            if self.collisionObject then
+              self.collisionObject:delete()
+            end
             self.collisionObject = nil
             Component.removeFromGroup(self, 'all')
           end,
