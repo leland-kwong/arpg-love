@@ -94,9 +94,9 @@ function NpcInfo.update(self, dt)
       propsText = propsText..'  '..p
     end
     local wrapLimit = 250
-    local propsTextWidth, propsTextHeight = GuiText.getTextSize(propsText, textLayerSmall.font, wrapLimit)
+    local _, propsTextHeight = GuiText.getTextSize(propsText, textLayerSmall.font, wrapLimit)
     local windowW, windowH = windowSize()
-    local xPos = Position.boxCenterOffset(propsTextWidth, propsTextHeight, windowW, windowH)
+    local xPos = Position.boxCenterOffset(wrapLimit, propsTextHeight, windowW, windowH)
     local propsTextVerticalMargin = 5
     textLayerSmall:addf(
       {Color.WHITE, propsText},
