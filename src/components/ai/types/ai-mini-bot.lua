@@ -26,7 +26,7 @@ local PelletShot = {
   cooldown = 0.8
 }
 
-function PelletShot.use(self, _, targetX, targetY)
+function PelletShot.use(self, state, targetX, targetY)
   local Attack = require 'components.abilities.bullet'
   local projectile = Attack.create({
       debug = false
@@ -40,26 +40,44 @@ function PelletShot.use(self, _, targetX, targetY)
   })
   playblasterSound()
 
-  return skill
+  state.isNewAttack = true
+  state.clock = 0
 end
 
+function PelletShot.update(self, state, dt)
+  self.animation = state.isNewAttack
+    and self.animations.attacking
+    or self.animations.idle
+  if state.isNewAttack then
+    state.clock = state.clock + dt
+    local isAbilityComplete = state.clock >= PelletShot.attackTime
+    if isAbilityComplete then
+      state.isNewAttack = false
+    end
+    return (not isAbilityComplete)
+  end
+  return false
+end
 
 return function()
   local animations = {
+    attacking = animationFactory:new({
+      'ai-1/ai-6'
+    }),
     moving = animationFactory:new({
+      'ai-1/ai-0',
       'ai-1/ai-1',
       'ai-1/ai-2',
       'ai-1/ai-3',
       'ai-1/ai-4',
       'ai-1/ai-5',
-      'ai-1/ai-6',
-    }),
+    }):setDuration(1),
     idle = animationFactory:new({
+      'ai-1/ai-6',
       'ai-1/ai-7',
       'ai-1/ai-8',
-      'ai-1/ai-9',
-      'ai-1/ai-10'
-    })
+      'ai-1/ai-9'
+    }):setDuration(0.6)
   }
 
   local attackRange = 8

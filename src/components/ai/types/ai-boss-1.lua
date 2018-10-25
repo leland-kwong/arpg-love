@@ -378,6 +378,10 @@ return function(props)
   aiProps.maxHealth = 400
 
   local animations = {
+    attacking = animationFactory:new({
+      'boss-1/boss-1',
+      'boss-1/boss-1'
+    }),
     idle = animationFactory:new({
       'boss-1/boss-1'
     }),
