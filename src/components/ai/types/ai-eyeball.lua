@@ -1,6 +1,6 @@
+local Component = require 'modules.component'
 local animationFactory = require 'components.animation-factory'
 local debounce = require 'modules.debounce'
-local tick = require 'utils.tick'
 local collisionGroups = require 'modules.collision-groups'
 local abs = math.abs
 
@@ -29,34 +29,119 @@ local FrostShot = {
   cooldown = 1
 }
 
-function FrostShot.use(self, _, targetX, targetY)
-  local Attack = require 'components.abilities.frost-spark'
-  local projectile = Attack.create({
-      debug = false
-    , x = self.x
-    , y = self.y - self.z
-    , x2 = targetX
-    , y2 = targetY
-    , speed = 115
-    , lifeTime = 60
-    , targetGroup = collisionGroups.player
-    , minDamage = 1
-    , maxDamage = 2
-    , drawOrder = function()
-      return self.drawOrder(self) + 1
-    end
-  })
-  playFrostShotSound()
+local DissipateEffectBlueprint = {
+  opacity = 1,
+  radiusScale = 0.3,
+  maxRadiusScale = 1
+}
+
+function DissipateEffectBlueprint.init(self)
+  Component.addToGroup(self, 'all')
+  self.animation = animationFactory:newStaticSprite('nova')
 end
 
+function DissipateEffectBlueprint.update(self, dt)
+  self.opacity = self.opacity - dt * 2
+  self.radiusScale = math.min(0.5, self.radiusScale + dt * 2)
+  if self.opacity <= 0 then
+    self:delete()
+  end
+end
+
+function DissipateEffectBlueprint.draw(self)
+  love.graphics.setColor(1,1,1,self.opacity)
+  local ox, oy = self.animation:getOffset()
+  love.graphics.draw(
+    animationFactory.atlas,
+    self.animation.sprite,
+    self.x,
+    self.y,
+    0,
+    0.2 * self.radiusScale,
+    0.3 * self.radiusScale,
+    ox,
+    oy
+  )
+end
+
+local DissipateEffect = Component.createFactory(DissipateEffectBlueprint)
+
+function FrostShot.use(_, state, targetX, targetY)
+  state.targetX = targetX
+  state.targetY = targetY
+  state.isNewAttack = true
+end
+
+function FrostShot.update(self, state)
+  local attackAnimation = self.animations.attacking
+  if state.isNewAttack then
+    state.abilityUsed = false
+    attackAnimation:setFrame(1)
+  end
+  if (state.isNewAttack or state.isAnimating) then
+    state.isNewAttack = false
+    self:set(
+      'animation',
+      attackAnimation
+    )
+    local isLastFrame = attackAnimation:isLastFrame()
+    local isHitFrame = attackAnimation.index == 3
+    if isHitFrame and (not state.abilityUsed) then
+      state.abilityUsed = true
+      local Attack = require 'components.abilities.frost-spark'
+      local projectile = Attack.create({
+          debug = false
+        , x = self.x
+        , y = self.y - self.z
+        , x2 = state.targetX
+        , y2 = state.targetY
+        , speed = 115
+        , lifeTime = 60
+        , targetGroup = collisionGroups.player
+        , minDamage = 1
+        , maxDamage = 2
+        , drawOrder = function(self)
+          return Component.groups.all:drawOrder(self) + 2
+        end
+      })
+      playFrostShotSound()
+      DissipateEffect.create({
+        x = self.x + 4 * self.facingDirectionX,
+        y = self.y - self.z,
+        drawOrder = function()
+          return self:drawOrder() + 1
+        end
+      })
+    end
+    state.isAnimating = (not isLastFrame)
+    return state.isAnimating
+  else
+    self:set(
+      'animation',
+      self.animations.idle
+    )
+  end
+end
 
 return function()
   local animations = {
+    attacking = animationFactory:new({
+      'eyeball/eyeball-0',
+      'eyeball/eyeball-1',
+      'eyeball/eyeball-2',
+      'eyeball/eyeball-3',
+      'eyeball/eyeball-3',
+      'eyeball/eyeball-3',
+      'eyeball/eyeball-3',
+      'eyeball/eyeball-2',
+      'eyeball/eyeball-1',
+      'eyeball/eyeball-0',
+    }):setDuration(FrostShot.attackTime),
     idle = animationFactory:new({
-      'eyeball/eyeball'
+      'eyeball/eyeball-0'
     }),
     moving = animationFactory:new({
-      'eyeball/eyeball'
+      'eyeball/eyeball-0'
     })
   }
 
