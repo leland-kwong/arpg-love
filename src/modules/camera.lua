@@ -24,7 +24,7 @@ local Camera = function()
 
   local function lerp(dt, reset)
     local dist = mathUtils.dist(camera.x, camera.y, targetPosition.x, targetPosition.y)
-    local actualDuration = lerpDuration    
+    local actualDuration = lerpDuration
     if reset then
       lerpTween = tween.new(actualDuration, camera, targetPosition, tween.easing.outExpo)
     end
@@ -141,6 +141,11 @@ local Camera = function()
     local wx = ((x) - self.w/2) / self.scale
     local wy = ((y) - self.h/2) / self.scale
     return wx + self.x, wy + self.y
+  end
+
+  function camera:toScreenCoords(x, y)
+    local width, height = self:getSize()
+    return x - self.x + width/2, y - self.y + height/2
   end
 
   function camera:getMousePosition()

@@ -9,6 +9,7 @@ local calcDist = require 'utils.math'.dist
 local config = require 'config.config'
 local Vec2 = require 'modules.brinevector'
 local msgBus = require 'components.msg-bus'
+local MapPointer = require 'components.hud.map-pointer'
 
 local bossId = 'Erion'
 
@@ -353,6 +354,19 @@ local function keepBossActive()
 end
 
 return function(props)
+  local pointerRef = MapPointer.create({
+    x = 200,
+    y = 200
+  })
+  msgBus.on(msgBus.UPDATE, function()
+    local bossRef = Component.get(bossId)
+    if (not bossRef) then
+      pointerRef:delete(true)
+      return msgBus.CLEANUP
+    end
+    pointerRef.fromTarget = Component.get('PLAYER')
+    pointerRef.target = bossRef
+  end)
   msgBus.on(msgBus.UPDATE, keepBossActive)
   msgBus.on(msgBus.UPDATE, lockDoorsWhenPlayerIsInBossRoom)
 

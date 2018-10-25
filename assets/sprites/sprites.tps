@@ -609,6 +609,7 @@
             <key type="filename">custom-art/gui/gui-home-button.png</key>
             <key type="filename">custom-art/gui/gui-inventory-button--hover.png</key>
             <key type="filename">custom-art/gui/gui-inventory-button.png</key>
+            <key type="filename">custom-art/gui/gui-map-pointer.png</key>
             <key type="filename">custom-art/items/weapons/weapon-modules/item-upgrade-placeholder-locked.png</key>
             <key type="filename">custom-art/items/weapons/weapon-modules/item-upgrade-placeholder-unlocked.png</key>
             <struct type="IndividualSpriteSettings">
