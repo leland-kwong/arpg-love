@@ -31,6 +31,22 @@ local ColFilter = memoize(function(groupToMatch, targetsToIgnore)
   end
 end)
 
+local function drawBullet(self, scale, opacity)
+  local ox, oy = self.animation:getOffset()
+  love.graphics.setColor(Color.multiplyAlpha(self.color, opacity))
+  love.graphics.draw(
+      animationFactory.atlas
+    , self.animation.sprite
+    , self.x
+    , self.y
+    , self.angle
+    , scale
+    , scale
+    , ox
+    , oy
+  )
+end
+
 local Bullet = {
   group = groups.all,
 
@@ -113,10 +129,17 @@ local Bullet = {
         self:delete()
       end
     end
+
+    self.angle = self.angle + (dt * 8)
   end,
 
   draw = function(self)
-    local angle = 0
+    local mainSceneRef = Component.get('MAIN_SCENE')
+    if mainSceneRef then
+      local lw = mainSceneRef.lightWorld
+      lw:addLight(self.x, self.y, 10, self.color)
+    end
+
     local ox, oy = self.animation:getOffset()
     local scale = self.scale
 
@@ -127,25 +150,22 @@ local Bullet = {
       , self.animation.sprite
       , self.x
       , self.y + self.h
-      , angle
+      , self.angle
       , scale
       , scale / 2
       , ox
       , oy
     )
 
-    love.graphics.setColor(self.color)
-    love.graphics.draw(
-        animationFactory.atlas
-      , self.animation.sprite
-      , self.x
-      , self.y
-      , angle
-      , scale
-      , scale
-      , ox
-      , oy
-    )
+    local oBlendMode = love.graphics.getBlendMode()
+    love.graphics.setBlendMode('add')
+    -- draw in several passes to give it a brighter blur effect
+    drawBullet(self, 1, 1)
+    drawBullet(self, 1.4, 0.5)
+    drawBullet(self, 1.8, 0.2)
+    drawBullet(self, 2.2, 0.1)
+    drawBullet(self, 3, 0.1)
+    love.graphics.setBlendMode(oBlendMode)
 
     if config.collisionDebug then
       local debug = require 'modules.debug'
@@ -160,7 +180,7 @@ local Bullet = {
 }
 
 Bullet.drawOrder = function(self)
-  local order = self.group:drawOrder(self) + 2
+  local order = self.group:drawOrder(self) + 3
   return order
 end
 

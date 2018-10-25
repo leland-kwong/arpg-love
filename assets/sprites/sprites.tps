@@ -602,6 +602,7 @@
             <key type="filename">custom-art/bullet-1.png</key>
             <key type="filename">custom-art/characters/ai-legendaries/legendary-1/legendary-ai-1.png</key>
             <key type="filename">custom-art/characters/eyeball/eyeball.png</key>
+            <key type="filename">custom-art/characters/legendary/eyeball.png</key>
             <key type="filename">custom-art/effects/floor-crack-1.png</key>
             <key type="filename">custom-art/effects/floor-crack-2.png</key>
             <key type="filename">custom-art/effects/floor-crack-3.png</key>
@@ -624,8 +625,8 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/characters/ai-1/ai-0.png</key>
             <key type="filename">custom-art/characters/ai-1/ai-1.png</key>
-            <key type="filename">custom-art/characters/ai-1/ai-10.png</key>
             <key type="filename">custom-art/characters/ai-1/ai-2.png</key>
             <key type="filename">custom-art/characters/ai-1/ai-3.png</key>
             <key type="filename">custom-art/characters/ai-1/ai-4.png</key>
