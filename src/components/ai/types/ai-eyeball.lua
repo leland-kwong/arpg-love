@@ -85,7 +85,7 @@ function FrostShot.update(self, state)
       attackAnimation
     )
     local isLastFrame = attackAnimation:isLastFrame()
-    local isHitFrame = attackAnimation.index == 3
+    local isHitFrame = attackAnimation.index == 2
     if isHitFrame and (not state.abilityUsed) then
       state.abilityUsed = true
       local Attack = require 'components.abilities.frost-spark'
@@ -126,22 +126,14 @@ end
 return function()
   local animations = {
     attacking = animationFactory:new({
-      'eyeball/eyeball-0',
-      'eyeball/eyeball-1',
-      'eyeball/eyeball-2',
-      'eyeball/eyeball-3',
-      'eyeball/eyeball-3',
-      'eyeball/eyeball-3',
-      'eyeball/eyeball-3',
-      'eyeball/eyeball-2',
-      'eyeball/eyeball-1',
-      'eyeball/eyeball-0',
+      'eyeball/eyeball',
+      'eyeball/eyeball',
     }):setDuration(FrostShot.attackTime),
     idle = animationFactory:new({
-      'eyeball/eyeball-0'
+      'eyeball/eyeball'
     }),
     moving = animationFactory:new({
-      'eyeball/eyeball-0'
+      'eyeball/eyeball'
     })
   }
 

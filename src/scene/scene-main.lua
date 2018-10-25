@@ -152,12 +152,13 @@ local function initializeMap()
 
   local function generateMapBlockDefinitions()
     local blocks = {
+      'room-3'
       -- 'room-boss-1'
     }
     local mapDefinitions = {
-      function()
-        return 'room-3'
-      end,
+      -- function()
+      --   return 'room-3'
+      -- end,
       mapBlockGenerator,
       mapBlockGenerator,
       mapBlockGenerator,
