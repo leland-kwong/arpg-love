@@ -101,7 +101,7 @@ return function()
       'melee-bot/melee-bot-4',
       'melee-bot/melee-bot-5',
       'melee-bot/melee-bot-6',
-    }):setDuration(0.5),
+    }):setDuration(PunchAbility.attackTime),
     idle = animationFactory:new({
       'melee-bot/melee-bot-7',
       'melee-bot/melee-bot-8',
