@@ -280,23 +280,11 @@ local function forEachDoor(callback)
   end
 end
 
-local function lockDoorsWhenPlayerIsInBossRoom()
-  local playerRef = Component.get('PLAYER')
-  local bossRef = Component.get(bossId)
-  local isBossDestroyed = not bossRef
-  if isBossDestroyed then
-    return msgBus.CLEANUP
-  end
-
-  local bossDistFromPlayer = calcDist(playerRef.x, playerRef.y, bossRef.x, bossRef.y)
-  local shouldLockDoors = bossDistFromPlayer < (30 * config.gridSize)
-  if shouldLockDoors then
-    -- show doors
-    forEachDoor(function(door)
-      door:enable()
-    end)
-    return msgBus.CLEANUP
-  end
+local function lockDoors()
+  -- show doors
+  forEachDoor(function(door)
+    door:enable()
+  end)
 end
 
 local function cameraActionOnBossEncounter(bossRef, playerRef)
@@ -315,6 +303,7 @@ local function cameraActionOnBossEncounter(bossRef, playerRef)
       playerRef:setUpdateDisabled(false)
       bossRef.silenced = false
       bossRef.moveSpeed = bossOriginalMoveSpeed
+      lockDoors()
     end, cameraOutDuration)
   end, cameraInDuration)
 end
@@ -339,7 +328,7 @@ local function keepBossActive()
   -- keep boss active even when it is outside of the viewport
   local bossDistFromPlayer = calcDist(playerRef.x, playerRef.y, bossRef.x, bossRef.y)
   local isNearPlayer = bossDistFromPlayer < (30 * config.gridSize)
-  if isNearPlayer then
+  if isNearPlayer and bossRef.canSeeTarget then
     if (not bossRef.encountered) then
       bossRef.encountered = true
       cameraActionOnBossEncounter(bossRef, playerRef)
@@ -368,7 +357,6 @@ return function(props)
     pointerRef.target = bossRef
   end)
   msgBus.on(msgBus.UPDATE, keepBossActive)
-  msgBus.on(msgBus.UPDATE, lockDoorsWhenPlayerIsInBossRoom)
 
   local function handleBossDeath(msg)
     local isBoss = msg.parent == Component.get(bossId)
