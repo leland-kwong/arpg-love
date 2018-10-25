@@ -6,7 +6,7 @@ local camera = require 'components.camera'
 local Color = require 'modules.color'
 
 local MapPointerWorld = {
-  debug = true,
+  -- debug = true,
   fromTarget = nil,
   target = nil, -- an object with `x` and `y` coordinates
   pointers = {}

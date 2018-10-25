@@ -26,6 +26,7 @@ require 'components.groups.dungeon-test'
 require 'components.groups.game-world'
 require 'modules.file-system'
 require 'utils.time'
+local MapPointerWorld = require 'components.hud.map-pointer'
 
 local scale = config.scaleFactor
 
@@ -41,6 +42,9 @@ function love.load()
   -- console debugging
   local console = Console.create()
 
+  MapPointerWorld.create({
+    id = 'hudPointerWorld'
+  })
   RootScene.create()
 end
 

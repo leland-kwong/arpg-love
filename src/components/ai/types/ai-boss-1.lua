@@ -9,9 +9,6 @@ local calcDist = require 'utils.math'.dist
 local config = require 'config.config'
 local Vec2 = require 'modules.brinevector'
 local msgBus = require 'components.msg-bus'
-local MapPointer = require 'components.hud.map-pointer'
-
-local pointerWorld = MapPointer.create()
 
 local bossId = 'Erion'
 
@@ -327,6 +324,7 @@ local function keepBossActive()
 
   local showBossPointer = (bossDistFromPlayer < 80 * config.gridSize) and ((not bossRef.isInViewOfPlayer) or (not bossRef.canSeeTarget))
   if (showBossPointer) then
+    local pointerWorld = Component.get('hudPointerWorld')
     pointerWorld:add(
       Component.get('PLAYER'),
       bossRef
