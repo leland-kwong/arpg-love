@@ -11,6 +11,8 @@ local Vec2 = require 'modules.brinevector'
 local msgBus = require 'components.msg-bus'
 local MapPointer = require 'components.hud.map-pointer'
 
+local pointerWorld = MapPointer.create()
+
 local bossId = 'Erion'
 
 local AbilityBeamStrike = {
@@ -321,12 +323,21 @@ local function keepBossActive()
     return msgBus.CLEANUP
   end
 
+  local bossDistFromPlayer = calcDist(playerRef.x, playerRef.y, bossRef.x, bossRef.y)
+
+  local showBossPointer = (bossDistFromPlayer < 80 * config.gridSize) and ((not bossRef.isInViewOfPlayer) or (not bossRef.canSeeTarget))
+  if (showBossPointer) then
+    pointerWorld:add(
+      Component.get('PLAYER'),
+      bossRef
+    )
+  end
+
   if (not isPlayerInRoom()) then
     return
   end
 
   -- keep boss active even when it is outside of the viewport
-  local bossDistFromPlayer = calcDist(playerRef.x, playerRef.y, bossRef.x, bossRef.y)
   local isNearPlayer = bossDistFromPlayer < (30 * config.gridSize)
   if isNearPlayer and bossRef.canSeeTarget then
     if (not bossRef.encountered) then
@@ -343,19 +354,6 @@ local function keepBossActive()
 end
 
 return function(props)
-  local pointerRef = MapPointer.create({
-    x = 200,
-    y = 200
-  })
-  msgBus.on(msgBus.UPDATE, function()
-    local bossRef = Component.get(bossId)
-    if (not bossRef) then
-      pointerRef:delete(true)
-      return msgBus.CLEANUP
-    end
-    pointerRef.fromTarget = Component.get('PLAYER')
-    pointerRef.target = bossRef
-  end)
   msgBus.on(msgBus.UPDATE, keepBossActive)
 
   local function handleBossDeath(msg)

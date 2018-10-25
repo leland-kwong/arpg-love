@@ -3,11 +3,13 @@ local AnimationFactory = require 'components.animation-factory'
 local bump = require 'modules.bump'
 local msgBus = require 'components.msg-bus'
 local camera = require 'components.camera'
+local Color = require 'modules.color'
 
-local MapPointer = {
-  -- debug = true,
+local MapPointerWorld = {
+  debug = true,
   fromTarget = nil,
-  target = nil -- an object with `x` and `y` coordinates
+  target = nil, -- an object with `x` and `y` coordinates
+  pointers = {}
 }
 
 local screenEdgeCollisionWorld = bump.newWorld(100)
@@ -51,57 +53,66 @@ end
 msgBus.on(msgBus.UPDATE, setScreenBoundsCollisions)
 setScreenBoundsCollisions()
 
-function handleCollisions(self)
+function handleCollisions(self, target)
   local camera = require 'components.camera'
-  local toX, toY = camera:toScreenCoords(self.target.x, self.target.y)
+  local toX, toY = camera:toScreenCoords(target.x, target.y)
   local actualX, actualY, _, numCollisions = self.collisionObject:move(toX, toY)
-  self.x, self.y = actualX, actualY
-  self.pointIsInsideViewport = numCollisions == 0
+  local pointIsInsideViewport = numCollisions == 0
+  return actualX, actualY, pointIsInsideViewport
 end
 
-function MapPointer.init(self)
+function MapPointerWorld.init(self)
   Component.addToGroup(self, 'hud')
 
   self.collisionObject = self:addCollisionObject(
     'map-pointer',
-    self.x,
-    self.y,
+    1,
+    1,
     16,
     16
   ):addToWorld(screenEdgeCollisionWorld)
 end
 
-function MapPointer.update(self)
-  local screenWidth, screenHeight = camera:getSize()
-  self.collisionObject:update(screenWidth/2, screenHeight/2)
-  handleCollisions(self)
-  self:setDrawDisabled(self.pointIsInsideViewport or (not self.target) or (not self.fromTarget))
+function MapPointerWorld.add(self, fromTarget, target, color)
+  local defaultColor = Color.YELLOW
+  table.insert(self.pointers, {
+    fromTarget = fromTarget,
+    target = target,
+    color = color or defaultColor
+  })
 end
 
-function MapPointer.draw(self)
+function MapPointerWorld.draw(self)
   local c = self.collisionObject
 
-  if self.debug then
-    love.graphics.setColor(1,1,0,0.5)
-    love.graphics.rectangle('fill', c.x, c.y, c.w, c.h)
+  for i=1, #self.pointers do
+    local pointer = self.pointers[i]
+    local animation = AnimationFactory:newStaticSprite('gui-map-pointer')
+    local Position = require 'utils.position'
+    local vx, vy = Position.getDirection(pointer.fromTarget.x, pointer.fromTarget.y, pointer.target.x, pointer.target.y)
+    love.graphics.setColor(pointer.color)
+    local ox, oy = animation:getSourceOffset()
+    local x, y = handleCollisions(self, pointer.target)
+    love.graphics.draw(
+      AnimationFactory.atlas,
+      animation.sprite,
+      x + c.w/2,
+      y + c.h/2,
+      math.atan2(vx, vy) * -1 - math.pi,
+      1,
+      1,
+      ox,
+      oy
+    )
+
+    if self.debug then
+      love.graphics.setColor(1,1,0,0.5)
+      love.graphics.rectangle('fill', c.x, c.y, c.w, c.h)
+    end
   end
 
-  local animation = AnimationFactory:newStaticSprite('gui-map-pointer')
-  local Position = require 'utils.position'
-  local vx, vy = Position.getDirection(self.fromTarget.x, self.fromTarget.y, self.target.x, self.target.y)
-  love.graphics.setColor(1,1,1)
-  local ox, oy = animation:getSourceOffset()
-  love.graphics.draw(
-    AnimationFactory.atlas,
-    animation.sprite,
-    self.x + c.w/2,
-    self.y + c.h/2,
-    math.atan2(vx, vy) * -1 - math.pi,
-    1,
-    1,
-    ox,
-    oy
-  )
+  -- reset pointers list after drawing them
+  self.pointers = {}
 end
 
-return Component.createFactory(MapPointer)
+return Component.createFactory(MapPointerWorld)
