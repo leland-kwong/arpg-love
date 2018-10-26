@@ -34,7 +34,9 @@ local PostDraw = Component.create({
     Component.addToGroup(self, 'all')
   end,
   draw = function()
-    love.graphics.setBlendMode(oBlendMode)
+    if oBlendMode then
+      love.graphics.setBlendMode(oBlendMode)
+    end
   end,
   drawOrder = function()
     return drawOrders.BulletPostDraw
