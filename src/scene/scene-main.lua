@@ -181,6 +181,8 @@ local function initializeMap()
 end
 
 function MainScene.init(self)
+  Component.get('lightWorld').ambientColor = {0.6,0.6,0.6,1}
+
   -- self.backgroundComponent = backgroundTypes.starField()
   local serializedState = msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:consumeSnapshot()
 

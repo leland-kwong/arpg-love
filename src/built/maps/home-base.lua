@@ -345,7 +345,7 @@ return {
           type = "",
           shape = "ellipse",
           x = 476,
-          y = 395,
+          y = 398,
           width = 8,
           height = 8,
           rotation = 0,

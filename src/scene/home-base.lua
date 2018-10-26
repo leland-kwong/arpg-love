@@ -25,7 +25,7 @@ local HomeBase = {
 }
 
 function HomeBase.init(self)
-  Component.get('lightWorld').ambientColor = {0.6,0.6,0.6,1}
+  Component.get('lightWorld').ambientColor = {1,1,1,1}
 
   local collisionObjectsLayer = f.find(tileData.layers, function(layer)
     return layer.name == 'collisions'
