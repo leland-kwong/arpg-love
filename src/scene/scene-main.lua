@@ -184,7 +184,6 @@ function MainScene.init(self)
   -- self.backgroundComponent = backgroundTypes.starField()
   local serializedState = msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:consumeSnapshot()
 
-  self.lightWorld = Component.get('lightWorld')
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0,0,0,1})
 
   local rootState = msgBus.send(msgBus.GAME_STATE_GET)

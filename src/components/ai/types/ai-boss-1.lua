@@ -86,7 +86,7 @@ end
 
 function AbilityBeamStrike.update(self, state, dt)
   for _,beam in pairs(Component.groups.bossActiveBeams.getAll()) do
-    local lw = Component.get('MAIN_SCENE').lightWorld
+    local lw = Component.get('lightWorld')
     lw:addLight(beam.x, beam.y, 20)
   end
 

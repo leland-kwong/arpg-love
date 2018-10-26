@@ -158,11 +158,8 @@ local Bullet = {
       end
     end
 
-    local mainSceneRef = Component.get('MAIN_SCENE')
-    if mainSceneRef then
-      local lw = mainSceneRef.lightWorld
-      lw:addLight(self.x, self.y, 10, self.color)
-    end
+    Component.get('lightWorld')
+      :addLight(self.x, self.y, 10, self.color)
     self.angle = self.angle + (dt * 8)
   end,
 

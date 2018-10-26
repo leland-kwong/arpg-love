@@ -11,7 +11,10 @@ local LightTest = {
 
 function LightTest.init(self)
   local width, height = love.graphics.getDimensions()
-  self.lw = LightWorld:new(width, height)
+  self.lw = LightWorld:create({
+    width = width,
+    height = height
+  })
     :setAmbientColor({0.4,0.4,0.4,0.1})
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, {1,1,1})
   local Player = require 'components.player'

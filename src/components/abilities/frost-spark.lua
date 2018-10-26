@@ -77,7 +77,7 @@ local FrostSpark = {
   update = function(self, dt)
     self.lifeTime = self.lifeTime - dt
 
-    local lw = Component.get('MAIN_SCENE').lightWorld
+    local lw = Component.get('lightWorld')
     lw:addLight(self.x, self.y, 5)
 
     local dx = self.direction.x * dt * self.speed
