@@ -13,7 +13,7 @@ local aiRarity = require 'components.ai.rarity'
 local f = require 'utils.functional'
 
 local SpawnerAi = {
-  -- debug = true,
+  debug = true,
   group = groups.firstLayer,
   x = 0,
   y = 0,

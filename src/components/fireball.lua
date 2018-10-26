@@ -18,7 +18,6 @@ local maxLifeTime = 2
 
 local filters = {
   obstacle = true,
-  obstacle2 = true,
   ai = true
 }
 local function colFilter(item, other)

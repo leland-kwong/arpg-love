@@ -249,6 +249,18 @@ local function computeObstacleInfluence(self)
 	return sepX/dist, sepY/dist
 end
 
+local function collidesWithPlayer(self, nextX, nextY)
+  local collisionWorlds = require 'components.collision-worlds'
+  local threshold = 4 -- minimum distance between player and ai collision objects
+  local _, len = collisionWorlds.player:queryRect(
+    nextX - self.collision.ox - threshold,
+    nextY - self.collision.oy - threshold,
+    self.w + threshold * 2,
+    self.h + threshold * 2
+  )
+  return len > 0
+end
+
 local function setNextPosition(self, speed, radius)
   local finiteState = self:getFiniteState()
   if (finiteState ~= states.MOVING) and (finiteState ~= states.FREE_MOVING) then
@@ -296,9 +308,14 @@ local function setNextPosition(self, speed, radius)
 	self.vy = (self.vy + normVy) * 0.5
 
   -- Apply direction with speed and our damping based on the target distance
-	self.x = self.x + self.vx * speed * targetDistDamping
-  self.y = self.y + self.vy * speed * targetDistDamping
-  self.collision:update(self.x, self.y)
+	local nextX = self.x + self.vx * speed * targetDistDamping
+  local nextY = self.y + self.vy * speed * targetDistDamping
+
+  if not collidesWithPlayer(self, nextX, nextY) then
+    self.collision:update(nextX, nextY)
+    self.x = nextX
+    self.y = nextY
+  end
 
   local Vec2 = require 'modules.brinevector'
   self.prevX, self.prevY = self.prevX or 0, self.prevY or 0
@@ -329,7 +346,7 @@ end
 
 local function createLight(self)
   if self.lightRadius then
-    local lightWorld = Component.get('MAIN_SCENE').lightWorld
+    local lightWorld = Component.get('lightWorld')
     local lightColor = self.lightColor or self.rarityColor
     lightWorld:addLight(
       self.x,

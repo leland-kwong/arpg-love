@@ -46,7 +46,6 @@ local EMPTY = {}
 
 local defaultFilters = {
   obstacle = true,
-  obstacle2 = true,
 }
 
 local ColFilter = memoize(function(groupToMatch, targetsToIgnore)

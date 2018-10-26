@@ -375,7 +375,6 @@ local Player = {
     local CreateStore = require'components.state.state'
     self.rootStore = msgBus.send(msgBus.GAME_STATE_GET)
     self.dir = DIRECTION_RIGHT
-    colMap:add(self, self.x, self.y, self.w, self.h)
 
     local energyRegenerationDuration = 99999999
     msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
@@ -427,6 +426,15 @@ local Player = {
       collisionOffX,
       5
     ):addToWorld(colMap)
+    self.localCollision = self:addCollisionObject(
+      'player',
+      self.x,
+      self.y,
+      self.colObj.w,
+      self.colObj.h,
+      self.colObj.ox,
+      self.colObj.oy
+    ):addToWorld(collisionWorlds.player)
     self.zoneCollision = self:addCollisionObject(
       'player',
       1,
@@ -582,6 +590,8 @@ function Player.handleMapCollision(self, nextX, nextY)
   self.y = actualY
   self.h = h
   self.w = w
+
+  self.localCollision:move(actualX, actualY)
 end
 
 local function zoneCollisionFilter()
@@ -641,8 +651,13 @@ end
 local function drawDebug(self)
   if config.collisionDebug then
     local c = self.colObj
-    love.graphics.setColor(1,1,0,0.8)
+    love.graphics.setColor(0,0,1,0.8)
     love.graphics.circle('fill', self.x, self.y, 4)
+
+    love.graphics.setColor(0,1,0)
+    local c1 = self.colObj
+    local x, y = c1:getPositionWithOffset()
+    love.graphics.rectangle('line', x, y, c1.w, c1.h)
   end
 end
 

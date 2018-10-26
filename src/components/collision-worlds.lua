@@ -4,7 +4,15 @@ local Worlds = {}
 
 Worlds.gui = bump.newWorld(config.gridSize)
 Worlds.map = bump.newWorld(config.gridSize)
-Worlds.zones = bump.newWorld(1) -- we use grid coordinates here
+
+--[[
+  Contains only the player's collision. This is useful for querying whether an object would
+  collide with the player without having to filter out other collision objects.
+]]
+Worlds.player = bump.newWorld(config.gridSize)
+
+-- uses grid coordinates
+Worlds.zones = bump.newWorld(1)
 
 function Worlds.reset(world)
   local items, len = world:getItems()
