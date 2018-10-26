@@ -251,7 +251,7 @@ end
 
 local function collidesWithPlayer(self, nextX, nextY)
   local collisionWorlds = require 'components.collision-worlds'
-  local threshold = 4 -- minimum distance between player and ai collision objects
+  local threshold = 2 -- minimum distance between player and ai collision objects
   local _, len = collisionWorlds.player:queryRect(
     nextX - self.collision.ox - threshold,
     nextY - self.collision.oy - threshold,

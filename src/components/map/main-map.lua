@@ -37,12 +37,24 @@ local function setupCollisionObjects(self, grid, gridSize)
       local animation = animationFactory:newStaticSprite(animationName)
       local ox, oy = animation:getSourceOffset()
 
+      --[[
+        Padding around the wall to prevent player and ai from hugging the wall completely. This
+        solves a host of problems including line of sight checks not working properly due to
+        rounding issues on a grid system. A value of 1 is enough to fix this
+      ]]
+      local padding = 1
+
       -- setup collision world objects
       local gridSize = self.gridSize
       local tileX, tileY = x * gridSize, y * gridSize
       return self:addCollisionObject(
         collisionGroups.obstacle,
-        tileX, tileY, gridSize, gridSize, ox, 0
+        tileX - padding,
+        tileY - padding,
+        gridSize + padding * 2,
+        gridSize + padding * 2,
+        ox,
+        0
       ):addToWorld(collisionWorlds.map)
     end
   end)
