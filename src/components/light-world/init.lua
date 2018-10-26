@@ -1,42 +1,29 @@
+local Component = require 'modules.component'
 local loadImage = require 'modules.load-image'
 local lightBlurImg = loadImage('built/images/light-blur.png')
 local imageHeight = lightBlurImg:getHeight()
 local scaleAdjustment = imageHeight / 100
-local Vec2 = require 'modules.brinevector'
 local config = require 'config.config'
 
 local defaultLightColor = {1,1,1}
-local defaultAmbientColor = {0.1,0.1,0.1,1}
 
-local LightWorld = {}
-LightWorld.__index = LightWorld
+local LightWorld = {
+  ambientColor = {1,1,1,1}
+}
 
-function LightWorld:new(width, height)
-  local canvas = love.graphics.newCanvas(width, height)
-
-  return setmetatable({
-    canvas = canvas,
-    preDrawCanvas = preDrawCanvas,
-    position = Vec2(0, 0),
-    ambientColor = defaultAmbientColor,
-    lights = {}
-  }, self)
+function LightWorld.init(self)
+  local width, height = self.width, self.height
+  self.canvas = love.graphics.newCanvas(width * 2, height)
+  self.lights = {}
 end
 
-function LightWorld:addLight(x, y, radius, color)
+function LightWorld.addLight(self, x, y, radius, color)
   table.insert(self.lights, {x, y, radius, color or defaultLightColor})
   return self
 end
 
-function LightWorld:setAmbientColor(color)
+function LightWorld.setAmbientColor(self, color)
   self.ambientColor = color
-
-  return self
-end
-
-function LightWorld:setPosition(x, y)
-  self.position.x = x
-  self.position.y = y
 
   return self
 end
@@ -45,7 +32,7 @@ function drawLights(self)
   local oBlendMode = love.graphics.getBlendMode()
   love.graphics.push()
   love.graphics.origin()
-  love.graphics.translate(self.position.x, self.position.y)
+  love.graphics.translate(self.x, self.y)
   love.graphics.setBlendMode('add', 'alphamultiply')
   love.graphics.setCanvas(self.canvas)
 
@@ -66,7 +53,11 @@ function drawLights(self)
   love.graphics.pop()
 end
 
-function LightWorld:draw()
+function LightWorld.draw(self)
+  love.graphics.push()
+  love.graphics.origin()
+  love.graphics.scale(config.scale)
+
   drawLights(self)
 
   local oBlendMode = love.graphics.getBlendMode()
@@ -81,7 +72,7 @@ function LightWorld:draw()
   love.graphics.clear(self.ambientColor)
   love.graphics.setCanvas()
 
-  return self
+  love.graphics.pop()
 end
 
-return LightWorld
+return Component.createFactory(LightWorld)

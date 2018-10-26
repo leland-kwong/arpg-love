@@ -31,6 +31,7 @@ local MapPointerWorld = require 'components.hud.map-pointer'
 local scale = config.scaleFactor
 
 function love.load()
+  require 'main.onload'
   msgBus.send(msgBus.GAME_LOADED)
   love.keyboard.setKeyRepeat(true)
   local vw, vh = config.window.width, config.window.height

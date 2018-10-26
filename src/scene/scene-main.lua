@@ -180,50 +180,11 @@ local function initializeMap()
   return mapGrid
 end
 
-local function setupLightWorld()
-  local LightWorld = require('components.light-world')
-  local width, height = love.graphics.getDimensions()
-  local newLightWorld = LightWorld:new(width, height)
-  local ambientColor = {0.6,0.6,0.6,1}
-  newLightWorld:setAmbientColor(ambientColor)
-
-  Component.create({
-    group = groups.all,
-    update = function()
-      local cameraTranslateX, cameraTranslateY = camera:getPosition()
-      local cWidth, cHeight = camera:getSize()
-      newLightWorld:setPosition(-cameraTranslateX + cWidth/2, -cameraTranslateY + cHeight/2)
-      local playerRef = Component.get('PLAYER')
-      local tx, ty = playerRef:getPosition()
-
-      -- draw light around player
-      newLightWorld:addLight(
-        tx, ty,
-        80,
-        {1,1,1}
-      )
-    end,
-    draw = function()
-      love.graphics.push()
-      love.graphics.origin()
-      love.graphics.scale(2)
-      local jprof = require 'modules.profile'
-      newLightWorld:draw()
-      love.graphics.pop()
-    end,
-    drawOrder = function()
-      return 100 * 100
-    end
-  }):setParent(Component.get('MAIN_SCENE'))
-
-  return newLightWorld
-end
-
 function MainScene.init(self)
   -- self.backgroundComponent = backgroundTypes.starField()
   local serializedState = msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:consumeSnapshot()
 
-  self.lightWorld = setupLightWorld()
+  self.lightWorld = Component.get('lightWorld')
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0,0,0,1})
 
   local rootState = msgBus.send(msgBus.GAME_STATE_GET)

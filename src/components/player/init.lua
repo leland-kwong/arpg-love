@@ -647,6 +647,13 @@ local function drawDebug(self)
 end
 
 function Player.draw(self)
+  -- draw light around player
+  Component.get('lightWorld'):addLight(
+    self.x, self.y,
+    80,
+    {1,1,1}
+  )
+
   local ox, oy = self.animation:getSourceOffset()
   local scaleX, scaleY = 1 * self.dir, 1
 

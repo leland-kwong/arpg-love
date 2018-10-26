@@ -199,6 +199,9 @@ function M.createFactory(blueprint)
       tc.validate(c.angle, tc.NUMBER, false)
     end
 
+    -- add to all components list
+    allComponentsById[id] = c
+
     -- add component to default group
     if c.group then
       M.addToGroup(id, c.group, c)
