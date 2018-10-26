@@ -15,134 +15,196 @@ local function findLayerByName(layers, name)
 end
 
 local objectParsersByType = {
-  legendaryEnemy = function(obj, grid, origin)
-    local config = require 'config.config'
-    local Map = require 'modules.map-generator.index'
-    local SpawnerAi = require 'components.spawn.spawn-ai'
-    local aiType = require('components.ai.types.ai-'..obj.name)
-    local Component = require 'modules.component'
-    SpawnerAi({
-      grid = grid,
-      WALKABLE = Map.WALKABLE,
-      rarity = function(ai)
-        local Color = require 'modules.color'
-        local itemConfig = require 'components.item-inventory.items.config'
-        return ai:set('rarityColor', Color.RARITY_LEGENDARY)
-          :set('armor', ai.armor * 1.2)
-          :set('moveSpeed', ai.moveSpeed * 1.5)
-          :set('experience', 10)
-      end,
-      target = function()
-        return Component.get('PLAYER')
-      end,
-      x = origin.x + (obj.x / config.gridSize),
-      y = origin.y + (obj.y / config.gridSize),
-      types = {
-        aiType
-      }
-    })
-  end,
-  aiGroup = function(obj, grid, origin, blockData)
-    local config = require 'config.config'
-    local Map = require 'modules.map-generator.index'
-    local SpawnerAi = require 'components.spawn.spawn-ai'
-    local Component = require 'modules.component'
+  ['unique-enemies'] = {
+    legendaryEnemy = function(obj, grid, origin)
+      local config = require 'config.config'
+      local Map = require 'modules.map-generator.index'
+      local SpawnerAi = require 'components.spawn.spawn-ai'
+      local aiType = require('components.ai.types.ai-'..obj.name)
+      local Component = require 'modules.component'
+      SpawnerAi({
+        grid = grid,
+        WALKABLE = Map.WALKABLE,
+        rarity = function(ai)
+          local Color = require 'modules.color'
+          local itemConfig = require 'components.item-inventory.items.config'
+          return ai:set('rarityColor', Color.RARITY_LEGENDARY)
+            :set('armor', ai.armor * 1.2)
+            :set('moveSpeed', ai.moveSpeed * 1.5)
+            :set('experience', 10)
+        end,
+        target = function()
+          return Component.get('PLAYER')
+        end,
+        x = origin.x + (obj.x / config.gridSize),
+        y = origin.y + (obj.y / config.gridSize),
+        types = {
+          aiType
+        }
+      })
+    end,
+  },
+  ['spawn-points'] = {
+    aiGroup = function(obj, grid, origin, blockData)
+      local config = require 'config.config'
+      local Map = require 'modules.map-generator.index'
+      local SpawnerAi = require 'components.spawn.spawn-ai'
+      local Component = require 'modules.component'
 
-    local aiTypes = require 'components.ai.types'
-    local chance = require 'utils.chance'
-    local AiTypeGen = chance(f.map(f.keys(aiTypes.types), function(k)
-      return {
-        chance = 1,
-        __call = function()
-          return aiTypes.types[k]
+      local aiTypes = require 'components.ai.types'
+      local chance = require 'utils.chance'
+      local AiTypeGen = chance(f.map(f.keys(aiTypes.types), function(k)
+        return {
+          chance = 1,
+          __call = function()
+            return aiTypes.types[k]
+          end
+        }
+      end))
+      local spawnTypes = {}
+      for i=1, obj.properties.groupSize do
+        table.insert(spawnTypes, AiTypeGen())
+      end
+
+      SpawnerAi({
+        grid = grid,
+        WALKABLE = Map.WALKABLE,
+        target = function()
+          return Component.get('PLAYER')
+        end,
+        x = origin.x + (obj.x / config.gridSize),
+        y = origin.y + (obj.y / config.gridSize),
+        types = spawnTypes
+      })
+    end,
+  },
+  ['environment'] = {
+    environmentDoor = function(obj, grid, origin, blockData)
+      local config = require 'config.config'
+      local Component = require 'modules.component'
+      local AnimationFactory = require 'components.animation-factory'
+      local doorGridWidth, doorGridHeight = obj.width / config.gridSize, obj.height / config.gridSize
+
+      if (not Component.groups.bossDoors) then
+        Component.newGroup({
+          name = 'bossDoors'
+        })
+      end
+      for x=1, doorGridWidth do
+        for y=1, doorGridHeight do
+          local door = Component.create({
+            x = (origin.x * config.gridSize) + obj.x + ((x - 1) * config.gridSize),
+            y = (origin.y * config.gridSize) + obj.y + ((y - 1) * config.gridSize),
+            enable = function(self)
+              local collisionWorlds = require 'components.collision-worlds'
+              self.collisionObject = self:addCollisionObject(
+                'obstacle',
+                self.x,
+                self.y,
+                config.gridSize,
+                config.gridSize
+              ):addToWorld(collisionWorlds.map)
+              Component.addToGroup(self, 'all')
+            end,
+            disable = function(self)
+              if self.collisionObject then
+                self.collisionObject:delete()
+              end
+              self.collisionObject = nil
+              Component.removeFromGroup(self, 'all')
+            end,
+            update = function(self)
+              local Map = require 'modules.map-generator.index'
+              local mapGrid = Component.get('MAIN_SCENE').mapGrid
+              local Grid = require 'utils.grid'
+              local isTraversable = Grid.get(mapGrid, self.x / config.gridSize, self.y / config.gridSize) == Map.WALKABLE
+              self:setDrawDisabled(not isTraversable)
+            end,
+            draw = function(self)
+              local animation = AnimationFactory:newStaticSprite('environment-door')
+              local ox, oy = animation:getOffset()
+              love.graphics.setColor(1,1,1)
+              love.graphics.draw(
+                AnimationFactory.atlas,
+                animation.sprite,
+                self.x,
+                self.y,
+                0,
+                1,
+                1,
+                ox,
+                oy
+              )
+            end,
+            drawOrder = function(self)
+              return Component.groups.all:drawOrder(self)
+            end
+          })
+          Component.addToGroup(door, 'bossDoors')
+          Component.addToGroup(door, 'gameWorld')
         end
-      }
-    end))
-    local spawnTypes = {}
-    for i=1, obj.properties.groupSize do
-      table.insert(spawnTypes, AiTypeGen())
-    end
+      end
+    end,
+    entrance = function(obj, grid, origin, blockData)
+      local Component = require 'modules.component'
+      local config = require 'config.config'
+      local AnimationFactory = require 'components.animation-factory'
+      local animation = AnimationFactory:newStaticSprite('environment-entrance')
+      local width, height = animation:getWidth(), animation:getHeight()
+      Component.create({
+        x = origin.x * config.gridSize + obj.x,
+        y = origin.y * config.gridSize + obj.y,
+        init = function(self)
+          Component.addToGroup(self:getId(), 'all', self)
+          local collisionWorlds = require 'components.collision-worlds'
+          local ox, oy = animation:getSourceOffset()
+          self.collision = self:addCollisionObject(
+            'obstacle',
+            self.x,
+            self.y,
+            width,
+            config.gridSize,
+            ox,
+            0
+          ):addToWorld(collisionWorlds.map)
+        end,
+        draw = function(self)
+          local ox, oy = animation:getOffset()
+          Component.get('lightWorld')
+            :addLight(self.x + width/2, self.y, width / 2)
+          love.graphics.setColor(1,1,1)
+          love.graphics.draw(
+            AnimationFactory.atlas,
+            animation.sprite,
+            self.x,
+            self.y,
+            0,
+            1,
+            1,
+            ox,
+            oy
+          )
 
-    SpawnerAi({
-      grid = grid,
-      WALKABLE = Map.WALKABLE,
-      target = function()
-        return Component.get('PLAYER')
-      end,
-      x = origin.x + (obj.x / config.gridSize),
-      y = origin.y + (obj.y / config.gridSize),
-      types = spawnTypes
-    })
-  end,
-  environmentDoor = function(obj, grid, origin, blockData)
-    local config = require 'config.config'
-    local Component = require 'modules.component'
-    local AnimationFactory = require 'components.animation-factory'
-    local doorGridWidth, doorGridHeight = obj.width / config.gridSize, obj.height / config.gridSize
-
-    if (not Component.groups.bossDoors) then
-      Component.newGroup({
-        name = 'bossDoors'
+          if self.debug then
+            love.graphics.setColor(1,1,1,0.5)
+            love.graphics.rectangle(
+              'fill',
+              self.collision.x - self.collision.ox,
+              self.collision.y - self.collision.oy,
+              self.collision.w,
+              self.collision.h
+            )
+          end
+        end,
+        drawOrder = function(self)
+          return Component.groups.all:drawOrder(self) + 10
+        end
       })
     end
-    for x=1, doorGridWidth do
-      for y=1, doorGridHeight do
-        local door = Component.create({
-          x = (origin.x * config.gridSize) + obj.x + ((x - 1) * config.gridSize),
-          y = (origin.y * config.gridSize) + obj.y + ((y - 1) * config.gridSize),
-          enable = function(self)
-            local collisionWorlds = require 'components.collision-worlds'
-            self.collisionObject = self:addCollisionObject(
-              'obstacle',
-              self.x,
-              self.y,
-              config.gridSize,
-              config.gridSize
-            ):addToWorld(collisionWorlds.map)
-            Component.addToGroup(self, 'all')
-          end,
-          disable = function(self)
-            if self.collisionObject then
-              self.collisionObject:delete()
-            end
-            self.collisionObject = nil
-            Component.removeFromGroup(self, 'all')
-          end,
-          update = function(self)
-            local Map = require 'modules.map-generator.index'
-            local mapGrid = Component.get('MAIN_SCENE').mapGrid
-            local Grid = require 'utils.grid'
-            local isTraversable = Grid.get(mapGrid, self.x / config.gridSize, self.y / config.gridSize) == Map.WALKABLE
-            self:setDrawDisabled(not isTraversable)
-          end,
-          draw = function(self)
-            local animation = AnimationFactory:newStaticSprite('environment-door')
-            local ox, oy = animation:getOffset()
-            love.graphics.setColor(1,1,1)
-            love.graphics.draw(
-              AnimationFactory.atlas,
-              animation.sprite,
-              self.x,
-              self.y,
-              0,
-              1,
-              1,
-              ox,
-              oy
-            )
-          end,
-          drawOrder = function(self)
-            return Component.groups.all:drawOrder(self)
-          end
-        })
-        Component.addToGroup(door, 'bossDoors')
-        Component.addToGroup(door, 'gameWorld')
-      end
-    end
-  end
+  }
 }
 
-local function parseObjectsLayer(grid, gridBlockOrigin, objectsLayer, blockData, gridBlock)
+local function parseObjectsLayer(layerName, objectsLayer, grid, gridBlockOrigin, blockData, gridBlock)
   if (not objectsLayer) then
     return
   end
@@ -150,11 +212,11 @@ local function parseObjectsLayer(grid, gridBlockOrigin, objectsLayer, blockData,
   for i=1, #objects do
     local obj = objects[i]
 
-    -- shift positions by 1 since lua indexes start at 1
+    -- shift positions by 1 full tile since lua indexes start at 1
     obj.x = obj.x + gridBlock.tilewidth
     obj.y = obj.y + gridBlock.tileheight
 
-    local parser = objectParsersByType[obj.type]
+    local parser = objectParsersByType[layerName][obj.type]
     if parser then
       parser(obj, grid, gridBlockOrigin, blockData)
     end
@@ -277,9 +339,10 @@ function Dungeon.new(gridBlockNames, options)
     }
     f.forEach(layersToParse, function(layerName)
       parseObjectsLayer(
+        layerName,
+        findLayerByName(gridBlock.layers, layerName),
         grid,
         origin,
-        findLayerByName(gridBlock.layers, layerName),
         blockData,
         gridBlock
       )

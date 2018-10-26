@@ -8,7 +8,7 @@ return {
   height = 80,
   tilewidth = 16,
   tileheight = 16,
-  nextobjectid = 50,
+  nextobjectid = 52,
   properties = {},
   tilesets = {
     {
@@ -133,6 +133,41 @@ return {
           image = "../../../assets/sprites/custom-art/tiles/treasure-chest.png",
           width = 34,
           height = 28
+        }
+      }
+    },
+    {
+      name = "home-base",
+      firstgid = 24,
+      filename = "../../../assets/maps/home-base.tsx",
+      tilewidth = 960,
+      tileheight = 800,
+      spacing = 0,
+      margin = 0,
+      tileoffset = {
+        x = 0,
+        y = 0
+      },
+      grid = {
+        orientation = "orthogonal",
+        width = 1,
+        height = 1
+      },
+      properties = {},
+      terrains = {},
+      tilecount = 2,
+      tiles = {
+        {
+          id = 0,
+          image = "../../../assets/sprites/custom-art/mothership/mothership.png",
+          width = 960,
+          height = 800
+        },
+        {
+          id = 1,
+          image = "../../../assets/sprites/custom-art/mothership/mothership-room-border.png",
+          width = 960,
+          height = 800
         }
       }
     }
@@ -277,7 +312,7 @@ return {
         12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12,
         12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12,
         12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12,
-        12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12,
+        12, 12, 12, 0, 0, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12,
         12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12,
         12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12,
         12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12,
@@ -332,6 +367,31 @@ return {
     },
     {
       type = "objectgroup",
+      name = "environment",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      draworder = "topdown",
+      properties = {},
+      objects = {
+        {
+          id = 50,
+          name = "entrance",
+          type = "entrance",
+          shape = "rectangle",
+          x = 48,
+          y = 464,
+          width = 32,
+          height = 32,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        }
+      }
+    },
+    {
+      type = "objectgroup",
       name = "spawn-points",
       visible = true,
       opacity = 1,
@@ -345,8 +405,8 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 243,
-          y = 641,
+          x = 224,
+          y = 640,
           width = 53,
           height = 53,
           rotation = 0,
@@ -360,8 +420,8 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 367,
-          y = 102,
+          x = 368,
+          y = 96,
           width = 53,
           height = 53,
           rotation = 0,
@@ -375,8 +435,8 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 569,
-          y = 104,
+          x = 624,
+          y = 96,
           width = 53,
           height = 53,
           rotation = 0,
@@ -390,8 +450,8 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 58,
-          y = 811,
+          x = 64,
+          y = 704,
           width = 53,
           height = 53,
           rotation = 0,
@@ -405,8 +465,8 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 322,
-          y = 1148,
+          x = 320,
+          y = 1152,
           width = 53,
           height = 53,
           rotation = 0,
@@ -435,7 +495,7 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 106,
+          x = 112,
           y = 320,
           width = 53,
           height = 53,
@@ -507,8 +567,8 @@ return {
           name = "legendary-1",
           type = "legendaryEnemy",
           shape = "ellipse",
-          x = 86,
-          y = 552,
+          x = 96,
+          y = 576,
           width = 48,
           height = 48,
           rotation = 0,
