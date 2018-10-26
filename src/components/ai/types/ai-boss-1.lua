@@ -120,9 +120,6 @@ local function Attack(self, x2, y2)
     , targetGroup = collisionGroups.player
     , minDamage = 1
     , maxDamage = 2
-    , drawOrder = function()
-      return self.drawOrder(self) + 1
-    end
   })
 end
 

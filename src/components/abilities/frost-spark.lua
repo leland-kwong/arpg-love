@@ -166,8 +166,8 @@ local FrostSpark = {
 }
 
 FrostSpark.drawOrder = function(self)
-  local order = self.group:drawOrder(self) + 2
-  return order
+  local drawOrders = require 'modules.draw-orders'
+  return drawOrders.FrostSparkDraw
 end
 
 return Component.createFactory(FrostSpark)

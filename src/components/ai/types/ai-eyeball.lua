@@ -100,9 +100,6 @@ function FrostShot.update(self, state)
         , targetGroup = collisionGroups.player
         , minDamage = 1
         , maxDamage = 2
-        , drawOrder = function(self)
-          return Component.groups.all:drawOrder(self) + 2
-        end
       })
       playFrostShotSound()
       DissipateEffect.create({

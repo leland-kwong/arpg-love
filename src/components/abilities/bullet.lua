@@ -12,6 +12,34 @@ local memoize = require 'utils.memoize'
 local typeCheck = require 'utils.type-check'
 local random = math.random
 local collisionGroups = require 'modules.collision-groups'
+local drawOrders = require 'modules.draw-orders'
+
+local oBlendMode = nil
+
+local PreDraw = Component.create({
+  init = function(self)
+    Component.addToGroup(self, 'all')
+  end,
+  draw = function()
+    oBlendMode = love.graphics.getBlendMode()
+    love.graphics.setBlendMode('add')
+  end,
+  drawOrder = function()
+    return drawOrders.BulletPreDraw
+  end
+})
+
+local PostDraw = Component.create({
+  init = function(self)
+    Component.addToGroup(self, 'all')
+  end,
+  draw = function()
+    love.graphics.setBlendMode(oBlendMode)
+  end,
+  drawOrder = function()
+    return drawOrders.BulletPostDraw
+  end
+})
 
 local colMap = collisionWorlds.map
 local EMPTY = {}
@@ -130,16 +158,15 @@ local Bullet = {
       end
     end
 
-    self.angle = self.angle + (dt * 8)
-  end,
-
-  draw = function(self)
     local mainSceneRef = Component.get('MAIN_SCENE')
     if mainSceneRef then
       local lw = mainSceneRef.lightWorld
       lw:addLight(self.x, self.y, 10, self.color)
     end
+    self.angle = self.angle + (dt * 8)
+  end,
 
+  draw = function(self)
     local ox, oy = self.animation:getOffset()
     local scale = self.scale
 
@@ -157,15 +184,12 @@ local Bullet = {
       , oy
     )
 
-    local oBlendMode = love.graphics.getBlendMode()
-    love.graphics.setBlendMode('add')
     -- draw in several passes to give it a brighter blur effect
     drawBullet(self, 1, 1)
     drawBullet(self, 1.4, 0.5)
     drawBullet(self, 1.8, 0.2)
     drawBullet(self, 2.2, 0.1)
     drawBullet(self, 3, 0.1)
-    love.graphics.setBlendMode(oBlendMode)
 
     if config.collisionDebug then
       local debug = require 'modules.debug'
@@ -180,8 +204,7 @@ local Bullet = {
 }
 
 Bullet.drawOrder = function(self)
-  local order = self.group:drawOrder(self) + 3
-  return order
+  return drawOrders.BulletDraw
 end
 
 return Component.createFactory(Bullet)
