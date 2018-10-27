@@ -155,6 +155,8 @@ local function calcMessageBusHandlers()
   return handlersByTypeCount
 end
 
+local maxGraphicStats = {}
+
 function Console.draw(self)
   love.graphics.setFont(font)
   local charHeight = font:getLineHeight() * font:getHeight()
@@ -181,9 +183,21 @@ function Console.draw(self)
   gfx.setColor(Color.MED_GRAY)
   gfx.print('GRAPHICS', edgeOffset, startY)
   gfx.setColor(Color.WHITE)
+
   -- print out each stat on its own line
+  local shouldResetMaxStats = (self.stats.frameCount % 1000) == 0
+  if shouldResetMaxStats then
+    maxGraphicStats = {}
+  end
+
+  local nextStats = {}
+  local gfxStats = gfx.getStats()
+  for k,v in pairs(gfxStats) do
+    nextStats[k] = v .. ' '.. (maxGraphicStats[k] or 0)
+    maxGraphicStats[k] = math.max(maxGraphicStats[k] or 0, v)
+  end
   printTable(
-    gfx.getStats(),
+    nextStats,
     charHeight,
     edgeOffset,
     startY + charHeight

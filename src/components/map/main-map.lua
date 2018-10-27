@@ -100,6 +100,10 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     for _,entity in pairs(Component.groups.activeWalls.getAll()) do
       self.wallObjectsPool:release(entity)
     end
+    self.drawQueue = {
+      floors = {},
+      walls = {}
+    }
   end,
 
   onUpdate = function(self, value, x, y, originX, originY, isInViewport, dt)
@@ -127,40 +131,55 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
       self.renderFloorCache[index] = true
     end
 
+    --[[
+      We must render walls onto a separate layer to get the correct
+      draw ordering. We also must render these before the actual walls
+      since the actual walls have some transparency which will otherwise reveal the game's
+      background color underneath.
+    ]]
+    local isWall = value ~= Map.WALKABLE
+    local canvas = isWall and self.wallsCanvas or self.floorCanvas
+    local drawQueue = self.drawQueue[isWall and 'walls' or 'floors']
+    local function drawFn()
+      local animationName = self.tileRenderDefinition[y][x]
+      local animation = getAnimation(self.animationCache, index, animationName)
+        :update(dt)
+      local ox, oy = animation:getOffset()
+      local tileX, tileY = x * self.gridSize, y * self.gridSize
+
+      love.graphics.setColor(1,1,1)
+      love.graphics.draw(
+        animation.atlas,
+        animation.sprite,
+        tileX,
+        tileY,
+        0,
+        1,
+        1,
+        ox,
+        oy
+      )
+    end
+    table.insert(drawQueue, drawFn)
+  end,
+
+  onUpdateEnd = function(self)
     love.graphics.push()
     love.graphics.origin()
-
-    local animationName = self.tileRenderDefinition[y][x]
-    if value ~= Map.WALKABLE then
-      --[[
-        We must render walls onto a separate layer to get the correct
-        draw ordering. We also must render these before the actual walls
-        since the actual walls have some transparency which will otherwise reveal the game's
-        background color underneath.
-      ]]
-      love.graphics.setCanvas(self.wallsCanvas)
-    else
-      love.graphics.setCanvas(self.floorCanvas)
+    love.graphics.setCanvas(self.floorCanvas)
+    for i=1, #self.drawQueue.floors do
+      local callback = self.drawQueue.floors[i]
+      callback()
     end
-    local animation = getAnimation(self.animationCache, index, animationName)
-      :update(dt)
-    local ox, oy = animation:getOffset()
-    local tileX, tileY = x * self.gridSize, y * self.gridSize
 
-    love.graphics.setColor(1,1,1)
-    love.graphics.draw(
-      animation.atlas,
-      animation.sprite,
-      tileX,
-      tileY,
-      0,
-      1,
-      1,
-      ox,
-      oy
-    )
-    love.graphics.pop()
+    love.graphics.setCanvas(self.wallsCanvas)
+    for i=1, #self.drawQueue.walls do
+      local callback = self.drawQueue.walls[i]
+      callback()
+    end
+
     love.graphics.setCanvas()
+    love.graphics.pop()
   end,
 
   renderEnd = function(self)
