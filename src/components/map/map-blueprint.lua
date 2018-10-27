@@ -25,6 +25,7 @@ local function iterateActiveGrid(self, cb, a, b, c)
   -- viewport origin
   local originX = max(1, w)
   local originY = max(1, s)
+  self.originX, self.originY = originX, originY
 
   --[[
     FIXME: thresholds are here as a way to make sure rendering reaches the edge of the screen.

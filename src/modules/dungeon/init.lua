@@ -145,12 +145,16 @@ local objectParsersByType = {
         end
       end
     end,
-    entrance = function(obj, grid, origin, blockData)
+    levelExit = function(obj, grid, origin, blockData)
       local Component = require 'modules.component'
       local config = require 'config.config'
       local AnimationFactory = require 'components.animation-factory'
       local animation = AnimationFactory:newStaticSprite('environment-entrance')
       local width, height = animation:getWidth(), animation:getHeight()
+      local Position = require 'utils.position'
+      local gridX, gridY = Position.pixelsToGridUnits(obj.x, obj.y, config.gridSize)
+      local Color = require 'modules.color'
+      local minimapColor = Color.CYAN
       Component.create({
         x = origin.x * config.gridSize + obj.x,
         y = origin.y * config.gridSize + obj.y,
@@ -167,6 +171,27 @@ local objectParsersByType = {
             ox,
             0
           ):addToWorld(collisionWorlds.map)
+          self.mapPointerPosition = {
+            x = self.x + width/2 - 8,
+            y = self.y + height/2
+          }
+        end,
+        update = function(self)
+          local minimapRef = Component.get('miniMap')
+          self.minimapRenderer = self.minimapRenderer or function()
+            love.graphics.setColor(minimapColor)
+            love.graphics.rectangle('fill', 0, 0, 2, 1)
+            -- entrance direction
+            love.graphics.circle('fill', 1, 3, 2)
+          end
+          minimapRef:renderBlock(gridX, gridY, self.minimapRenderer)
+
+          Component.get('hudPointerWorld')
+            :add(
+              Component.get('PLAYER'),
+              self.mapPointerPosition,
+              minimapColor
+            )
         end,
         draw = function(self)
           local ox, oy = animation:getOffset()

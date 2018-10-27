@@ -1,3 +1,9 @@
+--DEPRECATION: reverseX and reverseY are no longer supported
+
+--[[
+	Iterates a 2d grid assuming that rows and columns are arrays.
+	This does not support grids that have missing rows and/or columns.
+]]
 local function iterateGrid(grid, callback, reverseX, reverseY)
 	local lastRow = #grid + 1
 	local lastCol = #grid[1] + 1

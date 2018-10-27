@@ -8,7 +8,7 @@ local GetIndexByCoordinate = memoize(require 'utils.get-index-by-coordinate')
 
 local COLOR_TILE_OUT_OF_VIEW = {1,1,1,0.3}
 local COLOR_TILE_IN_VIEW = {1,1,1,1}
-local COLOR_WALL = {1,1,1,0.9}
+local COLOR_WALL = {1,1,1,0.7}
 local COLOR_GROUND = {0,0,0,0.2}
 local floor = math.floor
 local minimapTileRenderers = {
@@ -37,18 +37,31 @@ local minimapTileRenderers = {
 }
 
 local function drawPlayerPosition(self, centerX, centerY)
+  local playerDrawX, playerDrawY = self.x + centerX, self.y + centerY
   -- translucent background around player for better visibility
   love.graphics.setColor(1,1,1,0.3)
   local bgRadius = 5
-  love.graphics.circle('fill', self.x + centerX, self.y + centerY, bgRadius)
+  love.graphics.circle('fill', playerDrawX, playerDrawY, bgRadius)
 
   -- granular player position indicator
   love.graphics.setColor(1,1,0)
-  love.graphics.circle('fill', self.x + centerX, self.y + centerY, 1)
+  love.graphics.circle('fill', playerDrawX, playerDrawY, 1)
+end
+
+local function drawDynamicBlocks(self)
+  local Grid = require 'utils.grid'
+  love.graphics.push()
+  Grid.forEach(self.blocks, function(renderFn, x, y)
+    love.graphics.translate(self.x + x, self.y + y)
+    renderFn()
+  end)
+  love.graphics.pop()
+  self.blocks = {}
 end
 
 -- minimap
 local blueprint = objectUtils.assign({}, mapBlueprint, {
+  id = 'miniMap',
   group = groups.hud,
   x = 50,
   y = 50,
@@ -67,6 +80,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
         self.h
       )
     end
+    self.blocks = {}
   end,
 
   renderStart = function(self)
@@ -101,16 +115,24 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
 
     -- translate the minimap so its centered around the player
     local cameraX, cameraY  = self.camera:getPosition()
+    local Position = require 'utils.position'
     local tx, ty = centerX - cameraX/self.gridSize, centerY - cameraY/self.gridSize
     love.graphics.translate(tx, ty)
     love.graphics.setColor(1,1,1,1)
     love.graphics.setBlendMode('alpha')
     love.graphics.draw(self.canvas)
+    drawDynamicBlocks(self, centerX, centerY)
     love.graphics.setStencilTest()
     love.graphics.pop()
 
     drawPlayerPosition(self, centerX, centerY)
   end
 })
+
+-- adds a block for the next draw frame, and gets removed automatically each frame
+function blueprint.renderBlock(self, gridX, gridY, renderFn)
+  local Grid = require 'utils.grid'
+  Grid.set(self.blocks, gridX, gridY, renderFn)
+end
 
 return Component.createFactory(blueprint)

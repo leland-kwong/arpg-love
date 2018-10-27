@@ -17,4 +17,12 @@ function Grid.set(grid, x, y, value)
   return value
 end
 
+function Grid.forEach(grid, callback)
+  for y,row in pairs(grid) do
+    for x,colValue in pairs(row) do
+      callback(colValue, x, y)
+    end
+  end
+end
+
 return Grid

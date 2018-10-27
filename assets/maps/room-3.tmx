@@ -171,7 +171,7 @@
 </data>
  </layer>
  <objectgroup color="#06cddf" name="environment">
-  <object id="50" name="entrance" type="entrance" x="48" y="464" width="32" height="16"/>
+  <object id="50" name="entrance" type="levelExit" x="48" y="464" width="32" height="16"/>
  </objectgroup>
  <objectgroup color="#ffff00" name="spawn-points">
   <object id="29" name="ai-group" type="aiGroup" x="224" y="640" width="53" height="53">

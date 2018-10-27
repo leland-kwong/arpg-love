@@ -378,12 +378,12 @@ return {
         {
           id = 50,
           name = "entrance",
-          type = "entrance",
+          type = "levelExit",
           shape = "rectangle",
           x = 48,
           y = 464,
           width = 32,
-          height = 32,
+          height = 16,
           rotation = 0,
           visible = true,
           properties = {}
