@@ -53,12 +53,22 @@ return Component.createFactory({
     end
     minimapRef:renderBlock(self.gridX, self.gridY, self.minimapRenderer)
 
-    Component.get('hudPointerWorld')
-      :add(
-        Component.get('PLAYER'),
-        self.mapPointerPosition,
-        minimapColor
-      )
+    local calcDist = require 'utils.math'.dist
+    local distFromPlayer = calcDist(
+      self.mapPointerPosition.x,
+      self.mapPointerPosition.y,
+      Component.get('PLAYER').x,
+      Component.get('PLAYER').y
+    )
+
+    if distFromPlayer <= (60 * config.gridSize) then
+      Component.get('hudPointerWorld')
+        :add(
+          Component.get('PLAYER'),
+          self.mapPointerPosition,
+          minimapColor
+        )
+    end
 
     local len = select(4, self.collision:check(self.x, self.y + 4, collisionFilter))
     local playerCollided = len > 0
