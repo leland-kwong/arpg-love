@@ -64,7 +64,11 @@ local globalState = {
 
 msgBus.on(msgBus.NEW_GAME, function()
   globalState.stateSnapshot:consumeSnapshot()
-  globalState.generatedMaps = {}
 end, 1)
+
+msgBus.NEW_MAP = 'NEW_MAP'
+msgBus.on(msgBus.NEW_MAP, function()
+  globalState.stateSnapshot:consumeSnapshot()
+end)
 
 return globalState
