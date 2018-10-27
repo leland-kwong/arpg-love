@@ -19,32 +19,6 @@ local function setupTileTypes(types)
   return list
 end
 
-local backgroundTypes = {
-  starField = function()
-    local StarField = require 'components.star-field'
-    local Color = require 'modules.color'
-    local starField = StarField.create({
-      particleBaseColor = {Color.rgba255(244, 66, 217)},
-      updateRate = 30,
-      direction = 0,
-      emissionRate = 4000,
-      speed = {0}
-    }):setParent(Component.get('MAIN_SCENE'))
-    msgBus.on(msgBus.UPDATE, function()
-      if starField:isDeleted() then
-        return msgBus.CLEANUP
-      end
-      local camera = require 'components.camera'
-      local x, y = camera:getPosition()
-      starField:setPosition(
-        x * 0.5,
-        y * 0.5
-      )
-    end)
-    return starField
-  end
-}
-
 local gridTileTypes = {
   -- unwalkable
   [0] = setupTileTypes({
@@ -131,7 +105,6 @@ love.mouse.setCursor(cursor)
 function MainScene.init(self)
   Component.get('lightWorld').ambientColor = {0.6,0.6,0.6,1}
 
-  -- self.backgroundComponent = backgroundTypes.starField()
   local serializedState = msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:consumeSnapshot()
 
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0,0,0,1})
