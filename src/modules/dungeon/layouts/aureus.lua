@@ -21,13 +21,12 @@ return function()
 
   local function generateMapBlockDefinitions()
     local blocks = {
-      'room-3'
       -- 'room-boss-1'
     }
     local mapDefinitions = {
-      -- function()
-      --   return 'room-3'
-      -- end,
+      function()
+        return 'room-3'
+      end,
       mapBlockGenerator,
       mapBlockGenerator,
       mapBlockGenerator,
@@ -39,14 +38,22 @@ return function()
       table.insert(blocks, block)
     end
 
-    -- local bossRoomIndex = math.random(#blocks - 1, #blocks)
-    table.insert(blocks, 2, 'room-boss-1')
+    local bossRoomIndex = math.random(#blocks - 1, #blocks)
+    table.insert(blocks, bossRoomIndex, 'room-boss-1')
 
     return blocks
   end
 
   return {
     gridBlockNames = generateMapBlockDefinitions(),
-    columns = 3
+    columns = 3,
+    startPosition = {
+      x = 3,
+      y = 1
+    },
+    exitPosition = {
+      x = 3,
+      y = 1
+    }
   }
 end

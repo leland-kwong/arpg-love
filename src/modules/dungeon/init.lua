@@ -149,102 +149,22 @@ local objectParsersByType = {
       end
     end,
     levelExit = function(obj, grid, origin, blockData)
-      local Component = require 'modules.component'
+      local msgBus = require 'components.msg-bus'
+      local LevelExit = require 'components.map.level-exit'
       local config = require 'config.config'
-      local AnimationFactory = require 'components.animation-factory'
-      local animation = AnimationFactory:newStaticSprite('environment-entrance')
-      local width, height = animation:getWidth(), animation:getHeight()
-      local Position = require 'utils.position'
-      local gridX, gridY = Position.pixelsToGridUnits(obj.x, obj.y, config.gridSize)
-      local Color = require 'modules.color'
-      local minimapColor = Color.CYAN
-      local function collisionFilter(_, other)
-        local collisionGroups = require 'modules.collision-groups'
-        if collisionGroups.matches(other.group, 'player') then
-          return 'cross'
-        end
-        return false
-      end
-      Component.create({
-        class = 'environment',
+      LevelExit.create({
         x = origin.x * config.gridSize + obj.x,
         y = origin.y * config.gridSize + obj.y,
-        init = function(self)
-          Component.addToGroup(self:getId(), 'all', self)
-          self:setParent(Component.get('MAIN_SCENE'))
-
-          local collisionWorlds = require 'components.collision-worlds'
-          local ox, oy = animation:getSourceOffset()
-          self.collision = self:addCollisionObject(
-            'obstacle',
-            self.x,
-            self.y,
-            width,
-            config.gridSize,
-            ox,
-            0
-          ):addToWorld(collisionWorlds.map)
-          self.mapPointerPosition = {
-            x = self.x + width/2 - 8,
-            y = self.y + height/2
-          }
-        end,
-        update = function(self)
-          local minimapRef = Component.get('miniMap')
-          self.minimapRenderer = self.minimapRenderer or function()
-            love.graphics.setColor(minimapColor)
-            love.graphics.rectangle('fill', 0, 0, 2, 1)
-            -- entrance direction
-            love.graphics.circle('fill', 1, 3, 2)
-          end
-          minimapRef:renderBlock(gridX, gridY, self.minimapRenderer)
-
-          Component.get('hudPointerWorld')
-            :add(
-              Component.get('PLAYER'),
-              self.mapPointerPosition,
-              minimapColor
-            )
-
-          local len = select(4, self.collision:check(self.x, self.y + 4, collisionFilter))
-          local playerCollided = len > 0
-          if playerCollided then
-            consoleLog('player enter entrance', Time())
-          end
-        end,
-        draw = function(self)
-          local ox, oy = animation:getOffset()
-          Component.get('lightWorld')
-            :addLight(self.x + width/2, self.y, width / 2)
-          love.graphics.setColor(1,1,1)
-          love.graphics.draw(
-            AnimationFactory.atlas,
-            animation.sprite,
-            self.x,
-            self.y,
-            0,
-            1,
-            1,
-            ox,
-            oy
-          )
-
-          if self.debug then
-            love.graphics.setColor(1,1,1,0.5)
-            love.graphics.rectangle(
-              'fill',
-              self.collision.x - self.collision.ox,
-              self.collision.y - self.collision.oy,
-              self.collision.w,
-              self.collision.h
-            )
-          end
-        end,
-        drawOrder = function(self)
-          return Component.groups.all:drawOrder(self) + 10
-        end,
-        serialize = function(self)
-          return self.initialProps
+        onEnter = function()
+          msgBus.send(msgBus.NEW_MAP)
+          msgBus.send(msgBus.SCENE_STACK_REPLACE, {
+            scene = require 'scene.scene-main',
+            props = {
+              generateMap = function()
+                return Dungeon:new('aureus')
+              end
+            }
+          })
         end
       })
     end
@@ -311,15 +231,20 @@ local cellTranslationsByLayer = {
   }
 }
 
+local defaultOptions = {
+  linksTo = nil -- previous mapId
+}
+
 -- generates a dungeon and returns the dungeon id
-function Dungeon:new(layoutType)
+function Dungeon:new(layoutType, options)
+  local assign = require 'utils.object-utils'.assign
+  options = assign({}, defaultOptions, options)
   local layoutGenerator = require('modules.dungeon.layouts.'..layoutType)
   local layout = layoutGenerator()
   local extractProps = require 'utils.object-utils.extract'
   local gridBlockNames, columns = extractProps(layout, 'gridBlockNames', 'columns')
 
   collisionWorlds.reset(collisionWorlds.zones)
-  local assign = require 'utils.object-utils'.assign
 
   assert(#gridBlockNames%2 == 0, 'number of grid blocks must be an even number')
 
