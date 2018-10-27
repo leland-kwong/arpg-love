@@ -106,6 +106,7 @@ local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', 
 love.mouse.setCursor(cursor)
 
 function MainScene.init(self)
+  msgBus.send(msgBus.NEW_MAP)
   Component.get('lightWorld').ambientColor = {0.6,0.6,0.6,1}
 
   local serializedState = msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:consumeSnapshot(self.mapId)
@@ -117,7 +118,7 @@ function MainScene.init(self)
   local parent = self
 
   local Dungeon = require 'modules.dungeon'
-  local mapGrid = serializedState and serializedState.mainMap[1].state or Dungeon:getData(self.mapId).grid
+  local mapGrid = serializedState and (serializedState.mainMap and serializedState.mainMap[1].state) or Dungeon:getData(self.mapId).grid
   local gridTileDefinitions = cloneGrid(mapGrid, function(v, x, y)
     local tileGroup = gridTileTypes[v]
     if tileGroup then
@@ -203,10 +204,10 @@ function MainScene.init(self)
     serializedState.portal[1].state.position
   if (not playerStartPos) then
     if self.exitId then
-      print('exitId', self.exitId)
       local x, y = Component.get(self.exitId):getPosition()
+      local entranceXOffset = 1 * config.gridSize
       local entranceYOffset = 3 * config.gridSize
-      playerStartPos = {x = x, y = y + entranceYOffset}
+      playerStartPos = {x = x + entranceXOffset, y = y + entranceYOffset}
     else
       local defaultStartPosition = {x = 4 * config.gridSize, y = 5 * config.gridSize}
       playerStartPos = defaultStartPosition
@@ -265,10 +266,7 @@ local function toggleEntityVisibility(self)
 end
 
 function MainScene.update(self)
-  local jprof = require 'modules.profile'
-  jprof.push('toggleEntityVisibility')
   toggleEntityVisibility(self)
-  jprof.pop('toggleEntityVisibility')
 end
 
 local perf = require'utils.perf'
@@ -284,7 +282,6 @@ MainScene.update = perf({
 
 function MainScene.final(self)
   msgBus.off(self.listeners)
-  activeEntities = {}
 end
 
 return Component.createFactory(MainScene)

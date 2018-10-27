@@ -114,6 +114,19 @@ function HomeBase.init(self)
       )
     end)
   }
+
+  previousState = previousState or {}
+  local nextState = {}
+  for group in pairs(Component.groups) do
+    local count = 0
+    for _ in pairs(Component.groups[group].getAll()) do
+      count = count + 1
+    end
+    nextState[group] = count
+    local diff = count - (previousState[group] or 0)
+    print(group..': '..count..' '..diff)
+  end
+  previousState = nextState
 end
 
 function HomeBase.update(self)
