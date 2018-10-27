@@ -73,6 +73,7 @@ end)
 
 local Console = {
   name = 'Console',
+  resetMaxEveryNumFrames = 60,
   stats = {
     accumulatedMemoryUsed = 0,
     currentMemoryUsed = 0,
@@ -185,7 +186,7 @@ function Console.draw(self)
   gfx.setColor(Color.WHITE)
 
   -- print out each stat on its own line
-  local shouldResetMaxStats = (self.stats.frameCount % 1000) == 0
+  local shouldResetMaxStats = (self.stats.frameCount % self.resetMaxEveryNumFrames) == 0
   if shouldResetMaxStats then
     maxGraphicStats = {}
   end
