@@ -156,13 +156,11 @@ local objectParsersByType = {
         x = origin.x * config.gridSize + obj.x,
         y = origin.y * config.gridSize + obj.y,
         onEnter = function()
-          msgBus.send(msgBus.NEW_MAP)
-          msgBus.send(msgBus.SCENE_STACK_REPLACE, {
+          local Component = require 'modules.component'
+          msgBus.send(msgBus.SCENE_STACK_PUSH, {
             scene = require 'scene.scene-main',
             props = {
-              generateMap = function()
-                return Dungeon:new('aureus')
-              end
+              mapId = Dungeon:new('aureus-floor-2')
             }
           })
         end
@@ -235,8 +233,12 @@ local defaultOptions = {
   linksTo = nil -- previous mapId
 }
 
--- generates a dungeon and returns the dungeon id
-function Dungeon:new(layoutType, options)
+--[[
+  Initializes and generates a dungeon.
+
+  Returns a 2-d grid.
+]]
+local function buildDungeon(layoutType, options)
   local assign = require 'utils.object-utils'.assign
   options = assign({}, defaultOptions, options)
   local layoutGenerator = require('modules.dungeon.layouts.'..layoutType)
@@ -322,19 +324,28 @@ function Dungeon:new(layoutType, options)
     end)
   end
 
-  local uid = require 'utils.uid'
-  local dungeonId = uid()
-  local layoutData = {
+  return {
     grid = grid,
     name = layoutType
   }
-  self.generated[dungeonId] = layoutData
+end
+
+-- generates a dungeon and returns the dungeon id
+function Dungeon:new(layoutType, options)
+  local uid = require 'utils.uid'
+  local dungeonId = uid()
+  self.generated[dungeonId] = {
+    layoutType = layoutType,
+    options = options
+  }
   return dungeonId
 end
 
 -- gets the data for the generated dungeon by its id
 function Dungeon:getData(dungeonId)
-  return self.generated[dungeonId]
+  local dungeon = self.generated[dungeonId]
+  dungeon.built = dungeon.built or buildDungeon(dungeon.layoutType, dungeon.options)
+  return dungeon.built
 end
 
 function Dungeon:remove(dungeonId)

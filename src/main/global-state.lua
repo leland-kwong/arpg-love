@@ -3,6 +3,11 @@ local sceneManager = require 'scene.manager'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local CreateStore = require 'components.state.state'
+local Lru = require 'utils.lru'
+
+local function newStateStorage()
+  return Lru.new(100)
+end
 
 local globalState = {
   activeScene = nil,
@@ -10,8 +15,8 @@ local globalState = {
   sceneStack = sceneManager,
   gameState = CreateStore(),
   stateSnapshot = {
-    serializedState = nil,
-    serializeAll = function(self)
+    serializedStateByMapId = newStateStorage(),
+    serializeAll = function(self, mapId)
       local statesByClass = {}
       local collisionGroups = require 'modules.collision-groups'
       local f = require 'utils.functional'
@@ -48,27 +53,25 @@ local globalState = {
         })
       end
 
-      self.serializedState = setmetatable(statesByClass, {
+      self.serializedStateByMapId:set(mapId, setmetatable(statesByClass, {
         __index = function()
           return {}
         end
-      })
+      }))
+
+      consoleLog('dungeon serialized', mapId)
     end,
-    consumeSnapshot = function(self)
-      local serialized = self.serializedState
-      self.serializedState = nil
-      return serialized
+    consumeSnapshot = function(self, mapId)
+      return self.serializedStateByMapId:get(mapId)
+    end,
+    clearAll = function(self)
+      self.serializedStateByMapId = newStateStorage()
     end
   }
 }
 
 msgBus.on(msgBus.NEW_GAME, function()
-  globalState.stateSnapshot:consumeSnapshot()
+  globalState.stateSnapshot:clearAll()
 end, 1)
-
-msgBus.NEW_MAP = 'NEW_MAP'
-msgBus.on(msgBus.NEW_MAP, function()
-  globalState.stateSnapshot:consumeSnapshot()
-end)
 
 return globalState

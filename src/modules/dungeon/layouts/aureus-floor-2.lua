@@ -20,14 +20,11 @@ return function()
   })
 
   local function generateMapBlockDefinitions()
-    local blocks = {
-      -- 'room-boss-1'
-    }
+    local blocks = {}
     local mapDefinitions = {
       function()
         return 'room-3'
       end,
-      mapBlockGenerator,
       mapBlockGenerator,
       mapBlockGenerator,
       mapBlockGenerator,
@@ -38,6 +35,9 @@ return function()
       local block = table.remove(mapDefinitions, index)()
       table.insert(blocks, block)
     end
+
+    local bossRoomIndex = math.random(#blocks - 1, #blocks)
+    table.insert(blocks, bossRoomIndex, 'room-boss-1')
 
     return blocks
   end

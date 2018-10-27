@@ -11,6 +11,7 @@ local Portal = require 'components.portal'
 local StarField = require 'components.star-field'
 local loadImage = require 'modules.load-image'
 local imageObj = loadImage('built/images/pixel-1x1-white.png')
+local sceneManager = require 'scene.manager'
 
 local inspect = require 'utils.inspect'
 local defaultMapLayout = 'aureus'
@@ -49,10 +50,13 @@ function HomeBase.init(self)
     end
   }):setParent(self)
 
+  local previousScene = sceneManager:getLastItem()
+  local Dungeon = require 'modules.dungeon'
+
   Portal.create({
     x = startPosition.x,
     y = startPosition.y,
-    locationName = defaultMapLayout
+    locationName = previousScene and Dungeon:getData(previousScene.props.mapId).name or defaultMapLayout
   }):setParent(self)
 
   Component.create({
@@ -93,16 +97,13 @@ function HomeBase.init(self)
   self.listeners = {
     msgBus.on(msgBus.PORTAL_ENTER, function()
       local msgBusMainMenu = require 'components.msg-bus-main-menu'
-      local sceneManager = require 'scene.manager'
       local hasPreviousScene = sceneManager:canPop()
       if (not hasPreviousScene) then
         local Dungeon = require 'modules.dungeon'
         msgBus.send(msgBus.SCENE_STACK_REPLACE, {
           scene = require 'scene.scene-main',
           props = {
-            generateMap = function()
-              return Dungeon:new(defaultMapLayout)
-            end
+            mapId = Dungeon:new(defaultMapLayout)
           }
         })
         return

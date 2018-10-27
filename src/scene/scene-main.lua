@@ -93,6 +93,9 @@ local MainScene = {
   group = groups.firstLayer,
   zoneTitle = 'Aureus',
 
+  -- a map id to restore the state from
+  mapId = nil,
+
   -- options
   isNewGame = false
 }
@@ -105,7 +108,7 @@ love.mouse.setCursor(cursor)
 function MainScene.init(self)
   Component.get('lightWorld').ambientColor = {0.6,0.6,0.6,1}
 
-  local serializedState = msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:consumeSnapshot()
+  local serializedState = msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:consumeSnapshot(self.mapId)
 
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0,0,0,1})
 
@@ -114,7 +117,7 @@ function MainScene.init(self)
   local parent = self
 
   local Dungeon = require 'modules.dungeon'
-  local mapGrid = serializedState and serializedState.mainMap[1].state or Dungeon:getData(self.generateMap()).grid
+  local mapGrid = serializedState and serializedState.mainMap[1].state or Dungeon:getData(self.mapId).grid
   local gridTileDefinitions = cloneGrid(mapGrid, function(v, x, y)
     local tileGroup = gridTileTypes[v]
     if tileGroup then
@@ -125,7 +128,7 @@ function MainScene.init(self)
 
   self.listeners = {
     msgBus.on(msgBus.SCENE_STACK_PUSH, function(v)
-      msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:serializeAll()
+      msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:serializeAll(self.mapId)
     end, 1),
     -- setup default properties in case they don't exist
     msgBus.on(msgBus.CHARACTER_HIT, function(v)
