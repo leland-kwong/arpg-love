@@ -58,8 +58,6 @@ local globalState = {
           return {}
         end
       }))
-
-      consoleLog('dungeon serialized', mapId)
     end,
     consumeSnapshot = function(self, mapId)
       return self.serializedStateByMapId:get(mapId)

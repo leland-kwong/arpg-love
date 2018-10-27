@@ -152,15 +152,24 @@ local objectParsersByType = {
       local msgBus = require 'components.msg-bus'
       local LevelExit = require 'components.map.level-exit'
       local config = require 'config.config'
+      local Component = require 'modules.component'
+      local uid = require 'utils.uid'
+      local exitId = 'exit-'..uid()
+      local mapId = Dungeon:new('aureus-floor-2', {
+        from = {
+          mapId = Component.get('MAIN_SCENE').mapId,
+          exitId = exitId
+        }
+      })
       LevelExit.create({
+        id = exitId,
         x = origin.x * config.gridSize + obj.x,
         y = origin.y * config.gridSize + obj.y,
-        onEnter = function()
-          local Component = require 'modules.component'
+        onEnter = function(self)
           msgBus.send(msgBus.SCENE_STACK_PUSH, {
             scene = require 'scene.scene-main',
             props = {
-              mapId = Dungeon:new('aureus-floor-2')
+              mapId = mapId
             }
           })
         end
@@ -230,8 +239,20 @@ local cellTranslationsByLayer = {
 }
 
 local defaultOptions = {
-  linksTo = nil -- previous mapId
+  -- previous map
+  from = {
+    mapId = nil,
+    exitId = nil
+  }
 }
+
+local function validateOptions(options)
+  for k,v in pairs(options or {}) do
+    if defaultOptions[k] == nil then
+      error('invalid dungeon option `'..k..'`')
+    end
+  end
+end
 
 --[[
   Initializes and generates a dungeon.
@@ -239,12 +260,10 @@ local defaultOptions = {
   Returns a 2-d grid.
 ]]
 local function buildDungeon(layoutType, options)
-  local assign = require 'utils.object-utils'.assign
-  options = assign({}, defaultOptions, options)
   local layoutGenerator = require('modules.dungeon.layouts.'..layoutType)
   local layout = layoutGenerator()
   local extractProps = require 'utils.object-utils.extract'
-  local gridBlockNames, columns = extractProps(layout, 'gridBlockNames', 'columns')
+  local gridBlockNames, columns, exitPosition = extractProps(layout, 'gridBlockNames', 'columns', 'exitPosition')
 
   collisionWorlds.reset(collisionWorlds.zones)
 
@@ -324,6 +343,26 @@ local function buildDungeon(layoutType, options)
     end)
   end
 
+  -- create an exit that points back to the previous map
+  if options.from.mapId then
+    local LevelExit = require 'components.map.level-exit'
+    local config = require 'config.config'
+    LevelExit.create({
+      x = exitPosition.x * config.gridSize,
+      y = exitPosition.y * config.gridSize,
+      onEnter = function()
+        local msgBus = require 'components.msg-bus'
+        msgBus.send(msgBus.SCENE_STACK_PUSH, {
+          scene = require 'scene.scene-main',
+          props = {
+            mapId = options.from.mapId,
+            exitId = options.from.exitId
+          }
+        })
+      end
+    })
+  end
+
   return {
     grid = grid,
     name = layoutType
@@ -332,6 +371,11 @@ end
 
 -- generates a dungeon and returns the dungeon id
 function Dungeon:new(layoutType, options)
+  validateOptions(options)
+  -- assign defaults after validating first
+  local assign = require 'utils.object-utils'.assign
+  options = assign({}, defaultOptions, options)
+
   local uid = require 'utils.uid'
   local dungeonId = uid()
   self.generated[dungeonId] = {
@@ -344,6 +388,9 @@ end
 -- gets the data for the generated dungeon by its id
 function Dungeon:getData(dungeonId)
   local dungeon = self.generated[dungeonId]
+  if (not dungeon) then
+    return nil
+  end
   dungeon.built = dungeon.built or buildDungeon(dungeon.layoutType, dungeon.options)
   return dungeon.built
 end

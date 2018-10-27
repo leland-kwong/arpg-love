@@ -164,18 +164,6 @@ function MainScene.init(self)
     end)
   }
 
-  local playerStartPos =
-    serializedState and
-    serializedState.portal[1] and
-    serializedState.portal[1].state.position or
-
-    {x = 6 * config.gridSize, y = 5 * config.gridSize}
-  local player = Player.create({
-    x = playerStartPos.x,
-    y = playerStartPos.y,
-    mapGrid = mapGrid,
-  }):setParent(parent)
-
   MainMap.create({
     camera = camera,
     grid = mapGrid,
@@ -186,6 +174,7 @@ function MainScene.init(self)
     end
   }):setParent(parent)
 
+  -- rebuild all components from the serialized state
   if serializedState then
     -- rebuild loot from previous state
     for i=1, #(serializedState.floorItem or {}) do
@@ -207,6 +196,27 @@ function MainScene.init(self)
   else
     Component.addToGroup(self:getId(), 'dungeonTest', self)
   end
+
+  local playerStartPos =
+    serializedState and
+    serializedState.portal[1] and
+    serializedState.portal[1].state.position
+  if (not playerStartPos) then
+    if self.exitId then
+      print('exitId', self.exitId)
+      local x, y = Component.get(self.exitId):getPosition()
+      local entranceYOffset = 3 * config.gridSize
+      playerStartPos = {x = x, y = y + entranceYOffset}
+    else
+      local defaultStartPosition = {x = 4 * config.gridSize, y = 5 * config.gridSize}
+      playerStartPos = defaultStartPosition
+    end
+  end
+  local player = Player.create({
+    x = playerStartPos.x,
+    y = playerStartPos.y,
+    mapGrid = mapGrid,
+  }):setParent(parent)
 end
 
 local collisionGroups = require 'modules.collision-groups'
@@ -274,6 +284,7 @@ MainScene.update = perf({
 
 function MainScene.final(self)
   msgBus.off(self.listeners)
+  activeEntities = {}
 end
 
 return Component.createFactory(MainScene)
