@@ -50,12 +50,12 @@ end
 
 local function drawDynamicBlocks(self)
   local Grid = require 'utils.grid'
-  love.graphics.push()
   Grid.forEach(self.blocks, function(renderFn, x, y)
+    love.graphics.push()
     love.graphics.translate(self.x + x, self.y + y)
     renderFn()
+    love.graphics.pop()
   end)
-  love.graphics.pop()
   self.blocks = {}
 end
 
