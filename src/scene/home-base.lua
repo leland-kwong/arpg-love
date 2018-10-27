@@ -133,6 +133,10 @@ function HomeBase.draw(self)
   )
 end
 
+function HomeBase.drawOrder()
+  return 2
+end
+
 function HomeBase.final(self)
   msgBus.off(self.listeners)
 end
