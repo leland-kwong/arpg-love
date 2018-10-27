@@ -128,58 +128,6 @@ local cursorSize = 64
 local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', cursorSize/2, cursorSize/2)
 love.mouse.setCursor(cursor)
 
-local function initializeMap()
-  local Dungeon = require 'modules.dungeon'
-  local Chance = require 'utils.chance'
-  local mapBlockGenerator = Chance({
-    {
-      chance = 1,
-      value = 'room-1'
-    },
-    {
-      chance = 1,
-      value = 'room-2'
-    },
-    {
-      chance = 1,
-      value = 'room-4'
-    },
-    {
-      chance = 1,
-      value = 'room-5'
-    }
-  })
-
-  local function generateMapBlockDefinitions()
-    local blocks = {
-      'room-3'
-      -- 'room-boss-1'
-    }
-    local mapDefinitions = {
-      -- function()
-      --   return 'room-3'
-      -- end,
-      mapBlockGenerator,
-      mapBlockGenerator,
-      mapBlockGenerator,
-      mapBlockGenerator
-    }
-    while #mapDefinitions > 0 do
-      local index = math.random(1, #mapDefinitions)
-      local block = table.remove(mapDefinitions, index)()
-      table.insert(blocks, block)
-    end
-
-    -- local bossRoomIndex = math.random(#blocks - 1, #blocks)
-    table.insert(blocks, 2, 'room-boss-1')
-
-    return blocks
-  end
-
-  local mapGrid = Dungeon.new(generateMapBlockDefinitions(), { columns = 3 })
-  return mapGrid
-end
-
 function MainScene.init(self)
   Component.get('lightWorld').ambientColor = {0.6,0.6,0.6,1}
 
@@ -192,7 +140,8 @@ function MainScene.init(self)
   self.rootStore = rootState
   local parent = self
 
-  local mapGrid = serializedState and serializedState.mainMap[1].state or initializeMap()
+  local Dungeon = require 'modules.dungeon'
+  local mapGrid = serializedState and serializedState.mainMap[1].state or Dungeon:getData(self.generateMap()).grid
   local gridTileDefinitions = cloneGrid(mapGrid, function(v, x, y)
     local tileGroup = gridTileTypes[v]
     if tileGroup then
@@ -258,7 +207,6 @@ function MainScene.init(self)
     walkable = Map.WALKABLE,
     drawOrder = function()
       return 1
-      -- return parent.backgroundComponent:drawOrder() + 1
     end
   }):setParent(parent)
 

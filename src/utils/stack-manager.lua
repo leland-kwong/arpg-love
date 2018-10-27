@@ -16,7 +16,7 @@ function M:push(item)
 end
 
 function M:pop()
-  local previousItem = self.stack[#self.stack]
+  local previousItem = self:previous()
   -- remove most recently pushed
   table.remove(self.stack, #self.stack)
   -- return the previous item
@@ -31,6 +31,11 @@ end
 
 function M:canPop()
   return (#self - 1) > 0
+end
+
+-- returns the last item in the stack
+function M:previous()
+  return self.stack[#self.stack]
 end
 
 function M:popAll()

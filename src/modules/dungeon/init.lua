@@ -5,7 +5,10 @@ local iterateGrid = require 'utils.iterate-grid'
 local f = require 'utils.functional'
 local collisionWorlds = require 'components.collision-worlds'
 
-local Dungeon = {}
+local Dungeon = {
+  generated = {}
+}
+
 local function findLayerByName(layers, name)
   for i=1, #layers do
     if layers[i].name == name then
@@ -155,11 +158,21 @@ local objectParsersByType = {
       local gridX, gridY = Position.pixelsToGridUnits(obj.x, obj.y, config.gridSize)
       local Color = require 'modules.color'
       local minimapColor = Color.CYAN
+      local function collisionFilter(_, other)
+        local collisionGroups = require 'modules.collision-groups'
+        if collisionGroups.matches(other.group, 'player') then
+          return 'cross'
+        end
+        return false
+      end
       Component.create({
+        class = 'environment',
         x = origin.x * config.gridSize + obj.x,
         y = origin.y * config.gridSize + obj.y,
         init = function(self)
           Component.addToGroup(self:getId(), 'all', self)
+          self:setParent(Component.get('MAIN_SCENE'))
+
           local collisionWorlds = require 'components.collision-worlds'
           local ox, oy = animation:getSourceOffset()
           self.collision = self:addCollisionObject(
@@ -192,6 +205,12 @@ local objectParsersByType = {
               self.mapPointerPosition,
               minimapColor
             )
+
+          local len = select(4, self.collision:check(self.x, self.y + 4, collisionFilter))
+          local playerCollided = len > 0
+          if playerCollided then
+            consoleLog('player enter entrance', Time())
+          end
         end,
         draw = function(self)
           local ox, oy = animation:getOffset()
@@ -223,6 +242,9 @@ local objectParsersByType = {
         end,
         drawOrder = function(self)
           return Component.groups.all:drawOrder(self) + 10
+        end,
+        serialize = function(self)
+          return self.initialProps
         end
       })
     end
@@ -289,20 +311,21 @@ local cellTranslationsByLayer = {
   }
 }
 
-local defaults = {
-  columns = 2
-}
+-- generates a dungeon and returns the dungeon id
+function Dungeon:new(layoutType)
+  local layoutGenerator = require('modules.dungeon.layouts.'..layoutType)
+  local layout = layoutGenerator()
+  local extractProps = require 'utils.object-utils.extract'
+  local gridBlockNames, columns = extractProps(layout, 'gridBlockNames', 'columns')
 
-function Dungeon.new(gridBlockNames, options)
   collisionWorlds.reset(collisionWorlds.zones)
   local assign = require 'utils.object-utils'.assign
-  options = assign({}, defaults, options or {})
 
   assert(#gridBlockNames%2 == 0, 'number of grid blocks must be an even number')
 
   local grid = {}
   local numBlocks = #gridBlockNames
-  local numCols = options.columns
+  local numCols = columns
   local numRows = numBlocks/numCols
   for blockIndex=0, (numBlocks - 1) do
     local gridBlockName = gridBlockNames[blockIndex + 1]
@@ -373,7 +396,28 @@ function Dungeon.new(gridBlockNames, options)
       )
     end)
   end
-  return grid
+
+  local uid = require 'utils.uid'
+  local dungeonId = uid()
+  local layoutData = {
+    grid = grid,
+    name = layoutType
+  }
+  self.generated[dungeonId] = layoutData
+  return dungeonId
+end
+
+-- gets the data for the generated dungeon by its id
+function Dungeon:getData(dungeonId)
+  return self.generated[dungeonId]
+end
+
+function Dungeon:remove(dungeonId)
+  self.generated[dungeonId] = nil
+end
+
+function Dungeon:removeAll()
+  self.generated = {}
 end
 
 return Dungeon

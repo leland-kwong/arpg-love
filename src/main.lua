@@ -2,6 +2,7 @@
 -- require 'lua_modules.strict'
 
 require 'components.run'
+require 'main.globals'
 
 -- NOTE: this is necessary for crisp pixel rendering
 love.graphics.setDefaultFilter('nearest', 'nearest')
@@ -25,7 +26,6 @@ local systemsProfiler = require 'components.profiler.component-groups'
 require 'components.groups.dungeon-test'
 require 'components.groups.game-world'
 require 'modules.file-system'
-require 'utils.time'
 local MapPointerWorld = require 'components.hud.map-pointer'
 
 local scale = config.scaleFactor

@@ -1,6 +1,6 @@
 local socket = require 'socket'
 
-function Time()
+local function Time()
   return socket.gettime() * 1000
 end
 
