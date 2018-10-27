@@ -21,6 +21,7 @@ function ZoneInfo.init(self)
     group = Component.groups.hud,
     font = require 'components.font'.secondaryLarge.font
   })
+  Component.addToGroup(self.textLayer, 'gameWorld')
 end
 
 function ZoneInfo.update(self, dt)
