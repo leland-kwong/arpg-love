@@ -18,6 +18,10 @@ msgBus.on(msgBus.PROFILE_FUNC, function(profileProps)
   return require 'utils.perf'({
     resetEvery = 1000,
     done = function(_, totalTime, callCount)
+      if (not msgBus.send(msgBus.IS_CONSOLE_ENABLED)) then
+        return
+      end
+
       local averageTime = totalTime / callCount
       totalAverageExecutionTime = totalAverageExecutionTime + averageTime
       local passedThreshold = averageTime <= (profileProps.threshold or 0.1)
