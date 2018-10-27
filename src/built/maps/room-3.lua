@@ -8,7 +8,7 @@ return {
   height = 80,
   tilewidth = 16,
   tileheight = 16,
-  nextobjectid = 52,
+  nextobjectid = 54,
   properties = {},
   tilesets = {
     {
@@ -377,7 +377,7 @@ return {
       objects = {
         {
           id = 50,
-          name = "entrance",
+          name = "entrance to level",
           type = "levelExit",
           shape = "rectangle",
           x = 48,

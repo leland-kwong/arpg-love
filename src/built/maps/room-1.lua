@@ -8,7 +8,7 @@ return {
   height = 80,
   tilewidth = 16,
   tileheight = 16,
-  nextobjectid = 20,
+  nextobjectid = 24,
   properties = {},
   tilesets = {
     {
@@ -369,6 +369,31 @@ return {
     },
     {
       type = "objectgroup",
+      name = "environment",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      draworder = "topdown",
+      properties = {},
+      objects = {
+        {
+          id = 22,
+          name = "entrance to level",
+          type = "levelExit",
+          shape = "rectangle",
+          x = 576,
+          y = 0,
+          width = 32,
+          height = 16,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        }
+      }
+    },
+    {
+      type = "objectgroup",
       name = "spawn-points",
       visible = true,
       opacity = 1,
@@ -412,8 +437,8 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 598,
-          y = 173,
+          x = 544,
+          y = 144,
           width = 53,
           height = 53,
           rotation = 0,

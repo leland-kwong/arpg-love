@@ -8,7 +8,7 @@ return {
   height = 80,
   tilewidth = 16,
   tileheight = 16,
-  nextobjectid = 20,
+  nextobjectid = 30,
   properties = {},
   tilesets = {
     {
@@ -489,6 +489,31 @@ return {
           properties = {
             ["groupSize"] = 3
           }
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      name = "environment",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      draworder = "topdown",
+      properties = {},
+      objects = {
+        {
+          id = 28,
+          name = "entrance to level",
+          type = "levelExit",
+          shape = "rectangle",
+          x = 368,
+          y = 656,
+          width = 32,
+          height = 16,
+          rotation = 0,
+          visible = true,
+          properties = {}
         }
       }
     }
