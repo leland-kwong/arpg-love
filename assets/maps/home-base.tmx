@@ -59,10 +59,10 @@
  <objectgroup color="#ffff7f" name="collisions">
   <object id="1" type="collisionObject" x="320" y="287" width="12" height="206"/>
   <object id="2" type="collisionObject" x="628" y="286" width="12" height="207"/>
-  <object id="14" x="547" y="342" width="25" height="16"/>
+  <object id="14" x="542" y="457" width="25" height="16"/>
   <object id="15" x="332" y="480" width="296" height="13"/>
   <object id="16" x="332" y="287" width="296" height="17"/>
-  <object id="17" x="555" y="339" width="11" height="3"/>
+  <object id="17" x="550" y="454" width="11" height="3"/>
  </objectgroup>
  <objectgroup name="objects">
   <object id="19" name="startPosition" x="476" y="398" width="8" height="8">

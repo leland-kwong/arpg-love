@@ -3,7 +3,8 @@ local drawOrders = {
   'BulletPreDraw',
   'BulletDraw',
   'BulletPostDraw',
-  'LightWorldDraw'
+  'LightWorldDraw',
+  'SparkDraw',
 }
 
 local parsedOrders = {

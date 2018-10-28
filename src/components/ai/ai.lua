@@ -351,7 +351,8 @@ local function createLight(self)
       self.x,
       self.y,
       self.lightRadius,
-      lightColor
+      lightColor,
+      self.opacity
     )
   end
 end

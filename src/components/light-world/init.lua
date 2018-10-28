@@ -4,6 +4,7 @@ local lightBlurImg = loadImage('built/images/light-blur.png')
 local imageHeight = lightBlurImg:getHeight()
 local scaleAdjustment = imageHeight / 100
 local config = require 'config.config'
+local Color = require 'modules.color'
 
 local defaultLightColor = {1,1,1}
 
@@ -17,8 +18,8 @@ function LightWorld.init(self)
   self.lights = {}
 end
 
-function LightWorld.addLight(self, x, y, radius, color)
-  table.insert(self.lights, {x, y, radius, color or defaultLightColor})
+function LightWorld.addLight(self, x, y, radius, color, opacity)
+  table.insert(self.lights, {x, y, radius, (color or defaultLightColor), (opacity or 1)})
   return self
 end
 
@@ -39,12 +40,12 @@ function drawLights(self)
 
   for i=1, #self.lights do
     local light = self.lights[i]
-    local x, y, radius, color = light[1], light[2], light[3], light[4]
+    local x, y, radius, color, opacity = light[1], light[2], light[3], light[4], light[5]
     local diameter = radius * 2
     local lightSize = (diameter * scaleAdjustment) / imageHeight
     local offset = (diameter * scaleAdjustment) / config.scale
 
-    love.graphics.setColor(color or defaultLightColor)
+    love.graphics.setColor(Color.multiplyAlpha(color or defaultLightColor, opacity))
     love.graphics.draw(lightBlurImg, x - offset, y - offset, 0, lightSize, lightSize)
   end
   self.lights = {}

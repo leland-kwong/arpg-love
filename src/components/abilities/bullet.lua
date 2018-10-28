@@ -150,6 +150,13 @@ local Bullet = {
               msgBus.send(msgBus.CHARACTER_HIT, msg)
             end
             hitSuccess = true
+
+            local Spark = require 'components.abilities.spark'
+            Spark.create({
+              x = self.x,
+              y = self.y,
+              color = self.color
+            })
           end
         end
       end
