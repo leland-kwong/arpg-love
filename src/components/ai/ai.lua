@@ -4,7 +4,6 @@ local animationFactory = require 'components.animation-factory'
 local msgBus = require 'components.msg-bus'
 local getAdjacentWalkablePosition = require 'modules.get-adjacent-open-position'
 local collisionObject = require 'modules.collision'
-local uid = require'utils.uid'
 local tween = require 'modules.tween'
 local socket = require 'socket'
 local distOfLine = require'utils.math'.dist

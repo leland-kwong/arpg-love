@@ -15,7 +15,6 @@ retrieved in this module.
 ]]--
 
 local Stateful = require("utils.stateful")
-local uid = require 'utils.uid'
 local config = require('config.config')
 local sc = require("components.state.constants")
 local baseStatModifiers = require("components.state.base-stat-modifiers")
