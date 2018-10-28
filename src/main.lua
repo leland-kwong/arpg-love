@@ -68,10 +68,13 @@ function love.update(dt)
 
   characterSystem(dt)
 
+  camera:attach()
   groups.firstLayer.updateAll(dt)
   groups.all.updateAll(dt)
   groups.overlay.updateAll(dt)
   groups.debug.updateAll(dt)
+  camera:detach()
+
   groups.hud.updateAll(dt)
   groups.gui.updateAll(dt)
   groups.system.updateAll(dt)

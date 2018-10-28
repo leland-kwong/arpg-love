@@ -223,6 +223,34 @@ local function updateAbilities(self, dt)
   skillHandlers[self.skillId].updateCooldown(dt)
 end
 
+local SkillBarPreDraw = Component.create({
+  setSkill = function(self, skillId, drawFn)
+    self.drawBySkillId[skillId] = drawFn
+
+    local oBlendMode = love.graphics.getBlendMode()
+    love.graphics.setBlendMode('alpha', 'premultiplied')
+    love.graphics.setCanvas(self.canvas)
+    love.graphics.clear()
+    for _,drawFn in pairs(self.drawBySkillId) do
+      drawFn()
+    end
+    love.graphics.setCanvas()
+    love.graphics.setBlendMode(oBlendMode)
+  end,
+  init = function(self)
+    Component.addToGroup(self, 'hud')
+    self.drawBySkillId = {}
+    self.canvas = love.graphics.newCanvas()
+  end,
+  draw = function(self)
+    love.graphics.setColor(1,1,1)
+    love.graphics.draw(self.canvas)
+  end,
+  drawOrder = function()
+    return 1
+  end
+})
+
 local ActiveSkillInfo = {
   group = groups.hud,
   x = 0,
@@ -266,10 +294,34 @@ function ActiveSkillInfo.init(self)
     end
   })
   Component.addToGroup(itemRenderRef:getId(), 'gameWorld', itemRenderRef)
+  self.canvas = love.graphics.newCanvas()
 end
 
 function ActiveSkillInfo.update(self, dt)
   updateAbilities(self, dt)
+
+  local nextActiveItem = self.rootStore:get().equipment[self.slotY][self.slotX]
+  local isNewItem = nextActiveItem ~= self.activeItem
+  if (isNewItem) then
+    SkillBarPreDraw:setSkill(
+      self:getId(),
+      function()
+        local boxSize = self.size
+        love.graphics.setColor(0,0,0,0.8)
+        love.graphics.rectangle('fill', self.x, self.y, boxSize, boxSize)
+        local oLineWidth = love.graphics.getLineWidth()
+        love.graphics.setLineWidth(1)
+        love.graphics.setColor(1,1,1)
+        love.graphics.rectangle('line', self.x - 0.5, self.y - 0.5, boxSize, boxSize)
+        love.graphics.setLineWidth(oLineWidth)
+
+        if nextActiveItem then
+          drawItem(nextActiveItem, self.x, self.y, boxSize)
+        end
+      end
+    )
+  end
+  self.activeItem = nextActiveItem
 end
 
 local mouseBtnToString = {
@@ -291,19 +343,10 @@ local function drawHotkEy(self)
 end
 
 function ActiveSkillInfo.draw(self)
-  local boxSize = self.size
-
   drawHotkEy(self)
 
-  love.graphics.setColor(0,0,0,0.8)
-  love.graphics.rectangle('fill', self.x, self.y, boxSize, boxSize)
-  love.graphics.setColor(1,1,1)
-  love.graphics.rectangle('line', self.x, self.y, boxSize, boxSize)
-
-  local activeItem = self.rootStore:get().equipment[self.slotY][self.slotX]
-  if activeItem then
-    drawItem(activeItem, self.x, self.y, boxSize)
-
+  if self.activeItem then
+    local boxSize = self.size
     local cooldown, skillCooldown = skillHandlers[self.skillId].getStats()
     local progress = (skillCooldown - cooldown) / skillCooldown
     local offsetY = progress * boxSize
@@ -331,8 +374,14 @@ function ActiveSkillInfo.draw(self)
   end
 end
 
+function ActiveSkillInfo.drawOrder()
+  return SkillBarPreDraw:drawOrder() + 1
+end
+
 function ActiveSkillInfo.final(self)
   msgBus.off(self.listeners)
+
+  SkillBarPreDraw:setSkill(self:getId(), nil)
 end
 
 return Component.createFactory(ActiveSkillInfo)
