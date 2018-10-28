@@ -6,7 +6,7 @@
 
 ## 2.0.0 - alpha
 
-This release adds new major features and fixes a number of high priority bugs around player and ai movement. 
+This release adds new major features and fixes a number of high priority bugs around player and ai movement.
 
 ### New
 
