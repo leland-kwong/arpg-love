@@ -655,6 +655,7 @@ function Ai.init(self)
   Component.addToGroup(self, groups.all)
   Component.addToGroup(self, groups.character)
   Component.addToGroup(self, 'disabled')
+  Component.addToGroup(self, 'mapStateSerializers')
   self.onDamageTaken = require 'modules.handle-damage-taken'
 
   -- [[ BASE PROPERTIES ]]

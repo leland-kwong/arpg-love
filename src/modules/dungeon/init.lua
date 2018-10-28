@@ -96,8 +96,14 @@ local objectParsersByType = {
       for x=1, doorGridWidth do
         for y=1, doorGridHeight do
           local door = Component.create({
+            class = 'environment',
             x = (origin.x * config.gridSize) + obj.x + ((x - 1) * config.gridSize),
             y = (origin.y * config.gridSize) + obj.y + ((y - 1) * config.gridSize),
+            init = function(self)
+              Component.addToGroup(self, 'bossDoors')
+              Component.addToGroup(self, 'gameWorld')
+              Component.addToGroup(self, 'mapStateSerializers')
+            end,
             enable = function(self)
               local collisionWorlds = require 'components.collision-worlds'
               self.collisionObject = self:addCollisionObject(
@@ -141,10 +147,11 @@ local objectParsersByType = {
             end,
             drawOrder = function(self)
               return Component.groups.all:drawOrder(self)
+            end,
+            serialize = function(self)
+              return self.initialProps
             end
           })
-          Component.addToGroup(door, 'bossDoors')
-          Component.addToGroup(door, 'gameWorld')
         end
       end
     end,

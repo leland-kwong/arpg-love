@@ -25,7 +25,6 @@ local globalState = {
       local collisionGroups = require 'modules.collision-groups'
       local f = require 'utils.functional'
       local classesToMatch = collisionGroups.create(
-        collisionGroups.ai,
         collisionGroups.floorItem,
         collisionGroups.mainMap,
         collisionGroups.environment,

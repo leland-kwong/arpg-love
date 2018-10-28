@@ -26,6 +26,7 @@ local ImpactDispersion = {
 }
 
 function ImpactDispersion.init(self)
+  Component.addToGroup(self, 'gameWorld')
   self.maxFrames = 100
   self.maxRadius = self.radius + self.maxFrames
   self.frameCount = 0
@@ -122,6 +123,8 @@ local BeamStrike = {
 }
 
 function BeamStrike.init(self)
+  Component.addToGroup(self, 'gameWorld')
+
   self.canvas = love.graphics.newCanvas()
   self.clock = 0
   self.animationSpeed = 0.25

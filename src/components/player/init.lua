@@ -22,6 +22,7 @@ local HealSource = require 'components.heal-source'
 require'components.item-inventory.equipment-change-handler'
 local MenuManager = require 'modules.menu-manager'
 local InputContext = require 'modules.input-context'
+local F = require 'utils.functional'
 
 local colMap = collisionWorlds.map
 local keyMap = userSettings.keyboard
@@ -289,6 +290,13 @@ local Player = {
         end
 
         if (keyMap.PORTAL_OPEN == key) and (not v.hasModifier) then
+          local isBossZone = F.find(self.zones, function(zone)
+            return string.find(zone.name, 'boss') ~= nil
+          end)
+          if isBossZone then
+            msgBus.send(msgBus.PLAYER_ACTION_ERROR, "cannot portal in here")
+            return
+          end
           msgBus.send(msgBus.PORTAL_OPEN)
         end
 

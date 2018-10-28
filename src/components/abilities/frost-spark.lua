@@ -52,6 +52,8 @@ local FrostSpark = {
   color = Color.WHITE,
 
   init = function(self)
+    Component.addToGroup(self, 'gameWorld')
+
     assert(
       type(self.targetGroup) == 'string' and self.targetGroup ~= nil,
       '[FrostSpark] `targetGroup` is required'

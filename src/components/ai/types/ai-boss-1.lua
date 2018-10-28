@@ -235,6 +235,7 @@ function SpawnMinions.update(_, state, dt)
       )
       for i=1, #minions do
         local m = minions[i]
+        Component.removeFromGroup(m, 'mapStateSerializers')
         m.itemData.dropRate = 0
         m.sightRadius = 25
         m.experience = 0
@@ -349,23 +350,26 @@ local function keepBossActive()
 end
 
 return function(props)
-  msgBus.on(msgBus.UPDATE, keepBossActive)
+  local aiProps = AiEyeball()
 
-  local function handleBossDeath(msg)
-    local isBoss = msg.parent == Component.get(bossId)
-    if isBoss then
-      local camera = require 'components.camera'
-      camera:shake(4, 60, 5)
+  aiProps.onInit = function(self)
+    msgBus.on(msgBus.UPDATE, keepBossActive)
 
-      for _,minion in pairs(Component.groups.boss1Minions.getAll()) do
-        Component.remove(minion:getId(), true)
+    local function handleBossDeath(msg)
+      local isBoss = msg.parent == Component.get(bossId)
+      if isBoss then
+        local camera = require 'components.camera'
+        camera:shake(4, 60, 5)
+
+        for _,minion in pairs(Component.groups.boss1Minions.getAll()) do
+          Component.remove(minion:getId(), true)
+        end
       end
     end
+    local msgBus = require 'components.msg-bus'
+    msgBus.on(msgBus.ENTITY_DESTROYED, handleBossDeath)
   end
-  local msgBus = require 'components.msg-bus'
-  msgBus.on(msgBus.ENTITY_DESTROYED, handleBossDeath)
 
-  local aiProps = AiEyeball()
   aiProps.id = bossId
   aiProps.lightRadius = 40
   aiProps.sightRadius = 80
