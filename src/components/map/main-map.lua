@@ -10,7 +10,6 @@ local MainMapSolidsFactory = require 'components.map.main-map-solids'
 local animationFactory = require 'components.animation-factory'
 local lru = require 'utils.lru'
 local memoize = require'utils.memoize'
-local GetIndexByCoordinate = memoize(require 'utils.get-index-by-coordinate')
 local config = require'config.config'
 local Grid = require 'utils.grid'
 
@@ -107,7 +106,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   end,
 
   onUpdate = function(self, value, x, y, originX, originY, isInViewport, dt)
-    local index = GetIndexByCoordinate(self.grid)(x, y)
+    local index = Grid.getIndexByCoordinate(#self.grid[1], x, y)
 
     -- if its unwalkable, add a collision object and create wall tile
     if (value ~= nil) and (value ~= Map.WALKABLE) then

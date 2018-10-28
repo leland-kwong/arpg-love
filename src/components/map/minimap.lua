@@ -4,7 +4,7 @@ local groups = require 'components.groups'
 local mapBlueprint = require 'components.map.map-blueprint'
 local config = require 'config.config'
 local memoize = require 'utils.memoize'
-local GetIndexByCoordinate = memoize(require 'utils.get-index-by-coordinate')
+local Grid = require 'utils.grid'
 
 local COLOR_TILE_OUT_OF_VIEW = {1,1,1,0.3}
 local COLOR_TILE_IN_VIEW = {1,1,1,1}
@@ -92,7 +92,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   render = function(self, value, _x, _y, originX, originY, isInViewport)
     local tileRenderer = minimapTileRenderers[value]
     if tileRenderer then
-      local index = GetIndexByCoordinate(self.grid)(_x, _y)
+      local index = Grid.getIndexByCoordinate(#self.grid[1], _x, _y)
       if self.renderCache[index] then
         return
       end

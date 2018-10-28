@@ -25,4 +25,15 @@ function Grid.forEach(grid, callback)
   end
 end
 
+function Grid.getIndexByCoordinate(numCols, x, y)
+  return (y * numCols) + x
+end
+
+local floor = math.floor
+function Grid.getCoordinateByIndex(numCols, x, y)
+  local y = floor(index / numCols)
+  local x = index - (y * numCols)
+  return x, y
+end
+
 return Grid
