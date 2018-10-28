@@ -155,11 +155,12 @@ local objectParsersByType = {
       local Component = require 'modules.component'
       local uid = require 'utils.uid'
       local exitId = 'exit-'..uid()
-      local mapId = Dungeon:new('aureus-floor-2', {
+      local mapId = Dungeon:new(blockData.nextLevel, {
         from = {
           mapId = Component.get('MAIN_SCENE').mapId,
           exitId = exitId
-        }
+        },
+        nextLevel = blockData.nextLevel
       })
       LevelExit.create({
         id = exitId,
@@ -206,9 +207,9 @@ local function loadGridBlock(file)
   return dynamicModule('built/maps/'..file..'.lua')
 end
 
-local function addGridBlock(grid, gridBlockToAdd, startX, startY, transformFn, blockData)
+local function addGridBlock(grid, gridBlockToAdd, startX, startY, transformFn, blockName)
   collisionWorlds.zones:add(
-    blockData,
+    {name = blockName},
     startX,
     startY,
     gridBlockToAdd.width,
@@ -243,7 +244,8 @@ local defaultOptions = {
   from = {
     mapId = nil,
     exitId = nil
-  }
+  },
+  nextLevel = '' -- the next layout that the exit should use
 }
 
 local function validateOptions(options)
@@ -294,9 +296,7 @@ local function buildDungeon(layoutType, options)
     if origin.y > 0 then
       origin.y = origin.y + overlapAdjustmentY
     end
-    local blockData = {
-      name = gridBlockName
-    }
+    local blockData = options
     addGridBlock(
       grid,
       gridBlock,
@@ -324,7 +324,7 @@ local function buildDungeon(layoutType, options)
         local groundValue = groundLayer.data[index]
         return cellTranslationsByLayer.ground[groundValue]
       end,
-      blockData
+      gridBlockName
     )
     local layersToParse = {
       'spawn-points',

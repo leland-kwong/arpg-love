@@ -103,7 +103,9 @@ function HomeBase.init(self)
         msgBus.send(msgBus.SCENE_STACK_REPLACE, {
           scene = require 'scene.scene-main',
           props = {
-            mapId = Dungeon:new(defaultMapLayout)
+            mapId = Dungeon:new(defaultMapLayout, {
+              nextLevel = 'aureus-floor-2'
+            })
           }
         })
         return
