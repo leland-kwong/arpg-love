@@ -30,7 +30,7 @@ function Grid.getIndexByCoordinate(numCols, x, y)
 end
 
 local floor = math.floor
-function Grid.getCoordinateByIndex(numCols, x, y)
+function Grid.getCoordinateByIndex(numCols, index)
   local y = floor(index / numCols)
   local x = index - (y * numCols)
   return x, y

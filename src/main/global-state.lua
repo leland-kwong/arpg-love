@@ -9,6 +9,10 @@ local function newStateStorage()
   return Lru.new(100)
 end
 
+Component.newGroup({
+  name = 'mapStateSerializers'
+})
+
 local globalState = {
   activeScene = nil,
   backgroundColor = {0.2,0.2,0.2},
@@ -39,6 +43,12 @@ local globalState = {
         end
         return components
       end, {})
+
+      for _,entity in pairs(Component.groups.mapStateSerializers.getAll()) do
+        assert(entity.class ~= nil, 'class is required')
+        assert(type(entity.serialize) == 'function', 'serialize function is required')
+        components[entity:getId()] = entity
+      end
 
       -- serialize states
       for _,c in pairs(components) do

@@ -13,7 +13,7 @@ local COLOR_GROUND = {0,0,0,0.2}
 local floor = math.floor
 local minimapTileRenderers = {
   -- obstacle
-  [0] = function(self, x, y, originX, originY, isInViewport)
+  [0] = function(self, x, y)
     love.graphics.setColor(COLOR_WALL)
     local rectSize = 1
     local x = (self.x * rectSize) + x
@@ -24,7 +24,7 @@ local minimapTileRenderers = {
     )
   end,
   -- walkable
-  [1] = function(self, x, y, originX, originY, isInViewport)
+  [1] = function(self, x, y)
     love.graphics.setColor(COLOR_GROUND)
     local rectSize = 1
     local x = (self.x * rectSize) + x
@@ -60,8 +60,9 @@ local function drawDynamicBlocks(self)
 end
 
 -- minimap
-local blueprint = objectUtils.assign({}, mapBlueprint, {
+local MiniMap = objectUtils.assign({}, mapBlueprint, {
   id = 'miniMap',
+  class = 'miniMap',
   group = groups.hud,
   x = 50,
   y = 50,
@@ -69,8 +70,12 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   h = 100,
 
   init = function(self)
+    Component.addToGroup(self, 'mapStateSerializers')
+
+    -- 1-d array of visited indices
+    self.visitedIndices = self.visitedIndices or {}
+
     self.canvas = love.graphics.newCanvas()
-    self.renderCache = {}
     self.stencil = function()
       love.graphics.rectangle(
         'fill',
@@ -81,6 +86,18 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
       )
     end
     self.blocks = {}
+
+    -- pre-draw indices that have already been visited
+    self:renderStart()
+    for index in pairs(self.visitedIndices) do
+      local x, y = Grid.getCoordinateByIndex(#self.grid[1], index)
+      local value = self.grid[y][x]
+      local tileRenderer = minimapTileRenderers[value]
+      if tileRenderer then
+        tileRenderer(self, x, y)
+      end
+    end
+    self:renderEnd()
   end,
 
   renderStart = function(self)
@@ -89,15 +106,15 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     love.graphics.setCanvas(self.canvas)
   end,
 
-  render = function(self, value, _x, _y, originX, originY, isInViewport)
+  render = function(self, value, gridX, gridY)
     local tileRenderer = minimapTileRenderers[value]
     if tileRenderer then
-      local index = Grid.getIndexByCoordinate(#self.grid[1], _x, _y)
-      if self.renderCache[index] then
+      local index = Grid.getIndexByCoordinate(#self.grid[1], gridX, gridY)
+      if self.visitedIndices[index] then
         return
       end
-      tileRenderer(self, _x, _y, originX, originY, isInViewport)
-      self.renderCache[index] = true
+      tileRenderer(self, gridX, gridY)
+      self.visitedIndices[index] = true
     end
   end,
 
@@ -130,9 +147,15 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
 })
 
 -- adds a block for the next draw frame, and gets removed automatically each frame
-function blueprint.renderBlock(self, gridX, gridY, renderFn)
+function MiniMap.renderBlock(self, gridX, gridY, renderFn)
   local Grid = require 'utils.grid'
   Grid.set(self.blocks, gridX, gridY, renderFn)
 end
 
-return Component.createFactory(blueprint)
+function MiniMap.serialize(self)
+  return objectUtils.immutableApply(self.initialProps, {
+    visitedIndices = self.visitedIndices
+  })
+end
+
+return Component.createFactory(MiniMap)

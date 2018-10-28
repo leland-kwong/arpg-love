@@ -105,11 +105,25 @@ local cursorSize = 64
 local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', cursorSize/2, cursorSize/2)
 love.mouse.setCursor(cursor)
 
+local function restoreComponentsFromState(self, serializedState)
+  local classesToRestore = {
+    'floorItem',
+    'ai',
+    'environment'
+  }
+  local F = require 'utils.functional'
+  F.forEach(classesToRestore, function(class)
+    for i=1, #(serializedState[class] or {}) do
+      local item = serializedState[class][i]
+      item.blueprint.create(item.state):setParent(self)
+    end
+  end)
+end
+
 function MainScene.init(self)
   msgBus.send(msgBus.NEW_MAP)
   Component.get('lightWorld').ambientColor = {0.6,0.6,0.6,1}
 
-  local serializedState = msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:consumeSnapshot(self.mapId)
 
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0,0,0,1})
 
@@ -117,6 +131,7 @@ function MainScene.init(self)
   self.rootStore = rootState
   local parent = self
 
+  local serializedState = msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:consumeSnapshot(self.mapId)
   local Dungeon = require 'modules.dungeon'
   local mapGrid = serializedState and (serializedState.mainMap and serializedState.mainMap[1].state) or Dungeon:getData(self.mapId).grid
   local gridTileDefinitions = cloneGrid(mapGrid, function(v, x, y)
@@ -175,25 +190,8 @@ function MainScene.init(self)
     end
   }):setParent(parent)
 
-  -- rebuild all components from the serialized state
   if serializedState then
-    -- rebuild loot from previous state
-    for i=1, #(serializedState.floorItem or {}) do
-      local item = serializedState.floorItem[i]
-      item.blueprint.create(item.state):setParent(self)
-    end
-
-    -- rebuild ai from previous state
-    for i=1, #(serializedState.ai or {}) do
-      local item = serializedState.ai[i]
-      item.blueprint.create(item.state):setParent(self)
-    end
-
-    -- rebuild treasure environment objects from previous state
-    for i=1, #(serializedState.environment) do
-      local item = serializedState.environment[i]
-      item.blueprint.create(item.state):setParent(self)
-    end
+    restoreComponentsFromState(self, serializedState)
   else
     Component.addToGroup(self:getId(), 'dungeonTest', self)
   end
@@ -213,6 +211,7 @@ function MainScene.init(self)
       playerStartPos = defaultStartPosition
     end
   end
+
   local player = Player.create({
     x = playerStartPos.x,
     y = playerStartPos.y,

@@ -22,11 +22,6 @@ local function iterateActiveGrid(self, cb, a, b, c)
   n = floor(n)
   s = floor(s)
 
-  -- viewport origin
-  local originX = max(1, w)
-  local originY = max(1, s)
-  self.originX, self.originY = originX, originY
-
   --[[
     FIXME: thresholds are here as a way to make sure rendering reaches the edge of the screen.
     The "correct" way to do it would be to figure out exactly what the edges are instead of just adding to the edges to fill.
@@ -51,7 +46,7 @@ local function iterateActiveGrid(self, cb, a, b, c)
         local isInViewport = isInRowViewport and isInColViewport
         local tileExists = value ~= nil
         if tileExists then
-          cb(self, value, x, y, originX, originY, isInViewport, a, b, c)
+          cb(self, value, x, y, isInViewport, a, b, c)
         end
       end
     end
