@@ -33,8 +33,9 @@ function drawLights(self)
   love.graphics.push()
   love.graphics.origin()
   love.graphics.translate(self.x, self.y)
-  love.graphics.setBlendMode('add', 'alphamultiply')
   love.graphics.setCanvas(self.canvas)
+  love.graphics.clear(self.ambientColor)
+  love.graphics.setBlendMode('add', 'alphamultiply')
 
   for i=1, #self.lights do
     local light = self.lights[i]
@@ -65,13 +66,7 @@ function LightWorld.draw(self)
   love.graphics.setBlendMode('multiply', 'premultiplied')
   love.graphics.draw(self.canvas)
 
-  -- reset canvas
   love.graphics.setBlendMode(oBlendMode)
-  love.graphics.setCanvas(self.canvas)
-  love.graphics.setBlendMode('alpha', 'alphamultiply')
-  love.graphics.clear(self.ambientColor)
-  love.graphics.setCanvas()
-
   love.graphics.pop()
 end
 
