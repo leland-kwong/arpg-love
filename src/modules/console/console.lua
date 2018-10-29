@@ -212,7 +212,7 @@ function Console.draw(self)
       Color.WHITE,
       'msgBus avgTime: '..string.format('%0.3f', self.msgBusAverageTime),
       Color.WHITE,
-      '\nmsgBus calls: '..self.msgCountPerFrame,
+      '\nmsgBus send count: '..self.msgCountPerFrame,
       Color.WHITE,
       '\ninput context: ',
       Color.YELLOW,
