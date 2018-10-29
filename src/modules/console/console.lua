@@ -35,22 +35,8 @@ local function toggleConsole()
   })
 end
 
-local function togglePerformanceProfiler()
-  local enabled = not config.performanceProfile
-
-  if (not enabled) then
-    local profile = require 'modules.profile'
-    profile.write('prof.mpack')
-  end
-
-  msgBus.send(msgBus.SET_CONFIG, {
-    performanceProfile = enabled
-  })
-end
-
 local keyActions = setmetatable({
   o = toggleCollisionDebug,
-  p = togglePerformanceProfiler,
   c = toggleConsole,
 }, {
   __index = function()

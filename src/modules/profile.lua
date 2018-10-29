@@ -1,34 +1,27 @@
-local config = require 'config.config'
-local noop = require 'utils.noop'
-
-PROF_CAPTURE = true
+PROF_CAPTURE = false
 local jprof = require('jprof')
-local stackReady = false
 
-local customMethods = {
-  zoneStart = function(a, b, c)
-    stackReady = true
-    jprof.push(a, b, c)
-  end,
-  zoneEnd = function(a, b, c)
-    stackReady = false
-    jprof.pop(a, b, c)
+local isFrameReady = false
+local oPush = jprof.push
+jprof.push = function(name, annotation)
+  if (name == 'frame') then
+    isFrameReady = true
   end
-}
-
-return setmetatable({}, {
-  __index = function(_, method)
-    if (not config.performanceProfile) then
-      return noop
-    end
-
-    local custom = customMethods[method]
-    if custom then
-      return custom
-    end
-    if (method == 'push') and (not stackReady) then
-      return noop
-    end
-    return jprof[method]
+  if (not isFrameReady) then
+    return
   end
-})
+  oPush(name, annotation)
+end
+
+local oPop = jprof.pop
+jprof.pop = function(name)
+  if isFrameReady then
+    oPop(name)
+  end
+
+  if (name == 'frame') then
+    isFrameReady = false
+  end
+end
+
+return jprof
