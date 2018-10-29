@@ -269,6 +269,7 @@ function LootGenerator.init(self)
       if self.isOutOfBounds then
         return
       end
+
       -- draw item shadow
       love.graphics.setColor(0,0,0,.3)
       love.graphics.draw(
@@ -290,6 +291,9 @@ function LootGenerator.init(self)
         animation.sprite,
         self.x, self.y
       )
+
+      local ox, oy = animation:getOffset()
+      Component.get('lightWorld'):addLight(self.x + ox, self.y + oy, 17, nil, 0.4)
 
       if self.hovered then
         love.graphics.setShader()
