@@ -19,9 +19,9 @@ local function callSubscribersByTypeAndHandleCleanup(self, msgType, queue, msgHa
 	end
 
 	local ret = nextValue
-	local callback = function(handlerData)
-		local h = handlerData
-		local handler, _, filter = h[1], h[2], h[4]
+	local callback = function(handlerRef)
+		local h = handlerRef
+		local handler, filter = h[1], h[4]
 		if filter then
 			local shouldCall = filter and filter(ret)
 			if (not shouldCall) then

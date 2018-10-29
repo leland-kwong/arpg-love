@@ -22,7 +22,6 @@ local setElectricShockShader = require 'modules.shaders.shader-electric-shock'
 local Enum = require 'utils.enum'
 local collisionGroups = require 'modules.collision-groups'
 local Console = require 'modules.console.console'
-local jprof = require 'modules.profile'
 
 local max, random, abs, min = math.max, math.random, math.abs, math.min
 
@@ -510,28 +509,17 @@ local function drawShadow(self, h, w, ox, oy)
   )
 end
 
-local function getStatusIcons()
-  local iconAnimations = {}
-  for spriteName,_ in pairs(animationFactory.frameData) do
-    if string.find(spriteName, '^status-') then
-      local animation = animationFactory:new({ spriteName })
-      iconAnimations[spriteName] = animation
-    end
-  end
-  return iconAnimations
-end
-local statusIconAnimations = getStatusIcons()
+
 local function drawStatusEffects(self, statusIcons)
   local offsetX = 0
   local iconSize = 20
   for hitId,hit in pairs(self.hitData) do
-    if hit.statusIcon then
-      love.graphics.draw(
-        animationFactory.atlas,
-        statusIconAnimations[hit.statusIcon].sprite,
-        self.x + offsetX,
-        self.y - 20 - self.z
-      )
+    local icon = hit.statusIcon
+    if icon then
+      local x, y = self.x + offsetX,
+          self.y - 20 - self.z
+      Component.get('statusIcons'):addIcon(icon, x, y)
+      -- offset the next icon to be rendered
       offsetX = offsetX + iconSize
     end
   end

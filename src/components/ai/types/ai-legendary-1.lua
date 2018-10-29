@@ -145,6 +145,16 @@ return function(props)
       'multi-shot'
     }
   }
+  aiProps.lightRadius = 20
+  aiProps.onUpdateStart = function(self)
+    local iconX, iconY = self.x - spriteWidth / 2,
+      self.y - self.z - 40
+    Component.get('statusIcons'):addIcon(
+      'status-legendary-enemy',
+      iconX,
+      iconY
+    )
+  end
   aiProps.outlineColor = itemConfig.rarityColor[itemConfig.rarity.LEGENDARY]
   table.insert(aiProps.abilities, MultiShot)
   return aiProps

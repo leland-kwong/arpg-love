@@ -1,4 +1,4 @@
-PROF_CAPTURE = false
+PROF_CAPTURE = true
 local jprof = require('jprof')
 
 local isFrameReady = false

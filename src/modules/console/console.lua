@@ -111,9 +111,11 @@ consoleLog = Console.debug
 function Console.init(self)
   Component.addToGroup(self, groups.system)
   local perf = require 'utils.perf'
+  self.msgCountPerFrame = 0
   msgBus.send = perf({
     done = function(_, totalTime, callCount)
       self.msgBusAverageTime = totalTime/callCount
+      self.msgCountPerFrame = self.msgCountPerFrame + 1
     end
   })(msgBus.send)
 end
@@ -208,7 +210,9 @@ function Console.draw(self)
   gfx.printf(
     {
       Color.WHITE,
-      'msgBus '..string.format('%0.3f', self.msgBusAverageTime),
+      'msgBus avgTime: '..string.format('%0.3f', self.msgBusAverageTime),
+      Color.WHITE,
+      '\nmsgBus calls: '..self.msgCountPerFrame,
       Color.WHITE,
       '\ninput context: ',
       Color.YELLOW,
@@ -219,6 +223,7 @@ function Console.draw(self)
     400,
     'left'
   )
+  self.msgCountPerFrame = 0
 
   local logEntries = logger:get()
   gfx.setColor(Color.MED_GRAY)

@@ -1,4 +1,5 @@
 local drawOrders = {
+  'StatusIcons',
   'FrostSparkDraw',
   'BulletPreDraw',
   'BulletDraw',

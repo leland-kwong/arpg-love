@@ -54,10 +54,8 @@ local characterSystem = msgBus.send(msgBus.PROFILE_FUNC, {
   call = require 'components.groups.character'
 })
 
-local jprof = require('modules.profile')
-
 function love.update(dt)
-  jprof.zoneStart('frame')
+  jprof.push('frame')
 
   systemsProfiler()
 
@@ -99,7 +97,11 @@ function love.draw()
 
   groups.system.drawAll()
 
-  jprof.zoneEnd('frame')
+  jprof.pop('frame')
+end
+
+function love.quit()
+  jprof.write('prof.mpack')
 end
 
 --[[
