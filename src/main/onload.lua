@@ -3,6 +3,7 @@ local drawOrders = require 'modules.draw-orders'
 local LightWorld = require('components.light-world')
 local camera = require 'components.camera'
 local msgBus = require 'components.msg-bus'
+require 'components.status-icons'
 
 local width, height = love.graphics.getDimensions()
 
