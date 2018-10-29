@@ -19,7 +19,9 @@ local function callSubscribersByTypeAndHandleCleanup(self, msgType, queue, msgHa
 	end
 
 	local ret = nextValue
-	local callback = function(handler, handlerRef, filter)
+	local callback = function(handlerData)
+		local h = handlerData
+		local handler, _, filter = h[1], h[2], h[4]
 		if filter then
 			local shouldCall = filter and filter(ret)
 			if (not shouldCall) then
@@ -38,14 +40,14 @@ local function callSubscribersByTypeAndHandleCleanup(self, msgType, queue, msgHa
 
 	for i=1, handlerCount do
 		local h = msgHandlers[i]
-		local handler, priority, filter = h[1], h[2], h[4]
-		queue:add(priority, callback, handler, h, filter)
+		local priority = h[2]
+		queue:add(priority, callback, h)
 	end
 
 	for i=1, wildcardHandlerCount do
 		local h = wildCardListeners[i]
-		local handler, priority, filter = h[1], h[2], h[4]
-		queue:add(priority, callback, handler, h, filter)
+		local priority = h[2]
+		queue:add(priority, callback, h)
 	end
 
 	queue:flush()

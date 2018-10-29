@@ -57,7 +57,7 @@ function Q:add(order, cb, a, b, c)
   end
 
   local itemIndex = self.length + 1
-  local item = {cb, a, b, c}
+  local item = {cb, a}
 
   list[#list + 1] = item
   self.length = self.length + 1
@@ -79,7 +79,7 @@ function Q:flush()
     local rowLen = row and #row or 0
     for j=1, rowLen do
       local item = row[j]
-      item[1](item[2], item[3], item[4])
+      item[1](item[2])
     end
   end
   self.length = 0
