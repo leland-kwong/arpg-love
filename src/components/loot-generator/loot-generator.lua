@@ -156,6 +156,7 @@ local itemNamesTooltipLayer = Gui.create({
 
 local LootGenerator = {
   group = itemGroup,
+  isNew = true,
   rootStore = CreateStore,
   class = collisionGroups.floorItem,
   -- item to generate
@@ -177,6 +178,7 @@ local function flyoutEasing(t, b, c, d)
 end
 
 function LootGenerator.init(self)
+  local parent = self
   assert(self.item ~= nil, 'item must be provided')
 
   local parent = self
@@ -196,6 +198,7 @@ function LootGenerator.init(self)
     :addToWorld(collisionWorlds.map)
 
   Gui.create({
+    isNew = true,
     group = itemGroup,
     -- debug = true,
     x = self.x,
@@ -226,10 +229,13 @@ function LootGenerator.init(self)
         endStateY.y = actualY
       end
 
-      -- y-axis animation
-      self.tween = tween.new(0.5, self, endStateY, flyoutEasing)
-      -- x-axis animation
-      self.tween2 = tween.new(0.5, self, endStateX)
+      if parent.isNew then
+        parent.isNew = false
+        -- y-axis animation
+        self.tween = tween.new(0.5, self, endStateY, flyoutEasing)
+        -- x-axis animation
+        self.tween2 = tween.new(0.5, self, endStateX)
+      end
     end,
     getMousePosition = itemMousePosition,
     onPointerEnter = function(self)
@@ -259,10 +265,12 @@ function LootGenerator.init(self)
       -- cause the item to be deleted part-way through the update method, which will cause race conditions.
       itemNamesTooltipLayer:add(item, self.x, self.y, self)
 
-      if not self.animationComplete then
+      if self.tween then
         local complete = self.tween:update(dt)
         self.tween2:update(dt)
-        self.animationComplete = complete
+        if complete then
+          self.tween = nil
+        end
       end
     end,
     draw = function(self)
@@ -307,7 +315,12 @@ function LootGenerator.init(self)
 end
 
 function LootGenerator.serialize(self)
-  return self.initialProps
+  local Object = require 'utils.object-utils'
+  return Object.immutableApply(self.initialProps, {
+    x = self.x,
+    y = self.y,
+    isNew = self.isNew
+  })
 end
 
 return Component.createFactory(LootGenerator)

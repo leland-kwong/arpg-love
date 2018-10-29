@@ -145,6 +145,7 @@ return function(props)
       'multi-shot'
     }
   }
+  aiProps.outlineColor = itemConfig.rarityColor[itemConfig.rarity.LEGENDARY]
   table.insert(aiProps.abilities, MultiShot)
   return aiProps
 end
