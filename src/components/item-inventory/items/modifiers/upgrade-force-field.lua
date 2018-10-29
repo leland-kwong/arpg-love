@@ -131,6 +131,11 @@ return itemSystem.registerModule({
         forceFieldsByItemId[id] = nil
         return msgBus.CLEANUP
       end
+
+      if (not checkExpRequirement(item, props)) then
+        return
+      end
+
       if (not forceFieldsByItemId[id]) then
         local playerRef = Component.get('PLAYER')
         local x, y = playerRef:getPosition()
@@ -146,9 +151,7 @@ return itemSystem.registerModule({
           end)
           :setParent(playerRef)
       end
-    end, 100, function()
-      return checkExpRequirement(item, props)
-    end)
+    end, 100)
   end,
   tooltip = function(item, props)
     return {

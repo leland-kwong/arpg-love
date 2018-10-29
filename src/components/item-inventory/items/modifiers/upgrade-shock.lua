@@ -15,6 +15,12 @@ return itemSystem.registerModule({
       if (not itemState.equipped) then
         return msgBus.CLEANUP
       end
+
+      if hitMessage.source ~= id or
+        props.experienceRequired >= item.experience then
+          return
+      end
+
       msgBus.send(msgBus.CHARACTER_HIT, {
         parent = hitMessage.parent,
         duration = props.duration,
@@ -28,10 +34,7 @@ return itemSystem.registerModule({
         props.maxDamage
       )
       return hitMessage
-    end, 1, function(msg)
-      return msg.source == id and
-        props.experienceRequired <= item.experience
-    end)
+    end, 1)
   end,
   tooltip = function(item, props)
     return {
