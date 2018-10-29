@@ -65,13 +65,12 @@ function Spark.init(self)
   psystem:emit(30)
 
   self.clock = 0
-  local numFrames = self.maxLifeTime / dt
-  self.opacityPerFrame = 1/numFrames
 end
 
 function Spark.update(self, dt)
   self.clock = self.clock + dt
-  self.opacity = self.opacity - self.opacityPerFrame
+  local percentLifeTime = self.clock / self.maxLifeTime
+  self.opacity = self.opacity - (self.opacity * percentLifeTime)
   if self.clock >= self.maxLifeTime then
     self:delete(true)
   end
