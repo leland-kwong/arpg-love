@@ -50,6 +50,28 @@ local function hitAnimation()
   coroutine.yield(true)
 end
 
+msgBus.on(msgBus.CHARACTER_HIT, function(msgValue)
+  local component = msgValue.parent
+  if Component.getBlueprint(msgValue.parent) == EnvironmentInteractable then
+    component.hitAnimation = coroutine.wrap(hitAnimation)
+
+    local source = love.audio.newSource('built/sounds/attack-impact-1.wav', 'static')
+    source:setVolume(0.4)
+    love.audio.play(source)
+  end
+end)
+
+msgBus.on(msgBus.ENTITY_DESTROYED, function(msgValue)
+  local component = msgValue.parent
+  if Component.getBlueprint(msgValue.parent) == EnvironmentInteractable then
+    local source = love.audio.newSource(
+      'built/sounds/treasure-cache-demolish.wav',
+      'static'
+    )
+    love.audio.play(source)
+  end
+end)
+
 function EnvironmentInteractable.init(self)
   Component.addToGroup(self, groups.character)
   self.onDamageTaken = onDamageTaken
@@ -73,27 +95,6 @@ function EnvironmentInteractable.init(self)
     0,
     -offsetY
   ):addToWorld(collisionWorlds.map)
-  self.listeners = {
-    msgBus.on(msgBus.CHARACTER_HIT, function(msgValue)
-      if msgValue.parent == self then
-        self.hitAnimation = coroutine.wrap(hitAnimation)
-
-        local source = love.audio.newSource('built/sounds/attack-impact-1.wav', 'static')
-        source:setVolume(0.4)
-        love.audio.play(source)
-      end
-    end),
-
-    msgBus.on(msgBus.ENTITY_DESTROYED, function(msgValue)
-      if msgValue.parent == self then
-        local source = love.audio.newSource(
-          'built/sounds/treasure-cache-demolish.wav',
-          'static'
-        )
-        love.audio.play(source)
-      end
-    end)
-  }
 end
 
 function EnvironmentInteractable.update(self, dt)
@@ -143,10 +144,6 @@ function EnvironmentInteractable.draw(self)
   if self.state == states.HIT then
     love.graphics.setBlendMode(oBlendMode)
   end
-end
-
-function EnvironmentInteractable.final(self)
-  msgBus.off(self.listeners)
 end
 
 return Component.createFactory(EnvironmentInteractable)
