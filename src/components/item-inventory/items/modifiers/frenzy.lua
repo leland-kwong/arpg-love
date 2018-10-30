@@ -24,6 +24,23 @@ return itemSystem.registerModule({
       msgBus.send(msgBus.PLAYER_STATS_NEW_MODIFIERS)
     end
 
+    local function stackRenderer(x, y)
+      local AnimationFactory = require 'components.animation-factory'
+      local icon = AnimationFactory:newStaticSprite('status-frenzy')
+      local width = icon:getWidth()
+      Component.get('hudTextSmallLayer'):add(state.stacks, Color.WHITE, x + width - 4, y)
+      love.graphics.setColor(1,1,1)
+      love.graphics.draw(AnimationFactory.atlas, icon.sprite, x, y)
+    end
+
+    msgBus.on(msgBus.UPDATE, function(msg)
+      if (not state.equipped) then
+        return msgBus.CLEANUP
+      end
+      Component.get('hudStatusIcons')
+        :addIcon(stackRenderer)
+    end)
+
     msgBus.on(msgBus.CHARACTER_HIT, function(msg)
       if (not state.equipped) then
         return msgBus.CLEANUP

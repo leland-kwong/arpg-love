@@ -9,6 +9,7 @@ local GuiText = require 'components.gui.gui-text'
 local NpcInfo = require 'components.hud.npc-info'
 local Notifier = require 'components.hud.notifier'
 local Minimap = require 'components.map.minimap'
+local HudStatusIcons = require 'components.hud.status-icons'
 local camera = require 'components.camera'
 local msgBus = require 'components.msg-bus'
 local Position = require 'utils.position'
@@ -63,6 +64,7 @@ function Hud.init(self)
   end
 
   self.hudTextLayer = GuiText.create({
+    id = 'hudTextLayer',
     group = groups.hud,
     drawOrder = function()
       return 4
@@ -70,6 +72,7 @@ function Hud.init(self)
   }):setParent(self)
 
   self.hudTextSmallLayer = GuiText.create({
+    id = 'hudTextSmallLayer',
     group = groups.hud,
     font = require 'components.font'.primary.font,
     drawOrder = function()
@@ -104,7 +107,8 @@ function Hud.init(self)
   end
 
   -- health bar
-  StatusBar.create({
+  local healthStatusBar = StatusBar.create({
+    id = 'healthStatusBar',
     x = offX,
     y = winHeight - barHeight - 13,
     w = healthManaWidth / 2,
@@ -153,6 +157,12 @@ function Hud.init(self)
   NpcInfo.create():setParent(self)
   ActionError.create({
     textLayer = self.hudTextSmallLayer
+  }):setParent(self)
+
+  HudStatusIcons.create({
+    id = 'hudStatusIcons',
+    x = healthStatusBar.x,
+    y = healthStatusBar.y - 25
   }):setParent(self)
 
   local spacing = 32

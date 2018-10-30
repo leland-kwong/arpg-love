@@ -17,16 +17,15 @@ return {
 		category = itemConfig.category.AUGMENTATION,
 
 		baseModifiers = {
-			percentDamage = 0.5,
-			cooldownReduction = 0.5
+			percentDamage = 0.5
 		},
 
 		extraModifiers = {
 			require 'components.item-inventory.items.modifiers.frenzy'({
 				maxStacks = 30,
-				resetStackDelay = 1,
+				resetStackDelay = 2,
 				attackTimeReduction = 0.01,
-				energyCostReduction = -0.05,
+				energyCostReduction = -0.1,
 				cooldownReduction = 0.005
 			}),
 		}
