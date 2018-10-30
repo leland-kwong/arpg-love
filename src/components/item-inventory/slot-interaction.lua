@@ -187,7 +187,7 @@ local function setupSlotInteractions(
           local baseModifiersBlock = {
             content = modParser({
               type = 'baseStatsList',
-              data = item.baseModifiers
+              data = itemDefinition.getDefinition(item).baseModifiers
             }),
             width = tooltipWidth,
             font = font.primary.font,

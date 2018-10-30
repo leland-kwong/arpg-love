@@ -92,12 +92,6 @@ function items.create(module)
 
 	local newItem = createFn()
 
-	-- set modifiers to value based on range parameters
-	for k,v in pairs(newItem.baseModifiers) do
-		local fancyRandom = require 'utils.fancy-random'
-		newItem.baseModifiers[k] = fancyRandom(v[1], v[2], 2)
-	end
-
 	newItem.__type = module.type
 	newItem.__id = uid()
 

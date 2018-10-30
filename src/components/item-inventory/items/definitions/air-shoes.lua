@@ -4,12 +4,6 @@ return {
 	type = "air-shoes",
 
 	blueprint =  {
-		baseModifiers = {
-			cooldown = {1.5, 1.5},
-			moveSpeed = {120, 120},
-			armor = {10, 10}
-		},
-
 		extraModifiers = {},
 
 		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'(),
@@ -25,5 +19,11 @@ return {
 		title = 'Air Shoes',
 		baseDropChance = 1,
 		category = itemConfig.category.SHOES,
+
+		baseModifiers = {
+			cooldown = 1.5,
+			moveSpeed = 120,
+			armor = 10
+		},
 	}
 }

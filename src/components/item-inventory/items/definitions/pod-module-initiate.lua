@@ -10,12 +10,6 @@ return {
 	type = "pod-module-initiate",
 
 	blueprint = {
-		baseModifiers = {
-			cooldown = {0.1, 0.1},
-			attackTime = {0.25, 0.25},
-			energyCost = {1, 1}
-		},
-
 		extraModifiers = {
 			require(require('alias').path.items..'.modifiers.upgrade-shock')({
 				experienceRequired = 20,
@@ -48,5 +42,11 @@ return {
 		title = 'r-1 initiate',
 		baseDropChance = 1,
 		category = itemConfig.category.POD_MODULE,
+
+		baseModifiers = {
+			cooldown = 0.1,
+			attackTime = 0.1,
+			energyCost = 1
+		},
 	}
 }

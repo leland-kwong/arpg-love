@@ -6,12 +6,6 @@ return {
 	type = 'pod-module-hammer',
 
 	blueprint = {
-		baseModifiers = {
-			attackTime = {0.42, 0.42},
-			cooldown = {0.1, 0.1},
-			energyCost = {2, 2},
-		},
-
 		extraModifiers = {
 			require 'components.item-inventory.items.modifiers.stat'({
 				maxHealth = 1,
@@ -46,6 +40,12 @@ return {
 
 		levelRequirement = 1,
 
-		renderAnimation = 'weapon-hammer-attachment'
+		renderAnimation = 'weapon-hammer-attachment',
+
+		baseModifiers = {
+			attackTime = 0.42,
+			cooldown = 0.1,
+			energyCost = 2,
+		},
 	}
 }

@@ -4,10 +4,6 @@ return {
 	type = "potion-health",
 
 	blueprint = {
-		baseModifiers =  {
-			cooldown = {8, 8},
-		},
-
 		extraModifiers = {},
 
 		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'(),
@@ -25,5 +21,9 @@ return {
 		title = "Potion of Healing",
 		baseDropChance = 1,
 		category = itemConfig.category.CONSUMABLE,
+
+		baseModifiers =  {
+			cooldown = 8,
+		},
 	}
 }

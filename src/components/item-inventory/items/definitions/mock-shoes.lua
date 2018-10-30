@@ -4,12 +4,6 @@ return {
 	type = "mock-shoes",
 
 	blueprint =  {
-		baseModifiers = {
-			cooldown = {1.5, 1.5},
-			moveSpeed = {90, 90},
-			armor = {50, 50}
-		},
-
 		extraModifiers = {},
 
 		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'(),
@@ -24,5 +18,11 @@ return {
 		title = 'Mock shoes',
 		baseDropChance = 1,
 		category = itemConfig.category.SHOES,
+
+		baseModifiers = {
+			cooldown = 1.5,
+			moveSpeed = 90,
+			armor = 50
+		},
 	}
 }
