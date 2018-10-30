@@ -3,32 +3,46 @@
 ]]
 local Vec2 = require 'modules.brinevector'
 
+local bucketsByModifierType = {}
+
+local function RangeCalculator(min, max, multiplier)
+  assert(type(min) == 'number', 'min must be a number')
+  assert(type(max) == 'number', 'max must be a number')
+  assert(type(multiplier) == 'number', 'multiplier must be a number')
+
+  return function(rollValue)
+    assert(rollValue >= 0 and rollValue <= 1, 'roll value must be between 0 and 1')
+    local result = min + math.max(0, math.ceil(rollValue * (max - min + 1)) - 1)
+    return result * multiplier
+  end
+end
+
 return {
   cooldownReduction = {
-    range = Vec2(0.01, 0.1),
+    range = RangeCalculator(1, 10, 0.01),
   },
   attackTimeReduction = {
-    range = Vec2(0.01, 0.1)
+    range = RangeCalculator(1, 10, 0.01)
   },
   percentDamage = {
-    range = Vec2(0.1, 0.2)
+    range = RangeCalculator(10, 20, 0.01)
   },
   armor = {
-    range = Vec2(10,100)
+    range = RangeCalculator(10, 100, 1)
   },
   maxHealth = {
-    range = Vec2(50, 100)
+    range = RangeCalculator(50, 100, 1)
   },
   healthRegeneration = {
-    range = Vec2(1, 3)
+    range = RangeCalculator(1, 2, 1)
   },
   maxEnergy = {
-    range = Vec2(10, 20)
+    range = RangeCalculator(10, 20, 1)
   },
   energyRegeneration = {
-    range = Vec2(1, 2)
+    range = RangeCalculator(1, 2, 1)
   },
   moveSpeed = {
-    range = Vec2(10, 15)
+    range = RangeCalculator(10, 15, 1)
   },
 }

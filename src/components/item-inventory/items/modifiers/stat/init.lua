@@ -3,6 +3,11 @@ local msgBus = require 'components.msg-bus'
 local extend = require 'utils.object-utils'.extend
 local fancyRandom = require 'utils.fancy-random'
 local Color = require 'modules.color'
+local modDefinitions = require 'components.item-inventory.modifier-definitions'
+
+local function calcValue(k, v)
+  return modDefinitions[k].range(v)
+end
 
 local module = itemSystem.registerModule({
   name = 'stat',
@@ -13,15 +18,19 @@ local module = itemSystem.registerModule({
         return msgBus.CLEANUP
       end
       for k,v in pairs(props) do
-        mods[k] = mods[k] + v
+        mods[k] = mods[k] + calcValue(k, v)
       end
       return mods
     end, 1)
   end,
   tooltip = function(_, props)
+    local calculatedProps = {}
+    for k,v in pairs(props) do
+      calculatedProps[k] = calcValue(k, v)
+    end
     return {
       type = 'statsList',
-      data = props
+      data = calculatedProps
     }
   end
 })
@@ -31,11 +40,5 @@ local module = itemSystem.registerModule({
   converted to a single value with a randomizer
 ]]
 return function(props)
-  for prop,value in pairs(props) do
-    local isRange = type(value) == 'table'
-    if isRange then
-      props[prop] = fancyRandom(value[1], value[2], 2)
-    end
-  end
   return module(props)
 end
