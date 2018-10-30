@@ -74,6 +74,7 @@ end)
 
 function EnvironmentInteractable.init(self)
   Component.addToGroup(self, groups.character)
+  Component.addToGroup(self, 'autoVisibility')
   self.onDamageTaken = onDamageTaken
   self.health = self.maxHealth
 

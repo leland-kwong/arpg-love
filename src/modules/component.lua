@@ -291,28 +291,6 @@ function M.createFactory(blueprint)
     return self._deleted
   end
 
-  function blueprint:checkOutOfBounds(threshold)
-    threshold = threshold or 0
-    local camera = require 'components.camera'
-    local west, east, north, south = camera:getBounds()
-    -- add bounds data
-    local x, y = self.x, self.y
-    local outOfBoundsX, outOfBoundsY = 0, 0
-    if x < west then
-      outOfBoundsX = west - x
-    elseif x > east then
-      outOfBoundsX = x - east
-    end
-    if y < north then
-      outOfBoundsY = north - y
-    elseif y > south then
-      outOfBoundsY = y - south
-    end
-
-    return (outOfBoundsX > threshold) or
-      (outOfBoundsY > threshold)
-  end
-
   -- default methods
   for k,v in pairs(baseProps) do
     if not blueprint[k] then

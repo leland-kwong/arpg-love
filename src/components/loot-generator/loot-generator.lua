@@ -188,6 +188,7 @@ function LootGenerator.init(self)
 
   self:setParent(Component.get('MAIN_SCENE'))
   Component.addToGroup(self, Component.groups.gameWorld)
+  Component.addToGroup(self, 'autoVisibility')
 
   local animation = AnimationFactory:new({
     itemSystem.getDefinition(item).sprite
@@ -254,9 +255,7 @@ function LootGenerator.init(self)
       return true
     end,
     onUpdate = function(self, dt)
-      local boundsThreshold = 32
-      self.isOutOfBounds = self:checkOutOfBounds(boundsThreshold)
-      if self.isOutOfBounds then
+      if (not parent.isInViewOfPlayer) then
         itemNamesTooltipLayer:delete(item)
         return
       end

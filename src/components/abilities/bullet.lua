@@ -104,6 +104,8 @@ local Bullet = {
       '[Bullet] `targetGroup` is required'
     )
 
+    Component.addToGroup(self, 'autoVisibility')
+
     local dx, dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
     self.direction = {x = dx, y = dy}
     self.x = self.x + self.startOffset * dx
@@ -115,9 +117,9 @@ local Bullet = {
     local ox, oy = self.animation:getOffset()
     self.w = w
     self.h = h
-    self.colObj = collisionObject
-      :new('projectile', self.x, self.y, w, h, ox, oy)
-      :addToWorld(collisionWorlds.map)
+    self.colObj = self:addCollisionObject(
+      'projectile', self.x, self.y, w, h, ox, oy
+    ):addToWorld(collisionWorlds.map)
   end,
 
   update = function(self, dt)
@@ -172,6 +174,10 @@ local Bullet = {
   end,
 
   draw = function(self)
+    if (not self.isInViewOfPlayer) then
+      return
+    end
+
     local ox, oy = self.animation:getOffset()
     local scale = self.scale
 
