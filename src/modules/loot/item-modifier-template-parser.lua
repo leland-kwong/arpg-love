@@ -60,6 +60,7 @@ local modifierParsers = {
     end
     return coloredText
   end,
+  -- modifier stats
   statsList = function(data)
     local coloredText = {}
     local i = 0
