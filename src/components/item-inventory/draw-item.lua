@@ -1,6 +1,6 @@
 local GuiText = require 'components.gui.gui-text'
 local animationFactory = require'components.animation-factory'
-local itemDefinition = require'components.item-inventory.items.item-system'
+local itemSystem = require'components.item-inventory.items.item-system'
 local font = require 'components.font'
 local Position = require 'utils.position'
 local Color = require 'modules.color'
@@ -15,7 +15,7 @@ local guiStackSizeTextLayer = GuiText.create({
 })
 
 local function drawItem(item, x, y, slotSize)
-  local def = itemDefinition.getDefinition(item)
+  local def = itemSystem.getDefinition(item)
   if def then
     local animation = itemAnimationsCache[def]
     if not animation then

@@ -1,5 +1,5 @@
 local ItemGenerator = require 'components.loot-generator.algorithm-1'
-local itemDefinition = require 'components.item-inventory.items.item-system'
+local itemSystem = require 'components.item-inventory.items.item-system'
 local f = require 'utils.functional'
 
 local numItems = 1

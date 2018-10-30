@@ -6,7 +6,7 @@ local config = require 'config.config'
 local font = require 'components.font'
 local guiTextLayers = require 'components.item-inventory.gui-text-layers'
 local animationFactory = require'components.animation-factory'
-local itemDefinition = require'components.item-inventory.items.item-system'
+local itemSystem = require'components.item-inventory.items.item-system'
 local Position = require 'utils.position'
 local msgBus = require 'components.msg-bus'
 local groups = require 'components.groups'
@@ -69,7 +69,7 @@ Gui.create({
     if itemPickedUp then
       local gameScale = config.scaleFactor
       local mx, my = love.mouse.getX() / gameScale, love.mouse.getY() / gameScale
-      local sprite = itemDefinition.getDefinition(itemPickedUp).sprite
+      local sprite = itemSystem.getDefinition(itemPickedUp).sprite
       local sw, sh = animationFactory:getSpriteSize(sprite, true)
       drawItem(itemPickedUp, mx - sw/2, my - sh/2)
     end
@@ -108,12 +108,12 @@ local function setupSlotInteractions(
         -- create a tooltip
         local item = getItem()
         if self.hovered and item and (not self.tooltip) then
-          local itemState = itemDefinition.getState(item)
+          local itemState = itemSystem.getState(item)
           local Block = require 'components.gui.block'
           local itemConfig = require'components.item-inventory.items.config'
           local modParser = require 'modules.loot.item-modifier-template-parser'
           local blockPadding = 8
-          local itemDef = itemDefinition.getDefinition(item)
+          local itemDef = itemSystem.getDefinition(item)
           local rarityColor = itemConfig.rarityColor[item.rarity]
           local tooltipWidth = 250
           local modifierBackgroundColor = {0.17,0.17,0.17}
@@ -148,7 +148,7 @@ local function setupSlotInteractions(
 
           local activeAbilityBlock = nil
           if item.onActivateWhenEquipped then
-            local module = itemDefinition.loadModule(item.onActivateWhenEquipped)
+            local module = itemSystem.loadModule(item.onActivateWhenEquipped)
             if module.tooltip then
               activeAbilityBlock = Block.Row({
                 {
@@ -166,7 +166,7 @@ local function setupSlotInteractions(
             end
           end
 
-          local rightClickModule = itemDefinition.loadModule(item.onActivate)
+          local rightClickModule = itemSystem.loadModule(item.onActivate)
           local rightClickActionBlock = (not itemState.equipped) and
             Block.Row({
               {
@@ -187,7 +187,7 @@ local function setupSlotInteractions(
           local baseModifiersBlock = {
             content = modParser({
               type = 'baseStatsList',
-              data = itemDefinition.getDefinition(item).baseModifiers
+              data = itemSystem.getDefinition(item).baseModifiers
             }),
             width = tooltipWidth,
             font = font.primary.font,
@@ -221,7 +221,7 @@ local function setupSlotInteractions(
           }
           -- add extra modifiers to tooltip
           functional.forEach(item.extraModifiers, function(modifier)
-            local module = itemDefinition.loadModule(modifier)
+            local module = itemSystem.loadModule(modifier)
             local tooltip = module.tooltip
             if tooltip then
               local content = tooltip(item)
@@ -281,7 +281,7 @@ local function setupSlotInteractions(
       onClick = function(self, rightClick)
         if rightClick then
           local item = getItem()
-          local d = itemDefinition.getDefinition(item)
+          local d = itemSystem.getDefinition(item)
           if d and onItemActivate then
             onItemActivate(item)
           end
