@@ -15,6 +15,7 @@ return {
 		extraModifiers = {
 			require 'components.item-inventory.items.modifiers.stat'({
 				maxHealth = {100, 100},
+				healthRegeneration = {2, 2}
 			}),
 			require(require('alias').path.items..'.modifiers.upgrade-force-field')({
 				experienceRequired = 0,
@@ -27,13 +28,13 @@ return {
 				minDamage = 3,
 				maxDamage = 5,
 			}),
-			require(require('alias').path.items..'.modifiers.regeneration')(function()
-				return {
-					rate = 2,
-					property = 'health',
-					maxProperty = 'maxHealth'
-				}
-			end),
+			-- require(require('alias').path.items..'.modifiers.regeneration')(function()
+			-- 	return {
+			-- 		rate = 2,
+			-- 		property = 'health',
+			-- 		maxProperty = 'maxHealth'
+			-- 	}
+			-- end),
 		},
 
 		experience = 0,

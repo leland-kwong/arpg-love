@@ -46,7 +46,7 @@ end
 
 local min, max = math.min, math.max
 local function updateProperty(rootStore, changeAmount, property, maxProperty)
-  local state = rootStore:get()
+	local state = rootStore:get()
   local curProp = state[property]
   local maxProp = state[maxProperty] + state.statModifiers[maxProperty]
 	local newProp = max(0, min(maxProp, curProp + changeAmount))

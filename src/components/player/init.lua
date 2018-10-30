@@ -219,6 +219,28 @@ end
 
 msgBus.PLAYER_INITIALIZED = 'PLAYER_INITIALIZED'
 
+local function updateHealthRegeneration(healthRegeneration)
+  local healthRegenerationDuration = math.pow(10, 10)
+  msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
+    source = 'PLAYER_HEALTH_REGENERATION',
+    amount = healthRegenerationDuration * healthRegeneration,
+    duration = healthRegenerationDuration,
+    property = 'health',
+    maxProperty = 'maxHealth'
+  })
+end
+
+local function updateEnergyRegeneration(energyRegeneration)
+  local energyRegenerationDuration = math.pow(10, 10)
+  msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
+    source = 'PLAYER_ENERGY_REGENERATION',
+    amount = energyRegenerationDuration * energyRegeneration,
+    duration = energyRegenerationDuration,
+    property = 'energy',
+    maxProperty = 'maxEnergy'
+  })
+end
+
 local Player = {
   id = 'PLAYER',
   autoSave = config.autoSave,
@@ -250,6 +272,8 @@ local Player = {
       msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function(msgValue)
         local newModifiers = msgValue
         msgBus.send(msgBus.GAME_STATE_GET):set('statModifiers', newModifiers)
+        updateHealthRegeneration(newModifiers.healthRegeneration)
+        updateEnergyRegeneration(newModifiers.energyRegeneration)
       end),
 
       msgBus.on(msgBus.GENERATE_LOOT, function(msgValue)
@@ -383,26 +407,6 @@ local Player = {
     local CreateStore = require'components.state.state'
     self.rootStore = msgBus.send(msgBus.GAME_STATE_GET)
     self.dir = DIRECTION_RIGHT
-
-    local energyRegenerationDuration = 99999999
-    msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
-      source = 'BASE_ENERGY_REGENERATION',
-      amount = energyRegenerationDuration *
-        self.rootStore:get().statModifiers.energyRegeneration,
-      duration = energyRegenerationDuration,
-      property = 'energy',
-      maxProperty = 'maxEnergy'
-    })
-
-    local healthRegenerationDuration = math.pow(10, 10)
-    msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
-      source = 'PLAYER_INNATE_HEALTH_REGENERATION',
-      amount = healthRegenerationDuration *
-        self.rootStore:get().statModifiers.healthRegeneration,
-      duration = healthRegenerationDuration,
-      property = 'health',
-      maxProperty = 'maxHealth'
-    })
 
     self.animations = {
       idle = animationFactory:new({
