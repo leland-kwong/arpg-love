@@ -375,7 +375,7 @@ return function(props)
       end
     end
     local msgBus = require 'components.msg-bus'
-    msgBus.on(msgBus.ENTITY_DESTROYED, handleBossDeath)
+    msgBus.on(msgBus.ENEMY_DESTROYED, handleBossDeath)
   end
 
   aiProps.id = bossId

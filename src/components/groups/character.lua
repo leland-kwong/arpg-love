@@ -34,7 +34,7 @@ return function(dt)
           c:onDestroyStart()
         end
         c.collision:delete()
-        msgBus.send(msgBus.ENTITY_DESTROYED, {
+        msgBus.send(msgBus.ENEMY_DESTROYED, {
           parent = c,
           x = c.x,
           y = c.y,

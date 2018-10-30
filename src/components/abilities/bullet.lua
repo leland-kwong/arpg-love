@@ -168,8 +168,6 @@ local Bullet = {
       end
     end
 
-    Component.get('lightWorld')
-      :addLight(self.x, self.y, 10, self.color)
     self.angle = self.angle + (dt * 8)
   end,
 
@@ -177,6 +175,9 @@ local Bullet = {
     if (not self.isInViewOfPlayer) then
       return
     end
+
+    Component.get('lightWorld')
+      :addLight(self.x, self.y, 10, self.color)
 
     local ox, oy = self.animation:getOffset()
     local scale = self.scale

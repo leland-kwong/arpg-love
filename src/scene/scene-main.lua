@@ -151,7 +151,7 @@ function MainScene.init(self)
       return v
     end, 1),
 
-    msgBus.on(msgBus.ENTITY_DESTROYED, function(msgValue)
+    msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
       if randomItem then
         msgBus.send(msgBus.GENERATE_LOOT, {msgValue.x, msgValue.y, randomItem})
       end

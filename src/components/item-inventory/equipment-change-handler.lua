@@ -65,6 +65,8 @@ msgBus.on(msgBus.ITEM_EQUIPPED, function(item)
 	itemSystem:loadModules(item)
 
   itemState.listeners = {
+		msgBus.on(msgBus.ENEMY_DESTROYED, function()
+		end),
     msgBus.on(msgBus.ALL, equipmentSubscribers.staticModifiers(item), 1),
 		msgBus.on(msgBus.NEW_GAME, function()
 			msgBus.send(msgBus.EQUIPMENT_UNEQUIP, item)

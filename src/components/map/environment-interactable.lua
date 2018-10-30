@@ -61,7 +61,7 @@ msgBus.on(msgBus.CHARACTER_HIT, function(msgValue)
   end
 end)
 
-msgBus.on(msgBus.ENTITY_DESTROYED, function(msgValue)
+msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
   local component = msgValue.parent
   if Component.getBlueprint(msgValue.parent) == EnvironmentInteractable then
     local source = love.audio.newSource(

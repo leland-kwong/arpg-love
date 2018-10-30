@@ -2,7 +2,7 @@ local Component = require 'modules.component'
 local msgBus = require 'components.msg-bus'
 local config = require 'config.config'
 
-local activeEntities = {}
+local previousItems = {}
 
 local autoVisibilityGroup = Component.newGroup({
   name = 'autoVisibility'
@@ -13,11 +13,10 @@ local function visibleItemFilter(item)
   return autoVisibilityGroup.hasComponent(parent and parent:getId())
 end
 
-local floor = math.floor
 local function toggleEntityVisibility(self)
   local collisionWorlds = require 'components.collision-worlds'
   local camera = require 'components.camera'
-  local threshold = config.gridSize * 2
+  local threshold = config.gridSize * 1
   local west, _, north = camera:getBounds()
   local width, height = camera:getSize()
   local items, len = collisionWorlds.map:queryRect(
@@ -27,18 +26,17 @@ local function toggleEntityVisibility(self)
     visibleItemFilter
   )
 
-  -- reset active entities
-  for _,entity in pairs(activeEntities) do
+  -- reset previously active entities
+  for i=1, #previousItems do
+    local entity = previousItems[i].parent
     entity.isInViewOfPlayer = false
   end
-  activeEntities = {}
+  previousItems = items
 
-  -- set new list of active entities
+  -- set visibility for new active entities
   for i=1, len do
     local entity = items[i].parent
-    local entityId = entity:getId()
     entity.isInViewOfPlayer = true
-    activeEntities[entityId] = entity
   end
 end
 
