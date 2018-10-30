@@ -20,11 +20,6 @@ local equipmentSubscribers = {
 
 			-- add the item's stats to the list of modifiers
 			if msgBus.PLAYER_STATS_NEW_MODIFIERS == msgType then
-				print(
-					Inspect(
-						itemSystem.getDefinition(item)
-					)
-				)
 				-- add up item properties with the new modifiers list
 				for k,v in pairs(msgValue) do
 					msgValue[k] = msgValue[k] + (itemSystem.getDefinition(item).baseModifiers[k] or 0)
