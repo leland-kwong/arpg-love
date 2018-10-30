@@ -97,12 +97,12 @@ function ForceField.draw(self)
   if self.state == state.SHIELD_HIT then
     love.graphics.setColor(1,1,1,0.6)
   else
-    love.graphics.setColor(r, g, b, 0.5 * percentHealthLeft)
+    love.graphics.setColor(r, g, b, 0.2 * percentHealthLeft)
   end
   love.graphics.circle('fill', self.x, self.y, size)
 
   love.graphics.setLineWidth(1)
-  love.graphics.setColor(r, g, b, 0.3)
+  love.graphics.setColor(r, g, b, 0.5)
   love.graphics.circle('line', self.x, self.y, size)
 
   love.graphics.setBlendMode(oBlendMode)
