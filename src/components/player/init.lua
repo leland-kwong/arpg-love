@@ -314,10 +314,7 @@ local Player = {
         end
 
         if (keyMap.PORTAL_OPEN == key) and (not v.hasModifier) then
-          local isBossZone = F.find(self.zones, function(zone)
-            return string.find(zone.name, 'boss') ~= nil
-          end)
-          if isBossZone then
+          if self.inBossBattle then
             msgBus.send(msgBus.PLAYER_ACTION_ERROR, "cannot portal in here")
             return
           end
@@ -619,7 +616,19 @@ function Player.handleZoneCollision(self)
   end
 end
 
+local function handleBossMode(self)
+  -- destroy active portal
+  local playerPortal = Component.get('playerPortal')
+  if playerPortal then
+    playerPortal:delete(true)
+  end
+end
+
 function Player.update(self, dt)
+  if self.inBossBattle then
+    handleBossMode(self)
+  end
+
   local hasPlayerLost = self.rootStore:get().health <= 0
   if hasPlayerLost then
     if Component.get('PLAYER_LOSE') then

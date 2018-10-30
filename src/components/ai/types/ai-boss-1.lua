@@ -310,6 +310,9 @@ local function keepBossActive()
   local playerRef = Component.get('PLAYER')
   local bossRef = Component.get(bossId)
   local isBossDestroyed = not bossRef
+
+  playerRef.inBossBattle = (not isBossDestroyed) and bossRef.encountered
+
   if isBossDestroyed then
     -- remove doors
     forEachDoor(function(door)
@@ -329,13 +332,18 @@ local function keepBossActive()
     )
   end
 
-  if (not isPlayerInRoom()) then
-    return
+  local encounterSightRange = 40
+  local battleSightRange = 80
+  if (not bossRef.encountered) then
+    bossRef.health = bossRef.maxHealth
+    bossRef.sightRadius = encounterSightRange
+  else
+    bossRef.sightRadius = battleSightRange
   end
 
   -- keep boss active even when it is outside of the viewport
-  local isNearPlayer = bossDistFromPlayer < (30 * config.gridSize)
-  if isNearPlayer and bossRef.canSeeTarget then
+  local isNearPlayer = bossDistFromPlayer < (encounterSightRange * config.gridSize)
+  if isPlayerInRoom() and isNearPlayer and bossRef.canSeeTarget then
     if (not bossRef.encountered) then
       bossRef.encountered = true
       cameraActionOnBossEncounter(bossRef, playerRef)
@@ -372,7 +380,6 @@ return function(props)
 
   aiProps.id = bossId
   aiProps.lightRadius = 40
-  aiProps.sightRadius = 80
   local Color = require 'modules.color'
   aiProps.lightColor = Color.SKY_BLUE
   aiProps.attackRange = 12

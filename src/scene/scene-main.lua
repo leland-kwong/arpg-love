@@ -160,7 +160,9 @@ function MainScene.init(self)
 
     msgBus.on(msgBus.PORTAL_OPEN, function()
       local Portal = require 'components.portal'
-      self.portal = self.portal or Portal.create()
+      self.portal = self.portal or Portal.create({
+        id = 'playerPortal'
+      })
       local playerRef = Component.get('PLAYER')
       local x, y = playerRef:getPosition()
       self.portal
