@@ -108,12 +108,15 @@ local function connectInventory()
         type = 'pod-module-hammer',
       },
       {
+        type = 'augmentation-module-frenzy',
+      },
+      {
         type = 'augmentation-module-one',
         position = {
           x = 2,
           y = 4
         }
-      }
+      },
       -- {
       --   type = 'lightning-rod',
       --   position = {
@@ -269,6 +272,10 @@ local Player = {
 
     Component.addToGroup(self, groups.character)
     self.listeners = {
+      msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function()
+        local BaseStatModifiers = require'components.state.base-stat-modifiers'
+        return BaseStatModifiers()
+      end, 1),
       msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function(msgValue)
         local newModifiers = msgValue
         msgBus.send(msgBus.GAME_STATE_GET):set('statModifiers', newModifiers)

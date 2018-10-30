@@ -1,5 +1,6 @@
 local TemplateParser = require 'utils.string-template'
 local Color = require 'modules.color'
+local String = require 'utils.string'
 
 local colors = {
   statBodyText = {0.8,0.8,0.8},
@@ -15,7 +16,7 @@ local upgradeFragmentHandlers = {
     if (not title) then
       return nil
     end
-    return colors.upgradeTitle, title..': '
+    return colors.upgradeTitle, String.capitalize(title..': ')
   end,
   description = function(description)
     local parsed = parser(description.template, description.data)

@@ -45,7 +45,7 @@ return {
 
 		baseModifiers = {
 			cooldown = 0.1,
-			attackTime = 0.1,
+			attackTime = 0.25,
 			energyCost = 1
 		},
 	}

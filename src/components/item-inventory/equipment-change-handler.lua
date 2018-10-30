@@ -36,28 +36,6 @@ local equipmentSubscribers = {
 	end
 }
 
-local function triggerUpgradeMessage(item, level)
-  msgBus.send(
-    msgBus.ITEM_UPGRADE_UNLOCKED, {
-      item = item,
-      level = level
-    }
-  )
-end
-
-local function getHighestUpgradeUnlocked(upgrades, item)
-	local highestUpgradeUnlocked = 0
-	local upgradeCount = upgrades and #upgrades or 0
-	for level=1, upgradeCount do
-		local up = upgrades[level]
-		if item.experience >= up.experienceRequired then
-			highestUpgradeUnlocked = level
-			triggerUpgradeMessage(item, level)
-		end
-	end
-	return highestUpgradeUnlocked
-end
-
 msgBus.on(msgBus.EQUIPMENT_CHANGE, function()
 	local rootStore = msgBus.send(msgBus.GAME_STATE_GET)
 	local curState, lastState = rootStore:get()
@@ -82,38 +60,16 @@ msgBus.on(msgBus.EQUIPMENT_CHANGE, function()
 		return not not item
 	end))
 
-	local BaseStatModifiers = require'components.state.base-stat-modifiers'
-	local nextModifiers = BaseStatModifiers()
-  msgBus.send(msgBus.PLAYER_STATS_NEW_MODIFIERS, nextModifiers)
+  msgBus.send(msgBus.PLAYER_STATS_NEW_MODIFIERS)
 end)
 
 msgBus.on(msgBus.ITEM_EQUIPPED, function(item)
 	local definition = itemSystem.getDefinition(item)
-	local upgrades = definition.upgrades
-	local lastUpgradeUnlocked = getHighestUpgradeUnlocked(upgrades, item)
 	local itemState = itemSystem.getState(item)
 	itemState.equipped = true
-	itemSystem.loadModules(item)
+	itemSystem:loadModules(item)
 
   itemState.listeners = {
-    msgBus.on(msgBus.ENTITY_DESTROYED, function(v)
-      item.experience = item.experience + v.experience
-      local nextUpgradeLevel = getHighestUpgradeUnlocked(upgrades, item)
-      local newUpgradeUnlocked = nextUpgradeLevel > lastUpgradeUnlocked
-      lastUpgradeUnlocked = nextUpgradeLevel
-      if newUpgradeUnlocked then
-        local itemTitle = definition.title
-        msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
-          title = itemTitle..' upgraded',
-          icon = definition.sprite,
-          description = {
-            Color.CYAN, upgrades[nextUpgradeLevel].title,
-            Color.WHITE, ' is unlocked'
-          }
-        })
-        triggerUpgradeMessage(item, nextUpgradeLevel)
-      end
-    end),
     msgBus.on(msgBus.ALL, equipmentSubscribers.staticModifiers(item), 1),
 		msgBus.on(msgBus.NEW_GAME, function()
 			msgBus.send(msgBus.EQUIPMENT_UNEQUIP, item)

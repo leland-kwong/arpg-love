@@ -136,10 +136,15 @@ local function setupSlotInteractions(
             font = font.primary.font,
             fontSize = font.primary.fontSize
           }
+
+          local String = require 'utils.string'
+          local rarityTypeText = itemConfig.rarityTitle[item.rarity]
           local itemTypeBlock = {
             content = {
               rarityColor,
-              itemConfig.categoryTitle[itemDef.category]
+              String.capitalize(
+                (rarityTypeText and (rarityTypeText .. ' ') or '') .. itemConfig.categoryTitle[itemDef.category]
+              )
             },
             width = tooltipWidth,
             font = font.primary.font,
@@ -220,7 +225,7 @@ local function setupSlotInteractions(
             marginTop = 1
           }
           -- add extra modifiers to tooltip
-          functional.forEach(item.extraModifiers, function(modifier)
+          local function showExtraModifiers(modifier)
             local module = itemSystem.loadModule(modifier)
             local tooltip = module.tooltip
             if tooltip then
@@ -256,7 +261,9 @@ local function setupSlotInteractions(
                 }))
               end
             end
-          end)
+          end
+          functional.forEach(itemSystem.getDefinition(item).extraModifiers or {}, showExtraModifiers)
+          functional.forEach(item.extraModifiers, showExtraModifiers)
 
           table.insert(rows, rightClickActionBlock)
 

@@ -194,12 +194,14 @@ function items.loadModule(moduleDefinition)
 	return copy
 end
 
-function items.loadModules(item)
+function items:loadModules(item)
 	local f = require 'utils.functional'
-	f.forEach(item.extraModifiers, function(modifier)
+	local function loadModule(modifier)
 		local module = items.loadModule(modifier)
 		module.active(item)
-	end)
+	end
+	f.forEach(item.extraModifiers, loadModule)
+	f.forEach(self.getDefinition(item).extraModifiers or {}, loadModule)
 end
 
 local Lru = require 'utils.lru'
