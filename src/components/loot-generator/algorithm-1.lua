@@ -43,13 +43,14 @@ return function(baseItemPool)
         return {
           chance = 1,
           __call = function()
+            local round = require 'utils.math'.round
             return {
               modifier = modName,
               --[[
                 Store the value as a float between 0 and 1.
                 We will use this later to calculate the actual values based on their min-max range.
               ]]
-              range = math.random()
+              range = round(math.random(), 2)
             }
           end
         }
