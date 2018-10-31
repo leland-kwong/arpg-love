@@ -29,7 +29,7 @@ local rarityTypes = {
     chance = 15,
     __call = function(self, ai)
       ai.itemData.minRarity = iRarity.NORMAL
-      ai.itemData.maxRarity = iRarity.RARE
+      ai.itemData.maxRarity = iRarity.LEGENDARY
       return ai
     end
   },
@@ -40,7 +40,7 @@ local rarityTypes = {
     outlineColor = {0.5, 0.5, 1, 1},
     __call = function(self, ai)
       ai.itemData.minRarity = iRarity.NORMAL
-      ai.itemData.maxRarity = iRarity.RARE
+      ai.itemData.maxRarity = iRarity.LEGENDARY
       ai.itemData.dropRate = ai.itemData.dropRate * 1.8
       return ai:set('outlineColor', self.outlineColor)
         :set('rarityColor', Color.RARITY_MAGICAL)
@@ -59,7 +59,7 @@ local rarityTypes = {
       table.insert(ai.dataSheet.properties, modType)
 
       ai.itemData.minRarity = iRarity.MAGICAL
-      ai.itemData.maxRarity = iRarity.RARE
+      ai.itemData.maxRarity = iRarity.LEGENDARY
       ai.itemData.dropRate = ai.itemData.dropRate * 4
       return ai:set('outlineColor', self.outlineColor)
         :set('rarityColor', Color.RARITY_RARE)

@@ -1,4 +1,6 @@
-PROF_CAPTURE = true
+local config = require 'config.config'
+
+PROF_CAPTURE = config.performanceProfileEnabled
 local jprof = require('jprof')
 
 local isFrameReady = false

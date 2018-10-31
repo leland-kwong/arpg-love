@@ -38,7 +38,9 @@ M.performanceProfile = false
 M.debugDrawQueue = false
 M.collisionDebug = false
 
+M.performacneProfileEnabled = false
+
 M.gameTitle = 'Citizen of Nowhere'
-M.version = '1.1.0-alpha'
+M.version = '2.0.0-alpha'
 
 return M

@@ -5,8 +5,7 @@ local f = require 'utils.functional'
 local clone = require 'utils.object-utils'.clone
 
 
-return function(baseItemPool)
-
+return function()
   local function generator(path)
     return function()
       return itemSystem.create(require(path))
@@ -35,7 +34,7 @@ return function(baseItemPool)
   local legendaryItemPool = love.filesystem.getDirectoryItems(string.gsub(legendaryItemsRootPath, "%.", "/"))
   local randomLegendaryItem = setupChanceFunctions(
     f.map(
-      baseItemPool,
+      legendaryItemPool,
       function(path)
         local filePath = legendaryItemsRootPath..'.'..string.gsub(path, '%.lua', '')
         return {
