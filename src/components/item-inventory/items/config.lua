@@ -19,11 +19,14 @@ config.rarity = {
 }
 
 config.baseDropChance = {
-	[config.rarity.NORMAL] = 40,
+	[config.rarity.NORMAL] = 41,
 	[config.rarity.MAGICAL] = 30,
-	[config.rarity.RARE] = 18,
-	[config.rarity.EPIC] = 7,
-	[config.rarity.LEGENDARY] = 5
+	[config.rarity.RARE] = 19,
+
+	[config.rarity.EPIC] = 0, -- we have no epics right now, so this is disabled
+	-- [config.rarity.EPIC] = 7,
+
+	[config.rarity.LEGENDARY] = 0
 }
 
 config.rarityColor = {

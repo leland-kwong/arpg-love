@@ -77,41 +77,41 @@ local function connectInventory()
   if rootState:get().isNewGame then
     setupDefaultInventory({
       {
-        type = 'potion-health',
+        type = 'base.potion-health',
         position = {
           x = 1,
           y = 5
         }
       },
       {
-        type = 'pod-module-initiate',
+        type = 'base.pod-module-initiate',
         position = {
           x = 1,
           y = 1
         }
       },
       {
-        type = 'potion-energy',
+        type = 'base.potion-energy',
         position = {
           x = 2,
           y = 5
         }
       },
       {
-        type = 'mock-shoes',
+        type = 'base.mock-shoes',
         position = {
           x = 1,
           y = 4
         }
       },
       {
-        type = 'pod-module-hammer',
+        type = 'base.pod-module-hammer',
       },
       {
-        type = 'augmentation-module-frenzy',
+        type = 'legendary.augmentation-module-frenzy',
       },
       {
-        type = 'augmentation-module-one',
+        type = 'base.augmentation-module-one',
         position = {
           x = 2,
           y = 4

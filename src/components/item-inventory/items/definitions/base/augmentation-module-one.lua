@@ -1,7 +1,7 @@
 local itemConfig = require("components.item-inventory.items.config")
 
 return {
-	type = "augmentation-module-one",
+	type = "base.augmentation-module-one",
 
 	blueprint =  {
 		extraModifiers = {},

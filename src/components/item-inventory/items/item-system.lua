@@ -31,11 +31,8 @@ local loadedTypes = {}
 local function requireIfNecessary(item)
 	local iType = item.__type
 	if (not loadedTypes[iType]) then
-		local loadModule = require 'modules.load-module'
-		local errorFree, loadedItem = loadModule(require('alias').path.itemDefs, iType)
-		if (errorFree and loadedItem) then
-			return items.registerType(loadedItem)
-		end
+		local loadedItem = require(require('alias').path.itemDefs..'.'..iType)
+		return items.registerType(loadedItem)
 	end
 	return nil
 end

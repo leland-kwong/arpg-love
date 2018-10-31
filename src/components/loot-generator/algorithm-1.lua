@@ -3,13 +3,9 @@ local itemConfig = require(require('alias').path.items..'.config')
 local setupChanceFunctions = require 'utils.chance'
 local f = require 'utils.functional'
 local clone = require 'utils.object-utils'.clone
-local loadModule = require 'modules.load-module'
 
-local rootPath = 'components.item-inventory.items.definitions'
-local allItems = love.filesystem.getDirectoryItems(string.gsub(rootPath, "%.", "/"))
 
 return function(baseItemPool)
-  baseItemPool = baseItemPool or allItems
 
   local function generator(path)
     return function()
@@ -17,11 +13,31 @@ return function(baseItemPool)
     end
   end
 
+  local baseItemsRootPath = 'components.item-inventory.items.definitions.base'
+  local baseItemPool = love.filesystem.getDirectoryItems(string.gsub(baseItemsRootPath, "%.", "/"))
   local randomBaseItem = setupChanceFunctions(
     f.map(
       baseItemPool,
       function(path)
-        local filePath = rootPath..'.'..string.gsub(path, '%.lua', '')
+        local filePath = baseItemsRootPath..'.'..string.gsub(path, '%.lua', '')
+        return {
+          chance = 1,
+          __call = function()
+            return generator(filePath)
+          end
+        }
+      end,
+      {}
+    )
+  )
+
+  local legendaryItemsRootPath = 'components.item-inventory.items.definitions.legendary'
+  local legendaryItemPool = love.filesystem.getDirectoryItems(string.gsub(legendaryItemsRootPath, "%.", "/"))
+  local randomLegendaryItem = setupChanceFunctions(
+    f.map(
+      baseItemPool,
+      function(path)
+        local filePath = legendaryItemsRootPath..'.'..string.gsub(path, '%.lua', '')
         return {
           chance = 1,
           __call = function()
@@ -76,11 +92,10 @@ return function(baseItemPool)
   }
 
   local function randomItemByRarity(rarity)
-    local baseItem = randomBaseItem()()
-    local fancyRandom = require 'utils.fancy-random'
-    if rarity == itemConfig.rarity.MAGICAL or
+    local isMagicalOrRare = rarity == itemConfig.rarity.MAGICAL or
       rarity == itemConfig.rarity.RARE
-    then
+    if isMagicalOrRare then
+      local baseItem = randomBaseItem()()
       local numModifiers = extraModifiersByRarity[rarity]
       local modsToRoll = {}
       local numModsAdded = 0
@@ -95,10 +110,16 @@ return function(baseItemPool)
       local statsModule = require(require('alias').path.items..'.modifiers.stat')
       local modifier = statsModule(modsToRoll)
       itemSystem.item.addModifier(baseItem, modifier)
+      itemSystem.item.setRarity(baseItem, rarity)
+      local title = itemSystem.getDefinition(baseItem).title
+      itemSystem.item.setCustomTitle(baseItem, customTitles[rarity](title))
+      return baseItem
     end
-    itemSystem.item.setRarity(baseItem, rarity)
-    local title = itemSystem.getDefinition(baseItem).title
-    itemSystem.item.setCustomTitle(baseItem, customTitles[rarity](title))
+
+    if (itemConfig.rarity.LEGENDARY == rarity) then
+      return randomLegendaryItem()()
+    end
+
     return baseItem
   end
 

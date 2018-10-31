@@ -1,7 +1,7 @@
 local itemConfig = require("components.item-inventory.items.config")
 
 return {
-	type = "augmentation-module-frenzy",
+	type = "legendary.augmentation-module-frenzy",
 
 	blueprint =  {
 		extraModifiers = {},

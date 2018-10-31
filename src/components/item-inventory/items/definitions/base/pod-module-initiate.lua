@@ -7,7 +7,7 @@ local AnimationFactory = require 'components.animation-factory'
 local weaponCooldown = 0.1
 
 return {
-	type = "pod-module-initiate",
+	type = "base.pod-module-initiate",
 
 	blueprint = {
 		extraModifiers = {

@@ -1,7 +1,7 @@
 local itemConfig = require("components.item-inventory.items.config")
 
 return {
-	type = "mock-shoes",
+	type = "base.mock-shoes",
 
 	blueprint =  {
 		extraModifiers = {},

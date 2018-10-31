@@ -1,29 +1,27 @@
 local itemConfig = require(require('alias').path.itemConfig)
 
 return {
-	type = "potion-health",
+	type = "base.potion-energy",
 
 	blueprint = {
-		extraModifiers = {},
-
 		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'(),
 		onActivateWhenEquipped = require 'components.item-inventory.items.equipment-actives.heal'({
-			minHeal = 80,
-			maxHeal = 100,
-			duration = 6.5,
-			property = 'health',
-			maxProperty = 'maxHealth'
+			minHeal = 50,
+			maxHeal = 60,
+			duration = 5,
+			property = 'energy',
+			maxProperty = 'maxEnergy'
 		}),
 	},
 
 	properties = {
-		sprite = "potion_48",
-		title = "Potion of Healing",
+		sprite = "potion_40",
+		title = "Potion of Energy",
 		baseDropChance = 1,
 		category = itemConfig.category.CONSUMABLE,
 
 		baseModifiers =  {
-			cooldown = 8,
+			cooldown = 10,
 		},
 	}
 }

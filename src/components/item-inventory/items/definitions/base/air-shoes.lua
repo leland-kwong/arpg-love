@@ -1,7 +1,7 @@
 local itemConfig = require("components.item-inventory.items.config")
 
 return {
-	type = "air-shoes",
+	type = "base.air-shoes",
 
 	blueprint =  {
 		extraModifiers = {},

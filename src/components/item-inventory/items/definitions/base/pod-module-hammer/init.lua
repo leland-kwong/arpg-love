@@ -3,7 +3,7 @@ local itemConfig = require 'components.item-inventory.items.config'
 local itemSource = 'H_2_HAMMER'
 
 return {
-	type = 'pod-module-hammer',
+	type = 'base.pod-module-hammer',
 
 	blueprint = {
 		extraModifiers = {
