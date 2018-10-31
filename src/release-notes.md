@@ -2,6 +2,7 @@
 
 ## 1.2.0 - alpha
 
+* Redesigned UI to be more user friendly and simpler
 * Fixed an issue where some windows 10 users were unable to run the game
 
 ## 2.0.0 - alpha
@@ -13,6 +14,7 @@ This release adds new major features and fixes a number of high priority bugs ar
 * Dungeons now have levels
 * Boss added
 * Various HUD updates
+* New legendary items
 
 ### Bug Fixes
 
