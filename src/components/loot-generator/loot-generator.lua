@@ -154,6 +154,50 @@ local itemNamesTooltipLayer = Gui.create({
   end
 })
 
+local function dropItemCollisionFilter(item)
+  local collisionGroups = require 'modules.collision-groups'
+  return collisionGroups.matches(item.group, 'floorItem')
+end
+
+local memoize = require 'utils.memoize'
+local LineOfSight = memoize(require'modules.line-of-sight')
+local function findNearestDroppablePosition(startX, startY)
+  local config = require 'config.config'
+  local Position = require 'utils.position'
+  local Map = require 'modules.map-generator.index'
+
+  local mainSceneRef = Component.get('MAIN_SCENE')
+  if (not mainSceneRef) then
+    return startX, startY
+  end
+  local dropX, dropY
+  local checkDroppablePosition = function(x, y, isBlocked)
+    local screenX, screenY = Position.gridToPixels(x, y, config.gridSize)
+    if (not isBlocked) and (not dropX) then
+      local _, len = collisionWorlds.map:queryRect(screenX, screenY, config.gridSize, config.gridSize, dropItemCollisionFilter)
+      if (len == 0) then
+        dropX, dropY = x, y
+      end
+    end
+  end
+  local radius = 20
+  local slices = 50
+  local increment = (math.pi * 2) / slices
+  local x1, y1 = Position.pixelsToGridUnits(startX, startY, config.gridSize)
+  local i = 1
+  local startAngle = (math.pi * 2) / math.random(1, 4) * (math.random(0, 1) == 0 and 1 or -1)
+  -- rotate clockwise and raycast till we find a droppable position
+  while (not dropX) and (i < slices) do
+    local angle = startAngle + (i * increment)
+    local x2 = x1 + radius * math.cos(angle)
+    local y2 = y1 + radius * math.sin(angle)
+    LineOfSight(mainSceneRef.mapGrid, Map.WALKABLE, checkDroppablePosition)(x1, y1, x2, y2)
+    i = i + 1
+  end
+
+  return dropX * config.gridSize, dropY * config.gridSize
+end
+
 local LootGenerator = {
   group = itemGroup,
   isNew = true,
@@ -195,7 +239,7 @@ function LootGenerator.init(self)
   })
 
   local sx, sy, sw, sh = animation.sprite:getViewport()
-  local colObj = self:addCollisionObject(COLLISION_FLOOR_ITEM_TYPE, self.x, self.y, sw, sh)
+  self.colObj = self:addCollisionObject(COLLISION_FLOOR_ITEM_TYPE, self.x, self.y, sw, sh)
     :addToWorld(collisionWorlds.map)
 
   Gui.create({
@@ -214,21 +258,18 @@ function LootGenerator.init(self)
       local xOffset = math.random(10, 20)
       local yOffset = -10 -- cause item to fly upwards
       local endStateX = {
-        x = self.x + direction * xOffset
+        x = self.x
       }
       local endStateY = {
-        y = self.y + yOffset
+        y = self.y
       }
-      -- check collision of position to make sure its at a droppable position
-      local actualX, actualY, cols, len = colObj:move(endStateX.x, endStateY.y, collisionFilter)
-      if len > 0 then
-        parent.x = actualX
-        parent.y = actualY
-        endStateX.x = actualX
-        -- update initial position to new initial position
-        self.y = actualY - yOffset
-        endStateY.y = actualY
-      end
+      local actualX, actualY = findNearestDroppablePosition(endStateX.x, endStateY.y)
+      parent.x = actualX
+      parent.y = actualY
+      endStateX.x = actualX
+      -- update initial position to new initial position
+      self.y = actualY - yOffset
+      endStateY.y = actualY
 
       if parent.isNew then
         parent.isNew = false
@@ -311,6 +352,10 @@ function LootGenerator.init(self)
       itemNamesTooltipLayer:delete(item)
     end
   }):setParent(self)
+end
+
+function LootGenerator.update(self)
+  self.colObj:update(self.x, self.y)
 end
 
 function LootGenerator.serialize(self)
