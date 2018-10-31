@@ -357,11 +357,11 @@ function M.newGroup(groupDefinition)
   end
 
   function Group.addComponent(id, data)
-    if Group.hasComponent(id) then
-      return
+    local isNewComponent = not Group.hasComponent(id)
+    if isNewComponent then
+      count = count + 1
     end
 
-    count = count + 1
     allComponentsById[id] = data
     componentsById[id] = data
     if Group.onComponentEnter then
@@ -376,13 +376,14 @@ function M.newGroup(groupDefinition)
 
     count = count - 1
     componentsById[id] = nil
-    local component = M.entitiesById[id][Group.name]
+    local entity = M.entitiesById[id]
+    local component = entity[Group.name]
     if Group.onComponentLeave then
       Group:onComponentLeave(component)
     end
     -- remove global reference
-    M.entitiesById[id][Group.name] = nil
-    if component._deleted then
+    entity[Group.name] = nil
+    if (type(component) ~= 'table') or component._deleted then
       allComponentsById[id] = nil
     end
   end

@@ -15,7 +15,8 @@ local Component = require 'modules.component'
 return itemSystem.registerModule({
   name = 'frenzy',
   type = itemSystem.moduleTypes.MODIFIERS,
-  active = function(_, props, state)
+  active = function(item, props, state)
+    local itemId = item.__id
     state.stacks = 0
     local stackClearTimer
 
@@ -37,8 +38,7 @@ return itemSystem.registerModule({
       if (not state.equipped) then
         return msgBus.CLEANUP
       end
-      Component.get('hudStatusIcons')
-        :addIcon(stackRenderer)
+      Component.addToGroup(itemId, 'hudStatusIcons', stackRenderer)
     end)
 
     msgBus.on(msgBus.CHARACTER_HIT, function(msg)
