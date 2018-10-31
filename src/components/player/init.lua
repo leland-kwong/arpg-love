@@ -75,7 +75,7 @@ local function connectInventory()
 
   -- add default weapons
   if rootState:get().isNewGame then
-    setupDefaultInventory({
+    local items = {
       {
         type = 'base.potion-health',
         position = {
@@ -134,7 +134,8 @@ local function connectInventory()
       -- {
       --   type = 'pod-module-fireball'
       -- }
-    })
+    }
+    setupDefaultInventory(items)
   end
 
   -- trigger equipment change for items that were previously equipped from loading the state
