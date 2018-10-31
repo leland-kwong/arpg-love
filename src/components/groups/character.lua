@@ -26,6 +26,9 @@ return function(dt)
         local complete = c.destroyedAnimation:update(dt)
         if complete then
           c:delete(true)
+          if c.onFinal then
+            c:onFinal()
+          end
         end
       else
         c.destroyedAnimation = tween.new(0.5, c, {opacity = 0}, tween.easing.outCubic)

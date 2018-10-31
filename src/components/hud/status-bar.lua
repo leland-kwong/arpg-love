@@ -20,7 +20,8 @@ function HealthIndicator.draw(self)
 
   -- fill amount
   love.graphics.setColor(self.color)
-  local fillPixelAmount = self.w * self.fillPercentage()
+  local clamp = require 'utils.math'.clamp
+  local fillPixelAmount = self.w * clamp(self.fillPercentage(), 0, 1)
   if self.fillDirection == 1 then
     love.graphics.rectangle('fill', self.x, self.y, fillPixelAmount, self.h)
   else

@@ -313,14 +313,6 @@ local function keepBossActive()
 
   playerRef.inBossBattle = (not isBossDestroyed) and bossRef.encountered
 
-  if isBossDestroyed then
-    -- remove doors
-    forEachDoor(function(door)
-      door:disable()
-    end)
-    return msgBus.CLEANUP
-  end
-
   local bossDistFromPlayer = calcDist(playerRef.x, playerRef.y, bossRef.x, bossRef.y)
 
   local showBossPointer = (bossDistFromPlayer < 80 * config.gridSize) and ((not bossRef.isInViewOfPlayer) or (not bossRef.canSeeTarget))
@@ -361,8 +353,6 @@ return function(props)
   local aiProps = AiEyeball()
 
   aiProps.onInit = function(self)
-    msgBus.on(msgBus.UPDATE, keepBossActive)
-
     local function handleBossDeath(msg)
       local isBoss = msg.parent == Component.get(bossId)
       if isBoss then
@@ -376,6 +366,22 @@ return function(props)
     end
     local msgBus = require 'components.msg-bus'
     msgBus.on(msgBus.ENEMY_DESTROYED, handleBossDeath)
+
+    Component.create({
+      init = function(self)
+        Component.addToGroup(self, 'all')
+      end,
+      update = function()
+        keepBossActive()
+      end
+    }):setParent(self)
+  end
+
+  aiProps.onFinal = function()
+    local function openDoor(door)
+      door:disable()
+    end
+    forEachDoor(openDoor)
   end
 
   aiProps.id = bossId
