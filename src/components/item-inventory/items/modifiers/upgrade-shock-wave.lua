@@ -129,15 +129,16 @@ local Fissure = Component.createFactory(
 return itemSystem.registerModule({
   name = 'upgrade-shock-wave',
   type = itemSystem.moduleTypes.MODIFIERS,
-  active = function(item, props)
+	active = function(item, props)
+		local itemId = item.__id
     local itemState = itemSystem.getState(item)
     msgBus.on(msgBus.PLAYER_WEAPON_ATTACK, function(msg)
       if (not itemState.equipped) then
         return msgBus.CLEANUP
 			end
 
-			if msg.source ~= id or
-        props.experienceRequired >= item.experience then
+			if (msg.source ~= itemId) or
+        (props.experienceRequired > item.experience) then
           return
 			end
 

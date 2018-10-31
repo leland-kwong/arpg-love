@@ -65,7 +65,8 @@ msgBus.on(msgBus.ITEM_EQUIPPED, function(item)
 	itemSystem:loadModules(item)
 
   itemState.listeners = {
-		msgBus.on(msgBus.ENEMY_DESTROYED, function()
+		msgBus.on(msgBus.ENEMY_DESTROYED, function(msg)
+			item.experience = item.experience + msg.experience
 		end),
     msgBus.on(msgBus.ALL, equipmentSubscribers.staticModifiers(item), 1),
 		msgBus.on(msgBus.NEW_GAME, function()
@@ -81,9 +82,3 @@ msgBus.on(msgBus.EQUIPMENT_UNEQUIP, function(item)
 	itemState.equipped = false
   msgBus.off(itemState.listeners)
 end, 1)
-
-msgBus.on(msgBus.ITEM_CHECK_UPGRADE_AVAILABILITY, function(v)
-  local item, level = v.item, v.level
-  local upgrades = itemSystem.getDefinition(item).upgrades
-  return item.experience >= upgrades[level].experienceRequired
-end)
