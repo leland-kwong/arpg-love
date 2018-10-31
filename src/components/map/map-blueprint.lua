@@ -2,6 +2,8 @@ local config = require 'config.config'
 local noop = require 'utils.noop'
 local Map = require 'modules.map-generator.index'
 local Camera = require 'modules.camera'
+local Component = require 'modules.component'
+local Grid = require 'utils.grid'
 
 local floor, max = math.floor, math.max
 
@@ -72,6 +74,17 @@ local mapBlueprint = {
   getGridBounds = getGridBounds,
 
   update = function(self, dt)
+    self.playerVisitedIndices = self.playerVisitedIndices or {}
+    local playerRef = Component.get('PLAYER')
+    local Position = require 'utils.position'
+
+    local gridX, gridY = Position.pixelsToGridUnits(playerRef.x, playerRef.y, config.gridSize)
+    local index = Grid.getIndexByCoordinate(#self.grid[1], gridX, gridY)
+    self.isNewGridPosition = (gridX ~= self.lastGridX) or (gridY ~= self.lastGridY)
+    self.isVisitedGridPosition = self.playerVisitedIndices[index]
+    self.playerVisitedIndices[index] = true
+    self.lastGridX, self.lastGridY = gridX, gridY
+
     self.onUpdateStart(self, dt)
     if self.onUpdate then
       iterateActiveGrid(self, self.onUpdate, dt)
@@ -79,9 +92,13 @@ local mapBlueprint = {
     self.onUpdateEnd(self, dt)
   end,
 
+  setRenderDisabled = function(self, renderDisabled)
+    self.renderDisabled = renderDisabled
+  end,
+
   draw = function(self)
     self.renderStart(self)
-    if self.render then
+    if (not self.renderDisabled) and self.render then
       iterateActiveGrid(self, self.render)
     end
     self.renderEnd(self)

@@ -74,6 +74,7 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
 
     -- 1-d array of visited indices
     self.visitedIndices = self.visitedIndices or {}
+    self.playerVisitedIndices = {}
 
     self.canvas = love.graphics.newCanvas()
     self.stencil = function()
@@ -104,6 +105,7 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
     love.graphics.push()
     love.graphics.origin()
     love.graphics.setCanvas(self.canvas)
+    self:setRenderDisabled(self.isVisitedGridPosition)
   end,
 
   render = function(self, value, gridX, gridY)
@@ -123,10 +125,7 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
 
     love.graphics.setCanvas()
     love.graphics.scale(self.scale)
-
-
     love.graphics.setBlendMode('alpha', 'premultiplied')
-
     love.graphics.stencil(self.stencil, 'replace', 1)
     love.graphics.setStencilTest('greater', 0)
 
