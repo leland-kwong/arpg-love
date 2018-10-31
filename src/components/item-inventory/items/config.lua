@@ -18,15 +18,15 @@ config.rarity = {
 	LEGENDARY = 4
 }
 
+-- weighted chance, sums up all values and determines the chance based on the ratio of the total.
 config.baseDropChance = {
 	[config.rarity.NORMAL] = 41,
 	[config.rarity.MAGICAL] = 30,
 	[config.rarity.RARE] = 19,
 
 	[config.rarity.EPIC] = 0, -- we have no epics right now, so this is disabled
-	-- [config.rarity.EPIC] = 7,
 
-	[config.rarity.LEGENDARY] = 1000
+	[config.rarity.LEGENDARY] = 10
 }
 
 config.rarityColor = {
