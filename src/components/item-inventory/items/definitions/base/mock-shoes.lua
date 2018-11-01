@@ -21,7 +21,7 @@ return {
 
 		baseModifiers = {
 			cooldown = 1.5,
-			moveSpeed = 90,
+			moveSpeed = 50,
 			armor = 50
 		},
 	}

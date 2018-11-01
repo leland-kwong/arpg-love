@@ -191,7 +191,7 @@ return function()
       dropRate = 30
     },
     dataSheet = dataSheet,
-    moveSpeed = 100,
+    moveSpeed = 75,
     maxHealth = 25,
     w = spriteWidth,
     h = spriteHeight,

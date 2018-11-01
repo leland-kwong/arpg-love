@@ -155,7 +155,7 @@ return function()
     },
     heightOffset = math.random(0, heightChange),
     heightChange = heightChange,
-    moveSpeed = 115,
+    moveSpeed = 85,
     maxHealth = 17,
     experience = 1,
     w = spriteWidth,
