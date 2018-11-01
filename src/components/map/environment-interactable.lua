@@ -30,7 +30,9 @@ local generateTreasureCacheStyle = setupChanceFunction(f.reduce({
   return list
 end, {}))
 
-local EnvironmentInteractable = {
+local BaseStatModifiers = require'components.state.base-stat-modifiers'
+local extend = require 'utils.object-utils'.extend
+local EnvironmentInteractable = extend(BaseStatModifiers(), {
   -- debug = true,
   group = groups.all,
   itemLevel = 0,
@@ -38,7 +40,7 @@ local EnvironmentInteractable = {
   experience = 0,
   opacity = 1,
   state = states.IDLE
-}
+})
 
 local function hitAnimation()
   local frame = 0

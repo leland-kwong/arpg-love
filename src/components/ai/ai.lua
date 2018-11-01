@@ -22,6 +22,8 @@ local setElectricShockShader = require 'modules.shaders.shader-electric-shock'
 local Enum = require 'utils.enum'
 local collisionGroups = require 'modules.collision-groups'
 local Console = require 'modules.console.console'
+local Object = require 'utils.object-utils'
+local BaseStatModifiers = require 'components.state.base-stat-modifiers'
 
 local max, random, abs, min = math.max, math.random, math.abs, math.min
 
@@ -37,10 +39,8 @@ local states = Enum({
   'FREE_MOVING'
 })
 
-local Ai = {
+local Ai = Object.extend(BaseStatModifiers(), {
   class = collisionGroups.ai,
-
-  baseProps = {}, -- initial properties used to create the ai
 
   state = states.IDLE,
   attackRecoveryTime = 0,
@@ -52,12 +52,7 @@ local Ai = {
   attackRange = 8, -- distance in grid units from the player that the ai will stop moving
   sightRadius = 14,
   lightRadius = 10,
-  armor = 0,
-  flatPhysicalReduction = 0,
-  lightningResist = 0,
   maxHealth = 10,
-  healthRegeneration = 0,
-  damage = 0,
 
   experience = 1, -- amount of experience the ai grants when destroyed
 
@@ -91,7 +86,7 @@ local Ai = {
   drawOrder = function(self)
     return Component.groups.all:drawOrder(self) + 1
   end
-}
+})
 
 local function neighborFilter(item)
   return collisionGroups.matches(item.group, 'ai')

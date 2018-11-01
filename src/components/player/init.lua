@@ -23,6 +23,7 @@ require'components.item-inventory.equipment-change-handler'
 local MenuManager = require 'modules.menu-manager'
 local InputContext = require 'modules.input-context'
 local F = require 'utils.functional'
+local Object = require 'utils.object-utils'
 
 local colMap = collisionWorlds.map
 local keyMap = userSettings.keyboard
@@ -245,7 +246,8 @@ local function updateEnergyRegeneration(energyRegeneration)
   })
 end
 
-local Player = {
+local BaseStatModifiers = require'components.state.base-stat-modifiers'
+local Player = Object.extend(BaseStatModifiers(), {
   id = 'PLAYER',
   autoSave = config.autoSave,
   class = collisionGroups.player,
@@ -467,7 +469,7 @@ local Player = {
 
     msgBus.send(msgBus.PLAYER_INITIALIZED)
   end
-}
+})
 
 local function handleMovement(self, dt)
   local totalMoveSpeed = self:getCalculatedStat('moveSpeed')
