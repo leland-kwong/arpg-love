@@ -40,7 +40,7 @@ local states = Enum({
 })
 
 local Ai = Object.extend(BaseStatModifiers(), {
-  class = collisionGroups.ai,
+  class = collisionGroups.enemyAi,
 
   state = states.IDLE,
   attackRecoveryTime = 0,
@@ -88,9 +88,6 @@ local Ai = Object.extend(BaseStatModifiers(), {
   end
 })
 
-local function neighborFilter(item)
-  return collisionGroups.matches(item.group, 'ai')
-end
 local function getNeighbors(agent, neighborOffset)
 	local b = agent
 	return agent.collision.world:queryRect(
@@ -98,7 +95,7 @@ local function getNeighbors(agent, neighborOffset)
 		b.y - neighborOffset/2,
 		b.w + neighborOffset,
     b.h + neighborOffset,
-    neighborFilter
+    agent.neighborFilter
 	)
 end
 
@@ -115,19 +112,6 @@ function Ai:checkLineOfSight(grid, WALKABLE, targetX, targetY, debug)
   return LineOfSight(grid, WALKABLE, debug)(
     gridX, gridY, gridTargetX, gridTargetY
   )
-end
-
-local COLLISION_SLIDE = 'slide'
-local collisionFilters = collisionGroups.create(
-  'player',
-  'ai',
-  'obstacle'
-)
-local function collisionFilter(item, other)
-  if collisionGroups.matches(other.group, collisionFilters) then
-    return COLLISION_SLIDE
-  end
-  return false
 end
 
 local function spreadAggroToAllies(neighbors)
@@ -614,7 +598,7 @@ end
 
 local function adjustInitialPositionIfNeeded(self)
   -- check initial position and move if necessary
-  local actualX, actualY = self.collision:move(self.collision.x, self.collision.y, collisionFilter)
+  local actualX, actualY = self.collision:move(self.collision.x, self.collision.y, self.collisionFilter)
   self.x = actualX
   self.y = actualY
 end
@@ -642,6 +626,20 @@ function Ai.init(self)
   Component.addToGroup(self, 'mapStateSerializers')
   Component.addToGroup(self, 'autoVisibility')
   self.onDamageTaken = require 'modules.handle-damage-taken'
+  self.neighborFilter = function(item)
+    return collisionGroups.matches(item.group, self.class)
+  end
+  self.collisionFilter = function(item, other)
+    local collisionFilters = collisionGroups.create(
+      'player',
+      self.class,
+      'obstacle'
+    )
+    if collisionGroups.matches(other.group, collisionFilters) then
+      return 'slide'
+    end
+    return false
+  end
 
   -- [[ BASE PROPERTIES ]]
   self.health = self.health or self.maxHealth
@@ -675,7 +673,7 @@ function Ai.init(self)
 
   local ox, oy = self.animation:getSourceOffset()
   self.collision = self:addCollisionObject(
-      collisionGroups.ai,
+      self.class,
       self.x,
       self.y,
       self.w * self.scale,

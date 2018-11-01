@@ -28,7 +28,7 @@ local function colFilter(item, other)
 end
 
 local function impactCollisionFilter(item)
-  if collisionGroups.matches(item.group, collisionGroups.create(collisionGroups.ai, collisionGroups.environment)) then
+  if collisionGroups.matches(item.group, collisionGroups.create(collisionGroups.enemyAi, collisionGroups.environment)) then
     return true
   end
   return false
@@ -145,7 +145,7 @@ local Fireball = {
       if hasCollisions then
         for i=1, len do
           local col = cols[i]
-          if collisionGroups.matches(col.other.group, collisionGroups.ai) then
+          if collisionGroups.matches(col.other.group, collisionGroups.enemyAi) then
             handleImpact(self)
           end
         end

@@ -16,8 +16,8 @@ end
 
 local PunchAttack = Component.createFactory({
   group = Component.groups.all,
-  minDamage = 2,
-  maxDamage = 4,
+  minDamage = 8,
+  maxDamage = 12,
   init = function(self)
     local items, len = collisionWorlds.map:queryRect(
       self.x2 - self.w/2,

@@ -11,7 +11,7 @@ local collisionGroups = require 'modules.collision-groups'
 
 local itemHovered = nil
 local aiHoverFilter = function(item)
-  return (not itemHovered) and collisionGroups.matches(item.group, collisionGroups.ai)
+  return (not itemHovered) and collisionGroups.matches(item.group, collisionGroups.enemyAi)
 end
 
 local NpcInfo = {

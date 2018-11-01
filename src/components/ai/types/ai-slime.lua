@@ -11,8 +11,8 @@ end
 
 local SlimeAttack = Component.createFactory({
   group = groups.all,
-  minDamage = 5,
-  maxDamage = 10,
+  minDamage = 15,
+  maxDamage = 20,
   itemLevel = 1,
   init = function(self)
     local items, len = collisionWorlds.map:queryRect(

@@ -98,8 +98,8 @@ function FrostShot.update(self, state)
         , speed = 115
         , lifeTime = 60
         , targetGroup = collisionGroups.player
-        , minDamage = 1
-        , maxDamage = 2
+        , minDamage = 9
+        , maxDamage = 12
       })
       playFrostShotSound()
       DissipateEffect.create({

@@ -37,6 +37,8 @@ function PelletShot.use(self, state, targetX, targetY)
     , lifetime = 60
     , speed = 125
     , targetGroup = collisionGroups.create(collisionGroups.player, collisionGroups.obstacle)
+    , minDamage = 9
+    , maxDamage = 12
   })
   playblasterSound()
 

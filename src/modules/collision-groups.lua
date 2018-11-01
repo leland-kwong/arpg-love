@@ -2,6 +2,7 @@ local GroupMatcher = require 'utils.group-matcher'
 
 return GroupMatcher({
   'ai',
+  'enemyAi',
   'obstacle',
   'player',
   'projectile',
