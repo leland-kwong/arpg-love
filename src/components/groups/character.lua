@@ -5,13 +5,13 @@ local lootSystem = require'components.groups.loot'.system
 local tween = require 'modules.tween'
 
 msgBus.on(msgBus.CHARACTER_HIT, function(msg)
-  local uid = require 'utils.uid'
-  local hitId = msg.source or uid()
   -- FIXME: sometimes chain lightning triggers a hit for a non-character component
   if msg.parent.isCharacter then
     if msg.parent.invulnerable then
       return nil
     end
+    local uid = require 'utils.uid'
+    local hitId = msg.source or uid()
     msg.parent.hitData[hitId] = msg
   end
   return msg
