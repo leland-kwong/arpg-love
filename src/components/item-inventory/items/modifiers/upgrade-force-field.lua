@@ -149,9 +149,6 @@ function ForceField.draw(self)
   love.graphics.circle('line', self.x, self.y, size)
 
   love.graphics.setBlendMode(oBlendMode)
-
-  love.graphics.setColor(1,1,0,0.5)
-  love.graphics.circle('line', self.x, self.y, self.size)
 end
 
 local Factory = Component.createFactory(ForceField)
