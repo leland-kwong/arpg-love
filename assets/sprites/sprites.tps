@@ -559,32 +559,6 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/bullet-1.png</key>
-            <key type="filename">custom-art/characters/ai-legendaries/legendary-1/legendary-ai-1.png</key>
-            <key type="filename">custom-art/characters/eyeball/eyeball.png</key>
-            <key type="filename">custom-art/characters/legendary/eyeball.png</key>
-            <key type="filename">custom-art/effects/floor-crack-1.png</key>
-            <key type="filename">custom-art/effects/floor-crack-2.png</key>
-            <key type="filename">custom-art/effects/floor-crack-3.png</key>
-            <key type="filename">custom-art/gui/gui-home-button--hover.png</key>
-            <key type="filename">custom-art/gui/gui-home-button.png</key>
-            <key type="filename">custom-art/gui/gui-inventory-button--hover.png</key>
-            <key type="filename">custom-art/gui/gui-inventory-button.png</key>
-            <key type="filename">custom-art/gui/gui-map-pointer.png</key>
-            <key type="filename">custom-art/items/weapons/weapon-modules/item-upgrade-placeholder-locked.png</key>
-            <key type="filename">custom-art/items/weapons/weapon-modules/item-upgrade-placeholder-unlocked.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,4,8,8</rect>
-                <key>scale9Paddings</key>
-                <rect>4,4,8,8</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
             <key type="filename">custom-art/characters/ai-1/ai-0.png</key>
             <key type="filename">custom-art/characters/ai-1/ai-1.png</key>
             <key type="filename">custom-art/characters/ai-1/ai-2.png</key>
@@ -604,6 +578,33 @@
                 <rect>6,5,12,10</rect>
                 <key>scale9Paddings</key>
                 <rect>6,5,12,10</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/characters/ai-legendaries/legendary-1/legendary-ai-1.png</key>
+            <key type="filename">custom-art/characters/eyeball/eyeball.png</key>
+            <key type="filename">custom-art/characters/legendary/eyeball.png</key>
+            <key type="filename">custom-art/effects/floor-crack-1.png</key>
+            <key type="filename">custom-art/effects/floor-crack-2.png</key>
+            <key type="filename">custom-art/effects/floor-crack-3.png</key>
+            <key type="filename">custom-art/gui/gui-home-button--hover.png</key>
+            <key type="filename">custom-art/gui/gui-home-button.png</key>
+            <key type="filename">custom-art/gui/gui-inventory-button--hover.png</key>
+            <key type="filename">custom-art/gui/gui-inventory-button.png</key>
+            <key type="filename">custom-art/gui/gui-map-pointer.png</key>
+            <key type="filename">custom-art/items/weapons/weapon-modules/item-upgrade-placeholder-locked.png</key>
+            <key type="filename">custom-art/items/weapons/weapon-modules/item-upgrade-placeholder-unlocked.png</key>
+            <key type="filename">custom-art/status-effect-icons/status-frenzy.png</key>
+            <key type="filename">custom-art/status-effect-icons/status-legendary-enemy.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9Paddings</key>
+                <rect>4,4,8,8</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -818,19 +819,6 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/fireball.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.692308,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>7,5,13,9</rect>
-                <key>scale9Paddings</key>
-                <rect>7,5,13,9</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
             <key type="filename">custom-art/items/augmentations/augmentation-one.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -926,19 +914,6 @@
                 <rect>0,0,1,1</rect>
                 <key>scale9Paddings</key>
                 <rect>0,0,1,1</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">custom-art/spells/frost-spark.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>3,2,5,5</rect>
-                <key>scale9Paddings</key>
-                <rect>3,2,5,5</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -1054,17 +1029,14 @@
         </map>
         <key>fileList</key>
         <array>
-            <filename>custom-art/fireball.png</filename>
             <filename>custom-art/tiles</filename>
             <filename>custom-art/primitives</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets</filename>
-            <filename>custom-art/bullet-1.png</filename>
             <filename>custom-art/items/weapons/pods</filename>
             <filename>custom-art/status-effect-icons</filename>
-            <filename>custom-art/spells</filename>
             <filename>custom-art/items/weapons/weapon-modules</filename>
             <filename>custom-art/effects</filename>
             <filename>custom-art/items/augmentations</filename>
