@@ -108,7 +108,7 @@ love.mouse.setCursor(cursor)
 local function restoreComponentsFromState(self, serializedState)
   local classesToRestore = {
     'floorItem',
-    'ai',
+    'enemyAi',
     'environment'
   }
   local F = require 'utils.functional'

@@ -40,7 +40,7 @@ local DIRECTION_LEFT = -1
 
 local collisionGroups = {
   obstacle = true,
-  ai = true
+  enemyAi = true
 }
 
 local function collisionFilter(item, other)
