@@ -56,14 +56,14 @@ local function triggerAttack(self)
 		function(item)
 			msgBus.send(msgBus.CHARACTER_HIT, {
 				parent = item,
-				damage = calcDamage(self)
+				damage = calcDamage(self),
+				source = self.source
 			})
 			-- attack modifier
 			msgBus.send(msgBus.CHARACTER_HIT, {
 				parent = item,
 				duration = hitModifierDuration,
-				modifiers = hitModifers,
-				source = self.source
+				modifiers = hitModifers
 			})
 		end
 	)

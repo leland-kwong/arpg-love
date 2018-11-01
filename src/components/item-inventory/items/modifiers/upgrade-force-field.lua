@@ -4,6 +4,7 @@ local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local Enum = require 'utils.enum'
 local tween = require 'modules.tween'
+local Color = require 'modules.color'
 
 local state = Enum({
   'SHIELD_HIT',
@@ -17,8 +18,15 @@ local ForceField = {
   shieldHealth = 0,
   maxShieldHealth = 100,
   unhitDuration = 0,
-  unhitDurationRequirement = 2,
+  unhitDurationRequirement = 0,
   rechargeRate = 2,
+  baseAbsorption = 0,
+  bonusAbsorption = 0,
+  maxAbsorption = 50,
+  stackIncreaseDelay = 0.5,
+  owner = function()
+    return Component.get('PLAYER')
+  end,
   state = state.SHIELD_DOWN
 }
 
@@ -32,16 +40,38 @@ local function hitAnimation()
   coroutine.yield(true)
 end
 
+local function nearbyAiFilter(item)
+  local collisionGroups = require 'modules.collision-groups'
+  return collisionGroups.matches(item.group, 'enemyAi')
+end
+
+function ForceField.getAbsorption(self)
+  local collisionWorlds = require 'components.collision-worlds'
+  local _, len = collisionWorlds.map:queryRect(self.x - self.size, self.y - self.size, self.size * 2, self.size * 2, nearbyAiFilter)
+  return math.min(self.maxAbsorption, self.baseAbsorption + (len * self.bonusAbsorption)) / 100
+end
+
 function ForceField.init(self)
+  self.bonusStacks = 0
+  self.clock = 0
+  self.totalAbsorption = 0
+
+  self.stackRenderer = function(x, y)
+    local AnimationFactory = require 'components.animation-factory'
+    local icon = AnimationFactory:newStaticSprite('status-shield')
+    local width = icon:getWidth()
+    Component.get('hudTextSmallLayer'):add(self.totalAbsorption * 100, Color.WHITE, x + width - 4, y)
+    love.graphics.setColor(1,1,1)
+    love.graphics.draw(AnimationFactory.atlas, icon.sprite, x, y)
+  end
+
   msgBus.on(msgBus.PLAYER_HIT_RECEIVED, function(msgValue)
     if self:isDeleted() then
       return msgBus.CLEANUP
     end
 
     self.unhitDuration = 0
-    local damageAfterAbsorption = math.max(0, msgValue - self.shieldHealth)
-    -- modify shield health
-    self.shieldHealth = math.max(0, self.shieldHealth - msgValue)
+    local damageAfterAbsorption = math.max(0, msgValue - (msgValue * self.totalAbsorption))
 
     if self.shieldHealth > 0 then
       self.hitAnimation = coroutine.wrap(hitAnimation)
@@ -51,7 +81,20 @@ function ForceField.init(self)
 end
 
 function ForceField.update(self, dt)
-  self.unhitDuration = self.unhitDuration + dt
+  Component.addToGroup(self:getId(), 'hudStatusIcons', self.stackRenderer)
+  self.totalAbsorption = self:getAbsorption()
+
+  local nextX, nextY = self.owner():getPosition()
+  local hasOwnerMoved = nextX ~= self.previousX or nextY ~= self.previousY
+  -- reset clock for bonus stacks
+  if hasOwnerMoved then
+    self.clock = 0
+  end
+  self.previousX, self.previousY = nextX, nextY
+
+  local round = require 'utils.math'.round
+  self.clock = self.clock + dt
+  self.bonusStacks = round(self.clock / self.stackIncreaseDelay)
   self:setDrawDisabled(self.shieldHealth <= 0)
 
   local hasShield = self.shieldHealth > 0
@@ -91,7 +134,7 @@ function ForceField.draw(self)
   local oBlendMode = love.graphics.getBlendMode()
   love.graphics.setBlendMode('add')
   local percentHealthLeft = self.shieldHealth / self.maxShieldHealth
-  local size = self.size + (percentHealthLeft * 7)
+  local size = self.size + (self.size * self:getAbsorption())
 
   local r,g,b = 0.3, 0.5, 1
   if self.state == state.SHIELD_HIT then
@@ -106,6 +149,9 @@ function ForceField.draw(self)
   love.graphics.circle('line', self.x, self.y, size)
 
   love.graphics.setBlendMode(oBlendMode)
+
+  love.graphics.setColor(1,1,0,0.5)
+  love.graphics.circle('line', self.x, self.y, self.size)
 end
 
 local Factory = Component.createFactory(ForceField)
@@ -139,13 +185,9 @@ return itemSystem.registerModule({
       if (not forceFieldsByItemId[id]) then
         local playerRef = Component.get('PLAYER')
         local x, y = playerRef:getPosition()
-        forceFieldsByItemId[id] = ForceField.create({
-            x = x,
-            y = y,
-            size = props.size,
-            maxShieldHealth = props.maxShieldHealth,
-            unhitDurationRequirement = props.unhitDurationRequirement,
-          })
+        forceFieldsByItemId[id] = ForceField.create(props)
+          :set('x', x)
+          :set('y', y)
           :set('drawOrder', function()
             return playerRef:drawOrder() + 3
           end)
@@ -159,7 +201,7 @@ return itemSystem.registerModule({
       data = {
         title = 'force-field',
         description = {
-          template = 'Gain a forcefield that blocks {maxShieldHealth} total damage. Recharges when you have not been hit for {unhitDurationRequirement} second(s).',
+          template = 'Gain a forcefield that blocks %{absorption} damage. For each nearby enemy gain an extra %{bonusAbsorption}. Maximum absorption is %50.',
           data = props
         }
       }

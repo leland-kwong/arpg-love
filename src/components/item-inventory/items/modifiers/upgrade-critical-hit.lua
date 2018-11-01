@@ -17,15 +17,12 @@ return itemSystem.registerModule({
           return
       end
 
-      local isEnoughExperience = props.experienceRequired <= item.experience
-      if isEnoughExperience then
-        hitMessage.criticalChance = props.chance
-        hitMessage.criticalMultiplier = math.random(
-          props.minMultiplier * 100,
-          props.maxMultiplier * 100
-        ) / 100
-        return hitMessage
-      end
+      hitMessage.criticalChance = props.chance
+      hitMessage.criticalMultiplier = math.random(
+        props.minMultiplier * 100,
+        props.maxMultiplier * 100
+      ) / 100
+      return hitMessage
     end, 1)
   end,
   tooltip = function()

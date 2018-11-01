@@ -78,7 +78,7 @@ local Fissure = Component.createFactory(
 			local finalX = self.x + self.dx * shockWaveDistance
 			local finalY = self.y + self.dy * shockWaveDistance
 			self.collision:move(finalX, finalY, function(item, other)
-				if collisionGroups.matches(other.group, collisionGroups.create(collisionGroups.ai, collisionGroups.environment)) then
+				if collisionGroups.matches(other.group, collisionGroups.create(collisionGroups.enemyAi, collisionGroups.environment)) then
 					msgBus.send(msgBus.CHARACTER_HIT, {
 						parent =  other.parent,
 						damage = calcDamage(self)

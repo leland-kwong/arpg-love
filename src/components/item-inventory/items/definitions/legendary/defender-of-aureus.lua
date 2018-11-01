@@ -1,7 +1,7 @@
 local itemConfig = require("components.item-inventory.items.config")
 
 return {
-	type = "legendary.augmentation-module-frenzy",
+	type = "legendary.defender-of-aureus",
 
 	blueprint =  {
 		extraModifiers = {},
@@ -11,8 +11,8 @@ return {
 	},
 
 	properties = {
-		sprite = "augmentation-rage",
-		title = 'Frenzy',
+		sprite = "augmentation-defender",
+		title = 'Defender of Aureus',
 		baseDropChance = 1,
 		category = itemConfig.category.AUGMENTATION,
 
@@ -21,12 +21,11 @@ return {
 		},
 
 		extraModifiers = {
-			require 'components.item-inventory.items.modifiers.frenzy'({
-				maxStacks = 30,
-				resetStackDelay = 2,
-				attackTimeReduction = 0.01,
-				energyCostReduction = -0.1,
-				cooldownReduction = 0.005
+			require 'components.item-inventory.items.modifiers.upgrade-force-field'({
+				experienceRequired = 0,
+				size = 30,
+				bonusAbsorption = 10,
+				baseAbsorption = 15
 			}),
 		}
 	}
