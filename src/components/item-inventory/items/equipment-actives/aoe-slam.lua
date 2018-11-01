@@ -63,7 +63,7 @@ local function triggerAttack(self)
 				parent = item,
 				duration = hitModifierDuration,
 				modifiers = hitModifers,
-				source = itemSource
+				source = self.source
 			})
 		end
 	)
@@ -77,8 +77,8 @@ end
 local Attack = Component.createFactory(
 	AbilityBase({
 		group = groups.all,
-		w = 40,
-		h = 40,
+		w = 1,
+		h = 1,
 		impactAnimationDuration = 0.4,
 		cooldown = attackCooldown,
 		opacity = 1,

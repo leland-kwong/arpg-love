@@ -1,6 +1,14 @@
 local callableObject = require 'utils.callable-object'
 
-local function setupChanceFunctions(types)
+local Chance = {}
+
+math.randomseed(os.time())
+local random = math.random
+function Chance.roll(percentChance)
+  return random(1, 1 / percentChance) == 1
+end
+
+local function setupChanceFunctions(_, types)
   local list = {}
   for i=1, #types do
     local props = types[i]
@@ -16,4 +24,6 @@ local function setupChanceFunctions(types)
   end
 end
 
-return setupChanceFunctions
+return setmetatable(Chance, {
+  __call = setupChanceFunctions
+})
