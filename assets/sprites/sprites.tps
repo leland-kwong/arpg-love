@@ -559,6 +559,45 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/abilities/bullet-1.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>3,3,6,6</rect>
+                <key>scale9Paddings</key>
+                <rect>3,3,6,6</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/abilities/fireball.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>7,5,13,9</rect>
+                <key>scale9Paddings</key>
+                <rect>7,5,13,9</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/abilities/frost-spark.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>3,3,7,7</rect>
+                <key>scale9Paddings</key>
+                <rect>3,3,7,7</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/characters/ai-1/ai-0.png</key>
             <key type="filename">custom-art/characters/ai-1/ai-1.png</key>
             <key type="filename">custom-art/characters/ai-1/ai-2.png</key>
@@ -819,7 +858,9 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/items/augmentations/augmentation-defender.png</key>
             <key type="filename">custom-art/items/augmentations/augmentation-one.png</key>
+            <key type="filename">custom-art/items/augmentations/augmentation-rage.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -1043,6 +1084,7 @@
             <filename>custom-art/characters</filename>
             <filename>custom-art/gui</filename>
             <filename>custom-art/nova.png</filename>
+            <filename>custom-art/abilities</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
