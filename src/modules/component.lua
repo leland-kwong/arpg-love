@@ -103,7 +103,12 @@ local function cleanupCollisionObjects(self)
   end
 end
 
-M.groups = {}
+M.groups = setmetatable({}, {
+  -- default to emptyGroup
+  __index = function()
+    return M.groups.emptyGroup
+  end
+})
 M.entitiesById = {}
 
 local function getGroupName(group)
@@ -118,17 +123,20 @@ function M.addToGroup(id, group, data)
     id = id:getId()
   end
 
-  local name = getGroupName(group)
+  local groupName = getGroupName(group)
   local entity = M.entitiesById[id]
   if (not entity) then
     entity = {}
     M.entitiesById[id] = entity
   end
-  entity[name] = data or EMPTY
-  local group = M.groups[name]
-  if group then
-    group.addComponent(id, data)
+  entity[groupName] = data or EMPTY
+  local group = M.groups[groupName]
+  if (not group) then
+    group = M.newGroup({
+      name = groupName
+    })
   end
+  group.addComponent(id, data)
   return M
 end
 
@@ -396,6 +404,10 @@ function M.newGroup(groupDefinition)
     return componentsById
   end
 
+  function Group.get(_, id)
+    return componentsById[id]
+  end
+
   M.groups[Group.name] = Group
   return Group
 end
@@ -420,7 +432,7 @@ function M.remove(entityId, recursive)
 
   -- this is for legacy reasons when our entites weren't just plain tables
   local entityAsComponent = allComponentsById[entityId]
-  if entityAsComponent then
+  if entityAsComponent.isComponent then
     local eAsC = entityAsComponent
     local children = eAsC._children
     if (recursive and children) then
@@ -442,7 +454,12 @@ function M.remove(entityId, recursive)
   M.entitiesById[entityId] = nil
 end
 
+-- Method for creating components without a factory
 local NodeFactory = M.createFactory({})
 M.create = NodeFactory.create
+
+M.newGroup({
+  name = 'emptyGroup'
+})
 
 return M
