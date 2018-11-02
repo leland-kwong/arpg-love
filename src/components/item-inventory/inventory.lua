@@ -43,58 +43,33 @@ local function InteractArea(self)
 	})
 end
 
+msgBus.on(msgBus.ALL, function(msg, msgType)
+  local rootStore = require 'main.global-state'.gameState
+
+  if msgBus.EQUIPMENT_SWAP == msgType then
+    local item = msg
+    rootStore:equipmentSwap(item)
+    msgBus.send(msgBus.EQUIPMENT_CHANGE)
+  end
+
+  if msgBus.INVENTORY_PICKUP == msgType or
+    msgBus.EQUIPMENT_SWAP == msgType
+  then
+    love.audio.stop(Sound.INVENTORY_PICKUP)
+    love.audio.play(Sound.INVENTORY_PICKUP)
+  end
+
+  if msgBus.INVENTORY_DROP == msgType then
+    love.audio.stop(Sound.INVENTORY_DROP)
+    love.audio.play(Sound.INVENTORY_DROP)
+  end
+end)
+
 function InventoryBlueprint.init(self)
   local msgBusMainMenu = require 'components.msg-bus-main-menu'
   msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
   MenuManager.clearAll()
   MenuManager.push(self)
-
-  msgBus.on(msgBus.ALL, function(msg, msgType)
-    local rootStore = self.rootStore
-
-    if self:isDeleted() then
-      return msgBus.CLEANUP
-    end
-
-    if msgBus.EQUIPMENT_SWAP == msgType then
-      local F = require 'utils.functional'
-      local item = msg
-      local category = itemSystem.getDefinition(item).category
-      local validSlots = itemConfig.findEquipmentSlotsByCategory(category)
-      local isAlreadyEquipped = F.find(validSlots, function(slot)
-        local equippedItem = rootStore:getEquippedItem(slot.x, slot.y)
-        return (equippedItem and equippedItem.__id) == item.__id
-      end)
-
-      if isAlreadyEquipped then
-        return
-      end
-
-      local _, inventoryX, inventoryY = rootStore:findItemById(item)
-      local firstAvailableSlot = F.find(validSlots, function(slot)
-        return not (rootStore:getEquippedItem(slot.x, slot.y))
-      end)
-      local slotToEquipTo = firstAvailableSlot or validSlots[1]
-      local slotX, slotY = slotToEquipTo.x, slotToEquipTo.y
-      local unequippedItem = rootStore:unequipItem(slotX, slotY)
-      rootStore:removeItem(item)
-      rootStore:equipItem(item, slotX, slotY)
-      rootStore:addItemToInventory(unequippedItem, {inventoryX, inventoryY})
-      msgBus.send(msgBus.EQUIPMENT_CHANGE)
-    end
-
-    if msgBus.INVENTORY_PICKUP == msgType or
-      msgBus.EQUIPMENT_SWAP == msgType
-    then
-      love.audio.stop(Sound.INVENTORY_PICKUP)
-      love.audio.play(Sound.INVENTORY_PICKUP)
-    end
-
-    if msgBus.INVENTORY_DROP == msgType then
-      love.audio.stop(Sound.INVENTORY_DROP)
-      love.audio.play(Sound.INVENTORY_DROP)
-    end
-	end)
 
   self.slotSize = 30
   self.slotMargin = 2

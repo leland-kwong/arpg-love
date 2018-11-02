@@ -273,4 +273,29 @@ return function(rootStore)
 		local equipmentRow = self:get().equipment[slotY]
 		return equipmentRow and equipmentRow[slotX]
 	end
+
+	function rootStore:equipmentSwap(item)
+		local F = require 'utils.functional'
+    local category = itemSystem.getDefinition(item).category
+    local validSlots = itemConfig.findEquipmentSlotsByCategory(category)
+    local isAlreadyEquipped = F.find(validSlots, function(slot)
+      local equippedItem = rootStore:getEquippedItem(slot.x, slot.y)
+      return (equippedItem and equippedItem.__id) == item.__id
+    end)
+
+    if isAlreadyEquipped then
+      return
+    end
+
+    local _, inventoryX, inventoryY = rootStore:findItemById(item)
+    local firstAvailableSlot = F.find(validSlots, function(slot)
+      return not (rootStore:getEquippedItem(slot.x, slot.y))
+    end)
+    local slotToEquipTo = firstAvailableSlot or validSlots[1]
+    local slotX, slotY = slotToEquipTo.x, slotToEquipTo.y
+    local unequippedItem = rootStore:unequipItem(slotX, slotY)
+    rootStore:removeItem(item)
+    rootStore:equipItem(item, slotX, slotY)
+    rootStore:addItemToInventory(unequippedItem, {inventoryX, inventoryY})
+	end
 end

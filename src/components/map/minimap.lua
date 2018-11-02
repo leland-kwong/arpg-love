@@ -157,12 +157,13 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
 
 -- adds a block for the next draw frame, and gets removed automatically each frame
 function MiniMap.renderBlock(self, gridX, gridY, renderFn)
-  if self.bounds then
+  local bounds = self.bounds
+  if bounds then
     local thresholdX, thresholdY = 20, 40
-    local isOutOfBounds = gridX < self.bounds.w - thresholdX or
-      gridX > self.bounds.e + thresholdX or
-      gridY < self.bounds.n - thresholdY or
-      gridY > self.bounds.s + thresholdY
+    local isOutOfBounds = gridX < bounds.w - thresholdX or
+      gridX > bounds.e + thresholdX or
+      gridY < bounds.n - thresholdY or
+      gridY > bounds.s + thresholdY
     if isOutOfBounds then
       return
     end

@@ -52,21 +52,18 @@ end
 
 local function setupDefaultInventory(items)
   local itemSystem = require(require('alias').path.itemSystem)
-  local rootState = msgBus.send(msgBus.GAME_STATE_GET)
+  local rootState = require 'main.global-state'.gameState
 
-  for i=1, #items do
-    local it = items[i]
-    local module = require(require('alias').path.itemDefs..'.'..it.type)
-    local position = it.position
-    local canEquip, errorMsg
-    if position then
-      canEquip, errorMsg = rootState:equipItem(itemSystem.create(module), position.x, position.y)
-      if not canEquip then
-        error(errorMsg)
-      end
-    else
-      rootState:addItemToInventory(itemSystem.create(module))
-    end
+  for i=1, #items.equipment do
+    local itemType = items.equipment[i]
+    local module = require(require('alias').path.itemDefs..'.'..itemType)
+    rootState:equipmentSwap(itemSystem.create(module))
+  end
+
+  for i=1, #items.inventory do
+    local itemType = items.inventory[i]
+    local module = require(require('alias').path.itemDefs..'.'..itemType)
+    rootState:addItemToInventory(itemSystem.create(module))
   end
 end
 
