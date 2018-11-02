@@ -38,7 +38,11 @@ return itemSystem.registerModule({
       if (not state.equipped) then
         return msgBus.CLEANUP
       end
-      Component.addToGroup(itemId, 'hudStatusIcons', stackRenderer)
+      Component.addToGroup(itemId, 'hudStatusIcons', {
+        icon = 'status-frenzy',
+        text = state.stacks,
+        color = Color.WHITE
+      })
     end)
 
     msgBus.on(msgBus.CHARACTER_HIT, function(msg)
@@ -46,7 +50,7 @@ return itemSystem.registerModule({
         return msgBus.CLEANUP
       end
 
-      if (msg.parent == Component.get('PLAYER')) then
+      if (not msg.itemSource) then
         return
       end
 
@@ -83,9 +87,9 @@ return itemSystem.registerModule({
         title = 'frenzy',
         description = {
           template =
-            'Each time you hit an enemy, gain a frenzy stack.'
+            'Gain increased offensive capabilities at the expense of increased energy cost.'
 
-            ..'\n\nEach frenzy stack gives:'
+            ..'\n\nWhenever you hit an enemy, gain a frenzy stack that gives:'
               ..'\n\t+{attackTimeReduction} attack time reduction'
               ..'\n\t+{cooldownReduction} cooldown reduction'
               ..'\n\t+{energyCostReduction} energy cost reduction'

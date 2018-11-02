@@ -16,7 +16,7 @@ return itemSystem.registerModule({
         return msgBus.CLEANUP
       end
 
-      if hitMessage.source ~= id or
+      if hitMessage.itemSource ~= id or
         props.experienceRequired >= item.experience then
           return
       end

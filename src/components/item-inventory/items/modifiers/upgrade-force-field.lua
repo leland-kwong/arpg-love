@@ -56,15 +56,6 @@ function ForceField.init(self)
   self.clock = 0
   self.totalAbsorption = 0
 
-  self.stackRenderer = function(x, y)
-    local AnimationFactory = require 'components.animation-factory'
-    local icon = AnimationFactory:newStaticSprite('status-shield')
-    local width = icon:getWidth()
-    Component.get('hudTextSmallLayer'):add(self.totalAbsorption * 100, Color.WHITE, x + width - 4, y)
-    love.graphics.setColor(1,1,1)
-    love.graphics.draw(AnimationFactory.atlas, icon.sprite, x, y)
-  end
-
   msgBus.on(msgBus.PLAYER_HIT_RECEIVED, function(msgValue)
     if self:isDeleted() then
       return msgBus.CLEANUP
@@ -81,7 +72,10 @@ function ForceField.init(self)
 end
 
 function ForceField.update(self, dt)
-  Component.addToGroup(self:getId(), 'hudStatusIcons', self.stackRenderer)
+  Component.addToGroup(self:getId(), 'hudStatusIcons', {
+    text = self.totalAbsorption * 100,
+    icon = 'status-shield'
+  })
   self.totalAbsorption = self:getAbsorption()
 
   local nextX, nextY = self.owner():getPosition()

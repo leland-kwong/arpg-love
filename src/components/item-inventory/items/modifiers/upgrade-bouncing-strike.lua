@@ -17,12 +17,12 @@ return itemSystem.registerModule({
         return msgBus.CLEANUP
       end
 
-      if hitMessage.source ~= id or
+      if hitMessage.itemSource ~= id or
         props.experienceRequired >= item.experience then
           return
       end
 
-      local attack = hitMessage.collisionSource.parent
+      local attack = Component.get(hitMessage.source)
       local numBounces, maxBounces = (attack.numBounces or 0), props.maxBounces
       if numBounces >= maxBounces then
         return hitMessage

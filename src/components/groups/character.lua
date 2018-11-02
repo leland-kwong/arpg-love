@@ -4,7 +4,19 @@ local groups = require 'components.groups'
 local lootSystem = require'components.groups.loot'.system
 local tween = require 'modules.tween'
 
+local characterHitMessagePropTypes = {
+  source = {
+    string = true,
+    number = true
+  }
+}
+
 msgBus.on(msgBus.CHARACTER_HIT, function(msg)
+  local sourceValueType = type(msg.source)
+  if (not characterHitMessagePropTypes.source[sourceValueType]) then
+    print('[WARNING]: source value type should be a string or number')
+  end
+
   -- FIXME: sometimes chain lightning triggers a hit for a non-character component
   if msg.parent.isCharacter then
     if msg.parent.invulnerable then
@@ -14,6 +26,12 @@ msgBus.on(msgBus.CHARACTER_HIT, function(msg)
     local hitId = msg.source or uid()
     msg.parent.hitData[hitId] = msg
   end
+
+  -- add item source if applicable
+  local entity = Component.get(msg.source)
+  local itemSource = entity and entity.source
+  msg.itemSource = itemSource
+
   return msg
 end, 1)
 

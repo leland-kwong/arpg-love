@@ -57,7 +57,7 @@ local function triggerAttack(self)
 			msgBus.send(msgBus.CHARACTER_HIT, {
 				parent = item,
 				damage = calcDamage(self),
-				source = self.source
+				source = self:getId()
 			})
 			-- attack modifier
 			msgBus.send(msgBus.CHARACTER_HIT, {

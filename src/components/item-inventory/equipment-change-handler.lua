@@ -59,6 +59,7 @@ msgBus.on(msgBus.EQUIPMENT_CHANGE, function()
 end)
 
 msgBus.on(msgBus.ITEM_EQUIPPED, function(item)
+	Component.addToGroup(item.__id, 'activePlayerItems', item)
 	local definition = itemSystem.getDefinition(item)
 	local itemState = itemSystem.getState(item)
 	itemState.equipped = true
@@ -78,6 +79,7 @@ msgBus.on(msgBus.ITEM_EQUIPPED, function(item)
 end)
 
 msgBus.on(msgBus.EQUIPMENT_UNEQUIP, function(item)
+	Component.removeFromGroup(item.__id, 'activePlayerItems')
 	local itemState = itemSystem.getState(item)
 	itemState.equipped = false
   msgBus.off(itemState.listeners)

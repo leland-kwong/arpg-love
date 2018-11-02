@@ -146,7 +146,7 @@ local Bullet = {
               local msg = {
                 parent = collisionParent,
                 collisionSource = self.colObj,
-                source = self.source,
+                source = self:getId(),
                 damage = random(self.minDamage, self.maxDamage)
               }
               msgBus.send(msgBus.CHARACTER_HIT, msg)

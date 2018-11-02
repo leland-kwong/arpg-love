@@ -20,7 +20,7 @@ function Dash.init(self)
       moveSpeed = boost,
       freelyMove = 1
     },
-    source = 'MOCK_SHOES'
+    source = 'DASH_ABILITY'
   })
   self:delete()
 end
