@@ -204,7 +204,7 @@ local LootGenerator = {
   rootStore = CreateStore,
   class = collisionGroups.floorItem,
   -- item to generate
-  item = nil
+  item = nil,
 }
 
 local COLLISION_FLOOR_ITEM_TYPE = 'floorItem'
@@ -219,6 +219,39 @@ end
 local curve = love.math.newBezierCurve(0, 0, 10, -10, 0, 0)
 local function flyoutEasing(t, b, c, d)
   return c * curve:evaluate(t/d) + b
+end
+
+local function drawLegendaryItemEffect(self, x, y, angle)
+  local opacity = math.max(0.3, math.sin(self.clock * 2))
+  local Color = require 'modules.color'
+  love.graphics.setColor(Color.multiplyAlpha(Color.RARITY_LEGENDARY, opacity))
+  local animation = AnimationFactory:newStaticSprite('legendary-item-drop-effect')
+  local ox, oy = animation:getOffset()
+  love.graphics.draw(
+    AnimationFactory.atlas,
+    animation.sprite,
+    x,
+    y,
+    angle,
+    1,
+    1,
+    ox,
+    oy
+  )
+
+  local animation = AnimationFactory:newStaticSprite('light-blur')
+  local ox, oy = animation:getOffset()
+  love.graphics.draw(
+    AnimationFactory.atlas,
+    animation.sprite,
+    x,
+    y,
+    0,
+    1,
+    1,
+    ox,
+    oy
+  )
 end
 
 function LootGenerator.init(self)
@@ -254,6 +287,8 @@ function LootGenerator.init(self)
     selected = false,
     animationComplete = false,
     onCreate = function(self)
+      Component.addToGroup(self:getId(), 'clock', self)
+
       local direction = math.random(0, 1) == 1 and 1 or -1
       local xOffset = math.random(10, 20)
       local yOffset = -10 -- cause item to fly upwards
@@ -296,6 +331,8 @@ function LootGenerator.init(self)
       return true
     end,
     onUpdate = function(self, dt)
+      self.angle = self.angle + dt
+
       if (not parent.isInViewOfPlayer) then
         itemNamesTooltipLayer:delete(item)
         return
@@ -328,6 +365,14 @@ function LootGenerator.init(self)
         1, -0.5
       )
 
+      local ox, oy = animation:getOffset()
+      local centerX, centerY = self.x + ox, self.y + oy
+
+      local isLegendary = itemConfig.rarity.LEGENDARY == item.rarity
+      if isLegendary then
+        drawLegendaryItemEffect(self, centerX, centerY, self.angle)
+      end
+
       if self.hovered then
         love.graphics.setShader(shader)
       end
@@ -340,8 +385,7 @@ function LootGenerator.init(self)
         self.x, self.y
       )
 
-      local ox, oy = animation:getOffset()
-      Component.get('lightWorld'):addLight(self.x + ox, self.y + oy, 17, nil, 0.4)
+      Component.get('lightWorld'):addLight(centerX, centerY, 17, nil, 0.4)
 
       if self.hovered then
         love.graphics.setShader()

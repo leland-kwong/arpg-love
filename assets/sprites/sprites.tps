@@ -631,10 +631,9 @@
             <key type="filename">custom-art/gui/gui-inventory-button--hover.png</key>
             <key type="filename">custom-art/gui/gui-inventory-button.png</key>
             <key type="filename">custom-art/gui/gui-map-pointer.png</key>
-            <key type="filename">custom-art/items/weapons/weapon-modules/item-upgrade-placeholder-locked.png</key>
-            <key type="filename">custom-art/items/weapons/weapon-modules/item-upgrade-placeholder-unlocked.png</key>
             <key type="filename">custom-art/status-effect-icons/status-frenzy.png</key>
             <key type="filename">custom-art/status-effect-icons/status-legendary-enemy.png</key>
+            <key type="filename">custom-art/status-effect-icons/status-shield.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -858,9 +857,9 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/items/augmentations/augmentation-defender.png</key>
-            <key type="filename">custom-art/items/augmentations/augmentation-one.png</key>
-            <key type="filename">custom-art/items/augmentations/augmentation-rage.png</key>
+            <key type="filename">custom-art/items/augmentation-defender.png</key>
+            <key type="filename">custom-art/items/augmentation-one.png</key>
+            <key type="filename">custom-art/items/augmentation-rage.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -870,6 +869,50 @@
                 <rect>8,8,16,16</rect>
                 <key>scale9Paddings</key>
                 <rect>8,8,16,16</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/items/legendary-item-drop-effect.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,16,32,32</rect>
+                <key>scale9Paddings</key>
+                <rect>16,16,32,32</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/items/weapon-hammer-attachment.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,5,8,10</rect>
+                <key>scale9Paddings</key>
+                <rect>4,5,8,10</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/items/weapon-module-empty.png</key>
+            <key type="filename">custom-art/items/weapon-module-fireball.png</key>
+            <key type="filename">custom-art/items/weapon-module-hammer.png</key>
+            <key type="filename">custom-art/items/weapon-module-initiate.png</key>
+            <key type="filename">custom-art/items/weapon-module-lightning-rod.png</key>
+            <key type="filename">custom-art/items/weapon-module-slow-time.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>6,6,12,12</rect>
+                <key>scale9Paddings</key>
+                <rect>6,6,12,12</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -901,34 +944,16 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/items/weapons/weapon-modules/weapon-hammer-attachment.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0,0.55</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,5,8,10</rect>
-                <key>scale9Paddings</key>
-                <rect>4,5,8,10</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">custom-art/items/weapons/weapon-modules/weapon-module-empty.png</key>
-            <key type="filename">custom-art/items/weapons/weapon-modules/weapon-module-fireball.png</key>
-            <key type="filename">custom-art/items/weapons/weapon-modules/weapon-module-hammer.png</key>
-            <key type="filename">custom-art/items/weapons/weapon-modules/weapon-module-initiate.png</key>
-            <key type="filename">custom-art/items/weapons/weapon-modules/weapon-module-lightning-rod.png</key>
-            <key type="filename">custom-art/items/weapons/weapon-modules/weapon-module-slow-time.png</key>
+            <key type="filename">custom-art/light-blur.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>6,6,12,12</rect>
+                <rect>100,100,200,200</rect>
                 <key>scale9Paddings</key>
-                <rect>6,6,12,12</rect>
+                <rect>100,100,200,200</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -1078,13 +1103,13 @@
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets</filename>
             <filename>custom-art/items/weapons/pods</filename>
             <filename>custom-art/status-effect-icons</filename>
-            <filename>custom-art/items/weapons/weapon-modules</filename>
             <filename>custom-art/effects</filename>
-            <filename>custom-art/items/augmentations</filename>
             <filename>custom-art/characters</filename>
             <filename>custom-art/gui</filename>
             <filename>custom-art/nova.png</filename>
             <filename>custom-art/abilities</filename>
+            <filename>custom-art/items</filename>
+            <filename>custom-art/light-blur.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

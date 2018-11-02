@@ -344,6 +344,10 @@ function M.newGroup(groupDefinition)
     return Group
   end
 
+  --[[
+    if the component's update lifecycle has not been triggered (ready property is not true),
+    this will wait until the next update frame to draw.
+  ]]
   local max = math.max
   function Group.drawAll()
     for id,c in pairs(componentsById) do
