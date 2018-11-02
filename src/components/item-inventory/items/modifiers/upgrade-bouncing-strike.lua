@@ -22,7 +22,7 @@ return itemSystem.registerModule({
           return
       end
 
-      local attack = hitMessage.collisionItem
+      local attack = hitMessage.collisionSource.parent
       local numBounces, maxBounces = (attack.numBounces or 0), props.maxBounces
       if numBounces >= maxBounces then
         return hitMessage

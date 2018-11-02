@@ -145,7 +145,7 @@ local Bullet = {
             if (not isObstacleCollision) then
               local msg = {
                 parent = collisionParent,
-                collisionItem = self,
+                collisionSource = self.colObj,
                 source = self.source,
                 damage = random(self.minDamage, self.maxDamage)
               }
