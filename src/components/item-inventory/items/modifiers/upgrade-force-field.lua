@@ -134,7 +134,7 @@ function ForceField.draw(self)
   local oBlendMode = love.graphics.getBlendMode()
   love.graphics.setBlendMode('add')
   local percentHealthLeft = self.shieldHealth / self.maxShieldHealth
-  local size = self.size + (self.size * self:getAbsorption())
+  local size = self.size
 
   local r,g,b = 0.3, 0.5, 1
   if self.state == state.SHIELD_HIT then
@@ -198,7 +198,10 @@ return itemSystem.registerModule({
       data = {
         title = 'force-field',
         description = {
-          template = 'Gain a forcefield that blocks %{absorption} damage. For each nearby enemy gain an extra %{bonusAbsorption}. Maximum absorption is %50.',
+          template = 'Gain a forcefield that blocks {baseAbsorption}% damage. '
+
+            ..'\n\nFor each nearby enemy gain an extra {bonusAbsorption}% damage reduction.'
+            ..'\n\nMaximum absorption is capped to 50%.',
           data = props
         }
       }
