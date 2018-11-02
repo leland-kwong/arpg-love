@@ -4,14 +4,6 @@ return {
 	type = "base.potion-energy",
 
 	blueprint = {
-		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'(),
-		onActivateWhenEquipped = require 'components.item-inventory.items.equipment-actives.heal'({
-			minHeal = 50,
-			maxHeal = 60,
-			duration = 5,
-			property = 'energy',
-			maxProperty = 'maxEnergy'
-		}),
 	},
 
 	properties = {
@@ -23,5 +15,14 @@ return {
 		baseModifiers =  {
 			cooldown = 10,
 		},
+
+		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'(),
+		onActivateWhenEquipped = require 'components.item-inventory.items.equipment-actives.heal'({
+			minHeal = 50,
+			maxHeal = 60,
+			duration = 5,
+			property = 'energy',
+			maxProperty = 'maxEnergy'
+		}),
 	}
 }

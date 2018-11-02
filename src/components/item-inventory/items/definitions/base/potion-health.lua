@@ -5,15 +5,6 @@ return {
 
 	blueprint = {
 		extraModifiers = {},
-
-		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'(),
-		onActivateWhenEquipped = require 'components.item-inventory.items.equipment-actives.heal'({
-			minHeal = 80,
-			maxHeal = 100,
-			duration = 6.5,
-			property = 'health',
-			maxProperty = 'maxHealth'
-		}),
 	},
 
 	properties = {
@@ -25,5 +16,14 @@ return {
 		baseModifiers =  {
 			cooldown = 8,
 		},
+
+		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'(),
+		onActivateWhenEquipped = require 'components.item-inventory.items.equipment-actives.heal'({
+			minHeal = 80,
+			maxHeal = 100,
+			duration = 6.5,
+			property = 'health',
+			maxProperty = 'maxHealth'
+		}),
 	}
 }

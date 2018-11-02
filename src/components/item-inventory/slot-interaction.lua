@@ -153,8 +153,9 @@ local function setupSlotInteractions(
           }
 
           local activeAbilityBlock = nil
-          if item.onActivateWhenEquipped then
-            local module = itemSystem.loadModule(item.onActivateWhenEquipped)
+          local definition = itemSystem.getDefinition(item)
+          if definition.onActivateWhenEquipped then
+            local module = itemSystem.loadModule(definition.onActivateWhenEquipped)
             if module.tooltip then
               activeAbilityBlock = Block.Row({
                 {
@@ -172,7 +173,7 @@ local function setupSlotInteractions(
             end
           end
 
-          local rightClickModule = itemSystem.loadModule(item.onActivate)
+          local rightClickModule = itemSystem.loadModule(definition.onActivate)
           local rightClickActionBlock = (not itemState.equipped) and
             Block.Row({
               {

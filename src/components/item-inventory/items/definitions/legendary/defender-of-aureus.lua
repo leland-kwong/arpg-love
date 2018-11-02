@@ -7,7 +7,6 @@ return {
 		extraModifiers = {},
 
 		rarity = itemConfig.rarity.LEGENDARY,
-		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'()
 	},
 
 	properties = {
@@ -27,6 +26,8 @@ return {
 				bonusAbsorption = 10,
 				baseAbsorption = 15
 			}),
-		}
+		},
+
+		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'()
 	}
 }

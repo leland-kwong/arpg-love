@@ -6,7 +6,6 @@ return {
 	blueprint =  {
 		extraModifiers = {},
 
-		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'()
 	},
 
 	properties = {
@@ -18,5 +17,7 @@ return {
 		baseModifiers = {
 			percentDamage = 0.5
 		},
+
+		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'()
 	}
 }

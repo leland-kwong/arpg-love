@@ -5,12 +5,6 @@ return {
 
 	blueprint =  {
 		extraModifiers = {},
-
-		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'(),
-		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.movespeed-boost')({
-			speedBoost = 100,
-			speedBoostDuration = 1,
-		})
 	},
 
 	properties = {
@@ -24,5 +18,11 @@ return {
 			moveSpeed = 50,
 			armor = 50
 		},
+
+		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'(),
+		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.movespeed-boost')({
+			speedBoost = 100,
+			speedBoostDuration = 1,
+		})
 	}
 }

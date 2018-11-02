@@ -103,7 +103,9 @@ function InventoryBlueprint.init(self)
   end
 
   local function inventoryOnItemActivate(item)
-    local onActivate = itemSystem.loadModule(item.onActivate).active
+    local onActivate = itemSystem.loadModule(
+      itemSystem.getDefinition(item).onActivate
+    ).active
     onActivate(item)
   end
 

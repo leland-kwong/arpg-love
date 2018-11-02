@@ -7,7 +7,6 @@ return {
 		extraModifiers = {},
 
 		rarity = itemConfig.rarity.LEGENDARY,
-		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'()
 	},
 
 	properties = {
@@ -28,6 +27,8 @@ return {
 				energyCostReduction = -0.1,
 				cooldownReduction = 0.005
 			}),
-		}
+		},
+
+		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'()
 	}
 }

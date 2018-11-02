@@ -20,13 +20,6 @@ return {
 		},
 
 		experience = 0,
-		onActivate = require(require('alias').path.items..'.inventory-actives.equip-on-click')(),
-		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.aoe-slam')({
-			minDamage = 5,
-			maxDamage = 7,
-			w = 40,
-			h = 40
-		})
 	},
 
 	properties = {
@@ -43,6 +36,14 @@ return {
 			attackTime = 0.42,
 			cooldown = 0.1,
 			energyCost = 2
-		}
+		},
+
+		onActivate = require(require('alias').path.items..'.inventory-actives.equip-on-click')(),
+		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.aoe-slam')({
+			minDamage = 5,
+			maxDamage = 7,
+			w = 40,
+			h = 40
+		})
 	}
 }
