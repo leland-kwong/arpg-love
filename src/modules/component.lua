@@ -105,8 +105,8 @@ end
 
 M.groups = setmetatable({}, {
   -- default to emptyGroup
-  __index = function()
-    return M.groups.emptyGroup
+  __index = function(groups)
+    return groups.emptyGroup
   end
 })
 M.entitiesById = {}
@@ -131,7 +131,8 @@ function M.addToGroup(id, group, data)
   end
   entity[groupName] = data or EMPTY
   local group = M.groups[groupName]
-  if (not group) then
+  local isNewGroup = group == M.groups.emptyGroup
+  if (isNewGroup) then
     group = M.newGroup({
       name = groupName
     })

@@ -88,11 +88,6 @@ local objectParsersByType = {
       local AnimationFactory = require 'components.animation-factory'
       local doorGridWidth, doorGridHeight = obj.width / config.gridSize, obj.height / config.gridSize
 
-      if (not Component.groups.bossDoors) then
-        Component.newGroup({
-          name = 'bossDoors'
-        })
-      end
       for x=1, doorGridWidth do
         for y=1, doorGridHeight do
           local door = Component.create({
