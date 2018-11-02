@@ -63,7 +63,8 @@ local function triggerAttack(self)
 			msgBus.send(msgBus.CHARACTER_HIT, {
 				parent = item,
 				duration = hitModifierDuration,
-				modifiers = hitModifers
+				modifiers = hitModifers,
+				source = 'HAMMER_MODIFIER_EFFECT'
 			})
 		end
 	)

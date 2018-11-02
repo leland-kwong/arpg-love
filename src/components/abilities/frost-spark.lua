@@ -110,6 +110,7 @@ local FrostSpark = {
             msgBus.send(msgBus.CHARACTER_HIT, {
               parent = col.other.parent,
               damage = random(self.minDamage, self.maxDamage),
+              source = self:getId()
             })
             self.hits = self.hits + 1
           end

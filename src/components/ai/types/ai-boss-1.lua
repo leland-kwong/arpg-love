@@ -72,7 +72,8 @@ function AbilityBeamStrike.use(self, state, targetX, targetY)
             local msgBus = require 'components.msg-bus'
             msgBus.send(msgBus.CHARACTER_HIT, {
               parent = playerRef,
-              damage = 60
+              damage = 60,
+              source = self:getId()
             })
           end
         end

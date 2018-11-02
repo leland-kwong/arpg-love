@@ -87,7 +87,8 @@ local function handleImpact(self)
     local it = items[i]
     msgBus.send(msgBus.CHARACTER_HIT, self.onHit(self, {
       parent = it.parent,
-      damage = math.random(self.minDamage, self.maxDamage)
+      damage = math.random(self.minDamage, self.maxDamage),
+      source = self:getId()
     }))
   end
 

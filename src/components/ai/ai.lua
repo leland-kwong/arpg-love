@@ -114,11 +114,14 @@ function Ai:checkLineOfSight(grid, WALKABLE, targetX, targetY, debug)
   )
 end
 
-local function spreadAggroToAllies(neighbors)
+local function spreadAggroToAllies(sourceId, neighbors)
   for i=1, #neighbors do
     local ai = neighbors[i].parent
     if (not ai.isAggravated) then
-      local message = {parent = ai}
+      local message = {
+        parent = ai,
+        source = sourceId
+      }
       msgBus.send(msgBus.CHARACTER_HIT, message)
     end
   end
@@ -131,7 +134,7 @@ local function handleAggro(self)
     self.isAggravated = true
     if (not previouslyAggravated) then
       self.neighbors = getNeighbors(self, 10)
-      spreadAggroToAllies(self.neighbors)
+      spreadAggroToAllies(self:getId(), self.neighbors)
       -- put a short delay before setting `isAggravated` to false to prevent aggro spreading to cascade infinitely
       local tick = require 'utils.tick'
       tick.delay(function()

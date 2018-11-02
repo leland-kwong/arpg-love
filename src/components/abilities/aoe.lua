@@ -39,6 +39,7 @@ function Aoe.init(self)
     local it = items[i]
     local msgData = self:onHit()
     msgData.parent = it.parent
+    msgData.source = self:getId()
     msgBus.send(msgBus.CHARACTER_HIT, msgData)
   end
 
