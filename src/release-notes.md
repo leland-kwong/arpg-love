@@ -14,7 +14,8 @@ This release adds new major features and fixes a number of high priority bugs ar
 * Dungeons now have levels
 * Boss added
 * Various HUD updates
-* New legendary items
+* New legendary item
+* Right-click to equip now automatically equips to the next available slot if available. Otherwise it equips to the first slot that matches that item type.
 
 ### Bug Fixes
 
