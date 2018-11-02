@@ -57,21 +57,29 @@ function InventoryBlueprint.init(self)
     end
 
     if msgBus.EQUIPMENT_SWAP == msgType then
+      local F = require 'utils.functional'
       local item = msg
       local category = itemSystem.getDefinition(item).category
-      local slotX, slotY = itemConfig.findEquipmentSlotByCategory(category)
-      local currentlyEquipped = rootStore:getEquippedItem(slotX, slotY)
-      local isAlreadyEquipped = currentlyEquipped == item
+      local validSlots = itemConfig.findEquipmentSlotsByCategory(category)
+      local isAlreadyEquipped = F.find(validSlots, function(slot)
+        local equippedItem = rootStore:getEquippedItem(slot.x, slot.y)
+        return (equippedItem and equippedItem.__id) == item.__id
+      end)
 
       if isAlreadyEquipped then
         return
       end
 
-      local _, x, y = rootStore:findItemById(item)
-      local equippedItem = rootStore:unequipItem(slotX, slotY)
+      local _, inventoryX, inventoryY = rootStore:findItemById(item)
+      local firstAvailableSlot = F.find(validSlots, function(slot)
+        return not (rootStore:getEquippedItem(slot.x, slot.y))
+      end)
+      local slotToEquipTo = firstAvailableSlot or validSlots[1]
+      local slotX, slotY = slotToEquipTo.x, slotToEquipTo.y
+      local unequippedItem = rootStore:unequipItem(slotX, slotY)
       rootStore:removeItem(item)
       rootStore:equipItem(item, slotX, slotY)
-      rootStore:addItemToInventory(equippedItem, {x, y})
+      rootStore:addItemToInventory(unequippedItem, {inventoryX, inventoryY})
       msgBus.send(msgBus.EQUIPMENT_CHANGE)
     end
 

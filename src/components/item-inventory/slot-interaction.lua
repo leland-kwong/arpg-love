@@ -17,7 +17,8 @@ local Lru = require 'utils.lru'
 local drawOrders = {
   GUI_SLOT = 3,
   GUI_SLOT_ITEM = 4,
-  GUI_SLOT_TOOLTIP = 5
+  GUI_ITEM_PICKED_UP = 5,
+  GUI_SLOT_TOOLTIP = 6
 }
 
 local spriteCache = Lru.new(100)
@@ -75,7 +76,7 @@ Gui.create({
     end
   end,
   drawOrder = function()
-    return 4
+    return drawOrders.GUI_ITEM_PICKED_UP
   end
 })
 
