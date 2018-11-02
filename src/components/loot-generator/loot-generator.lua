@@ -262,6 +262,12 @@ function LootGenerator.init(self)
   local rootStore = msgBus.send(msgBus.GAME_STATE_GET)
   local screenX, screenY = self.x, self.y
   local item = self.item
+  local isLegendary = itemConfig.rarity.LEGENDARY == item.rarity
+
+  if isLegendary then
+    local Sound = require 'components.sound'
+    Sound.playEffect('legendary-item-drop.wav')
+  end
 
   self:setParent(Component.get('MAIN_SCENE'))
   Component.addToGroup(self, Component.groups.gameWorld)
@@ -368,7 +374,6 @@ function LootGenerator.init(self)
       local ox, oy = animation:getOffset()
       local centerX, centerY = self.x + ox, self.y + oy
 
-      local isLegendary = itemConfig.rarity.LEGENDARY == item.rarity
       if isLegendary then
         drawLegendaryItemEffect(self, centerX, centerY, self.angle)
       end
