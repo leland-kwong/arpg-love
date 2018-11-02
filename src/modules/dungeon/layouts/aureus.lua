@@ -21,8 +21,8 @@ return function()
 
   local function generateMapBlockDefinitions()
     local blocks = {
-      -- 'room-3'
-      'room-boss-1'
+      'room-3'
+      -- 'room-boss-1'
     }
     local mapDefinitions = {
       -- function()

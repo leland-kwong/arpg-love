@@ -106,7 +106,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   end,
 
   onUpdate = function(self, value, x, y, isInViewport, dt)
-    local index = Grid.getIndexByCoordinate(#self.grid[1], x, y)
+    local index = Grid.getIndexByCoordinate(self.grid, x, y)
 
     -- if its unwalkable, add a collision object and create wall tile
     if (value ~= nil) and (value ~= Map.WALKABLE) then

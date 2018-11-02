@@ -10,19 +10,15 @@ local floor, max = math.floor, math.max
 local function getGridBounds(gridSize, camera)
   local w, e, n, s = camera:getBounds()
   local scale = config.scaleFactor
-  return w / gridSize,
-    e / gridSize,
-    n / gridSize,
-    s / gridSize
+  return floor(w / gridSize),
+    floor(e / gridSize),
+    floor(n / gridSize),
+    floor(s / gridSize)
 end
 
 -- a,b,c are arguments to pass to the callback
 local function iterateActiveGrid(self, cb, a, b, c)
-  local w,e,n,s = getGridBounds(self.gridSize, self.camera)
-  w = floor(w)
-  e = floor(e)
-  n = floor(n)
-  s = floor(s)
+  local w,e,n,s = self.bounds.w, self.bounds.e, self.bounds.n, self.bounds.s
 
   --[[
     FIXME: thresholds are here as a way to make sure rendering reaches the edge of the screen.
@@ -74,12 +70,20 @@ local mapBlueprint = {
   getGridBounds = getGridBounds,
 
   update = function(self, dt)
+    local w, e, n, s = getGridBounds(self.gridSize, self.camera)
+    self.bounds = {
+      w = w,
+      e = e,
+      n = n,
+      s = s
+    }
+
     self.playerVisitedIndices = self.playerVisitedIndices or {}
     local playerRef = Component.get('PLAYER')
     local Position = require 'utils.position'
 
     local gridX, gridY = Position.pixelsToGridUnits(playerRef.x, playerRef.y, config.gridSize)
-    local index = Grid.getIndexByCoordinate(#self.grid[1], gridX, gridY)
+    local index = Grid.getIndexByCoordinate(self.grid, gridX, gridY)
     self.isNewGridPosition = (gridX ~= self.lastGridX) or (gridY ~= self.lastGridY)
     self.isVisitedGridPosition = self.playerVisitedIndices[index]
     self.playerVisitedIndices[index] = true

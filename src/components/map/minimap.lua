@@ -49,13 +49,13 @@ local function drawPlayerPosition(self, centerX, centerY)
 end
 
 local function drawDynamicBlocks(self)
-  local Grid = require 'utils.grid'
-  Grid.forEach(self.blocks, function(renderFn, x, y)
+  for coordIndex, renderFn in pairs(self.blocks) do
+    local x, y = Grid.getCoordinateByIndex(self.grid, coordIndex)
     love.graphics.push()
     love.graphics.translate(self.x + x, self.y + y)
     renderFn()
     love.graphics.pop()
-  end)
+  end
   self.blocks = {}
 end
 
@@ -91,8 +91,8 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
     -- pre-draw indices that have already been visited
     self:renderStart()
     for index in pairs(self.visitedIndices) do
-      local x, y = Grid.getCoordinateByIndex(#self.grid[1], index)
-      local value = self.grid[y][x]
+      local x, y = Grid.getCoordinateByIndex(self.grid, index)
+      local value = Grid.get(self.grid, x, y)
       local tileRenderer = minimapTileRenderers[value]
       if tileRenderer then
         tileRenderer(self, x, y)
@@ -111,7 +111,7 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
   render = function(self, value, gridX, gridY)
     local tileRenderer = minimapTileRenderers[value]
     if tileRenderer then
-      local index = Grid.getIndexByCoordinate(#self.grid[1], gridX, gridY)
+      local index = Grid.getIndexByCoordinate(self.grid, gridX, gridY)
       if self.visitedIndices[index] then
         return
       end
@@ -141,14 +141,35 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
     love.graphics.setStencilTest()
     love.graphics.pop()
 
+    love.graphics.setColor(1,1,1)
+    love.graphics.rectangle('line', self.x, self.y, self.w, self.h)
+
+    if self.bounds then
+      love.graphics.setColor(1,1,0)
+      local b = self.bounds
+      local width, height = math.abs(b.w - b.e), math.abs(b.n - b.s)
+      love.graphics.rectangle('line', self.x + self.w/2 - width/2, self.y + self.h/2 - height/2, width, height)
+    end
+
     drawPlayerPosition(self, centerX, centerY)
   end
 })
 
 -- adds a block for the next draw frame, and gets removed automatically each frame
 function MiniMap.renderBlock(self, gridX, gridY, renderFn)
+  if self.bounds then
+    local thresholdX, thresholdY = 20, 40
+    local isOutOfBounds = gridX < self.bounds.w - thresholdX or
+      gridX > self.bounds.e + thresholdX or
+      gridY < self.bounds.n - thresholdY or
+      gridY > self.bounds.s + thresholdY
+    if isOutOfBounds then
+      return
+    end
+  end
   local Grid = require 'utils.grid'
-  Grid.set(self.blocks, gridX, gridY, renderFn)
+  local index = Grid.getIndexByCoordinate(self.grid, gridX, gridY)
+  self.blocks[index] = renderFn
 end
 
 function MiniMap.serialize(self)

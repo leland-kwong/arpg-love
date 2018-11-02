@@ -13,6 +13,7 @@ local tick = require 'utils.tick'
 local tween = require 'modules.tween'
 local bump = require 'modules.bump'
 local collisionGroups = require 'modules.collision-groups'
+require 'components.groups.clock'
 
 local itemGroup = groups.all
 local tooltipCollisionWorld = bump.newWorld(16)
@@ -254,6 +255,24 @@ local function drawLegendaryItemEffect(self, x, y, angle)
   )
 end
 
+local function drawLegendaryItemEffectMinimap()
+  local Color = require 'modules.color'
+  love.graphics.setColor(Color.RARITY_LEGENDARY)
+  local animation = AnimationFactory:newStaticSprite('legendary-item-drop-effect-minimap')
+  local ox, oy = animation:getOffset()
+  love.graphics.draw(
+    AnimationFactory.atlas,
+    animation.sprite,
+    0,
+    0,
+    0,
+    0.5,
+    0.5,
+    ox,
+    oy
+  )
+end
+
 function LootGenerator.init(self)
   local parent = self
   assert(self.item ~= nil, 'item must be provided')
@@ -339,6 +358,14 @@ function LootGenerator.init(self)
     onUpdate = function(self, dt)
       self.angle = self.angle + dt
 
+      local minimap = Component.get('miniMap')
+      if isLegendary and minimap then
+        local Position = require 'utils.position'
+        local config = require 'config.config'
+        local gridX, gridY = Position.pixelsToGridUnits(self.x, self.y, config.gridSize)
+        minimap:renderBlock(gridX, gridY, drawLegendaryItemEffectMinimap)
+      end
+
       if (not parent.isInViewOfPlayer) then
         itemNamesTooltipLayer:delete(item)
         return
@@ -357,7 +384,7 @@ function LootGenerator.init(self)
       end
     end,
     draw = function(self)
-      if self.isOutOfBounds then
+      if (not parent.isInViewOfPlayer) then
         return
       end
 
