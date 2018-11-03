@@ -15,13 +15,13 @@ return {
 
 		baseModifiers = {
 			cooldown = 2,
-			moveSpeed = 50,
+			moveSpeed = 40,
 			armor = 50
 		},
 
 		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'(),
 		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.movespeed-boost')({
-			speedBoost = 50,
+			speedBoost = 40,
 			speedBoostDuration = 1,
 		})
 	}
