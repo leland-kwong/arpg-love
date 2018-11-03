@@ -11,7 +11,7 @@ This release adds new major features and fixes a number of high priority bugs ar
 ### New
 
 * New legendary items (drop rates are increased to 10% for testing purposes)
-* Boss added
+* Boss added (follow the yellow arrow on level 2)
 * Dungeons now have levels
 * Various HUD updates
 * Right-click to equip now automatically equips to the next available slot if available. Otherwise it equips to the first slot that matches that item type.
