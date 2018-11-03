@@ -226,20 +226,8 @@ local function drawLegendaryItemEffect(self, x, y, angle)
   local opacity = math.max(0.3, math.sin(self.clock * 2))
   local Color = require 'modules.color'
   love.graphics.setColor(Color.multiplyAlpha(Color.RARITY_LEGENDARY, opacity))
-  local animation = AnimationFactory:newStaticSprite('legendary-item-drop-effect')
-  local ox, oy = animation:getOffset()
-  love.graphics.draw(
-    AnimationFactory.atlas,
-    animation.sprite,
-    x,
-    y,
-    angle,
-    1,
-    1,
-    ox,
-    oy
-  )
 
+  -- circular light
   local animation = AnimationFactory:newStaticSprite('light-blur')
   local ox, oy = animation:getOffset()
   love.graphics.draw(
@@ -248,6 +236,21 @@ local function drawLegendaryItemEffect(self, x, y, angle)
     x,
     y,
     0,
+    1,
+    1,
+    ox,
+    oy
+  )
+
+  -- light beams
+  local animation = AnimationFactory:newStaticSprite('legendary-item-drop-effect')
+  local ox, oy = animation:getOffset()
+  love.graphics.draw(
+    AnimationFactory.atlas,
+    animation.sprite,
+    x,
+    y,
+    angle,
     1,
     1,
     ox,
