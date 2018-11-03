@@ -1,11 +1,6 @@
 # Release notes
 
-## 1.2.0 - alpha
-
-* Redesigned UI to be more user friendly and simpler
-* Fixed an issue where some windows 10 users were unable to run the game
-
-## 2.0.0 - alpha
+## 2.0.0-alpha
 
 This release adds new major features and fixes a number of high priority bugs around player and ai movement.
 
@@ -22,3 +17,8 @@ This release adds new major features and fixes a number of high priority bugs ar
 * Player should no longer randomly teleport
 * Hugging the wall no longer prevents ai from engaging player
 * Ai no longer pushes the player through the wall
+
+## 1.2.0-alpha
+
+* Redesigned UI to be more user friendly and simpler
+* Fixed an issue where some windows 10 users were unable to run the game
