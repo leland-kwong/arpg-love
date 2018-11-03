@@ -11,19 +11,19 @@ return itemSystem.registerModule({
       if (not itemState.equipped) then
         return msgBus.CLEANUP
       end
-      local isEnoughExperience = props.experienceRequired <= item.experience
-      if isEnoughExperience then
-        hitMessage.criticalChance = props.chance
-        hitMessage.criticalMultiplier = math.random(
-          props.minMultiplier * 100,
-          props.maxMultiplier * 100
-        ) / 100
-        return hitMessage
+
+      if hitMessage.source ~= id or
+        props.experienceRequired >= item.experience then
+          return
       end
-    end, 1, function(msg)
-      return msg.source == id and
-        props.experienceRequired <= item.experience
-    end)
+
+      hitMessage.criticalChance = props.chance
+      hitMessage.criticalMultiplier = math.random(
+        props.minMultiplier * 100,
+        props.maxMultiplier * 100
+      ) / 100
+      return hitMessage
+    end, 1)
   end,
   tooltip = function()
     return {

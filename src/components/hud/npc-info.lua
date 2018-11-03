@@ -11,7 +11,7 @@ local collisionGroups = require 'modules.collision-groups'
 
 local itemHovered = nil
 local aiHoverFilter = function(item)
-  return (not itemHovered) and collisionGroups.matches(item.group, collisionGroups.ai)
+  return (not itemHovered) and collisionGroups.matches(item.group, collisionGroups.enemyAi)
 end
 
 local NpcInfo = {
@@ -94,14 +94,14 @@ function NpcInfo.update(self, dt)
       propsText = propsText..'  '..p
     end
     local wrapLimit = 250
-    local propsTextWidth, propsTextHeight = GuiText.getTextSize(propsText, textLayerSmall.font, wrapLimit)
+    local _, propsTextHeight = GuiText.getTextSize(propsText, textLayerSmall.font, wrapLimit)
     local windowW, windowH = windowSize()
-    local xPos = Position.boxCenterOffset(propsTextWidth, propsTextHeight, windowW, windowH)
+    local xPos = Position.boxCenterOffset(wrapLimit, propsTextHeight, windowW, windowH)
     local propsTextVerticalMargin = 5
     textLayerSmall:addf(
       {Color.WHITE, propsText},
       wrapLimit,
-      'left',
+      'center',
       xPos,
       self.statusBar.y + self.statusBar.h + propsTextVerticalMargin
     )

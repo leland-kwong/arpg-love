@@ -11,6 +11,7 @@ local ParticleTest = {
 
 function ParticleTest.init(self)
   local player = Player.create({
+    autoSave = false,
     x = 100,
     y = 100
   }):setParent(self)

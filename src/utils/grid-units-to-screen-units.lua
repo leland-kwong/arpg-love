@@ -1,5 +1,5 @@
-local function toScreen(gridX, gridY)
-	return gridX * tile_size, gridY * tile_size
+local function toScreen(gridX, gridY, cellSize)
+	return gridX * cellSize, gridY * cellSize
 end
 
 return toScreen

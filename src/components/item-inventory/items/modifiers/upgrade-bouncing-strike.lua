@@ -17,7 +17,12 @@ return itemSystem.registerModule({
         return msgBus.CLEANUP
       end
 
-      local attack = hitMessage.collisionItem
+      if hitMessage.itemSource ~= id or
+        props.experienceRequired >= item.experience then
+          return
+      end
+
+      local attack = Component.get(hitMessage.source)
       local numBounces, maxBounces = (attack.numBounces or 0), props.maxBounces
       if numBounces >= maxBounces then
         return hitMessage
@@ -62,9 +67,6 @@ return itemSystem.registerModule({
           maxDamage = attack.maxDamage
         })
       end
-    end, nil, function(msg)
-      return msg.source == id and
-        props.experienceRequired <= item.experience
     end)
   end,
   tooltip = function()

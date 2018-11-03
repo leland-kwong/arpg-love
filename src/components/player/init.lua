@@ -22,6 +22,8 @@ local HealSource = require 'components.heal-source'
 require'components.item-inventory.equipment-change-handler'
 local MenuManager = require 'modules.menu-manager'
 local InputContext = require 'modules.input-context'
+local F = require 'utils.functional'
+local Object = require 'utils.object-utils'
 
 local colMap = collisionWorlds.map
 local keyMap = userSettings.keyboard
@@ -38,7 +40,7 @@ local DIRECTION_LEFT = -1
 
 local collisionGroups = {
   obstacle = true,
-  ai = true
+  enemyAi = true
 }
 
 local function collisionFilter(item, other)
@@ -50,21 +52,18 @@ end
 
 local function setupDefaultInventory(items)
   local itemSystem = require(require('alias').path.itemSystem)
-  local rootState = msgBus.send(msgBus.GAME_STATE_GET)
+  local rootState = require 'main.global-state'.gameState
 
-  for i=1, #items do
-    local it = items[i]
-    local module = require(require('alias').path.itemDefs..'.'..it.type)
-    local position = it.position
-    local canEquip, errorMsg
-    if position then
-      canEquip, errorMsg = rootState:equipItem(itemSystem.create(module), position.x, position.y)
-      if not canEquip then
-        error(errorMsg)
-      end
-    else
-      rootState:addItemToInventory(itemSystem.create(module))
-    end
+  for i=1, #items.equipment do
+    local itemType = items.equipment[i]
+    local module = require(require('alias').path.itemDefs..'.'..itemType)
+    rootState:equipmentSwap(itemSystem.create(module))
+  end
+
+  for i=1, #items.inventory do
+    local itemType = items.inventory[i]
+    local module = require(require('alias').path.itemDefs..'.'..itemType)
+    rootState:addItemToInventory(itemSystem.create(module))
   end
 end
 
@@ -74,63 +73,9 @@ local function connectInventory()
 
   -- add default weapons
   if rootState:get().isNewGame then
-    setupDefaultInventory({
-      {
-        type = 'potion-health',
-        position = {
-          x = 1,
-          y = 5
-        }
-      },
-      {
-        type = 'pod-module-initiate',
-        position = {
-          x = 1,
-          y = 1
-        }
-      },
-      {
-        type = 'potion-energy',
-        position = {
-          x = 2,
-          y = 5
-        }
-      },
-      {
-        type = 'mock-shoes',
-        position = {
-          x = 1,
-          y = 4
-        }
-      },
-      {
-        type = 'pod-module-hammer',
-      },
-      {
-        type = 'augmentation-module-one',
-        position = {
-          x = 2,
-          y = 4
-        }
-      }
-      -- {
-      --   type = 'lightning-rod',
-      --   position = {
-      --     x = 1,
-      --     y = 2
-      --   }
-      -- },
-      -- {
-      --   type = 'mock-armor',
-      --   position = {
-      --     x = 2,
-      --     y = 3
-      --   }
-      -- },
-      -- {
-      --   type = 'pod-module-fireball'
-      -- }
-    })
+    setupDefaultInventory(
+      require 'components.player.starting-items'
+    )
   end
 
   -- trigger equipment change for items that were previously equipped from loading the state
@@ -178,16 +123,24 @@ msgBusMainMenu.on(msgBusMainMenu.TOGGLE_MAIN_MENU, function(menuOpened)
   msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, menuOpened)
 end)
 
-msgBus.PLAYER_REVIVE = 'PLAYER_REVIVE'
-msgBus.on(msgBus.PLAYER_REVIVE, function()
+msgBus.PLAYER_FULL_HEAL = 'PLAYER_FULL_HEAL'
+msgBus.on(msgBus.PLAYER_FULL_HEAL, function()
   local rootState = msgBus.send(msgBus.GAME_STATE_GET)
-  rootState
-    :set('health', function(state)
-      return state.maxHealth
-    end)
-    :set('energy', function(state)
-      return state.maxEnergy
-    end)
+  msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
+    amount = math.pow(10, 10),
+    source = 'PLAYER_FULL_HEALTH',
+    duration = 0,
+    property = 'health',
+    maxProperty = 'maxHealth'
+  })
+
+  msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
+    amount = math.pow(10, 10),
+    source = 'PLAYER_FULL_ENERGY',
+    duration = 0,
+    property = 'energy',
+    maxProperty = 'maxEnergy'
+  })
 end)
 
 local function canPickupItem(self, item)
@@ -208,7 +161,32 @@ local function canPickupItem(self, item)
   return canWalkToItem
 end
 
-local Player = {
+msgBus.PLAYER_INITIALIZED = 'PLAYER_INITIALIZED'
+
+local function updateHealthRegeneration(healthRegeneration)
+  local healthRegenerationDuration = math.pow(10, 10)
+  msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
+    source = 'PLAYER_HEALTH_REGENERATION',
+    amount = healthRegenerationDuration * healthRegeneration,
+    duration = healthRegenerationDuration,
+    property = 'health',
+    maxProperty = 'maxHealth'
+  })
+end
+
+local function updateEnergyRegeneration(energyRegeneration)
+  local energyRegenerationDuration = math.pow(10, 10)
+  msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
+    source = 'PLAYER_ENERGY_REGENERATION',
+    amount = energyRegenerationDuration * energyRegeneration,
+    duration = energyRegenerationDuration,
+    property = 'energy',
+    maxProperty = 'maxEnergy'
+  })
+end
+
+local BaseStatModifiers = require'components.state.base-stat-modifiers'
+local Player = Object.extend(BaseStatModifiers(), {
   id = 'PLAYER',
   autoSave = config.autoSave,
   class = collisionGroups.player,
@@ -220,6 +198,8 @@ local Player = {
   pickupRadius = 5 * config.gridSize,
   moveSpeed = 100,
   attackRecoveryTime = 0,
+
+  zones = {},
 
   -- collision properties
   h = 1,
@@ -234,9 +214,15 @@ local Player = {
 
     Component.addToGroup(self, groups.character)
     self.listeners = {
+      msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function()
+        local BaseStatModifiers = require'components.state.base-stat-modifiers'
+        return BaseStatModifiers()
+      end, 1),
       msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function(msgValue)
         local newModifiers = msgValue
         msgBus.send(msgBus.GAME_STATE_GET):set('statModifiers', newModifiers)
+        updateHealthRegeneration(newModifiers.healthRegeneration)
+        updateEnergyRegeneration(newModifiers.energyRegeneration)
       end),
 
       msgBus.on(msgBus.GENERATE_LOOT, function(msgValue)
@@ -277,6 +263,10 @@ local Player = {
         end
 
         if (keyMap.PORTAL_OPEN == key) and (not v.hasModifier) then
+          if self.inBossBattle then
+            msgBus.send(msgBus.PLAYER_ACTION_ERROR, "cannot portal in here")
+            return
+          end
           msgBus.send(msgBus.PORTAL_OPEN)
         end
 
@@ -363,41 +353,20 @@ local Player = {
     local CreateStore = require'components.state.state'
     self.rootStore = msgBus.send(msgBus.GAME_STATE_GET)
     self.dir = DIRECTION_RIGHT
-    colMap:add(self, self.x, self.y, self.w, self.h)
-
-    local energyRegenerationDuration = 99999999
-    msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
-      source = 'BASE_ENERGY_REGENERATION',
-      amount = energyRegenerationDuration *
-        self.rootStore:get().statModifiers.energyRegeneration,
-      duration = energyRegenerationDuration,
-      property = 'energy',
-      maxProperty = 'maxEnergy'
-    })
-
-    local healthRegenerationDuration = math.pow(10, 10)
-    msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
-      source = 'PLAYER_INNATE_HEALTH_REGENERATION',
-      amount = healthRegenerationDuration *
-        self.rootStore:get().statModifiers.healthRegeneration,
-      duration = healthRegenerationDuration,
-      property = 'health',
-      maxProperty = 'maxHealth'
-    })
 
     self.animations = {
       idle = animationFactory:new({
-        'character-1',
-        'character-8',
-        'character-9',
-        'character-10',
-        'character-11'
+        'player/character-1',
+        'player/character-8',
+        'player/character-9',
+        'player/character-10',
+        'player/character-11'
       }),
       run = animationFactory:new({
-        'character-15',
-        'character-16',
-        'character-17',
-        'character-18',
+        'player/character-15',
+        'player/character-16',
+        'player/character-17',
+        'player/character-18',
       })
     }
 
@@ -415,13 +384,31 @@ local Player = {
       collisionOffX,
       5
     ):addToWorld(colMap)
+    self.localCollision = self:addCollisionObject(
+      'player',
+      self.x,
+      self.y,
+      self.colObj.w,
+      self.colObj.h,
+      self.colObj.ox,
+      self.colObj.oy
+    ):addToWorld(collisionWorlds.player)
+    self.zoneCollision = self:addCollisionObject(
+      'player',
+      1,
+      1,
+      1,
+      1
+    ):addToWorld(collisionWorlds.zones)
 
     WeaponCore.create({
       x = self.x,
       y = self.y
     }):setParent(self)
+
+    msgBus.send(msgBus.PLAYER_INITIALIZED)
   end
-}
+})
 
 local function handleMovement(self, dt)
   local totalMoveSpeed = self:getCalculatedStat('moveSpeed')
@@ -551,7 +538,46 @@ local function updateHealthAndEnergy(rootStore)
   rootStore:set('energy', min(state.energy, state.maxEnergy + mods.maxEnergy))
 end
 
+function Player.handleMapCollision(self, nextX, nextY)
+  -- dynamically get the current animation frame's height
+  local sx, sy, sw, sh = self.animation.sprite:getViewport()
+  local w,h = sw, sh
+
+  local actualX, actualY, cols, len = self.colObj:move(nextX, nextY, collisionFilter)
+  self.x = actualX
+  self.y = actualY
+  self.h = h
+  self.w = w
+
+  self.localCollision:move(actualX, actualY)
+end
+
+local function zoneCollisionFilter()
+  return 'cross'
+end
+
+function Player.handleZoneCollision(self)
+  local x, y = math.floor(self.x / config.gridSize), math.floor(self.y / config.gridSize)
+  local _, _, zones, len = self.zoneCollision:move(x, y, zoneCollisionFilter)
+  self.zones = zones
+  for i=1, len do
+    zones[i] = zones[i].other
+  end
+end
+
+local function handleBossMode(self)
+  -- destroy active portal
+  local playerPortal = Component.get('playerPortal')
+  if playerPortal then
+    playerPortal:delete(true)
+  end
+end
+
 function Player.update(self, dt)
+  if self.inBossBattle then
+    handleBossMode(self)
+  end
+
   local hasPlayerLost = self.rootStore:get().health <= 0
   if hasPlayerLost then
     if Component.get('PLAYER_LOSE') then
@@ -569,15 +595,8 @@ function Player.update(self, dt)
   handleAbilities(self, dt)
   updateHealthAndEnergy(self.rootStore)
 
-  -- dynamically get the current animation frame's height
-  local sx, sy, sw, sh = self.animation.sprite:getViewport()
-  local w,h = sw, sh
-
-  local actualX, actualY, cols, len = self.colObj:move(nextX, nextY, collisionFilter)
-  self.x = actualX
-  self.y = actualY
-  self.h = h
-  self.w = w
+  self:handleMapCollision(nextX, nextY)
+  self:handleZoneCollision()
 
   -- update camera to follow player
   camera:setPosition(self.x, self.y, userSettings.camera.speed)
@@ -602,25 +621,28 @@ end
 local function drawDebug(self)
   if config.collisionDebug then
     local c = self.colObj
-    love.graphics.setColor(1,1,1,0.5)
-    local debug = require 'modules.debug'
-    debug.boundingBox(
-      'fill',
-      c.x - c.ox,
-      c.y - c.oy,
-      c.w,
-      c.h,
-      false
-    )
+    love.graphics.setColor(0,0,1,0.8)
+    love.graphics.circle('fill', self.x, self.y, 4)
+
+    love.graphics.setColor(0,1,0)
+    local c1 = self.colObj
+    local x, y = c1:getPositionWithOffset()
+    love.graphics.rectangle('line', x, y, c1.w, c1.h)
   end
 end
 
 function Player.draw(self)
+  -- draw light around player
+  Component.get('lightWorld'):addLight(
+    self.x, self.y,
+    80,
+    {1,1,1}
+  )
+
   local ox, oy = self.animation:getSourceOffset()
   local scaleX, scaleY = 1 * self.dir, 1
 
   drawShadow(self, scaleX, scaleY, ox, oy)
-  drawDebug(self)
 
   love.graphics.setColor(1,1,1)
   love.graphics.draw(
@@ -634,6 +656,8 @@ function Player.draw(self)
     ox,
     oy
   )
+
+  drawDebug(self)
 end
 
 Player.drawOrder = function(self)

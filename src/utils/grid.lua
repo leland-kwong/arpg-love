@@ -17,4 +17,25 @@ function Grid.set(grid, x, y, value)
   return value
 end
 
+function Grid.forEach(grid, callback)
+  for y,row in pairs(grid) do
+    for x,colValue in pairs(row) do
+      callback(colValue, x, y)
+    end
+  end
+end
+
+function Grid.getIndexByCoordinate(grid, x, y)
+  local numCols = #grid[1]
+  return (y * numCols) + x
+end
+
+local floor = math.floor
+function Grid.getCoordinateByIndex(grid, index)
+  local numCols = #grid[1]
+  local y = floor(index / numCols)
+  local x = index - (y * numCols)
+  return x, y
+end
+
 return Grid

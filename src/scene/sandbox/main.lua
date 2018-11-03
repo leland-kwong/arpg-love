@@ -16,7 +16,7 @@ local function getMenuTabsPosition()
 end
 
 local drawOrder = function()
-  return 1000
+  return require 'modules.draw-orders'.MainMenu
 end
 
 local guiTextBodyLayer = GuiText.create({
@@ -112,6 +112,7 @@ local menuOptionHomeScreen = {
     msgBus.send(msgBus.SCENE_STACK_REPLACE, {
       scene = HomeScreen
     })
+    msgBus.send(msgBus.GAME_UNLOADED)
     msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
     msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, true)
   end
@@ -129,13 +130,20 @@ local menuOptionSettingsMenu = {
 }
 
 local menuOptionPlayGameMenu = {
-  name = 'New/Load Game',
+  name = 'Play Game',
   value = function()
     -- dont close it if it's already open
     if Component.get('PlayGameMenu') then
       return
     end
     msgBus.send(msgBus.PLAY_GAME_MENU_TOGGLE)
+  end
+}
+
+local menuOptionNewsPanel = {
+  name = 'Latest news',
+  value = function()
+    Component.get('newsDialog'):setDisabled(false)
   end
 }
 
@@ -162,6 +170,7 @@ local sceneOptionsNormal = {
   menuOptionPlayGameMenu,
   menuOptionSettingsMenu,
   menuOptionHomeScreen,
+  menuOptionNewsPanel,
   menuOptionQuitGame
 }
 
@@ -207,6 +216,7 @@ end)
 require 'scene.light-test'
 require 'scene.font-test'
 require 'scene.tooltip-test'
+require 'scene.skew-rotate-test'
 
 function Sandbox.init(self)
   self.activeSceneMenu = nil

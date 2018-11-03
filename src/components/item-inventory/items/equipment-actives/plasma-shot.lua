@@ -25,7 +25,7 @@ return itemSystem.registerModule({
 				maxDamage = props.maxDamage,
 				color = bulletColor,
 				targetGroup = collisionGroups.create(
-					collisionGroups.ai,
+					collisionGroups.enemyAi,
 					collisionGroups.environment,
 					collisionGroups.obstacle
 				),

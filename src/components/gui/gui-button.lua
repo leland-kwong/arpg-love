@@ -23,6 +23,7 @@ local Button = extend(Gui, {
 })
 
 Button.init = f.wrap(function(self)
+  assert(self.textLayer ~= nil, '`textLayer` property is required')
   assert(
     Component.getBlueprint(self.textLayer) == GuiText,
     '`textLayer` should be an instance of GuiText'

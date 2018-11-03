@@ -4,7 +4,7 @@ local MusicManager = require 'main.listeners.music-manager'
 
 local SCENE_STACK_MESSAGE_LAST_PRIORITY = 10
 
-msgBus.on(msgBus.SCENE_STACK_PUSH, function(msgValue)
+local function sceneStackPush(msgValue)
   local nextScene = msgValue
   if globalState.activeScene then
     globalState.activeScene:delete(true)
@@ -15,7 +15,9 @@ msgBus.on(msgBus.SCENE_STACK_PUSH, function(msgValue)
   msgBus.send(msgBus.MUSIC_PLAY, sceneRef)
   msgBus.send(msgBus.SCENE_CHANGE, sceneRef)
   return sceneRef
-end, SCENE_STACK_MESSAGE_LAST_PRIORITY)
+end
+
+msgBus.on(msgBus.SCENE_STACK_PUSH, sceneStackPush, SCENE_STACK_MESSAGE_LAST_PRIORITY)
 
 msgBus.on(msgBus.SCENE_STACK_POP, function()
   if globalState.activeScene then
@@ -31,7 +33,11 @@ end, SCENE_STACK_MESSAGE_LAST_PRIORITY)
 
 msgBus.on(msgBus.SCENE_STACK_REPLACE, function(nextScene)
   globalState.sceneStack:clear()
-  return msgBus.send(msgBus.SCENE_STACK_PUSH, nextScene)
+  --[[
+    call scene push function directly instead of triggering the `SCENE_STACK_PUSH` event since there are modules that
+    trigger specifically on `SCENE_STACK_PUSH`
+  ]]
+  return sceneStackPush(nextScene)
 end, SCENE_STACK_MESSAGE_LAST_PRIORITY)
 
 msgBus.on(msgBus.SET_CONFIG, function(msgValue)

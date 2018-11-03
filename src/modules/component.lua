@@ -103,7 +103,12 @@ local function cleanupCollisionObjects(self)
   end
 end
 
-M.groups = {}
+M.groups = setmetatable({}, {
+  -- default to emptyGroup
+  __index = function(groups)
+    return groups.emptyGroup
+  end
+})
 M.entitiesById = {}
 
 local function getGroupName(group)
@@ -118,17 +123,21 @@ function M.addToGroup(id, group, data)
     id = id:getId()
   end
 
-  local name = getGroupName(group)
+  local groupName = getGroupName(group)
   local entity = M.entitiesById[id]
   if (not entity) then
     entity = {}
     M.entitiesById[id] = entity
   end
-  entity[name] = data or EMPTY
-  local group = M.groups[name]
-  if group then
-    group.addComponent(id, data)
+  entity[groupName] = data or EMPTY
+  local group = M.groups[groupName]
+  local isNewGroup = group == M.groups.emptyGroup
+  if (isNewGroup) then
+    group = M.newGroup({
+      name = groupName
+    })
   end
+  group.addComponent(id, data)
   return M
 end
 
@@ -198,6 +207,9 @@ function M.createFactory(blueprint)
       tc.validate(c.y, tc.NUMBER, false) -- y-axis position
       tc.validate(c.angle, tc.NUMBER, false)
     end
+
+    -- add to all components list
+    allComponentsById[id] = c
 
     -- add component to default group
     if c.group then
@@ -288,28 +300,6 @@ function M.createFactory(blueprint)
     return self._deleted
   end
 
-  function blueprint:checkOutOfBounds(threshold)
-    threshold = threshold or 0
-    local camera = require 'components.camera'
-    local west, east, north, south = camera:getBounds()
-    -- add bounds data
-    local x, y = self.x, self.y
-    local outOfBoundsX, outOfBoundsY = 0, 0
-    if x < west then
-      outOfBoundsX = west - x
-    elseif x > east then
-      outOfBoundsX = x - east
-    end
-    if y < north then
-      outOfBoundsY = north - y
-    elseif y > south then
-      outOfBoundsY = y - south
-    end
-
-    return (outOfBoundsX > threshold) or
-      (outOfBoundsY > threshold)
-  end
-
   -- default methods
   for k,v in pairs(baseProps) do
     if not blueprint[k] then
@@ -354,6 +344,10 @@ function M.newGroup(groupDefinition)
     return Group
   end
 
+  --[[
+    if the component's update lifecycle has not been triggered (ready property is not true),
+    this will wait until the next update frame to draw.
+  ]]
   local max = math.max
   function Group.drawAll()
     for id,c in pairs(componentsById) do
@@ -376,11 +370,11 @@ function M.newGroup(groupDefinition)
   end
 
   function Group.addComponent(id, data)
-    if Group.hasComponent(id) then
-      return
+    local isNewComponent = not Group.hasComponent(id)
+    if isNewComponent then
+      count = count + 1
     end
 
-    count = count + 1
     allComponentsById[id] = data
     componentsById[id] = data
     if Group.onComponentEnter then
@@ -395,13 +389,14 @@ function M.newGroup(groupDefinition)
 
     count = count - 1
     componentsById[id] = nil
-    local component = M.entitiesById[id][Group.name]
+    local entity = M.entitiesById[id]
+    local component = entity[Group.name]
     if Group.onComponentLeave then
       Group:onComponentLeave(component)
     end
     -- remove global reference
-    M.entitiesById[id][Group.name] = nil
-    if component._deleted then
+    entity[Group.name] = nil
+    if (type(component) ~= 'table') or component._deleted then
       allComponentsById[id] = nil
     end
   end
@@ -412,6 +407,10 @@ function M.newGroup(groupDefinition)
 
   function Group.getAll()
     return componentsById
+  end
+
+  function Group.get(_, id)
+    return componentsById[id]
   end
 
   M.groups[Group.name] = Group
@@ -430,9 +429,15 @@ function M.getBlueprint(component)
 end
 
 function M.remove(entityId, recursive)
+  local idType = type(entityId)
+  assert(
+    idType == 'string' or idType == 'number',
+    'entity id must be a number or string'
+  )
+
   -- this is for legacy reasons when our entites weren't just plain tables
   local entityAsComponent = allComponentsById[entityId]
-  if entityAsComponent then
+  if entityAsComponent.isComponent then
     local eAsC = entityAsComponent
     local children = eAsC._children
     if (recursive and children) then
@@ -454,7 +459,12 @@ function M.remove(entityId, recursive)
   M.entitiesById[entityId] = nil
 end
 
+-- Method for creating components without a factory
 local NodeFactory = M.createFactory({})
 M.create = NodeFactory.create
+
+M.newGroup({
+  name = 'emptyGroup'
+})
 
 return M

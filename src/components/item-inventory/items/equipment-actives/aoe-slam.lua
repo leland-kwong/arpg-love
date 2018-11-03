@@ -34,7 +34,7 @@ local function triggerAttack(self)
 		self.collisionW,
 		self.collisionH,
 		function(item)
-			if (collisionGroups.matches(item.group, collisionGroups.create(collisionGroups.ai, collisionGroups.environment))) then
+			if (collisionGroups.matches(item.group, collisionGroups.create(collisionGroups.enemyAi, collisionGroups.environment))) then
 				local aiCollision = item
 				local aiCollisionX, aiCollisionY = aiCollision:getPositionWithOffset()
 				hammerWorld:add(
@@ -56,14 +56,15 @@ local function triggerAttack(self)
 		function(item)
 			msgBus.send(msgBus.CHARACTER_HIT, {
 				parent = item,
-				damage = calcDamage(self)
+				damage = calcDamage(self),
+				source = self:getId()
 			})
 			-- attack modifier
 			msgBus.send(msgBus.CHARACTER_HIT, {
 				parent = item,
 				duration = hitModifierDuration,
 				modifiers = hitModifers,
-				source = itemSource
+				source = 'HAMMER_MODIFIER_EFFECT'
 			})
 		end
 	)
@@ -77,8 +78,8 @@ end
 local Attack = Component.createFactory(
 	AbilityBase({
 		group = groups.all,
-		w = 40,
-		h = 40,
+		w = 1,
+		h = 1,
 		impactAnimationDuration = 0.4,
 		cooldown = attackCooldown,
 		opacity = 1,

@@ -31,11 +31,8 @@ local loadedTypes = {}
 local function requireIfNecessary(item)
 	local iType = item.__type
 	if (not loadedTypes[iType]) then
-		local loadModule = require 'modules.load-module'
-		local errorFree, loadedItem = loadModule(require('alias').path.itemDefs, iType)
-		if (errorFree and loadedItem) then
-			return items.registerType(loadedItem)
-		end
+		local loadedItem = require(require('alias').path.itemDefs..'.'..iType)
+		return items.registerType(loadedItem)
 	end
 	return nil
 end
@@ -91,12 +88,6 @@ function items.create(module)
 	end
 
 	local newItem = createFn()
-
-	-- set modifiers to value based on range parameters
-	for k,v in pairs(newItem.baseModifiers) do
-		local fancyRandom = require 'utils.fancy-random'
-		newItem.baseModifiers[k] = fancyRandom(v[1], v[2], 2)
-	end
 
 	newItem.__type = module.type
 	newItem.__id = uid()
@@ -200,12 +191,14 @@ function items.loadModule(moduleDefinition)
 	return copy
 end
 
-function items.loadModules(item)
+function items:loadModules(item)
 	local f = require 'utils.functional'
-	f.forEach(item.extraModifiers, function(modifier)
+	local function loadModule(modifier)
 		local module = items.loadModule(modifier)
 		module.active(item)
-	end)
+	end
+	f.forEach(item.extraModifiers, loadModule)
+	f.forEach(self.getDefinition(item).extraModifiers or {}, loadModule)
 end
 
 local Lru = require 'utils.lru'

@@ -22,7 +22,6 @@ local SpawnerAi = {
   -- these need to be passed in
   grid = nil,
   WALKABLE = nil,
-  -- debug = true,
 
   colWorld = collisionWorlds.map,
   pxToGridUnits = function(screenX, screenY, gridSize)
@@ -36,6 +35,7 @@ local SpawnerAi = {
   end,
   gridSize = config.gridSize,
 }
+SpawnerAi.__index = SpawnerAi
 
 local directions = {
   1, -1
@@ -44,7 +44,8 @@ local function getRandomDirection()
   return directions[math.random(1, 2)]
 end
 
-local function AiFactory(self)
+local function AiFactory(props)
+  local self = setmetatable(props, SpawnerAi)
   assert(
     type(self.target) == 'function',
     'target property must be a function'
@@ -55,7 +56,7 @@ local function AiFactory(self)
       return nil
     end
     local target = self.target()
-    local tPosX, tPosY = target:getPosition()
+    local tPosX, tPosY = target.x, target.y
     local dist = Math.dist(tPosX, tPosY, otherX, otherY)
     local withinVision = dist <= otherSightRadius
 
@@ -82,7 +83,7 @@ local function AiFactory(self)
       :set('y',                 spawnY)
       :set('collisionWorld',    self.colWorld)
       :set('pxToGridUnits',     self.pxToGridUnits)
-      :set('findNearestTarget', findNearestTarget)
+      :set('findNearestTarget', aiPrototype.findNearestTarget or findNearestTarget)
       :set('grid',              self.grid)
       :set('gridSize',          self.gridSize)
       :set('WALKABLE',          self.WALKABLE)
@@ -94,9 +95,4 @@ local function AiFactory(self)
   end)
 end
 
-function SpawnerAi.init(self)
-  AiFactory(self)
-  self:delete()
-end
-
-return Component.createFactory(SpawnerAi)
+return AiFactory

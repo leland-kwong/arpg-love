@@ -10,7 +10,6 @@ local MainMapSolidsFactory = require 'components.map.main-map-solids'
 local animationFactory = require 'components.animation-factory'
 local lru = require 'utils.lru'
 local memoize = require'utils.memoize'
-local GetIndexByCoordinate = memoize(require 'utils.get-index-by-coordinate')
 local config = require'config.config'
 local Grid = require 'utils.grid'
 
@@ -37,12 +36,24 @@ local function setupCollisionObjects(self, grid, gridSize)
       local animation = animationFactory:newStaticSprite(animationName)
       local ox, oy = animation:getSourceOffset()
 
+      --[[
+        Padding around the wall to prevent player and ai from hugging the wall completely. This
+        solves a host of problems including line of sight checks not working properly due to
+        rounding issues on a grid system. A value of 1 is enough to fix this
+      ]]
+      local padding = 1
+
       -- setup collision world objects
       local gridSize = self.gridSize
       local tileX, tileY = x * gridSize, y * gridSize
       return self:addCollisionObject(
         collisionGroups.obstacle,
-        tileX, tileY, gridSize, gridSize, ox, 0
+        tileX - padding,
+        tileY - padding,
+        gridSize + padding * 2,
+        gridSize + padding * 2,
+        ox,
+        0
       ):addToWorld(collisionWorlds.map)
     end
   end)
@@ -88,10 +99,14 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     for _,entity in pairs(Component.groups.activeWalls.getAll()) do
       self.wallObjectsPool:release(entity)
     end
+    self.drawQueue = {
+      floors = {},
+      walls = {}
+    }
   end,
 
-  onUpdate = function(self, value, x, y, originX, originY, isInViewport, dt)
-    local index = GetIndexByCoordinate(self.grid)(x, y)
+  onUpdate = function(self, value, x, y, isInViewport, dt)
+    local index = Grid.getIndexByCoordinate(self.grid, x, y)
 
     -- if its unwalkable, add a collision object and create wall tile
     if (value ~= nil) and (value ~= Map.WALKABLE) then
@@ -115,40 +130,55 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
       self.renderFloorCache[index] = true
     end
 
+    --[[
+      We must render walls onto a separate layer to get the correct
+      draw ordering. We also must render these before the actual walls
+      since the actual walls have some transparency which will otherwise reveal the game's
+      background color underneath.
+    ]]
+    local isWall = value ~= Map.WALKABLE
+    local canvas = isWall and self.wallsCanvas or self.floorCanvas
+    local drawQueue = self.drawQueue[isWall and 'walls' or 'floors']
+    local function drawFn()
+      local animationName = self.tileRenderDefinition[y][x]
+      local animation = getAnimation(self.animationCache, index, animationName)
+        :update(dt)
+      local ox, oy = animation:getOffset()
+      local tileX, tileY = x * self.gridSize, y * self.gridSize
+
+      love.graphics.setColor(1,1,1)
+      love.graphics.draw(
+        animation.atlas,
+        animation.sprite,
+        tileX,
+        tileY,
+        0,
+        1,
+        1,
+        ox,
+        oy
+      )
+    end
+    table.insert(drawQueue, drawFn)
+  end,
+
+  onUpdateEnd = function(self)
     love.graphics.push()
     love.graphics.origin()
-
-    local animationName = self.tileRenderDefinition[y][x]
-    if value ~= Map.WALKABLE then
-      --[[
-        We must render walls onto a separate layer to get the correct
-        draw ordering. We also must render these before the actual walls
-        since the actual walls have some transparency which will otherwise reveal the game's
-        background color underneath.
-      ]]
-      love.graphics.setCanvas(self.wallsCanvas)
-    else
-      love.graphics.setCanvas(self.floorCanvas)
+    love.graphics.setCanvas(self.floorCanvas)
+    for i=1, #self.drawQueue.floors do
+      local callback = self.drawQueue.floors[i]
+      callback()
     end
-    local animation = getAnimation(self.animationCache, index, animationName)
-      :update(dt)
-    local ox, oy = animation:getOffset()
-    local tileX, tileY = x * self.gridSize, y * self.gridSize
 
-    love.graphics.setColor(1,1,1)
-    love.graphics.draw(
-      animation.atlas,
-      animation.sprite,
-      tileX,
-      tileY,
-      0,
-      1,
-      1,
-      ox,
-      oy
-    )
-    love.graphics.pop()
+    love.graphics.setCanvas(self.wallsCanvas)
+    for i=1, #self.drawQueue.walls do
+      local callback = self.drawQueue.walls[i]
+      callback()
+    end
+
     love.graphics.setCanvas()
+    love.graphics.pop()
   end,
 
   renderEnd = function(self)

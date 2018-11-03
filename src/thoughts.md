@@ -43,7 +43,7 @@ Whenever an event occurs, it sends that information to the event bus. Each event
 - PLAYER_ADD_HEAL_SOURCE_RECEIVED
 - PLAYER_AURA_TRIGGER
 - ENEMY_ATTACK
-- ENTITY_DESTROYED
+- ENEMY_DESTROYED
 
 ## Static vs dynamic modifiers
 
@@ -232,3 +232,8 @@ local module = {
 1. Item equipped -> add item to equipment system
 2. Item activate -> add ability entity to ability system
 3. Add ability to upgrade system
+
+## Credits
+
+Ootsby - boids ai improvement
+Lumie1337 - item range calculation

@@ -9,6 +9,7 @@ local GuiText = require 'components.gui.gui-text'
 local NpcInfo = require 'components.hud.npc-info'
 local Notifier = require 'components.hud.notifier'
 local Minimap = require 'components.map.minimap'
+local HudStatusIcons = require 'components.hud.status-icons'
 local camera = require 'components.camera'
 local msgBus = require 'components.msg-bus'
 local Position = require 'utils.position'
@@ -45,6 +46,9 @@ end
 function Hud.init(self)
   local mainSceneRef = Component.get('MAIN_SCENE')
   if mainSceneRef and self.minimapEnabled then
+    local stateSnapshot = msgBus.send(msgBus.GLOBAL_STATE_GET)
+      .stateSnapshot
+        :consumeSnapshot(mainSceneRef.mapId)
     local minimapW, minimapH = 100, 100
     local minimapMargin = 5
     Minimap.create({
@@ -54,11 +58,13 @@ function Hud.init(self)
       y = minimapH + minimapMargin,
       w = minimapW,
       h = minimapH,
-      scale = config.scale
+      scale = config.scale,
+      visitedIndices = stateSnapshot and (stateSnapshot.miniMap[1].state.visitedIndices)
     }):setParent(self)
   end
 
   self.hudTextLayer = GuiText.create({
+    id = 'hudTextLayer',
     group = groups.hud,
     drawOrder = function()
       return 4
@@ -66,6 +72,7 @@ function Hud.init(self)
   }):setParent(self)
 
   self.hudTextSmallLayer = GuiText.create({
+    id = 'hudTextSmallLayer',
     group = groups.hud,
     font = require 'components.font'.primary.font,
     drawOrder = function()
@@ -100,7 +107,8 @@ function Hud.init(self)
   end
 
   -- health bar
-  StatusBar.create({
+  local healthStatusBar = StatusBar.create({
+    id = 'healthStatusBar',
     x = offX,
     y = winHeight - barHeight - 13,
     w = healthManaWidth / 2,
@@ -151,6 +159,12 @@ function Hud.init(self)
     textLayer = self.hudTextSmallLayer
   }):setParent(self)
 
+  HudStatusIcons.create({
+    id = 'hudStatusIcons',
+    x = healthStatusBar.x,
+    y = healthStatusBar.y - 25
+  }):setParent(self)
+
   local spacing = 32
   local endXPos = 355
 
@@ -172,13 +186,13 @@ function Hud.init(self)
     },
     {
       skillId = 'SKILL_3',
-      slotX = 2,
-      slotY = 1
+      slotX = 1,
+      slotY = 2
     },
     {
       skillId = 'SKILL_2',
-      slotX = 1,
-      slotY = 2
+      slotX = 2,
+      slotY = 1
     },
     {
       skillId = 'SKILL_1',

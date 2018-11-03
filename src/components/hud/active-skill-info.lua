@@ -10,6 +10,7 @@ local setProp = require 'utils.set-prop'
 local extend = require 'utils.object-utils'.extend
 local Vec2 = require 'modules.brinevector'
 local propTypesCalculator = require 'components.state.base-stat-modifiers'.propTypesCalculator
+local itemSystem = require('components.item-inventory.items.item-system')
 
 local keyMap = userSettings.keyboard
 local mouseInputMap = userSettings.mouseInputMap
@@ -19,7 +20,6 @@ local function ActiveConsumableHandler()
   local skillCooldown = 0
   local activeItem = nil
   local max = math.max
-  local itemSystem = require("components.item-inventory.items.item-system")
   local skill = {
     type = 'CONSUMABLE'
   }
@@ -37,13 +37,13 @@ local function ActiveConsumableHandler()
     if (not activeItem) or (curCooldown > 0) then
       return skill
     else
-      local activateFn = itemSystem.loadModule(activeItem.onActivateWhenEquipped).active
+      local activateFn = itemSystem.loadModule(itemSystem.getDefinition(activeItem).onActivateWhenEquipped).active
       if not activateFn then
         return skill
       end
       activateFn(activeItem)
       local curState = self.rootStore:get()
-      local baseCooldown = activeItem.baseModifiers.cooldown or 0
+      local baseCooldown = itemSystem.getDefinition(activeItem).baseModifiers.cooldown or 0
       local actualCooldown = propTypesCalculator.cooldownReduction(baseCooldown, curState.statModifiers.cooldownReduction)
       curCooldown = actualCooldown
       skillCooldown = actualCooldown
@@ -64,7 +64,6 @@ local function ActiveConsumableHandler()
     if (not activeItem) then
       return
     end
-    local itemSystem = require("components.item-inventory.items.item-system")
     local renderFn = itemSystem.getDefinition(activeItem).render
     if renderFn then
       renderFn(activeItem)
@@ -82,7 +81,6 @@ local function ActiveEquipmentHandler()
   local skill = {
     type = 'EQUIPMENT'
   }
-  local itemSystem = require("components.item-inventory.items.item-system")
 
   local floor = math.floor
   local function modifyAbility(instance, modifiers)
@@ -114,9 +112,9 @@ local function ActiveEquipmentHandler()
       return skill
     else
       local definition = itemSystem.getDefinition(activeItem)
-      local activateModule = itemSystem.loadModule(activeItem.onActivateWhenEquipped)
+      local activateModule = itemSystem.loadModule(itemSystem.getDefinition(activeItem).onActivateWhenEquipped)
       local activateFn = activateModule and activateModule.active
-      local energyCost = activeItem.baseModifiers.energyCost
+      local energyCost = itemSystem.getDefinition(activeItem).baseModifiers.energyCost
       -- time an attack takes to finish (triggers a global cooldown)
       local curState = self.rootStore:get()
       local enoughEnergy = (energyCost == nil) or
@@ -147,12 +145,12 @@ local function ActiveEquipmentHandler()
         abilityEntity,
         curState.statModifiers
       )
-      local baseCooldown = activeItem.baseModifiers.cooldown or 0
+      local baseCooldown = itemSystem.getDefinition(activeItem).baseModifiers.cooldown or 0
       local actualCooldown = propTypesCalculator.cooldownReduction(baseCooldown, curState.statModifiers.cooldownReduction)
       curCooldown = actualCooldown
       skillCooldown = actualCooldown
 
-      local attackTime = activeItem.baseModifiers.attackTime or 0
+      local attackTime = itemSystem.getDefinition(activeItem).baseModifiers.attackTime or 0
       local actualAttackTime = propTypesCalculator.attackTimeReduction(attackTime, curState.statModifiers.attackTimeReduction)
       playerRef:set('attackRecoveryTime', actualAttackTime)
       msgBus.send(
@@ -194,7 +192,6 @@ local function ActiveEquipmentHandler()
     if (not activeItem) then
       return skill
     end
-    local itemSystem = require("components.item-inventory.items.item-system")
     local renderFn = itemSystem.getDefinition(activeItem).render
     if renderFn then
       renderFn(activeItem)
@@ -222,6 +219,34 @@ local function updateAbilities(self, dt)
   skillHandlers[self.skillId].set(item)
   skillHandlers[self.skillId].updateCooldown(dt)
 end
+
+local SkillBarPreDraw = Component.create({
+  setSkill = function(self, skillId, drawFn)
+    self.drawBySkillId[skillId] = drawFn
+
+    local oBlendMode = love.graphics.getBlendMode()
+    love.graphics.setBlendMode('alpha', 'premultiplied')
+    love.graphics.setCanvas(self.canvas)
+    love.graphics.clear()
+    for _,drawFn in pairs(self.drawBySkillId) do
+      drawFn()
+    end
+    love.graphics.setCanvas()
+    love.graphics.setBlendMode(oBlendMode)
+  end,
+  init = function(self)
+    Component.addToGroup(self, 'hud')
+    self.drawBySkillId = {}
+    self.canvas = love.graphics.newCanvas()
+  end,
+  draw = function(self)
+    love.graphics.setColor(1,1,1)
+    love.graphics.draw(self.canvas)
+  end,
+  drawOrder = function()
+    return 1
+  end
+})
 
 local ActiveSkillInfo = {
   group = groups.hud,
@@ -266,10 +291,34 @@ function ActiveSkillInfo.init(self)
     end
   })
   Component.addToGroup(itemRenderRef:getId(), 'gameWorld', itemRenderRef)
+  self.canvas = love.graphics.newCanvas()
 end
 
 function ActiveSkillInfo.update(self, dt)
   updateAbilities(self, dt)
+
+  local nextActiveItem = self.rootStore:get().equipment[self.slotY][self.slotX]
+  local isNewItem = nextActiveItem ~= self.activeItem
+  if (isNewItem) then
+    SkillBarPreDraw:setSkill(
+      self:getId(),
+      function()
+        local boxSize = self.size
+        love.graphics.setColor(0,0,0,0.8)
+        love.graphics.rectangle('fill', self.x, self.y, boxSize, boxSize)
+        local oLineWidth = love.graphics.getLineWidth()
+        love.graphics.setLineWidth(1)
+        love.graphics.setColor(1,1,1)
+        love.graphics.rectangle('line', self.x - 0.5, self.y - 0.5, boxSize, boxSize)
+        love.graphics.setLineWidth(oLineWidth)
+
+        if nextActiveItem then
+          drawItem(nextActiveItem, self.x, self.y, boxSize)
+        end
+      end
+    )
+  end
+  self.activeItem = nextActiveItem
 end
 
 local mouseBtnToString = {
@@ -291,19 +340,10 @@ local function drawHotkEy(self)
 end
 
 function ActiveSkillInfo.draw(self)
-  local boxSize = self.size
-
   drawHotkEy(self)
 
-  love.graphics.setColor(0,0,0,0.8)
-  love.graphics.rectangle('fill', self.x, self.y, boxSize, boxSize)
-  love.graphics.setColor(1,1,1)
-  love.graphics.rectangle('line', self.x, self.y, boxSize, boxSize)
-
-  local activeItem = self.rootStore:get().equipment[self.slotY][self.slotX]
-  if activeItem then
-    drawItem(activeItem, self.x, self.y, boxSize)
-
+  if self.activeItem then
+    local boxSize = self.size
     local cooldown, skillCooldown = skillHandlers[self.skillId].getStats()
     local progress = (skillCooldown - cooldown) / skillCooldown
     local offsetY = progress * boxSize
@@ -331,8 +371,14 @@ function ActiveSkillInfo.draw(self)
   end
 end
 
+function ActiveSkillInfo.drawOrder()
+  return SkillBarPreDraw:drawOrder() + 1
+end
+
 function ActiveSkillInfo.final(self)
   msgBus.off(self.listeners)
+
+  SkillBarPreDraw:setSkill(self:getId(), nil)
 end
 
 return Component.createFactory(ActiveSkillInfo)

@@ -43,50 +43,33 @@ local function InteractArea(self)
 	})
 end
 
+msgBus.on(msgBus.ALL, function(msg, msgType)
+  local rootStore = require 'main.global-state'.gameState
+
+  if msgBus.EQUIPMENT_SWAP == msgType then
+    local item = msg
+    rootStore:equipmentSwap(item)
+    msgBus.send(msgBus.EQUIPMENT_CHANGE)
+  end
+
+  if msgBus.INVENTORY_PICKUP == msgType or
+    msgBus.EQUIPMENT_SWAP == msgType
+  then
+    love.audio.stop(Sound.INVENTORY_PICKUP)
+    love.audio.play(Sound.INVENTORY_PICKUP)
+  end
+
+  if msgBus.INVENTORY_DROP == msgType then
+    love.audio.stop(Sound.INVENTORY_DROP)
+    love.audio.play(Sound.INVENTORY_DROP)
+  end
+end)
+
 function InventoryBlueprint.init(self)
   local msgBusMainMenu = require 'components.msg-bus-main-menu'
   msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
   MenuManager.clearAll()
   MenuManager.push(self)
-
-  msgBus.on(msgBus.ALL, function(msg, msgType)
-    local rootStore = self.rootStore
-
-    if self:isDeleted() then
-      return msgBus.CLEANUP
-    end
-
-    if msgBus.EQUIPMENT_SWAP == msgType then
-      local item = msg
-      local category = itemSystem.getDefinition(item).category
-      local slotX, slotY = itemConfig.findEquipmentSlotByCategory(category)
-      local currentlyEquipped = rootStore:getEquippedItem(slotX, slotY)
-      local isAlreadyEquipped = currentlyEquipped == item
-
-      if isAlreadyEquipped then
-        return
-      end
-
-      local _, x, y = rootStore:findItemById(item)
-      local equippedItem = rootStore:unequipItem(slotX, slotY)
-      rootStore:removeItem(item)
-      rootStore:equipItem(item, slotX, slotY)
-      rootStore:addItemToInventory(equippedItem, {x, y})
-      msgBus.send(msgBus.EQUIPMENT_CHANGE)
-    end
-
-    if msgBus.INVENTORY_PICKUP == msgType or
-      msgBus.EQUIPMENT_SWAP == msgType
-    then
-      love.audio.stop(Sound.INVENTORY_PICKUP)
-      love.audio.play(Sound.INVENTORY_PICKUP)
-    end
-
-    if msgBus.INVENTORY_DROP == msgType then
-      love.audio.stop(Sound.INVENTORY_DROP)
-      love.audio.play(Sound.INVENTORY_DROP)
-    end
-	end)
 
   self.slotSize = 30
   self.slotMargin = 2
@@ -120,7 +103,9 @@ function InventoryBlueprint.init(self)
   end
 
   local function inventoryOnItemActivate(item)
-    local onActivate = itemSystem.loadModule(item.onActivate).active
+    local onActivate = itemSystem.loadModule(
+      itemSystem.getDefinition(item).onActivate
+    ).active
     onActivate(item)
   end
 

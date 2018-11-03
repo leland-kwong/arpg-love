@@ -2,29 +2,23 @@ local config = require 'config.config'
 local noop = require 'utils.noop'
 local Map = require 'modules.map-generator.index'
 local Camera = require 'modules.camera'
+local Component = require 'modules.component'
+local Grid = require 'utils.grid'
 
 local floor, max = math.floor, math.max
 
 local function getGridBounds(gridSize, camera)
   local w, e, n, s = camera:getBounds()
   local scale = config.scaleFactor
-  return w / gridSize,
-    e / gridSize,
-    n / gridSize,
-    s / gridSize
+  return floor(w / gridSize),
+    floor(e / gridSize),
+    floor(n / gridSize),
+    floor(s / gridSize)
 end
 
 -- a,b,c are arguments to pass to the callback
 local function iterateActiveGrid(self, cb, a, b, c)
-  local w,e,n,s = getGridBounds(self.gridSize, self.camera)
-  w = floor(w)
-  e = floor(e)
-  n = floor(n)
-  s = floor(s)
-
-  -- viewport origin
-  local originX = max(1, w)
-  local originY = max(1, s)
+  local w,e,n,s = self.bounds.w, self.bounds.e, self.bounds.n, self.bounds.s
 
   --[[
     FIXME: thresholds are here as a way to make sure rendering reaches the edge of the screen.
@@ -50,7 +44,7 @@ local function iterateActiveGrid(self, cb, a, b, c)
         local isInViewport = isInRowViewport and isInColViewport
         local tileExists = value ~= nil
         if tileExists then
-          cb(self, value, x, y, originX, originY, isInViewport, a, b, c)
+          cb(self, value, x, y, isInViewport, a, b, c)
         end
       end
     end
@@ -76,6 +70,25 @@ local mapBlueprint = {
   getGridBounds = getGridBounds,
 
   update = function(self, dt)
+    local w, e, n, s = getGridBounds(self.gridSize, self.camera)
+    self.bounds = {
+      w = w,
+      e = e,
+      n = n,
+      s = s
+    }
+
+    self.playerVisitedIndices = self.playerVisitedIndices or {}
+    local playerRef = Component.get('PLAYER')
+    local Position = require 'utils.position'
+
+    local gridX, gridY = Position.pixelsToGridUnits(playerRef.x, playerRef.y, config.gridSize)
+    local index = Grid.getIndexByCoordinate(self.grid, gridX, gridY)
+    self.isNewGridPosition = (gridX ~= self.lastGridX) or (gridY ~= self.lastGridY)
+    self.isVisitedGridPosition = self.playerVisitedIndices[index]
+    self.playerVisitedIndices[index] = true
+    self.lastGridX, self.lastGridY = gridX, gridY
+
     self.onUpdateStart(self, dt)
     if self.onUpdate then
       iterateActiveGrid(self, self.onUpdate, dt)
@@ -83,9 +96,13 @@ local mapBlueprint = {
     self.onUpdateEnd(self, dt)
   end,
 
+  setRenderDisabled = function(self, renderDisabled)
+    self.renderDisabled = renderDisabled
+  end,
+
   draw = function(self)
     self.renderStart(self)
-    if self.render then
+    if (not self.renderDisabled) and self.render then
       iterateActiveGrid(self, self.render)
     end
     self.renderEnd(self)

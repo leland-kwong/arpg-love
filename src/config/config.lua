@@ -38,7 +38,11 @@ M.performanceProfile = false
 M.debugDrawQueue = false
 M.collisionDebug = false
 
+M.performacneProfileEnabled = false
+
 M.gameTitle = 'Citizen of Nowhere'
-M.version = '1.1.0-alpha'
+
+local getVersion = require 'modules.get-version'
+M.version = getVersion()
 
 return M

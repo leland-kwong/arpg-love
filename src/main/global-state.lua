@@ -3,6 +3,15 @@ local sceneManager = require 'scene.manager'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local CreateStore = require 'components.state.state'
+local Lru = require 'utils.lru'
+
+local function newStateStorage()
+  return Lru.new(100)
+end
+
+Component.newGroup({
+  name = 'mapStateSerializers'
+})
 
 local globalState = {
   activeScene = nil,
@@ -10,13 +19,12 @@ local globalState = {
   sceneStack = sceneManager,
   gameState = CreateStore(),
   stateSnapshot = {
-    serializedState = nil,
-    serializeAll = function(self)
+    serializedStateByMapId = newStateStorage(),
+    serializeAll = function(self, mapId)
       local statesByClass = {}
       local collisionGroups = require 'modules.collision-groups'
       local f = require 'utils.functional'
       local classesToMatch = collisionGroups.create(
-        collisionGroups.ai,
         collisionGroups.floorItem,
         collisionGroups.mainMap,
         collisionGroups.environment,
@@ -35,6 +43,12 @@ local globalState = {
         return components
       end, {})
 
+      for _,entity in pairs(Component.groups.mapStateSerializers.getAll()) do
+        assert(entity.class ~= nil, 'class is required')
+        assert(type(entity.serialize) == 'function', 'serialize function is required')
+        components[entity:getId()] = entity
+      end
+
       -- serialize states
       for _,c in pairs(components) do
         local list = statesByClass[c.class]
@@ -48,22 +62,23 @@ local globalState = {
         })
       end
 
-      self.serializedState = setmetatable(statesByClass, {
+      self.serializedStateByMapId:set(mapId, setmetatable(statesByClass, {
         __index = function()
           return {}
         end
-      })
+      }))
     end,
-    consumeSnapshot = function(self)
-      local serialized = self.serializedState
-      self.serializedState = nil
-      return serialized
+    consumeSnapshot = function(self, mapId)
+      return self.serializedStateByMapId:get(mapId)
+    end,
+    clearAll = function(self)
+      self.serializedStateByMapId = newStateStorage()
     end
   }
 }
 
 msgBus.on(msgBus.NEW_GAME, function()
-  globalState.stateSnapshot:consumeSnapshot()
+  globalState.stateSnapshot:clearAll()
 end, 1)
 
 return globalState

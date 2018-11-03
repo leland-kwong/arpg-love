@@ -35,22 +35,8 @@ local function toggleConsole()
   })
 end
 
-local function togglePerformanceProfiler()
-  local enabled = not config.performanceProfile
-
-  if (not enabled) then
-    local profile = require 'modules.profile'
-    profile.write('prof.mpack')
-  end
-
-  msgBus.send(msgBus.SET_CONFIG, {
-    performanceProfile = enabled
-  })
-end
-
 local keyActions = setmetatable({
   o = toggleCollisionDebug,
-  p = togglePerformanceProfiler,
   c = toggleConsole,
 }, {
   __index = function()
@@ -73,6 +59,7 @@ end)
 
 local Console = {
   name = 'Console',
+  resetMaxEveryNumFrames = 60,
   stats = {
     accumulatedMemoryUsed = 0,
     currentMemoryUsed = 0,
@@ -124,9 +111,11 @@ consoleLog = Console.debug
 function Console.init(self)
   Component.addToGroup(self, groups.system)
   local perf = require 'utils.perf'
+  self.msgCountPerFrame = 0
   msgBus.send = perf({
     done = function(_, totalTime, callCount)
       self.msgBusAverageTime = totalTime/callCount
+      self.msgCountPerFrame = self.msgCountPerFrame + 1
     end
   })(msgBus.send)
 end
@@ -155,6 +144,8 @@ local function calcMessageBusHandlers()
   return handlersByTypeCount
 end
 
+local maxGraphicStats = {}
+
 function Console.draw(self)
   love.graphics.setFont(font)
   local charHeight = font:getLineHeight() * font:getHeight()
@@ -181,9 +172,21 @@ function Console.draw(self)
   gfx.setColor(Color.MED_GRAY)
   gfx.print('GRAPHICS', edgeOffset, startY)
   gfx.setColor(Color.WHITE)
+
   -- print out each stat on its own line
+  local shouldResetMaxStats = (self.stats.frameCount % self.resetMaxEveryNumFrames) == 0
+  if shouldResetMaxStats then
+    maxGraphicStats = {}
+  end
+
+  local nextStats = {}
+  local gfxStats = gfx.getStats()
+  for k,v in pairs(gfxStats) do
+    nextStats[k] = v .. ' '.. (maxGraphicStats[k] or 0)
+    maxGraphicStats[k] = math.max(maxGraphicStats[k] or 0, v)
+  end
   printTable(
-    gfx.getStats(),
+    nextStats,
     charHeight,
     edgeOffset,
     startY + charHeight
@@ -207,7 +210,9 @@ function Console.draw(self)
   gfx.printf(
     {
       Color.WHITE,
-      'msgBus '..string.format('%0.3f', self.msgBusAverageTime),
+      'msgBus avgTime: '..string.format('%0.3f', self.msgBusAverageTime),
+      Color.WHITE,
+      '\nmsgBus send count: '..self.msgCountPerFrame,
       Color.WHITE,
       '\ninput context: ',
       Color.YELLOW,
@@ -218,6 +223,7 @@ function Console.draw(self)
     400,
     'left'
   )
+  self.msgCountPerFrame = 0
 
   local logEntries = logger:get()
   gfx.setColor(Color.MED_GRAY)

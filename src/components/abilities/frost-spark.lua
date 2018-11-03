@@ -16,7 +16,6 @@ local colMap = collisionWorlds.map
 
 local defaultFilters = {
   obstacle = true,
-  obstacle2 = true,
 }
 
 local ColFilter = memoize(function(groupToMatch)
@@ -53,6 +52,8 @@ local FrostSpark = {
   color = Color.WHITE,
 
   init = function(self)
+    Component.addToGroup(self, 'gameWorld')
+
     assert(
       type(self.targetGroup) == 'string' and self.targetGroup ~= nil,
       '[FrostSpark] `targetGroup` is required'
@@ -76,6 +77,9 @@ local FrostSpark = {
 
   update = function(self, dt)
     self.lifeTime = self.lifeTime - dt
+
+    local lw = Component.get('lightWorld')
+    lw:addLight(self.x, self.y, 5)
 
     local dx = self.direction.x * dt * self.speed
     local dy = self.direction.y * dt * self.speed
@@ -106,6 +110,7 @@ local FrostSpark = {
             msgBus.send(msgBus.CHARACTER_HIT, {
               parent = col.other.parent,
               damage = random(self.minDamage, self.maxDamage),
+              source = self:getId()
             })
             self.hits = self.hits + 1
           end
@@ -163,8 +168,8 @@ local FrostSpark = {
 }
 
 FrostSpark.drawOrder = function(self)
-  local order = self.group:drawOrder(self) + 2
-  return order
+  local drawOrders = require 'modules.draw-orders'
+  return drawOrders.FrostSparkDraw
 end
 
 return Component.createFactory(FrostSpark)

@@ -78,10 +78,11 @@ local Fissure = Component.createFactory(
 			local finalX = self.x + self.dx * shockWaveDistance
 			local finalY = self.y + self.dy * shockWaveDistance
 			self.collision:move(finalX, finalY, function(item, other)
-				if collisionGroups.matches(other.group, collisionGroups.create(collisionGroups.ai, collisionGroups.environment)) then
+				if collisionGroups.matches(other.group, collisionGroups.create(collisionGroups.enemyAi, collisionGroups.environment)) then
 					msgBus.send(msgBus.CHARACTER_HIT, {
 						parent =  other.parent,
-						damage = calcDamage(self)
+						damage = calcDamage(self),
+						source = self:getId()
 					})
 					return 'touch'
 				end
@@ -129,12 +130,19 @@ local Fissure = Component.createFactory(
 return itemSystem.registerModule({
   name = 'upgrade-shock-wave',
   type = itemSystem.moduleTypes.MODIFIERS,
-  active = function(item, props)
+	active = function(item, props)
+		local itemId = item.__id
     local itemState = itemSystem.getState(item)
     msgBus.on(msgBus.PLAYER_WEAPON_ATTACK, function(msg)
       if (not itemState.equipped) then
         return msgBus.CLEANUP
-      end
+			end
+
+			if (msg.source ~= itemId) or
+        (props.experienceRequired > item.experience) then
+          return
+			end
+
       Fissure.create({
 				minDamage = props.minDamage,
 				maxDamage = props.maxDamage,
@@ -143,12 +151,6 @@ return itemSystem.registerModule({
         x2 = msg.targetPos.x,
         y2 = msg.targetPos.y,
       })
-    end, nil, function(msg)
-      return (not itemState.equipped)
-        or (
-					(item.experience >= props.experienceRequired) and
-					msg.source == item.__id
-				)
     end)
 	end,
 	tooltip = function(_, props)

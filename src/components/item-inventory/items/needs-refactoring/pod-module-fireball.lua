@@ -119,7 +119,7 @@ return itemSystem.registerType({
 			local upgrades = definition.upgrades
 
 			local listeners = {
-				msgBus.on(msgBus.ENTITY_DESTROYED, function()
+				msgBus.on(msgBus.ENEMY_DESTROYED, function()
 					onEnemyDestroyedIncreaseDamage(self)
 				end)
 			}
@@ -188,7 +188,7 @@ return itemSystem.registerType({
 							width * 2,
 							height * 2,
 							function(item)
-								if collisionGroups.matches(item.group, collisionGroups.create(collisionGroups.ai, collisionGroups.environment)) then
+								if collisionGroups.matches(item.group, collisionGroups.create(collisionGroups.enemyAi, collisionGroups.environment)) then
 									msgBus.send(msgBus.CHARACTER_HIT, {
 										parent = item.parent,
 										damage = math.random(

@@ -18,7 +18,6 @@ local maxLifeTime = 2
 
 local filters = {
   obstacle = true,
-  obstacle2 = true,
   ai = true
 }
 local function colFilter(item, other)
@@ -29,7 +28,7 @@ local function colFilter(item, other)
 end
 
 local function impactCollisionFilter(item)
-  if collisionGroups.matches(item.group, collisionGroups.create(collisionGroups.ai, collisionGroups.environment)) then
+  if collisionGroups.matches(item.group, collisionGroups.create(collisionGroups.enemyAi, collisionGroups.environment)) then
     return true
   end
   return false
@@ -88,7 +87,8 @@ local function handleImpact(self)
     local it = items[i]
     msgBus.send(msgBus.CHARACTER_HIT, self.onHit(self, {
       parent = it.parent,
-      damage = math.random(self.minDamage, self.maxDamage)
+      damage = math.random(self.minDamage, self.maxDamage),
+      source = self:getId()
     }))
   end
 
@@ -146,7 +146,7 @@ local Fireball = {
       if hasCollisions then
         for i=1, len do
           local col = cols[i]
-          if collisionGroups.matches(col.other.group, collisionGroups.ai) then
+          if collisionGroups.matches(col.other.group, collisionGroups.enemyAi) then
             handleImpact(self)
           end
         end

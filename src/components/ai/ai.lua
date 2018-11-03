@@ -4,7 +4,6 @@ local animationFactory = require 'components.animation-factory'
 local msgBus = require 'components.msg-bus'
 local getAdjacentWalkablePosition = require 'modules.get-adjacent-open-position'
 local collisionObject = require 'modules.collision'
-local uid = require'utils.uid'
 local tween = require 'modules.tween'
 local socket = require 'socket'
 local distOfLine = require'utils.math'.dist
@@ -23,7 +22,8 @@ local setElectricShockShader = require 'modules.shaders.shader-electric-shock'
 local Enum = require 'utils.enum'
 local collisionGroups = require 'modules.collision-groups'
 local Console = require 'modules.console.console'
-local jprof = require 'modules.profile'
+local Object = require 'utils.object-utils'
+local BaseStatModifiers = require 'components.state.base-stat-modifiers'
 
 local max, random, abs, min = math.max, math.random, math.abs, math.min
 
@@ -39,26 +39,20 @@ local states = Enum({
   'FREE_MOVING'
 })
 
-local Ai = {
-  class = collisionGroups.ai,
-
-  baseProps = {}, -- initial properties used to create the ai
+local Ai = Object.extend(BaseStatModifiers(), {
+  class = collisionGroups.enemyAi,
 
   state = states.IDLE,
   attackRecoveryTime = 0,
 
   -- calculated base properties (properties that can be changed from external modifiers)
   silenced = false,
+  invulnerable = false,
   moveSpeed = 100,
   attackRange = 8, -- distance in grid units from the player that the ai will stop moving
-  sightRadius = 11,
-  lightRadius = 100,
-  armor = 0,
-  flatPhysicalReduction = 0,
-  lightningResist = 0,
+  sightRadius = 14,
+  lightRadius = 10,
   maxHealth = 10,
-  healthRegeneration = 0,
-  damage = 0,
 
   experience = 1, -- amount of experience the ai grants when destroyed
 
@@ -79,7 +73,7 @@ local Ai = {
   burning = 0,
   cold = 0,
 
-  isAggravated = false,
+  isAggravated = false, -- gets triggered whenever the ai is hit by anything
   gridSize = 1,
   fillColor = {1,1,1,1},
   opacity = 1,
@@ -92,11 +86,8 @@ local Ai = {
   drawOrder = function(self)
     return Component.groups.all:drawOrder(self) + 1
   end
-}
+})
 
-local function neighborFilter(item)
-  return collisionGroups.matches(item.group, 'ai')
-end
 local function getNeighbors(agent, neighborOffset)
 	local b = agent
 	return agent.collision.world:queryRect(
@@ -104,7 +95,7 @@ local function getNeighbors(agent, neighborOffset)
 		b.y - neighborOffset/2,
 		b.w + neighborOffset,
     b.h + neighborOffset,
-    neighborFilter
+    agent.neighborFilter
 	)
 end
 
@@ -123,24 +114,14 @@ function Ai:checkLineOfSight(grid, WALKABLE, targetX, targetY, debug)
   )
 end
 
-local COLLISION_SLIDE = 'slide'
-local collisionFilters = collisionGroups.create(
-  'player',
-  'ai',
-  'obstacle'
-)
-local function collisionFilter(item, other)
-  if collisionGroups.matches(other.group, collisionFilters) then
-    return COLLISION_SLIDE
-  end
-  return false
-end
-
-local function spreadAggroToAllies(neighbors)
+local function spreadAggroToAllies(sourceId, neighbors)
   for i=1, #neighbors do
     local ai = neighbors[i].parent
     if (not ai.isAggravated) then
-      local message = {parent = ai}
+      local message = {
+        parent = ai,
+        source = sourceId
+      }
       msgBus.send(msgBus.CHARACTER_HIT, message)
     end
   end
@@ -148,12 +129,12 @@ end
 
 local function handleAggro(self)
   local previouslyAggravated = self.isAggravated
-  local hasHits = self.hitCount > 0
+  local hasHits = (self.hitCount or 0) > 0
   if hasHits then
     self.isAggravated = true
     if (not previouslyAggravated) then
       self.neighbors = getNeighbors(self, 10)
-      spreadAggroToAllies(self.neighbors)
+      spreadAggroToAllies(self:getId(), self.neighbors)
       -- put a short delay before setting `isAggravated` to false to prevent aggro spreading to cascade infinitely
       local tick = require 'utils.tick'
       tick.delay(function()
@@ -248,6 +229,18 @@ local function computeObstacleInfluence(self)
 	return sepX/dist, sepY/dist
 end
 
+local function collidesWithPlayer(self, nextX, nextY)
+  local collisionWorlds = require 'components.collision-worlds'
+  local threshold = 2 -- minimum distance between player and ai collision objects
+  local _, len = collisionWorlds.player:queryRect(
+    nextX - self.collision.ox - threshold,
+    nextY - self.collision.oy - threshold,
+    self.w + threshold * 2,
+    self.h + threshold * 2
+  )
+  return len > 0
+end
+
 local function setNextPosition(self, speed, radius)
   local finiteState = self:getFiniteState()
   if (finiteState ~= states.MOVING) and (finiteState ~= states.FREE_MOVING) then
@@ -295,9 +288,14 @@ local function setNextPosition(self, speed, radius)
 	self.vy = (self.vy + normVy) * 0.5
 
   -- Apply direction with speed and our damping based on the target distance
-	self.x = self.x + self.vx * speed * targetDistDamping
-  self.y = self.y + self.vy * speed * targetDistDamping
-  self.collision:update(self.x, self.y)
+	local nextX = self.x + self.vx * speed * targetDistDamping
+  local nextY = self.y + self.vy * speed * targetDistDamping
+
+  if not collidesWithPlayer(self, nextX, nextY) then
+    self.collision:update(nextX, nextY)
+    self.x = nextX
+    self.y = nextY
+  end
 
   local Vec2 = require 'modules.brinevector'
   self.prevX, self.prevY = self.prevX or 0, self.prevY or 0
@@ -311,7 +309,7 @@ function Ai.getFiniteState(self)
     return states.FREE_MOVING
   end
 
-  if self.attackRecoveryTime > 0 then
+  if self.isAbilityRecovering then
     return states.ATTACKING
   end
 
@@ -328,12 +326,14 @@ end
 
 local function createLight(self)
   if self.lightRadius then
-    local lightWorld = Component.get('MAIN_SCENE').lightWorld
+    local lightWorld = Component.get('lightWorld')
+    local lightColor = self.lightColor or self.rarityColor
     lightWorld:addLight(
       self.x,
       self.y,
-      10,
-      self.rarityColor
+      self.lightRadius,
+      lightColor,
+      self.opacity
     )
   end
 end
@@ -343,6 +343,8 @@ function Ai.update(self, dt)
     return
   end
 
+  -- reset list of neighbors each frame
+  self.neighbors = nil
   handleAggro(self)
 
   local isIdle = (self:getFiniteState() ~= states.MOVING) and (not self.isInViewOfPlayer) and (not self.isAggravated)
@@ -368,21 +370,20 @@ function Ai.update(self, dt)
     end
   end
 
-  createLight(self)
-
   local playerRef = Component.get('PLAYER') or Component.get('TEST_PLAYER')
   local playerX, playerY = playerRef:getPosition()
 
   local grid = self.grid
   self.clock = self.clock + dt
   self.frameCount = self.frameCount + 1
-  self.attackRecoveryTime = self.attackRecoveryTime - dt
 
   if self.onUpdateStart then
     self.onUpdateStart(self, dt)
   end
 
   local targetX, targetY
+  local extraSightRadiusFromAggro = (self.isAggravated and 20 or 0) * self.gridSize
+  local actualSightRadius = self:getCalculatedStat('sightRadius') * self.gridSize + extraSightRadiusFromAggro
 
   if (self.isInViewOfPlayer or self.isAggravated) then
     -- update ai facing direction
@@ -403,14 +404,13 @@ function Ai.update(self, dt)
     targetX, targetY = self.findNearestTarget(
       self.x,
       self.y,
-      40 * self.gridSize
+      actualSightRadius
     )
 
-    self.animation:update(dt / 12)
+    self.animation:update(dt)
   end
 
-  local actualSightRadius = self:getCalculatedStat('sightRadius')
-  local canSeeTarget = self.isInViewOfPlayer and self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY, self.losDebug)
+  local canSeeTarget = self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY, self.losDebug)
   local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
   local isInAggroRange = gridDistFromPlayer <= (actualSightRadius / self.gridSize)
   local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or 99999
@@ -420,44 +420,48 @@ function Ai.update(self, dt)
   self.canSeeTarget = canSeeTarget
 
   if canSeeTarget and (isInAggroRange or self.isAggravated) then
-    local path
-    local gridX, gridY = self.pxToGridUnits(self.x, self.y, self.gridSize)
     self.targetX, self.targetY = targetX, targetY
+  end
 
-    -- use abilities
+  -- use abilities
+  self.isAbilityRecovering = false
+  local abilities = self.abilities
+  for i=1, #abilities do
+    local ability = abilities[i]
     if (not self.silenced) then
-      local abilities = self.abilities
-      for i=1, #abilities do
-        local ability = abilities[i]
-        -- local isInAbilityRange = distFromTarget <= ability.range * self.gridSize
-        local isRecoveringFromAttack = self.attackRecoveryTime > 0
-        local finiteState = self:getFiniteState()
-        local canUseAbility = (not isRecoveringFromAttack)
-          and (finiteState == states.MOVING)
-        ability:update(self, dt)
-        if canUseAbility then
-          -- execute ability and get new attack recovery time
-          local recoveryTime = ability:use(self, targetX, targetY, distFromTarget)
-          self.attackRecoveryTime = recoveryTime
-        end
+      local canUseAbility = (not self.isAbilityRecovering)
+        and (self:getFiniteState() == states.MOVING)
+      ability:update(self, dt)
+      if canUseAbility then
+        -- execute ability and get new attack recovery time
+        ability:use(self, targetX, targetY, distFromTarget)
       end
     end
-
-    self.isInAttackRange = isInAttackRange
-    local isTargetStillAtLastKnownPosition = self.targetX == targetX and self.targetY == targetY
-    if isInAttackRange and isTargetStillAtLastKnownPosition then
-      -- we're already in attack range, so we can stop the update here since the rest of the update is just moving
-      return
+    -- we must check for this after using the ability so the recovery state is set
+    -- for the next ability
+    if ability.isRecovering then
+      self.isAbilityRecovering = true
     end
   end
-  if self.targetX and (self:getFiniteState() ~= states.ATTACKING) then
+
+  self.isInAttackRange = isInAttackRange
+  local isTargetStillAtLastKnownPosition = self.targetX == targetX and self.targetY == targetY
+  if isInAttackRange and isTargetStillAtLastKnownPosition then
+    -- we're already in attack range, so we can stop the update here since the rest of the update is just moving
+    return
+  end
+
+  local hasTarget = not not self.targetX
+  if hasTarget and (self:getFiniteState() ~= states.ATTACKING) then
     setNextPosition(self, self:getActualSpeed(dt), 40)
   end
 
   local nextX, nextY = self.x, self.y
 
-  local isMoving = originalX ~= nextX or originalY ~= nextY
-  self.animation = isMoving and self.animations.moving or self.animations.idle
+  if (self:getFiniteState() ~= states.ATTACKING) then
+    local isMoving = originalX ~= nextX or originalY ~= nextY
+    self.animation = isMoving and self.animations.moving or self.animations.idle
+  end
 end
 
 local perf = require'utils.perf'
@@ -478,54 +482,44 @@ local function drawShadow(self, h, w, ox, oy)
     animationFactory.atlas,
     self.animation.sprite,
     self.x,
-    self.y + (h * self.scale / 1.3),
+    self.y + (h * self.scale / 1.5),
     0,
-    self.scale*0.9 * self.facingDirectionX - heightScaleDiff,
+    self.scale*0.8 * self.facingDirectionX - heightScaleDiff,
     -self.scale/2 + heightScaleDiff,
     ox,
     oy
   )
 end
 
-local function getStatusIcons()
-  local iconAnimations = {}
-  for spriteName,_ in pairs(animationFactory.frameData) do
-    if string.find(spriteName, '^status-') then
-      local animation = animationFactory:new({ spriteName })
-      iconAnimations[spriteName] = animation
-    end
-  end
-  return iconAnimations
-end
-local statusIconAnimations = getStatusIcons()
+
 local function drawStatusEffects(self, statusIcons)
   local offsetX = 0
   local iconSize = 20
   for hitId,hit in pairs(self.hitData) do
-    if hit.statusIcon then
-      love.graphics.draw(
-        animationFactory.atlas,
-        statusIconAnimations[hit.statusIcon].sprite,
-        self.x + offsetX,
-        self.y - 20 - self.z
-      )
+    local icon = hit.statusIcon
+    if icon then
+      local x, y = self.x + offsetX,
+          self.y - 20 - self.z
+      Component.get('statusIcons'):addIcon(icon, x, y)
+      -- offset the next icon to be rendered
       offsetX = offsetX + iconSize
     end
   end
 end
 
 function drawSprite(self, ox, oy)
+  local round = require 'utils.math'.round
   local atlas = animationFactory.atlas
   love.graphics.draw(
     atlas,
     self.animation.sprite,
-    self.x,
-    self.y - self.z,
+    round(self.x),
+    round(self.y - self.z),
     0,
     self.scale * self.facingDirectionX,
     self.scale,
-    ox,
-    oy
+    round(ox),
+    round(oy)
   )
 end
 
@@ -567,6 +561,8 @@ end
 function Ai.draw(self)
   debugLineOfSight(self)
 
+  createLight(self)
+
   local oBlendMode = love.graphics.getBlendMode()
   local ox, oy = self.animation:getOffset()
   local w, h = self.animation:getSourceSize()
@@ -605,7 +601,7 @@ end
 
 local function adjustInitialPositionIfNeeded(self)
   -- check initial position and move if necessary
-  local actualX, actualY = self.collision:move(self.collision.x, self.collision.y, collisionFilter)
+  local actualX, actualY = self.collision:move(self.collision.x, self.collision.y, self.collisionFilter)
   self.x = actualX
   self.y = actualY
 end
@@ -630,7 +626,23 @@ function Ai.init(self)
   Component.addToGroup(self, groups.all)
   Component.addToGroup(self, groups.character)
   Component.addToGroup(self, 'disabled')
+  Component.addToGroup(self, 'mapStateSerializers')
+  Component.addToGroup(self, 'autoVisibility')
   self.onDamageTaken = require 'modules.handle-damage-taken'
+  self.neighborFilter = function(item)
+    return collisionGroups.matches(item.group, self.class)
+  end
+  self.collisionFilter = function(item, other)
+    local collisionFilters = collisionGroups.create(
+      'player',
+      self.class,
+      'obstacle'
+    )
+    if collisionGroups.matches(other.group, collisionFilters) then
+      return 'slide'
+    end
+    return false
+  end
 
   -- [[ BASE PROPERTIES ]]
   self.health = self.health or self.maxHealth
@@ -662,21 +674,9 @@ function Ai.init(self)
 
   setupAbilities(self)
 
-  if scale % 1 == 0 then
-    -- to prevent wall collision from getting stuck when pathing around corners, we'll adjust
-    -- the agent size so its slightly smaller than the grid size.
-    scale = scale - (2 / gridSize)
-  end
-
-  local scale = scale or 1
-  local size = gridSize * scale
-  if self.scale % 1 == 0 then
-    self.scale = self.scale - 0.1
-  end
-
-  local ox, oy = self.animation:getOffset()
+  local ox, oy = self.animation:getSourceOffset()
   self.collision = self:addCollisionObject(
-      collisionGroups.ai,
+      self.class,
       self.x,
       self.y,
       self.w * self.scale,
@@ -688,7 +688,6 @@ function Ai.init(self)
   adjustInitialPositionIfNeeded(self)
 
   self.attackRange = self.attackRange * self.gridSize
-  self.sightRadius = self.sightRadius * self.gridSize
   self.getPathWithAstar = Perf({
     enabled = false,
     done = function(_, totalTime, callCount)

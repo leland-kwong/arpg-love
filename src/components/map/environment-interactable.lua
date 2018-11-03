@@ -30,7 +30,9 @@ local generateTreasureCacheStyle = setupChanceFunction(f.reduce({
   return list
 end, {}))
 
-local EnvironmentInteractable = {
+local BaseStatModifiers = require'components.state.base-stat-modifiers'
+local extend = require 'utils.object-utils'.extend
+local EnvironmentInteractable = extend(BaseStatModifiers(), {
   -- debug = true,
   group = groups.all,
   itemLevel = 0,
@@ -38,7 +40,7 @@ local EnvironmentInteractable = {
   experience = 0,
   opacity = 1,
   state = states.IDLE
-}
+})
 
 local function hitAnimation()
   local frame = 0
@@ -50,8 +52,31 @@ local function hitAnimation()
   coroutine.yield(true)
 end
 
+msgBus.on(msgBus.CHARACTER_HIT, function(msgValue)
+  local component = msgValue.parent
+  if Component.getBlueprint(msgValue.parent) == EnvironmentInteractable then
+    component.hitAnimation = coroutine.wrap(hitAnimation)
+
+    local source = love.audio.newSource('built/sounds/attack-impact-1.wav', 'static')
+    source:setVolume(0.4)
+    love.audio.play(source)
+  end
+end)
+
+msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
+  local component = msgValue.parent
+  if Component.getBlueprint(msgValue.parent) == EnvironmentInteractable then
+    local source = love.audio.newSource(
+      'built/sounds/treasure-cache-demolish.wav',
+      'static'
+    )
+    love.audio.play(source)
+  end
+end)
+
 function EnvironmentInteractable.init(self)
   Component.addToGroup(self, groups.character)
+  Component.addToGroup(self, 'autoVisibility')
   self.onDamageTaken = onDamageTaken
   self.health = self.maxHealth
 
@@ -73,27 +98,6 @@ function EnvironmentInteractable.init(self)
     0,
     -offsetY
   ):addToWorld(collisionWorlds.map)
-  self.listeners = {
-    msgBus.on(msgBus.CHARACTER_HIT, function(msgValue)
-      if msgValue.parent == self then
-        self.hitAnimation = coroutine.wrap(hitAnimation)
-
-        local source = love.audio.newSource('built/sounds/attack-impact-1.wav', 'static')
-        source:setVolume(0.4)
-        love.audio.play(source)
-      end
-    end),
-
-    msgBus.on(msgBus.ENTITY_DESTROYED, function(msgValue)
-      if msgValue.parent == self then
-        local source = love.audio.newSource(
-          'built/sounds/treasure-cache-demolish.wav',
-          'static'
-        )
-        love.audio.play(source)
-      end
-    end)
-  }
 end
 
 function EnvironmentInteractable.update(self, dt)
@@ -143,10 +147,6 @@ function EnvironmentInteractable.draw(self)
   if self.state == states.HIT then
     love.graphics.setBlendMode(oBlendMode)
   end
-end
-
-function EnvironmentInteractable.final(self)
-  msgBus.off(self.listeners)
 end
 
 return Component.createFactory(EnvironmentInteractable)

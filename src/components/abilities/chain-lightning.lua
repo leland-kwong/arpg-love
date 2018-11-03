@@ -20,7 +20,6 @@ local colMap = collisionWorlds.map
 
 local defaultFilters = {
   obstacle = true,
-  obstacle2 = true,
 }
 
 local ColFilter = memoize(function(groupToMatch)
@@ -173,7 +172,8 @@ ChainLightning.init = function(self)
         if currentTarget.isComponent then
           msgBus.send(msgBus.CHARACTER_HIT, {
             parent = currentTarget,
-            damage = math.random(self.minDamage, self.maxDamage)
+            damage = math.random(self.minDamage, self.maxDamage),
+            source = self:getId()
           })
         end
         previousTarget = currentTarget

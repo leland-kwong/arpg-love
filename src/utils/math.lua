@@ -33,4 +33,11 @@ function math_utils.clamp(v, a, b)
 	return v
 end
 
+function math_utils.sign(v)
+	if v == 0 then
+		return 0
+	end
+	return v > 0 and 1 or -1
+end
+
 return math_utils

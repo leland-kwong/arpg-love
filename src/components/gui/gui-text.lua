@@ -28,7 +28,7 @@ local GuiTextLayer = {
   -- statics
   getTextSize = function(text, font, wrapLimit, alignMode)
     local textForMeasuring = getTextForMeasuring(font)
-    if type(text) == 'table' then
+    if (type(text) == 'table' or wrapLimit) then
       textForMeasuring:setf(
         text,
         wrapLimit or 99999,

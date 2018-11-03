@@ -2,6 +2,7 @@
 -- require 'lua_modules.strict'
 
 require 'components.run'
+require 'main.globals'
 
 -- NOTE: this is necessary for crisp pixel rendering
 love.graphics.setDefaultFilter('nearest', 'nearest')
@@ -25,7 +26,7 @@ local systemsProfiler = require 'components.profiler.component-groups'
 require 'components.groups.dungeon-test'
 require 'components.groups.game-world'
 require 'modules.file-system'
-require 'utils.time'
+local MapPointerWorld = require 'components.hud.map-pointer'
 
 local scale = config.scaleFactor
 
@@ -37,10 +38,14 @@ function love.load()
   camera
     :setSize(vw, vh)
     :setScale(scale)
+  require 'main.onload'
 
   -- console debugging
   local console = Console.create()
 
+  MapPointerWorld.create({
+    id = 'hudPointerWorld'
+  })
   RootScene.create()
 end
 
@@ -49,10 +54,8 @@ local characterSystem = msgBus.send(msgBus.PROFILE_FUNC, {
   call = require 'components.groups.character'
 })
 
-local jprof = require('modules.profile')
-
 function love.update(dt)
-  jprof.zoneStart('frame')
+  jprof.push('frame')
 
   systemsProfiler()
 
@@ -63,10 +66,13 @@ function love.update(dt)
 
   characterSystem(dt)
 
+  camera:attach()
   groups.firstLayer.updateAll(dt)
   groups.all.updateAll(dt)
   groups.overlay.updateAll(dt)
   groups.debug.updateAll(dt)
+  camera:detach()
+
   groups.hud.updateAll(dt)
   groups.gui.updateAll(dt)
   groups.system.updateAll(dt)
@@ -91,7 +97,11 @@ function love.draw()
 
   groups.system.drawAll()
 
-  jprof.zoneEnd('frame')
+  jprof.pop('frame')
+end
+
+function love.quit()
+  jprof.write('prof.mpack')
 end
 
 --[[
@@ -101,6 +111,5 @@ end
 if config.isDevelopment then
   require 'modules.test.index'
   require 'utils.test.index'
-  require 'components.loot-generator.test'
   require '_debug'
 end

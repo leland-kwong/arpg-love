@@ -56,8 +56,8 @@ function GuiList.init(self)
       'fill',
       self.x,
       self.y,
-      width,
-      height
+      self.width,
+      self.height
     )
   end
 
@@ -86,13 +86,21 @@ function GuiList.init(self)
     x = self.x,
     y = self.y,
     inputContext = self.inputContext,
-    w = width,
-    h = height,
+    w = 1,
+    h = 1,
     type = Gui.types.LIST,
     children = children,
-    scrollHeight = (contentHeight >= height) and (contentHeight - height) or height,
-    scrollWidth = (contentWidth >= width) and (contentWidth - width) or width,
+    scrollHeight = 1,
+    scrollWidth = 1,
     scrollSpeed = 8,
+    onUpdate = function(self)
+      local width, height, contentWidth, contentHeight =
+        parent.width, parent.height, parent.contentWidth, parent.contentHeight
+      self.w = width
+      self.h = height
+      self.scrollHeight = (contentHeight >= height) and (contentHeight - height) or height
+      self.scrollWidth = (contentWidth >= width) and (contentWidth - width) or width
+    end,
     onScroll = function(self)
     end,
     render = function(self)

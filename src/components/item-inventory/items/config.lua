@@ -18,12 +18,15 @@ config.rarity = {
 	LEGENDARY = 4
 }
 
+-- weighted chance, sums up all values and determines the chance based on the ratio of the total.
 config.baseDropChance = {
-	[config.rarity.NORMAL] = 40,
+	[config.rarity.NORMAL] = 41,
 	[config.rarity.MAGICAL] = 30,
-	[config.rarity.RARE] = 18,
-	[config.rarity.EPIC] = 7,
-	[config.rarity.LEGENDARY] = 5
+	[config.rarity.RARE] = 19,
+
+	[config.rarity.EPIC] = 0, -- we have no epics right now, so this is disabled
+
+	[config.rarity.LEGENDARY] = 10
 }
 
 config.rarityColor = {
@@ -90,12 +93,12 @@ config.equipmentGuiSlotMap = {
 		equipmentCategory.POD_MODULE
 	},
 	{
-		equipmentCategory.HELMET,
-		equipmentCategory.BODY_ARMOR
+		equipmentCategory.AUGMENTATION,
+		equipmentCategory.AUGMENTATION
 	},
 	{
 		equipmentCategory.SHOES,
-		equipmentCategory.AUGMENTATION
+		equipmentCategory.BODY_ARMOR,
 	},
 	{
 		consumableCategory.CONSUMABLE,
@@ -103,23 +106,17 @@ config.equipmentGuiSlotMap = {
 	},
 }
 
-function config.findEquipmentSlotByCategory(category)
+function config.findEquipmentSlotsByCategory(category)
 	assert(config.category[category] ~= nil, 'invalid category '..category)
 
-	local slotX, slotY
-	local hasMatch = false
+	local validSlots = {}
 	require'utils.iterate-grid'(config.equipmentGuiSlotMap, function(v, x, y)
-		-- return the first slot that matches the category
-		if hasMatch then
-			return
-		end
-
-		hasMatch = v == category
-		if hasMatch then
-			slotX, slotY = x, y
+		local hasMatch = v == category
+		if (hasMatch) then
+			table.insert(validSlots, {x = x, y = y})
 		end
 	end)
-	return slotX, slotY
+	return validSlots
 end
 
 return config

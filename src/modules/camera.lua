@@ -11,7 +11,11 @@ local Camera = function()
     y = 0,
     w = love.graphics.getWidth(),
     h = love.graphics.getHeight(),
-    scale = 1
+    scale = 1,
+    shakeOffset = {
+      x = 0,
+      y = 0
+    }
   }
 
   local targetPosition = {x = 0, y = 0}
@@ -21,11 +25,6 @@ local Camera = function()
   local function lerp(dt, reset)
     local dist = mathUtils.dist(camera.x, camera.y, targetPosition.x, targetPosition.y)
     local actualDuration = lerpDuration
-    local isFarTransition = (dist / config.gridSize) > 50
-    if isFarTransition then
-      -- increase duration so that the screen doesn't scroll too fast, otherwise it looks too jarring
-      actualDuration = 0.5
-    end
     if reset then
       lerpTween = tween.new(actualDuration, camera, targetPosition, tween.easing.outExpo)
     end
@@ -39,6 +38,8 @@ local Camera = function()
   end
 
   function camera:setPosition(x, y, _lerpDuration)
+    local round = require 'utils.math'.round
+    x, y = round(x), round(y)
     lerpDuration = _lerpDuration or 0
     if (lerpDuration > 0) then
       targetPosition.x = x
@@ -63,6 +64,17 @@ local Camera = function()
       self.lastTargetPositionX = targetPosition.x
       self.lastTargetPositionY = targetPosition.y
       lerp(dt, hasChangedPosition)
+    end
+
+    if self.shakeComponents then
+      if (not self.shakeComponents.x.isShaking) then
+        self.shakeComponents = nil
+        return
+      end
+      self.shakeComponents.x:update(dt)
+      self.shakeComponents.y:update(dt)
+      self.shakeOffset.x = self.shakeComponents.x:amplitude()
+      self.shakeOffset.y = self.shakeComponents.y:amplitude()
     end
   end
 
@@ -111,10 +123,12 @@ local Camera = function()
     love.graphics.push()
     love.graphics.translate(self.w/2, self.h/2)
     love.graphics.scale(self.scale)
-    love.graphics.translate(
-      -self.x,
-      -self.y
-    )
+    local tx, ty = -self.x, -self.y
+    if self.shakeComponents then
+      tx = tx + (self.shakeOffset.x * self.shakeComponents.amplitude)
+      ty = ty + (self.shakeOffset.y * self.shakeComponents.amplitude)
+    end
+    love.graphics.translate(tx, ty)
     return self
   end
 
@@ -129,8 +143,24 @@ local Camera = function()
     return wx + self.x, wy + self.y
   end
 
+  function camera:toScreenCoords(x, y)
+    local width, height = self:getSize()
+    return x - self.x + width/2, y - self.y + height/2
+  end
+
   function camera:getMousePosition()
     return self:toWorldCoords(love.mouse.getPosition())
+  end
+
+  function camera:shake(duration, frequency, amplitude)
+    local Shake = require 'modules.shake'
+    self.shakeComponents = {
+      amplitude = amplitude or 1,
+      x = Shake(duration, frequency),
+      y = Shake(duration, frequency)
+    }
+    self.shakeComponents.x:start()
+    self.shakeComponents.y:start()
   end
 
   return camera

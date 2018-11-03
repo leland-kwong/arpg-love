@@ -56,7 +56,6 @@ end
 local function createStore(initialState)
 	assert((initialState == nil) or type(initialState) == 'table', 'invalid initialState')
 
-
 	local baseState = defaultState()
 	-- set a state id if one doesn't exist
 	baseState.__stateId = initialState and initialState.__stateId or 'game-'..uid()

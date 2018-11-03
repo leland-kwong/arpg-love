@@ -1,6 +1,6 @@
 local Component = require 'modules.component'
 local Color = require 'modules.color'
-local itemDefinition = require 'components.item-inventory.items.item-system'
+local itemSystem = require 'components.item-inventory.items.item-system'
 local msgBus = require 'components.msg-bus'
 local filterCall = require 'utils.filter-call'
 local noop = require 'utils.noop'
@@ -22,7 +22,7 @@ local equipmentSubscribers = {
 			if msgBus.PLAYER_STATS_NEW_MODIFIERS == msgType then
 				-- add up item properties with the new modifiers list
 				for k,v in pairs(msgValue) do
-					msgValue[k] = msgValue[k] + (item.baseModifiers[k] or 0)
+					msgValue[k] = msgValue[k] + (itemSystem.getDefinition(item).baseModifiers[k] or 0)
 				end
 				return msgValue
 			end
@@ -30,28 +30,6 @@ local equipmentSubscribers = {
 		end
 	end
 }
-
-local function triggerUpgradeMessage(item, level)
-  msgBus.send(
-    msgBus.ITEM_UPGRADE_UNLOCKED, {
-      item = item,
-      level = level
-    }
-  )
-end
-
-local function getHighestUpgradeUnlocked(upgrades, item)
-	local highestUpgradeUnlocked = 0
-	local upgradeCount = upgrades and #upgrades or 0
-	for level=1, upgradeCount do
-		local up = upgrades[level]
-		if item.experience >= up.experienceRequired then
-			highestUpgradeUnlocked = level
-			triggerUpgradeMessage(item, level)
-		end
-	end
-	return highestUpgradeUnlocked
-end
 
 msgBus.on(msgBus.EQUIPMENT_CHANGE, function()
 	local rootStore = msgBus.send(msgBus.GAME_STATE_GET)
@@ -71,44 +49,26 @@ msgBus.on(msgBus.EQUIPMENT_CHANGE, function()
 	iterateGrid(curState.equipment, filterCall(function(item, x, y)
 		-- refresh equipment by unequipping first
 		msgBus.send(msgBus.EQUIPMENT_UNEQUIP, item)
-		itemDefinition.resetState(item)
+		itemSystem.resetState(item)
 		msgBus.send(msgBus.ITEM_EQUIPPED, item)
 	end, function(item)
 		return not not item
 	end))
 
-	local BaseStatModifiers = require'components.state.base-stat-modifiers'
-	local nextModifiers = BaseStatModifiers()
-  msgBus.send(msgBus.PLAYER_STATS_NEW_MODIFIERS, nextModifiers)
+  msgBus.send(msgBus.PLAYER_STATS_NEW_MODIFIERS)
 end)
 
 msgBus.on(msgBus.ITEM_EQUIPPED, function(item)
-	local definition = itemDefinition.getDefinition(item)
-	local upgrades = definition.upgrades
-	local lastUpgradeUnlocked = getHighestUpgradeUnlocked(upgrades, item)
-	local itemState = itemDefinition.getState(item)
+	Component.addToGroup(item.__id, 'activePlayerItems', item)
+	local definition = itemSystem.getDefinition(item)
+	local itemState = itemSystem.getState(item)
 	itemState.equipped = true
-	itemDefinition.loadModules(item)
+	itemSystem:loadModules(item)
 
   itemState.listeners = {
-    msgBus.on(msgBus.ENTITY_DESTROYED, function(v)
-      item.experience = item.experience + v.experience
-      local nextUpgradeLevel = getHighestUpgradeUnlocked(upgrades, item)
-      local newUpgradeUnlocked = nextUpgradeLevel > lastUpgradeUnlocked
-      lastUpgradeUnlocked = nextUpgradeLevel
-      if newUpgradeUnlocked then
-        local itemTitle = definition.title
-        msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
-          title = itemTitle..' upgraded',
-          icon = definition.sprite,
-          description = {
-            Color.CYAN, upgrades[nextUpgradeLevel].title,
-            Color.WHITE, ' is unlocked'
-          }
-        })
-        triggerUpgradeMessage(item, nextUpgradeLevel)
-      end
-    end),
+		msgBus.on(msgBus.ENEMY_DESTROYED, function(msg)
+			item.experience = item.experience + msg.experience
+		end),
     msgBus.on(msgBus.ALL, equipmentSubscribers.staticModifiers(item), 1),
 		msgBus.on(msgBus.NEW_GAME, function()
 			msgBus.send(msgBus.EQUIPMENT_UNEQUIP, item)
@@ -119,13 +79,8 @@ msgBus.on(msgBus.ITEM_EQUIPPED, function(item)
 end)
 
 msgBus.on(msgBus.EQUIPMENT_UNEQUIP, function(item)
-	local itemState = itemDefinition.getState(item)
+	Component.removeFromGroup(item.__id, 'activePlayerItems')
+	local itemState = itemSystem.getState(item)
 	itemState.equipped = false
   msgBus.off(itemState.listeners)
 end, 1)
-
-msgBus.on(msgBus.ITEM_CHECK_UPGRADE_AVAILABILITY, function(v)
-  local item, level = v.item, v.level
-  local upgrades = itemDefinition.getDefinition(item).upgrades
-  return item.experience >= upgrades[level].experienceRequired
-end)

@@ -158,7 +158,7 @@ local function getMenuOptions(parent)
           meta.displayName..'\n',
 
           Color.LIGHT_GRAY,
-          'last saved: '..saveDateHumanized
+          'last played: '..saveDateHumanized
         },
         value = function()
           if parent.state.menuMode == menuModes.DELETE_GAME then
@@ -177,6 +177,7 @@ local function getMenuOptions(parent)
                 props = loadedState
               }
             )
+            msgBus.send(msgBus.PLAYER_FULL_HEAL)
             msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
             parent:delete(true)
           end

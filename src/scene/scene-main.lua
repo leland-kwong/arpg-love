@@ -3,7 +3,6 @@ local groups = require 'components.groups'
 local Map = require 'modules.map-generator.index'
 local Player = require 'components.player'
 local MainMap = require 'components.map.main-map'
-local SpawnerAi = require 'components.spawn.spawn-ai'
 local config = require 'config.config'
 local camera = require 'components.camera'
 local cloneGrid = require 'utils.clone-grid'
@@ -19,32 +18,6 @@ local function setupTileTypes(types)
   end
   return list
 end
-
-local backgroundTypes = {
-  starField = function()
-    local StarField = require 'components.star-field'
-    local Color = require 'modules.color'
-    local starField = StarField.create({
-      particleBaseColor = {Color.rgba255(244, 66, 217)},
-      updateRate = 30,
-      direction = 0,
-      emissionRate = 4000,
-      speed = {0}
-    }):setParent(Component.get('MAIN_SCENE'))
-    msgBus.on(msgBus.UPDATE, function()
-      if starField:isDeleted() then
-        return msgBus.CLEANUP
-      end
-      local camera = require 'components.camera'
-      local x, y = camera:getPosition()
-      starField:setPosition(
-        x * 0.5,
-        y * 0.5
-      )
-    end)
-    return starField
-  end
-}
 
 local gridTileTypes = {
   -- unwalkable
@@ -120,6 +93,9 @@ local MainScene = {
   group = groups.firstLayer,
   zoneTitle = 'Aureus',
 
+  -- a map id to restore the state from
+  mapId = nil,
+
   -- options
   isNewGame = false
 }
@@ -129,103 +105,34 @@ local cursorSize = 64
 local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', cursorSize/2, cursorSize/2)
 love.mouse.setCursor(cursor)
 
-local function initializeMap()
-  local Dungeon = require 'modules.dungeon'
-  local Chance = require 'utils.chance'
-  local mapBlockGenerator = Chance({
-    {
-      chance = 1,
-      value = 'room-1'
-    },
-    {
-      chance = 1,
-      value = 'room-2'
-    },
-    {
-      chance = 1,
-      value = 'room-4'
-    },
-    {
-      chance = 1,
-      value = 'room-5'
-    }
-  })
-
-  local function generateMapBlockDefinitions()
-    local blocks = {}
-    local mapDefinitions = {
-      function()
-        return 'room-3'
-      end,
-      mapBlockGenerator,
-      mapBlockGenerator,
-      mapBlockGenerator,
-      mapBlockGenerator,
-      mapBlockGenerator
-    }
-    while #mapDefinitions > 0 do
-      local index = math.random(1, #mapDefinitions)
-      local block = table.remove(mapDefinitions, index)()
-      table.insert(blocks, block)
+local function restoreComponentsFromState(self, serializedState)
+  local classesToRestore = {
+    'floorItem',
+    'enemyAi',
+    'environment'
+  }
+  local F = require 'utils.functional'
+  F.forEach(classesToRestore, function(class)
+    for i=1, #(serializedState[class] or {}) do
+      local item = serializedState[class][i]
+      item.blueprint.create(item.state):setParent(self)
     end
-    return blocks
-  end
-
-  local mapGrid = Dungeon.new(generateMapBlockDefinitions(), { columns = 2 })
-  return mapGrid
-end
-
-local function setupLightWorld()
-  local LightWorld = require('components.light-world')
-  local width, height = love.graphics.getDimensions()
-  local newLightWorld = LightWorld:new(width, height)
-  local ambientColor = {0.6,0.6,0.6,1}
-  newLightWorld:setAmbientColor(ambientColor)
-
-  Component.create({
-    group = groups.all,
-    update = function()
-      local cameraTranslateX, cameraTranslateY = camera:getPosition()
-      local cWidth, cHeight = camera:getSize()
-      newLightWorld:setPosition(-cameraTranslateX + cWidth/2, -cameraTranslateY + cHeight/2)
-      local playerRef = Component.get('PLAYER')
-      local tx, ty = playerRef:getPosition()
-
-      -- draw light around player
-      newLightWorld:addLight(
-        tx, ty,
-        80,
-        {1,1,1}
-      )
-    end,
-    draw = function()
-      love.graphics.push()
-      love.graphics.origin()
-      love.graphics.scale(2)
-      local jprof = require 'modules.profile'
-      newLightWorld:draw()
-      love.graphics.pop()
-    end,
-    drawOrder = function()
-      return 100 * 100
-    end
-  }):setParent(Component.get('MAIN_SCENE'))
-
-  return newLightWorld
+  end)
 end
 
 function MainScene.init(self)
-  -- self.backgroundComponent = backgroundTypes.starField()
-  local serializedState = msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:consumeSnapshot()
+  msgBus.send(msgBus.NEW_MAP)
+  Component.get('lightWorld').ambientColor = {0.6,0.6,0.6,1}
 
-  self.lightWorld = setupLightWorld()
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0,0,0,1})
 
   local rootState = msgBus.send(msgBus.GAME_STATE_GET)
   self.rootStore = rootState
   local parent = self
 
-  local mapGrid = serializedState and serializedState.mainMap[1].state or initializeMap()
+  local serializedState = msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:consumeSnapshot(self.mapId)
+  local Dungeon = require 'modules.dungeon'
+  local mapGrid = serializedState and (serializedState.mainMap and serializedState.mainMap[1].state) or Dungeon:getData(self.mapId).grid
   local gridTileDefinitions = cloneGrid(mapGrid, function(v, x, y)
     local tileGroup = gridTileTypes[v]
     if tileGroup then
@@ -236,7 +143,7 @@ function MainScene.init(self)
 
   self.listeners = {
     msgBus.on(msgBus.SCENE_STACK_PUSH, function(v)
-      msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:serializeAll()
+      msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:serializeAll(self.mapId)
     end, 1),
     -- setup default properties in case they don't exist
     msgBus.on(msgBus.CHARACTER_HIT, function(v)
@@ -244,7 +151,7 @@ function MainScene.init(self)
       return v
     end, 1),
 
-    msgBus.on(msgBus.ENTITY_DESTROYED, function(msgValue)
+    msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
       if randomItem then
         msgBus.send(msgBus.GENERATE_LOOT, {msgValue.x, msgValue.y, randomItem})
       end
@@ -253,7 +160,9 @@ function MainScene.init(self)
 
     msgBus.on(msgBus.PORTAL_OPEN, function()
       local Portal = require 'components.portal'
-      self.portal = self.portal or Portal.create()
+      self.portal = self.portal or Portal.create({
+        id = 'playerPortal'
+      })
       local playerRef = Component.get('PLAYER')
       local x, y = playerRef:getPosition()
       self.portal
@@ -272,18 +181,6 @@ function MainScene.init(self)
     end)
   }
 
-  local playerStartPos =
-    serializedState and
-    serializedState.portal[1] and
-    serializedState.portal[1].state.position or
-
-    {x = 6 * config.gridSize, y = 5 * config.gridSize}
-  local player = Player.create({
-    x = playerStartPos.x,
-    y = playerStartPos.y,
-    mapGrid = mapGrid,
-  }):setParent(parent)
-
   MainMap.create({
     camera = camera,
     grid = mapGrid,
@@ -291,82 +188,38 @@ function MainScene.init(self)
     walkable = Map.WALKABLE,
     drawOrder = function()
       return 1
-      -- return parent.backgroundComponent:drawOrder() + 1
     end
   }):setParent(parent)
 
   if serializedState then
-    -- rebuild loot from previous state
-    for i=1, #(serializedState.floorItem or {}) do
-      local item = serializedState.floorItem[i]
-      item.blueprint.create(item.state):setParent(self)
-    end
-
-    -- rebuild ai from previous state
-    for i=1, #(serializedState.ai or {}) do
-      local item = serializedState.ai[i]
-      item.blueprint.create(item.state):setParent(self)
-    end
-
-    -- rebuild treasure environment objects from previous state
-    for i=1, #(serializedState.environment) do
-      local item = serializedState.environment[i]
-      item.blueprint.create(item.state):setParent(self)
-    end
+    restoreComponentsFromState(self, serializedState)
   else
     Component.addToGroup(self:getId(), 'dungeonTest', self)
   end
-end
 
-local collisionGroups = require 'modules.collision-groups'
-local visibilityGroup = collisionGroups.create(
-  collisionGroups.ai,
-  collisionGroups.environment
-)
-local activeEntities = {}
-
-local matchers = {
-  [collisionGroups.ai] = true,
-  [collisionGroups.environment] = true
-}
-
-local function visibleItemFilter(item)
-  return collisionGroups.matches(item.group, visibilityGroup)
-end
-
-local floor = math.floor
-local function toggleEntityVisibility(self)
-  local collisionWorlds = require 'components.collision-worlds'
-  local camera = require 'components.camera'
-  local threshold = config.gridSize * 2
-  local west, _, north = camera:getBounds()
-  local width, height = camera:getSize()
-  local items, len = collisionWorlds.map:queryRect(
-    west - threshold,
-    north - threshold, width + (threshold * 2),
-    height + (threshold * 2),
-    visibleItemFilter
-  )
-
-  for _,entity in pairs(activeEntities) do
-    entity.isInViewOfPlayer = false
+  local playerStartPos =
+    serializedState and
+    serializedState.portal[1] and
+    serializedState.portal[1].state.position
+  if (not playerStartPos) then
+    if self.exitId then
+      local x, y = Component.get(self.exitId):getPosition()
+      local entranceXOffset = 1 * config.gridSize
+      local entranceYOffset = 3 * config.gridSize
+      playerStartPos = {x = x + entranceXOffset, y = y + entranceYOffset}
+    else
+      local defaultStartPosition = {x = 4 * config.gridSize, y = 5 * config.gridSize}
+      playerStartPos = defaultStartPosition
+    end
   end
-  activeEntities = {}
 
-  for i=1, len do
-    local entity = items[i].parent
-    local entityId = entity:getId()
-    entity.isInViewOfPlayer = true
-    activeEntities[entityId] = entity
-  end
+  local player = Player.create({
+    x = playerStartPos.x,
+    y = playerStartPos.y,
+    mapGrid = mapGrid,
+  }):setParent(parent)
 end
 
-function MainScene.update(self)
-  local jprof = require 'modules.profile'
-  jprof.push('toggleEntityVisibility')
-  toggleEntityVisibility(self)
-  jprof.pop('toggleEntityVisibility')
-end
 
 local perf = require'utils.perf'
 MainScene.update = perf({

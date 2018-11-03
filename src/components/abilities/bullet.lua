@@ -12,13 +12,42 @@ local memoize = require 'utils.memoize'
 local typeCheck = require 'utils.type-check'
 local random = math.random
 local collisionGroups = require 'modules.collision-groups'
+local drawOrders = require 'modules.draw-orders'
+
+local oBlendMode = nil
+
+local PreDraw = Component.create({
+  init = function(self)
+    Component.addToGroup(self, 'all')
+  end,
+  draw = function()
+    oBlendMode = love.graphics.getBlendMode()
+    love.graphics.setBlendMode('add')
+  end,
+  drawOrder = function()
+    return drawOrders.BulletPreDraw
+  end
+})
+
+local PostDraw = Component.create({
+  init = function(self)
+    Component.addToGroup(self, 'all')
+  end,
+  draw = function()
+    if oBlendMode then
+      love.graphics.setBlendMode(oBlendMode)
+    end
+  end,
+  drawOrder = function()
+    return drawOrders.BulletPostDraw
+  end
+})
 
 local colMap = collisionWorlds.map
 local EMPTY = {}
 
 local defaultFilters = {
   obstacle = true,
-  obstacle2 = true,
 }
 
 local ColFilter = memoize(function(groupToMatch, targetsToIgnore)
@@ -30,6 +59,22 @@ local ColFilter = memoize(function(groupToMatch, targetsToIgnore)
     return false
   end
 end)
+
+local function drawBullet(self, scale, opacity)
+  local ox, oy = self.animation:getOffset()
+  love.graphics.setColor(Color.multiplyAlpha(self.color, opacity))
+  love.graphics.draw(
+      animationFactory.atlas
+    , self.animation.sprite
+    , self.x
+    , self.y
+    , self.angle
+    , scale
+    , scale
+    , ox
+    , oy
+  )
+end
 
 local Bullet = {
   group = groups.all,
@@ -59,6 +104,8 @@ local Bullet = {
       '[Bullet] `targetGroup` is required'
     )
 
+    Component.addToGroup(self, 'autoVisibility')
+
     local dx, dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
     self.direction = {x = dx, y = dy}
     self.x = self.x + self.startOffset * dx
@@ -70,9 +117,9 @@ local Bullet = {
     local ox, oy = self.animation:getOffset()
     self.w = w
     self.h = h
-    self.colObj = collisionObject
-      :new('projectile', self.x, self.y, w, h, ox, oy)
-      :addToWorld(collisionWorlds.map)
+    self.colObj = self:addCollisionObject(
+      'projectile', self.x, self.y, w, h, ox, oy
+    ):addToWorld(collisionWorlds.map)
   end,
 
   update = function(self, dt)
@@ -98,13 +145,20 @@ local Bullet = {
             if (not isObstacleCollision) then
               local msg = {
                 parent = collisionParent,
-                collisionItem = self,
-                source = self.source,
+                collisionSource = self.colObj,
+                source = self:getId(),
                 damage = random(self.minDamage, self.maxDamage)
               }
               msgBus.send(msgBus.CHARACTER_HIT, msg)
             end
             hitSuccess = true
+
+            local Spark = require 'components.abilities.spark'
+            Spark.create({
+              x = self.x,
+              y = self.y,
+              color = self.color
+            })
           end
         end
       end
@@ -113,10 +167,18 @@ local Bullet = {
         self:delete()
       end
     end
+
+    self.angle = self.angle + (dt * 8)
   end,
 
   draw = function(self)
-    local angle = 0
+    if (not self.isInViewOfPlayer) then
+      return
+    end
+
+    Component.get('lightWorld')
+      :addLight(self.x, self.y, 10, self.color)
+
     local ox, oy = self.animation:getOffset()
     local scale = self.scale
 
@@ -127,25 +189,19 @@ local Bullet = {
       , self.animation.sprite
       , self.x
       , self.y + self.h
-      , angle
+      , self.angle
       , scale
       , scale / 2
       , ox
       , oy
     )
 
-    love.graphics.setColor(self.color)
-    love.graphics.draw(
-        animationFactory.atlas
-      , self.animation.sprite
-      , self.x
-      , self.y
-      , angle
-      , scale
-      , scale
-      , ox
-      , oy
-    )
+    -- draw in several passes to give it a brighter blur effect
+    drawBullet(self, 1, 1)
+    drawBullet(self, 1.4, 0.5)
+    drawBullet(self, 1.8, 0.2)
+    drawBullet(self, 2.2, 0.1)
+    drawBullet(self, 3, 0.1)
 
     if config.collisionDebug then
       local debug = require 'modules.debug'
@@ -160,8 +216,7 @@ local Bullet = {
 }
 
 Bullet.drawOrder = function(self)
-  local order = self.group:drawOrder(self) + 2
-  return order
+  return drawOrders.BulletDraw
 end
 
 return Component.createFactory(Bullet)

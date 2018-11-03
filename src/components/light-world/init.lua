@@ -1,41 +1,30 @@
+local Component = require 'modules.component'
 local loadImage = require 'modules.load-image'
 local lightBlurImg = loadImage('built/images/light-blur.png')
 local imageHeight = lightBlurImg:getHeight()
 local scaleAdjustment = imageHeight / 100
-local Vec2 = require 'modules.brinevector'
+local config = require 'config.config'
+local Color = require 'modules.color'
 
 local defaultLightColor = {1,1,1}
-local defaultAmbientColor = {0.4,0.4,0.4,0.1}
 
-local LightWorld = {}
-LightWorld.__index = LightWorld
+local LightWorld = {
+  ambientColor = {1,1,1,1}
+}
 
-function LightWorld:new(width, height)
-  local canvas = love.graphics.newCanvas(width, height)
-
-  return setmetatable({
-    canvas = canvas,
-    preDrawCanvas = preDrawCanvas,
-    position = Vec2(0, 0),
-    ambientColor = defaultAmbientColor,
-    lights = {}
-  }, self)
+function LightWorld.init(self)
+  local width, height = self.width, self.height
+  self.canvas = love.graphics.newCanvas(width * 2, height)
+  self.lights = {}
 end
 
-function LightWorld:addLight(x, y, radius, color)
-  table.insert(self.lights, {x, y, radius, color})
+function LightWorld.addLight(self, x, y, radius, color, opacity)
+  table.insert(self.lights, {x, y, radius, (color or defaultLightColor), (opacity or 1)})
   return self
 end
 
-function LightWorld:setAmbientColor(color)
+function LightWorld.setAmbientColor(self, color)
   self.ambientColor = color
-
-  return self
-end
-
-function LightWorld:setPosition(x, y)
-  self.position.x = x
-  self.position.y = y
 
   return self
 end
@@ -44,17 +33,19 @@ function drawLights(self)
   local oBlendMode = love.graphics.getBlendMode()
   love.graphics.push()
   love.graphics.origin()
-  love.graphics.translate(self.position.x, self.position.y)
-  love.graphics.setBlendMode('add', 'alphamultiply')
+  love.graphics.translate(self.x, self.y)
   love.graphics.setCanvas(self.canvas)
+  love.graphics.clear(self.ambientColor)
+  love.graphics.setBlendMode('add', 'alphamultiply')
 
   for i=1, #self.lights do
     local light = self.lights[i]
-    local x, y, radius, color = light[1], light[2], light[3], light[4]
-    local lightSize = (radius * 2 * scaleAdjustment) / imageHeight
-    local offset = (radius * 2 * scaleAdjustment) / 2
+    local x, y, radius, color, opacity = light[1], light[2], light[3], light[4], light[5]
+    local diameter = radius * 2
+    local lightSize = (diameter * scaleAdjustment) / imageHeight
+    local offset = (diameter * scaleAdjustment) / config.scale
 
-    love.graphics.setColor(color or defaultLightColor)
+    love.graphics.setColor(Color.multiplyAlpha(color or defaultLightColor, opacity))
     love.graphics.draw(lightBlurImg, x - offset, y - offset, 0, lightSize, lightSize)
   end
   self.lights = {}
@@ -64,7 +55,11 @@ function drawLights(self)
   love.graphics.pop()
 end
 
-function LightWorld:draw()
+function LightWorld.draw(self)
+  love.graphics.push()
+  love.graphics.origin()
+  love.graphics.scale(config.scale)
+
   drawLights(self)
 
   local oBlendMode = love.graphics.getBlendMode()
@@ -72,14 +67,8 @@ function LightWorld:draw()
   love.graphics.setBlendMode('multiply', 'premultiplied')
   love.graphics.draw(self.canvas)
 
-  -- reset canvas
   love.graphics.setBlendMode(oBlendMode)
-  love.graphics.setCanvas(self.canvas)
-  love.graphics.setBlendMode('alpha', 'alphamultiply')
-  love.graphics.clear(self.ambientColor)
-  love.graphics.setCanvas()
-
-  return self
+  love.graphics.pop()
 end
 
-return LightWorld
+return Component.createFactory(LightWorld)
