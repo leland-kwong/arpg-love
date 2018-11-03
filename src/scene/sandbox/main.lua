@@ -231,7 +231,7 @@ function Sandbox.init(self)
         x = x,
         y = y,
         width = 150,
-        options = config.isDevelopment and sceneOptionsDebug or sceneOptionsNormal,
+        options = {},
         onSelect = function(name, value)
           value()
         end,
@@ -272,6 +272,7 @@ function Sandbox.update(self)
   else
     Component.removeFromGroup(self.activeSceneMenu, 'guiDrawBox')
   end
+  self.activeSceneMenu.options = config.isDevelopment and sceneOptionsDebug or sceneOptionsNormal
 end
 
 function Sandbox.final(self)
