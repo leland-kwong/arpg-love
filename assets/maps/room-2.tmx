@@ -175,19 +175,19 @@
  <objectgroup color="#ffff00" name="spawn-points">
   <object id="2" name="ai-group" type="aiGroup" x="443" y="473" width="53" height="53">
    <properties>
-    <property name="groupSize" type="int" value="4"/>
+    <property name="groupSize" type="int" value="3"/>
    </properties>
    <ellipse/>
   </object>
   <object id="3" name="ai-group" type="aiGroup" x="371" y="84" width="53" height="53">
    <properties>
-    <property name="groupSize" type="int" value="2"/>
+    <property name="groupSize" type="int" value="1"/>
    </properties>
    <ellipse/>
   </object>
   <object id="5" name="ai-group" type="aiGroup" x="769" y="510" width="53" height="53">
    <properties>
-    <property name="groupSize" type="int" value="4"/>
+    <property name="groupSize" type="int" value="3"/>
    </properties>
    <ellipse/>
   </object>
@@ -217,7 +217,7 @@
   </object>
   <object id="10" name="ai-group" type="aiGroup" x="641" y="1019" width="53" height="53">
    <properties>
-    <property name="groupSize" type="int" value="4"/>
+    <property name="groupSize" type="int" value="3"/>
    </properties>
    <ellipse/>
   </object>
@@ -229,7 +229,7 @@
   </object>
   <object id="13" name="ai-group" type="aiGroup" x="625" y="56" width="53" height="53">
    <properties>
-    <property name="groupSize" type="int" value="4"/>
+    <property name="groupSize" type="int" value="2"/>
    </properties>
    <ellipse/>
   </object>

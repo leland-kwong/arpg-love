@@ -316,7 +316,7 @@ local function keepBossActive()
 
   local bossDistFromPlayer = calcDist(playerRef.x, playerRef.y, bossRef.x, bossRef.y)
 
-  local showBossPointer = (bossDistFromPlayer < 80 * config.gridSize) and ((not bossRef.isInViewOfPlayer) or (not bossRef.canSeeTarget))
+  local showBossPointer = (bossDistFromPlayer < 200 * config.gridSize) and ((not bossRef.isInViewOfPlayer) or (not bossRef.canSeeTarget))
   if (showBossPointer) then
     local pointerWorld = Component.get('hudPointerWorld')
     pointerWorld:add(

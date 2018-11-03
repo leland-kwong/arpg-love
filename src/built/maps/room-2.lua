@@ -377,7 +377,7 @@ return {
           rotation = 0,
           visible = true,
           properties = {
-            ["groupSize"] = 4
+            ["groupSize"] = 3
           }
         },
         {
@@ -392,7 +392,7 @@ return {
           rotation = 0,
           visible = true,
           properties = {
-            ["groupSize"] = 2
+            ["groupSize"] = 1
           }
         },
         {
@@ -407,7 +407,7 @@ return {
           rotation = 0,
           visible = true,
           properties = {
-            ["groupSize"] = 4
+            ["groupSize"] = 3
           }
         },
         {
@@ -482,7 +482,7 @@ return {
           rotation = 0,
           visible = true,
           properties = {
-            ["groupSize"] = 4
+            ["groupSize"] = 3
           }
         },
         {
@@ -512,7 +512,7 @@ return {
           rotation = 0,
           visible = true,
           properties = {
-            ["groupSize"] = 4
+            ["groupSize"] = 2
           }
         },
         {
