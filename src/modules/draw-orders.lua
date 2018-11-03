@@ -6,6 +6,8 @@ local drawOrders = {
   'BulletPostDraw',
   'LightWorldDraw',
   'SparkDraw',
+  'MainMenu',
+  'Dialog'
 }
 
 local parsedOrders = {
@@ -18,7 +20,8 @@ local startIndex = 10000
 
 for i=1, #drawOrders do
   local key = drawOrders[i]
-  parsedOrders[key] = i + startIndex
+  local interval = 10
+  parsedOrders[key] = (i * interval) + startIndex
 end
 
 return parsedOrders

@@ -135,8 +135,8 @@ local function handleScroll(self, dx, dy)
   end
 
   self.scrollNode:setPosition(
-    self.scrollNode.initialX + self.scrollLeft,
-    self.scrollNode.initialY + self.scrollTop
+    self.scrollNode.parent.x + self.scrollLeft,
+    self.scrollNode.parent.y + self.scrollTop
   )
   self.onScroll(self)
 end
@@ -151,8 +151,6 @@ function Gui.init(self)
     self.scrollNode = GuiNode.create({
       x = self.x,
       y = self.y,
-      initialX = self.x,
-      initialY = self.y
     }):setParent(self)
   end
 

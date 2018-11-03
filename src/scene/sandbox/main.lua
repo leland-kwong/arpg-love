@@ -16,7 +16,7 @@ local function getMenuTabsPosition()
 end
 
 local drawOrder = function()
-  return 1000
+  return require 'modules.draw-orders'.MainMenu
 end
 
 local guiTextBodyLayer = GuiText.create({
