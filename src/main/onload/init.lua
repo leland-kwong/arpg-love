@@ -5,7 +5,7 @@ local camera = require 'components.camera'
 local msgBus = require 'components.msg-bus'
 require 'modules.auto-visibility'
 require 'components.status-icons'
-require 'main.onload.startup-dialog'
+require 'main.onload.news-dialog'
 
 local width, height = love.graphics.getDimensions()
 

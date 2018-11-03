@@ -140,6 +140,13 @@ local menuOptionPlayGameMenu = {
   end
 }
 
+local menuOptionNewsPanel = {
+  name = 'Latest news',
+  value = function()
+    Component.get('newsDialog'):setDisabled(false)
+  end
+}
+
 msgBus.PLAY_GAME_MENU_TOGGLE = 'PLAY_GAME_MENU_TOGGLE'
 msgBus.on(msgBus.PLAY_GAME_MENU_TOGGLE, function()
   local activeMenu = Component.get('PlayGameMenu')
@@ -163,6 +170,7 @@ local sceneOptionsNormal = {
   menuOptionPlayGameMenu,
   menuOptionSettingsMenu,
   menuOptionHomeScreen,
+  menuOptionNewsPanel,
   menuOptionQuitGame
 }
 

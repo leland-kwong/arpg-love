@@ -10,6 +10,7 @@ local GuiDialog = {
   width = 1,
   height = 1,
   padding = 0,
+  wrapLimit = 20,
   onClose = function()
   end
 }
@@ -46,6 +47,9 @@ function GuiDialog.init(self)
       love.graphics.setFont(root.font)
       love.graphics.setColor(1,1,1)
       love.graphics.printf(root.text, self.x + root.padding, self.y + root.padding, root.wrapLimit)
+    end,
+    drawOrder = function()
+      return root:drawOrder() + 1
     end
   })
   self.scrollablePanel = GuiList.create({

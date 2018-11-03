@@ -20,7 +20,7 @@ local startIndex = 10000
 
 for i=1, #drawOrders do
   local key = drawOrders[i]
-  local interval = 10
+  local interval = 100
   parsedOrders[key] = (i * interval) + startIndex
 end
 

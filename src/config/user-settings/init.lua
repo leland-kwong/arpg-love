@@ -51,5 +51,6 @@ M.sound = {
 }
 
 M.isDevelopment = false
+M.previousVersion = nil -- the last version the game was loaded as
 
 return M
