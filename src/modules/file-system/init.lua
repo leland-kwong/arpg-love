@@ -1,4 +1,10 @@
 --[[
+  NOTE: On certain situations, loading a file more than once can cause the game to lock up.
+  This issue cannot be reliably replicated. One solution that seems to have worked well is to
+  cache the loaded data and not load the file again if it has been already loaded from disk.
+]]
+
+--[[
   TODO: add support for multiple fileSystem instances so that we can save to different
   subdirectories with their own save settings.
 ]]

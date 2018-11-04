@@ -1,3 +1,7 @@
+-- load up user settings on game start
+local userSettingsState = require 'config.user-settings.state'
+userSettingsState.load()
+
 local Component = require 'modules.component'
 local drawOrders = require 'modules.draw-orders'
 local LightWorld = require('components.light-world')
