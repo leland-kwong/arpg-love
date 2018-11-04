@@ -272,7 +272,9 @@ function Sandbox.update(self)
   else
     Component.removeFromGroup(self.activeSceneMenu, 'guiDrawBox')
   end
-  self.activeSceneMenu.options = config.isDevelopment and sceneOptionsDebug or sceneOptionsNormal
+  if self.activeSceneMenu then
+    self.activeSceneMenu.options = config.isDevelopment and sceneOptionsDebug or sceneOptionsNormal
+  end
 end
 
 function Sandbox.final(self)
