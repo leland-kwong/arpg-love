@@ -25,10 +25,10 @@ local Hud = {
   rootStore = {}
 }
 
-local healthManaWidth = 180
+local healthManaWidth = 63 * 2
 
 local function setupExperienceIndicator(self)
-  local w, h = 180, 6
+  local w, h = healthManaWidth, 4
   local winWidth, winHeight = love.graphics.getWidth() / scale, love.graphics.getHeight() / scale
   local offX, offY = Position.boxCenterOffset(w, h, winWidth, winHeight)
   ExperienceIndicator.create({
@@ -44,6 +44,7 @@ local function setupExperienceIndicator(self)
 end
 
 function Hud.init(self)
+  local root = self
   local mainSceneRef = Component.get('MAIN_SCENE')
   if mainSceneRef and self.minimapEnabled then
     local stateSnapshot = msgBus.send(msgBus.GLOBAL_STATE_GET)
@@ -107,27 +108,28 @@ function Hud.init(self)
   end
 
   -- health bar
-  local healthStatusBar = StatusBar.create({
+  local StatusBarFancy = require 'components.hud.status-bar-fancy'
+  local healthStatusBar = StatusBarFancy.create({
     id = 'healthStatusBar',
-    x = offX,
+    x = offX - 1,
     y = winHeight - barHeight - 13,
     w = healthManaWidth / 2,
     h = barHeight,
-    color = {Color.rgba255(209, 27, 27)},
+    color = {Color.rgba255(120, 252, 136)},
     fillPercentage = getHealthRemaining,
     drawOrder = function()
       return 2
     end
   }):setParent(self)
 
-  -- -- mana bar
-  local energyStatusBar = StatusBar.create({
-    x = offX + healthManaWidth / 2,
+  -- mana bar
+  local energyStatusBar = StatusBarFancy.create({
+    x = offX + healthManaWidth / 2 + 1,
     y = winHeight - barHeight - 13,
     w = healthManaWidth / 2,
     h = barHeight,
     fillDirection = -1,
-    color = {Color.rgba255(33, 89, 186)},
+    color = {Color.rgba255(142, 238, 255)},
     fillPercentage = getEnergyRemaining,
     drawOrder = function()
       return 2
@@ -166,7 +168,7 @@ function Hud.init(self)
   }):setParent(self)
 
   local spacing = 32
-  local endXPos = 355
+  local endXPos = healthStatusBar.x - spacing
 
   local skillSetup = {
     {

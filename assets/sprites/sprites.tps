@@ -857,6 +857,20 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/gui/gui-status-bar-fill-mask.png</key>
+            <key type="filename">custom-art/gui/gui-status-bar-outline.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,5,31,9</rect>
+                <key>scale9Paddings</key>
+                <rect>16,5,31,9</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/items/augmentation-defender.png</key>
             <key type="filename">custom-art/items/augmentation-one.png</key>
             <key type="filename">custom-art/items/augmentation-rage.png</key>
@@ -869,6 +883,19 @@
                 <rect>8,8,16,16</rect>
                 <key>scale9Paddings</key>
                 <rect>8,8,16,16</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/items/legendary-item-drop-effect-minimap.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>24,4,48,8</rect>
+                <key>scale9Paddings</key>
+                <rect>24,4,48,8</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
