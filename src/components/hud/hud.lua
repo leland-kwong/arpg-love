@@ -116,10 +116,7 @@ function Hud.init(self)
     w = healthManaWidth / 2,
     h = barHeight,
     color = {Color.rgba255(120, 252, 136)},
-    fillPercentage = getHealthRemaining,
-    drawOrder = function()
-      return 2
-    end
+    fillPercentage = getHealthRemaining
   }):setParent(self)
 
   -- mana bar
@@ -130,10 +127,7 @@ function Hud.init(self)
     h = barHeight,
     fillDirection = -1,
     color = {Color.rgba255(142, 238, 255)},
-    fillPercentage = getEnergyRemaining,
-    drawOrder = function()
-      return 2
-    end
+    fillPercentage = getEnergyRemaining
   }):setParent(self)
 
   self.listeners = {

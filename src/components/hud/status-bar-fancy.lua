@@ -5,6 +5,65 @@ local Color = require 'modules.color'
 local Position = require 'utils.position'
 local AnimationFactory = require 'components.animation-factory'
 
+Component.create({
+  init = function(self)
+    Component.addToGroup(self, 'hud')
+    self.fillStencil = function()
+      local components = Component.groups.hudStatusBarFancy.getAll()
+
+      -- setup stencils
+      for _,c in pairs(components) do
+
+        local clamp = require 'utils.math'.clamp
+        local fillPixelAmount = c.w * clamp(c.fillPercentage(), 0, 1)
+        if c.fillDirection == 1 then
+          love.graphics.rectangle('fill', c.x, c.y, fillPixelAmount, c.h)
+        else
+          local amountMissing = c.w - fillPixelAmount
+          love.graphics.rectangle('fill', c.x + amountMissing, c.y, fillPixelAmount, c.h)
+        end
+
+      end
+    end
+  end,
+  draw = function(self)
+    local group = Component.groups.hudStatusBarFancy
+    local components = group.getAll()
+
+    local outlineAnimation = AnimationFactory:newStaticSprite('gui-status-bar-outline')
+    local spriteWidth = outlineAnimation:getWidth()
+    for _,c in pairs(components) do
+      c.offsetX = c.fillDirection == -1 and spriteWidth or 0
+      love.graphics.setColor(1, 1, 1)
+      love.graphics.draw(AnimationFactory.atlas, outlineAnimation.sprite, c.x + c.offsetX, c.y, 0, c.fillDirection, 1)
+    end
+
+    love.graphics.stencil(self.fillStencil, 'replace', 1)
+    love.graphics.setStencilTest('greater', 0)
+
+    -- draw graphics
+    local fillSprite = AnimationFactory:newStaticSprite('gui-status-bar-fill-mask').sprite
+    for _,c in pairs(components) do
+      love.graphics.setColor(c.color)
+      love.graphics.draw(
+        AnimationFactory.atlas,
+        fillSprite,
+        c.x + c.fillDirection + c.offsetX,
+        c.y + 1,
+        0,
+        c.fillDirection,
+        1
+      )
+      Component.removeFromGroup(c, 'hudStatusBarFancy')
+    end
+
+    love.graphics.setStencilTest()
+  end,
+  drawOrder = function()
+    return 50
+  end
+})
+
 local StatusBarFancy = {
   group = groups.hud,
   color = {1,1,1},
@@ -14,48 +73,8 @@ local StatusBarFancy = {
   fillDirection = 1,
 }
 
-function StatusBarFancy.init(self)
-  self.fillStencil = function()
-    love.graphics.setColor(1,1,1)
-
-    local clamp = require 'utils.math'.clamp
-    local fillPixelAmount = self.w * clamp(self.fillPercentage(), 0, 1)
-    if self.fillDirection == 1 then
-      love.graphics.rectangle('fill', self.x, self.y, fillPixelAmount, self.h)
-    else
-      local amountMissing = self.w - fillPixelAmount
-      love.graphics.rectangle('fill', self.x + amountMissing, self.y, fillPixelAmount, self.h)
-    end
-  end
-end
-
-function StatusBarFancy.draw(self)
-  local outlineAnimation = AnimationFactory:newStaticSprite('gui-status-bar-outline')
-  local fillSprite = AnimationFactory:newStaticSprite('gui-status-bar-fill-mask').sprite
-
-  local spriteWidth = outlineAnimation:getWidth()
-  local offsetX = self.fillDirection == -1 and spriteWidth or 0
-
-  -- indicator outline
-  love.graphics.setColor(1, 1, 1)
-  love.graphics.draw(AnimationFactory.atlas, outlineAnimation.sprite, self.x + offsetX, self.y, 0, self.fillDirection, 1)
-
-  love.graphics.stencil(self.fillStencil, 'replace', 1)
-  love.graphics.setStencilTest('greater', 0)
-
-  -- fill bars
-  love.graphics.setColor(self.color)
-  love.graphics.draw(
-    AnimationFactory.atlas,
-    fillSprite,
-    self.x + self.fillDirection + offsetX,
-    self.y + 1,
-    0,
-    self.fillDirection,
-    1
-  )
-
-  love.graphics.setStencilTest()
+function StatusBarFancy.update(self)
+  Component.addToGroup(self, 'hudStatusBarFancy')
 end
 
 return Component.createFactory(StatusBarFancy)
