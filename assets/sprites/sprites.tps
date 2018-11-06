@@ -4,7 +4,7 @@
         <key>fileFormatVersion</key>
         <int>4</int>
         <key>texturePackerVersion</key>
-        <string>4.9.0</string>
+        <string>4.10.0</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -886,6 +886,19 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/items/companion/companion.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,4,9,8</rect>
+                <key>scale9Paddings</key>
+                <rect>5,4,9,8</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/items/legendary-item-drop-effect-minimap.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -940,34 +953,6 @@
                 <rect>6,6,12,12</rect>
                 <key>scale9Paddings</key>
                 <rect>6,6,12,12</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">custom-art/items/weapons/pods/pod-one-0.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one-1.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one-10.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one-11.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one-12.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one-13.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one-14.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one-15.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one-2.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one-3.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one-4.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one-5.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one-6.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one-7.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one-8.png</key>
-            <key type="filename">custom-art/items/weapons/pods/pod-one-9.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>5,5,11,10</rect>
-                <key>scale9Paddings</key>
-                <rect>5,5,11,10</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -1128,7 +1113,6 @@
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets</filename>
-            <filename>custom-art/items/weapons/pods</filename>
             <filename>custom-art/status-effect-icons</filename>
             <filename>custom-art/effects</filename>
             <filename>custom-art/characters</filename>

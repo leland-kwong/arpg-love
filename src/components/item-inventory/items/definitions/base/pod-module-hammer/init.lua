@@ -30,7 +30,7 @@ return {
 
 		levelRequirement = 1,
 
-		renderAnimation = 'weapon-hammer-attachment',
+		-- renderAnimation = 'weapon-hammer-attachment',
 
 		baseModifiers = {
 			attackTime = 0.42,

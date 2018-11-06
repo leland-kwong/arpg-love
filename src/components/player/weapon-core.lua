@@ -21,13 +21,9 @@ local WeaponCore = {
 }
 
 function WeaponCore.init(self)
-  local frames = {}
-  for i=0, 15 do
-    table.insert(frames, 'pod-one-'..i)
-  end
-  for i=15, 0, -1 do
-    table.insert(frames, 'pod-one-'..i)
-  end
+  local frames = {
+    'companion/companion'
+  }
   self.animation = AnimationFactory:new(frames)
 
   self.listeners = {
@@ -57,18 +53,20 @@ function WeaponCore.update(self, dt)
   local playerRef = Component.get('PLAYER')
   self.facingX, self.facingY = playerRef.facingDirectionX,
                                playerRef.facingDirectionY
+  self.clock = (self.clock or 0) + dt
+  self.z = math.sin(self.clock * 2.5) * 2
 end
+
 
 local function drawMuzzleFlash(color, x, y, angle, radius)
   local r,g,b,a = Color.multiply(color)
-  local weaponLength = 26
-  local offsetX, offsetY = math.sin( -angle + halfRad ) * weaponLength,
-    math.cos( -angle + halfRad ) * weaponLength
-
   local oBlendMode = love.graphics.getBlendMode()
   love.graphics.setBlendMode('add')
 
   love.graphics.setColor(r,g,b,a * 0.3)
+  local centerOffsetX = 26
+  local offsetX, offsetY = math.sin( -angle + halfRad ) * centerOffsetX,
+    math.cos( -angle + halfRad ) * centerOffsetX
   love.graphics.circle(
     'fill',
     x + offsetX,
@@ -76,7 +74,11 @@ local function drawMuzzleFlash(color, x, y, angle, radius)
     radius * 1.4
   )
 
+  -- core
   love.graphics.setColor(r,g,b,0.6)
+  local centerOffsetX = 23
+  local offsetX, offsetY = math.sin( -angle + halfRad ) * centerOffsetX,
+    math.cos( -angle + halfRad ) * centerOffsetX
   love.graphics.circle(
     'fill',
     x + offsetX,
@@ -132,12 +134,11 @@ function WeaponCore.draw(self)
   local recoilDistance = self.recoilDurationRemaining > 0
     and (self.recoilDurationRemaining/self.recoilDuration * recoilMaxDistance)
     or 0
-  local posX = playerX + recoilDistance * math.sin(-self.angle + halfRad)
+  local posX = playerX + (self.facingX * 10) + recoilDistance * math.sin(-self.angle + halfRad)
   local posY = playerY + recoilDistance * math.cos(-self.angle + halfRad)
 
   local centerOffsetX, centerOffsetY = state.animation:getOffset()
   local facingSide = self.facingX > 0 and 1 or -1
-  local offsetX = (facingSide * -1) * 30
 
   --shadow
   love.graphics.setColor(0,0,0,0.17)
@@ -159,7 +160,7 @@ function WeaponCore.draw(self)
     AnimationFactory.atlas,
     state.animation.sprite,
     posX,
-    posY,
+    posY + self.z,
     self.angle,
     1,
     -- vertically flip when facing other side so the shadow is in the right position
@@ -171,9 +172,9 @@ function WeaponCore.draw(self)
     drawMuzzleFlash(
       self.muzzleFlashColor,
       posX,
-      posY,
+      posY + self.z,
       self.angle,
-      8
+      7
     )
   end
 

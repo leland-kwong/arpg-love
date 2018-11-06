@@ -75,6 +75,49 @@ local function triggerAttack(self)
 	end
 end
 
+local WeaponAnimation = Component.createFactory({
+	init = function(self)
+		Component.addToGroup(self, 'all')
+		Component.removeFromGroup(
+			Component.get('WEAPON_CORE'),
+			'all'
+		)
+	end,
+	drawSprite = function(color, x, y, angle, facingX)
+		local AnimationFactory = require 'components.animation-factory'
+		local animation = AnimationFactory:newStaticSprite('companion/companion')
+		local ox, oy = animation:getOffset()
+		love.graphics.setColor(color)
+		love.graphics.draw(
+			AnimationFactory.atlas,
+			animation.sprite,
+			x,
+			y,
+			angle or 0,
+			1 * facingX,
+			1,
+			ox,oy
+		)
+	end,
+	draw = function(self)
+		local playerRef = Component.get('PLAYER')
+		local x, y = playerRef.x + (playerRef.facingDirectionX * 15), playerRef.y
+		local facingX = playerRef.facingDirectionX > 0 and 1 or -1
+
+		self.drawSprite({
+			1,1,1,0.2
+		}, x, y - 30, 0, facingX)
+
+		self.drawSprite({
+			1,1,1,0.4
+		}, x, y - 20, 0, facingX)
+
+		self.drawSprite({
+			1,1,1,1
+		}, x, y + 5, 0, facingX)
+	end
+})
+
 local Attack = Component.createFactory(
 	AbilityBase({
 		group = groups.all,
@@ -85,6 +128,7 @@ local Attack = Component.createFactory(
 		opacity = 1,
 		init = function(self)
 			self.animationTween = tween.new(self.impactAnimationDuration, self, { opacity = 0 }, tween.easing.inExpo)
+			WeaponAnimation.create()
 		end,
 		update = function(self, dt)
 			-- we must trigger after init since the attack gets modified immediately upon creation
