@@ -128,13 +128,17 @@ local function ActiveEquipmentHandler()
         return skill
       end
 
+      local attackTime = itemSystem.getDefinition(activeItem).baseModifiers.attackTime or 0
+      local actualAttackTime = propTypesCalculator.attackTimeReduction(attackTime, curState.statModifiers.attackTimeReduction)
+
       local mx, my = camera:getMousePosition()
       local playerX, playerY = self.player:getPosition()
       local abilityData = activateFn(activeItem)
       local abilityEntity = abilityData.blueprint.create(
         extend(
           abilityData.props, {
-            x = playerX
+            attackTime = actualAttackTime
+          , x = playerX
           , y = playerY
           , x2 = mx
           , y2 = my
@@ -150,8 +154,6 @@ local function ActiveEquipmentHandler()
       curCooldown = actualCooldown
       skillCooldown = actualCooldown
 
-      local attackTime = itemSystem.getDefinition(activeItem).baseModifiers.attackTime or 0
-      local actualAttackTime = propTypesCalculator.attackTimeReduction(attackTime, curState.statModifiers.attackTimeReduction)
       playerRef:set('attackRecoveryTime', actualAttackTime)
       msgBus.send(
         msgBus.PLAYER_WEAPON_ATTACK,

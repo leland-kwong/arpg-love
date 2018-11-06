@@ -10,55 +10,7 @@ local msgBus = require 'components.msg-bus'
 local AnimationFactory = require 'components.animation-factory'
 local AudioManager = require 'components.sound'
 local config = require 'config.config'
-
-local impactAnimation = AnimationFactory:newStaticSprite('nova')
-
-local Color = require 'modules.color'
-local ImpactDispersion = {
-  group = groups.gui,
-  radius = 10,
-  duration = 10, -- number of frames
-  scale = {
-    x = 1,
-    y = 1
-  },
-  color = Color.WHITE
-}
-
-function ImpactDispersion.init(self)
-  Component.addToGroup(self, 'gameWorld')
-  self.maxFrames = 100
-  self.maxRadius = self.radius + self.maxFrames
-  self.frameCount = 0
-end
-
-function ImpactDispersion.update(self)
-  local displayRadius = math.min(self.maxRadius, self.radius + self.frameCount)
-  self.displayRadius = displayRadius
-  self.frameCount = self.frameCount + (60 / self.duration)
-end
-
-function ImpactDispersion.draw(self)
-  local opacity = math.max(0, (self.maxFrames - self.frameCount) / self.maxFrames)
-  love.graphics.setColor(Color.multiplyAlpha(self.color, opacity))
-  local imageWidth = impactAnimation:getSourceSize()
-  local renderSize = self.displayRadius / imageWidth
-  love.graphics.draw(
-    AnimationFactory.atlas,
-    impactAnimation.sprite,
-    (self.x - self.displayRadius/2) + ((1 - self.scale.x) * self.displayRadius/2),
-    (self.y - self.displayRadius/2) + ((1 - self.scale.y) * self.displayRadius/2),
-    0,
-    renderSize * self.scale.x,
-    renderSize * self.scale.y
-  )
-end
-
-function ImpactDispersion.drawOrder()
-  return 3
-end
-
-local ID = Component.createFactory(ImpactDispersion)
+local ImpactDispersion = require 'components.abilities.effect-dispersion'
 
 local impactSoundHitFrameTime = 0.535
 
@@ -108,7 +60,7 @@ function createBeam(x1, y1, animationSpeed)
 end
 
 local BeamStrike = {
-  group = groups.gui,
+  group = groups.all,
   delay = 0.25, -- impact delay
   radius = 20,
   opacity = 1,
@@ -143,8 +95,7 @@ function BeamStrike.update(self, dt)
     self.beamCo = self.beamCo or createBeam(self.x, self.y, self.animationSpeed)
     local isAlive, x, y, beamLength, isImpactFrame = coroutine.resume(self.beamCo)
     if isImpactFrame then
-      ID.create({
-        group = self.group,
+      ImpactDispersion.create({
         x = self.x,
         y = self.y,
         radius = self.radius,
