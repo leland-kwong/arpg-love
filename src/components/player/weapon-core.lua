@@ -64,7 +64,7 @@ local function drawMuzzleFlash(color, x, y, angle, radius)
   love.graphics.setBlendMode('add')
 
   love.graphics.setColor(r,g,b,a * 0.3)
-  local centerOffsetX = 26
+  local centerOffsetX = 16
   local offsetX, offsetY = math.sin( -angle + halfRad ) * centerOffsetX,
     math.cos( -angle + halfRad ) * centerOffsetX
   love.graphics.circle(
@@ -76,7 +76,7 @@ local function drawMuzzleFlash(color, x, y, angle, radius)
 
   -- core
   love.graphics.setColor(r,g,b,0.6)
-  local centerOffsetX = 23
+  local centerOffsetX = centerOffsetX - 3
   local offsetX, offsetY = math.sin( -angle + halfRad ) * centerOffsetX,
     math.cos( -angle + halfRad ) * centerOffsetX
   love.graphics.circle(
