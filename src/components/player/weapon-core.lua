@@ -134,8 +134,9 @@ function WeaponCore.draw(self)
   local recoilDistance = self.recoilDurationRemaining > 0
     and (self.recoilDurationRemaining/self.recoilDuration * recoilMaxDistance)
     or 0
-  local posX = playerX + (self.facingX * 10) + recoilDistance * math.sin(-self.angle + halfRad)
-  local posY = playerY + recoilDistance * math.cos(-self.angle + halfRad)
+  local distFromPlayer = 12
+  local posX = playerX + (self.facingX * distFromPlayer) + recoilDistance * math.sin(-self.angle + halfRad)
+  local posY = playerY + (self.facingY * distFromPlayer) + recoilDistance * math.cos(-self.angle + halfRad)
 
   local centerOffsetX, centerOffsetY = state.animation:getOffset()
   local facingSide = self.facingX > 0 and 1 or -1
@@ -147,10 +148,10 @@ function WeaponCore.draw(self)
     state.animation.sprite,
     posX,
     posY + 15,
-    self.angle,
-    1,
+    0,
+    1 * facingSide,
     -- vertically flip when facing other side so the shadow is in the right position
-    (1 * facingSide) / 2,
+    1 / 2,
     centerOffsetX, centerOffsetY
   )
 
@@ -161,10 +162,9 @@ function WeaponCore.draw(self)
     state.animation.sprite,
     posX,
     posY + self.z,
-    self.angle,
-    1,
-    -- vertically flip when facing other side so the shadow is in the right position
+    0,
     1 * facingSide,
+    1,
     centerOffsetX, centerOffsetY
   )
 
