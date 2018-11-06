@@ -35,7 +35,7 @@ return {
 		baseModifiers = {
 			attackTime = 0.42,
 			cooldown = 0.1,
-			energyCost = 0
+			energyCost = 3
 		},
 
 		onActivate = require(require('alias').path.items..'.inventory-actives.equip-on-click')(),
