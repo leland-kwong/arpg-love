@@ -88,9 +88,6 @@ local function drawMuzzleFlash(color, x, y, angle, radius)
 end
 
 local function drawEquipment(equipmentAnimation, x, y, angle)
-  -- if (not self.renderAttachmentAnimation) then
-  --   return
-  -- end
   local weaponLength = 26
   local spriteOffsetX, spriteOffsetY = equipmentAnimation:getSourceOffset()
   local offsetX, offsetY = math.sin( -angle + halfRad ) * (weaponLength),
