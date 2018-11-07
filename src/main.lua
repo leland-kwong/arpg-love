@@ -45,6 +45,14 @@ function love.load()
     id = 'hudPointerWorld'
   })
   RootScene.create()
+
+  --[[
+    run tests after everything is loaded since some tests rely on the game loop
+  ]]
+  if config.isDevelopment then
+    require 'modules.test'
+    require '_debug'
+  end
 end
 
 local characterSystem = msgBus.send(msgBus.PROFILE_FUNC, {
@@ -100,14 +108,4 @@ end
 
 function love.quit()
   jprof.write('prof.mpack')
-end
-
---[[
-  run tests after everything is loaded since some tests
-  since some of the tests rely on the game loop
-]]
-if config.isDevelopment then
-  require 'modules.test.index'
-  require 'utils.test.index'
-  require '_debug'
 end
