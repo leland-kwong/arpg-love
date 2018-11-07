@@ -2,6 +2,19 @@
 
 ---
 
+## 2.1.0-alpha
+
+### New
+
+* Added Swipe ability for fast close-range combat
+
+### Updates
+
+* Redesigned hammer animation
+* Redesigned player's drone character
+
+---
+
 ## 2.0.0-alpha
 
 **NOTE:** In order to support the latest changes, we've had to delete your existing saved games. We will continue to do this as necessary until the game has reached a more stable state.
