@@ -40,8 +40,8 @@ return {
 
 		onActivate = require(require('alias').path.items..'.inventory-actives.equip-on-click')(),
 		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.aoe-slam')({
-			minDamage = 5,
-			maxDamage = 7,
+			minDamage = 4,
+			maxDamage = 8,
 			w = 40,
 			h = 40
 		})

@@ -20,14 +20,14 @@ return {
 		levelRequirement = 1,
 
 		baseModifiers = {
-			attackTime = 0.23,
+			attackTime = 0.2,
 			cooldown = 0.1,
 			energyCost = 1
 		},
 
 		onActivate = require(require('alias').path.items..'.inventory-actives.equip-on-click')(),
 		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.swipe')({
-			minDamage = 2,
+			minDamage = 3,
 			maxDamage = 4,
 		})
 	}
