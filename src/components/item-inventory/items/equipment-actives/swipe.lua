@@ -87,6 +87,9 @@ function Swipe.init(self)
 
   local playerRef = Component.get('PLAYER')
   self.angle = (math.atan2(self.dx, self.dy) * -1) + (math.pi/2)
+
+  local Sound = require 'components.sound'
+  Sound.playEffect('whoosh-very-fast.wav')
 end
 
 function Swipe.update(self, dt)
