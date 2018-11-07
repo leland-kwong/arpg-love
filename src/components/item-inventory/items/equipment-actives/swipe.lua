@@ -64,6 +64,12 @@ local function triggerHit(self)
           damage = calcDamage(self),
           source = self:getId()
         })
+
+        local ImpactAnimation = require 'components.abilities.effect-impact'
+        ImpactAnimation.create({
+          x = point.x,
+          y = point.y
+        })
       end
     end
   end
