@@ -387,11 +387,8 @@ function Ai.update(self, dt)
 
   if (self.isInViewOfPlayer or self.isAggravated) then
     -- update ai facing direction
-    if (self.frameCount % 5 == 0) then
-      local shouldFlipX = abs(self.vx) > 0.15
-      self.facingDirectionX = shouldFlipX and (self.vx > 0 and 1 or -1) or self.facingDirectionX
-      self.facingDirectionY = self.vy > 0 and 1 or -1
-    end
+    self.facingDirectionX = self.vx > 0 and 1 or -1
+    self.facingDirectionY = self.vy > 0 and 1 or -1
 
     -- handle hit animation
     if self.hitAnimation then

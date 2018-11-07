@@ -131,7 +131,7 @@ function Swipe.draw(self)
 end
 
 function Swipe.drawOrder()
-  return Component.get('PLAYER'):drawOrder() + 1
+  return Component.get('PLAYER'):drawOrder() + 20
 end
 
 local SwipeFactory = Component.createFactory(Swipe)
