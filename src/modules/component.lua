@@ -433,6 +433,10 @@ function M.getBlueprint(component)
   return component.blueprint
 end
 
+function M.getChildren(component)
+  return component and component._children or EMPTY
+end
+
 function M.remove(entityId, recursive)
   local idType = type(entityId)
   assert(
