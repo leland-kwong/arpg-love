@@ -3096,15 +3096,6 @@
 	"sourceSize": {"w":54,"h":60},
 	"pivot": {"x":0.5,"y":0.5}
 },
-"legendary/eyeball":
-{
-	"frame": {"x":1083,"y":56,"w":16,"h":16},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
-	"sourceSize": {"w":16,"h":16},
-	"pivot": {"x":0.5,"y":0.5}
-},
 "light-blur":
 {
 	"frame": {"x":2,"y":2,"w":100,"h":100},
@@ -4660,6 +4651,6 @@
 	"format": "RGBA8888",
 	"size": {"w":1664,"h":128},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:aba19447e6800dcf33878d11c7bbcf51:f25b62f0a1ce381f8c98d339f48ceae2:68d88b3cf7eafc9b5accfffdfb2fda91$"
+	"smartupdate": "$TexturePacker:SmartUpdate:f5167bd96264a125010b59621c80b310:0dd790e037fb611c5d15a3dc6679445b:68d88b3cf7eafc9b5accfffdfb2fda91$"
 }
 }

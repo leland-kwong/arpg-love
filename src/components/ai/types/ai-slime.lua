@@ -120,22 +120,13 @@ end
 local Chance = require 'utils.chance'
 local Color = require 'modules.color'
 local getRandomProps = Chance({
-  -- halloween style
-  {
-    chance = 5,
-    __call = function()
-      return {
-        color = {Color.rgba255(249, 157, 37)},
-        name = 'jack-o-slime-o'
-      }
-    end
-  },
   {
     chance = 1,
     __call = function()
+      local Color = require 'modules.color'
       return {
         -- green
-        color = {0,1,0.2,1},
+        color = {Color.rgba255(85, 188, 2)},
         name = 'slime'
       }
     end
