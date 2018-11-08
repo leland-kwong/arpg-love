@@ -25,6 +25,7 @@ local guiTextBodyLayer = GuiText.create({
 })
 
 local Sandbox = {
+  id = 'mainMenu',
   group = groups.gui,
   drawOrder = function()
     return drawOrder() - 1
@@ -217,6 +218,7 @@ require 'scene.light-test'
 require 'scene.font-test'
 require 'scene.tooltip-test'
 require 'scene.skew-rotate-test'
+require 'scene.passive-tree'
 
 function Sandbox.init(self)
   self.activeSceneMenu = nil

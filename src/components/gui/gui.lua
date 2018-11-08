@@ -66,8 +66,9 @@ local Gui = {
   onFinal = noop,
   collision = true,
   collisionGroup = nil,
-  getMousePosition = function()
-    return love.mouse.getX() / scale, love.mouse.getY() / scale
+  scale = scale,
+  getMousePosition = function(self)
+    return love.mouse.getX() / self.scale, love.mouse.getY() / self.scale
   end,
   render = noop,
   type = guiType.INTERACT,
@@ -144,7 +145,7 @@ end
 function Gui.init(self)
   assert(guiType[self.type] ~= nil, 'invalid gui type'..tostring(self.type))
 
-  self.w, self.h = self.w or 1, self.h or 1
+  self.w, self.h = self.w or self.width or 1, self.h or self.height or 1
 
   if guiType.LIST == self.type then
     assert(self.h <= love.graphics.getHeight() / self.scale, 'scrollable list height should not be greater than window height')
@@ -235,7 +236,7 @@ local function isDifferent(a, b)
 end
 
 local function handleEvents(self)
-  local mx, my = self.getMousePosition()
+  local mx, my = self:getMousePosition()
   local cacheKey = indexByMouseCoord(mx, my)
   local mouseCollisions = collisionWorlds.gui:queryPoint(mx, my, mouseCollisionFilter)
 
