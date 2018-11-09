@@ -10,12 +10,7 @@ local bump = require 'modules.bump'
 local F = require 'utils.functional'
 local nodeValueOptions = require 'scene.skill-tree-editor.node-data-options'
 local inputState = require 'main.inputs'.state
-
-local mouseCollisionWorld = bump.newWorld(32)
-local mouseCollisionObject = {}
-local mouseCollisionSize = 24
-local cellSize = 40
-mouseCollisionWorld:add(mouseCollisionObject, 0, 0, mouseCollisionSize, mouseCollisionSize)
+local fs = require 'modules.file-system'
 
 --[[
   Instructions:
@@ -26,6 +21,15 @@ mouseCollisionWorld:add(mouseCollisionObject, 0, 0, mouseCollisionSize, mouseCol
   'delete' key - deletes selected node or connection
   's' key - executes serialization function
 ]]
+
+local mouseCollisionWorld = bump.newWorld(32)
+local mouseCollisionObject = {}
+local mouseCollisionSize = 24
+local cellSize = 40
+mouseCollisionWorld:add(mouseCollisionObject, 0, 0, mouseCollisionSize, mouseCollisionSize)
+
+local sourceDirectory = love.filesystem.getSourceBaseDirectory()
+local pathToSave = sourceDirectory..'/src/scene/skill-tree-editor/serialized.lua'
 
 local debugTextLayer = GuiText.create({
   font = require 'components.font'.primary.font
@@ -44,9 +48,17 @@ local PassiveTree = {
       local node = Component.get(nodeId)
       serializedTree[nodeId] = node:serialize()
     end
-    print(
-      Inspect(serializedTree)
+
+    --[[
+      Love's `love.filesystem.write` doesn't support writing to files in the source directory,
+      therefore we must use the `io` module.
+    ]]
+    local io = require 'io'
+    local f = assert(io.open(pathToSave, 'w'))
+    local success, message = f:write(
+      ser(serializedTree)
     )
+    f:close()
   end
 }
 
@@ -422,39 +434,17 @@ msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
   name = 'passive tree',
   value = function()
     local msgBusMainMenu = require 'components.msg-bus-main-menu'
+    local io = require 'io'
+    local savedState = nil
+    for line in io.lines(pathToSave) do
+      savedState = (savedState or '')..line
+    end
+
     msgBus.send(msgBus.SCENE_STACK_PUSH, {
       scene = Factory,
       props = {
         nodeValueOptions = nodeValueOptions,
-        nodes = {
-          a6a6495d_73 = {
-            connections = {
-              a6a6495d_75 = {},
-              a73aac1c_74 = {}
-            },
-            nodeValue = 1,
-            size = 40,
-            x = 960,
-            y = 400
-          },
-          a6a6495d_75 = {
-            connections = {
-              a6a6495d_73 = {}
-            },
-            size = 40,
-            x = 1040,
-            y = 440
-          },
-          a73aac1c_74 = {
-            connections = {
-              a6a6495d_73 = {}
-            },
-            nodeValue = 1,
-            size = 40,
-            x = 920,
-            y = 320
-          }
-        }
+        nodes = savedState and loadstring(savedState)()
       }
     })
     msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
