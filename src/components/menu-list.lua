@@ -21,7 +21,9 @@ local MenuList = {
   options = {
     {
       name = '', -- [STRING]
-      value = {} -- [ANY]
+      value = {}, -- [ANY]
+      onSelectSoundEnabled = true,
+      onSelectDeleteMenu = false
     }
   },
   value = nil, -- selected value
@@ -102,6 +104,9 @@ function MenuList.update(self)
             )
           end
           parent.value = option.value
+          if option.onSelectDeleteMenu then
+            parent:delete(true)
+          end
         end,
         draw = function(self)
           if (parent.value == option.value) then
