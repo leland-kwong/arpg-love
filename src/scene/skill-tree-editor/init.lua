@@ -58,7 +58,14 @@ local PassiveTree = {
     local success, message = f:write(
       ser(serializedTree)
     )
-    f:close()
+    if success then
+      f:close()
+      msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
+        title = '[SKILL TREE] state saved',
+      })
+    else
+      error(message)
+    end
   end
 }
 
