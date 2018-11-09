@@ -8,7 +8,7 @@ local GuiText = require 'components.gui.gui-text'
 local Color = require 'modules.color'
 local bump = require 'modules.bump'
 local F = require 'utils.functional'
-local NodeDataOptions = require 'scene.passive-tree.node-data-options'
+local NodeDataOptions = require 'scene.skill-tree-editor.node-data-options'
 local inputState = require 'main.inputs'.state
 
 local mouseCollisionWorld = bump.newWorld(32)

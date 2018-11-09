@@ -218,7 +218,7 @@ require 'scene.light-test'
 require 'scene.font-test'
 require 'scene.tooltip-test'
 require 'scene.skew-rotate-test'
-require 'scene.passive-tree'
+require 'scene.skill-tree-editor'
 
 function Sandbox.init(self)
   self.activeSceneMenu = nil
