@@ -28,3 +28,13 @@ msgBus.on(msgBus.UPDATE, function()
   local cWidth, cHeight = camera:getSize()
   newLightWorld:setPosition(-cameraTranslateX + cWidth/2, -cameraTranslateY + cHeight/2)
 end)
+
+local Notifier = require 'components.hud.notifier'
+local config = require 'config.config'
+local notifierWidth, notifierHeight = 250, 200
+Notifier.create({
+  x = love.graphics.getWidth()/config.scale - notifierWidth,
+  y = love.graphics.getHeight()/config.scale - notifierHeight,
+  h = notifierHeight,
+  w = notifierWidth
+})

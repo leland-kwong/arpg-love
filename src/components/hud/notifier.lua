@@ -85,7 +85,7 @@ function Notifier.draw(self)
       Color.MED_GRAY, e.timestamp..'\n'
     }
 
-    for i=1, #e.description do
+    for i=1, #(e.description or {}) do
       table.insert(content, e.description[i])
     end
 

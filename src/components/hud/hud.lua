@@ -81,14 +81,6 @@ function Hud.init(self)
     end
   }):setParent(self)
 
-  local notifierWidth, notifierHeight = 250, 200
-  Notifier.create({
-    x = love.graphics.getWidth()/config.scale - notifierWidth,
-    y = love.graphics.getHeight()/config.scale - notifierHeight,
-    h = notifierHeight,
-    w = notifierWidth
-  }):setParent(self)
-
   local winWidth, winHeight = love.graphics.getWidth() / scale, love.graphics.getHeight() / scale
   local barHeight = 18
   local offX, offY = Position.boxCenterOffset(healthManaWidth, barHeight, winWidth, winHeight)
