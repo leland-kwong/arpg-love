@@ -46,7 +46,9 @@ local function handleDragEvent()
       dragState.start.y = my
       msgBus.send(msgBus.MOUSE_DRAG_START, {
         startX = mx,
-        startY = my
+        startY = my,
+        x = mx,
+        y = my
       })
     end
     local dx, dy = mx - dragState.start.x, my - dragState.start.y
@@ -56,6 +58,8 @@ local function handleDragEvent()
       local event = {
         startX = dragState.start.x,
         startY = dragState.start.y,
+        x = mx,
+        y = my,
         dx = dx,
         dy = dy
       }
