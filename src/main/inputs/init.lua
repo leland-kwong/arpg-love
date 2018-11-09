@@ -114,3 +114,7 @@ function love.textinput(t)
     t
   )
 end
+
+return {
+  state = state
+}
