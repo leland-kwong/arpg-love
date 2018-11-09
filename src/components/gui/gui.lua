@@ -267,7 +267,8 @@ end
 
 function Gui.update(self, dt)
   local posX, posY = self:getPosition()
-  self.colObj:update(posX, posY, self.w, self.h)
+  local width, height = self.width or self.w, self.height or self.h
+  self.colObj:update(posX, posY, width, height)
 
   self.hovered = false
   handleEvents(self)

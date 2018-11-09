@@ -8,6 +8,7 @@ require 'main.inputs.keyboard-manager'
 msgBus.MOUSE_CLICKED = 'MOUSE_CLICKED'
 
 local state = {
+  keyboard = require 'main.inputs.keyboard-manager'.state.keyboard,
   mouse = {
     position = {
       x = 0,
