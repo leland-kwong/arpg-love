@@ -230,11 +230,21 @@ function PassiveTree.update(self, dt)
   mouseCollisionWorld:update(mouseCollisionObject, mx - mOffset, my - mOffset)
 
   self:handleConnectionInteractions()
+  self.mode = getMode()
 end
 
 function PassiveTree.draw(self)
   love.graphics.push()
   love.graphics.origin()
+
+  if 'NODE_CREATE' == self.mode then
+    love.graphics.setColor(1,1,1,0.5)
+    local x, y = snapToGrid(
+      love.mouse.getX() - cellSize/2,
+      love.mouse.getY() - cellSize/2
+    )
+    love.graphics.rectangle('line', x, y, cellSize, cellSize)
+  end
 
   -- draw connections
   for nodeId in pairs(self.nodes) do
