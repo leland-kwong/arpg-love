@@ -20,11 +20,8 @@ mouseCollisionWorld:add(mouseCollisionObject, 0, 0, mouseCollisionSize, mouseCol
 
   click - place a node
   click node - selects node. If a node is already selected, creates a connection between both nodes
-]]
-
---[[
-  TODO:
-  - delete connection by selecting it and pressing delete
+  drag node - moves node
+  'delete' button - deletes selected node or connection
 ]]
 
 local debugTextLayer = GuiText.create({
@@ -169,8 +166,8 @@ function PassiveTree.init(self)
   end)
 
   msgBus.on(msgBus.KEY_PRESSED, function(event)
-    if event.key == 'escape' and selectedNode then
-      selectedNode = nil
+    if (event.key == 'escape') then
+      clearSelections()
     end
 
     if 'delete' == event.key then
