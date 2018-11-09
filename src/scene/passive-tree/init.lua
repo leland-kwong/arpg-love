@@ -13,6 +13,7 @@ local inputState = require 'main.inputs'.state
 local mouseCollisionWorld = bump.newWorld(32)
 local mouseCollisionObject = {}
 local mouseCollisionSize = 24
+local cellSize = 40
 mouseCollisionWorld:add(mouseCollisionObject, 0, 0, mouseCollisionSize, mouseCollisionSize)
 
 --[[
@@ -41,7 +42,7 @@ local selectedConnection = nil
 local mx, my = 0,0
 
 local function getMode()
-  if hoveredNode and inputState.mouse.drag.isDragging then
+  if selectedNode and inputState.mouse.drag.isDragging then
     return 'NODE_MOVE'
   end
 
@@ -73,13 +74,19 @@ local function clearSelections()
   selectedConnection = nil
 end
 
-local function placeNode(root, x, y)
-  local size = 40
+local function snapToGrid(x, y)
+  local Position = require 'utils.position'
+  local gridX, gridY = Position.pixelsToGridUnits(x, y, cellSize)
+  return Position.gridToPixels(gridX, gridY, cellSize)
+end
+
+local function placeNode(root, x, y, nodeSize)
+  local snapX, snapY = snapToGrid(x - nodeSize/2, y - nodeSize/2)
   local node = Gui.create({
-    x = x - size/2,
-    y = y - size/2,
-    width = size,
-    height = size,
+    x = snapX,
+    y = snapY,
+    width = nodeSize,
+    height = nodeSize,
     scale = 1,
     connections = {},
     onPointerMove = function(self)
@@ -144,11 +151,16 @@ function PassiveTree.init(self)
     end
 
     if ('NODE_CREATE' == mode) and (button == 1) then
-      self.nodes[placeNode(root, x, y)] = true
+      self.nodes[placeNode(root, x, y, 40)] = true
     end
 
     if ('NODE_SELECTION' == mode) and (button == 1) then
-      selectedNode = hoveredNode
+      local alreadySelected = selectedNode == hoveredNode
+      if alreadySelected then
+        selectedNode = nil
+      else
+        selectedNode = hoveredNode
+      end
     end
 
     if ('CONNECTION_SELECTION' == mode) and (button == 1) then
@@ -159,9 +171,10 @@ function PassiveTree.init(self)
 
   msgBus.on(msgBus.MOUSE_DRAG, function(event)
     if 'NODE_MOVE' == getMode() then
-      local guiNode = Component.get(hoveredNode)
-      guiNode.x = event.x - guiNode.width/2
-      guiNode.y = event.y - guiNode.height/2
+      local guiNode = Component.get(selectedNode)
+      local x, y = snapToGrid(event.x - guiNode.width/2, event.y - guiNode.height/2)
+      guiNode.x = x
+      guiNode.y = y
     end
   end)
 
