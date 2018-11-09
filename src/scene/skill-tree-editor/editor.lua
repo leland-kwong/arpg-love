@@ -34,7 +34,14 @@ local debugTextLayer = GuiText.create({
 })
 
 local TreeEditor = {
-  pathToSave = pathToSave,
+  loadState = function()
+    local io = require 'io'
+    local savedState = nil
+    for line in io.lines(pathToSave) do
+      savedState = (savedState or '')..line
+    end
+    return savedState and loadstring(savedState)() or {}
+  end,
   debug = {
     connectionCount = true,
   },
