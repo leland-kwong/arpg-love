@@ -8,6 +8,7 @@ local GuiText = require 'components.gui.gui-text'
 local Color = require 'modules.color'
 local bump = require 'modules.bump'
 local F = require 'utils.functional'
+local inputState = require 'main.inputs'.state
 
 local mouseCollisionWorld = bump.newWorld(32)
 local mouseCollisionObject = {}
@@ -43,11 +44,21 @@ local selectedConnection = nil
 local mx, my = 0,0
 
 local function getMode()
+  if hoveredNode and inputState.mouse.drag.isDragging then
+    return 'NODE_MOVE'
+  end
+
   if selectedNode and hoveredNode and (hoveredNode ~= selectedNode) then
-    return 'CONNECTION_CREATE'
+    local hasConnection = Component.get(selectedNode).connections[hoveredNode]
+    if (not hasConnection) then
+      return 'CONNECTION_CREATE'
+    end
   end
 
   if (not hoveredNode) and (not hoveredConnection) then
+    if (selectedNode or selectedConnection) then
+      return 'CLEAR_SELECTIONS'
+    end
     return 'NODE_CREATE'
   end
 
@@ -114,6 +125,10 @@ function PassiveTree.init(self)
     local mode = getMode()
     local x, y, button = unpack(event)
 
+    if ('CLEAR_SELECTIONS' == mode) then
+      return clearSelections()
+    end
+
     if ('CONNECTION_CREATE' == mode) then
       local selection = selectedNode
       clearSelections()
@@ -131,18 +146,25 @@ function PassiveTree.init(self)
       end
     end
 
-    if ('NODE_SELECTION' == mode) then
-      selectedNode = hoveredNode
-    end
-
     if ('NODE_CREATE' == mode) and (button == 1) then
       self.nodes[placeNode(root, x, y)] = true
     end
 
+    if ('NODE_SELECTION' == mode) and (button == 1) then
+      selectedNode = hoveredNode
+    end
 
     if ('CONNECTION_SELECTION' == mode) and (button == 1) then
       clearSelections()
       selectedConnection = hoveredConnection
+    end
+  end)
+
+  msgBus.on(msgBus.MOUSE_DRAG, function(event)
+    if 'NODE_MOVE' == getMode() then
+      local guiNode = Component.get(hoveredNode)
+      guiNode.x = event.x - guiNode.width/2
+      guiNode.y = event.y - guiNode.height/2
     end
   end)
 
