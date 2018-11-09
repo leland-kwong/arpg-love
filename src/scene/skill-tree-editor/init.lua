@@ -40,6 +40,7 @@ local PassiveTree = {
 local state = {
   hoveredNode = nil,
   selectedNode = nil,
+  movingNode = nil,
   hoveredConnection = nil,
   selectedConnection = nil,
   mx = 0,
@@ -52,7 +53,7 @@ local function getMode()
     return
   end
 
-  if state.selectedNode and inputState.mouse.drag.isDragging then
+  if (state.hoveredNode or state.movingNode) and inputState.mouse.drag.isDragging then
     return 'NODE_MOVE'
   end
 
@@ -198,11 +199,16 @@ function PassiveTree.init(self)
 
   msgBus.on(msgBus.MOUSE_DRAG, function(event)
     if 'NODE_MOVE' == getMode() then
-      local guiNode = Component.get(state.selectedNode)
+      state.movingNode = state.movingNode or state.hoveredNode
+      local guiNode = Component.get(state.movingNode)
       local x, y = snapToGrid(event.x - guiNode.width/2, event.y - guiNode.height/2)
       guiNode.x = x
       guiNode.y = y
     end
+  end)
+
+  msgBus.on(msgBus.MOUSE_DRAG_END, function(event)
+    state.movingNode = nil
   end)
 
   msgBus.on(msgBus.KEY_PRESSED, function(event)
