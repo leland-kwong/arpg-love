@@ -7,6 +7,7 @@ local Gui = require 'components.gui.gui'
 local GuiText = require 'components.gui.gui-text'
 local Color = require 'modules.color'
 local bump = require 'modules.bump'
+local F = require 'utils.functional'
 
 local mouseCollisionWorld = bump.newWorld(32)
 local mouseCollisionObject = {}
@@ -42,6 +43,10 @@ local selectedConnection = nil
 local mx, my = 0,0
 
 local function getMode()
+  if selectedNode and hoveredNode and (hoveredNode ~= selectedNode) then
+    return 'CONNECTION_CREATE'
+  end
+
   if (not hoveredNode) and (not hoveredConnection) then
     return 'NODE_CREATE'
   end
@@ -53,6 +58,11 @@ local function getMode()
   if hoveredConnection then
     return 'CONNECTION_SELECTION'
   end
+end
+
+local function clearSelections()
+  selectedNode = nil
+  selectedConnection = nil
 end
 
 local function placeNode(root, x, y)
@@ -76,31 +86,18 @@ local function placeNode(root, x, y)
         hoveredNode = nil
         selectedNode = nil
       end
-    end,
-    onClick = function(self)
-      local selection = selectedNode
-      selectedNode = nil
-      local shouldDrawConnection = not not selection
-      local selfId = self:getId()
-      if shouldDrawConnection then
-        local selectedGuiNode = Component.get(selection)
-        local duplicateConnection = self.connections[selection]
-        if duplicateConnection then
-          consoleLog('duplicate connection detected')
-          return
-        end
-
-        local lineData = {} -- if more points are added, we define a bezier curve
-        self.connections[selection] = lineData
-        selectedGuiNode.connections[selfId] = lineData
-
-        return
-      end
-      selectedNode = self:getId()
     end
   })
 
   return node:getId()
+end
+
+local function deleteConnection(connectionId)
+  local connectionIds = F.keys(selectedConnection)
+  local id1, id2 = unpack(connectionIds)
+  Component.get(id1).connections[id2] = nil
+  Component.get(id2).connections[id1] = nil
+  clearSelections()
 end
 
 function PassiveTree.init(self)
@@ -114,24 +111,38 @@ function PassiveTree.init(self)
   self.nodes = {}
 
   msgBus.on(msgBus.MOUSE_CLICKED, function(event)
-    if hoveredNode then
-      return
-    end
-
     local mode = getMode()
     local x, y, button = unpack(event)
 
-    if 'NODE_CREATE' == mode then
-      -- place node
-      if button == 1 then
-        self.nodes[placeNode(root, x, y)] = true
+    if ('CONNECTION_CREATE' == mode) then
+      local selection = selectedNode
+      clearSelections()
+
+      -- make connection between nodes
+      local shouldDrawConnection = not not selection
+      if shouldDrawConnection then
+        local selectedGuiNode = Component.get(selection)
+        local hoveredGuiNode = Component.get(hoveredNode)
+
+        local lineData = {} -- if more points are added, we define a bezier curve
+        hoveredGuiNode.connections[selection] = lineData
+        selectedGuiNode.connections[hoveredNode] = lineData
+        return
       end
     end
 
-    if 'CONNECTION_SELECTION' == mode then
-      if button == 1 then
-        selectedConnection = hoveredConnection
-      end
+    if ('NODE_SELECTION' == mode) then
+      selectedNode = hoveredNode
+    end
+
+    if ('NODE_CREATE' == mode) and (button == 1) then
+      self.nodes[placeNode(root, x, y)] = true
+    end
+
+
+    if ('CONNECTION_SELECTION' == mode) and (button == 1) then
+      clearSelections()
+      selectedConnection = hoveredConnection
     end
   end)
 
@@ -140,17 +151,22 @@ function PassiveTree.init(self)
       selectedNode = nil
     end
 
-    local deleteNode = event.key == 'delete' and selectedNode
-    if deleteNode then
-      -- remove connections
-      local guiNode = Component.get(selectedNode)
-      for toNodeId in pairs(guiNode.connections) do
-        local toGuiNode = Component.get(toNodeId)
-        toGuiNode.connections[selectedNode] = nil
+    if 'delete' == event.key then
+      if selectedConnection then
+        deleteConnection(selectedConnection)
       end
 
-      -- remove node from list
-      self.nodes[selectedNode] = nil
+      if selectedNode then
+        -- remove connections
+        local guiNode = Component.get(selectedNode)
+        for toNodeId in pairs(guiNode.connections) do
+          local toGuiNode = Component.get(toNodeId)
+          toGuiNode.connections[selectedNode] = nil
+        end
+
+        -- remove node from list
+        self.nodes[selectedNode] = nil
+      end
     end
   end)
 end
@@ -196,9 +212,17 @@ function PassiveTree.draw(self)
       local oLineWidth = love.graphics.getLineWidth()
       local connectionNode = Component.get(connectionNodeId)
 
-      if selectedConnection == connectionNodeId then
-        love.graphics.setLineWidth(6)
-        love.graphics.setColor(1,1,1)
+      local isSelectedConnection = selectedConnection and
+        (selectedConnection[connectionNodeId] and selectedConnection[nodeId])
+      if isSelectedConnection then
+        love.graphics.setLineWidth(8)
+        love.graphics.setColor(1,0.2,1)
+        love.graphics.line(
+          node.x + node.width/2,
+          node.y + node.width/2,
+          connectionNode.x + connectionNode.width/2,
+          connectionNode.y + connectionNode.width/2
+        )
       end
 
       local isHovered = hoveredConnection and hoveredConnection[nodeId] and hoveredConnection[connectionNodeId]
@@ -235,7 +259,6 @@ function PassiveTree.draw(self)
     end
 
     if self.debug.connectionCount then
-      local F = require 'utils.functional'
       debugTextLayer:add(
         #F.keys(node.connections),
         Color.WHITE,
