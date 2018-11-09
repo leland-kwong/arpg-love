@@ -8,6 +8,7 @@ local GuiText = require 'components.gui.gui-text'
 local Color = require 'modules.color'
 local bump = require 'modules.bump'
 local F = require 'utils.functional'
+local NodeDataOptions = require 'scene.passive-tree.node-data-options'
 local inputState = require 'main.inputs'.state
 
 local mouseCollisionWorld = bump.newWorld(32)
@@ -32,7 +33,8 @@ local debugTextLayer = GuiText.create({
 local PassiveTree = {
   debug = {
     connectionCount = true,
-  }
+  },
+  data = {}
 }
 
 local hoveredNode = nil
@@ -42,6 +44,11 @@ local selectedConnection = nil
 local mx, my = 0,0
 
 local function getMode()
+  local InputContext = require 'modules.input-context'
+  if 'gui' == InputContext.get() then
+    return
+  end
+
   if selectedNode and inputState.mouse.drag.isDragging then
     return 'NODE_MOVE'
   end
@@ -83,12 +90,16 @@ end
 local function placeNode(root, x, y, nodeSize)
   local snapX, snapY = snapToGrid(x - nodeSize/2, y - nodeSize/2)
   local node = Gui.create({
+    inputContext = 'treeNode',
     x = snapX,
     y = snapY,
     width = nodeSize,
     height = nodeSize,
     scale = 1,
+
     connections = {},
+    nodeData = {},
+
     onPointerMove = function(self)
       hoveredNode = self:getId()
     end,
@@ -116,6 +127,19 @@ local function deleteConnection(connectionId)
 end
 
 function PassiveTree.init(self)
+  NodeDataOptions.create({
+    id = 'nodeDataMenu',
+    x = 0,
+    y = 0,
+    options = self.nodeDataOptions,
+
+    -- set the node's data
+    onSelect = function(name, value)
+      local guiNode = Component.get(selectedNode)
+      guiNode.nodeData = value
+    end
+  })
+
   local root = self
   msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
   Component.get('mainMenu'):delete(true)
@@ -300,6 +324,17 @@ function PassiveTree.draw(self)
       love.graphics.setLineWidth(oLineWidth)
     end
 
+    local nodeData = node.nodeData
+    if nodeData.value then
+      love.graphics.setColor(1,1,1)
+      debugTextLayer:add(
+        nodeData.value,
+        Color.WHITE,
+        x/2,
+        y/2 -10
+      )
+    end
+
     if self.debug.connectionCount then
       debugTextLayer:add(
         #F.keys(node.connections),
@@ -314,12 +349,26 @@ end
 
 local Factory = Component.createFactory(PassiveTree)
 
+local nodeDataOptions = {
+  [1] = {
+    name = 'attack speed',
+    value = 1
+  },
+  [2] = {
+    name = 'bonus damage',
+    value = 0.2
+  }
+}
+
 msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
   name = 'passive tree',
   value = function()
     local msgBusMainMenu = require 'components.msg-bus-main-menu'
     msgBus.send(msgBus.SCENE_STACK_PUSH, {
-      scene = Factory
+      scene = Factory,
+      props = {
+        nodeDataOptions = nodeDataOptions
+      }
     })
     msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
   end
