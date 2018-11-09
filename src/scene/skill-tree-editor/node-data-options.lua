@@ -14,7 +14,7 @@ function NodeDataOptions.init(self)
   local menuOptions = F.map(keys, function(key)
     return {
       name = self.options[key].name,
-      value = self.options[key],
+      value = key,
       onSelectSoundEnabled = false
     }
   end)

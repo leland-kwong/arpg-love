@@ -8,7 +8,7 @@ local GuiText = require 'components.gui.gui-text'
 local Color = require 'modules.color'
 local bump = require 'modules.bump'
 local F = require 'utils.functional'
-local NodeDataOptions = require 'scene.skill-tree-editor.node-data-options'
+local nodeValueOptions = require 'scene.skill-tree-editor.node-data-options'
 local inputState = require 'main.inputs'.state
 
 local mouseCollisionWorld = bump.newWorld(32)
@@ -23,7 +23,8 @@ mouseCollisionWorld:add(mouseCollisionObject, 0, 0, mouseCollisionSize, mouseCol
   click - place a node
   click node - selects node. If a node is already selected, creates a connection between both nodes
   drag node - moves node
-  'delete' button - deletes selected node or connection
+  'delete' key - deletes selected node or connection
+  's' key - executes serialization function
 ]]
 
 local debugTextLayer = GuiText.create({
@@ -34,7 +35,19 @@ local PassiveTree = {
   debug = {
     connectionCount = true,
   },
-  data = {}
+  nodes = {},
+  nodeValueOptions = {},
+  serialize = function(self)
+    local ser = require 'utils.ser'
+    local serializedTree = {}
+    for nodeId in pairs(self.nodes) do
+      local node = Component.get(nodeId)
+      serializedTree[nodeId] = node:serialize()
+    end
+    print(
+      Inspect(serializedTree)
+    )
+  end
 }
 
 local state = {
@@ -91,9 +104,11 @@ local function snapToGrid(x, y)
   return Position.gridToPixels(gridX, gridY, cellSize)
 end
 
-local function placeNode(root, x, y, nodeSize)
+-- creates a new node and adds it to the node tree
+local function placeNode(root, nodeId, x, y, nodeSize, connections, nodeValue)
   local snapX, snapY = snapToGrid(x - nodeSize/2, y - nodeSize/2)
   local node = Gui.create({
+    id = nodeId,
     inputContext = 'treeNode',
     x = snapX,
     y = snapY,
@@ -101,8 +116,18 @@ local function placeNode(root, x, y, nodeSize)
     height = nodeSize,
     scale = 1,
 
-    connections = {},
-    nodeData = {},
+    connections = connections or {},
+    nodeValue = nodeValue, -- stores the value by the option's key
+
+    serialize = function(self)
+      return {
+        x = self.x,
+        y = self.y,
+        size = nodeSize,
+        connections = self.connections,
+        nodeValue = self.nodeValue
+      }
+    end,
 
     onPointerMove = function(self)
       state.hoveredNode = self:getId()
@@ -119,7 +144,9 @@ local function placeNode(root, x, y, nodeSize)
     end
   })
 
-  return node:getId()
+  local nodeId = node:getId()
+  root.nodes[nodeId] = true
+  return nodeId
 end
 
 local function deleteConnection(connectionId)
@@ -130,19 +157,36 @@ local function deleteConnection(connectionId)
   clearSelections()
 end
 
+function PassiveTree.loadFromSerializedState(self)
+  for id,props in pairs(self.nodes) do
+    placeNode(
+      self,
+      id,
+      props.x,
+      props.y,
+      props.size,
+      props.connections,
+      props.nodeValue
+    )
+  end
+end
+
 function PassiveTree.init(self)
-  NodeDataOptions.create({
-    id = 'nodeDataMenu',
+  local function setnodeValue(name, optionKey)
+    local guiNode = Component.get(state.selectedNode)
+    guiNode.nodeValue = optionKey
+  end
+  nodeValueOptions.create({
+    id = 'nodeValueMenu',
     x = 0,
     y = 0,
-    options = self.nodeDataOptions,
+    options = self.nodeValueOptions,
 
     -- set the node's data
-    onSelect = function(name, value)
-      local guiNode = Component.get(state.selectedNode)
-      guiNode.nodeData = value
-    end
+    onSelect = setnodeValue
   })
+
+  self:loadFromSerializedState()
 
   local root = self
   msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
@@ -151,7 +195,6 @@ function PassiveTree.init(self)
   love.mouse.setCursor()
 
   Component.addToGroup(self, 'gui')
-  self.nodes = {}
 
   msgBus.on(msgBus.MOUSE_CLICKED, function(event)
     local mode = getMode()
@@ -179,7 +222,7 @@ function PassiveTree.init(self)
     end
 
     if ('NODE_CREATE' == mode) and (button == 1) then
-      self.nodes[placeNode(root, x, y, 40)] = true
+      placeNode(root, nil, x, y, 40)
     end
 
     if ('NODE_SELECTION' == mode) and (button == 1) then
@@ -215,6 +258,11 @@ function PassiveTree.init(self)
   msgBus.on(msgBus.KEY_PRESSED, function(event)
     if (event.key == 'escape') then
       clearSelections()
+    end
+
+    local serializeTree = 's' == event.key
+    if serializeTree then
+      self:serialize()
     end
 
     if 'delete' == event.key then
@@ -334,11 +382,11 @@ function PassiveTree.draw(self)
       love.graphics.setLineWidth(oLineWidth)
     end
 
-    local nodeData = node.nodeData
-    if nodeData.value then
+    local dataKey = node.nodeValue
+    if dataKey then
       love.graphics.setColor(1,1,1)
       debugTextLayer:add(
-        nodeData.value,
+        self.nodeValueOptions[dataKey].value,
         Color.WHITE,
         x/2,
         y/2 -10
@@ -359,7 +407,7 @@ end
 
 local Factory = Component.createFactory(PassiveTree)
 
-local nodeDataOptions = {
+local nodeValueOptions = {
   [1] = {
     name = 'attack speed',
     value = 1
@@ -377,7 +425,36 @@ msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
     msgBus.send(msgBus.SCENE_STACK_PUSH, {
       scene = Factory,
       props = {
-        nodeDataOptions = nodeDataOptions
+        nodeValueOptions = nodeValueOptions,
+        nodes = {
+          a6a6495d_73 = {
+            connections = {
+              a6a6495d_75 = {},
+              a73aac1c_74 = {}
+            },
+            nodeValue = 1,
+            size = 40,
+            x = 960,
+            y = 400
+          },
+          a6a6495d_75 = {
+            connections = {
+              a6a6495d_73 = {}
+            },
+            size = 40,
+            x = 1040,
+            y = 440
+          },
+          a73aac1c_74 = {
+            connections = {
+              a6a6495d_73 = {}
+            },
+            nodeValue = 1,
+            size = 40,
+            x = 920,
+            y = 320
+          }
+        }
       }
     })
     msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
