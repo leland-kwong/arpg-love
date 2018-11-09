@@ -37,11 +37,14 @@ local PassiveTree = {
   data = {}
 }
 
-local hoveredNode = nil
-local selectedNode = nil
-local hoveredConnection = nil
-local selectedConnection = nil
-local mx, my = 0,0
+local state = {
+  hoveredNode = nil,
+  selectedNode = nil,
+  hoveredConnection = nil,
+  selectedConnection = nil,
+  mx = 0,
+  my = 0
+}
 
 local function getMode()
   local InputContext = require 'modules.input-context'
@@ -49,36 +52,36 @@ local function getMode()
     return
   end
 
-  if selectedNode and inputState.mouse.drag.isDragging then
+  if state.selectedNode and inputState.mouse.drag.isDragging then
     return 'NODE_MOVE'
   end
 
-  if selectedNode and hoveredNode and (hoveredNode ~= selectedNode) then
-    local hasConnection = Component.get(selectedNode).connections[hoveredNode]
+  if state.selectedNode and state.hoveredNode and (state.hoveredNode ~= state.selectedNode) then
+    local hasConnection = Component.get(state.selectedNode).connections[state.hoveredNode]
     if (not hasConnection) then
       return 'CONNECTION_CREATE'
     end
   end
 
-  if (not hoveredNode) and (not hoveredConnection) then
-    if (selectedNode or selectedConnection) then
+  if (not state.hoveredNode) and (not state.hoveredConnection) then
+    if (state.selectedNode or state.selectedConnection) then
       return 'CLEAR_SELECTIONS'
     end
     return 'NODE_CREATE'
   end
 
-  if hoveredNode then
+  if state.hoveredNode then
     return 'NODE_SELECTION'
   end
 
-  if hoveredConnection then
+  if state.hoveredConnection then
     return 'CONNECTION_SELECTION'
   end
 end
 
 local function clearSelections()
-  selectedNode = nil
-  selectedConnection = nil
+  state.selectedNode = nil
+  state.selectedConnection = nil
 end
 
 local function snapToGrid(x, y)
@@ -101,16 +104,16 @@ local function placeNode(root, x, y, nodeSize)
     nodeData = {},
 
     onPointerMove = function(self)
-      hoveredNode = self:getId()
+      state.hoveredNode = self:getId()
     end,
     onPointerLeave = function(self)
-      hoveredNode = nil
+      state.hoveredNode = nil
     end,
     onUpdate = function(self)
       if (not root.nodes[self:getId()]) then
         self:delete(true)
-        hoveredNode = nil
-        selectedNode = nil
+        state.hoveredNode = nil
+        state.selectedNode = nil
       end
     end
   })
@@ -119,7 +122,7 @@ local function placeNode(root, x, y, nodeSize)
 end
 
 local function deleteConnection(connectionId)
-  local connectionIds = F.keys(selectedConnection)
+  local connectionIds = F.keys(state.selectedConnection)
   local id1, id2 = unpack(connectionIds)
   Component.get(id1).connections[id2] = nil
   Component.get(id2).connections[id1] = nil
@@ -135,7 +138,7 @@ function PassiveTree.init(self)
 
     -- set the node's data
     onSelect = function(name, value)
-      local guiNode = Component.get(selectedNode)
+      local guiNode = Component.get(state.selectedNode)
       guiNode.nodeData = value
     end
   })
@@ -158,18 +161,18 @@ function PassiveTree.init(self)
     end
 
     if ('CONNECTION_CREATE' == mode) then
-      local selection = selectedNode
+      local selection = state.selectedNode
       clearSelections()
 
       -- make connection between nodes
       local shouldDrawConnection = not not selection
       if shouldDrawConnection then
         local selectedGuiNode = Component.get(selection)
-        local hoveredGuiNode = Component.get(hoveredNode)
+        local hoveredGuiNode = Component.get(state.hoveredNode)
 
         local lineData = {} -- if more points are added, we define a bezier curve
         hoveredGuiNode.connections[selection] = lineData
-        selectedGuiNode.connections[hoveredNode] = lineData
+        selectedGuiNode.connections[state.hoveredNode] = lineData
         return
       end
     end
@@ -179,23 +182,23 @@ function PassiveTree.init(self)
     end
 
     if ('NODE_SELECTION' == mode) and (button == 1) then
-      local alreadySelected = selectedNode == hoveredNode
+      local alreadySelected = state.selectedNode == state.hoveredNode
       if alreadySelected then
-        selectedNode = nil
+        state.selectedNode = nil
       else
-        selectedNode = hoveredNode
+        state.selectedNode = state.hoveredNode
       end
     end
 
     if ('CONNECTION_SELECTION' == mode) and (button == 1) then
       clearSelections()
-      selectedConnection = hoveredConnection
+      state.selectedConnection = state.hoveredConnection
     end
   end)
 
   msgBus.on(msgBus.MOUSE_DRAG, function(event)
     if 'NODE_MOVE' == getMode() then
-      local guiNode = Component.get(selectedNode)
+      local guiNode = Component.get(state.selectedNode)
       local x, y = snapToGrid(event.x - guiNode.width/2, event.y - guiNode.height/2)
       guiNode.x = x
       guiNode.y = y
@@ -208,20 +211,20 @@ function PassiveTree.init(self)
     end
 
     if 'delete' == event.key then
-      if selectedConnection then
-        deleteConnection(selectedConnection)
+      if state.selectedConnection then
+        deleteConnection(state.selectedConnection)
       end
 
-      if selectedNode then
+      if state.selectedNode then
         -- remove connections
-        local guiNode = Component.get(selectedNode)
+        local guiNode = Component.get(state.selectedNode)
         for toNodeId in pairs(guiNode.connections) do
           local toGuiNode = Component.get(toNodeId)
-          toGuiNode.connections[selectedNode] = nil
+          toGuiNode.connections[state.selectedNode] = nil
         end
 
         -- remove node from list
-        self.nodes[selectedNode] = nil
+        self.nodes[state.selectedNode] = nil
       end
     end
   end)
@@ -229,8 +232,8 @@ end
 
 function PassiveTree.handleConnectionInteractions(self)
   -- handle connection collisions
-  hoveredConnection = nil
-  if (not hoveredNode) then
+  state.hoveredConnection = nil
+  if (not state.hoveredNode) then
     for nodeId in pairs(self.nodes) do
       local node = Component.get(nodeId)
 
@@ -238,7 +241,7 @@ function PassiveTree.handleConnectionInteractions(self)
         local connectionNode = Component.get(connectionNodeId)
         local _, len = mouseCollisionWorld:querySegment(node.x, node.y, connectionNode.x, connectionNode.y)
         if len > 0 then
-          hoveredConnection = {
+          state.hoveredConnection = {
             [nodeId] = true,
             [connectionNodeId] = true
           }
@@ -250,8 +253,8 @@ end
 
 function PassiveTree.update(self, dt)
   local mOffset = mouseCollisionSize
-  mx, my = love.mouse.getX(), love.mouse.getY()
-  mouseCollisionWorld:update(mouseCollisionObject, mx - mOffset, my - mOffset)
+  state.mx, state.my = love.mouse.getX(), love.mouse.getY()
+  mouseCollisionWorld:update(mouseCollisionObject, state.mx - mOffset, state.my - mOffset)
 
   self:handleConnectionInteractions()
   self.mode = getMode()
@@ -278,8 +281,8 @@ function PassiveTree.draw(self)
       local oLineWidth = love.graphics.getLineWidth()
       local connectionNode = Component.get(connectionNodeId)
 
-      local isSelectedConnection = selectedConnection and
-        (selectedConnection[connectionNodeId] and selectedConnection[nodeId])
+      local isSelectedConnection = state.selectedConnection and
+        (state.selectedConnection[connectionNodeId] and state.selectedConnection[nodeId])
       if isSelectedConnection then
         love.graphics.setLineWidth(8)
         love.graphics.setColor(1,0.2,1)
@@ -291,7 +294,7 @@ function PassiveTree.draw(self)
         )
       end
 
-      local isHovered = hoveredConnection and hoveredConnection[nodeId] and hoveredConnection[connectionNodeId]
+      local isHovered = state.hoveredConnection and state.hoveredConnection[nodeId] and state.hoveredConnection[connectionNodeId]
       local color = isHovered and Color.LIME or Color.WHITE
       love.graphics.setLineWidth(4)
       love.graphics.setColor(color)
@@ -316,7 +319,7 @@ function PassiveTree.draw(self)
     local x, y, radius = node.x + node.width/2, node.y + node.width/2, node.width/2
     love.graphics.circle('fill', x, y, radius)
 
-    if selectedNode == nodeId then
+    if state.selectedNode == nodeId then
       local oLineWidth = love.graphics.getLineWidth()
       love.graphics.setLineWidth(4)
       love.graphics.setColor(1,1,1)
