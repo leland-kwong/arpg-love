@@ -30,11 +30,26 @@ local state = {
 
 msgBus.MOUSE_DRAG = 'MOUSE_DRAG'
 msgBus.MOUSE_DRAG_START = 'MOUSE_DRAG_START'
+msgBus.MOUSE_DRAG_END = 'MOUSE_DRAG_END'
 local function handleDragEvent()
   local isMouseDown = state.mouse.isDown
   local dragState = state.mouse.drag
   local isDragStart = isMouseDown and (not dragState.isDragging)
+  local isDragEnd = dragState.isDragging and (not isMouseDown)
+
   dragState.isDragging = isMouseDown
+
+  if isDragEnd then
+    local mx, my = love.mouse.getX(), love.mouse.getY()
+    msgBus.send(msgBus.MOUSE_DRAG_END, {
+      startX = dragState.start.x,
+      startY = dragState.start.y,
+      x = mx,
+      y = my
+    })
+    return
+  end
+
   if isMouseDown then
     local mx, my = love.mouse.getX(), love.mouse.getY()
     if isDragStart then
