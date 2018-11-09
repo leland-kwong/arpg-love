@@ -2,6 +2,7 @@ local socket = require 'socket'
 local msgBus = require 'components.msg-bus'
 local config = require 'config.config'
 local userSettings = require 'config.user-settings'
+local abs = math.abs
 require 'main.inputs.keyboard-manager'
 
 msgBus.MOUSE_CLICKED = 'MOUSE_CLICKED'
@@ -52,7 +53,8 @@ local function handleDragEvent()
       })
     end
     local dx, dy = mx - dragState.start.x, my - dragState.start.y
-    local isDragging = (dx ~= 0) or (dy ~= 0)
+    local threshold = 2 -- minimum distance to consider it a drag
+    local isDragging = (abs(dx) + abs(dy)) >= threshold
     dragState.isDragging = isDragging
     if isDragging then
       local event = {

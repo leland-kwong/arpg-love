@@ -204,6 +204,7 @@ function PassiveTree.init(self)
       local x, y = snapToGrid(event.x - guiNode.width/2, event.y - guiNode.height/2)
       guiNode.x = x
       guiNode.y = y
+      clearSelections()
     end
   end)
 
