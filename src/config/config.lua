@@ -27,10 +27,6 @@ M.resolution = {
   w = 640 * 1.5,
   h = 360 * 1.5
 }
-M.window = {
-  width = M.resolution.w * M.scale,
-  height = M.resolution.h * M.scale
-}
 
 M.isDevelopment = false
 M.enableConsole = false
