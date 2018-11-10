@@ -6,16 +6,19 @@ local SkillTreeEditor = require 'scene.skill-tree-editor.editor'
 local nodeValueOptions = {
   [1] = {
     name = 'attack speed',
-    value = 1
+    value = 1,
+    image = 'gui-skill-tree_node_speed-up'
   },
   [2] = {
     name = 'bonus damage',
-    value = 0.2
+    value = 0.2,
+    image = 'gui-skill-tree_node_damage-up'
   },
   [3] = {
     name = 'lightning rod',
     value = 'lightning damage',
-    type = 'keystone'
+    type = 'keystone',
+    image = 'gui-skill-tree_node_lightning'
   }
 }
 
@@ -32,6 +35,7 @@ msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
       scene = Component.createFactory(Scene),
       props = {
         nodeValueOptions = nodeValueOptions,
+        defaultNodeImage = 'gui-skill-tree_node_background',
         nodes = SkillTreeEditor.loadState()
       }
     })

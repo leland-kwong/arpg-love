@@ -4,6 +4,7 @@ local msgBus = require 'components.msg-bus'
 local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local Gui = require 'components.gui.gui'
 local GuiText = require 'components.gui.gui-text'
+local config = require 'config.config'
 local Color = require 'modules.color'
 local bump = require 'modules.bump'
 local F = require 'utils.functional'
@@ -22,8 +23,8 @@ local inputState = require 'main.inputs'.state
 
 local mouseCollisionWorld = bump.newWorld(32)
 local mouseCollisionObject = {}
-local mouseCollisionSize = 24
-local cellSize = 30
+local mouseCollisionSize = 50
+local cellSize = 25
 mouseCollisionWorld:add(mouseCollisionObject, 0, 0, mouseCollisionSize, mouseCollisionSize)
 
 local sourceDirectory = love.filesystem.getSourceBaseDirectory()
@@ -67,7 +68,7 @@ local TreeEditor = {
     )
   end,
   debug = {
-    connectionCount = true,
+    -- connectionCount = true,
   },
   nodes = {},
   nodeValueOptions = {},
@@ -249,7 +250,7 @@ local function placeNode(root, nodeId, screenX, screenY, connections, nodeValue,
         state.selectedNode = nil
       end
       local optionValue = root.nodeValueOptions[self.nodeValue]
-      local size = optionValue and optionValue.type == 'keystone' and (1.5 * cellSize) or cellSize
+      local size = optionValue and (optionValue.type == 'keystone') and (2 * cellSize) or (2 * cellSize)
       self.width, self.height = size, size
     end
   })
@@ -564,7 +565,7 @@ function TreeEditor.draw(self)
     local node = Component.get(nodeId)
     local dataKey = node.nodeValue
     local optionValue = self.nodeValueOptions[dataKey]
-    local radius = optionValue and optionValue.type == 'keystone' and 30 or node.width/2
+    local radius = node.width/2
     local x, y = node.x + node.width/2 + tx, node.y + node.width/2 + ty
 
     -- cut-out the areas that overlap the connections
@@ -575,22 +576,40 @@ function TreeEditor.draw(self)
 
     if editorModes.PLAY == state.editorMode then
       if node.selected then
-        love.graphics.setColor(0.2,0,1)
-      elseif playMode.isNodeSelectable(node, self.nodes) then
         love.graphics.setColor(1,1,1)
-      -- non-selectable
       else
         love.graphics.setColor(1,1,1,0.3)
       end
-    else
+      local AnimationFactory = require 'components.animation-factory'
+      local sprite = optionValue and optionValue.image or self.defaultNodeImage
+      local animation = AnimationFactory:newStaticSprite(sprite)
+      local ox, oy = animation:getOffset()
+      local scale = 2
+      love.graphics.draw(
+        AnimationFactory.atlas, animation.sprite,
+        x, y,
+        0,
+        scale, scale,
+        ox, oy
+      )
+    end
+
+    if editorModes.EDIT == state.editorMode then
       if node.hovered then
         love.graphics.setColor(0,1,0)
       else
         love.graphics.setColor(1,0.5,0)
       end
-    end
+      love.graphics.circle('fill', x, y, radius)
 
-    love.graphics.circle('fill', x, y, radius)
+      if optionValue then
+        debugTextLayer:add(
+          optionValue.value,
+          Color.WHITE,
+          x/config.scale, y/config.scale
+        )
+      end
+    end
 
     if state.selectedNode == nodeId then
       local oLineWidth = love.graphics.getLineWidth()
@@ -600,21 +619,11 @@ function TreeEditor.draw(self)
       love.graphics.setLineWidth(oLineWidth)
     end
 
-    if optionValue then
-      love.graphics.setColor(1,1,1)
-      debugTextLayer:add(
-        optionValue.value,
-        Color.WHITE,
-        x/2,
-        y/2 -10
-      )
-    end
-
     if self.debug.connectionCount then
       debugTextLayer:add(
         #F.keys(node.connections),
         Color.WHITE,
-        x / 2, y / 2
+        x/config.scale, y/config.scale
       )
     end
   end

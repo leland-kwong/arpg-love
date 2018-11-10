@@ -251,18 +251,18 @@ Nodes
 
 - +1% attack speed
 - sharp: +1% damage
+- +2% movespeed
+- +2% health regeneration
+- +2% energy regeneration
+- sturdy: +2% maximum health
+- battery: +2% maximum energy
 - +2% fire damage
 - +1% fire damage, +1% chance to burn
 - +2% cold damage
 - +1% cold damage, +1% chance to freeze
 - +2% lightning damage
 - +1% lightning damage, +1% chance to shock
-- +2% movespeed
-- +2% health regeneration
-- +2% energy regeneration
 - sure strike: +1% critical hit chance
-- sturdy: +2% maximum health
-- battery: +2% maximum energy
 - recharge: +1 energy gained per hit
 - life force: +1 health gained per hit
 - efficiency: -2% energy cost
