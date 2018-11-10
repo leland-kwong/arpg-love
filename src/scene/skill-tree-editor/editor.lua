@@ -512,6 +512,37 @@ function TreeEditor.drawTreeCenter(self)
   love.graphics.circle('fill', tx, ty, 10)
 end
 
+function TreeEditor.drawTooltip(self)
+  if (not state.hoveredNode) then
+    return
+  end
+
+  local tx, ty = getTranslate()
+  local guiNode = Component.get(state.hoveredNode)
+  local dataKey = guiNode.nodeValue
+  local optionValue = self.nodeValueOptions[dataKey]
+  if optionValue then
+    local tooltipContent = optionValue:description()
+    local x, y = (guiNode.x + tx)/config.scale, (guiNode.y + ty - 20)/config.scale
+    local width, height = GuiText.getTextSize(tooltipContent, debugTextLayer.font)
+    local padding = 5
+    love.graphics.push()
+    love.graphics.scale(config.scale)
+      local rectX, rectY, rectW, rectH = x - padding, y - padding, width + padding*2, height + padding
+      love.graphics.setColor(0,0,0)
+      love.graphics.rectangle('fill', rectX, rectY, rectW, rectH)
+      love.graphics.setColor(1,1,1)
+      love.graphics.rectangle('line', rectX, rectY, rectW, rectH)
+    love.graphics.pop()
+    debugTextLayer:add(
+      tooltipContent,
+      Color.WHITE,
+      x,
+      y
+    )
+  end
+end
+
 function TreeEditor.draw(self)
   local tx, ty = getTranslate()
   love.graphics.push()
@@ -635,6 +666,8 @@ function TreeEditor.draw(self)
       )
     end
   end
+
+  self:drawTooltip()
 
   love.graphics.pop()
 end

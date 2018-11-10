@@ -8,18 +8,35 @@ local nodeValueOptions = {
   [1] = {
     name = 'attack speed',
     value = 1,
-    image = 'gui-skill-tree_node_speed-up'
+    image = 'gui-skill-tree_node_speed-up',
+    description = function(self)
+      return '+'..self.value..'% attack speed'
+    end
   },
   [2] = {
     name = 'bonus damage',
     value = 0.2,
-    image = 'gui-skill-tree_node_damage-up'
+    image = 'gui-skill-tree_node_damage-up',
+    description = function(self)
+      return '+'..self.value..'% damage'
+    end
   },
   [3] = {
     name = 'lightning rod',
-    value = 'lightning damage',
+    value = 0.1,
     type = 'keystone',
-    image = 'gui-skill-tree_node_lightning'
+    image = 'gui-skill-tree_node_lightning',
+    description = function(self)
+      return '+'..(self.value * 100)..'% chance lightning damage'
+    end
+  },
+  [4] = {
+    name = 'battle suit',
+    value = 0,
+    type = 'dummyNode',
+    description = function()
+      return 'Battle suit'
+    end
   }
 }
 
