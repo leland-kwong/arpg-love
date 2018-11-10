@@ -149,12 +149,11 @@ end
 
 -- creates a new node and adds it to the node tree
 local function placeNode(root, nodeId, x, y, nodeSize, connections, nodeValue)
-  local snapX, snapY = snapToGrid(x - nodeSize/2, y - nodeSize/2)
   local node = Gui.create({
     id = nodeId,
     inputContext = 'treeNode',
-    x = snapX,
-    y = snapY,
+    x = x,
+    y = y,
     width = nodeSize,
     height = nodeSize,
     scale = 1,
@@ -271,7 +270,9 @@ function TreeEditor.init(self)
     end
 
     if ('NODE_CREATE' == mode) and (button == 1) then
-      placeNode(root, nil, state.mx, state.my, 40)
+      local nodeSize = 40
+      local snapX, snapY = snapToGrid(state.mx - nodeSize/2, state.my - nodeSize/2)
+      placeNode(root, nil, snapX, snapY, nodeSize)
     end
 
     if ('NODE_SELECTION' == mode) and (button == 1) then
