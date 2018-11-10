@@ -38,3 +38,11 @@ Notifier.create({
   h = notifierHeight,
   w = notifierWidth
 })
+
+local ActionError = require 'components.hud.action-error'
+local ActionErrorTextLayer = require 'components.gui.gui-text'.create({
+  font = require 'components.font'.primary.font
+})
+ActionError.create({
+  textLayer = ActionErrorTextLayer
+})

@@ -4,7 +4,6 @@ local StatusBar = require 'components.hud.status-bar'
 local ExperienceIndicator = require 'components.hud.experience-indicator'
 local ScreenFx = require 'components.hud.screen-fx'
 local ActiveSkillInfo = require 'components.hud.active-skill-info'
-local ActionError = require 'components.hud.action-error'
 local GuiText = require 'components.gui.gui-text'
 local NpcInfo = require 'components.hud.npc-info'
 local Notifier = require 'components.hud.notifier'
@@ -143,9 +142,6 @@ function Hud.init(self)
     end
   }):setParent(self)
   NpcInfo.create():setParent(self)
-  ActionError.create({
-    textLayer = self.hudTextSmallLayer
-  }):setParent(self)
 
   HudStatusIcons.create({
     id = 'hudStatusIcons',
