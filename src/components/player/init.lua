@@ -26,8 +26,6 @@ local F = require 'utils.functional'
 local Object = require 'utils.object-utils'
 
 local colMap = collisionWorlds.map
-local keyMap = userSettings.keyboard
-local mouseInputMap = userSettings.mouseInputMap
 
 local startPos = {
   x = config.gridSize * 3,
@@ -411,6 +409,7 @@ local Player = Object.extend(BaseStatModifiers(), {
 })
 
 local function handleMovement(self, dt)
+  local keyMap = userSettings.keyboard
   local totalMoveSpeed = self:getCalculatedStat('moveSpeed')
 
   if self.attackRecoveryTime > 0 then
@@ -469,6 +468,8 @@ local function handleAnimation(self, dt, nextX, nextY, moveSpeed)
 end
 
 local function handleAbilities(self, dt)
+  local mouseInputMap = userSettings.mouseInputMap
+  local keyMap = userSettings.keyboard
   -- ACTIVE_ITEM_1
   local isItem1Activate = love.keyboard.isDown(keyMap.ACTIVE_ITEM_1)
   if not self.clickDisabled and isItem1Activate then
