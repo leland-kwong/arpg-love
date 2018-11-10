@@ -33,6 +33,26 @@ local debugTextLayer = GuiText.create({
   font = require 'components.font'.primary.font
 })
 
+local function sortKeys(val)
+  if type(val) ~= 'table' then
+    return val
+  end
+
+  local newTable = {}
+  local keys = {}
+  for k in pairs(val) do
+    table.insert(keys, k)
+  end
+  table.sort(keys)
+
+  for i=1, #keys do
+    local key = keys[i]
+    newTable[key] = sortKeys(val[key])
+  end
+
+  return newTable
+end
+
 local TreeEditor = {
   loadState = function()
     local io = require 'io'
@@ -40,7 +60,11 @@ local TreeEditor = {
     for line in io.lines(pathToSave) do
       savedState = (savedState or '')..line
     end
-    return savedState and loadstring(savedState)() or {}
+
+    -- IMPORTANT: In lua, key insertion order affects the order of serialization. So we should sort the keys to make sure it is deterministic.
+    return sortKeys(
+      savedState and loadstring(savedState)() or {}
+    )
   end,
   debug = {
     connectionCount = true,
