@@ -41,6 +41,7 @@ msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
         colors = {
           nodeConnection = {
             outer = Color.SKY_BLUE,
+            outerNonSelectable = Color.MED_DARK_GRAY,
             inner = {Color.multiplyAlpha(Color.DARK_GRAY, 0.7)}
           }
         }

@@ -198,6 +198,9 @@ local playMode = {
       end
     end
     return true
+  end,
+  isConnectionToSelectableNode = function(fromNode, toNode)
+    return fromNode.selected or toNode.selected
   end
 }
 
@@ -549,8 +552,10 @@ function TreeEditor.draw(self)
       love.graphics.setLineWidth(6)
       if isSelectedConnection then
         love.graphics.setColor(1,0.2,1)
-      else
+      elseif playMode.isConnectionToSelectableNode(node, connectionNode) then
         love.graphics.setColor(self.colors.nodeConnection.outer)
+      else
+        love.graphics.setColor(self.colors.nodeConnection.outerNonSelectable)
       end
       drawConnection(node, connectionNode)
 
