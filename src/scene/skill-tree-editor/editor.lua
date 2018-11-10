@@ -201,14 +201,16 @@ local playMode = {
 }
 
 -- creates a new node and adds it to the node tree
-local function placeNode(root, nodeId, screenX, screenY, nodeSize, connections, nodeValue, selected)
+local function placeNode(root, nodeId, screenX, screenY, connections, nodeValue, selected, size)
+  size = size or 1
+
   local node = Gui.create({
     id = nodeId,
     inputContext = 'treeNode',
     x = screenX,
     y = screenY,
-    width = nodeSize,
-    height = nodeSize,
+    width = size,
+    height = size,
     scale = 1,
 
     -- node-specific state data to be serialized
@@ -246,6 +248,9 @@ local function placeNode(root, nodeId, screenX, screenY, nodeSize, connections, 
         state.hoveredNode = nil
         state.selectedNode = nil
       end
+      local optionValue = root.nodeValueOptions[self.nodeValue]
+      local size = optionValue and optionValue.type == 'keystone' and (1.5 * cellSize) or cellSize
+      self.width, self.height = size, size
     end
   })
 
@@ -270,7 +275,6 @@ function TreeEditor.loadFromSerializedState(self)
       -- restore coordinates as pixel units
       props.x * cellSize,
       props.y * cellSize,
-      props.size,
       props.connections,
       props.nodeValue,
       props.selected
@@ -307,9 +311,8 @@ function TreeEditor.handleInputs(self)
     end
 
     if ('NODE_CREATE' == mode) and (button == 1) then
-      local nodeSize = 40
-      local snapX, snapY = snapToGrid(state.mx - nodeSize/2, state.my - nodeSize/2)
-      placeNode(root, nil, snapX, snapY, nodeSize)
+      local snapX, snapY = snapToGrid(state.mx - cellSize/2, state.my - cellSize/2)
+      placeNode(root, nil, snapX, snapY, nil, nil, nil, cellSize)
     end
 
     if ('NODE_SELECTION' == mode) and (button == 1) then
@@ -511,6 +514,8 @@ function TreeEditor.draw(self)
   love.graphics.origin()
 
   self:drawTreeCenter()
+
+  -- draw mouse preview position
   if 'NODE_CREATE' == self.mode then
     love.graphics.setColor(1,1,1,0.5)
     local x, y = snapToGrid(
