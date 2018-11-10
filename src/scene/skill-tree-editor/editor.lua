@@ -243,31 +243,7 @@ function TreeEditor.loadFromSerializedState(self)
   end
 end
 
-function TreeEditor.init(self)
-  local function setnodeValue(name, optionKey)
-    local guiNode = Component.get(state.selectedNode)
-    guiNode.nodeValue = optionKey
-  end
-  nodeValueOptions.create({
-    id = 'nodeValueMenu',
-    x = 0,
-    y = 0,
-    options = self.nodeValueOptions,
-
-    -- set the node's data
-    onSelect = setnodeValue
-  })
-
-  self:loadFromSerializedState()
-
-  local root = self
-  msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
-  Component.get('mainMenu'):delete(true)
-
-  love.mouse.setCursor()
-
-  Component.addToGroup(self, 'gui')
-
+function TreeEditor.handleInputs(self)
   msgBus.on(msgBus.MOUSE_CLICKED, function(event)
     local mode = getMode()
     local _, _, button = unpack(event)
@@ -377,6 +353,72 @@ function TreeEditor.init(self)
   end)
 end
 
+function TreeEditor.init(self)
+  local function setnodeValue(name, optionKey)
+    local guiNode = Component.get(state.selectedNode)
+    guiNode.nodeValue = optionKey
+  end
+  nodeValueOptions.create({
+    id = 'nodeValueMenu',
+    x = 0,
+    y = 0,
+    options = self.nodeValueOptions,
+
+    -- set the node's data
+    onSelect = setnodeValue
+  })
+
+  self:loadFromSerializedState()
+
+  local root = self
+  msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
+  Component.get('mainMenu'):delete(true)
+
+  love.mouse.setCursor()
+
+  Component.addToGroup(self, 'gui')
+
+  self:handleInputs()
+
+  Component.create({
+    init = function(self)
+      local Gui = require 'components.gui.gui'
+      local GuiText = require 'components.gui.gui-text'
+      local config = require 'config.config'
+      local Enum = require 'utils.enum'
+      local modes = Enum({
+        'EDIT',
+        'DEMO'
+      })
+      local editorMode = modes.EDIT
+      local guiTextRegular = GuiText.create({
+        font = require 'components.font'.primary.font
+      })
+      Gui.create({
+        type = Gui.types.INTERACT,
+        x = 200,
+        y = love.graphics.getHeight() / config.scale - 50,
+        onClick = function()
+          editorMode = (editorMode == modes.EDIT) and modes.DEMO or modes.EDIT
+
+          if modes.DEMO == editorMode then
+
+          else
+
+          end
+        end,
+        onUpdate = function(self)
+          self.width, self.height = guiTextRegular.getTextSize(editorMode, guiTextRegular.font)
+        end,
+        draw = function(self)
+          local Color = require 'modules.color'
+          guiTextRegular:add(editorMode, Color.WHITE, self.x, self.y)
+        end
+      })
+    end
+  })
+end
+
 function TreeEditor.handleConnectionInteractions(self)
   -- handle connection collisions
   state.hoveredConnection = nil
@@ -476,9 +518,9 @@ function TreeEditor.draw(self)
 
     if state.selectedNode == nodeId then
       local oLineWidth = love.graphics.getLineWidth()
-      love.graphics.setLineWidth(4)
+      love.graphics.setLineWidth(2)
       love.graphics.setColor(1,1,1)
-      love.graphics.circle('line', x, y, radius)
+      love.graphics.circle('line', x, y, radius + 4)
       love.graphics.setLineWidth(oLineWidth)
     end
 
