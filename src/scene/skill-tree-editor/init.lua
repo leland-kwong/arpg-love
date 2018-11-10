@@ -12,6 +12,10 @@ local nodeValueOptions = {
   [2] = {
     name = 'bonus damage',
     value = 0.2
+  },
+  [3] = {
+    name = 'lightning rod',
+    value = 'lightning damage'
   }
 }
 

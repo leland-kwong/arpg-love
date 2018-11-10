@@ -23,7 +23,7 @@ local inputState = require 'main.inputs'.state
 local mouseCollisionWorld = bump.newWorld(32)
 local mouseCollisionObject = {}
 local mouseCollisionSize = 24
-local cellSize = 40
+local cellSize = 20
 mouseCollisionWorld:add(mouseCollisionObject, 0, 0, mouseCollisionSize, mouseCollisionSize)
 
 local sourceDirectory = love.filesystem.getSourceBaseDirectory()
@@ -75,12 +75,27 @@ local TreeEditor = {
   end
 }
 
+local function snapToGrid(x, y)
+  local Position = require 'utils.position'
+  local gridX, gridY = Position.pixelsToGridUnits(x, y, cellSize)
+  return Position.gridToPixels(gridX, gridY, cellSize)
+end
+
+local initialDx, initialDy = snapToGrid(1920/2, 1080/2)
 local state = {
   hoveredNode = nil,
   selectedNode = nil,
   movingNode = nil,
   hoveredConnection = nil,
   selectedConnection = nil,
+  translate = {
+    startX = 0,
+    startY = 0,
+    dx = 0,
+    dy = 0,
+    dxTotal = initialDx,
+    dyTotal = initialDy
+  },
   mx = 0,
   my = 0
 }
@@ -89,6 +104,10 @@ local function getMode()
   local InputContext = require 'modules.input-context'
   if 'gui' == InputContext.get() then
     return
+  end
+
+  if (inputState.keyboard.keysPressed.space) then
+    return 'TREE_PANNING'
   end
 
   if (state.hoveredNode or state.movingNode) and inputState.mouse.drag.isDragging then
@@ -118,15 +137,14 @@ local function getMode()
   end
 end
 
+local function getTranslate()
+  return state.translate.dxTotal + state.translate.dx,
+    state.translate.dyTotal + state.translate.dy
+end
+
 local function clearSelections()
   state.selectedNode = nil
   state.selectedConnection = nil
-end
-
-local function snapToGrid(x, y)
-  local Position = require 'utils.position'
-  local gridX, gridY = Position.pixelsToGridUnits(x, y, cellSize)
-  return Position.gridToPixels(gridX, gridY, cellSize)
 end
 
 -- creates a new node and adds it to the node tree
@@ -143,6 +161,12 @@ local function placeNode(root, nodeId, x, y, nodeSize, connections, nodeValue)
 
     connections = connections or {},
     nodeValue = nodeValue, -- stores the value by the option's key
+
+    getMousePosition = function(self)
+      local tx, ty = getTranslate()
+      return love.mouse.getX() - tx,
+        love.mouse.getY() - ty
+    end,
 
     serialize = function(self)
       return {
@@ -223,7 +247,7 @@ function TreeEditor.init(self)
 
   msgBus.on(msgBus.MOUSE_CLICKED, function(event)
     local mode = getMode()
-    local x, y, button = unpack(event)
+    local _, _, button = unpack(event)
 
     if ('CLEAR_SELECTIONS' == mode) then
       return clearSelections()
@@ -247,7 +271,7 @@ function TreeEditor.init(self)
     end
 
     if ('NODE_CREATE' == mode) and (button == 1) then
-      placeNode(root, nil, x, y, 40)
+      placeNode(root, nil, state.mx, state.my, 40)
     end
 
     if ('NODE_SELECTION' == mode) and (button == 1) then
@@ -269,15 +293,32 @@ function TreeEditor.init(self)
     if 'NODE_MOVE' == getMode() then
       state.movingNode = state.movingNode or state.hoveredNode
       local guiNode = Component.get(state.movingNode)
-      local x, y = snapToGrid(event.x - guiNode.width/2, event.y - guiNode.height/2)
+      local x, y = snapToGrid(state.mx - guiNode.width/2, state.my - guiNode.height/2)
       guiNode.x = x
       guiNode.y = y
       clearSelections()
+    end
+
+    if 'TREE_PANNING' == getMode() then
+      local tx = state.translate
+      tx.startX = event.startX
+      tx.startY = event.startY
+      local snapX, snapY = snapToGrid(event.dx, event.dy)
+      tx.dx = snapX
+      tx.dy = snapY
     end
   end)
 
   msgBus.on(msgBus.MOUSE_DRAG_END, function(event)
     state.movingNode = nil
+
+    local tx = state.translate
+    tx.dxTotal = tx.dxTotal + tx.dx
+    tx.dyTotal = tx.dyTotal + tx.dy
+    tx.startX = 0
+    tx.startY = 0
+    tx.dx = 0
+    tx.dy = 0
   end)
 
   msgBus.on(msgBus.KEY_PRESSED, function(event)
@@ -285,7 +326,8 @@ function TreeEditor.init(self)
       clearSelections()
     end
 
-    local serializeTree = 's' == event.key
+    local serializeTree = 's' == event.key and
+      (inputState.keyboard.keysPressed.lctrl or inputState.keyboard.keysPressed.rctrl)
     if serializeTree then
       self:serialize()
     end
@@ -332,18 +374,27 @@ function TreeEditor.handleConnectionInteractions(self)
 end
 
 function TreeEditor.update(self, dt)
+  local tx, ty = getTranslate()
   local mOffset = mouseCollisionSize
-  state.mx, state.my = love.mouse.getX(), love.mouse.getY()
+  state.mx, state.my = love.mouse.getX() - tx, love.mouse.getY() - ty
   mouseCollisionWorld:update(mouseCollisionObject, state.mx - mOffset, state.my - mOffset)
 
   self:handleConnectionInteractions()
   self.mode = getMode()
 end
 
+function TreeEditor.drawTreeCenter(self)
+  local tx, ty = getTranslate()
+  love.graphics.setColor(1,1,1)
+  love.graphics.circle('fill', tx, ty, 10)
+end
+
 function TreeEditor.draw(self)
+  local tx, ty = getTranslate()
   love.graphics.push()
   love.graphics.origin()
 
+  self:drawTreeCenter()
   if 'NODE_CREATE' == self.mode then
     love.graphics.setColor(1,1,1,0.5)
     local x, y = snapToGrid(
@@ -351,6 +402,15 @@ function TreeEditor.draw(self)
       love.mouse.getY() - cellSize/2
     )
     love.graphics.rectangle('line', x, y, cellSize, cellSize)
+  end
+
+  local function drawConnection(node, connectionNode)
+    love.graphics.line(
+      node.x + node.width/2 + tx,
+      node.y + node.width/2 + ty,
+      connectionNode.x + connectionNode.width/2 + tx,
+      connectionNode.y + connectionNode.width/2 + ty
+    )
   end
 
   -- draw connections
@@ -366,24 +426,14 @@ function TreeEditor.draw(self)
       if isSelectedConnection then
         love.graphics.setLineWidth(8)
         love.graphics.setColor(1,0.2,1)
-        love.graphics.line(
-          node.x + node.width/2,
-          node.y + node.width/2,
-          connectionNode.x + connectionNode.width/2,
-          connectionNode.y + connectionNode.width/2
-        )
+        drawConnection(node, connectionNode)
       end
 
       local isHovered = state.hoveredConnection and state.hoveredConnection[nodeId] and state.hoveredConnection[connectionNodeId]
       local color = isHovered and Color.LIME or Color.WHITE
       love.graphics.setLineWidth(4)
       love.graphics.setColor(color)
-      love.graphics.line(
-        node.x + node.width/2,
-        node.y + node.width/2,
-        connectionNode.x + connectionNode.width/2,
-        connectionNode.y + connectionNode.width/2
-      )
+      drawConnection(node, connectionNode)
       love.graphics.setLineWidth(oLineWidth)
     end
   end
@@ -396,7 +446,7 @@ function TreeEditor.draw(self)
     else
       love.graphics.setColor(1,0.5,0)
     end
-    local x, y, radius = node.x + node.width/2, node.y + node.width/2, node.width/2
+    local x, y, radius = node.x + node.width/2 + tx, node.y + node.width/2 + ty, node.width/2
     love.graphics.circle('fill', x, y, radius)
 
     if state.selectedNode == nodeId then
