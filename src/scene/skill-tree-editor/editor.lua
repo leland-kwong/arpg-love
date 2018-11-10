@@ -23,7 +23,7 @@ local inputState = require 'main.inputs'.state
 local mouseCollisionWorld = bump.newWorld(32)
 local mouseCollisionObject = {}
 local mouseCollisionSize = 24
-local cellSize = 20
+local cellSize = 30
 mouseCollisionWorld:add(mouseCollisionObject, 0, 0, mouseCollisionSize, mouseCollisionSize)
 
 local sourceDirectory = love.filesystem.getSourceBaseDirectory()
@@ -201,12 +201,12 @@ local playMode = {
 }
 
 -- creates a new node and adds it to the node tree
-local function placeNode(root, nodeId, x, y, nodeSize, connections, nodeValue, selected)
+local function placeNode(root, nodeId, screenX, screenY, nodeSize, connections, nodeValue, selected)
   local node = Gui.create({
     id = nodeId,
     inputContext = 'treeNode',
-    x = x,
-    y = y,
+    x = screenX,
+    y = screenY,
     width = nodeSize,
     height = nodeSize,
     scale = 1,
@@ -224,8 +224,9 @@ local function placeNode(root, nodeId, x, y, nodeSize, connections, nodeValue, s
 
     serialize = function(self)
       return {
-        x = self.x,
-        y = self.y,
+        -- store coordinates as grid units
+        x = self.x / cellSize,
+        y = self.y / cellSize,
         size = nodeSize,
         connections = self.connections,
         nodeValue = self.nodeValue,
@@ -266,8 +267,9 @@ function TreeEditor.loadFromSerializedState(self)
     placeNode(
       self,
       id,
-      props.x,
-      props.y,
+      -- restore coordinates as pixel units
+      props.x * cellSize,
+      props.y * cellSize,
       props.size,
       props.connections,
       props.nodeValue,
