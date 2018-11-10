@@ -141,14 +141,14 @@ _[24]={x=10,selected=false,y=2,connections=_[65]}
 _[23]={x=-7,selected=false,y=17,connections=_[64]}
 _[22]={x=-11,selected=true,y=-3,nodeValue=1,connections=_[63]}
 _[21]={x=7,selected=false,y=1,connections=_[62]}
-_[20]={x=-19,selected=true,y=2,nodeValue=1,connections=_[61]}
+_[20]={x=-19,selected=false,y=2,nodeValue=1,connections=_[61]}
 _[19]={x=-1,selected=false,y=7,connections=_[60]}
 _[18]={x=11,selected=false,y=12,connections=_[59]}
 _[17]={x=18,selected=false,y=-3,connections=_[58]}
 _[16]={x=-22,selected=false,y=5,nodeValue=1,connections=_[57]}
 _[15]={x=14,selected=false,y=-3,connections=_[56]}
 _[14]={x=8,selected=false,y=9,connections=_[55]}
-_[13]={x=5,selected=true,y=-3,connections=_[54]}
+_[13]={x=5,selected=false,y=-3,connections=_[54]}
 _[12]={x=-14,selected=false,y=9,connections=_[53]}
 _[11]={x=-12,selected=false,y=7,connections=_[52]}
 _[10]={x=13,selected=false,y=2,connections=_[51]}
