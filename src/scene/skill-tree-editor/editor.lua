@@ -106,6 +106,11 @@ local function snapToGrid(x, y)
 end
 
 local initialDx, initialDy = snapToGrid(1920/2, 1080/2)
+local Enum = require 'utils.enum'
+local editorModes = Enum({
+  'EDIT',
+  'DEMO'
+})
 local state = {
   hoveredNode = nil,
   selectedNode = nil,
@@ -121,7 +126,8 @@ local state = {
     dyTotal = initialDy
   },
   mx = 0,
-  my = 0
+  my = 0,
+  editorMode = editorModes.EDIT
 }
 
 local function getMode()
@@ -171,8 +177,31 @@ local function clearSelections()
   state.selectedConnection = nil
 end
 
+local demoMode = {
+  isNodeSelectable = function(nodeToCheck, nodeList)
+    for id in pairs(nodeToCheck.connections) do
+      if nodeList[id].selected then
+        return true
+      end
+    end
+    return false
+  end,
+  isNodeUnselectable = function(nodeToCheck, nodeList)
+    local numSelectedSiblingNodes = 0
+    for id in pairs(nodeToCheck.connections) do
+      if nodeList[id].selected then
+        numSelectedSiblingNodes = numSelectedSiblingNodes + 1
+      end
+      if numSelectedSiblingNodes > 1 then
+        return false
+      end
+    end
+    return true
+  end
+}
+
 -- creates a new node and adds it to the node tree
-local function placeNode(root, nodeId, x, y, nodeSize, connections, nodeValue)
+local function placeNode(root, nodeId, x, y, nodeSize, connections, nodeValue, selected)
   local node = Gui.create({
     id = nodeId,
     inputContext = 'treeNode',
@@ -182,8 +211,10 @@ local function placeNode(root, nodeId, x, y, nodeSize, connections, nodeValue)
     height = nodeSize,
     scale = 1,
 
+    -- node-specific state data to be serialized
     connections = connections or {},
     nodeValue = nodeValue, -- stores the value by the option's key
+    selected = selected or false, -- whether the node has been "bought"
 
     getMousePosition = function(self)
       local tx, ty = getTranslate()
@@ -197,7 +228,8 @@ local function placeNode(root, nodeId, x, y, nodeSize, connections, nodeValue)
         y = self.y,
         size = nodeSize,
         connections = self.connections,
-        nodeValue = self.nodeValue
+        nodeValue = self.nodeValue,
+        selected = self.selected
       }
     end,
 
@@ -217,7 +249,7 @@ local function placeNode(root, nodeId, x, y, nodeSize, connections, nodeValue)
   })
 
   local nodeId = node:getId()
-  root.nodes[nodeId] = true
+  root.nodes[nodeId] = node
   return nodeId
 end
 
@@ -238,12 +270,15 @@ function TreeEditor.loadFromSerializedState(self)
       props.y,
       props.size,
       props.connections,
-      props.nodeValue
+      props.nodeValue,
+      props.selected
     )
   end
 end
 
 function TreeEditor.handleInputs(self)
+  local root = self
+
   msgBus.on(msgBus.MOUSE_CLICKED, function(event)
     local mode = getMode()
     local _, _, button = unpack(event)
@@ -276,6 +311,17 @@ function TreeEditor.handleInputs(self)
     end
 
     if ('NODE_SELECTION' == mode) and (button == 1) then
+      if (state.editorMode == editorModes.DEMO) then
+        local node = Component.get(state.hoveredNode)
+        if ((not node.selected) and (not demoMode.isNodeSelectable(node, self.nodes))) or
+          (node.selected and (not demoMode.isNodeUnselectable(node, self.nodes)))
+        then
+          return
+        end
+        node.selected = not node.selected
+        return
+      end
+
       local alreadySelected = state.selectedNode == state.hoveredNode
       if alreadySelected then
         state.selectedNode = nil
@@ -354,6 +400,12 @@ function TreeEditor.handleInputs(self)
 end
 
 function TreeEditor.init(self)
+  local tick = require 'utils.tick'
+  local function autoSerialize()
+    self:serialize()
+  end
+  tick.recur(autoSerialize, 0.5)
+
   local function setnodeValue(name, optionKey)
     local guiNode = Component.get(state.selectedNode)
     guiNode.nodeValue = optionKey
@@ -385,34 +437,29 @@ function TreeEditor.init(self)
       local Gui = require 'components.gui.gui'
       local GuiText = require 'components.gui.gui-text'
       local config = require 'config.config'
-      local Enum = require 'utils.enum'
-      local modes = Enum({
-        'EDIT',
-        'DEMO'
-      })
-      local editorMode = modes.EDIT
       local guiTextRegular = GuiText.create({
         font = require 'components.font'.primary.font
       })
+      local modes = editorModes
       Gui.create({
         type = Gui.types.INTERACT,
         x = 200,
         y = love.graphics.getHeight() / config.scale - 50,
         onClick = function()
-          editorMode = (editorMode == modes.EDIT) and modes.DEMO or modes.EDIT
+          state.editorMode = (state.editorMode == modes.EDIT) and modes.DEMO or modes.EDIT
 
-          if modes.DEMO == editorMode then
+          if modes.DEMO == state.editorMode then
 
           else
 
           end
         end,
         onUpdate = function(self)
-          self.width, self.height = guiTextRegular.getTextSize(editorMode, guiTextRegular.font)
+          self.width, self.height = guiTextRegular.getTextSize(state.editorMode, guiTextRegular.font)
         end,
         draw = function(self)
           local Color = require 'modules.color'
-          guiTextRegular:add(editorMode, Color.WHITE, self.x, self.y)
+          guiTextRegular:add(state.editorMode, Color.WHITE, self.x, self.y)
         end
       })
     end
@@ -508,12 +555,34 @@ function TreeEditor.draw(self)
   -- draw nodes
   for nodeId in pairs(self.nodes) do
     local node = Component.get(nodeId)
-    if node.hovered then
-      love.graphics.setColor(0,1,0)
+    local dataKey = node.nodeValue
+    local optionValue = self.nodeValueOptions[dataKey]
+    local radius = optionValue and optionValue.type == 'keystone' and 30 or node.width/2
+    local x, y = node.x + node.width/2 + tx, node.y + node.width/2 + ty
+
+    -- cut-out the areas that overlap the connections
+    love.graphics.setColor(0,0,0)
+    love.graphics.setBlendMode('replace')
+    love.graphics.circle('fill', x, y, radius)
+    love.graphics.setBlendMode('alpha')
+
+    if editorModes.DEMO == state.editorMode then
+      if node.selected then
+        love.graphics.setColor(0.2,0,1)
+      elseif demoMode.isNodeSelectable(node, self.nodes) then
+        love.graphics.setColor(1,1,1)
+      -- non-selectable
+      else
+        love.graphics.setColor(1,1,1,0.3)
+      end
     else
-      love.graphics.setColor(1,0.5,0)
+      if node.hovered then
+        love.graphics.setColor(0,1,0)
+      else
+        love.graphics.setColor(1,0.5,0)
+      end
     end
-    local x, y, radius = node.x + node.width/2 + tx, node.y + node.width/2 + ty, node.width/2
+
     love.graphics.circle('fill', x, y, radius)
 
     if state.selectedNode == nodeId then
@@ -524,11 +593,10 @@ function TreeEditor.draw(self)
       love.graphics.setLineWidth(oLineWidth)
     end
 
-    local dataKey = node.nodeValue
-    if dataKey then
+    if optionValue then
       love.graphics.setColor(1,1,1)
       debugTextLayer:add(
-        self.nodeValueOptions[dataKey].value,
+        optionValue.value,
         Color.WHITE,
         x/2,
         y/2 -10

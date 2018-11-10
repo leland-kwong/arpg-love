@@ -14,7 +14,8 @@ local nodeValueOptions = {
   },
   [3] = {
     name = 'lightning rod',
-    value = 'lightning damage'
+    value = 'lightning damage',
+    type = 'keystone'
   }
 }
 
