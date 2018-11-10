@@ -2,6 +2,7 @@ local Component = require 'modules.component'
 local msgBus = require 'components.msg-bus'
 local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local SkillTreeEditor = require 'scene.skill-tree-editor.editor'
+local Color = require 'modules.color'
 
 local nodeValueOptions = {
   [1] = {
@@ -36,7 +37,13 @@ msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
       props = {
         nodeValueOptions = nodeValueOptions,
         defaultNodeImage = 'gui-skill-tree_node_background',
-        nodes = SkillTreeEditor.loadState()
+        nodes = SkillTreeEditor.loadState(),
+        colors = {
+          nodeConnection = {
+            outer = Color.SKY_BLUE,
+            inner = {Color.multiplyAlpha(Color.DARK_GRAY, 0.7)}
+          }
+        }
       }
     })
     msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
