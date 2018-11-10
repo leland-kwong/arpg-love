@@ -109,7 +109,7 @@ local initialDx, initialDy = snapToGrid(1920/2, 1080/2)
 local Enum = require 'utils.enum'
 local editorModes = Enum({
   'EDIT',
-  'DEMO'
+  'PLAY'
 })
 local state = {
   hoveredNode = nil,
@@ -177,7 +177,7 @@ local function clearSelections()
   state.selectedConnection = nil
 end
 
-local demoMode = {
+local playMode = {
   isNodeSelectable = function(nodeToCheck, nodeList)
     for id in pairs(nodeToCheck.connections) do
       if nodeList[id].selected then
@@ -311,10 +311,10 @@ function TreeEditor.handleInputs(self)
     end
 
     if ('NODE_SELECTION' == mode) and (button == 1) then
-      if (state.editorMode == editorModes.DEMO) then
+      if (state.editorMode == editorModes.PLAY) then
         local node = Component.get(state.hoveredNode)
-        if ((not node.selected) and (not demoMode.isNodeSelectable(node, self.nodes))) or
-          (node.selected and (not demoMode.isNodeUnselectable(node, self.nodes)))
+        if ((not node.selected) and (not playMode.isNodeSelectable(node, self.nodes))) or
+          (node.selected and (not playMode.isNodeUnselectable(node, self.nodes)))
         then
           return
         end
@@ -446,9 +446,9 @@ function TreeEditor.init(self)
         x = 200,
         y = love.graphics.getHeight() / config.scale - 50,
         onClick = function()
-          state.editorMode = (state.editorMode == modes.EDIT) and modes.DEMO or modes.EDIT
+          state.editorMode = (state.editorMode == modes.EDIT) and modes.PLAY or modes.EDIT
 
-          if modes.DEMO == state.editorMode then
+          if modes.PLAY == state.editorMode then
 
           else
 
@@ -566,10 +566,10 @@ function TreeEditor.draw(self)
     love.graphics.circle('fill', x, y, radius)
     love.graphics.setBlendMode('alpha')
 
-    if editorModes.DEMO == state.editorMode then
+    if editorModes.PLAY == state.editorMode then
       if node.selected then
         love.graphics.setColor(0.2,0,1)
-      elseif demoMode.isNodeSelectable(node, self.nodes) then
+      elseif playMode.isNodeSelectable(node, self.nodes) then
         love.graphics.setColor(1,1,1)
       -- non-selectable
       else
