@@ -31,7 +31,10 @@ local sourceDirectory = love.filesystem.getSourceBaseDirectory()
 local pathToSave = sourceDirectory..'/src/scene/skill-tree-editor/serialized.lua'
 
 local debugTextLayer = GuiText.create({
-  font = require 'components.font'.primary.font
+  font = require 'components.font'.primary.font,
+  drawOrder = function()
+    return 10
+  end
 })
 
 local function sortKeys(val)
@@ -415,20 +418,6 @@ function TreeEditor.init(self)
   end
   tick.recur(autoSerialize, 0.5)
 
-  local function setnodeValue(name, optionKey)
-    local guiNode = Component.get(state.selectedNode)
-    guiNode.nodeValue = optionKey
-  end
-  nodeValueOptions.create({
-    id = 'nodeValueMenu',
-    x = 0,
-    y = 0,
-    options = self.nodeValueOptions,
-
-    -- set the node's data
-    onSelect = setnodeValue
-  })
-
   self:loadFromSerializedState()
 
   local root = self
@@ -496,17 +485,50 @@ function TreeEditor.handleConnectionInteractions(self)
   end
 end
 
+function TreeEditor.showNodeValueOptionsMenu(self)
+  if (not state.selectedNode) then
+    if self.nodeValueOptionsMenu then
+      self.nodeValueOptionsMenu:delete(true)
+      self.nodeValueOptionsMenu = nil
+    end
+    return
+  end
+
+  if self.nodeValueOptionsMenu then
+    return
+  end
+
+  local guiNode = Component.get(state.selectedNode)
+  local function setnodeValue(name, optionKey)
+    guiNode.nodeValue = optionKey
+    clearSelections()
+  end
+  self.nodeValueOptionsMenu = self.nodeValueOptionsMenu or nodeValueOptions.create({
+    id = 'nodeValueMenu',
+    x = 0,
+    y = 0,
+    options = self.nodeValueOptions,
+
+    -- set the node's data
+    onSelect = setnodeValue
+  })
+end
+
 function TreeEditor.update(self, dt)
   local tx, ty = getTranslate()
   local mOffset = mouseCollisionSize
   state.mx, state.my = love.mouse.getX() - tx, love.mouse.getY() - ty
   mouseCollisionWorld:update(mouseCollisionObject, state.mx - mOffset, state.my - mOffset)
 
+  self:showNodeValueOptionsMenu()
   self:handleConnectionInteractions()
   self.mode = getMode()
 end
 
 function TreeEditor.drawTreeCenter(self)
+  if editorModes.EDIT ~= state.editorMode then
+    return
+  end
   local tx, ty = getTranslate()
   love.graphics.setColor(1,1,1)
   love.graphics.circle('fill', tx, ty, 10)
@@ -521,26 +543,24 @@ function TreeEditor.drawTooltip(self)
   local guiNode = Component.get(state.hoveredNode)
   local dataKey = guiNode.nodeValue
   local optionValue = self.nodeValueOptions[dataKey]
-  if optionValue then
-    local tooltipContent = optionValue:description()
-    local x, y = (guiNode.x + tx)/config.scale, (guiNode.y + ty - 20)/config.scale
-    local width, height = GuiText.getTextSize(tooltipContent, debugTextLayer.font)
-    local padding = 5
-    love.graphics.push()
-    love.graphics.scale(config.scale)
-      local rectX, rectY, rectW, rectH = x - padding, y - padding, width + padding*2, height + padding
-      love.graphics.setColor(0,0,0)
-      love.graphics.rectangle('fill', rectX, rectY, rectW, rectH)
-      love.graphics.setColor(1,1,1)
-      love.graphics.rectangle('line', rectX, rectY, rectW, rectH)
-    love.graphics.pop()
-    debugTextLayer:add(
-      tooltipContent,
-      Color.WHITE,
-      x,
-      y
-    )
-  end
+  local tooltipContent = optionValue and optionValue:description() or self.defaultNodeDescription
+  local x, y = (guiNode.x + tx)/config.scale, (guiNode.y + ty - 20)/config.scale
+  local width, height = GuiText.getTextSize(tooltipContent, debugTextLayer.font)
+  local padding = 5
+  love.graphics.push()
+  love.graphics.scale(config.scale)
+    local rectX, rectY, rectW, rectH = x - padding, y - padding, width + padding*2, height + padding
+    love.graphics.setColor(0,0,0)
+    love.graphics.rectangle('fill', rectX, rectY, rectW, rectH)
+    love.graphics.setColor(1,1,1)
+    love.graphics.rectangle('line', rectX, rectY, rectW, rectH)
+  love.graphics.pop()
+  debugTextLayer:add(
+    tooltipContent,
+    Color.WHITE,
+    x,
+    y
+  )
 end
 
 function TreeEditor.draw(self)
@@ -561,6 +581,7 @@ function TreeEditor.draw(self)
   end
 
   local function drawConnection(node, connectionNode)
+    love.graphics.setLineStyle('rough')
     love.graphics.line(
       node.x + node.width/2 + tx,
       node.y + node.width/2 + ty,
@@ -580,7 +601,7 @@ function TreeEditor.draw(self)
       local isSelectedConnection = state.selectedConnection and
         (state.selectedConnection[connectionNodeId] and state.selectedConnection[nodeId])
       -- line outline
-      love.graphics.setLineWidth(6)
+      love.graphics.setLineWidth(8)
       if isSelectedConnection then
         love.graphics.setColor(1,0.2,1)
       elseif playMode.isConnectionToSelectableNode(node, connectionNode) then
@@ -592,7 +613,7 @@ function TreeEditor.draw(self)
 
       local isHovered = state.hoveredConnection and state.hoveredConnection[nodeId] and state.hoveredConnection[connectionNodeId]
       local color = isHovered and Color.LIME or self.colors.nodeConnection.inner
-      love.graphics.setLineWidth(3)
+      love.graphics.setLineWidth(4)
       love.graphics.setColor(color)
       drawConnection(node, connectionNode)
       love.graphics.setLineWidth(oLineWidth)

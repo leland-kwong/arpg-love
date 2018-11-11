@@ -54,6 +54,7 @@ msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
       props = {
         nodeValueOptions = nodeValueOptions,
         defaultNodeImage = 'gui-skill-tree_node_background',
+        defaultNodeDescription = 'not implemented yet',
         nodes = SkillTreeEditor.loadState(),
         colors = {
           nodeConnection = {

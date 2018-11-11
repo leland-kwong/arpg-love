@@ -119,7 +119,7 @@ function MenuList.update(self)
           end
         end,
         drawOrder = function()
-          return parent:drawOrder() - 1
+          return parent:drawOrder()
         end
       }):setParent(self)
       table.insert(self.interactNodes, node)
