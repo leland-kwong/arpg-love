@@ -434,13 +434,18 @@ function TreeEditor.modeToggleButtons(self)
 end
 
 function TreeEditor.init(self)
-  local tick = require 'utils.tick'
-  local function autoSerialize()
-    self:serialize()
-  end
-  tick.recur(autoSerialize, 0.5)
-
   self:loadFromSerializedState()
+
+  local tick = require 'utils.tick'
+  local previousNodesList = self.nodes
+  local function autoSerialize()
+    local isDirty = previousNodesList ~= self.nodes
+    if isDirty then
+      self:serialize()
+    end
+    previousNodesList = self.nodes
+  end
+  tick.recur(autoSerialize, 0.1)
 
   local root = self
   msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
