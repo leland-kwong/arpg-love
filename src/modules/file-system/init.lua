@@ -103,18 +103,13 @@ function fileSystem.loadSaveFile(rootPath, saveId)
   checkRootPath(rootPath)
   local filePath = path.getSavedStatePath(rootPath, saveId)
 
-  local loadedFile = loadedFilesCache[filePath]
-  if loadedFile then
-    print('load cached')
-    return loadedFile
-  end
-
-  print('load uncached')
-
   local ok, result = pcall(function()
-    return bitser.loads(
-      bitser.loadLoveFile(filePath)
-    )
+    local loadedFile = loadedFilesCache[filePath]
+    return
+      loadedFile or
+      bitser.loads(
+        bitser.loadLoveFile(filePath)
+      )
   end)
 
   if ok then
