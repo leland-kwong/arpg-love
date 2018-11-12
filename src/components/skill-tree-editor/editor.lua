@@ -76,7 +76,10 @@ local initialDx, initialDy = snapToGrid(1920/2, 1080/2)
 local Enum = require 'utils.enum'
 local editorModes = Enum({
   'EDIT',
-  'PLAY'
+
+  -- these modes are for in-game views
+  'PLAY',
+  'PLAY_READ_ONLY'
 })
 local state = {
   hoveredNode = nil,
@@ -168,7 +171,13 @@ local playMode = {
     return true
   end,
   isConnectionToSelectableNode = function(fromNode, toNode)
-    return fromNode.selected or toNode.selected
+    if editorModes.PLAY == state.editorMode then
+      return fromNode.selected or toNode.selected
+    end
+
+    if editorModes.PLAY_READ_ONLY == state.editorMode then
+      return fromNode.selected and toNode.selected
+    end
   end
 }
 
@@ -243,6 +252,10 @@ end
   and making a copy of the node to be changed
 ]]
 function TreeEditor.setNode(self, nodeId, props)
+  if state.editorMode == 'PLAY_READ_ONLY' then
+    return
+  end
+
   assert(type(nodeId) == 'string', 'nodeId should be a string')
   assert(props == nil or type(props) == 'table', 'props should be a table')
 
@@ -417,46 +430,6 @@ function TreeEditor.handleInputs(self)
   end)
 end
 
-function TreeEditor.modeToggleButtons(self)
-  local buttons = {}
-  local modes = F.keys(editorModes)
-  F.forEach(modes, function(mode, index)
-    Component.create({
-      init = function(self)
-        local Gui = require 'components.gui.gui'
-        local GuiText = require 'components.gui.gui-text'
-        local config = require 'config.config'
-        local guiTextRegular = GuiText.create({
-          font = require 'components.font'.primary.font
-        })
-        local button = Gui.create({
-          type = Gui.types.INTERACT,
-          x = 0,
-          y = love.graphics.getHeight() / config.scale - 50,
-          onClick = function()
-            state.editorMode = mode
-          end,
-          onUpdate = function(self)
-            self.width, self.height = guiTextRegular.getTextSize(mode, guiTextRegular.font)
-
-            local previousButton = buttons[index - 1]
-            local btnMargin = 10
-            local xPosition = (previousButton and (previousButton.x + previousButton.w + btnMargin) or 200)
-            self.x = xPosition
-          end,
-          draw = function(self)
-            local Color = require 'modules.color'
-            local isSelected = state.editorMode == mode
-            local color = isSelected and Color.WHITE or Color.MED_GRAY
-            guiTextRegular:add(mode, color, self.x, self.y)
-          end
-        })
-        table.insert(buttons, button)
-      end
-    })
-  end)
-end
-
 function TreeEditor.init(self)
   self:loadFromSerializedState()
 
@@ -480,7 +453,6 @@ function TreeEditor.init(self)
   Component.addToGroup(self, 'gui')
 
   self:handleInputs()
-  self:modeToggleButtons()
 end
 
 function TreeEditor.handleConnectionInteractions(self)
@@ -534,7 +506,8 @@ end
 
 local backgroundColorByEditorMode = {
   [editorModes.EDIT] = Color.DARK_GRAY,
-  [editorModes.PLAY] = Color.DARK_GRAY_BLUE
+  [editorModes.PLAY] = Color.DARK_GRAY_BLUE,
+  [editorModes.PLAY_READ_ONLY] = Color.DARK_GRAY_BLUE
 }
 
 function TreeEditor.update(self, dt)
@@ -548,6 +521,7 @@ function TreeEditor.update(self, dt)
     self:handleConnectionInteractions()
   end
   self.mode = self:getMode()
+  state.editorMode = self.editorMode or editorModes.EDIT
 
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, backgroundColorByEditorMode[state.editorMode])
 end
@@ -659,7 +633,9 @@ function TreeEditor.draw(self)
     love.graphics.circle('fill', x, y, radius)
     love.graphics.setBlendMode('alpha')
 
-    if editorModes.PLAY == state.editorMode then
+    if (editorModes.PLAY == state.editorMode) or
+      (editorModes.PLAY_READ_ONLY == state.editorMode)
+    then
       if node.selected then
         love.graphics.setColor(1,1,1)
       else

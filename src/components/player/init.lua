@@ -183,6 +183,18 @@ local function updateEnergyRegeneration(energyRegeneration)
   })
 end
 
+local function getPassiveModifiers()
+
+end
+
+local function loadSkillTree()
+  local globalState = require 'main.global-state'
+  local stateId = globalState.gameState:getId()
+  local passiveTreeFilePath = stateId..'passive-tree.dat'
+  local SkillTreeEditor = require 'components.skill-tree-editor.editor'
+
+end
+
 local BaseStatModifiers = require'components.state.base-stat-modifiers'
 local Player = Object.extend(BaseStatModifiers(), {
   id = 'PLAYER',
