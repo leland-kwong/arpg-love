@@ -49,7 +49,12 @@ local nodeValueOptions = {
   }
 }
 
-local function sortKeys(val)
+--[[
+  Makes a new copy of a table by setting properties based on sorted key order. This is necessary
+  to guarantee that serialization/deserialization are identical, otherwise theres no guarantee on
+  the order of the key serialization.
+]]
+local function rebuildTableBySortedKeys(val)
   if type(val) ~= 'table' then
     return val
   end
@@ -63,7 +68,7 @@ local function sortKeys(val)
 
   for i=1, #keys do
     local key = keys[i]
-    newTable[key] = sortKeys(val[key])
+    newTable[key] = rebuildTableBySortedKeys(val[key])
   end
 
   return newTable
@@ -77,7 +82,7 @@ local function loadState(pathToSave)
   end
 
   -- IMPORTANT: In lua, key insertion order affects the order of serialization. So we should sort the keys to make sure it is deterministic.
-  return sortKeys(
+  return rebuildTableBySortedKeys(
     savedState and loadstring(savedState)() or {}
   )
 end
@@ -106,7 +111,7 @@ msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
         serialize = function(self)
           local ser = require 'utils.ser'
           local serializedTree = {}
-          for nodeId in pairs(self.nodes) do
+          for nodeId in pairs(rebuildTableBySortedKeys(self.nodes)) do
             local node = Component.get(nodeId)
             serializedTree[nodeId] = node:serialize()
           end
