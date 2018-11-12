@@ -48,30 +48,15 @@ local nodeValueOptions = {
   }
 }
 
-local function loadState(pathToSave)
-  local io = require 'io'
-  local savedState = nil
-  for line in io.lines(pathToSave) do
-    savedState = (savedState or '')..line
-  end
-
-  -- IMPORTANT: In lua, key insertion order affects the order of serialization. So we should sort the keys to make sure it is deterministic.
-  return (
-    savedState and loadstring(savedState)() or {}
-  )
-end
-
 return Component.createFactory({
   init = function(self)
     local Object = require 'utils.object-utils'
-    local pathToSave = self.pathToSave or
-      love.filesystem.getSourceBaseDirectory()..'/src/scene/skill-tree-editor/serialized.lua'
 
     SkillTreeEditor.create(Object.assign({
       nodeValueOptions = nodeValueOptions,
       defaultNodeImage = 'gui-skill-tree_node_background',
       defaultNodeDescription = 'not implemented yet',
-      nodes = loadState(pathToSave),
+      nodes = self.nodes,
       colors = {
         nodeConnection = {
           outer = Color.SKY_BLUE,
@@ -79,19 +64,7 @@ return Component.createFactory({
           inner = {Color.multiplyAlpha(Color.DARK_GRAY, 0.7)}
         }
       },
-      onSerialize = function(serializedTreeAsString)
-        local io = require 'io'
-        local f = assert(io.open(pathToSave, 'w'))
-        local success, message = f:write(serializedTreeAsString)
-        f:close()
-        if success then
-          msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
-            title = '[SKILL TREE] state saved',
-          })
-        else
-          error(message)
-        end
-      end
+      onSerialize = self.onSerialize
     }, self.initialProps)):setParent(self)
   end
 })
