@@ -11,6 +11,8 @@ local F = require 'utils.functional'
 local nodeValueOptions = require 'scene.skill-tree-editor.node-data-options'
 local inputState = require 'main.inputs'.state
 local Object = require 'utils.object-utils'
+local noop = require 'utils.noop'
+local rebuildTableBySortingKeys = require 'scene.skill-tree-editor.rebuild-table-by-sorting-keys'
 
 --[[
   Instructions:
@@ -40,7 +42,28 @@ local TreeEditor = {
     -- connectionCount = true,
   },
   nodes = {},
-  nodeValueOptions = {}
+  nodeValueOptions = {},
+  onSerialize = noop,
+  serialize = function(self)
+    local ser = require 'utils.ser'
+    local serializedTree = {}
+    for nodeId in pairs(rebuildTableBySortingKeys(self.nodes)) do
+      local node = Component.get(nodeId)
+      serializedTree[nodeId] = node:serialize()
+    end
+
+    --[[
+      Love's `love.filesystem.write` doesn't support writing to files in the source directory,
+      therefore we must use the `io` module.
+    ]]
+    local serializedTreeAsString = ser(serializedTree)
+    local isNewState = previousSerializedTreeAsString ~= serializedTreeAsString
+    previousSerializedTreeAsString = serializedTreeAsString
+
+    if isNewState then
+      self.onSerialize(serializedTreeAsString)
+    end
+  end
 }
 
 local function snapToGrid(x, y)
@@ -221,12 +244,12 @@ end
 ]]
 function TreeEditor.setNode(self, nodeId, props)
   assert(type(nodeId) == 'string', 'nodeId should be a string')
-  assert(type(props) == 'table', 'props should be a table')
+  assert(props == nil or type(props) == 'table', 'props should be a table')
 
   local node = self.nodes[nodeId]
   local Object = require 'utils.object-utils'
   self.nodes = Object.clone(self.nodes)
-  self.nodes[nodeId] = Object.immutableApply(node, props)
+  self.nodes[nodeId] = props and Object.immutableApply(node, props) or nil
 end
 
 function TreeEditor.deleteConnection(self, connectionId)
@@ -239,7 +262,7 @@ function TreeEditor.deleteConnection(self, connectionId)
 end
 
 function TreeEditor.loadFromSerializedState(self)
-  for id,props in pairs(self.nodes) do
+  for id,props in pairs(rebuildTableBySortingKeys(self.nodes)) do
     placeNode(
       self,
       id,
@@ -378,6 +401,7 @@ function TreeEditor.handleInputs(self)
         root:deleteConnection(state.selectedConnection)
       end
 
+      -- delete node
       if state.selectedNode then
         -- remove connections
         local nodeData = root.nodes[state.selectedNode]
@@ -387,7 +411,7 @@ function TreeEditor.handleInputs(self)
         end
 
         -- remove node from list
-        self.nodes[state.selectedNode] = nil
+        self:setNode(state.selectedNode, nil)
       end
     end
   end)

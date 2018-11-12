@@ -49,31 +49,6 @@ local nodeValueOptions = {
   }
 }
 
---[[
-  Makes a new copy of a table by setting properties based on sorted key order. This is necessary
-  to guarantee that serialization/deserialization are identical, otherwise theres no guarantee on
-  the order of the key serialization.
-]]
-local function rebuildTableBySortedKeys(val)
-  if type(val) ~= 'table' then
-    return val
-  end
-
-  local newTable = {}
-  local keys = {}
-  for k in pairs(val) do
-    table.insert(keys, k)
-  end
-  table.sort(keys)
-
-  for i=1, #keys do
-    local key = keys[i]
-    newTable[key] = rebuildTableBySortedKeys(val[key])
-  end
-
-  return newTable
-end
-
 local function loadState(pathToSave)
   local io = require 'io'
   local savedState = nil
@@ -82,7 +57,7 @@ local function loadState(pathToSave)
   end
 
   -- IMPORTANT: In lua, key insertion order affects the order of serialization. So we should sort the keys to make sure it is deterministic.
-  return rebuildTableBySortedKeys(
+  return (
     savedState and loadstring(savedState)() or {}
   )
 end
@@ -108,36 +83,18 @@ msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
             inner = {Color.multiplyAlpha(Color.DARK_GRAY, 0.7)}
           }
         },
-        serialize = function(self)
-          local ser = require 'utils.ser'
-          local serializedTree = {}
-          for nodeId in pairs(rebuildTableBySortedKeys(self.nodes)) do
-            local node = Component.get(nodeId)
-            serializedTree[nodeId] = node:serialize()
+        onSerialize = function(serializedTreeAsString)
+          local io = require 'io'
+          local f = assert(io.open(pathToSave, 'w'))
+          local success, message = f:write(serializedTreeAsString)
+          f:close()
+          if success then
+            msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
+              title = '[SKILL TREE] state saved',
+            })
+          else
+            error(message)
           end
-
-          --[[
-            Love's `love.filesystem.write` doesn't support writing to files in the source directory,
-            therefore we must use the `io` module.
-          ]]
-          local serializedTreeAsString = ser(serializedTree)
-          local isNewState = previousSerializedTreeAsString ~= serializedTreeAsString
-          previousSerializedTreeAsString = serializedTreeAsString
-
-          if isNewState then
-            local io = require 'io'
-            local f = assert(io.open(pathToSave, 'w'))
-            local success, message = f:write(serializedTreeAsString)
-            f:close()
-            if success then
-              msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
-                title = '[SKILL TREE] state saved',
-              })
-            else
-              error(message)
-            end
-          end
-
         end
       }
     })
