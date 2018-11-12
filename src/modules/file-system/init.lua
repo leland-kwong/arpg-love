@@ -21,6 +21,11 @@ local function invalidateFileListCache()
   fileListCache = nil
 end
 
+local loadedFilesCache = {}
+local function invalidateLoadedFileCache(file)
+  loadedFilesCache[file] = nil
+end
+
 local function init()
   -- start async write thread
   local source = love.filesystem.read('modules/file-system/async-write.lua')
@@ -58,6 +63,8 @@ function fileSystem.saveFile(rootPath, saveId, saveState, metadata)
 
     local success = love.thread.getChannel('saveStateSuccess'):pop()
     if success then
+      local filePath = path.getSavedStatePath(rootPath, saveId)
+      invalidateLoadedFileCache(filePath)
       invalidateFileListCache()
       return true
     end
@@ -84,6 +91,8 @@ function fileSystem.deleteFile(rootPath, saveId)
 
     local success = love.thread.getChannel('saveStateDeleteSuccess'):pop()
     if success then
+      local filePath = path.getSavedStatePath(rootPath, saveId)
+      invalidateLoadedFileCache(filePath)
       invalidateFileListCache()
       return true
     end
@@ -92,13 +101,26 @@ end
 
 function fileSystem.loadSaveFile(rootPath, saveId)
   checkRootPath(rootPath)
+  local filePath = path.getSavedStatePath(rootPath, saveId)
+
+  local loadedFile = loadedFilesCache[filePath]
+  if loadedFile then
+    print('load cached')
+    return loadedFile
+  end
+
+  print('load uncached')
+
   local ok, result = pcall(function()
     return bitser.loads(
-      bitser.loadLoveFile(
-        path.getSavedStatePath(rootPath, saveId)
-      )
+      bitser.loadLoveFile(filePath)
     )
   end)
+
+  if ok then
+    loadedFilesCache[filePath] = result
+  end
+
   return result, ok
 end
 
@@ -114,10 +136,6 @@ function fileSystem.listSavedFiles(rootPath)
     end)
   end
   return fileListCache
-end
-
-if config.isDevelopment then
-  require 'modules.file-system.test'(fileSystem)
 end
 
 return fileSystem
