@@ -10,6 +10,7 @@ local bump = require 'modules.bump'
 local F = require 'utils.functional'
 local nodeValueOptions = require 'scene.skill-tree-editor.node-data-options'
 local inputState = require 'main.inputs'.state
+local Object = require 'utils.object-utils'
 
 --[[
   Instructions:
@@ -70,7 +71,7 @@ local state = {
   },
   mx = 0,
   my = 0,
-  editorMode = editorModes.EDIT
+  editorMode = editorModes.EDIT,
 }
 
 function TreeEditor.getMode(self)
@@ -203,15 +204,29 @@ local function placeNode(root, nodeId, screenX, screenY, connections, nodeValue,
   })
 
   local nodeId = node:getId()
-  root.nodes[nodeId] = {
+  root:setNode(nodeId, {
     x = screenX,
     y = screenY,
     size = size,
     connections = connections or {},
     nodeValue = nodeValue, -- stores the value by the option's key
     selected = selected or false, -- whether the node has been "bought"
-  }
+  })
   return nodeId
+end
+
+--[[
+  immutably updates the entire node tree by shallow copying the tree
+  and making a copy of the node to be changed
+]]
+function TreeEditor.setNode(self, nodeId, props)
+  assert(type(nodeId) == 'string', 'nodeId should be a string')
+  assert(type(props) == 'table', 'props should be a table')
+
+  local node = self.nodes[nodeId]
+  local Object = require 'utils.object-utils'
+  self.nodes = Object.clone(self.nodes)
+  self.nodes[nodeId] = Object.immutableApply(node, props)
 end
 
 function TreeEditor.deleteConnection(self, connectionId)
@@ -254,14 +269,26 @@ function TreeEditor.handleInputs(self)
       clearSelections()
 
       -- make connection between nodes
-      local shouldDrawConnection = not not selection
-      if shouldDrawConnection then
+      local shouldAddConnection = not not selection
+      if shouldAddConnection then
         local selectedNodeData = root.nodes[selection]
         local hoveredNodeData = root.nodes[state.hoveredNode]
 
         local lineData = {} -- if more points are added, we define a bezier curve
-        hoveredNodeData.connections[selection] = lineData
-        selectedNodeData.connections[state.hoveredNode] = lineData
+        self:setNode(state.hoveredNode, {
+          connections = Object.immutableApply(
+            hoveredNodeData.connections, {
+              [selection] = lineData
+            }
+          )
+        })
+        self:setNode(selection, {
+          connections = Object.immutableApply(
+            selectedNodeData.connections, {
+              [state.hoveredNode] = lineData
+            }
+          )
+        })
         return
       end
     end
@@ -272,22 +299,25 @@ function TreeEditor.handleInputs(self)
     end
 
     if ('NODE_SELECTION' == mode) and (button == 1) then
-      if (state.editorMode == editorModes.PLAY) then
-        local node = root.nodes[state.hoveredNode]
+      local nodeId = state.hoveredNode
+      if (editorModes.PLAY == state.editorMode) then
+        local node = root.nodes[nodeId]
         if ((not node.selected) and (not playMode.isNodeSelectable(node, self.nodes))) or
           (node.selected and (not playMode.isNodeUnselectable(node, self.nodes)))
         then
           return
         end
-        node.selected = not node.selected
+        self:setNode(nodeId, {
+          selected = not node.selected
+        })
         return
       end
 
-      local alreadySelected = state.selectedNode == state.hoveredNode
+      local alreadySelected = state.selectedNode == nodeId
       if alreadySelected then
         state.selectedNode = nil
       else
-        state.selectedNode = state.hoveredNode
+        state.selectedNode = nodeId
       end
     end
 
@@ -302,8 +332,10 @@ function TreeEditor.handleInputs(self)
       state.movingNode = state.movingNode or state.hoveredNode
       local nodeData = self.nodes[state.movingNode]
       local x, y = snapToGrid(state.mx - nodeData.size/2, state.my - nodeData.size/2)
-      nodeData.x = x
-      nodeData.y = y
+      self:setNode(state.movingNode, {
+        x = x,
+        y = y
+      })
       clearSelections()
     end
 
@@ -454,9 +486,10 @@ function TreeEditor.showNodeValueOptionsMenu(self)
     return
   end
 
-  local nodeData = self.nodes[state.selectedNode]
   local function setnodeValue(name, optionKey)
-    nodeData.nodeValue = optionKey
+    self:setNode(state.selectedNode, {
+      nodeValue = optionKey
+    })
     clearSelections()
   end
   self.nodeValueOptionsMenu = self.nodeValueOptionsMenu or nodeValueOptions.create({
