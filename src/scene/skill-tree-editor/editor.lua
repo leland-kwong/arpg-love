@@ -27,9 +27,6 @@ local mouseCollisionSize = 50
 local cellSize = 25
 mouseCollisionWorld:add(mouseCollisionObject, 0, 0, mouseCollisionSize, mouseCollisionSize)
 
-local sourceDirectory = love.filesystem.getSourceBaseDirectory()
-local pathToSave = sourceDirectory..'/src/scene/skill-tree-editor/serialized.lua'
-
 local debugTextLayer = GuiText.create({
   font = require 'components.font'.primary.font,
   drawOrder = function()
@@ -37,70 +34,12 @@ local debugTextLayer = GuiText.create({
   end
 })
 
-local function sortKeys(val)
-  if type(val) ~= 'table' then
-    return val
-  end
-
-  local newTable = {}
-  local keys = {}
-  for k in pairs(val) do
-    table.insert(keys, k)
-  end
-  table.sort(keys)
-
-  for i=1, #keys do
-    local key = keys[i]
-    newTable[key] = sortKeys(val[key])
-  end
-
-  return newTable
-end
-
 local TreeEditor = {
-  loadState = function()
-    local io = require 'io'
-    local savedState = nil
-    for line in io.lines(pathToSave) do
-      savedState = (savedState or '')..line
-    end
-
-    -- IMPORTANT: In lua, key insertion order affects the order of serialization. So we should sort the keys to make sure it is deterministic.
-    return sortKeys(
-      savedState and loadstring(savedState)() or {}
-    )
-  end,
   debug = {
     -- connectionCount = true,
   },
   nodes = {},
-  nodeValueOptions = {},
-  serialize = function(self)
-    local ser = require 'utils.ser'
-    local serializedTree = {}
-    for nodeId in pairs(self.nodes) do
-      local node = Component.get(nodeId)
-      serializedTree[nodeId] = node:serialize()
-    end
-
-    --[[
-      Love's `love.filesystem.write` doesn't support writing to files in the source directory,
-      therefore we must use the `io` module.
-    ]]
-    local io = require 'io'
-    local f = assert(io.open(pathToSave, 'w'))
-    local success, message = f:write(
-      ser(serializedTree)
-    )
-    if success then
-      f:close()
-      msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
-        title = '[SKILL TREE] state saved',
-      })
-    else
-      error(message)
-    end
-  end
+  nodeValueOptions = {}
 }
 
 local function snapToGrid(x, y)
@@ -679,7 +618,7 @@ function TreeEditor.draw(self)
 
       if optionValue then
         debugTextLayer:add(
-          optionValue.value,
+          optionValue.name,
           Color.WHITE,
           x/config.scale, y/config.scale
         )
