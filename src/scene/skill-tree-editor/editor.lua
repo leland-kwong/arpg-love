@@ -411,6 +411,46 @@ function TreeEditor.handleInputs(self)
   end)
 end
 
+function TreeEditor.modeToggleButtons(self)
+  local buttons = {}
+  local modes = F.keys(editorModes)
+  F.forEach(modes, function(mode, index)
+    Component.create({
+      init = function(self)
+        local Gui = require 'components.gui.gui'
+        local GuiText = require 'components.gui.gui-text'
+        local config = require 'config.config'
+        local guiTextRegular = GuiText.create({
+          font = require 'components.font'.primary.font
+        })
+        local button = Gui.create({
+          type = Gui.types.INTERACT,
+          x = 0,
+          y = love.graphics.getHeight() / config.scale - 50,
+          onClick = function()
+            state.editorMode = mode
+          end,
+          onUpdate = function(self)
+            self.width, self.height = guiTextRegular.getTextSize(mode, guiTextRegular.font)
+
+            local previousButton = buttons[index - 1]
+            local btnMargin = 10
+            local xPosition = (previousButton and (previousButton.x + previousButton.w + btnMargin) or 200)
+            self.x = xPosition
+          end,
+          draw = function(self)
+            local Color = require 'modules.color'
+            local isSelected = state.editorMode == mode
+            local color = isSelected and Color.WHITE or Color.MED_GRAY
+            guiTextRegular:add(mode, color, self.x, self.y)
+          end
+        })
+        table.insert(buttons, button)
+      end
+    })
+  end)
+end
+
 function TreeEditor.init(self)
   local tick = require 'utils.tick'
   local function autoSerialize()
@@ -429,39 +469,7 @@ function TreeEditor.init(self)
   Component.addToGroup(self, 'gui')
 
   self:handleInputs()
-
-  Component.create({
-    init = function(self)
-      local Gui = require 'components.gui.gui'
-      local GuiText = require 'components.gui.gui-text'
-      local config = require 'config.config'
-      local guiTextRegular = GuiText.create({
-        font = require 'components.font'.primary.font
-      })
-      local modes = editorModes
-      Gui.create({
-        type = Gui.types.INTERACT,
-        x = 200,
-        y = love.graphics.getHeight() / config.scale - 50,
-        onClick = function()
-          state.editorMode = (state.editorMode == modes.EDIT) and modes.PLAY or modes.EDIT
-
-          if modes.PLAY == state.editorMode then
-
-          else
-
-          end
-        end,
-        onUpdate = function(self)
-          self.width, self.height = guiTextRegular.getTextSize(state.editorMode, guiTextRegular.font)
-        end,
-        draw = function(self)
-          local Color = require 'modules.color'
-          guiTextRegular:add(state.editorMode, Color.WHITE, self.x, self.y)
-        end
-      })
-    end
-  })
+  self:modeToggleButtons()
 end
 
 function TreeEditor.handleConnectionInteractions(self)
@@ -514,6 +522,11 @@ function TreeEditor.showNodeValueOptionsMenu(self)
   })
 end
 
+local backgroundColorByEditorMode = {
+  [editorModes.EDIT] = Color.DARK_GRAY,
+  [editorModes.PLAY] = Color.DARK_GRAY_BLUE
+}
+
 function TreeEditor.update(self, dt)
   local tx, ty = getTranslate()
   local mOffset = mouseCollisionSize
@@ -523,6 +536,8 @@ function TreeEditor.update(self, dt)
   self:showNodeValueOptionsMenu()
   self:handleConnectionInteractions()
   self.mode = getMode()
+
+  msgBus.send(msgBus.SET_BACKGROUND_COLOR, backgroundColorByEditorMode[state.editorMode])
 end
 
 function TreeEditor.drawTreeCenter(self)
