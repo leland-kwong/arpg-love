@@ -41,7 +41,7 @@ local TreeEditor = {
   debug = {
     -- connectionCount = true,
   },
-  nodes = {},
+  nodes = nil,
   nodeValueOptions = {},
   onSerialize = noop,
   serialize = function(self)
@@ -275,6 +275,9 @@ function TreeEditor.deleteConnection(self, connectionId)
 end
 
 function TreeEditor.loadFromSerializedState(self)
+  local originalEditorMode = self.editorMode
+  state.editorMode = 'PLAY'
+
   for id,props in pairs(rebuildTableBySortingKeys(self.nodes)) do
     placeNode(
       self,
@@ -287,6 +290,8 @@ function TreeEditor.loadFromSerializedState(self)
       props.selected
     )
   end
+
+  state.editorMode = originalEditorMode
 end
 
 function TreeEditor.handleInputs(self)
@@ -430,7 +435,26 @@ function TreeEditor.handleInputs(self)
   end)
 end
 
+local function loadState(pathToSave)
+    local io = require 'io'
+    local savedState = nil
+    for line in io.lines(pathToSave) do
+      savedState = (savedState or '')..line
+    end
+
+    -- IMPORTANT: In lua, key insertion order affects the order of serialization. So we should sort the keys to make sure it is deterministic.
+    return (
+      savedState and loadstring(savedState)() or {}
+    )
+  end
+
 function TreeEditor.init(self)
+  -- load default state
+  if (not self.nodes) then
+    local defaultLayout = love.filesystem.getSourceBaseDirectory()..'/src/scene/skill-tree-editor/layout.lua'
+    self.nodes = loadState(defaultLayout)
+  end
+
   self:loadFromSerializedState()
 
   local tick = require 'utils.tick'
@@ -612,7 +636,10 @@ function TreeEditor.draw(self)
       end
       drawConnection(node, connectionNode)
 
-      local isHovered = state.hoveredConnection and state.hoveredConnection[nodeId] and state.hoveredConnection[connectionNodeId]
+      local isHovered = (editorModes.EDIT == state.editorMode) and
+        state.hoveredConnection and
+        state.hoveredConnection[nodeId] and
+        state.hoveredConnection[connectionNodeId]
       local color = isHovered and Color.LIME or self.colors.nodeConnection.inner
       love.graphics.setLineWidth(4)
       love.graphics.setColor(color)

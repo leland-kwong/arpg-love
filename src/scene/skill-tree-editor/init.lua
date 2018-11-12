@@ -5,19 +5,6 @@ local msgBusMainMenu = require 'components.msg-bus-main-menu'
 
 local skillTreeId = 'passiveSkillsTree'
 
-local function loadState(pathToSave)
-  local io = require 'io'
-  local savedState = nil
-  for line in io.lines(pathToSave) do
-    savedState = (savedState or '')..line
-  end
-
-  -- IMPORTANT: In lua, key insertion order affects the order of serialization. So we should sort the keys to make sure it is deterministic.
-  return (
-    savedState and loadstring(savedState)() or {}
-  )
-end
-
 local function editorModesToggleButtons()
   local buttons = {}
   local modes = {'PLAY', 'PLAY_READ_ONLY', 'EDIT'}
@@ -62,22 +49,26 @@ end
 msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
   name = 'passive tree',
   value = function()
-    local pathToSave = love.filesystem.getSourceBaseDirectory()..'/src/scene/skill-tree-editor/serialized.lua'
     msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
     Component.get('mainMenu'):delete(true)
+
+    local fs = require 'modules.file-system'
+    local savedState, ok = fs.loadSaveFile('', 'skill-tree-test')
 
     msgBus.send(msgBus.SCENE_STACK_PUSH, {
       scene = SkillTreeEditor,
       props = {
         id = skillTreeId,
         editorMode = 'EDIT',
-        nodes = loadState(pathToSave),
+        nodes = ok and savedState or nil,
         onSerialize = function(serializedTreeAsString)
+          local pathToSave = love.filesystem.getSourceBaseDirectory()..'/src/scene/skill-tree-editor/layout.lua'
           local io = require 'io'
           local f = assert(io.open(pathToSave, 'w'))
           local success, message = f:write(serializedTreeAsString)
           f:close()
           if success then
+            fs.saveFile('', 'skill-tree-test')
             msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
               title = '[SKILL TREE] state saved',
             })
