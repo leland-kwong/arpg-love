@@ -183,16 +183,78 @@ local function updateEnergyRegeneration(energyRegeneration)
   })
 end
 
-local function getPassiveModifiers()
+local function togglePassiveTree()
+  if Component.get('passiveSkillsTree') then
+    MenuManager.clearAll()
+    return
+  end
 
-end
-
-local function loadSkillTree()
-  local globalState = require 'main.global-state'
-  local stateId = globalState.gameState:getId()
-  local passiveTreeFilePath = stateId..'passive-tree.dat'
-  local SkillTreeEditor = require 'components.skill-tree-editor.editor'
-
+  local gameState = require 'main.global-state'.gameState
+  local SkillTreeEditor = require 'components.skill-tree-editor'
+  local fs = require 'modules.file-system'
+  local saveDir = gameState:getId()
+  local rootDir = 'passive-tree-states'
+  local nodesFromSavedState, ok = fs.loadSaveFile(rootDir, saveDir)
+  local editor = SkillTreeEditor.create({
+    id = 'passiveSkillsTree',
+    editorMode = 'PLAY_READ_ONLY',
+    nodes = ok and nodesFromSavedState or nil,
+    onSerialize = function(serializedString, serialized)
+      fs.saveFile(rootDir, saveDir, serialized)
+    end
+  }):setParent(
+    Component.get('HUD')
+  )
+  Component.create({
+    init = function(self)
+      Component.addToGroup(self, 'gui')
+    end,
+    update = function(self)
+      local gameState = require 'main.global-state'.gameState
+      local totalSkillPointsAvailable = gameState:get().level
+      local actualPointsRemaining = totalSkillPointsAvailable
+      for _,data in pairs(editor.nodes) do
+        if data.selected then
+          actualPointsRemaining = actualPointsRemaining - 1
+        end
+      end
+      editor.editorMode = actualPointsRemaining > 0 and
+        'PLAY' or
+        'PLAY_UNSELECT_ONLY'
+      self.actualPointsRemaining = actualPointsRemaining
+    end,
+    draw = function(self)
+      local font = require 'components.font'.primary.font
+      love.graphics.setColor(1,1,1)
+      love.graphics.setFont(font)
+      local text = {
+        Color.WHITE,
+        self.actualPointsRemaining,
+        Color.WHITE,
+        ' points left',
+      }
+      local GuiText = require 'components.gui.gui-text'
+      local Position = require 'utils.position'
+      local textWidth, textHeight = GuiText.getTextSize(text, font)
+      local vWidth, vHeight = love.graphics.getWidth()/config.scale,
+        love.graphics.getHeight()/config.scale
+      local x = Position.boxCenterOffset(textWidth, textHeight, vWidth, vHeight)
+      love.graphics.printf(
+        text,
+        x,
+        20,
+        200
+      )
+    end,
+    drawOrder = function()
+      return 100000
+    end
+  }):setParent(editor)
+  local msgBusMainMenu = require 'components.msg-bus-main-menu'
+  msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
+  local MenuManager = require 'modules.menu-manager'
+  MenuManager.clearAll()
+  MenuManager.push(editor)
 end
 
 local BaseStatModifiers = require'components.state.base-stat-modifiers'
@@ -282,6 +344,10 @@ local Player = Object.extend(BaseStatModifiers(), {
 
         if (keyMap.PAUSE_GAME == key) and (not v.hasModifier) then
           msgBus.send(msgBus.PAUSE_GAME_TOGGLE)
+        end
+
+        if (keyMap.PASSIVE_SKILLS_TREE_TOGGLE == key) and (not v.hasModifier) then
+          togglePassiveTree()
         end
       end),
 

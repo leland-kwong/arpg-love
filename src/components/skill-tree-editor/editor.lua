@@ -79,7 +79,8 @@ local editorModes = Enum({
 
   -- these modes are for in-game views
   'PLAY',
-  'PLAY_READ_ONLY'
+  'PLAY_READ_ONLY',
+  'PLAY_UNSELECT_ONLY'
 })
 local state = {
   hoveredNode = nil,
@@ -110,7 +111,7 @@ function TreeEditor.getMode(self)
     return 'TREE_PANNING'
   end
 
-  if editorModes.EDIT == state.editorMode then
+  if editorModes.EDIT == self.editorMode then
     if (state.hoveredNode or state.movingNode) and inputState.mouse.drag.isDragging then
       return 'NODE_MOVE'
     end
@@ -175,7 +176,8 @@ local playMode = {
       return fromNode.selected or toNode.selected
     end
 
-    if editorModes.PLAY_READ_ONLY == state.editorMode then
+    if (editorModes.PLAY_READ_ONLY == state.editorMode) or
+      (editorModes.PLAY_UNSELECT_ONLY == state.editorMode) then
       return fromNode.selected and toNode.selected
     end
   end
@@ -341,8 +343,15 @@ function TreeEditor.handleInputs(self)
 
     if ('NODE_SELECTION' == mode) and (button == 1) then
       local nodeId = state.hoveredNode
-      if (editorModes.PLAY == state.editorMode) then
-        local node = root.nodes[nodeId]
+      local node = root.nodes[nodeId]
+
+      if (editorModes.PLAY_UNSELECT_ONLY == state.editorMode) then
+        if (node.selected) then
+          self:setNode(nodeId, {
+            selected = false
+          })
+        end
+      elseif (editorModes.PLAY == state.editorMode) then
         if ((not node.selected) and (not playMode.isNodeSelectable(node, self.nodes))) or
           (node.selected and (not playMode.isNodeUnselectable(node, self.nodes)))
         then
@@ -527,7 +536,8 @@ end
 local backgroundColorByEditorMode = {
   [editorModes.EDIT] = Color.DARK_GRAY,
   [editorModes.PLAY] = Color.DARK_GRAY_BLUE,
-  [editorModes.PLAY_READ_ONLY] = Color.DARK_GRAY_BLUE
+  [editorModes.PLAY_READ_ONLY] = Color.DARK_GRAY_BLUE,
+  [editorModes.PLAY_UNSELECT_ONLY] = Color.DARK_GRAY_BLUE
 }
 
 function TreeEditor.update(self, dt)
@@ -586,9 +596,10 @@ function TreeEditor.draw(self)
   local tx, ty = getTranslate()
   love.graphics.push()
   love.graphics.origin()
+  local _editorMode = state.editorMode
 
   -- create background
-  love.graphics.setColor(backgroundColorByEditorMode[state.editorMode])
+  love.graphics.setColor(backgroundColorByEditorMode[_editorMode])
   love.graphics.rectangle(
     'fill',
     0, 0, love.graphics.getWidth(), love.graphics.getHeight()
@@ -636,7 +647,7 @@ function TreeEditor.draw(self)
       end
       drawConnection(node, connectionNode)
 
-      local isHovered = (editorModes.EDIT == state.editorMode) and
+      local isHovered = (editorModes.EDIT == _editorMode) and
         state.hoveredConnection and
         state.hoveredConnection[nodeId] and
         state.hoveredConnection[connectionNodeId]
@@ -661,8 +672,9 @@ function TreeEditor.draw(self)
     love.graphics.circle('fill', x, y, radius)
     love.graphics.setBlendMode('alpha')
 
-    if (editorModes.PLAY == state.editorMode) or
-      (editorModes.PLAY_READ_ONLY == state.editorMode)
+    if (editorModes.PLAY == _editorMode) or
+      (editorModes.PLAY_READ_ONLY == _editorMode) or
+      (editorModes.PLAY_UNSELECT_ONLY == _editorMode)
     then
       if node.selected then
         love.graphics.setColor(1,1,1)
@@ -683,7 +695,7 @@ function TreeEditor.draw(self)
       )
     end
 
-    if editorModes.EDIT == state.editorMode then
+    if (editorModes.EDIT == _editorMode) then
       if node.hovered then
         love.graphics.setColor(0,1,0)
       else
@@ -698,14 +710,14 @@ function TreeEditor.draw(self)
           x/config.scale, y/config.scale
         )
       end
-    end
 
-    if state.selectedNode == nodeId then
-      local oLineWidth = love.graphics.getLineWidth()
-      love.graphics.setLineWidth(2)
-      love.graphics.setColor(1,1,1)
-      love.graphics.circle('line', x, y, radius + 4)
-      love.graphics.setLineWidth(oLineWidth)
+      if state.selectedNode == nodeId then
+        local oLineWidth = love.graphics.getLineWidth()
+        love.graphics.setLineWidth(2)
+        love.graphics.setColor(1,1,1)
+        love.graphics.circle('line', x, y, radius + 4)
+        love.graphics.setLineWidth(oLineWidth)
+      end
     end
 
     if self.debug.connectionCount then
