@@ -73,7 +73,7 @@ local state = {
   editorMode = editorModes.EDIT
 }
 
-local function getMode()
+function TreeEditor.getMode(self)
   local InputContext = require 'modules.input-context'
   if 'gui' == InputContext.get() then
     return
@@ -88,7 +88,7 @@ local function getMode()
   end
 
   if state.selectedNode and state.hoveredNode and (state.hoveredNode ~= state.selectedNode) then
-    local hasConnection = Component.get(state.selectedNode).connections[state.hoveredNode]
+    local hasConnection = self.nodes[state.selectedNode].connections[state.hoveredNode]
     if (not hasConnection) then
       return 'CONNECTION_CREATE'
     end
@@ -159,11 +159,6 @@ local function placeNode(root, nodeId, screenX, screenY, connections, nodeValue,
     height = size,
     scale = 1,
 
-    -- node-specific state data to be serialized
-    connections = connections or {},
-    nodeValue = nodeValue, -- stores the value by the option's key
-    selected = selected or false, -- whether the node has been "bought"
-
     getMousePosition = function(self)
       local tx, ty = getTranslate()
       return love.mouse.getX() - tx,
@@ -171,14 +166,15 @@ local function placeNode(root, nodeId, screenX, screenY, connections, nodeValue,
     end,
 
     serialize = function(self)
+      local dataRef = root.nodes[self:getId()]
       return {
         -- store coordinates as grid units
-        x = self.x / cellSize,
-        y = self.y / cellSize,
+        x = dataRef.x / cellSize,
+        y = dataRef.y / cellSize,
         size = nodeSize,
-        connections = self.connections,
-        nodeValue = self.nodeValue,
-        selected = self.selected
+        connections = dataRef.connections,
+        nodeValue = dataRef.nodeValue,
+        selected = dataRef.selected
       }
     end,
 
@@ -189,27 +185,39 @@ local function placeNode(root, nodeId, screenX, screenY, connections, nodeValue,
       state.hoveredNode = nil
     end,
     onUpdate = function(self)
-      if (not root.nodes[self:getId()]) then
+      local dataRef = root.nodes[self:getId()]
+      if (not dataRef) then
         self:delete(true)
         state.hoveredNode = nil
         state.selectedNode = nil
+        return
       end
       local optionValue = root.nodeValueOptions[self.nodeValue]
       local size = optionValue and (optionValue.type == 'keystone') and (2 * cellSize) or (2 * cellSize)
       self.width, self.height = size, size
+      dataRef.size = size
+      self.x, self.y = dataRef.x, dataRef.y
     end
   })
 
   local nodeId = node:getId()
-  root.nodes[nodeId] = node
+  root.nodes[nodeId] = {
+    x = screenX,
+    y = screenY,
+    size = size,
+    connections = connections or {},
+    nodeValue = nodeValue, -- stores the value by the option's key
+    selected = selected or false, -- whether the node has been "bought"
+  }
   return nodeId
 end
 
-local function deleteConnection(connectionId)
+function TreeEditor.deleteConnection(self, connectionId)
   local connectionIds = F.keys(state.selectedConnection)
   local id1, id2 = unpack(connectionIds)
-  Component.get(id1).connections[id2] = nil
-  Component.get(id2).connections[id1] = nil
+  local node1, node2 = self.nodes[id1], self.nodes[id2]
+  node1.connections[id2] = nil
+  node2.connections[id1] = nil
   clearSelections()
 end
 
@@ -232,7 +240,7 @@ function TreeEditor.handleInputs(self)
   local root = self
 
   msgBus.on(msgBus.MOUSE_CLICKED, function(event)
-    local mode = getMode()
+    local mode = self:getMode()
     local _, _, button = unpack(event)
 
     if ('CLEAR_SELECTIONS' == mode) then
@@ -246,12 +254,12 @@ function TreeEditor.handleInputs(self)
       -- make connection between nodes
       local shouldDrawConnection = not not selection
       if shouldDrawConnection then
-        local selectedGuiNode = Component.get(selection)
-        local hoveredGuiNode = Component.get(state.hoveredNode)
+        local selectedNodeData = root.nodes[selection]
+        local hoveredNodeData = root.nodes[state.hoveredNode]
 
         local lineData = {} -- if more points are added, we define a bezier curve
-        hoveredGuiNode.connections[selection] = lineData
-        selectedGuiNode.connections[state.hoveredNode] = lineData
+        hoveredNodeData.connections[selection] = lineData
+        selectedNodeData.connections[state.hoveredNode] = lineData
         return
       end
     end
@@ -263,7 +271,7 @@ function TreeEditor.handleInputs(self)
 
     if ('NODE_SELECTION' == mode) and (button == 1) then
       if (state.editorMode == editorModes.PLAY) then
-        local node = Component.get(state.hoveredNode)
+        local node = root.nodes[state.hoveredNode]
         if ((not node.selected) and (not playMode.isNodeSelectable(node, self.nodes))) or
           (node.selected and (not playMode.isNodeUnselectable(node, self.nodes)))
         then
@@ -288,16 +296,16 @@ function TreeEditor.handleInputs(self)
   end)
 
   msgBus.on(msgBus.MOUSE_DRAG, function(event)
-    if 'NODE_MOVE' == getMode() then
+    if 'NODE_MOVE' == self:getMode() then
       state.movingNode = state.movingNode or state.hoveredNode
-      local guiNode = Component.get(state.movingNode)
-      local x, y = snapToGrid(state.mx - guiNode.width/2, state.my - guiNode.height/2)
-      guiNode.x = x
-      guiNode.y = y
+      local nodeData = self.nodes[state.movingNode]
+      local x, y = snapToGrid(state.mx - nodeData.size/2, state.my - nodeData.size/2)
+      nodeData.x = x
+      nodeData.y = y
       clearSelections()
     end
 
-    if 'TREE_PANNING' == getMode() then
+    if 'TREE_PANNING' == self:getMode() then
       local tx = state.translate
       tx.startX = event.startX
       tx.startY = event.startY
@@ -310,6 +318,7 @@ function TreeEditor.handleInputs(self)
   msgBus.on(msgBus.MOUSE_DRAG_END, function(event)
     state.movingNode = nil
 
+    -- update tree translation
     local tx = state.translate
     tx.dxTotal = tx.dxTotal + tx.dx
     tx.dyTotal = tx.dyTotal + tx.dy
@@ -332,15 +341,15 @@ function TreeEditor.handleInputs(self)
 
     if 'delete' == event.key then
       if state.selectedConnection then
-        deleteConnection(state.selectedConnection)
+        root:deleteConnection(state.selectedConnection)
       end
 
       if state.selectedNode then
         -- remove connections
-        local guiNode = Component.get(state.selectedNode)
-        for toNodeId in pairs(guiNode.connections) do
-          local toGuiNode = Component.get(toNodeId)
-          toGuiNode.connections[state.selectedNode] = nil
+        local nodeData = root.nodes[state.selectedNode]
+        for toNodeId in pairs(nodeData.connections) do
+          local toNodeData = root.nodes[toNodeId]
+          toNodeData.connections[state.selectedNode] = nil
         end
 
         -- remove node from list
@@ -415,11 +424,9 @@ function TreeEditor.handleConnectionInteractions(self)
   -- handle connection collisions
   state.hoveredConnection = nil
   if (not state.hoveredNode) then
-    for nodeId in pairs(self.nodes) do
-      local node = Component.get(nodeId)
-
+    for nodeId,node in pairs(self.nodes) do
       for connectionNodeId in pairs(node.connections or {}) do
-        local connectionNode = Component.get(connectionNodeId)
+        local connectionNode = self.nodes[connectionNodeId]
         local _, len = mouseCollisionWorld:querySegment(node.x, node.y, connectionNode.x, connectionNode.y)
         if len > 0 then
           state.hoveredConnection = {
@@ -445,9 +452,9 @@ function TreeEditor.showNodeValueOptionsMenu(self)
     return
   end
 
-  local guiNode = Component.get(state.selectedNode)
+  local nodeData = self.nodes[state.selectedNode]
   local function setnodeValue(name, optionKey)
-    guiNode.nodeValue = optionKey
+    nodeData.nodeValue = optionKey
     clearSelections()
   end
   self.nodeValueOptionsMenu = self.nodeValueOptionsMenu or nodeValueOptions.create({
@@ -474,7 +481,7 @@ function TreeEditor.update(self, dt)
 
   self:showNodeValueOptionsMenu()
   self:handleConnectionInteractions()
-  self.mode = getMode()
+  self.mode = self:getMode()
 
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, backgroundColorByEditorMode[state.editorMode])
 end
@@ -494,11 +501,11 @@ function TreeEditor.drawTooltip(self)
   end
 
   local tx, ty = getTranslate()
-  local guiNode = Component.get(state.hoveredNode)
-  local dataKey = guiNode.nodeValue
+  local node = self.nodes[state.hoveredNode]
+  local dataKey = node.nodeValue
   local optionValue = self.nodeValueOptions[dataKey]
   local tooltipContent = optionValue and optionValue:description() or self.defaultNodeDescription
-  local x, y = (guiNode.x + tx)/config.scale, (guiNode.y + ty - 20)/config.scale
+  local x, y = (node.x + tx)/config.scale, (node.y + ty - 20)/config.scale
   local width, height = GuiText.getTextSize(tooltipContent, debugTextLayer.font)
   local padding = 5
   love.graphics.push()
@@ -537,20 +544,19 @@ function TreeEditor.draw(self)
   local function drawConnection(node, connectionNode)
     love.graphics.setLineStyle('rough')
     love.graphics.line(
-      node.x + node.width/2 + tx,
-      node.y + node.width/2 + ty,
-      connectionNode.x + connectionNode.width/2 + tx,
-      connectionNode.y + connectionNode.width/2 + ty
+      node.x + node.size/2 + tx,
+      node.y + node.size/2 + ty,
+      connectionNode.x + connectionNode.size/2 + tx,
+      connectionNode.y + connectionNode.size/2 + ty
     )
   end
 
   -- draw connections
-  for nodeId in pairs(self.nodes) do
-    local node = Component.get(nodeId)
+  for nodeId,node in pairs(self.nodes) do
 
     for connectionNodeId in pairs(node.connections or {}) do
       local oLineWidth = love.graphics.getLineWidth()
-      local connectionNode = Component.get(connectionNodeId)
+      local connectionNode = self.nodes[connectionNodeId]
 
       local isSelectedConnection = state.selectedConnection and
         (state.selectedConnection[connectionNodeId] and state.selectedConnection[nodeId])
@@ -575,12 +581,11 @@ function TreeEditor.draw(self)
   end
 
   -- draw nodes
-  for nodeId in pairs(self.nodes) do
-    local node = Component.get(nodeId)
+  for nodeId,node in pairs(self.nodes) do
     local dataKey = node.nodeValue
     local optionValue = self.nodeValueOptions[dataKey]
-    local radius = node.width/2
-    local x, y = node.x + node.width/2 + tx, node.y + node.width/2 + ty
+    local radius = node.size/2
+    local x, y = node.x + node.size/2 + tx, node.y + node.size/2 + ty
 
     -- cut-out the areas that overlap the connections
     love.graphics.setColor(0,0,0)
