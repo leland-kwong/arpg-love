@@ -83,30 +83,32 @@ function TreeEditor.getMode(self)
     return 'TREE_PANNING'
   end
 
-  if (state.hoveredNode or state.movingNode) and inputState.mouse.drag.isDragging then
-    return 'NODE_MOVE'
-  end
-
-  if state.selectedNode and state.hoveredNode and (state.hoveredNode ~= state.selectedNode) then
-    local hasConnection = self.nodes[state.selectedNode].connections[state.hoveredNode]
-    if (not hasConnection) then
-      return 'CONNECTION_CREATE'
+  if editorModes.EDIT == state.editorMode then
+    if (state.hoveredNode or state.movingNode) and inputState.mouse.drag.isDragging then
+      return 'NODE_MOVE'
     end
-  end
 
-  if (not state.hoveredNode) and (not state.hoveredConnection) then
-    if (state.selectedNode or state.selectedConnection) then
-      return 'CLEAR_SELECTIONS'
+    if state.selectedNode and state.hoveredNode and (state.hoveredNode ~= state.selectedNode) then
+      local hasConnection = self.nodes[state.selectedNode].connections[state.hoveredNode]
+      if (not hasConnection) then
+        return 'CONNECTION_CREATE'
+      end
     end
-    return 'NODE_CREATE'
+
+    if (not state.hoveredNode) and (not state.hoveredConnection) then
+      if (state.selectedNode or state.selectedConnection) then
+        return 'CLEAR_SELECTIONS'
+      end
+      return 'NODE_CREATE'
+    end
+
+    if state.hoveredConnection then
+      return 'CONNECTION_SELECTION'
+    end
   end
 
   if state.hoveredNode then
     return 'NODE_SELECTION'
-  end
-
-  if state.hoveredConnection then
-    return 'CONNECTION_SELECTION'
   end
 end
 
@@ -479,8 +481,10 @@ function TreeEditor.update(self, dt)
   state.mx, state.my = love.mouse.getX() - tx, love.mouse.getY() - ty
   mouseCollisionWorld:update(mouseCollisionObject, state.mx - mOffset, state.my - mOffset)
 
-  self:showNodeValueOptionsMenu()
-  self:handleConnectionInteractions()
+  if editorModes.EDIT == state.editorMode then
+    self:showNodeValueOptionsMenu()
+    self:handleConnectionInteractions()
+  end
   self.mode = self:getMode()
 
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, backgroundColorByEditorMode[state.editorMode])
