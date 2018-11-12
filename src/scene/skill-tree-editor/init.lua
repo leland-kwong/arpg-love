@@ -63,6 +63,8 @@ msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
   name = 'passive tree',
   value = function()
     local pathToSave = love.filesystem.getSourceBaseDirectory()..'/src/scene/skill-tree-editor/serialized.lua'
+    msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
+    Component.get('mainMenu'):delete(true)
 
     msgBus.send(msgBus.SCENE_STACK_PUSH, {
       scene = SkillTreeEditor,

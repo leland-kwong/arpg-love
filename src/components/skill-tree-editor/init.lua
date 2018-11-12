@@ -2,6 +2,7 @@ local Component = require 'modules.component'
 local msgBus = require 'components.msg-bus'
 local SkillTreeEditor = require 'components.skill-tree-editor.editor'
 local Color = require 'modules.color'
+local Object = require 'utils.object-utils'
 
 local nodeValueOptions = {
   [1] = {
@@ -48,23 +49,17 @@ local nodeValueOptions = {
   }
 }
 
-return Component.createFactory({
-  init = function(self)
-    local Object = require 'utils.object-utils'
-
-    SkillTreeEditor.create(Object.assign({
-      nodeValueOptions = nodeValueOptions,
-      defaultNodeImage = 'gui-skill-tree_node_background',
-      defaultNodeDescription = 'not implemented yet',
-      nodes = self.nodes,
-      colors = {
-        nodeConnection = {
-          outer = Color.SKY_BLUE,
-          outerNonSelectable = Color.MED_DARK_GRAY,
-          inner = {Color.multiplyAlpha(Color.DARK_GRAY, 0.7)}
-        }
-      },
-      onSerialize = self.onSerialize
-    }, self.initialProps)):setParent(self)
-  end
+local EditorWithDefaults = Object.assign(SkillTreeEditor, {
+  nodeValueOptions = nodeValueOptions,
+  defaultNodeImage = 'gui-skill-tree_node_background',
+  defaultNodeDescription = 'not implemented yet',
+  colors = {
+    nodeConnection = {
+      outer = Color.SKY_BLUE,
+      outerNonSelectable = Color.MED_DARK_GRAY,
+      inner = {Color.multiplyAlpha(Color.DARK_GRAY, 0.7)}
+    }
+  }
 })
+
+return Component.createFactory(EditorWithDefaults)

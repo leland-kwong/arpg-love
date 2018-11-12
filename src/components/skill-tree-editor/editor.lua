@@ -61,7 +61,7 @@ local TreeEditor = {
     previousSerializedTreeAsString = serializedTreeAsString
 
     if isNewState then
-      self.onSerialize(serializedTreeAsString)
+      self.onSerialize(serializedTreeAsString, serializedTree)
     end
   end
 }
@@ -444,10 +444,6 @@ function TreeEditor.init(self)
   end
   tick.recur(autoSerialize, 0.1)
 
-  local root = self
-  msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
-  Component.get('mainMenu'):delete(true)
-
   love.mouse.setCursor()
 
   Component.addToGroup(self, 'gui')
@@ -522,8 +518,6 @@ function TreeEditor.update(self, dt)
   end
   self.mode = self:getMode()
   state.editorMode = self.editorMode or editorModes.EDIT
-
-  msgBus.send(msgBus.SET_BACKGROUND_COLOR, backgroundColorByEditorMode[state.editorMode])
 end
 
 function TreeEditor.drawTreeCenter(self)
@@ -568,6 +562,13 @@ function TreeEditor.draw(self)
   local tx, ty = getTranslate()
   love.graphics.push()
   love.graphics.origin()
+
+  -- create background
+  love.graphics.setColor(backgroundColorByEditorMode[state.editorMode])
+  love.graphics.rectangle(
+    'fill',
+    0, 0, love.graphics.getWidth(), love.graphics.getHeight()
+  )
 
   self:drawTreeCenter()
 
