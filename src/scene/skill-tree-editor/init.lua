@@ -49,12 +49,6 @@ local nodeValueOptions = {
   }
 }
 
-local Scene = {}
-
-function Scene.init(self)
-  SkillTreeEditor.create(self.initialProps)
-end
-
 local function sortKeys(val)
   if type(val) ~= 'table' then
     return val
@@ -93,9 +87,10 @@ msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
   value = function()
     local sourceDirectory = love.filesystem.getSourceBaseDirectory()
     local pathToSave = sourceDirectory..'/src/scene/skill-tree-editor/serialized.lua'
+    local previousSerializedTreeAsString = nil
 
     msgBus.send(msgBus.SCENE_STACK_PUSH, {
-      scene = Component.createFactory(Scene),
+      scene = SkillTreeEditor,
       props = {
         nodeValueOptions = nodeValueOptions,
         defaultNodeImage = 'gui-skill-tree_node_background',
@@ -120,19 +115,24 @@ msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
             Love's `love.filesystem.write` doesn't support writing to files in the source directory,
             therefore we must use the `io` module.
           ]]
-          local io = require 'io'
-          local f = assert(io.open(pathToSave, 'w'))
-          local success, message = f:write(
-            ser(serializedTree)
-          )
-          if success then
+          local serializedTreeAsString = ser(serializedTree)
+          local isNewState = previousSerializedTreeAsString ~= serializedTreeAsString
+          previousSerializedTreeAsString = serializedTreeAsString
+
+          if isNewState then
+            local io = require 'io'
+            local f = assert(io.open(pathToSave, 'w'))
+            local success, message = f:write(serializedTreeAsString)
             f:close()
-            msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
-              title = '[SKILL TREE] state saved',
-            })
-          else
-            error(message)
+            if success then
+              msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
+                title = '[SKILL TREE] state saved',
+              })
+            else
+              error(message)
+            end
           end
+
         end
       }
     })
