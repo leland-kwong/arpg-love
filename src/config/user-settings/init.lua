@@ -24,6 +24,7 @@ M.keyboard = {
   MAIN_MENU = 'escape',
   PORTAL_OPEN = 't',
   PAUSE_GAME = 'p',
+  PASSIVE_SKILLS_TREE_TOGGLE = 'o'
 }
 
 -- these actions may not be remapped
