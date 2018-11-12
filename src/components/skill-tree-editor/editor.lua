@@ -43,6 +43,7 @@ local TreeEditor = {
   },
   nodes = nil,
   nodeValueOptions = {},
+  onChange = noop,
   onSerialize = noop,
   serialize = function(self)
     local ser = require 'utils.ser'
@@ -235,7 +236,7 @@ local function placeNode(root, nodeId, screenX, screenY, connections, nodeValue,
       dataRef.size = size
       self.x, self.y = dataRef.x, dataRef.y
     end
-  })
+  }):setParent(root)
 
   local nodeId = node:getId()
   root:setNode(nodeId, {
@@ -263,8 +264,10 @@ function TreeEditor.setNode(self, nodeId, props)
 
   local node = self.nodes[nodeId]
   local Object = require 'utils.object-utils'
+  local previousState = self.nodes
   self.nodes = Object.clone(self.nodes)
   self.nodes[nodeId] = props and Object.immutableApply(node, props) or nil
+  self:onChange(self.nodes, previousState)
 end
 
 function TreeEditor.deleteConnection(self, connectionId)
@@ -475,7 +478,7 @@ function TreeEditor.init(self)
     end
     previousNodesList = self.nodes
   end
-  tick.recur(autoSerialize, 0.1)
+  self.autoSave = tick.recur(autoSerialize, 0.1)
 
   love.mouse.setCursor()
 
@@ -732,6 +735,10 @@ function TreeEditor.draw(self)
   self:drawTooltip()
 
   love.graphics.pop()
+end
+
+function TreeEditor.final(self)
+  self.autoSave:stop()
 end
 
 return Component.createFactory(TreeEditor)

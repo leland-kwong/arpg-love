@@ -195,10 +195,24 @@ local function togglePassiveTree()
   local saveDir = gameState:getId()
   local rootDir = 'passive-tree-states'
   local nodesFromSavedState, ok = fs.loadSaveFile(rootDir, saveDir)
+  local actualPointsRemaining = 0
   local editor = SkillTreeEditor.create({
     id = 'passiveSkillsTree',
     editorMode = 'PLAY_READ_ONLY',
     nodes = ok and nodesFromSavedState or nil,
+    onChange = function(self)
+      local gameState = require 'main.global-state'.gameState
+      local totalSkillPointsAvailable = gameState:get().level
+      actualPointsRemaining = totalSkillPointsAvailable
+      for _,data in pairs(self.nodes) do
+        if data.selected then
+          actualPointsRemaining = actualPointsRemaining - 1
+        end
+      end
+      self.editorMode = actualPointsRemaining > 0 and
+        'PLAY' or
+        'PLAY_UNSELECT_ONLY'
+    end,
     onSerialize = function(serializedString, serialized)
       fs.saveFile(rootDir, saveDir, serialized)
     end
@@ -209,27 +223,13 @@ local function togglePassiveTree()
     init = function(self)
       Component.addToGroup(self, 'gui')
     end,
-    update = function(self)
-      local gameState = require 'main.global-state'.gameState
-      local totalSkillPointsAvailable = gameState:get().level
-      local actualPointsRemaining = totalSkillPointsAvailable
-      for _,data in pairs(editor.nodes) do
-        if data.selected then
-          actualPointsRemaining = actualPointsRemaining - 1
-        end
-      end
-      editor.editorMode = actualPointsRemaining > 0 and
-        'PLAY' or
-        'PLAY_UNSELECT_ONLY'
-      self.actualPointsRemaining = actualPointsRemaining
-    end,
     draw = function(self)
       local font = require 'components.font'.primary.font
       love.graphics.setColor(1,1,1)
       love.graphics.setFont(font)
       local text = {
         Color.WHITE,
-        self.actualPointsRemaining,
+        actualPointsRemaining,
         Color.WHITE,
         ' points left',
       }
@@ -247,7 +247,7 @@ local function togglePassiveTree()
       )
     end,
     drawOrder = function()
-      return 100000
+      return editor:drawOrder() + 1
     end
   }):setParent(editor)
   local msgBusMainMenu = require 'components.msg-bus-main-menu'
