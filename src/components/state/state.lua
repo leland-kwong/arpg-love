@@ -43,9 +43,6 @@ local function defaultState()
 		--[[ static modifiers ]]
 		statModifiers = baseStatModifiers(),
 
-		--[[ buffs, debuffs, auras, ailments ]]
-		statusEffects = {},
-
 		inventory = require'utils.make-grid'(11, 9, EMPTY_SLOT),
 
 		--[[ equipped items ]]
