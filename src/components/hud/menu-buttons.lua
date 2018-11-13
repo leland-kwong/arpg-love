@@ -52,11 +52,7 @@ function MenuButtons.init(self)
       badge = function()
         local PlayerPassiveTree = require 'components.player.passive-tree'
         local unusedSkillPoints = PlayerPassiveTree.getUnusedSkillPoints()
-        local displayValue = (unusedSkillPoints > 0) and unusedSkillPoints or nil
-        if displayValue and (displayValue >= 9) then
-          displayValue = '9+'
-        end
-        return displayValue
+        return unusedSkillPoints
       end,
       onClick = function()
         msgBus.send(msgBus.PASSIVE_SKILLS_TREE_TOGGLE)
@@ -82,7 +78,11 @@ function MenuButtons.init(self)
       draw = function(self)
         local Color = require 'modules.color'
         local highlightColor = nil
-        local badgeValue = b.badge and b.badge()
+        local badgeValue = b.badge and b.badge() or 0
+        badgeValue = (badgeValue > 0) and badgeValue or nil
+        if badgeValue and (badgeValue > 9) then
+          badgeValue = '9+'
+        end
         local showBadge = badgeValue ~= nil
         love.graphics.setColor(1,1,1)
         local yPos = showBadge and (self.y + math.sin(self.clock) * -1) or self.y
