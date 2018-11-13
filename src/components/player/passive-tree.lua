@@ -10,7 +10,7 @@ local onHitModifiers = {}
 local updateModifiers = {}
 
 msgBus.on(msgBus.CHARACTER_HIT, function(msg)
-  if msg.parent ~= Component.get('PLAYER') then
+  if msg.itemSource then
     for _,handler in pairs(onHitModifiers) do
       handler(msg)
     end
@@ -52,6 +52,14 @@ local modifierHandlers = {
         hitMsg.criticalChance = 1
         hitMsg.criticalMultiplier = (hitMsg.criticalMultiplier or 0) + percentBonusDamage
       end
+    end
+    local uid = require 'utils.uid'
+    local iconId = uid()
+    updateModifiers[nodeId] = function(dt)
+      Component.addToGroup(iconId, 'hudStatusIcons', {
+        text = hitCount,
+        icon = 'gui-skill-tree_node_heavy-strike'
+      })
     end
     return modifiers
   end,

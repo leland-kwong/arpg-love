@@ -619,6 +619,22 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/abilities/impact-animation-0.png</key>
+            <key type="filename">custom-art/abilities/impact-animation-1.png</key>
+            <key type="filename">custom-art/abilities/impact-animation-2.png</key>
+            <key type="filename">custom-art/abilities/impact-animation-3.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,6,7,11</rect>
+                <key>scale9Paddings</key>
+                <rect>4,6,7,11</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/characters/ai-1/ai-0.png</key>
             <key type="filename">custom-art/characters/ai-1/ai-1.png</key>
             <key type="filename">custom-art/characters/ai-1/ai-2.png</key>
@@ -643,7 +659,6 @@
             </struct>
             <key type="filename">custom-art/characters/ai-legendaries/legendary-1/legendary-ai-1.png</key>
             <key type="filename">custom-art/characters/eyeball/eyeball.png</key>
-            <key type="filename">custom-art/characters/legendary/eyeball.png</key>
             <key type="filename">custom-art/effects/floor-crack-1.png</key>
             <key type="filename">custom-art/effects/floor-crack-2.png</key>
             <key type="filename">custom-art/effects/floor-crack-3.png</key>
@@ -652,6 +667,8 @@
             <key type="filename">custom-art/gui/gui-inventory-button--hover.png</key>
             <key type="filename">custom-art/gui/gui-inventory-button.png</key>
             <key type="filename">custom-art/gui/gui-map-pointer.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree-button--hover.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree-button.png</key>
             <key type="filename">custom-art/status-effect-icons/status-frenzy.png</key>
             <key type="filename">custom-art/status-effect-icons/status-legendary-enemy.png</key>
             <key type="filename">custom-art/status-effect-icons/status-shield.png</key>
@@ -875,6 +892,23 @@
                 <rect>7,11,14,22</rect>
                 <key>scale9Paddings</key>
                 <rect>7,11,14,22</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_background.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_damage-up.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_heavy-strike.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_lightning.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_speed-up.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>6,6,13,13</rect>
+                <key>scale9Paddings</key>
+                <rect>6,6,13,13</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>

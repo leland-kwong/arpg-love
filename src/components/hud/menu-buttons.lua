@@ -43,14 +43,22 @@ function MenuButtons.init(self)
       onClick = function()
         msgBus.send(msgBus.INVENTORY_TOGGLE)
       end
-    }
+    },
+    {
+      displayValue = 'Skill Tree (o)',
+      normalAni = AnimationFactory:newStaticSprite('gui-skill-tree-button'),
+      hoverAni = AnimationFactory:newStaticSprite('gui-skill-tree-button--hover'),
+      onClick = function()
+        msgBus.send(msgBus.PASSIVE_SKILLS_TREE_TOGGLE)
+      end
+    },
   }
 
   for index=1, #buttons do
     local b = buttons[index]
     local spriteWidth, spriteHeight = b.normalAni:getSourceSize()
     local drawIndex = index - 1
-    local spacing = (drawIndex * spriteWidth) + (drawIndex * 2)
+    local spacing = (drawIndex * spriteWidth) + (drawIndex * 1)
     Gui.create({
       x = parent.x + spacing,
       y = parent.y,

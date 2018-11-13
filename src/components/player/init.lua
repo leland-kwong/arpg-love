@@ -260,6 +260,11 @@ local Player = Object.extend(BaseStatModifiers(), {
         end
       end),
 
+      msgBus.on(msgBus.PASSIVE_SKILLS_TREE_TOGGLE, function()
+        local PassiveTree = require 'components.player.passive-tree'
+        PassiveTree.toggle()
+      end),
+
       msgBus.on(msgBus.KEY_DOWN, function(v)
         local key = v.key
         local keyMap = userSettings.keyboard
@@ -281,8 +286,7 @@ local Player = Object.extend(BaseStatModifiers(), {
         end
 
         if (keyMap.PASSIVE_SKILLS_TREE_TOGGLE == key) and (not v.hasModifier) then
-          local PassiveTree = require 'components.player.passive-tree'
-          PassiveTree.toggle()
+          msgBus.send(msgBus.PASSIVE_SKILLS_TREE_TOGGLE)
         end
       end),
 

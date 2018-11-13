@@ -443,6 +443,7 @@ function TreeEditor.handleInputs(self)
 
           -- remove node from list
           self:setNode(state.selectedNode, nil)
+          clearSelections()
         end
       end
     end)
