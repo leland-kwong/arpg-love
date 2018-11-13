@@ -7,18 +7,51 @@ local msgBus = require 'components.msg-bus'
 local memoize = require 'utils.memoize'
 
 local onHitModifiers = {}
+local updateModifiers = {}
 
 msgBus.on(msgBus.CHARACTER_HIT, function(msg)
-  for _,handler in pairs(onHitModifiers) do
-    handler(msg)
+  if msg.parent ~= Component.get('PLAYER') then
+    for _,handler in pairs(onHitModifiers) do
+      handler(msg)
+    end
   end
   return msg
+end, 1)
+
+msgBus.on(msgBus.UPDATE, function(dt)
+  for _,handler in pairs(updateModifiers) do
+    handler(dt)
+  end
 end)
 
 local modifierHandlers = {
   lightningRod = function(nodeId, data, modifiers)
+    onHitModifiers[nodeId] = coroutine.wrap(function(hitMsg)
+      while (true) do
+        coroutine.yield()
+      end
+    end)
+    return modifiers
+  end,
+  heavyStrike = function(nodeId, data, modifiers)
+    local hitCount = 0
+    local hitSources = {}
     onHitModifiers[nodeId] = function(hitMsg)
-      consoleLog('trigger lightning', data.value.value, Time())
+      local isNewSource = not hitSources[hitMsg.source]
+      if isNewSource then
+        hitCount = hitCount + 1
+        if hitCount > 3 then
+          hitCount = 1
+          hitSources = {}
+        end
+        hitSources[hitMsg.source] = true
+      end
+      local isBigHit = hitCount >= 3
+      if isBigHit then
+        local percentBonusDamage = data.value.value
+        hitMsg.criticalChance = 1
+        hitMsg.criticalMultiplier = (hitMsg.criticalMultiplier or 0) + percentBonusDamage
+      end
     end
     return modifiers
   end,
@@ -45,6 +78,7 @@ end
 
 local calcModifiers = memoize(function(treeData)
   onHitModifiers = {}
+  updateModifiers = {}
 
   local nodeData = SkillTreeEditor.parseTreeData(treeData)
   local modifiers = {}
@@ -61,7 +95,7 @@ function PassiveTree.calcModifiers()
   local gameState = require 'main.global-state'.gameState
   local saveDir = gameState:getId()
   local treeData = PassiveTree.getState(saveDir)
-  return calcModifiers(treeData)
+  return calcModifiers(treeData or {})
 end
 
 function PassiveTree.toggle()

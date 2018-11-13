@@ -48,6 +48,17 @@ local nodeValueOptions = {
     description = function()
       return 'Battle suit'
     end
+  },
+  [5] = {
+    name = 'heavy strike',
+    value = {
+      type = 'heavyStrike',
+      value = 0.5
+    },
+    image = 'gui-skill-tree_node_heavy-strike',
+    description = function(self)
+      return 'every third hit deals +'..(self.value.value * 100)..'% bonus damage'
+    end
   }
 }
 

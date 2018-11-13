@@ -1,6 +1,8 @@
 local noop = require("utils.noop")
 local objectUtils = require("utils.object-utils")
 
+local NIL = {}
+
 local defaultOptions = {
 	resolver = function(lastArgs, input1, input2, input3, input4)
 		return (input1 ~= lastArgs[1])
@@ -23,11 +25,11 @@ local function memoize(fn, options)
 		end
 	end
 
-	local lastArgs = {nil, nil, nil, nil}
-	local out1 = nil
-	local out2 = nil
-	local out3 = nil
-	local out4 = nil
+	local lastArgs = {NIL, NIL, NIL, NIL}
+	local out1 = NIL
+	local out2 = NIL
+	local out3 = NIL
+	local out4 = NIL
 	local resolver = options.resolver
 
 	return function(input1, input2, input3, input4)
