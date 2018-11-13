@@ -214,7 +214,15 @@ local Player = Object.extend(BaseStatModifiers(), {
     self.listeners = {
       msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function()
         local BaseStatModifiers = require'components.state.base-stat-modifiers'
-        return BaseStatModifiers()
+        local modifiers = BaseStatModifiers()
+
+        local PassiveTree = require 'components.player.passive-tree'
+        local passiveStatModifiers = PassiveTree.calcModifiers()
+        for prop,val in pairs(passiveStatModifiers) do
+          modifiers[prop] = modifiers[prop] + val
+        end
+
+        return modifiers
       end, 1),
       msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function(msgValue)
         local newModifiers = msgValue

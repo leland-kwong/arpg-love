@@ -2,6 +2,36 @@ local Component = require 'modules.component'
 local Color = require 'modules.color'
 local config = require 'config.config'
 local MenuManager = require 'modules.menu-manager'
+local SkillTreeEditor = require 'components.skill-tree-editor'
+local msgBus = require 'components.msg-bus'
+local memoize = require 'utils.memoize'
+
+local onHitModifiers = {}
+
+msgBus.on(msgBus.CHARACTER_HIT, function(msg)
+  for _,handler in pairs(onHitModifiers) do
+    handler(msg)
+  end
+  return msg
+end)
+
+local modifierHandlers = {
+  lightningRod = function(nodeId, data, modifiers)
+    onHitModifiers[nodeId] = function(hitMsg)
+      consoleLog('trigger lightning', data.value.value, Time())
+    end
+    return modifiers
+  end,
+  dummyNode = function(_, _, modifiers)
+    return modifiers
+  end,
+  statModifier = function(nodeId, data, modifiers)
+    local dataType = data.value.type
+    local currentValue = (modifiers[dataType] or 0)
+    modifiers[dataType] = currentValue + data.value.value
+    return modifiers
+  end
+}
 
 local PassiveTree = {}
 
@@ -9,7 +39,29 @@ local rootDir = 'passive-tree-states'
 
 function PassiveTree.getState(saveDir)
   local fs = require 'modules.file-system'
-  return fs.loadSaveFile(rootDir, saveDir)
+  local result, ok = fs.loadSaveFile(rootDir, saveDir)
+  return ok and result or nil
+end
+
+local calcModifiers = memoize(function(treeData)
+  onHitModifiers = {}
+
+  local nodeData = SkillTreeEditor.parseTreeData(treeData)
+  local modifiers = {}
+  for nodeId,data in pairs(nodeData) do
+    local dataType = data.value.type
+    local modifierFunc = modifierHandlers[dataType] or
+      modifierHandlers.statModifier
+    modifierFunc(nodeId, data, modifiers)
+  end
+  return modifiers
+end)
+
+function PassiveTree.calcModifiers()
+  local gameState = require 'main.global-state'.gameState
+  local saveDir = gameState:getId()
+  local treeData = PassiveTree.getState(saveDir)
+  return calcModifiers(treeData)
 end
 
 function PassiveTree.toggle()
@@ -19,15 +71,14 @@ function PassiveTree.toggle()
   end
 
   local gameState = require 'main.global-state'.gameState
-  local SkillTreeEditor = require 'components.skill-tree-editor'
   local fs = require 'modules.file-system'
   local saveDir = gameState:getId()
-  local nodesFromSavedState, ok = PassiveTree.getState(saveDir)
+  local nodesFromSavedState = PassiveTree.getState(saveDir)
   local actualPointsRemaining = 0
   local editor = SkillTreeEditor.create({
     id = 'passiveSkillsTree',
     editorMode = 'PLAY_READ_ONLY',
-    nodes = ok and nodesFromSavedState or nil,
+    nodes = nodesFromSavedState,
     onChange = function(self)
       local gameState = require 'main.global-state'.gameState
       local totalSkillPointsAvailable = gameState:get().level
@@ -43,6 +94,9 @@ function PassiveTree.toggle()
     end,
     onSerialize = function(serializedString, serialized)
       fs.saveFile(rootDir, saveDir, serialized)
+        :next(function()
+          msgBus.send(msgBus.PLAYER_STATS_NEW_MODIFIERS)
+        end)
     end
   }):setParent(
     Component.get('HUD')

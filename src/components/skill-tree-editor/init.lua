@@ -30,7 +30,7 @@ local nodeValueOptions = {
   [3] = {
     name = 'lightning rod',
     value = {
-      type = 'lightningDamage',
+      type = 'lightningRod',
       value = 0.1
     },
     type = 'keystone',
@@ -41,8 +41,10 @@ local nodeValueOptions = {
   },
   [4] = {
     name = 'battle suit',
-    value = 0,
-    type = 'dummyNode',
+    value = {
+      value = 0,
+      type = 'dummyNode',
+    },
     description = function()
       return 'Battle suit'
     end
@@ -59,7 +61,18 @@ local EditorWithDefaults = Object.assign(SkillTreeEditor, {
       outerNonSelectable = Color.MED_DARK_GRAY,
       inner = {Color.multiplyAlpha(Color.DARK_GRAY, 0.7)}
     }
-  }
+  },
+  parseTreeData = function(treeData)
+    local parsedData = {}
+    for nodeId,node in pairs(treeData) do
+      if node.selected then
+        local nodeValue = node.nodeValue
+        local nodeData = nodeValueOptions[nodeValue]
+        parsedData[nodeId] = nodeData
+      end
+    end
+    return parsedData
+  end
 })
 
 return Component.createFactory(EditorWithDefaults)
