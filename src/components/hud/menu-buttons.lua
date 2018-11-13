@@ -6,6 +6,7 @@ local AnimationFactory = require 'components.animation-factory'
 local font = require 'components.font'
 local GuiText = require 'components.gui.gui-text'
 
+
 local MenuButtons = {
   group = Component.groups.hud
 }
@@ -48,6 +49,11 @@ function MenuButtons.init(self)
       displayValue = 'Skill Tree (o)',
       normalAni = AnimationFactory:newStaticSprite('gui-skill-tree-button'),
       hoverAni = AnimationFactory:newStaticSprite('gui-skill-tree-button--hover'),
+      badge = function()
+        local PlayerPassiveTree = require 'components.player.passive-tree'
+        local unusedSkillPoints = PlayerPassiveTree.unusedSkillPoints
+        return (unusedSkillPoints > 0) and unusedSkillPoints or nil
+      end,
       onClick = function()
         msgBus.send(msgBus.PASSIVE_SKILLS_TREE_TOGGLE)
       end
@@ -77,6 +83,19 @@ function MenuButtons.init(self)
           self.x,
           self.y
         )
+
+        if b.badge then
+          local badgeValue = b.badge()
+          local hudTextSmallLayer = Component.get('hudTextSmallLayer')
+          local Color = require 'modules.color'
+          local x, y = self.x + spriteWidth - 3, self.y
+          hudTextSmallLayer:add(
+            badgeValue == nil and '' or badgeValue,
+            Color.WHITE,
+            x,
+            y
+          )
+        end
 
         if self.hovered then
           showTooltip(self.x, self.y, b.displayValue)

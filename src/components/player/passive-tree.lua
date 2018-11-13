@@ -74,7 +74,9 @@ local modifierHandlers = {
   end
 }
 
-local PassiveTree = {}
+local PassiveTree = {
+  unusedSkillPoints = 0
+}
 
 local rootDir = 'passive-tree-states'
 
@@ -116,7 +118,6 @@ function PassiveTree.toggle()
   local fs = require 'modules.file-system'
   local saveDir = gameState:getId()
   local nodesFromSavedState = PassiveTree.getState(saveDir)
-  local actualPointsRemaining = 0
   local editor = SkillTreeEditor.create({
     id = 'passiveSkillsTree',
     editorMode = 'PLAY_READ_ONLY',
@@ -124,13 +125,13 @@ function PassiveTree.toggle()
     onChange = function(self)
       local gameState = require 'main.global-state'.gameState
       local totalSkillPointsAvailable = gameState:get().level
-      actualPointsRemaining = totalSkillPointsAvailable
+      PassiveTree.unusedSkillPoints = totalSkillPointsAvailable
       for _,data in pairs(self.nodes) do
         if data.selected then
-          actualPointsRemaining = actualPointsRemaining - 1
+          PassiveTree.unusedSkillPoints = PassiveTree.unusedSkillPoints - 1
         end
       end
-      self.editorMode = actualPointsRemaining > 0 and
+      self.editorMode = PassiveTree.unusedSkillPoints > 0 and
         'PLAY' or
         'PLAY_UNSELECT_ONLY'
     end,
@@ -153,7 +154,7 @@ function PassiveTree.toggle()
       love.graphics.setFont(font)
       local text = {
         Color.WHITE,
-        actualPointsRemaining,
+        PassiveTree.unusedSkillPoints,
         Color.WHITE,
         ' points left',
       }
