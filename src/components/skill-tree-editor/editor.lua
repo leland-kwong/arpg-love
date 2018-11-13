@@ -302,149 +302,151 @@ end
 function TreeEditor.handleInputs(self)
   local root = self
 
-  msgBus.on(msgBus.MOUSE_CLICKED, function(event)
-    local mode = self:getMode()
-    local _, _, button = unpack(event)
+  self.listeners = {
+    msgBus.on(msgBus.MOUSE_CLICKED, function(event)
+      local mode = self:getMode()
+      local _, _, button = unpack(event)
 
-    if ('CLEAR_SELECTIONS' == mode) then
-      return clearSelections()
-    end
-
-    if ('CONNECTION_CREATE' == mode) then
-      local selection = state.selectedNode
-      clearSelections()
-
-      -- make connection between nodes
-      local shouldAddConnection = not not selection
-      if shouldAddConnection then
-        local selectedNodeData = root.nodes[selection]
-        local hoveredNodeData = root.nodes[state.hoveredNode]
-
-        local lineData = {} -- if more points are added, we define a bezier curve
-        self:setNode(state.hoveredNode, {
-          connections = Object.immutableApply(
-            hoveredNodeData.connections, {
-              [selection] = lineData
-            }
-          )
-        })
-        self:setNode(selection, {
-          connections = Object.immutableApply(
-            selectedNodeData.connections, {
-              [state.hoveredNode] = lineData
-            }
-          )
-        })
-        return
+      if ('CLEAR_SELECTIONS' == mode) then
+        return clearSelections()
       end
-    end
 
-    if ('NODE_CREATE' == mode) and (button == 1) then
-      local snapX, snapY = snapToGrid(state.mx - cellSize/2, state.my - cellSize/2)
-      placeNode(root, nil, snapX, snapY, nil, nil, nil, cellSize)
-    end
+      if ('CONNECTION_CREATE' == mode) then
+        local selection = state.selectedNode
+        clearSelections()
 
-    if ('NODE_SELECTION' == mode) and (button == 1) then
-      local nodeId = state.hoveredNode
-      local node = root.nodes[nodeId]
+        -- make connection between nodes
+        local shouldAddConnection = not not selection
+        if shouldAddConnection then
+          local selectedNodeData = root.nodes[selection]
+          local hoveredNodeData = root.nodes[state.hoveredNode]
 
-      if (editorModes.PLAY_UNSELECT_ONLY == state.editorMode) then
-        if (node.selected) then
-          self:setNode(nodeId, {
-            selected = false
+          local lineData = {} -- if more points are added, we define a bezier curve
+          self:setNode(state.hoveredNode, {
+            connections = Object.immutableApply(
+              hoveredNodeData.connections, {
+                [selection] = lineData
+              }
+            )
           })
-        end
-      elseif (editorModes.PLAY == state.editorMode) then
-        if ((not node.selected) and (not playMode.isNodeSelectable(node, self.nodes))) or
-          (node.selected and (not playMode.isNodeUnselectable(node, self.nodes)))
-        then
+          self:setNode(selection, {
+            connections = Object.immutableApply(
+              selectedNodeData.connections, {
+                [state.hoveredNode] = lineData
+              }
+            )
+          })
           return
         end
-        self:setNode(nodeId, {
-          selected = not node.selected
-        })
-        return
       end
 
-      local alreadySelected = state.selectedNode == nodeId
-      if alreadySelected then
-        state.selectedNode = nil
-      else
-        state.selectedNode = nodeId
-      end
-    end
-
-    if ('CONNECTION_SELECTION' == mode) and (button == 1) then
-      clearSelections()
-      state.selectedConnection = state.hoveredConnection
-    end
-  end)
-
-  msgBus.on(msgBus.MOUSE_DRAG, function(event)
-    if 'NODE_MOVE' == self:getMode() then
-      state.movingNode = state.movingNode or state.hoveredNode
-      local nodeData = self.nodes[state.movingNode]
-      local x, y = snapToGrid(state.mx - nodeData.size/2, state.my - nodeData.size/2)
-      self:setNode(state.movingNode, {
-        x = x,
-        y = y
-      })
-      clearSelections()
-    end
-
-    if 'TREE_PANNING' == self:getMode() then
-      local tx = state.translate
-      tx.startX = event.startX
-      tx.startY = event.startY
-      local snapX, snapY = snapToGrid(event.dx, event.dy)
-      tx.dx = snapX
-      tx.dy = snapY
-    end
-  end)
-
-  msgBus.on(msgBus.MOUSE_DRAG_END, function(event)
-    state.movingNode = nil
-
-    -- update tree translation
-    local tx = state.translate
-    tx.dxTotal = tx.dxTotal + tx.dx
-    tx.dyTotal = tx.dyTotal + tx.dy
-    tx.startX = 0
-    tx.startY = 0
-    tx.dx = 0
-    tx.dy = 0
-  end)
-
-  msgBus.on(msgBus.KEY_PRESSED, function(event)
-    if (event.key == 'escape') then
-      clearSelections()
-    end
-
-    local serializeTree = 's' == event.key and
-      (inputState.keyboard.keysPressed.lctrl or inputState.keyboard.keysPressed.rctrl)
-    if serializeTree then
-      self:serialize()
-    end
-
-    if 'delete' == event.key then
-      if state.selectedConnection then
-        root:deleteConnection(state.selectedConnection)
+      if ('NODE_CREATE' == mode) and (button == 1) then
+        local snapX, snapY = snapToGrid(state.mx - cellSize/2, state.my - cellSize/2)
+        placeNode(root, nil, snapX, snapY, nil, nil, nil, cellSize)
       end
 
-      -- delete node
-      if state.selectedNode then
-        -- remove connections
-        local nodeData = root.nodes[state.selectedNode]
-        for toNodeId in pairs(nodeData.connections) do
-          local toNodeData = root.nodes[toNodeId]
-          toNodeData.connections[state.selectedNode] = nil
+      if ('NODE_SELECTION' == mode) and (button == 1) then
+        local nodeId = state.hoveredNode
+        local node = root.nodes[nodeId]
+
+        if (editorModes.PLAY_UNSELECT_ONLY == state.editorMode) then
+          if (node.selected) then
+            self:setNode(nodeId, {
+              selected = false
+            })
+          end
+        elseif (editorModes.PLAY == state.editorMode) then
+          if ((not node.selected) and (not playMode.isNodeSelectable(node, self.nodes))) or
+            (node.selected and (not playMode.isNodeUnselectable(node, self.nodes)))
+          then
+            return
+          end
+          self:setNode(nodeId, {
+            selected = not node.selected
+          })
+          return
         end
 
-        -- remove node from list
-        self:setNode(state.selectedNode, nil)
+        local alreadySelected = state.selectedNode == nodeId
+        if alreadySelected then
+          state.selectedNode = nil
+        else
+          state.selectedNode = nodeId
+        end
       end
-    end
-  end)
+
+      if ('CONNECTION_SELECTION' == mode) and (button == 1) then
+        clearSelections()
+        state.selectedConnection = state.hoveredConnection
+      end
+    end),
+
+    msgBus.on(msgBus.MOUSE_DRAG, function(event)
+      if 'NODE_MOVE' == self:getMode() then
+        state.movingNode = state.movingNode or state.hoveredNode
+        local nodeData = self.nodes[state.movingNode]
+        local x, y = snapToGrid(state.mx - nodeData.size/2, state.my - nodeData.size/2)
+        self:setNode(state.movingNode, {
+          x = x,
+          y = y
+        })
+        clearSelections()
+      end
+
+      if 'TREE_PANNING' == self:getMode() then
+        local tx = state.translate
+        tx.startX = event.startX
+        tx.startY = event.startY
+        local snapX, snapY = snapToGrid(event.dx, event.dy)
+        tx.dx = snapX
+        tx.dy = snapY
+      end
+    end),
+
+    msgBus.on(msgBus.MOUSE_DRAG_END, function(event)
+      state.movingNode = nil
+
+      -- update tree translation
+      local tx = state.translate
+      tx.dxTotal = tx.dxTotal + tx.dx
+      tx.dyTotal = tx.dyTotal + tx.dy
+      tx.startX = 0
+      tx.startY = 0
+      tx.dx = 0
+      tx.dy = 0
+    end),
+
+    msgBus.on(msgBus.KEY_PRESSED, function(event)
+      if (event.key == 'escape') then
+        clearSelections()
+      end
+
+      local serializeTree = 's' == event.key and
+        (inputState.keyboard.keysPressed.lctrl or inputState.keyboard.keysPressed.rctrl)
+      if serializeTree then
+        self:serialize()
+      end
+
+      if 'delete' == event.key then
+        if state.selectedConnection then
+          root:deleteConnection(state.selectedConnection)
+        end
+
+        -- delete node
+        if state.selectedNode then
+          -- remove connections
+          local nodeData = root.nodes[state.selectedNode]
+          for toNodeId in pairs(nodeData.connections) do
+            local toNodeData = root.nodes[toNodeId]
+            toNodeData.connections[state.selectedNode] = nil
+          end
+
+          -- remove node from list
+          self:setNode(state.selectedNode, nil)
+        end
+      end
+    end)
+  }
 end
 
 local function loadState(pathToSave)
@@ -662,18 +664,22 @@ function TreeEditor.draw(self)
     end
   end
 
+  love.graphics.setBlendMode('replace')
+  for _,node in pairs(self.nodes) do
+    local radius = node.size/2
+    local x, y = node.x + node.size/2 + tx, node.y + node.size/2 + ty
+    -- cut-out the areas that overlap the connections
+    love.graphics.setColor(0,0,0)
+    love.graphics.circle('fill', x, y, radius)
+  end
+  love.graphics.setBlendMode('alpha')
+
   -- draw nodes
   for nodeId,node in pairs(self.nodes) do
     local dataKey = node.nodeValue
     local optionValue = self.nodeValueOptions[dataKey]
     local radius = node.size/2
     local x, y = node.x + node.size/2 + tx, node.y + node.size/2 + ty
-
-    -- cut-out the areas that overlap the connections
-    love.graphics.setColor(0,0,0)
-    love.graphics.setBlendMode('replace')
-    love.graphics.circle('fill', x, y, radius)
-    love.graphics.setBlendMode('alpha')
 
     if (editorModes.PLAY == _editorMode) or
       (editorModes.PLAY_READ_ONLY == _editorMode) or
@@ -739,6 +745,7 @@ end
 
 function TreeEditor.final(self)
   self.autoSave:stop()
+  msgBus.off(self.listeners)
 end
 
 return Component.createFactory(TreeEditor)
