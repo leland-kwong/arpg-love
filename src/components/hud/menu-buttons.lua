@@ -52,7 +52,11 @@ function MenuButtons.init(self)
       badge = function()
         local PlayerPassiveTree = require 'components.player.passive-tree'
         local unusedSkillPoints = PlayerPassiveTree.getUnusedSkillPoints()
-        return (unusedSkillPoints > 0) and unusedSkillPoints or nil
+        local displayValue = (unusedSkillPoints > 0) and unusedSkillPoints or nil
+        if displayValue and (displayValue >= 9) then
+          displayValue = '9+'
+        end
+        return displayValue
       end,
       onClick = function()
         msgBus.send(msgBus.PASSIVE_SKILLS_TREE_TOGGLE)
