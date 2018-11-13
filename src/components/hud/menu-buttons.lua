@@ -51,7 +51,7 @@ function MenuButtons.init(self)
       hoverAni = AnimationFactory:newStaticSprite('gui-skill-tree-button--hover'),
       badge = function()
         local PlayerPassiveTree = require 'components.player.passive-tree'
-        local unusedSkillPoints = PlayerPassiveTree.unusedSkillPoints
+        local unusedSkillPoints = PlayerPassiveTree.getUnusedSkillPoints()
         return (unusedSkillPoints > 0) and unusedSkillPoints or nil
       end,
       onClick = function()
@@ -71,34 +71,60 @@ function MenuButtons.init(self)
       group = Component.groups.hud,
       type = Gui.types.BUTTON,
       onClick = b.onClick,
-      onUpdate = function(self)
+      onUpdate = function(self, dt)
         self.w, self.h = spriteWidth, spriteHeight
+        self.clock = (self.clock or 0) + (dt * 3)
       end,
       draw = function(self)
+        local Color = require 'modules.color'
+        local highlightColor = nil
+        local badgeValue = b.badge and b.badge()
+        local showBadge = badgeValue ~= nil
         love.graphics.setColor(1,1,1)
+        local yPos = showBadge and (self.y + math.sin(self.clock) * -1) or self.y
+
+        if showBadge then
+          local hudTextSmallLayer = Component.get('hudTextSmallLayer')
+          local x, y = self.x + spriteWidth - 3, yPos
+          hudTextSmallLayer:add(
+            badgeValue,
+            Color.WHITE,
+            x,
+            y
+          )
+          local drawBox = require 'components.gui.utils.draw-box'
+          highlightColor = {Color.multiplyAlpha(Color.PURPLE, math.sin(self.clock))}
+          drawBox({
+            x = self.x + 1,
+            y = yPos + 1,
+            width = self.w,
+            height = self.h
+          }, {
+            borderWidth = 2,
+            borderColor = highlightColor
+          })
+        end
+
         local animation = self.hovered and b.hoverAni or b.normalAni
         love.graphics.draw(
           AnimationFactory.atlas,
           animation.sprite,
           self.x,
-          self.y
+          yPos
         )
 
-        if b.badge then
-          local badgeValue = b.badge()
-          local hudTextSmallLayer = Component.get('hudTextSmallLayer')
-          local Color = require 'modules.color'
-          local x, y = self.x + spriteWidth - 3, self.y
-          hudTextSmallLayer:add(
-            badgeValue == nil and '' or badgeValue,
-            Color.WHITE,
-            x,
-            y
+        if highlightColor then
+          love.graphics.setColor(highlightColor)
+          love.graphics.draw(
+            AnimationFactory.atlas,
+            animation.sprite,
+            self.x,
+            yPos
           )
         end
 
         if self.hovered then
-          showTooltip(self.x, self.y, b.displayValue)
+          showTooltip(self.x, yPos, b.displayValue)
         end
       end
     }):setParent(self)

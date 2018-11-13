@@ -74,9 +74,7 @@ local modifierHandlers = {
   end
 }
 
-local PassiveTree = {
-  unusedSkillPoints = 0
-}
+local PassiveTree = {}
 
 local rootDir = 'passive-tree-states'
 
@@ -108,6 +106,24 @@ function PassiveTree.calcModifiers()
   return calcModifiers(treeData or {})
 end
 
+local getUnusedSkillPoints = memoize(function(treeData, totalSkillPointsAvailable)
+  local nodeData = SkillTreeEditor.parseTreeData(treeData)
+  local unusedSkillPoints = totalSkillPointsAvailable
+  for _ in pairs(nodeData) do
+    unusedSkillPoints = unusedSkillPoints - 1
+  end
+  return unusedSkillPoints
+end)
+
+function PassiveTree.getUnusedSkillPoints()
+  local gameState = require 'main.global-state'.gameState
+  local saveDir = gameState:getId()
+  local treeData = PassiveTree.getState(saveDir)
+  local gameState = require 'main.global-state'.gameState
+  local totalSkillPointsAvailable = gameState:get().level
+  return getUnusedSkillPoints(treeData, totalSkillPointsAvailable)
+end
+
 function PassiveTree.toggle()
   if Component.get('passiveSkillsTree') then
     MenuManager.clearAll()
@@ -123,15 +139,7 @@ function PassiveTree.toggle()
     editorMode = 'PLAY_READ_ONLY',
     nodes = nodesFromSavedState,
     onChange = function(self)
-      local gameState = require 'main.global-state'.gameState
-      local totalSkillPointsAvailable = gameState:get().level
-      PassiveTree.unusedSkillPoints = totalSkillPointsAvailable
-      for _,data in pairs(self.nodes) do
-        if data.selected then
-          PassiveTree.unusedSkillPoints = PassiveTree.unusedSkillPoints - 1
-        end
-      end
-      self.editorMode = PassiveTree.unusedSkillPoints > 0 and
+      self.editorMode = PassiveTree.getUnusedSkillPoints() > 0 and
         'PLAY' or
         'PLAY_UNSELECT_ONLY'
     end,
@@ -154,7 +162,7 @@ function PassiveTree.toggle()
       love.graphics.setFont(font)
       local text = {
         Color.WHITE,
-        PassiveTree.unusedSkillPoints,
+        PassiveTree.getUnusedSkillPoints(),
         Color.WHITE,
         ' points left',
       }
