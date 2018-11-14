@@ -7,8 +7,8 @@ return {
 	},
 
 	properties = {
-		sprite = "potion_40",
-		title = "Potion of Energy",
+		sprite = "vial-energy",
+		title = "Vial of Energy",
 		baseDropChance = 1,
 		category = itemConfig.category.CONSUMABLE,
 

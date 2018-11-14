@@ -457,74 +457,6 @@
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_97.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_98.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_99.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_1.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_10.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_11.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_12.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_13.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_14.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_15.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_16.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_17.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_18.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_19.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_2.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_20.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_21.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_22.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_23.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_24.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_25.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_26.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_27.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_28.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_29.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_3.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_30.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_31.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_32.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_33.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_34.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_35.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_36.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_37.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_38.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_39.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_4.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_40.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_41.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_42.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_43.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_44.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_45.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_46.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_47.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_48.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_49.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_5.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_50.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_51.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_52.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_53.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_54.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_55.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_56.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_57.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_58.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_59.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_6.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_60.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_7.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_8.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/potion_9.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/vial_1.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/vial_2.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/vial_3.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/vial_4.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/vial_5.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/vial_6.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/vial_7.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions/vial_8.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_1.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_10.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_11.png</key>
@@ -669,6 +601,8 @@
             <key type="filename">custom-art/gui/gui-map-pointer.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree-button--hover.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree-button.png</key>
+            <key type="filename">custom-art/items/vial-energy.png</key>
+            <key type="filename">custom-art/items/vial-health.png</key>
             <key type="filename">custom-art/status-effect-icons/status-frenzy.png</key>
             <key type="filename">custom-art/status-effect-icons/status-legendary-enemy.png</key>
             <key type="filename">custom-art/status-effect-icons/status-shield.png</key>
@@ -892,6 +826,19 @@
                 <rect>7,11,14,22</rect>
                 <key>scale9Paddings</key>
                 <rect>7,11,14,22</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-menu-button-badge-background.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,4,7,8</rect>
+                <key>scale9Paddings</key>
+                <rect>4,4,7,8</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -1167,7 +1114,6 @@
             <filename>custom-art/primitives</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors</filename>
-            <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/potions</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets</filename>
             <filename>custom-art/status-effect-icons</filename>
             <filename>custom-art/effects</filename>

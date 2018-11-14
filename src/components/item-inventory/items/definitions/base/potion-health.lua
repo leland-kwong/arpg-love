@@ -8,8 +8,8 @@ return {
 	},
 
 	properties = {
-		sprite = "potion_48",
-		title = "Potion of Healing",
+		sprite = "vial-health",
+		title = "Vial of Health",
 		baseDropChance = 1,
 		category = itemConfig.category.CONSUMABLE,
 
