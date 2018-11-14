@@ -325,11 +325,15 @@ local mouseBtnToString = {
   [2] = 'rm'
 }
 
+local keyboardBtnToString = {
+  space = 'spc'
+}
+
 local function drawHotkEy(self)
   local userSettings = require 'config.user-settings'
   local mouseBtn = userSettings.mouseInputMap[self.skillId]
   local keyboardKey = userSettings.keyboard[self.skillId]
-  local hotKeyToShow = mouseBtn and mouseBtnToString[mouseBtn] or keyboardKey
+  local hotKeyToShow = mouseBtnToString[mouseBtn] or keyboardBtnToString[keyboardKey] or keyboardKey
   self.hudTextLayer:add(
     hotKeyToShow,
     Color.WHITE,
