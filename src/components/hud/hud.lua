@@ -106,7 +106,7 @@ function Hud.init(self)
     y = winHeight - barHeight - 17,
     w = healthManaWidth / 2,
     h = barHeight,
-    color = {Color.rgba255(228, 59, 119)},
+    color = {Color.rgba255(207, 23, 59)},
     fillPercentage = getHealthRemaining
   }):setParent(self)
 
@@ -117,7 +117,7 @@ function Hud.init(self)
     w = healthManaWidth / 2,
     h = barHeight,
     fillDirection = -1,
-    color = {Color.rgba255(44, 192, 245)},
+    color = {Color.rgba255(24, 144, 224)},
     fillPercentage = getEnergyRemaining
   }):setParent(self)
 
@@ -229,20 +229,10 @@ function Hud.init(self)
     y = healthStatusBar.y - 25
   }):setParent(self)
 
-  local spacing = 32
-  local endXPos = healthStatusBar.x - spacing
+  local spacing = 27
+  local endXPos = healthStatusBar.x - spacing - 9
 
   local skillSetup = {
-    {
-      skillId = 'ACTIVE_ITEM_2',
-      slotX = 2,
-      slotY = 5
-    },
-    {
-      skillId = 'ACTIVE_ITEM_1',
-      slotX = 1,
-      slotY = 5
-    },
     {
       skillId = 'SKILL_4',
       slotX = 2,
@@ -277,13 +267,37 @@ function Hud.init(self)
       player = self.player,
       rootStore = self.rootStore,
       x = endXPos - (spacing * (i - 1)),
-      y = winHeight - 32 - 1,
+      y = winHeight - 32 - 2,
       slotX = skill.slotX,
       slotY = skill.slotY,
       hudTextLayer = self.hudTextSmallLayer,
-      drawOrder = function()
-        return 2
-      end
+    }):setParent(self)
+  end
+
+  local itemSetup = {
+    {
+      skillId = 'ACTIVE_ITEM_1',
+      slotX = 1,
+      slotY = 5
+    },
+    {
+      skillId = 'ACTIVE_ITEM_2',
+      slotX = 2,
+      slotY = 5
+    },
+  }
+
+  for i=1, #itemSetup do
+    local skill = itemSetup[i]
+    ActiveSkillInfo.create({
+      skillId = skill.skillId,
+      player = self.player,
+      rootStore = self.rootStore,
+      x = energyStatusBar.x + energyStatusBar.w + 10 + (spacing * (i - 1)),
+      y = winHeight - 32 - 2,
+      slotX = skill.slotX,
+      slotY = skill.slotY,
+      hudTextLayer = self.hudTextSmallLayer,
     }):setParent(self)
   end
 

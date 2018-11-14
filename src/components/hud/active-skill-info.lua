@@ -250,7 +250,7 @@ local SkillBarPreDraw = Component.create({
     love.graphics.draw(self.canvas)
   end,
   drawOrder = function()
-    return 1
+    return 2
   end
 })
 
@@ -261,7 +261,7 @@ local ActiveSkillInfo = {
   skillId = nil,
   slotX = 1,
   slotY = 1,
-  size = 28,
+  size = 26,
   player = nil,
   rootStore = nil
 }
@@ -310,13 +310,6 @@ function ActiveSkillInfo.update(self, dt)
       self:getId(),
       function()
         local boxSize = self.size
-        love.graphics.setColor(0,0,0,0.8)
-        love.graphics.rectangle('fill', self.x, self.y, boxSize, boxSize)
-        local oLineWidth = love.graphics.getLineWidth()
-        love.graphics.setLineWidth(1)
-        love.graphics.setColor(1,1,1)
-        love.graphics.rectangle('line', self.x - 0.5, self.y - 0.5, boxSize, boxSize)
-        love.graphics.setLineWidth(oLineWidth)
 
         if nextActiveItem then
           drawItem(nextActiveItem, self.x, self.y, boxSize)
@@ -340,8 +333,8 @@ local function drawHotkEy(self)
   self.hudTextLayer:add(
     hotKeyToShow,
     Color.WHITE,
-    self.x,
-    self.y - 5
+    self.x + 2,
+    self.y + self.size - 9
   )
 end
 

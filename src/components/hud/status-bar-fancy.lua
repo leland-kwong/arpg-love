@@ -16,11 +16,12 @@ Component.create({
 
         local clamp = require 'utils.math'.clamp
         local fillPixelAmount = c.w * clamp(c.fillPercentage(), 0, 1)
+        local height = 100
         if c.fillDirection == 1 then
-          love.graphics.rectangle('fill', c.x, c.y, fillPixelAmount, c.h)
+          love.graphics.rectangle('fill', c.x, c.y, fillPixelAmount, height)
         else
           local amountMissing = c.w - fillPixelAmount
-          love.graphics.rectangle('fill', c.x + amountMissing, c.y, fillPixelAmount, c.h)
+          love.graphics.rectangle('fill', c.x + amountMissing, c.y, fillPixelAmount, height)
         end
 
       end
@@ -29,12 +30,26 @@ Component.create({
   draw = function(self)
     local group = Component.groups.hudStatusBarFancy
     local components = group.getAll()
-
     local fillAnimation = AnimationFactory:newStaticSprite('gui-dashboard-status-bar-fancy')
+
     local spriteWidth = fillAnimation:getFullWidth()
     for _,c in pairs(components) do
       c.offsetX = c.fillDirection == -1 and spriteWidth or 0
     end
+
+    for _,c in pairs(components) do
+      love.graphics.setColor(Color.multiplyAlpha(c.color, 0.2))
+      love.graphics.draw(
+        AnimationFactory.atlas,
+        fillAnimation.sprite,
+        c.x + c.fillDirection + c.offsetX,
+        c.y + 1,
+        0,
+        c.fillDirection,
+        1
+      )
+    end
+
     love.graphics.stencil(self.fillStencil, 'replace', 1)
     love.graphics.setStencilTest('greater', 0)
 
@@ -49,10 +64,24 @@ Component.create({
         c.fillDirection,
         1
       )
-      Component.removeFromGroup(c, 'hudStatusBarFancy')
     end
 
     love.graphics.setStencilTest()
+
+    local highlightAnimation = AnimationFactory:newStaticSprite('gui-dashboard-status-bar-fancy-highlight')
+    for _,c in pairs(components) do
+      love.graphics.setColor(1,1,1,0.3)
+      love.graphics.draw(
+        AnimationFactory.atlas,
+        highlightAnimation.sprite,
+        c.x + c.fillDirection + c.offsetX,
+        c.y + 1,
+        0,
+        c.fillDirection,
+        1
+      )
+      Component.removeFromGroup(c, 'hudStatusBarFancy')
+    end
   end,
   drawOrder = function()
     return 50
