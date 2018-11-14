@@ -34,7 +34,7 @@ local function drawItem(item, x, y, slotSize)
     love.graphics.draw(
       animationFactory.atlas,
       animation.sprite,
-      x + ox, y + oy
+      math.floor(x + ox), math.floor(y + oy)
     )
 
     local showStackSize = item.stackSize > 1
