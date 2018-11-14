@@ -75,7 +75,7 @@ config.categoryTitle = {
 
 config.equipmentCategorySilhouette = {
 	[equipmentCategory.POD_MODULE] = 'weapon-module-empty',
-	[consumableCategory.CONSUMABLE] = 'potion_48',
+	[consumableCategory.CONSUMABLE] = 'vial-health',
 	[equipmentCategory.HELMET] = 'helmet_106',
 	[equipmentCategory.BODY_ARMOR] = 'armor_121',
 	[equipmentCategory.SHOES] = 'shoe_1',
