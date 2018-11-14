@@ -64,7 +64,8 @@ function MenuButtons.init(self)
     local b = buttons[index]
     local spriteWidth, spriteHeight = b.normalAni:getSourceSize()
     local drawIndex = index - 1
-    local spacing = (drawIndex * spriteWidth) + (drawIndex * 1)
+    local margin = 2
+    local spacing = (drawIndex * spriteWidth) + (drawIndex * margin)
     Gui.create({
       x = parent.x + spacing,
       y = parent.y,

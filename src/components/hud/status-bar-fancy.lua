@@ -30,24 +30,19 @@ Component.create({
     local group = Component.groups.hudStatusBarFancy
     local components = group.getAll()
 
-    local outlineAnimation = AnimationFactory:newStaticSprite('gui-status-bar-outline')
-    local spriteWidth = outlineAnimation:getWidth()
+    local fillAnimation = AnimationFactory:newStaticSprite('gui-dashboard-status-bar-fancy')
+    local spriteWidth = fillAnimation:getFullWidth()
     for _,c in pairs(components) do
       c.offsetX = c.fillDirection == -1 and spriteWidth or 0
-      love.graphics.setColor(1, 1, 1)
-      love.graphics.draw(AnimationFactory.atlas, outlineAnimation.sprite, c.x + c.offsetX, c.y, 0, c.fillDirection, 1)
     end
-
     love.graphics.stencil(self.fillStencil, 'replace', 1)
     love.graphics.setStencilTest('greater', 0)
 
-    -- draw graphics
-    local fillSprite = AnimationFactory:newStaticSprite('gui-status-bar-fill-mask').sprite
     for _,c in pairs(components) do
       love.graphics.setColor(c.color)
       love.graphics.draw(
         AnimationFactory.atlas,
-        fillSprite,
+        fillAnimation.sprite,
         c.x + c.fillDirection + c.offsetX,
         c.y + 1,
         0,

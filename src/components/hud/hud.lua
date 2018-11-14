@@ -24,7 +24,7 @@ local Hud = {
   rootStore = {}
 }
 
-local healthManaWidth = 63 * 2
+local healthManaWidth = 62 * 2
 
 local function setupExperienceIndicator(self)
   local w, h = healthManaWidth, 4
@@ -103,22 +103,102 @@ function Hud.init(self)
   local healthStatusBar = StatusBarFancy.create({
     id = 'healthStatusBar',
     x = offX - 1,
-    y = winHeight - barHeight - 13,
+    y = winHeight - barHeight - 17,
     w = healthManaWidth / 2,
     h = barHeight,
-    color = {Color.rgba255(120, 252, 136)},
+    color = {Color.rgba255(228, 59, 119)},
     fillPercentage = getHealthRemaining
   }):setParent(self)
 
   -- mana bar
   local energyStatusBar = StatusBarFancy.create({
     x = offX + healthManaWidth / 2 + 1,
-    y = winHeight - barHeight - 13,
+    y = healthStatusBar.y,
     w = healthManaWidth / 2,
     h = barHeight,
     fillDirection = -1,
-    color = {Color.rgba255(142, 238, 255)},
+    color = {Color.rgba255(44, 192, 245)},
     fillPercentage = getEnergyRemaining
+  }):setParent(self)
+
+  local AnimationFactory = require 'components.animation-factory'
+  local aniStatusBar = AnimationFactory:newStaticSprite('gui-dashboard-status-bars-underlay')
+  local function drawStatusBarUnderlay()
+    love.graphics.setColor(1,1,1)
+    love.graphics.draw(
+      AnimationFactory.atlas,
+      aniStatusBar.sprite,
+      offX - 6,
+      healthStatusBar.y - 4
+    )
+  end
+
+  local function drawAbilityUnderlay()
+    local AnimationFactory = require 'components.animation-factory'
+    local ani = AnimationFactory:newStaticSprite('gui-dashboard-abilities-underlay')
+    love.graphics.setColor(1,1,1)
+    love.graphics.draw(
+      AnimationFactory.atlas,
+      ani.sprite,
+      offX - 6 - ani:getWidth(),
+      healthStatusBar.y - 7
+    )
+  end
+
+  local AnimationFactory = require 'components.animation-factory'
+  local aniVialUnderlay = AnimationFactory:newStaticSprite('gui-dashboard-vials-underlay')
+  local function drawVialUnderlay()
+    love.graphics.setColor(1,1,1)
+    love.graphics.draw(
+      AnimationFactory.atlas,
+      aniVialUnderlay.sprite,
+      offX - 6 + aniStatusBar:getWidth(),
+      healthStatusBar.y - 7
+    )
+  end
+
+  local function drawMenuButtonsUnderlay()
+    local AnimationFactory = require 'components.animation-factory'
+    local aniLeft = AnimationFactory:newStaticSprite('gui-dashboard-menu-left')
+    local aniMiddle = AnimationFactory:newStaticSprite('gui-dashboard-menu-middle')
+    local aniRight = AnimationFactory:newStaticSprite('gui-dashboard-menu-right')
+    local y = healthStatusBar.y
+    local x = offX - 4 + aniStatusBar:getWidth() + aniVialUnderlay:getWidth()
+    love.graphics.setColor(1,1,1)
+    love.graphics.draw(
+      AnimationFactory.atlas,
+      aniLeft.sprite,
+      x,
+      y + 2
+    )
+    local middleWidth = 1
+    love.graphics.draw(
+      AnimationFactory.atlas,
+      aniMiddle.sprite,
+      x + aniLeft:getWidth(),
+      y + 2
+    )
+    love.graphics.draw(
+      AnimationFactory.atlas,
+      aniRight.sprite,
+      x + aniLeft:getWidth() + middleWidth,
+      y
+    )
+  end
+
+  Component.create({
+    init = function(self)
+      Component.addToGroup(self, 'hud')
+    end,
+    draw = function()
+      drawStatusBarUnderlay()
+      drawVialUnderlay()
+      drawAbilityUnderlay()
+      drawMenuButtonsUnderlay()
+    end,
+    drawOrder = function(self)
+      return 1
+    end
   }):setParent(self)
 
   self.listeners = {
@@ -135,7 +215,7 @@ function Hud.init(self)
     end)
   }
 
-  setupExperienceIndicator(self)
+  -- setupExperienceIndicator(self)
   ScreenFx.create({
     drawOrder = function()
       return 1
@@ -209,8 +289,8 @@ function Hud.init(self)
 
   local MenuButtons = require 'components.hud.menu-buttons'
   MenuButtons.create({
-    x = energyStatusBar.x + energyStatusBar.w + 5,
-    y = winHeight - 30
+    x = energyStatusBar.x + 134,
+    y = healthStatusBar.y + 5
   }):setParent(self)
 end
 

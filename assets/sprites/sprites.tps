@@ -167,7 +167,7 @@
             <key>trimThreshold</key>
             <uint>1</uint>
             <key>trimMargin</key>
-            <uint>1</uint>
+            <uint>0</uint>
             <key>trimMode</key>
             <enum type="SpriteSettings::TrimMode">CropKeepPos</enum>
             <key>tracerTolerance</key>
@@ -829,16 +829,107 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/gui/gui-menu-button-badge-background.png</key>
+            <key type="filename">custom-art/gui/gui-dashboard-abilities-underlay.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>4,4,7,8</rect>
+                <rect>37,9,73,19</rect>
                 <key>scale9Paddings</key>
-                <rect>4,4,7,8</rect>
+                <rect>37,9,73,19</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-dashboard-menu-left.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>1,7,2,13</rect>
+                <key>scale9Paddings</key>
+                <rect>1,7,2,13</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-dashboard-menu-middle.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>0,7,1,13</rect>
+                <key>scale9Paddings</key>
+                <rect>0,7,1,13</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-dashboard-menu-right.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>12,7,25,13</rect>
+                <key>scale9Paddings</key>
+                <rect>12,7,25,13</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-dashboard-status-bar-experience.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>31,1,61,1</rect>
+                <key>scale9Paddings</key>
+                <rect>31,1,61,1</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-dashboard-status-bar-fancy.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>15,5,30,9</rect>
+                <key>scale9Paddings</key>
+                <rect>15,5,30,9</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-dashboard-status-bars-underlay.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>34,9,67,17</rect>
+                <key>scale9Paddings</key>
+                <rect>34,9,67,17</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-dashboard-vials-underlay.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,10,31,19</rect>
+                <key>scale9Paddings</key>
+                <rect>16,10,31,19</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -856,20 +947,6 @@
                 <rect>6,6,13,13</rect>
                 <key>scale9Paddings</key>
                 <rect>6,6,13,13</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">custom-art/gui/gui-status-bar-fill-mask.png</key>
-            <key type="filename">custom-art/gui/gui-status-bar-outline.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0,0</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>16,5,31,9</rect>
-                <key>scale9Paddings</key>
-                <rect>16,5,31,9</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
