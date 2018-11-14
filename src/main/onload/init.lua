@@ -25,12 +25,6 @@ local newLightWorld = LightWorld.create({
   end
 })
 
-msgBus.on(msgBus.UPDATE, function()
-  local cameraTranslateX, cameraTranslateY = camera:getPosition()
-  local cWidth, cHeight = camera:getSize()
-  newLightWorld:setPosition(-cameraTranslateX + cWidth/2, -cameraTranslateY + cHeight/2)
-end)
-
 local Notifier = require 'components.hud.notifier'
 local config = require 'config.config'
 local notifierWidth, notifierHeight = 250, 200

@@ -28,7 +28,7 @@ local HomeBase = {
 
 function HomeBase.init(self)
   msgBus.send(msgBus.NEW_MAP)
-  Component.get('lightWorld').ambientColor = {1,1,1,1}
+  Component.get('lightWorld'):setAmbientColor({1,1,1,1})
 
   local collisionObjectsLayer = f.find(tileData.layers, function(layer)
     return layer.name == 'collisions'

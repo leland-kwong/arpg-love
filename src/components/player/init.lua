@@ -591,6 +591,13 @@ local function handleBossMode(self)
   end
 end
 
+function updateLightWorld(camera)
+  local cameraTranslateX, cameraTranslateY = camera:getPosition()
+  local cWidth, cHeight = camera:getSize()
+  local lightWorld = Component.get('lightWorld')
+  lightWorld:setPosition(-cameraTranslateX + cWidth/2, -cameraTranslateY + cHeight/2)
+end
+
 function Player.update(self, dt)
   if self.inBossBattle then
     handleBossMode(self)
@@ -618,6 +625,7 @@ function Player.update(self, dt)
 
   -- update camera to follow player
   camera:setPosition(self.x, self.y, userSettings.camera.speed)
+  updateLightWorld(camera)
 end
 
 local function drawShadow(self, sx, sy, ox, oy)
