@@ -84,7 +84,7 @@ Component.create({
     end
   end,
   drawOrder = function()
-    return 50
+    return 3
   end
 })
 

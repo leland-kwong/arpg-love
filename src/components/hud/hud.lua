@@ -76,7 +76,7 @@ function Hud.init(self)
     group = groups.hud,
     font = require 'components.font'.primary.font,
     drawOrder = function()
-      return 10
+      return 4
     end
   }):setParent(self)
 
