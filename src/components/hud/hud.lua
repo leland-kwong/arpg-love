@@ -27,13 +27,13 @@ local Hud = {
 local healthManaWidth = 62 * 2
 
 local function setupExperienceIndicator(self)
-  local w, h = healthManaWidth, 4
+  local w, h = healthManaWidth - 2, 2
   local winWidth, winHeight = love.graphics.getWidth() / scale, love.graphics.getHeight() / scale
   local offX, offY = Position.boxCenterOffset(w, h, winWidth, winHeight)
   ExperienceIndicator.create({
     rootStore = self.rootStore,
     x = offX,
-    y = winHeight - h - 5,
+    y = winHeight - h - 11,
     w = w,
     h = h,
     drawOrder = function()
@@ -215,7 +215,7 @@ function Hud.init(self)
     end)
   }
 
-  -- setupExperienceIndicator(self)
+  setupExperienceIndicator(self)
   ScreenFx.create({
     drawOrder = function()
       return 1

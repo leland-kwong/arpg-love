@@ -38,7 +38,7 @@ Component.create({
     end
 
     for _,c in pairs(components) do
-      love.graphics.setColor(Color.multiplyAlpha(c.color, 0.2))
+      love.graphics.setColor(0,0,0,0.5)
       love.graphics.draw(
         AnimationFactory.atlas,
         fillAnimation.sprite,
