@@ -10,6 +10,7 @@ local itemConfig = require 'components.item-inventory.items.config'
 local itemSystem =require("components.item-inventory.items.item-system")
 local Sound = require 'components.sound'
 local MenuManager = require 'modules.menu-manager'
+require 'components.groups.pixel-round'
 
 local iContext = 'InventoryMenu'
 
@@ -66,6 +67,8 @@ msgBus.on(msgBus.ALL, function(msg, msgType)
 end)
 
 function InventoryBlueprint.init(self)
+  Component.addToGroup(self:getId(), 'pixelRound', self)
+
   local msgBusMainMenu = require 'components.msg-bus-main-menu'
   msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
   MenuManager.clearAll()

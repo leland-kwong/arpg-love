@@ -4,6 +4,7 @@ local itemSystem = require'components.item-inventory.items.item-system'
 local font = require 'components.font'
 local Position = require 'utils.position'
 local Color = require 'modules.color'
+local floor = math.floor
 
 local itemAnimationsCache = {}
 
@@ -34,7 +35,7 @@ local function drawItem(item, x, y, slotSize)
     love.graphics.draw(
       animationFactory.atlas,
       animation.sprite,
-      math.floor(x + ox), math.floor(y + oy)
+      floor(x + ox), floor(y + oy)
     )
 
     local showStackSize = item.stackSize > 1
