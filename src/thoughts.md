@@ -285,7 +285,7 @@ Nodes
 - Power stone slot: put any power stone into this slot to gain its additional stats
 - reboot: If damage would bring your life total to 0, instead you get a forcefield that blocks 200(+5 per level) damage
 - leech(passive): you steal X% life from nearby enemies
-- eye for an eye: gain X damage for every X% health missing
+- blood rage: gain X damage for every X% health missing
 - masochism: abilities cost you health instead of energy. You have zero energy.
 - energy shield: 30% of damage is taken from energy before health
 - 2nd wind: receive large speed buff after taking a critical hit
