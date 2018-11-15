@@ -27,7 +27,6 @@ end)
 local modifierHandlers = {
   lightningRod = function(nodeId, data, modifiers)
     onHitModifiers[nodeId] = function(hitMsg)
-      consoleLog('lightning hit', Time())
       msgBus.send(msgBus.CHARACTER_HIT, {
         parent = hitMsg.parent,
         duration = 0.5,
@@ -36,10 +35,8 @@ local modifierHandlers = {
         },
         source = 'INITIATE_SHOCK'
       })
-      hitMsg.lightningDamage = hitMsg.lightningDamage + math.random(
-        10,
-        20
-      )
+      local multiplier = data.value.value
+      hitMsg.lightningDamage = hitMsg.lightningDamage + (multiplier * hitMsg.damage)
     end
     return modifiers
   end,

@@ -36,7 +36,7 @@ local nodeValueOptions = {
     type = 'keystone',
     image = 'gui-skill-tree_node_lightning',
     description = function(self)
-      return '+'..(self.value.value * 100)..'% chance lightning damage'
+      return '+'..(self.value.value * 100)..'% damage as lightning damage'
     end
   },
   [4] = {
