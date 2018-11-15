@@ -115,10 +115,10 @@ local getUnusedSkillPoints = memoize(function(treeData, totalSkillPointsAvailabl
   return unusedSkillPoints
 end)
 
-function PassiveTree.getUnusedSkillPoints()
+function PassiveTree.getUnusedSkillPoints(treeData)
   local gameState = require 'main.global-state'.gameState
   local saveDir = gameState:getId()
-  local treeData = PassiveTree.getState(saveDir)
+  treeData = treeData or PassiveTree.getState(saveDir)
   local gameState = require 'main.global-state'.gameState
   local totalSkillPointsAvailable = gameState:get().level
   return getUnusedSkillPoints(treeData or {}, totalSkillPointsAvailable)
@@ -138,12 +138,20 @@ function PassiveTree.toggle()
     id = 'passiveSkillsTree',
     editorMode = 'PLAY_READ_ONLY',
     nodes = nodesFromSavedState,
+    --[[
+      NOTE: we need to update editor mode during both `onChange` and `onSerialize`
+      since onSerialize is async which means there could be new changes that have
+      not been saved yet.
+    ]]
     onChange = function(self)
       self.editorMode = PassiveTree.getUnusedSkillPoints() > 0 and
         'PLAY' or
         'PLAY_UNSELECT_ONLY'
     end,
-    onSerialize = function(serializedString, serialized)
+    onSerialize = function(self, serializedString, serialized)
+      self.editorMode = PassiveTree.getUnusedSkillPoints(serialized) > 0 and
+        'PLAY' or
+        'PLAY_UNSELECT_ONLY'
       fs.saveFile(rootDir, saveDir, serialized)
         :next(function()
           msgBus.send(msgBus.PLAYER_STATS_NEW_MODIFIERS)

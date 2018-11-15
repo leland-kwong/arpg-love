@@ -61,7 +61,7 @@ msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
         id = skillTreeId,
         editorMode = 'EDIT',
         nodes = ok and savedState or nil,
-        onSerialize = function(serializedTreeAsString)
+        onSerialize = function(self, serializedTreeAsString)
           local pathToSave = love.filesystem.getSourceBaseDirectory()..'/src/scene/skill-tree-editor/layout.lua'
           local io = require 'io'
           local f = assert(io.open(pathToSave, 'w'))

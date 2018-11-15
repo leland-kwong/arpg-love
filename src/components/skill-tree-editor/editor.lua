@@ -62,7 +62,7 @@ local TreeEditor = {
     previousSerializedTreeAsString = serializedTreeAsString
 
     if isNewState then
-      self.onSerialize(serializedTreeAsString, serializedTree)
+      self:onSerialize(serializedTreeAsString, serializedTree)
     end
   end
 }
@@ -481,7 +481,7 @@ function TreeEditor.init(self)
     end
     previousNodesList = self.nodes
   end
-  self.autoSave = tick.recur(autoSerialize, 0.1)
+  self.autoSave = tick.recur(autoSerialize, 1/60)
 
   love.mouse.setCursor()
 
