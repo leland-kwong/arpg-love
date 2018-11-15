@@ -145,11 +145,6 @@ function MainScene.init(self)
     msgBus.on(msgBus.SCENE_STACK_PUSH, function(v)
       msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:serializeAll(self.mapId)
     end, 1),
-    -- setup default properties in case they don't exist
-    msgBus.on(msgBus.CHARACTER_HIT, function(v)
-      v.damage = v.damage or 0
-      return v
-    end, 1),
 
     msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
       if randomItem then

@@ -32,6 +32,10 @@ msgBus.on(msgBus.CHARACTER_HIT, function(msg)
   local itemSource = entity and entity.source
   msg.itemSource = itemSource
 
+  -- setup default properties in case they don't exist
+  msg.damage = msg.damage or 0
+  msg.lightningDamage = msg.lightningDamage or 0
+
   return msg
 end, 1)
 

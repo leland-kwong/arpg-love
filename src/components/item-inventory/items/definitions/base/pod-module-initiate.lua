@@ -11,12 +11,6 @@ return {
 
 	blueprint = {
 		extraModifiers = {
-			require(require('alias').path.items..'.modifiers.upgrade-shock')({
-				experienceRequired = 20,
-				duration = 0.3,
-				minDamage = 1,
-				maxDamage = 2
-			}),
 			require(require('alias').path.items..'.modifiers.upgrade-bouncing-strike')({
 				experienceRequired = 120,
 				maxBounces = 1

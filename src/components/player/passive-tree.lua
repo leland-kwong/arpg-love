@@ -16,7 +16,7 @@ msgBus.on(msgBus.CHARACTER_HIT, function(msg)
     end
   end
   return msg
-end, 1)
+end, 2)
 
 msgBus.on(msgBus.UPDATE, function(dt)
   for _,handler in pairs(updateModifiers) do
@@ -26,11 +26,21 @@ end)
 
 local modifierHandlers = {
   lightningRod = function(nodeId, data, modifiers)
-    onHitModifiers[nodeId] = coroutine.wrap(function(hitMsg)
-      while (true) do
-        coroutine.yield()
-      end
-    end)
+    onHitModifiers[nodeId] = function(hitMsg)
+      consoleLog('lightning hit', Time())
+      msgBus.send(msgBus.CHARACTER_HIT, {
+        parent = hitMsg.parent,
+        duration = 0.5,
+        modifiers = {
+          shocked = 1
+        },
+        source = 'INITIATE_SHOCK'
+      })
+      hitMsg.lightningDamage = hitMsg.lightningDamage + math.random(
+        10,
+        20
+      )
+    end
     return modifiers
   end,
   heavyStrike = function(nodeId, data, modifiers)
