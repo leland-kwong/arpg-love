@@ -155,7 +155,6 @@ local playMode = {
   isNodeSelectable = function(nodeToCheck, nodeList, nodeValueOptions)
     local nodeValue = nodeToCheck.nodeValue
     local nodeData = nodeValueOptions[nodeValue]
-    consoleLog(nodeData and nodeData.name)
 
     -- if any node has a selected connection, then it is selectable
     for id in pairs(nodeToCheck.connections) do
