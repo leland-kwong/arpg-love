@@ -13,6 +13,12 @@ local inputState = require 'main.inputs'.state
 local Object = require 'utils.object-utils'
 local noop = require 'utils.noop'
 local rebuildTableBySortingKeys = require 'components.skill-tree-editor.rebuild-table-by-sorting-keys'
+local Sound = require 'components.sound'
+
+local sounds = {
+  NODE_SELECT = 'gui/UI_Animate_Clean_Beeps_Appear_stereo.wav',
+  NODE_UNSELECT = 'gui/UI_Animate_Clean_Beeps_Disappear_stereo.wav'
+}
 
 --[[
   Instructions:
@@ -365,6 +371,7 @@ function TreeEditor.handleInputs(self)
 
         if (editorModes.PLAY_UNSELECT_ONLY == state.editorMode) then
           if (node.selected) then
+            Sound.playEffect(sounds.NODE_UNSELECT)
             self:setNode(nodeId, {
               selected = false
             })
@@ -375,8 +382,14 @@ function TreeEditor.handleInputs(self)
           then
             return
           end
+          local isSelected = not node.selected
+          if isSelected then
+            Sound.playEffect(sounds.NODE_SELECT)
+          else
+            Sound.playEffect(sounds.NODE_UNSELECT)
+          end
           self:setNode(nodeId, {
-            selected = not node.selected
+            selected = isSelected
           })
           return
         end
