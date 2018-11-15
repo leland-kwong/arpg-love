@@ -152,7 +152,12 @@ local function clearSelections()
 end
 
 local playMode = {
-  isNodeSelectable = function(nodeToCheck, nodeList)
+  isNodeSelectable = function(nodeToCheck, nodeList, nodeValueOptions)
+    local nodeValue = nodeToCheck.nodeValue
+    local nodeData = nodeValueOptions[nodeValue]
+    consoleLog(nodeData and nodeData.name)
+
+    -- if any node has a selected connection, then it is selectable
     for id in pairs(nodeToCheck.connections) do
       if nodeList[id].selected then
         return true
@@ -217,6 +222,16 @@ local function placeNode(root, nodeId, screenX, screenY, connections, nodeValue,
     end,
 
     onPointerMove = function(self)
+      -- in any non-edit mode, prevent selection if the node is read only
+      if editorModes.EDIT ~= root.editorMode then
+        local dataRef = root.nodes[self:getId()]
+        local nodeData = root.nodeValueOptions[dataRef.nodeValue]
+        local isReadOnly = (not nodeData) or nodeData.readOnly
+        if isReadOnly then
+          return
+        end
+      end
+
       state.hoveredNode = self:getId()
     end,
     onPointerLeave = function(self)
@@ -356,7 +371,7 @@ function TreeEditor.handleInputs(self)
             })
           end
         elseif (editorModes.PLAY == state.editorMode) then
-          if ((not node.selected) and (not playMode.isNodeSelectable(node, self.nodes))) or
+          if ((not node.selected) and (not playMode.isNodeSelectable(node, self.nodes, self.nodeValueOptions))) or
             (node.selected and (not playMode.isNodeUnselectable(node, self.nodes)))
           then
             return

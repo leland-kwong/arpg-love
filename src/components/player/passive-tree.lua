@@ -120,7 +120,8 @@ function PassiveTree.getUnusedSkillPoints(treeData)
   local saveDir = gameState:getId()
   treeData = treeData or PassiveTree.getState(saveDir)
   local gameState = require 'main.global-state'.gameState
-  local totalSkillPointsAvailable = gameState:get().level
+  -- start out with zero skill points at level 1
+  local totalSkillPointsAvailable = gameState:get().level - 1
   return getUnusedSkillPoints(treeData or {}, totalSkillPointsAvailable)
 end
 

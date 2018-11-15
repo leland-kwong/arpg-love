@@ -45,6 +45,7 @@ local nodeValueOptions = {
       value = 0,
       type = 'dummyNode',
     },
+    readOnly = true,
     description = function()
       return 'Battle suit'
     end
@@ -76,9 +77,9 @@ local EditorWithDefaults = Object.assign(SkillTreeEditor, {
   parseTreeData = function(treeData)
     local parsedData = {}
     for nodeId,node in pairs(treeData) do
-      if node.selected then
-        local nodeValue = node.nodeValue
-        local nodeData = nodeValueOptions[nodeValue]
+      local nodeValue = node.nodeValue
+      local nodeData = nodeValueOptions[nodeValue]
+      if node.selected and (not nodeData.readOnly) then
         parsedData[nodeId] = nodeData
       end
     end
