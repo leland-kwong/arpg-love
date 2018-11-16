@@ -42,7 +42,6 @@ local modifierHandlers = {
   end,
   bloodRage = function(nodeId, data, modifiers)
     Component.get('PLAYER'):addFunctionalMod('percentDamage', function()
-      -- consoleLog('get blood rage')
       local gameState = require 'main.global-state'.gameState:get()
       local currentMods = gameState.statModifiers
       local percentHealthMissing = 1 - gameState.health / gameState.maxHealth
@@ -101,7 +100,7 @@ function PassiveTree.getState(saveDir)
   return ok and result or nil
 end
 
-local calcModifiers = memoize(function(treeData)
+local calcModifiers = function(treeData)
   onHitModifiers = {}
   updateModifiers = {}
 
@@ -114,7 +113,7 @@ local calcModifiers = memoize(function(treeData)
     modifierFunc(nodeId, data, modifiers)
   end
   return modifiers
-end)
+end
 
 function PassiveTree.calcModifiers()
   local gameState = require 'main.global-state'.gameState
