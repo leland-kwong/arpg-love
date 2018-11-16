@@ -57,7 +57,6 @@ return setmetatable({
 }, {
 	__call = function()
 		return setmetatable({
-			flatDamage = 0,
 			percentDamage = 0, -- total damage increase
 			energyCostReduction = 0, -- multiplier
 			maxHealth = 0,
@@ -65,7 +64,7 @@ return setmetatable({
 			healthRegeneration = 0,
 			energyRegeneration = base.energyRegeneration,
 			armor = 0,
-			flatPhysicalReduction = 0,
+			physicalReduction = 0,
 			cooldownReduction = 0, -- multiplier
 			attackTimeReduction = 0, -- multiplier
 			moveSpeed = 0, -- flat increase

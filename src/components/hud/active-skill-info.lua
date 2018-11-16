@@ -86,8 +86,8 @@ local function ActiveEquipmentHandler()
   local function modifyAbility(instance, playerRef)
     local v = instance
     local dmgMultiplier = 1 + playerRef:getCalculatedStat('percentDamage')
-    local min = floor((v.minDamage * dmgMultiplier) + playerRef:getCalculatedStat('flatDamage'))
-    local max = floor((v.maxDamage * dmgMultiplier) + playerRef:getCalculatedStat('flatDamage'))
+    local min = floor(v.minDamage * dmgMultiplier)
+    local max = floor(v.maxDamage * dmgMultiplier)
 
     -- update instance properties
     v:set('minDamage', min)
