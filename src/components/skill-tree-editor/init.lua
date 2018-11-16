@@ -60,6 +60,18 @@ local nodeValueOptions = {
     description = function(self)
       return 'every third hit deals +'..(self.value.value * 100)..'% bonus damage'
     end
+  },
+  [6] = {
+    name = 'blood rage',
+    value = {
+      type = 'bloodRage',
+      -- bonuse per percentage of health missing
+      bonus = 0.005,
+    },
+    image = 'gui-skill-tree_node_blood-rage',
+    description = function(self)
+      return 'gain '..(self.value.bonus * 100)..'% damage for each 1% of missing health'
+    end
   }
 }
 
@@ -69,9 +81,10 @@ local EditorWithDefaults = Object.assign(SkillTreeEditor, {
   defaultNodeDescription = 'not implemented yet',
   colors = {
     nodeConnection = {
-      outer = Color.SKY_BLUE,
-      outerNonSelectable = Color.MED_DARK_GRAY,
-      inner = {Color.multiplyAlpha(Color.DARK_GRAY, 0.7)}
+      inner = Color.SKY_BLUE,
+      innerNonSelectable = {Color.multiplyAlpha(Color.SKY_BLUE, 0.1)},
+      outerNonSelectable = {Color.multiplyAlpha(Color.SKY_BLUE, 0)},
+      outer = {Color.multiplyAlpha(Color.SKY_BLUE, 0.2)}
     }
   },
   parseTreeData = function(treeData)

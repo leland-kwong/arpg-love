@@ -2,6 +2,7 @@ local PopupTextController = require 'components.popup-text'
 local popupText = PopupTextController.create()
 local min, max, random = math.min, math.max, math.random
 local round = require 'utils.math'.round
+local Object = require 'utils.object-utils'
 
 local function rollCritChance(chance)
   if chance == 0 then
@@ -38,8 +39,14 @@ end
 
 -- Returns calculated stats. This should always be used when we need the stat including any modifiers.
 local function getCalculatedStat(self, prop)
+  local totalFunctionalValues = 0
+  local fMods = self.functionalMods[prop] or Object.EMPTY
+  for i=1, #fMods do
+    local modifierFn = fMods[i]
+    totalFunctionalValues = totalFunctionalValues + modifierFn(self)
+  end
   -- baseProperty + modifier
-  return self:getBaseStat(prop) + (self.modifiers[prop] or 0)
+  return self:getBaseStat(prop) + (self.modifiers[prop] or 0) + totalFunctionalValues
 end
 
 local defaultEquipmentModifiers = require'components.state.base-stat-modifiers'()
@@ -112,6 +119,15 @@ local function hitManager(_, self, dt, onDamageTaken)
   return hitCount
 end
 
+local function addFunctionalMod(self, prop, fn)
+  self.functionalMods[prop] = self.functionalMods[prop] or {}
+  table.insert(self.functionalMods[prop], fn)
+end
+
+local function newFunctionalMods(self)
+  self.functionalMods = setmetatable({}, functionalModsMt)
+end
+
 return setmetatable({
   setup = function(component)
     component.modifiers = {
@@ -121,7 +137,11 @@ return setmetatable({
     component.hitData = {}
     component.getCalculatedStat = getCalculatedStat
     component.getBaseStat = getBaseStat
-  end
+
+    newFunctionalMods(component)
+    component.addFunctionalMod = addFunctionalMod
+    component.newFunctionalMods = newFunctionalMods
+  end,
 }, {
   __call = hitManager
 })

@@ -684,7 +684,12 @@ function TreeEditor.draw(self)
         state.hoveredConnection and
         state.hoveredConnection[nodeId] and
         state.hoveredConnection[connectionNodeId]
-      local color = isHovered and Color.LIME or self.colors.nodeConnection.inner
+      local color = isHovered and Color.LIME or
+        (
+          playMode.isConnectionToSelectableNode(node, connectionNode) and
+            self.colors.nodeConnection.inner or
+            self.colors.nodeConnection.innerNonSelectable
+        )
       love.graphics.setLineWidth(4)
       love.graphics.setColor(color)
       drawConnection(node, connectionNode)

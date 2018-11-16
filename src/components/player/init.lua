@@ -213,6 +213,7 @@ local Player = Object.extend(BaseStatModifiers(), {
     Component.addToGroup(self, groups.character)
     self.listeners = {
       msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function()
+        self:newFunctionalMods()
         local BaseStatModifiers = require'components.state.base-stat-modifiers'
         local modifiers = BaseStatModifiers()
 

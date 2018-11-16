@@ -40,6 +40,16 @@ local modifierHandlers = {
     end
     return modifiers
   end,
+  bloodRage = function(nodeId, data, modifiers)
+    Component.get('PLAYER'):addFunctionalMod('percentDamage', function()
+      -- consoleLog('get blood rage')
+      local gameState = require 'main.global-state'.gameState:get()
+      local currentMods = gameState.statModifiers
+      local percentHealthMissing = 1 - gameState.health / gameState.maxHealth
+      return data.value.bonus * percentHealthMissing * 100
+    end)
+    return modifiers
+  end,
   heavyStrike = function(nodeId, data, modifiers)
     local hitCount = 0
     local hitSources = {}

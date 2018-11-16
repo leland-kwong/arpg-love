@@ -83,12 +83,11 @@ local function ActiveEquipmentHandler()
   }
 
   local floor = math.floor
-  local function modifyAbility(instance, modifiers)
+  local function modifyAbility(instance, playerRef)
     local v = instance
-    local m = modifiers
-    local dmgMultiplier = 1 + m.percentDamage
-    local min = floor((v.minDamage * dmgMultiplier) + m.flatDamage)
-    local max = floor((v.maxDamage * dmgMultiplier) + m.flatDamage)
+    local dmgMultiplier = 1 + playerRef:getCalculatedStat('percentDamage')
+    local min = floor((v.minDamage * dmgMultiplier) + playerRef:getCalculatedStat('flatDamage'))
+    local max = floor((v.maxDamage * dmgMultiplier) + playerRef:getCalculatedStat('flatDamage'))
 
     -- update instance properties
     v:set('minDamage', min)
@@ -117,6 +116,7 @@ local function ActiveEquipmentHandler()
       local energyCost = itemSystem.getDefinition(activeItem).baseModifiers.energyCost
       -- time an attack takes to finish (triggers a global cooldown)
       local curState = self.rootStore:get()
+      local playerRef = Component.get('PLAYER')
       local enoughEnergy = (energyCost == nil) or
         (energyCost <= curState.energy)
       if (not enoughEnergy) then
@@ -151,7 +151,7 @@ local function ActiveEquipmentHandler()
       )
       local instance = modifyAbility(
         abilityEntity,
-        curState.statModifiers
+        playerRef
       )
       local baseCooldown = itemSystem.getDefinition(activeItem).baseModifiers.cooldown or 0
       local actualCooldown = propTypesCalculator.cooldownReduction(baseCooldown, curState.statModifiers.cooldownReduction)
@@ -170,7 +170,7 @@ local function ActiveEquipmentHandler()
       )
 
       local actualEnergyCost = energyCost -
-        (energyCost * curState.statModifiers.energyCostReduction)
+        (energyCost * playerRef:getCalculatedStat('energyCostReduction'))
       self.rootStore:set(
         'energy',
         curState.energy - actualEnergyCost

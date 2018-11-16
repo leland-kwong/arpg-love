@@ -96,4 +96,6 @@ function Object.setReadOnly(o)
 	return o
 end
 
+Object.EMPTY = Object.setReadOnly({})
+
 return Object
