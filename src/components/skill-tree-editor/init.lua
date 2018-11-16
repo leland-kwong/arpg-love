@@ -12,6 +12,7 @@ local nodeValueOptions = {
       value = 0.01
     },
     image = 'gui-skill-tree_node_speed-up',
+    backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
       return '+'..(self.value.value * 100)..'% attack speed'
     end
@@ -23,6 +24,7 @@ local nodeValueOptions = {
       value = 0.02
     },
     image = 'gui-skill-tree_node_damage-up',
+    backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
       return '+'..(self.value.value * 100)..'% damage'
     end
@@ -35,6 +37,7 @@ local nodeValueOptions = {
     },
     type = 'keystone',
     image = 'gui-skill-tree_node_lightning',
+    backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
       return '+'..(self.value.value * 100)..'% damage as lightning damage'
     end
@@ -57,6 +60,7 @@ local nodeValueOptions = {
       value = 0.5
     },
     image = 'gui-skill-tree_node_heavy-strike',
+    backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
       return 'every third hit deals +'..(self.value.value * 100)..'% bonus damage'
     end
@@ -69,8 +73,46 @@ local nodeValueOptions = {
       bonus = 0.005,
     },
     image = 'gui-skill-tree_node_blood-rage',
+    backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
       return 'gain '..(self.value.bonus * 100)..'% damage for each 1% of missing health'
+    end
+  },
+  [7] = {
+    name = 'extra health',
+    value = {
+      type = 'maxHealth',
+      value = 10
+    },
+    image = 'gui-skill-tree_node_max-health',
+    backgroundImage = 'gui-skill-tree_node_background',
+    description = function(self)
+      return 'gain +'..(self.value.value)..' maximum health'
+    end
+  },
+  [8] = {
+    name = 'extra energy',
+    value = {
+      type = 'maxEnergy',
+      value = 2
+    },
+    image = 'gui-skill-tree_node_max-energy',
+    backgroundImage = 'gui-skill-tree_node_background',
+    description = function(self)
+      return 'gain +'..(self.value.value)..' maximum energy'
+    end
+  },
+  [9] = {
+    name = 'extra health and energy',
+    value = {
+      type = 'maxHealthEnergy',
+      bonusHealth = 10,
+      bonusEnergy = 2,
+    },
+    image = 'gui-skill-tree_node_max-health-energy',
+    backgroundImage = 'gui-skill-tree_node_background',
+    description = function(self)
+      return 'gain +'..(self.value.bonusHealth)..' maximum health, and +'..(self.value.bonusEnergy)..' maximum energy'
     end
   }
 }

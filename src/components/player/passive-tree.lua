@@ -82,6 +82,15 @@ local modifierHandlers = {
   dummyNode = function(_, _, modifiers)
     return modifiers
   end,
+  maxHealthEnergy = function(nodeId, data, modifiers)
+    local gameState = require 'main.global-state'.gameState:get()
+    local baseMods = gameState.statModifiers
+
+    modifiers
+      :apply('maxHealth', data.value.bonusHealth)
+      :apply('maxEnergy', data.value.bonusEnergy)
+    return modifiers
+  end,
   statModifier = function(nodeId, data, modifiers)
     local dataType = data.value.type
     local currentValue = (modifiers[dataType] or 0)
@@ -105,7 +114,8 @@ local calcModifiers = function(treeData)
   updateModifiers = {}
 
   local nodeData = SkillTreeEditor.parseTreeData(treeData)
-  local modifiers = {}
+  local BaseModifiers = require 'components.state.base-stat-modifiers'
+  local modifiers = BaseModifiers()
   for nodeId,data in pairs(nodeData) do
     local dataType = data.value.type
     local modifierFunc = modifierHandlers[dataType] or

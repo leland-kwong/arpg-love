@@ -30,7 +30,7 @@ local function defaultState()
 		characterName = characterName,
 		isNewGame = true,
 
-		level = 20,
+		level = 1,
 		totalExperience = 0,
 		enemyKillCount = 0,
 

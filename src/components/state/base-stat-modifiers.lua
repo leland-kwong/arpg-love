@@ -17,6 +17,14 @@ local function passThrough(v)
 	return v
 end
 
+local baseStatModifiersMt = {
+	apply = function(self, prop, value)
+		self[prop] = self[prop] + value
+		return self
+	end
+}
+baseStatModifiersMt.__index = baseStatModifiersMt
+
 return setmetatable({
 	--[[
 		TODO: add prop type handlers for transforming values. This way we can easily see how properties are being calculated.
@@ -48,7 +56,7 @@ return setmetatable({
 	})
 }, {
 	__call = function()
-		return {
+		return setmetatable({
 			flatDamage = 0,
 			percentDamage = 0, -- total damage increase
 			energyCostReduction = 0, -- multiplier
@@ -65,6 +73,6 @@ return setmetatable({
 			coldResist = 0,
 			lightningResist = 0,
 			experienceMultiplier = 0 -- increases experience gained by percentage amount
-		}
+		}, baseStatModifiersMt)
 	end
 })
