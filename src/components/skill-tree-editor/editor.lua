@@ -33,7 +33,7 @@ local sounds = {
 local mouseCollisionWorld = bump.newWorld(32)
 local mouseCollisionObject = {}
 local mouseCollisionSize = 50
-local cellSize = 25
+local cellSize = 50
 mouseCollisionWorld:add(mouseCollisionObject, 0, 0, mouseCollisionSize, mouseCollisionSize)
 
 local debugTextLayer = GuiText.create({
@@ -251,7 +251,7 @@ local function placeNode(root, nodeId, screenX, screenY, connections, nodeValue,
         return
       end
       local optionValue = root.nodeValueOptions[self.nodeValue]
-      local size = optionValue and (optionValue.type == 'keystone') and (2 * cellSize) or (2 * cellSize)
+      local size = optionValue and (optionValue.type == 'keystone') and (2 * cellSize) or (cellSize)
       self.width, self.height = size, size
       dataRef.size = size
       self.x, self.y = dataRef.x, dataRef.y
