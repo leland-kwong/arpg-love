@@ -41,7 +41,7 @@ local function setupCollisionObjects(self, grid, gridSize)
         solves a host of problems including line of sight checks not working properly due to
         rounding issues on a grid system. A value of 1 is enough to fix this
       ]]
-      local padding = 1
+      local padding = 3
 
       -- setup collision world objects
       local gridSize = self.gridSize
