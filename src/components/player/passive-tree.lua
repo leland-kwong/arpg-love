@@ -18,7 +18,7 @@ msgBus.on(msgBus.CHARACTER_HIT, function(msg)
   return msg
 end, 2)
 
-msgBus.on(msgBus.UPDATE, function(dt)
+msgBus.on(msgBus.PLAYER_UPDATE_START, function(dt)
   for _,handler in pairs(updateModifiers) do
     handler(dt)
   end
@@ -41,12 +41,12 @@ local modifierHandlers = {
     return modifiers
   end,
   bloodRage = function(nodeId, data, modifiers)
-    Component.get('PLAYER'):addFunctionalMod('percentDamage', function()
-      local gameState = require 'main.global-state'.gameState:get()
-      local currentMods = gameState.statModifiers
-      local percentHealthMissing = 1 - gameState.health / gameState.maxHealth
-      return data.value.bonus * percentHealthMissing * 100
-    end)
+    updateModifiers[nodeId] = function()
+      Component.get('PLAYER').stats:add('percentDamage', function(self)
+        local percentHealthMissing = 1 - self.health / self.maxHealth
+        return data.value.bonus * percentHealthMissing * 100
+      end)
+    end
     return modifiers
   end,
   heavyStrike = function(nodeId, data, modifiers)
@@ -87,15 +87,12 @@ local modifierHandlers = {
     local baseMods = gameState.statModifiers
 
     modifiers
-      :apply('maxHealth', data.value.bonusHealth)
-      :apply('maxEnergy', data.value.bonusEnergy)
+      :add('maxHealth', data.value.bonusHealth)
+      :add('maxEnergy', data.value.bonusEnergy)
     return modifiers
   end,
   statModifier = function(nodeId, data, modifiers)
-    local dataType = data.value.type
-    local currentValue = (modifiers[dataType] or 0)
-    modifiers[dataType] = currentValue + data.value.value
-    return modifiers
+    return modifiers:add(data.value.type, data.value.value)
   end
 }
 
@@ -114,8 +111,7 @@ local calcModifiers = function(treeData)
   updateModifiers = {}
 
   local nodeData = SkillTreeEditor.parseTreeData(treeData)
-  local BaseModifiers = require 'components.state.base-stat-modifiers'
-  local modifiers = BaseModifiers()
+  local modifiers = Component.get('PLAYER').stats
   for nodeId,data in pairs(nodeData) do
     local dataType = data.value.type
     local modifierFunc = modifierHandlers[dataType] or
@@ -181,7 +177,7 @@ function PassiveTree.toggle()
         'PLAY_UNSELECT_ONLY'
       fs.saveFile(rootDir, saveDir, serialized)
         :next(function()
-          msgBus.send(msgBus.PLAYER_STATS_NEW_MODIFIERS)
+          print('passive tree saved')
         end)
     end
   }):setParent(

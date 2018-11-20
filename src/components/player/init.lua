@@ -221,10 +221,10 @@ local Player = {
 
     Component.addToGroup(self, groups.character)
     self.listeners = {
-      msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function(msgValue)
-        updateHealthRegeneration(self.stats:get('healthRegeneration'))
-        updateEnergyRegeneration(self.stats:get('energyRegeneration'))
-      end),
+      -- msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function(msgValue)
+      --   updateHealthRegeneration(self.stats:get('healthRegeneration'))
+      --   updateEnergyRegeneration(self.stats:get('energyRegeneration'))
+      -- end),
 
       msgBus.on(msgBus.GENERATE_LOOT, function(msgValue)
         local LootGenerator = require'components.loot-generator.loot-generator'
@@ -589,10 +589,24 @@ end
 msgBus.PLAYER_UPDATE_START = 'PLAYER_UPDATE_START'
 
 function Player.update(self, dt)
+  PassiveTree = require 'components.player.passive-tree'
+  PassiveTree.calcModifiers()
   msgBus.send(msgBus.PLAYER_UPDATE_START)
   if (not self.recentlyCreated) then
     self.recentlyCreated = true
     msgBus.send(msgBus.PLAYER_FULL_HEAL)
+  end
+
+  local healthRegen = self.stats:get('healthRegeneration')
+  if self.prevHealthRegeneration ~= healthRegen then
+    self.prevHealthRegeneration = healthRegen
+    updateHealthRegeneration(healthRegen)
+  end
+
+  local energyRegen = self.stats:get('energyRegeneration')
+  if self.prevEnergyRegeneration ~= energyRegen then
+    self.prevEnergyRegeneration = energyRegen
+    updateEnergyRegeneration(energyRegen)
   end
 
   if self.inBossBattle then
