@@ -37,11 +37,10 @@ local function applyModifiers(self, newModifiers, multiplier)
 end
 
 local function getDamageParams(self, hit)
-  local dmg = (type(hit.damage) == 'table') and hit.damage or hit
   return
     self,
-    dmg.damage or 0,
-    dmg.lightningDamage or 0,
+    hit.damage or 0,
+    hit.lightningDamage or 0,
     min(1, hit.criticalChance or 0), -- maximum value of 1
     hit.criticalMultiplier or 0
 end
