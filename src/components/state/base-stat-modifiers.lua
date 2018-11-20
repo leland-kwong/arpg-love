@@ -33,7 +33,7 @@ return setmetatable({
 		attackTime = valueTypeHandlers.time,
 		cooldown = valueTypeHandlers.time,
 		attackTimeReduction = valueTypeHandlers.percent,
-		percentDamage = valueTypeHandlers.percent,
+		attackPower = valueTypeHandlers.percent,
 		energyCostReduction = valueTypeHandlers.percent,
 		cooldownReduction = valueTypeHandlers.percent,
 	}, {
@@ -57,7 +57,7 @@ return setmetatable({
 }, {
 	__call = function()
 		return setmetatable({
-			percentDamage = 0, -- total damage increase
+			attackPower = 0, -- total damage increase
 			energyCostReduction = 0, -- multiplier
 			maxHealth = 0,
 			maxEnergy = 0,

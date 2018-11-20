@@ -84,7 +84,7 @@ local function ActiveEquipmentHandler()
   local floor = math.floor
   local function modifyAbility(instance, playerRef)
     local v = instance
-    local dmgMultiplier = 1 + playerRef.stats:get('percentDamage')
+    local dmgMultiplier = 1 + playerRef.stats:get('attackPower')
     local min = floor(v.minDamage * dmgMultiplier)
     local max = floor(v.maxDamage * dmgMultiplier)
 

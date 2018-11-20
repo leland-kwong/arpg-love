@@ -20,7 +20,7 @@ local nodeValueOptions = {
   [2] = {
     name = 'bonus damage',
     value = {
-      type = 'percentDamage',
+      type = 'attackPower',
       value = 0.02
     },
     image = 'gui-skill-tree_node_damage-up',
@@ -82,32 +82,32 @@ local nodeValueOptions = {
     name = 'extra health',
     value = {
       type = 'maxHealth',
-      value = 10
+      value = 0.01
     },
     image = 'gui-skill-tree_node_max-health',
     backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
-      return 'gain +'..(self.value.value)..' maximum health'
+      return 'gain +'..(self.value.value * 100)..'% maximum health'
     end
   },
   [8] = {
     name = 'extra energy',
     value = {
       type = 'maxEnergy',
-      value = 2
+      value = 0.01
     },
     image = 'gui-skill-tree_node_max-energy',
     backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
-      return 'gain +'..(self.value.value)..' maximum energy'
+      return 'gain +'..(self.value.value * 100)..'% maximum energy'
     end
   },
   [9] = {
     name = 'extra health and energy',
     value = {
       type = 'maxHealthEnergy',
-      bonusHealth = 10,
-      bonusEnergy = 2,
+      bonusHealth = 0.01,
+      bonusEnergy = 0.01,
     },
     image = 'gui-skill-tree_node_max-health-energy',
     backgroundImage = 'gui-skill-tree_node_background',

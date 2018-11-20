@@ -16,7 +16,7 @@ return {
 		category = itemConfig.category.AUGMENTATION,
 
 		baseModifiers = {
-			percentDamage = 0.3
+			attackPower = 0.3
 		},
 
 		extraModifiers = {

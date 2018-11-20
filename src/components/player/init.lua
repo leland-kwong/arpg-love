@@ -589,9 +589,20 @@ end
 msgBus.PLAYER_UPDATE_START = 'PLAYER_UPDATE_START'
 
 function Player.update(self, dt)
+  msgBus.send(msgBus.PLAYER_UPDATE_START)
+  local Grid = require 'utils.grid'
+  local gameState = require 'main.global-state'.gameState
+  Grid.forEach(gameState:get().equipment, function(item)
+    if (not item) then
+      return
+    end
+    local itemSystem = require 'components.item-inventory.items.item-system'
+    for k,v in pairs(itemSystem.getDefinition(item).baseModifiers) do
+      Component.get('PLAYER').stats:add(k, v)
+    end
+  end)
   PassiveTree = require 'components.player.passive-tree'
   PassiveTree.calcModifiers()
-  msgBus.send(msgBus.PLAYER_UPDATE_START)
   if (not self.recentlyCreated) then
     self.recentlyCreated = true
     msgBus.send(msgBus.PLAYER_FULL_HEAL)
@@ -612,18 +623,6 @@ function Player.update(self, dt)
   if self.inBossBattle then
     handleBossMode(self)
   end
-
-  local Grid = require 'utils.grid'
-  local gameState = require 'main.global-state'.gameState
-  Grid.forEach(gameState:get().equipment, function(item)
-    if (not item) then
-      return
-    end
-    local itemSystem = require 'components.item-inventory.items.item-system'
-    for k,v in pairs(itemSystem.getDefinition(item).baseModifiers) do
-      Component.get('PLAYER').stats:add(k, v)
-    end
-  end)
 
   local hasPlayerLost = self.stats:get('health') <= 0
   if hasPlayerLost then

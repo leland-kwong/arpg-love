@@ -154,7 +154,7 @@ local item = {
     baseModifiers = {
       -- instance-level base modifiers
       armor =                         {0, 1}, -- min-max range to roll with
-      percentDamage =                 {0, 1}, -- percent damage increase to all damage types
+      attackPower =                 {0, 1}, -- percent damage increase to all damage types
       weaponDamage =                  {0, 1},
       moveSpeed =                     {0, 0},
       healthRegen =                   {0, 1},

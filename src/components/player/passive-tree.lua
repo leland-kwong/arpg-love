@@ -18,6 +18,25 @@ local stateByNodeId = {
     return state
   end
 }
+local statModifiersByTypeAndValue = {
+  get = function(self, prop, value)
+    local fnsByType = self[prop]
+    if (not fnsByType) then
+      fnsByType = {}
+      self[prop] = fnsByType
+    end
+
+    local modFn = fnsByType[value]
+    if (not modFn) then
+      modFn = function(stats)
+        return value * stats[prop]
+      end
+      fnsByType[value] = modFn
+    end
+
+    return modFn
+  end
+}
 
 msgBus.on(msgBus.CHARACTER_HIT, function(msg)
   if msg.itemSource then
@@ -51,12 +70,11 @@ local modifierHandlers = {
     return modifiers
   end,
   bloodRage = function(nodeId, data, modifiers)
-    updateModifiers[nodeId] = function()
-      Component.get('PLAYER').stats:add('percentDamage', function(self)
-        local percentHealthMissing = 1 - self.health / self.maxHealth
-        return data.value.bonus * percentHealthMissing * 100
-      end)
-    end
+    Component.get('PLAYER').stats:add('attackPower', function(self)
+      local percentHealthMissing = 1 - self:get('health') / self:get('maxHealth')
+      local totalBonusPercentage = data.value.bonus * percentHealthMissing * 100
+      return self.attackPower * totalBonusPercentage
+    end)
     return modifiers
   end,
   heavyStrike = function(nodeId, data, modifiers)
@@ -102,12 +120,15 @@ local modifierHandlers = {
     local baseMods = gameState.statModifiers
 
     modifiers
-      :add('maxHealth', data.value.bonusHealth)
-      :add('maxEnergy', data.value.bonusEnergy)
+      :add('maxHealth', data.value.bonusHealth * modifiers.maxHealth)
+      :add('maxEnergy', data.value.bonusEnergy * modifiers.maxEnergy)
     return modifiers
   end,
   statModifier = function(nodeId, data, modifiers)
-    return modifiers:add(data.value.type, data.value.value)
+    local prop = data.value.type
+    local percentBonus = data.value.value
+    local modFn = statModifiersByTypeAndValue:get(prop, percentBonus)
+    return modifiers:add(prop, modFn)
   end
 }
 
