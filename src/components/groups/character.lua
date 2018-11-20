@@ -41,8 +41,6 @@ end, 1)
 
 return function(dt)
   for _,c in pairs(groups.character.getAll()) do
-    local hitManager = require 'modules.hit-manager'
-    local hitCount = hitManager(c, dt, c.onDamageTaken)
     if c.isDestroyed then
       if c.destroyedAnimation then
         local complete = c.destroyedAnimation:update(dt)
@@ -69,6 +67,9 @@ return function(dt)
     else
       local Stats = require 'modules.stats'
       c.stats = Stats:new(c.baseStats and c:baseStats())
+
+      local hitManager = require 'modules.hit-manager'
+      hitManager(c, dt, c.onDamageTaken)
     end
   end
 end

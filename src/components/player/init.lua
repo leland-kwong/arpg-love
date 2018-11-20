@@ -221,13 +221,6 @@ local Player = {
 
     Component.addToGroup(self, groups.character)
     self.listeners = {
-      msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function()
-        local PassiveTree = require 'components.player.passive-tree'
-        local passiveStatModifiers = PassiveTree.calcModifiers()
-        for prop,val in pairs(passiveStatModifiers) do
-          self.stats:add(prop, val)
-        end
-      end, 1),
       msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function(msgValue)
         updateHealthRegeneration(self.stats:get('healthRegeneration'))
         updateEnergyRegeneration(self.stats:get('energyRegeneration'))
@@ -551,13 +544,6 @@ end
 
 local min = math.min
 
-local function updateHealthAndEnergy(rootStore)
-  local state = rootStore:get()
-  local mods = state.statModifiers
-  rootStore:set('health', min(state.health, state.maxHealth + mods.maxHealth))
-  rootStore:set('energy', min(state.energy, state.maxEnergy + mods.maxEnergy))
-end
-
 function Player.handleMapCollision(self, nextX, nextY)
   -- dynamically get the current animation frame's height
   local sx, sy, sw, sh = self.animation.sprite:getViewport()
@@ -639,7 +625,6 @@ function Player.update(self, dt)
   local nextX, nextY, totalMoveSpeed = handleMovement(self, dt)
   handleAnimation(self, dt, nextX, nextY, totalMoveSpeed)
   handleAbilities(self, dt)
-  updateHealthAndEnergy(self.rootStore)
 
   self:handleMapCollision(nextX, nextY)
   self:handleZoneCollision()

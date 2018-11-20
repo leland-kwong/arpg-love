@@ -30,10 +30,9 @@ local function applyModifiers(self, newModifiers, multiplier)
     return
   end
   multiplier = multiplier or 1
-  local totalModifiers = self.modifiers
   for prop, value in pairs(newModifiers) do
     local actualValue = type(value) == 'function' and value(self) or value
-    totalModifiers[prop] = (totalModifiers[prop] or 0) + (actualValue * multiplier)
+    self.stats:add(prop, actualValue * multiplier)
   end
 end
 
@@ -76,20 +75,17 @@ local function hitManager(_, self, dt, onDamageTaken)
       local isNewModifiers = currentModifiers ~= hit.modifiers
       -- update modifiers for the source
       if (isNewModifiers) then
-        -- undo current ones first
-        applyModifiers(self, currentModifiers, -1)
         self.modifiersApplied[hitId] = hit.modifiers
-        applyModifiers(self, hit.modifiers)
       end
     end
+
+    applyModifiers(self, hit.modifiers)
 
     hit.duration = (hit.duration or 0) - dt
     local isEffectFinished = hit.duration <= 0
     if isEffectFinished then
       self.hitData[hitId] = nil
       self.modifiersApplied[hitId] = nil
-      -- remove modifiers by negating them
-      applyModifiers(self, hit.modifiers, -1)
     end
   end
 
