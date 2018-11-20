@@ -5,32 +5,6 @@ local msgBus = require 'components.msg-bus'
 local filterCall = require 'utils.filter-call'
 local noop = require 'utils.noop'
 
-local equipmentSubscribers = {
-	-- handle static props
-	staticModifiers = function(item)
-		return function(msgValue, msgType)
-			if msgBus.NEW_GAME == msgType then
-				return msgBus.CLEANUP
-			end
-
-			local shouldCleanup = (msgBus.EQUIPMENT_UNEQUIP == msgType) and (msgValue == item)
-			if shouldCleanup then
-				return msgBus.CLEANUP
-			end
-
-			-- add the item's stats to the list of modifiers
-			if msgBus.PLAYER_STATS_NEW_MODIFIERS == msgType then
-				-- add up item properties with the new modifiers list
-				for k,v in pairs(msgValue) do
-					msgValue[k] = msgValue[k] + (itemSystem.getDefinition(item).baseModifiers[k] or 0)
-				end
-				return msgValue
-			end
-			return msgValue
-		end
-	end
-}
-
 msgBus.on(msgBus.EQUIPMENT_CHANGE, function()
 	local rootStore = msgBus.send(msgBus.GAME_STATE_GET)
 	local curState, lastState = rootStore:get()
@@ -69,7 +43,6 @@ msgBus.on(msgBus.ITEM_EQUIPPED, function(item)
 		msgBus.on(msgBus.ENEMY_DESTROYED, function(msg)
 			item.experience = item.experience + msg.experience
 		end),
-    msgBus.on(msgBus.ALL, equipmentSubscribers.staticModifiers(item), 1),
 		msgBus.on(msgBus.NEW_GAME, function()
 			msgBus.send(msgBus.EQUIPMENT_UNEQUIP, item)
       msgBus.off(itemState.listeners)

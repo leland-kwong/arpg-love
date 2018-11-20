@@ -13,14 +13,14 @@ local module = itemSystem.registerModule({
   name = 'stat',
   type = itemSystem.moduleTypes.MODIFIERS,
   active = function(_, props, state)
-    msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function(mods)
+    msgBus.on(msgBus.PLAYER_UPDATE_START, function()
       if (not state.equipped) then
         return msgBus.CLEANUP
       end
       for k,v in pairs(props) do
-        mods[k] = mods[k] + calcValue(k, v)
+        local Component = require 'modules.component'
+        Component.get('PLAYER').stats:add(k, calcValue(k, v))
       end
-      return mods
     end, 1)
   end,
   tooltip = function(_, props)

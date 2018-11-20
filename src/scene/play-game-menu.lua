@@ -177,7 +177,6 @@ local function getMenuOptions(parent)
                 props = loadedState
               }
             )
-            msgBus.send(msgBus.PLAYER_FULL_HEAL)
             msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
             parent:delete(true)
           end

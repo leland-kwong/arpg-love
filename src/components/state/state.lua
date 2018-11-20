@@ -34,12 +34,6 @@ local function defaultState()
 		totalExperience = 0,
 		enemyKillCount = 0,
 
-		--[[ base player stats ]]
-		health = 200,
-		maxHealth = 200,
-		energy = 100,
-		maxEnergy = 100,
-
 		--[[ static modifiers ]]
 		statModifiers = baseStatModifiers(),
 

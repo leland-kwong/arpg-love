@@ -13,9 +13,9 @@ end
 
 local function adjustedDamageTaken(self, damage, lightningDamage, criticalChance, criticalMultiplier)
   local damageReductionPerArmor = 0.0001
-  local damageAfterFlatReduction = damage - self:getCalculatedStat('physicalReduction')
-  local reducedDamageFromArmorResistance = (damageAfterFlatReduction * self:getCalculatedStat('armor') * damageReductionPerArmor)
-  local lightningDamageAfterResistance = lightningDamage - (lightningDamage * self:getCalculatedStat('lightningResist'))
+  local damageAfterFlatReduction = damage - self:get('physicalReduction')
+  local reducedDamageFromArmorResistance = (damageAfterFlatReduction * self:get('armor') * damageReductionPerArmor)
+  local lightningDamageAfterResistance = lightningDamage - (lightningDamage * self:get('lightningResist'))
   local totalDamage = damageAfterFlatReduction
     - reducedDamageFromArmorResistance
     + lightningDamageAfterResistance
@@ -35,28 +35,6 @@ local function applyModifiers(self, newModifiers, multiplier)
     local actualValue = type(value) == 'function' and value(self) or value
     totalModifiers[prop] = (totalModifiers[prop] or 0) + (actualValue * multiplier)
   end
-end
-
--- Returns calculated stats. This should always be used when we need the stat including any modifiers.
-local function getCalculatedStat(self, prop)
-  local totalFunctionalValues = 0
-  local fMods = self.functionalMods[prop] or Object.EMPTY
-  for i=1, #fMods do
-    local modifierFn = fMods[i]
-    totalFunctionalValues = totalFunctionalValues + modifierFn(self)
-  end
-  -- baseProperty + modifier
-  return self:getBaseStat(prop) + (self.modifiers[prop] or 0) + totalFunctionalValues
-end
-
-local defaultEquipmentModifiers = require'components.state.base-stat-modifiers'()
-
--- Returns stat including any equipment modifiers
-local function getBaseStat(self, prop)
-  local equipmentModifiers = self.equipmentModifiers or defaultEquipmentModifiers
-  local baseStat = self[prop] or 0
-  local equipmentModifierStat = equipmentModifiers[prop] or 0
-  return baseStat + equipmentModifierStat
 end
 
 local function getDamageParams(self, hit)
@@ -82,7 +60,7 @@ local function hitManager(_, self, dt, onDamageTaken)
 
     if onDamageTaken then
       local actualDamage, actualNonCritDamage, actualCritMultiplier, actualLightningDamage = adjustedDamageTaken(
-        getDamageParams(self, hit)
+        getDamageParams(self.stats, hit)
       )
       onDamageTaken(
         self,
@@ -135,8 +113,6 @@ return setmetatable({
     }
     component.modifiersApplied = {}
     component.hitData = {}
-    component.getCalculatedStat = getCalculatedStat
-    component.getBaseStat = getBaseStat
 
     newFunctionalMods(component)
     component.addFunctionalMod = addFunctionalMod

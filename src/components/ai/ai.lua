@@ -23,7 +23,6 @@ local Enum = require 'utils.enum'
 local collisionGroups = require 'modules.collision-groups'
 local Console = require 'modules.console.console'
 local Object = require 'utils.object-utils'
-local BaseStatModifiers = require 'components.state.base-stat-modifiers'
 
 local max, random, abs, min = math.max, math.random, math.abs, math.min
 
@@ -39,7 +38,7 @@ local states = Enum({
   'FREE_MOVING'
 })
 
-local Ai = Object.extend(BaseStatModifiers(), {
+local Ai = {
   class = collisionGroups.enemyAi,
 
   state = states.IDLE,
@@ -48,11 +47,16 @@ local Ai = Object.extend(BaseStatModifiers(), {
   -- calculated base properties (properties that can be changed from external modifiers)
   silenced = false,
   invulnerable = false,
-  moveSpeed = 100,
   attackRange = 8, -- distance in grid units from the player that the ai will stop moving
-  sightRadius = 14,
   lightRadius = 10,
-  maxHealth = 10,
+
+  baseStats = function(self)
+    self.__index = self
+    return setmetatable({
+      moveSpeed = 100,
+      sightRadius = 14,
+    }, self)
+  end,
 
   experience = 1, -- amount of experience the ai grants when destroyed
 
@@ -68,10 +72,6 @@ local Ai = Object.extend(BaseStatModifiers(), {
   vx = 0,
   vy = 0,
 
-  -- elemental status effects
-  shocked = 0,
-  burning = 0,
-  cold = 0,
 
   isAggravated = false, -- gets triggered whenever the ai is hit by anything
   gridSize = 1,
@@ -86,7 +86,7 @@ local Ai = Object.extend(BaseStatModifiers(), {
   drawOrder = function(self)
     return Component.groups.all:drawOrder(self) + 1
   end
-})
+}
 
 local function getNeighbors(agent, neighborOffset)
 	local b = agent
@@ -321,7 +321,7 @@ function Ai.getFiniteState(self)
 end
 
 function Ai.getActualSpeed(self, dt)
-  return max(0, self:getCalculatedStat('moveSpeed') * dt)
+  return max(0, self.stats:get('moveSpeed') * dt)
 end
 
 local function createLight(self)
@@ -383,7 +383,7 @@ function Ai.update(self, dt)
 
   local targetX, targetY
   local extraSightRadiusFromAggro = (self.isAggravated and 20 or 0) * self.gridSize
-  local actualSightRadius = self:getCalculatedStat('sightRadius') * self.gridSize + extraSightRadiusFromAggro
+  local actualSightRadius = self.stats:get('sightRadius') * self.gridSize + extraSightRadiusFromAggro
 
   if (self.isInViewOfPlayer or self.isAggravated) then
     -- update ai facing direction
@@ -411,7 +411,7 @@ function Ai.update(self, dt)
   local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
   local isInAggroRange = gridDistFromPlayer <= (actualSightRadius / self.gridSize)
   local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or 99999
-  local isInAttackRange = canSeeTarget and (distFromTarget <= self:getCalculatedStat('attackRange'))
+  local isInAttackRange = canSeeTarget and (distFromTarget <= self.stats:get('attackRange'))
   local originalX, originalY = self.x, self.y
 
   self.canSeeTarget = canSeeTarget
@@ -584,7 +584,7 @@ function Ai.draw(self)
   love.graphics.setColor(r, g, b, a * self.opacity)
   drawSprite(self, ox, oy)
 
-  local isShocked = self:getCalculatedStat('shocked') > 0
+  local isShocked = self.stats:get('shocked') > 0
   if (isShocked) then
     drawShockEffect(self, ox, oy)
   end
@@ -642,7 +642,7 @@ function Ai.init(self)
   end
 
   -- [[ BASE PROPERTIES ]]
-  self.health = self.health or self.maxHealth
+  self.health = self.health or self.stats:get('maxHealth')
   self.clockOffset = math.random(0, 100)
 
   if self.debug then

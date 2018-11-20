@@ -42,9 +42,8 @@ local function ActiveConsumableHandler()
         return skill
       end
       activateFn(activeItem)
-      local curState = self.rootStore:get()
       local baseCooldown = itemSystem.getDefinition(activeItem).baseModifiers.cooldown or 0
-      local actualCooldown = propTypesCalculator.cooldownReduction(baseCooldown, curState.statModifiers.cooldownReduction)
+      local actualCooldown = propTypesCalculator.cooldownReduction(baseCooldown, Component.get('PLAYER').stats:get('cooldownReduction'))
       curCooldown = actualCooldown
       skillCooldown = actualCooldown
       return skill
@@ -85,7 +84,7 @@ local function ActiveEquipmentHandler()
   local floor = math.floor
   local function modifyAbility(instance, playerRef)
     local v = instance
-    local dmgMultiplier = 1 + playerRef:getCalculatedStat('percentDamage')
+    local dmgMultiplier = 1 + playerRef.stats:get('percentDamage')
     local min = floor(v.minDamage * dmgMultiplier)
     local max = floor(v.maxDamage * dmgMultiplier)
 
@@ -115,10 +114,9 @@ local function ActiveEquipmentHandler()
       local activateFn = activateModule and activateModule.active
       local energyCost = itemSystem.getDefinition(activeItem).baseModifiers.energyCost
       -- time an attack takes to finish (triggers a global cooldown)
-      local curState = self.rootStore:get()
       local playerRef = Component.get('PLAYER')
       local enoughEnergy = (energyCost == nil) or
-        (energyCost <= curState.energy)
+        (energyCost <= playerRef.energy)
       if (not enoughEnergy) then
         msgBus.send(msgBus.PLAYER_ACTION_ERROR, 'not enough energy')
         return skill
@@ -129,7 +127,7 @@ local function ActiveEquipmentHandler()
       end
 
       local attackTime = itemSystem.getDefinition(activeItem).baseModifiers.attackTime or 0
-      local actualAttackTime = propTypesCalculator.attackTimeReduction(attackTime, curState.statModifiers.attackTimeReduction)
+      local actualAttackTime = propTypesCalculator.attackTimeReduction(attackTime, Component.get('PLAYER').stats:get('attackTimeReduction'))
 
       local mx, my = camera:getMousePosition()
       local playerX, playerY = self.player:getPosition()
@@ -154,7 +152,7 @@ local function ActiveEquipmentHandler()
         playerRef
       )
       local baseCooldown = itemSystem.getDefinition(activeItem).baseModifiers.cooldown or 0
-      local actualCooldown = propTypesCalculator.cooldownReduction(baseCooldown, curState.statModifiers.cooldownReduction)
+      local actualCooldown = propTypesCalculator.cooldownReduction(baseCooldown, Component.get('PLAYER').stats:get('cooldownReduction'))
       curCooldown = actualCooldown
       skillCooldown = actualCooldown
 
@@ -170,11 +168,8 @@ local function ActiveEquipmentHandler()
       )
 
       local actualEnergyCost = energyCost -
-        (energyCost * playerRef:getCalculatedStat('energyCostReduction'))
-      self.rootStore:set(
-        'energy',
-        curState.energy - actualEnergyCost
-      )
+        (energyCost * playerRef.stats:get('energyCostReduction'))
+      playerRef.energy = playerRef.energy - actualEnergyCost
       return skill
     end
   end

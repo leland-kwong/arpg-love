@@ -66,6 +66,9 @@ return function(dt)
           experience = c.experience
         })
       end
+    else
+      local Stats = require 'modules.stats'
+      c.stats = Stats:new(c.baseStats and c:baseStats())
     end
   end
 end

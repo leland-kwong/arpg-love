@@ -85,17 +85,13 @@ function Hud.init(self)
   local offX, offY = Position.boxCenterOffset(healthManaWidth, barHeight, winWidth, winHeight)
 
   local function getHealthRemaining()
-    local state = self.rootStore:get()
-    local maxHealth = state.maxHealth + state.statModifiers.maxHealth
-    local health = state.health
-    return health / maxHealth
+    local playerRef = Component.get('PLAYER')
+    return playerRef.stats:get('health') / playerRef.stats:get('maxHealth')
   end
 
   local function getEnergyRemaining()
-    local state = self.rootStore:get()
-    local maxEnergy = state.maxEnergy + state.statModifiers.maxEnergy
-    local energy = state.energy
-    return energy / maxEnergy
+    local playerRef = Component.get('PLAYER')
+    return playerRef.stats:get('energy') / playerRef.stats:get('maxEnergy')
   end
 
   -- health bar
@@ -203,10 +199,8 @@ function Hud.init(self)
 
   self.listeners = {
     msgBus.on(msgBus.PLAYER_HIT_RECEIVED, function(msgValue)
-      self.rootStore:set('health', function(state)
-        return max(0, state.health - msgValue)
-      end)
-
+      local playerRef = Component.get('PLAYER')
+      playerRef.health = max(0, playerRef.health - msgValue)
       return msgValue
     end),
     msgBus.on(msgBus.SCENE_CHANGE, function(sceneRef)

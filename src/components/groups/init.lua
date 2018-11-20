@@ -62,6 +62,8 @@ local Groups = {
     onComponentEnter = function(_, c)
       local hitManager = require 'modules.hit-manager'
       hitManager.setup(c)
+      local Stats = require 'modules.stats'
+      c.stats = Stats:new(c.baseStats and c:baseStats())
       c.isCharacter = true
       c.itemLevel = c.itemLevel or 0
     end
