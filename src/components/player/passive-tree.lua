@@ -8,6 +8,16 @@ local memoize = require 'utils.memoize'
 
 local onHitModifiers = {}
 local updateModifiers = {}
+local stateByNodeId = {
+  get = function(self, nodeId)
+    local state = self[nodeId]
+    if (not state) then
+      state = {}
+      self[nodeId] = state
+    end
+    return state
+  end
+}
 
 msgBus.on(msgBus.CHARACTER_HIT, function(msg)
   if msg.itemSource then
@@ -50,30 +60,35 @@ local modifierHandlers = {
     return modifiers
   end,
   heavyStrike = function(nodeId, data, modifiers)
-    local hitCount = 0
-    local hitSources = {}
     onHitModifiers[nodeId] = function(hitMsg)
-      local isNewSource = not hitSources[hitMsg.source]
+      local state = stateByNodeId:get(nodeId)
+      state.hitCount = state.hitCount or 0
+      state.hitSources = state.hitSources or {}
+      local isNewSource = not state.hitSources[hitMsg.source]
       if isNewSource then
-        hitCount = hitCount + 1
-        if hitCount > 3 then
-          hitCount = 1
-          hitSources = {}
+        state.hitCount = state.hitCount + 1
+        if state.hitCount > 2 then
+          state.isBigHit = true
+          state.hitCount = 0
+          state.hitSources = {}
         end
-        hitSources[hitMsg.source] = true
+        state.hitSources[hitMsg.source] = true
+        if state.hitCount == 1 then
+          state.isBigHit = false
+        end
       end
-      local isBigHit = hitCount >= 3
-      if isBigHit then
+      if state.isBigHit then
         local percentBonusDamage = data.value.value
         hitMsg.criticalChance = 1
         hitMsg.criticalMultiplier = (hitMsg.criticalMultiplier or 0) + percentBonusDamage
       end
     end
-    local uid = require 'utils.uid'
-    local iconId = uid()
     updateModifiers[nodeId] = function(dt)
+      local uid = require 'utils.uid'
+      local iconId = uid()
+      local state = stateByNodeId:get(nodeId)
       Component.addToGroup(iconId, 'hudStatusIcons', {
-        text = hitCount,
+        text = (state.hitCount or 0),
         icon = 'gui-skill-tree_node_heavy-strike'
       })
     end
