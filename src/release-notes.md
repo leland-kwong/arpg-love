@@ -1,5 +1,9 @@
 # Release notes
 
+## 3.0.1-alpha-hotfix
+
+* Fixed issue with tree layout file not found.
+
 ---
 
 ## 3.0.0-alpha
