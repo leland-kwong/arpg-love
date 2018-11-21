@@ -477,24 +477,11 @@ function TreeEditor.handleInputs(self)
   }
 end
 
-local function loadState(pathToSave)
-    local io = require 'io'
-    local savedState = nil
-    for line in io.lines(pathToSave) do
-      savedState = (savedState or '')..line
-    end
-
-    -- IMPORTANT: In lua, key insertion order affects the order of serialization. So we should sort the keys to make sure it is deterministic.
-    return (
-      savedState and loadstring(savedState)() or {}
-    )
-  end
-
 function TreeEditor.init(self)
   -- load default state
   if (not self.nodes) then
-    local defaultLayout = love.filesystem.getSourceBaseDirectory()..'/src/scene/skill-tree-editor/layout.lua'
-    self.nodes = loadState(defaultLayout)
+    local defaultLayout = 'components.skill-tree-editor.layout'
+    self.nodes = require(defaultLayout)
   end
 
   self:loadFromSerializedState()
