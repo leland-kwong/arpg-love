@@ -33,7 +33,6 @@ return setmetatable({
 		attackTime = valueTypeHandlers.time,
 		cooldown = valueTypeHandlers.time,
 		attackTimeReduction = valueTypeHandlers.percent,
-		attackPower = valueTypeHandlers.percent,
 		energyCostReduction = valueTypeHandlers.percent,
 		cooldownReduction = valueTypeHandlers.percent,
 	}, {

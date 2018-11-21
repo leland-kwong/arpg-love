@@ -81,12 +81,12 @@ local function ActiveEquipmentHandler()
     type = 'EQUIPMENT'
   }
 
-  local floor = math.floor
+  local round = require 'utils.math'.round
   local function modifyAbility(instance, playerRef)
     local v = instance
-    local dmgMultiplier = 1 + playerRef.stats:get('attackPower')
-    local min = floor(v.minDamage * dmgMultiplier)
-    local max = floor(v.maxDamage * dmgMultiplier)
+    local dmgMultiplier = 1 + (playerRef.stats:get('attackPower') / 100)
+    local min = round(v.minDamage * dmgMultiplier)
+    local max = round(v.maxDamage * dmgMultiplier)
 
     -- update instance properties
     v:set('minDamage', min)
