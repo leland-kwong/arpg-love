@@ -25,6 +25,8 @@ function statsMt.add(self, prop, value, context)
   if isFunction then
     self._functionalStats[prop] = self._functionalStats[prop] or {}
     table.insert(self._functionalStats[prop], value)
+    -- add 0 to add property to _stats list
+    self[prop] = self[prop] + 0
   else
     self[prop] = self[prop] + value
   end

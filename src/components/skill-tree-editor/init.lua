@@ -112,7 +112,7 @@ local nodeValueOptions = {
     image = 'gui-skill-tree_node_max-health-energy',
     backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
-      return 'gain +'..(self.value.bonusHealth)..' maximum health, and +'..(self.value.bonusEnergy)..' maximum energy'
+      return 'gain +'..(self.value.bonusHealth * 100)..'% maximum health, and +'..(self.value.bonusEnergy * 100)..'% maximum energy'
     end
   }
 }
