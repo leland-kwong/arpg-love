@@ -9,7 +9,7 @@ return {
 	type = "mock-armor",
 
 	blueprint = {
-		baseModifiers = {
+		info = {
 			moveSpeed = 10,
 			damage = 5
 		},

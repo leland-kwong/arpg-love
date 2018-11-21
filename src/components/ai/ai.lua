@@ -41,6 +41,7 @@ local states = Enum({
 local statDefaults = {
   moveSpeed = 100,
   sightRadius = 14,
+  freelyMove = 0
 }
 local statsMt = {
   __index = function(self, k)
@@ -314,7 +315,7 @@ local function setNextPosition(self, speed, radius)
 end
 
 function Ai.getFiniteState(self)
-  if self.modifiers.freelyMove > 0 then
+  if self.stats:get('freelyMove') > 0 then
     return states.FREE_MOVING
   end
 

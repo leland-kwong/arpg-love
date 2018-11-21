@@ -15,7 +15,7 @@ return {
 		baseDropChance = 1,
 		category = itemConfig.category.AUGMENTATION,
 
-		baseModifiers = {
+		info = {
 			attackPower = 30
 		},
 

@@ -26,7 +26,7 @@ return {
 		baseDropChance = 1,
 		category = itemConfig.category.POD_MODULE,
 
-		baseModifiers = {
+		info = {
 			cooldown = 0.1,
 			attackTime = 0.25,
 			energyCost = 2

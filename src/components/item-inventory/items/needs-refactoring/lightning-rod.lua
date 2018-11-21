@@ -11,7 +11,7 @@ return {
 	type = "lightning-rod",
 
 	blueprint = {
-		baseModifiers = {},
+		info = {},
 	},
 
 	properties = {

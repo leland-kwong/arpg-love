@@ -58,7 +58,12 @@ function items.registerType(itemDefinition)
 	local isDuplicateType = types[def.type] ~= nil
 	assert(not isDuplicateType, "duplicate item type ".."\""..def.type.."\"")
 
-	types[def.type] = def.properties
+	local mt = {
+		info = {},
+		baseModifiers = {}
+	}
+	mt.__index = mt
+	types[def.type] = setmetatable(def.properties, mt)
 
 	assert(itemDefinition ~= nil, "item type missing")
 	local file = 'components/item-inventory/items/definitions/'..def.type

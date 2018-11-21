@@ -13,7 +13,7 @@ return {
 		baseDropChance = 1,
 		category = itemConfig.category.CONSUMABLE,
 
-		baseModifiers =  {
+		info =  {
 			cooldown = 8,
 		},
 

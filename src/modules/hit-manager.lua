@@ -92,26 +92,10 @@ local function hitManager(_, self, dt, onDamageTaken)
   return hitCount
 end
 
-local function addFunctionalMod(self, prop, fn)
-  self.functionalMods[prop] = self.functionalMods[prop] or {}
-  table.insert(self.functionalMods[prop], fn)
-end
-
-local function newFunctionalMods(self)
-  self.functionalMods = setmetatable({}, functionalModsMt)
-end
-
 return setmetatable({
   setup = function(component)
-    component.modifiers = {
-      freelyMove = 0, -- if > 0 this allows the character to move regardless of any other states
-    }
     component.modifiersApplied = {}
     component.hitData = {}
-
-    newFunctionalMods(component)
-    component.addFunctionalMod = addFunctionalMod
-    component.newFunctionalMods = newFunctionalMods
   end,
 }, {
   __call = hitManager

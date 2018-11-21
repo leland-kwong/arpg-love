@@ -42,7 +42,7 @@ local function ActiveConsumableHandler()
         return skill
       end
       activateFn(activeItem)
-      local baseCooldown = itemSystem.getDefinition(activeItem).baseModifiers.cooldown or 0
+      local baseCooldown = itemSystem.getDefinition(activeItem).info.cooldown or 0
       local actualCooldown = propTypesCalculator.cooldownReduction(baseCooldown, Component.get('PLAYER').stats:get('cooldownReduction'))
       curCooldown = actualCooldown
       skillCooldown = actualCooldown
@@ -112,7 +112,7 @@ local function ActiveEquipmentHandler()
       local definition = itemSystem.getDefinition(activeItem)
       local activateModule = itemSystem.loadModule(itemSystem.getDefinition(activeItem).onActivateWhenEquipped)
       local activateFn = activateModule and activateModule.active
-      local energyCost = itemSystem.getDefinition(activeItem).baseModifiers.energyCost
+      local energyCost = itemSystem.getDefinition(activeItem).info.energyCost
       -- time an attack takes to finish (triggers a global cooldown)
       local playerRef = Component.get('PLAYER')
       local enoughEnergy = (energyCost == nil) or
@@ -126,7 +126,7 @@ local function ActiveEquipmentHandler()
         return skill
       end
 
-      local attackTime = itemSystem.getDefinition(activeItem).baseModifiers.attackTime or 0
+      local attackTime = itemSystem.getDefinition(activeItem).info.attackTime or 0
       local actualAttackTime = propTypesCalculator.attackTimeReduction(attackTime, Component.get('PLAYER').stats:get('attackTimeReduction'))
 
       local mx, my = camera:getMousePosition()
@@ -151,7 +151,7 @@ local function ActiveEquipmentHandler()
         abilityEntity,
         playerRef
       )
-      local baseCooldown = itemSystem.getDefinition(activeItem).baseModifiers.cooldown or 0
+      local baseCooldown = itemSystem.getDefinition(activeItem).info.cooldown or 0
       local actualCooldown = propTypesCalculator.cooldownReduction(baseCooldown, Component.get('PLAYER').stats:get('cooldownReduction'))
       curCooldown = actualCooldown
       skillCooldown = actualCooldown
