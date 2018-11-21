@@ -38,6 +38,16 @@ local states = Enum({
   'FREE_MOVING'
 })
 
+local statDefaults = {
+  moveSpeed = 100,
+  sightRadius = 14,
+}
+local statsMt = {
+  __index = function(self, k)
+    return self.baseStats[k] or self.defaults[k]
+  end
+}
+
 local Ai = {
   class = collisionGroups.enemyAi,
 
@@ -51,11 +61,10 @@ local Ai = {
   lightRadius = 10,
 
   baseStats = function(self)
-    self.__index = self
     return setmetatable({
-      moveSpeed = 100,
-      sightRadius = 14,
-    }, self)
+      baseStats = self,
+      defaults = statDefaults
+    }, statsMt)
   end,
 
   experience = 1, -- amount of experience the ai grants when destroyed
