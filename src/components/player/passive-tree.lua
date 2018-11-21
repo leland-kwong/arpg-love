@@ -5,6 +5,7 @@ local MenuManager = require 'modules.menu-manager'
 local SkillTreeEditor = require 'components.skill-tree-editor'
 local msgBus = require 'components.msg-bus'
 local memoize = require 'utils.memoize'
+local fs = require 'modules.file-system'
 
 local onHitModifiers = {}
 local updateModifiers = {}
@@ -183,6 +184,10 @@ function PassiveTree.getUnusedSkillPoints(treeData)
   return getUnusedSkillPoints(treeData or {}, totalSkillPointsAvailable)
 end
 
+function PassiveTree.deleteState(stateId)
+  return fs.deleteFile(rootDir, stateId)
+end
+
 function PassiveTree.toggle()
   if Component.get('passiveSkillsTree') then
     MenuManager.clearAll()
@@ -190,7 +195,6 @@ function PassiveTree.toggle()
   end
 
   local gameState = require 'main.global-state'.gameState
-  local fs = require 'modules.file-system'
   local saveDir = gameState:getId()
   local nodesFromSavedState = PassiveTree.getState(saveDir)
   local editor = SkillTreeEditor.create({

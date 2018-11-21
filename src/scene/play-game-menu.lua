@@ -162,9 +162,14 @@ local function getMenuOptions(parent)
         },
         value = function()
           if parent.state.menuMode == menuModes.DELETE_GAME then
+            local PassiveTree = require 'components.player.passive-tree'
+            PassiveTree.deleteState(fileData.id)
+              :next(nil, function(err)
+                print(err)
+              end)
             fileSystem.deleteFile('saved-states', fileData.id)
               :next(nil, function(err)
-                print('delete error')
+                print(err)
               end)
           -- load game
           else
