@@ -75,7 +75,7 @@ local nodeValueOptions = {
     image = 'gui-skill-tree_node_blood-rage',
     backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
-      return 'gain '..(self.value.bonus * 100)..'% damage for each 1% of missing health'
+      return 'gain '..(self.value.bonus * 100)..'% attack power for each 1% of missing health'
     end
   },
   [7] = {

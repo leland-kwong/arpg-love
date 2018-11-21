@@ -44,8 +44,8 @@ end
 
 local function eachCo(ctx)
   coroutine.yield()
-  for k,v in pairs(ctx._stats) do
-    coroutine.yield(k, v)
+  for k in pairs(ctx._stats) do
+    coroutine.yield(k, ctx:get(k))
   end
 end
 

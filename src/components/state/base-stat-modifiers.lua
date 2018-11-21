@@ -1,4 +1,5 @@
 local Enum = require 'utils.enum'
+local round = require 'utils.math'.round
 
 local base = {
 	energyRegeneration = 1
@@ -6,7 +7,7 @@ local base = {
 
 local valueTypeHandlers = {
 	percent = function(v)
-		return (v * 100)..'%'
+		return round(v * 100)..'%'
 	end,
 	time = function(v)
 		return v..'s'
@@ -14,7 +15,7 @@ local valueTypeHandlers = {
 }
 
 local function passThrough(v)
-	return v
+	return v > 0 and round(v) or v
 end
 
 local baseStatModifiersMt = {
