@@ -66,7 +66,7 @@ return function(dt)
       end
     else
       local Stats = require 'modules.stats'
-      c.stats = Stats:new(c.baseStats and c:baseStats())
+      c.stats = c.stats.hasChanges and Stats:new(c.baseStats and c:baseStats()) or c.stats
 
       local hitManager = require 'modules.hit-manager'
       hitManager(c, dt, c.onDamageTaken)

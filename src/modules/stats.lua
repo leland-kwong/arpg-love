@@ -15,7 +15,7 @@ local EMPTY = setmetatable({}, readOnlyMt)
 
 local methods = {}
 
-function methods.add(self, prop, value)
+function methods.add(self, prop, value, context)
   local isFunction = type(value) == 'function'
   if isFunction then
     self.functionalStats[prop] = self.functionalStats[prop] or {}
@@ -23,6 +23,7 @@ function methods.add(self, prop, value)
   else
     self[prop] = self[prop] + value
   end
+  self.hasChanges = true
   return self
 end
 
@@ -46,7 +47,8 @@ local statsMt = {
 function Stats.new(self, baseStats)
   return setmetatable({
     baseStats = baseStats or EMPTY,
-    functionalStats = {}
+    functionalStats = {},
+    hasChanges = false
   }, statsMt)
 end
 
