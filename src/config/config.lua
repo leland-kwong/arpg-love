@@ -21,11 +21,11 @@ end)()
 M.autoSave = true
 
 M.gridSize = 16
-M.scaleFactor = 2
+M.scaleFactor = 3
 M.scale = M.scaleFactor
 M.resolution = {
-  w = 640 * 1.5,
-  h = 360 * 1.5
+  w = 640 * 1,
+  h = 360 * 1
 }
 
 M.isDevelopment = false
