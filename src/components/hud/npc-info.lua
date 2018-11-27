@@ -91,7 +91,8 @@ function NpcInfo.update(self, dt)
     local propsText = ''
     for i=1, #props do
       local p = props[i]
-      propsText = propsText..'  '..p
+      local separator = i > 1 and ', ' or ''
+      propsText = propsText..separator..p
     end
     local wrapLimit = 250
     local _, propsTextHeight = GuiText.getTextSize(propsText, textLayerSmall.font, wrapLimit)
