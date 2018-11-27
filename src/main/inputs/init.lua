@@ -2,11 +2,13 @@ local socket = require 'socket'
 local msgBus = require 'components.msg-bus'
 local config = require 'config.config'
 local userSettings = require 'config.user-settings'
+local abs = math.abs
 require 'main.inputs.keyboard-manager'
 
 msgBus.MOUSE_CLICKED = 'MOUSE_CLICKED'
 
 local state = {
+  keyboard = require 'main.inputs.keyboard-manager'.state.keyboard,
   mouse = {
     position = {
       x = 0,
@@ -18,6 +20,7 @@ local state = {
       y = 0
     },
     drag = {
+      started = false,
       isDragging = false,
       start = {
         x = 0,
@@ -30,31 +33,54 @@ local state = {
 
 msgBus.MOUSE_DRAG = 'MOUSE_DRAG'
 msgBus.MOUSE_DRAG_START = 'MOUSE_DRAG_START'
+msgBus.MOUSE_DRAG_END = 'MOUSE_DRAG_END'
 local function handleDragEvent()
   local isMouseDown = state.mouse.isDown
   local dragState = state.mouse.drag
-  local isDragStart = isMouseDown and (not dragState.isDragging)
-  dragState.isDragging = isMouseDown
+  local isDragStart = isMouseDown and (not dragState.started)
+  local isDragEnd = dragState.started and (not isMouseDown)
+
   if isMouseDown then
     local mx, my = love.mouse.getX(), love.mouse.getY()
     if isDragStart then
+      dragState.started = true
       dragState.start.x = mx
       dragState.start.y = my
       msgBus.send(msgBus.MOUSE_DRAG_START, {
         startX = mx,
-        startY = my
+        startY = my,
+        x = mx,
+        y = my
       })
     end
     local dx, dy = mx - dragState.start.x, my - dragState.start.y
-    if (dx ~= 0) or (dy ~= 0) then
+    local threshold = 2 -- minimum distance to consider it a drag
+    local isDragging = (abs(dx) + abs(dy)) >= threshold
+    dragState.isDragging = isDragging
+    if isDragging then
       local event = {
         startX = dragState.start.x,
         startY = dragState.start.y,
+        x = mx,
+        y = my,
         dx = dx,
         dy = dy
       }
       msgBus.send(msgBus.MOUSE_DRAG, event)
     end
+  end
+
+  if isDragEnd then
+    dragState.started = false
+    dragState.isDragging = false
+    local mx, my = love.mouse.getX(), love.mouse.getY()
+    msgBus.send(msgBus.MOUSE_DRAG_END, {
+      startX = dragState.start.x,
+      startY = dragState.start.y,
+      x = mx,
+      y = my
+    })
+    return
   end
 end
 
@@ -99,3 +125,7 @@ function love.textinput(t)
     t
   )
 end
+
+return {
+  state = state
+}

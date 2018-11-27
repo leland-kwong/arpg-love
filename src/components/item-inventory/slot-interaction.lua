@@ -191,16 +191,18 @@ local function setupSlotInteractions(
             }) or
             nil
 
-          local baseModifiersBlock = {
+          local Object = require 'utils.object-utils'
+          local infoBlock = {
             content = modParser({
               type = 'baseStatsList',
-              data = itemSystem.getDefinition(item).baseModifiers
+              data = Object.assign({},
+                itemSystem.getDefinition(item).info,
+                itemSystem.getDefinition(item).baseModifiers
+              )
             }),
             width = tooltipWidth,
             font = font.primary.font,
             fontSize = font.primary.fontSize,
-            -- background = modifierBackgroundColor,
-            -- padding = blockPadding
           }
           local rows = {
             Block.Row({
@@ -215,11 +217,11 @@ local function setupSlotInteractions(
               marginBottom = 12
             }),
             Block.Row({
-              baseModifiersBlock
+              infoBlock
             }, {
               marginBottom = blockPadding
             }),
-            activeAbilityBlock
+            activeAbilityBlock,
           }
 
           local functional = require 'utils.functional'

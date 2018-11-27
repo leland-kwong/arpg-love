@@ -5,6 +5,7 @@ if config.isDevelopment then
     equipment = {
       'base.potion-health',
       'base.pod-module-initiate',
+      'base.pod-module-swipe',
       'base.potion-energy',
       'base.mock-shoes',
     },

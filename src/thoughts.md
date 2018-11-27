@@ -154,8 +154,7 @@ local item = {
     baseModifiers = {
       -- instance-level base modifiers
       armor =                         {0, 1}, -- min-max range to roll with
-      percentDamage =                 {0, 1}, -- percent damage increase to all damage types
-      flatDamage =                    {0, 1}, -- flat physical increase
+      attackPower =                 {0, 1}, -- percent damage increase to all damage types
       weaponDamage =                  {0, 1},
       moveSpeed =                     {0, 0},
       healthRegen =                   {0, 1},
@@ -237,3 +236,57 @@ local module = {
 
 Ootsby - boids ai improvement
 Lumie1337 - item range calculation
+Gamernissem - passive tree skill ideas
+Funky Hippo - itch website suggestion
+
+## Passive system
+
+### Basic nodes
+
+Ideas
+
+- Every X(this increases based on the player's level) levels the player get a passive skill point to purchase a node
+- Certain quests also grant the player skill points
+
+Nodes
+
+- +1% attack speed
+- sharp: +1% damage
+- +2% movespeed
+- +2% health regeneration
+- +2% energy regeneration
+- sturdy: +2% maximum health
+- battery: +2% maximum energy
+- +2% fire damage
+- +1% fire damage, +1% chance to burn
+- +2% cold damage
+- +1% cold damage, +1% chance to freeze
+- +2% lightning damage
+- +1% lightning damage, +1% chance to shock
+- sure strike: +1% critical hit chance
+- recharge: +1 energy gained per hit
+- life force: +1 health gained per hit
+- efficiency: -2% energy cost
+
+### Keystone nodes
+
+Ideas
+
+- Each keystone node has a specific requirement of basic nodes
+- The final node's bonuses are based on the combination of the basic nodes leading up to it.
+
+Nodes
+
+- heavy strike: every 3rd hit does +50% damage
+- lightning rod: 15% chance to deal 10% lightning damage
+- stealthy: reduce enemy detection range
+- showboat: increase enemy detection range, increase defense
+- Power stone slot: put any power stone into this slot to gain its additional stats
+- reboot: If damage would bring your life total to 0, instead you get a forcefield that blocks 200(+5 per level) damage
+- leech(passive): you steal X% life from nearby enemies
+- blood rage: gain X damage for every X% health missing
+- masochism: abilities cost you health instead of energy. You have zero energy.
+- energy shield: 30% of damage is taken from energy before health
+- 2nd wind: receive large speed buff after taking a critical hit
+- punching bag: you return %100(+1% per 1000 armor) of the damage taken to nearby enemies
+- puppet master: +1 extra summon

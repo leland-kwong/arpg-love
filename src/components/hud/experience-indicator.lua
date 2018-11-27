@@ -85,7 +85,7 @@ function ExperienceIndicator.draw(self)
   -- segment outlines
   local segmentCount = 6
   for i=0, (segmentCount - 1) do
-    drawSegments(self, i, segmentCount, self.x, self.w)
+    -- drawSegments(self, i, segmentCount, self.x, self.w)
   end
 end
 

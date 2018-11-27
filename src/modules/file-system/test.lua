@@ -38,12 +38,8 @@ local function runTest(fs, saveState)
     end)
 end
 
-local tick = require 'utils.tick'
-
 return function(fs)
   print('[TEST] file-system')
-
-  local tick = require 'utils.tick'
 
   local saveState = {
     displayName = 123,

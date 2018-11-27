@@ -108,4 +108,16 @@ Test.suite('testUniqueIds', function()
   assert(Component.get('foobar') ~= nil, 'failed to find by component by id')
 end)
 
+Test.suite('duplicateIds', function()
+  local foo1 = Component.create({
+    id = 'foo'
+  })
+
+  local foo2 = Component.create({
+    id = 'foo'
+  })
+
+  assert(foo1:isDeleted(), 'components with duplicate ids should have the first instance deleted')
+end)
+
 Test.run()

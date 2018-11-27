@@ -1,11 +1,12 @@
 local Component = require 'modules.component'
 local GuiDialog = require 'components.gui.gui-dialog'
-local releaseNotes = love.filesystem.read('release-notes.md')
 local Position = require 'utils.position'
 local Color = require 'modules.color'
+local userSettings = require 'config.user-settings'
 local userSettingsState = require 'config.user-settings.state'
 
 local function createDialog(self)
+  local releaseNotes = love.filesystem.read('release-notes.md')
   return GuiDialog.create({
     x = 200,
     y = 100,
@@ -30,11 +31,11 @@ Component.create({
   init = function(self)
     Component.addToGroup(self, 'gui')
 
-    local settingsData = userSettingsState.load()
-    local previousVersion = settingsData.previousVersion
+    local previousVersion = userSettings.previousVersion
     local getVersion = require 'modules.get-version'
     local currentVersion = getVersion()
     local isNewVersion = previousVersion ~= currentVersion
+
     -- show news dialog
     if isNewVersion then
       require 'main.onload.handle-version-change'()

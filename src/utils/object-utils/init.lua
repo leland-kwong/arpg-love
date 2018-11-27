@@ -1,18 +1,30 @@
 local Object = {}
 
-local function apply(t1, t2)
+local function apply(t1, t2, deep)
 	if t2 == nil then
 		return t1
+	end
+
+	if type(t2) ~= 'table' then
+		return t2
 	end
 
 	local isArrayLike = t2[1] ~= nil
 	if isArrayLike then
 		for i=1, #t2 do
-			t1[i] = t2[i]
+			if deep then
+				t1[i] = apply(t1[i], t2[i], deep)
+			else
+				t1[i] = t2[i]
+			end
 		end
 	else
 		for k,v in pairs(t2) do
-			t1[k] = v
+			if deep then
+				t1[k] = apply(t1[k], v, deep)
+			else
+				t1[k] = v
+			end
 		end
 	end
 	return t1
@@ -23,14 +35,14 @@ Assigns key-value pairs by iterating over a series of objects.
 
 Returns first input object
 --]]
-function Object.assign(t1, t2, t3, t4)
+function Object.assign(t1, t2, t3, t4, deep)
 	t1 = t1 or {}
-	apply(t1, t2)
+	apply(t1, t2, deep)
 	if t3 then
-		apply(t1, t3)
+		apply(t1, t3, deep)
 	end
 	if t4 then
-		apply(t1, t4)
+		apply(t1, t4, deep)
 	end
 	return t1
 end
@@ -83,5 +95,7 @@ function Object.setReadOnly(o)
 	setmetatable(o, metatable)
 	return o
 end
+
+Object.EMPTY = Object.setReadOnly({})
 
 return Object

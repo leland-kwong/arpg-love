@@ -13,8 +13,11 @@ return {
 		baseDropChance = 1,
 		category = itemConfig.category.SHOES,
 
-		baseModifiers = {
+		info = {
 			cooldown = 2,
+		},
+
+		baseModifiers = {
 			moveSpeed = 40,
 			armor = 50
 		},

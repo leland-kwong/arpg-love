@@ -14,7 +14,7 @@ local popupTextCritMultiplier = PopupTextController.create({
 
 local function hitAnimation()
   local frame = 0
-  local animationLength = 4
+  local animationLength = 10
   while frame < animationLength do
     frame = frame + 1
     coroutine.yield(false)

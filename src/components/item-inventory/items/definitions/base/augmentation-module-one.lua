@@ -15,7 +15,7 @@ return {
 		category = itemConfig.category.AUGMENTATION,
 
 		baseModifiers = {
-			percentDamage = 0.3
+			attackPower = 30
 		},
 
 		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'()

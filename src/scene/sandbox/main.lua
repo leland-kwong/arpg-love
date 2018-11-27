@@ -25,6 +25,7 @@ local guiTextBodyLayer = GuiText.create({
 })
 
 local Sandbox = {
+  id = 'mainMenu',
   group = groups.gui,
   drawOrder = function()
     return drawOrder() - 1
@@ -213,6 +214,7 @@ msgBusMainMenu.on(msgBusMainMenu.MENU_ITEM_REMOVE, function(menuOption)
   end
 end)
 
+require 'scene.skill-tree-editor'
 require 'scene.light-test'
 require 'scene.font-test'
 require 'scene.tooltip-test'
@@ -231,7 +233,7 @@ function Sandbox.init(self)
         x = x,
         y = y,
         width = 150,
-        options = config.isDevelopment and sceneOptionsDebug or sceneOptionsNormal,
+        options = {},
         onSelect = function(name, value)
           value()
         end,
@@ -271,6 +273,9 @@ function Sandbox.update(self)
     Component.addToGroup(self.activeSceneMenu, 'guiDrawBox')
   else
     Component.removeFromGroup(self.activeSceneMenu, 'guiDrawBox')
+  end
+  if self.activeSceneMenu then
+    self.activeSceneMenu.options = config.isDevelopment and sceneOptionsDebug or sceneOptionsNormal
   end
 end
 

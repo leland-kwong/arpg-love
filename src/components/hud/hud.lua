@@ -4,7 +4,6 @@ local StatusBar = require 'components.hud.status-bar'
 local ExperienceIndicator = require 'components.hud.experience-indicator'
 local ScreenFx = require 'components.hud.screen-fx'
 local ActiveSkillInfo = require 'components.hud.active-skill-info'
-local ActionError = require 'components.hud.action-error'
 local GuiText = require 'components.gui.gui-text'
 local NpcInfo = require 'components.hud.npc-info'
 local Notifier = require 'components.hud.notifier'
@@ -25,16 +24,16 @@ local Hud = {
   rootStore = {}
 }
 
-local healthManaWidth = 180
+local healthManaWidth = 62 * 2
 
 local function setupExperienceIndicator(self)
-  local w, h = 180, 6
+  local w, h = healthManaWidth - 2, 2
   local winWidth, winHeight = love.graphics.getWidth() / scale, love.graphics.getHeight() / scale
   local offX, offY = Position.boxCenterOffset(w, h, winWidth, winHeight)
   ExperienceIndicator.create({
     rootStore = self.rootStore,
     x = offX,
-    y = winHeight - h - 5,
+    y = winHeight - h - 11,
     w = w,
     h = h,
     drawOrder = function()
@@ -44,6 +43,7 @@ local function setupExperienceIndicator(self)
 end
 
 function Hud.init(self)
+  local root = self
   local mainSceneRef = Component.get('MAIN_SCENE')
   if mainSceneRef and self.minimapEnabled then
     local stateSnapshot = msgBus.send(msgBus.GLOBAL_STATE_GET)
@@ -76,16 +76,8 @@ function Hud.init(self)
     group = groups.hud,
     font = require 'components.font'.primary.font,
     drawOrder = function()
-      return 10
+      return 4
     end
-  }):setParent(self)
-
-  local notifierWidth, notifierHeight = 250, 200
-  Notifier.create({
-    x = love.graphics.getWidth()/config.scale - notifierWidth,
-    y = love.graphics.getHeight()/config.scale - notifierHeight,
-    h = notifierHeight,
-    w = notifierWidth
   }):setParent(self)
 
   local winWidth, winHeight = love.graphics.getWidth() / scale, love.graphics.getHeight() / scale
@@ -93,53 +85,122 @@ function Hud.init(self)
   local offX, offY = Position.boxCenterOffset(healthManaWidth, barHeight, winWidth, winHeight)
 
   local function getHealthRemaining()
-    local state = self.rootStore:get()
-    local maxHealth = state.maxHealth + state.statModifiers.maxHealth
-    local health = state.health
-    return health / maxHealth
+    local playerRef = Component.get('PLAYER')
+    return playerRef.stats:get('health') / playerRef.stats:get('maxHealth')
   end
 
   local function getEnergyRemaining()
-    local state = self.rootStore:get()
-    local maxEnergy = state.maxEnergy + state.statModifiers.maxEnergy
-    local energy = state.energy
-    return energy / maxEnergy
+    local playerRef = Component.get('PLAYER')
+    return playerRef.stats:get('energy') / playerRef.stats:get('maxEnergy')
   end
 
   -- health bar
-  local healthStatusBar = StatusBar.create({
+  local StatusBarFancy = require 'components.hud.status-bar-fancy'
+  local healthStatusBar = StatusBarFancy.create({
     id = 'healthStatusBar',
-    x = offX,
-    y = winHeight - barHeight - 13,
+    x = offX - 1,
+    y = winHeight - barHeight - 17,
     w = healthManaWidth / 2,
     h = barHeight,
-    color = {Color.rgba255(209, 27, 27)},
-    fillPercentage = getHealthRemaining,
-    drawOrder = function()
-      return 2
-    end
+    color = {Color.rgba255(207, 23, 59)},
+    fillPercentage = getHealthRemaining
   }):setParent(self)
 
-  -- -- mana bar
-  local energyStatusBar = StatusBar.create({
-    x = offX + healthManaWidth / 2,
-    y = winHeight - barHeight - 13,
+  -- mana bar
+  local energyStatusBar = StatusBarFancy.create({
+    x = offX + healthManaWidth / 2 + 1,
+    y = healthStatusBar.y,
     w = healthManaWidth / 2,
     h = barHeight,
     fillDirection = -1,
-    color = {Color.rgba255(33, 89, 186)},
-    fillPercentage = getEnergyRemaining,
-    drawOrder = function()
-      return 2
+    color = {Color.rgba255(24, 144, 224)},
+    fillPercentage = getEnergyRemaining
+  }):setParent(self)
+
+  local AnimationFactory = require 'components.animation-factory'
+  local aniStatusBar = AnimationFactory:newStaticSprite('gui-dashboard-status-bars-underlay')
+  local function drawStatusBarUnderlay()
+    love.graphics.setColor(1,1,1)
+    love.graphics.draw(
+      AnimationFactory.atlas,
+      aniStatusBar.sprite,
+      offX - 6,
+      healthStatusBar.y - 4
+    )
+  end
+
+  local function drawAbilityUnderlay()
+    local AnimationFactory = require 'components.animation-factory'
+    local ani = AnimationFactory:newStaticSprite('gui-dashboard-abilities-underlay')
+    love.graphics.setColor(1,1,1)
+    love.graphics.draw(
+      AnimationFactory.atlas,
+      ani.sprite,
+      offX - 6 - ani:getWidth(),
+      healthStatusBar.y - 7
+    )
+  end
+
+  local AnimationFactory = require 'components.animation-factory'
+  local aniVialUnderlay = AnimationFactory:newStaticSprite('gui-dashboard-vials-underlay')
+  local function drawVialUnderlay()
+    love.graphics.setColor(1,1,1)
+    love.graphics.draw(
+      AnimationFactory.atlas,
+      aniVialUnderlay.sprite,
+      offX - 6 + aniStatusBar:getWidth(),
+      healthStatusBar.y - 7
+    )
+  end
+
+  local function drawMenuButtonsUnderlay()
+    local AnimationFactory = require 'components.animation-factory'
+    local aniLeft = AnimationFactory:newStaticSprite('gui-dashboard-menu-left')
+    local aniMiddle = AnimationFactory:newStaticSprite('gui-dashboard-menu-middle')
+    local aniRight = AnimationFactory:newStaticSprite('gui-dashboard-menu-right')
+    local y = healthStatusBar.y
+    local x = offX - 4 + aniStatusBar:getWidth() + aniVialUnderlay:getWidth()
+    love.graphics.setColor(1,1,1)
+    love.graphics.draw(
+      AnimationFactory.atlas,
+      aniLeft.sprite,
+      x,
+      y + 2
+    )
+    local middleWidth = 1
+    love.graphics.draw(
+      AnimationFactory.atlas,
+      aniMiddle.sprite,
+      x + aniLeft:getWidth(),
+      y + 2
+    )
+    love.graphics.draw(
+      AnimationFactory.atlas,
+      aniRight.sprite,
+      x + aniLeft:getWidth() + middleWidth,
+      y
+    )
+  end
+
+  Component.create({
+    init = function(self)
+      Component.addToGroup(self, 'hud')
+    end,
+    draw = function()
+      drawStatusBarUnderlay()
+      drawVialUnderlay()
+      drawAbilityUnderlay()
+      drawMenuButtonsUnderlay()
+    end,
+    drawOrder = function(self)
+      return 1
     end
   }):setParent(self)
 
   self.listeners = {
     msgBus.on(msgBus.PLAYER_HIT_RECEIVED, function(msgValue)
-      self.rootStore:set('health', function(state)
-        return max(0, state.health - msgValue)
-      end)
-
+      local playerRef = Component.get('PLAYER')
+      playerRef.health = max(0, playerRef.health - msgValue)
       return msgValue
     end),
     msgBus.on(msgBus.SCENE_CHANGE, function(sceneRef)
@@ -155,9 +216,6 @@ function Hud.init(self)
     end
   }):setParent(self)
   NpcInfo.create():setParent(self)
-  ActionError.create({
-    textLayer = self.hudTextSmallLayer
-  }):setParent(self)
 
   HudStatusIcons.create({
     id = 'hudStatusIcons',
@@ -165,20 +223,10 @@ function Hud.init(self)
     y = healthStatusBar.y - 25
   }):setParent(self)
 
-  local spacing = 32
-  local endXPos = 355
+  local spacing = 27
+  local endXPos = healthStatusBar.x - spacing - 9
 
   local skillSetup = {
-    {
-      skillId = 'ACTIVE_ITEM_2',
-      slotX = 2,
-      slotY = 5
-    },
-    {
-      skillId = 'ACTIVE_ITEM_1',
-      slotX = 1,
-      slotY = 5
-    },
     {
       skillId = 'SKILL_4',
       slotX = 2,
@@ -213,20 +261,44 @@ function Hud.init(self)
       player = self.player,
       rootStore = self.rootStore,
       x = endXPos - (spacing * (i - 1)),
-      y = winHeight - 32 - 1,
+      y = winHeight - 32 - 2,
       slotX = skill.slotX,
       slotY = skill.slotY,
       hudTextLayer = self.hudTextSmallLayer,
-      drawOrder = function()
-        return 2
-      end
+    }):setParent(self)
+  end
+
+  local itemSetup = {
+    {
+      skillId = 'ACTIVE_ITEM_1',
+      slotX = 1,
+      slotY = 5
+    },
+    {
+      skillId = 'ACTIVE_ITEM_2',
+      slotX = 2,
+      slotY = 5
+    },
+  }
+
+  for i=1, #itemSetup do
+    local skill = itemSetup[i]
+    ActiveSkillInfo.create({
+      skillId = skill.skillId,
+      player = self.player,
+      rootStore = self.rootStore,
+      x = energyStatusBar.x + energyStatusBar.w + 10 + (spacing * (i - 1)),
+      y = winHeight - 32 - 2,
+      slotX = skill.slotX,
+      slotY = skill.slotY,
+      hudTextLayer = self.hudTextSmallLayer,
     }):setParent(self)
   end
 
   local MenuButtons = require 'components.hud.menu-buttons'
   MenuButtons.create({
-    x = energyStatusBar.x + energyStatusBar.w + 5,
-    y = winHeight - 30
+    x = energyStatusBar.x + 134,
+    y = healthStatusBar.y + 5
   }):setParent(self)
 end
 

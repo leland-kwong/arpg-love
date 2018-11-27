@@ -42,9 +42,8 @@ local function ActiveConsumableHandler()
         return skill
       end
       activateFn(activeItem)
-      local curState = self.rootStore:get()
-      local baseCooldown = itemSystem.getDefinition(activeItem).baseModifiers.cooldown or 0
-      local actualCooldown = propTypesCalculator.cooldownReduction(baseCooldown, curState.statModifiers.cooldownReduction)
+      local baseCooldown = itemSystem.getDefinition(activeItem).info.cooldown or 0
+      local actualCooldown = propTypesCalculator.cooldownReduction(baseCooldown, Component.get('PLAYER').stats:get('cooldownReduction'))
       curCooldown = actualCooldown
       skillCooldown = actualCooldown
       return skill
@@ -82,13 +81,12 @@ local function ActiveEquipmentHandler()
     type = 'EQUIPMENT'
   }
 
-  local floor = math.floor
-  local function modifyAbility(instance, modifiers)
+  local round = require 'utils.math'.round
+  local function modifyAbility(instance, playerRef)
     local v = instance
-    local m = modifiers
-    local dmgMultiplier = 1 + m.percentDamage
-    local min = floor((v.minDamage * dmgMultiplier) + m.flatDamage)
-    local max = floor((v.maxDamage * dmgMultiplier) + m.flatDamage)
+    local dmgMultiplier = 1 + (playerRef.stats:get('attackPower') / 100)
+    local min = round(v.minDamage * dmgMultiplier)
+    local max = round(v.maxDamage * dmgMultiplier)
 
     -- update instance properties
     v:set('minDamage', min)
@@ -114,11 +112,11 @@ local function ActiveEquipmentHandler()
       local definition = itemSystem.getDefinition(activeItem)
       local activateModule = itemSystem.loadModule(itemSystem.getDefinition(activeItem).onActivateWhenEquipped)
       local activateFn = activateModule and activateModule.active
-      local energyCost = itemSystem.getDefinition(activeItem).baseModifiers.energyCost
+      local energyCost = itemSystem.getDefinition(activeItem).info.energyCost
       -- time an attack takes to finish (triggers a global cooldown)
-      local curState = self.rootStore:get()
+      local playerRef = Component.get('PLAYER')
       local enoughEnergy = (energyCost == nil) or
-        (energyCost <= curState.energy)
+        (energyCost <= playerRef.energy)
       if (not enoughEnergy) then
         msgBus.send(msgBus.PLAYER_ACTION_ERROR, 'not enough energy')
         return skill
@@ -128,30 +126,36 @@ local function ActiveEquipmentHandler()
         return skill
       end
 
+      local attackTime = itemSystem.getDefinition(activeItem).info.attackTime or 0
+      local actualAttackTime = propTypesCalculator.attackTimeReduction(attackTime, Component.get('PLAYER').stats:get('attackTimeReduction'))
+
       local mx, my = camera:getMousePosition()
       local playerX, playerY = self.player:getPosition()
       local abilityData = activateFn(activeItem)
+      local Position = require 'utils.position'
+      local dx, dy = Position.getDirection(playerX, playerY, mx, my)
       local abilityEntity = abilityData.blueprint.create(
         extend(
           abilityData.props, {
-            x = playerX
+            attackTime = actualAttackTime
+          , x = playerX
           , y = playerY
           , x2 = mx
           , y2 = my
+          , dx = dx
+          , dy = dy
           , source = activeItem.__id
         })
       )
       local instance = modifyAbility(
         abilityEntity,
-        curState.statModifiers
+        playerRef
       )
-      local baseCooldown = itemSystem.getDefinition(activeItem).baseModifiers.cooldown or 0
-      local actualCooldown = propTypesCalculator.cooldownReduction(baseCooldown, curState.statModifiers.cooldownReduction)
+      local baseCooldown = itemSystem.getDefinition(activeItem).info.cooldown or 0
+      local actualCooldown = propTypesCalculator.cooldownReduction(baseCooldown, Component.get('PLAYER').stats:get('cooldownReduction'))
       curCooldown = actualCooldown
       skillCooldown = actualCooldown
 
-      local attackTime = itemSystem.getDefinition(activeItem).baseModifiers.attackTime or 0
-      local actualAttackTime = propTypesCalculator.attackTimeReduction(attackTime, curState.statModifiers.attackTimeReduction)
       playerRef:set('attackRecoveryTime', actualAttackTime)
       msgBus.send(
         msgBus.PLAYER_WEAPON_ATTACK,
@@ -164,11 +168,8 @@ local function ActiveEquipmentHandler()
       )
 
       local actualEnergyCost = energyCost -
-        (energyCost * curState.statModifiers.energyCostReduction)
-      self.rootStore:set(
-        'energy',
-        curState.energy - actualEnergyCost
-      )
+        (energyCost * playerRef.stats:get('energyCostReduction'))
+      playerRef.energy = playerRef.energy - actualEnergyCost
       return skill
     end
   end
@@ -244,7 +245,7 @@ local SkillBarPreDraw = Component.create({
     love.graphics.draw(self.canvas)
   end,
   drawOrder = function()
-    return 1
+    return 2
   end
 })
 
@@ -255,7 +256,7 @@ local ActiveSkillInfo = {
   skillId = nil,
   slotX = 1,
   slotY = 1,
-  size = 28,
+  size = 26,
   player = nil,
   rootStore = nil
 }
@@ -304,13 +305,6 @@ function ActiveSkillInfo.update(self, dt)
       self:getId(),
       function()
         local boxSize = self.size
-        love.graphics.setColor(0,0,0,0.8)
-        love.graphics.rectangle('fill', self.x, self.y, boxSize, boxSize)
-        local oLineWidth = love.graphics.getLineWidth()
-        love.graphics.setLineWidth(1)
-        love.graphics.setColor(1,1,1)
-        love.graphics.rectangle('line', self.x - 0.5, self.y - 0.5, boxSize, boxSize)
-        love.graphics.setLineWidth(oLineWidth)
 
         if nextActiveItem then
           drawItem(nextActiveItem, self.x, self.y, boxSize)
@@ -326,16 +320,20 @@ local mouseBtnToString = {
   [2] = 'rm'
 }
 
+local keyboardBtnToString = {
+  space = 'spc'
+}
+
 local function drawHotkEy(self)
   local userSettings = require 'config.user-settings'
   local mouseBtn = userSettings.mouseInputMap[self.skillId]
   local keyboardKey = userSettings.keyboard[self.skillId]
-  local hotKeyToShow = mouseBtn and mouseBtnToString[mouseBtn] or keyboardKey
+  local hotKeyToShow = mouseBtnToString[mouseBtn] or keyboardBtnToString[keyboardKey] or keyboardKey
   self.hudTextLayer:add(
     hotKeyToShow,
     Color.WHITE,
-    self.x,
-    self.y - 5
+    self.x + 2,
+    self.y + self.size - 9
   )
 end
 

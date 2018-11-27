@@ -27,7 +27,6 @@ function PlayerLose.init(self)
       msgBus.send(msgBus.SCENE_STACK_PUSH, {
         scene = HomeBase
       })
-      msgBus.send(msgBus.PLAYER_FULL_HEAL)
       self:delete(true)
       return msgBus.CLEANUP
     end

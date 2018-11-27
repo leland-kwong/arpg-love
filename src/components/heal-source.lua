@@ -45,22 +45,21 @@ function HealSource.remove(self, source)
 end
 
 local min, max = math.min, math.max
-local function updateProperty(rootStore, changeAmount, property, maxProperty)
-	local state = rootStore:get()
-  local curProp = state[property]
-  local maxProp = state[maxProperty] + state.statModifiers[maxProperty]
-	local newProp = max(0, min(maxProp, curProp + changeAmount))
-	rootStore:set(property, newProp)
+local function updateProperty(self, changeAmount, property, maxProperty)
+  local curProp = self[property]
+  local maxProp = self.stats:get(maxProperty)
+	local newVal = max(0, min(maxProp, curProp + changeAmount))
+	self[property] = newVal
 end
 
-function HealSource.add(self, healSource, rootStore)
+function HealSource.add(self, healSource)
 	self.healSources = self.healSources or {}
 	local currentSource = self.healSources[healSource.source]
 
 	local instantHeal = healSource.duration == 0
 	if instantHeal then
 		return updateProperty(
-			rootStore,
+			self,
 			healSource.amount,
 			healSource.property,
 			healSource.maxProperty
@@ -77,7 +76,7 @@ function HealSource.add(self, healSource, rootStore)
 				if (not hasMore) then
 					HealSource.remove(self, source)
 				else
-					updateProperty(rootStore, healAmount, property, maxProperty)
+					updateProperty(self, healAmount, property, maxProperty)
 				end
 			end
 		end,

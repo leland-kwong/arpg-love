@@ -1,4 +1,10 @@
 --[[
+  NOTE: On certain situations, loading a file more than once can cause the game to lock up.
+  This issue cannot be reliably replicated. One solution that seems to have worked well is to
+  cache the loaded data and not load the file again if it has been already loaded from disk.
+]]
+
+--[[
   TODO: add support for multiple fileSystem instances so that we can save to different
   subdirectories with their own save settings.
 ]]
@@ -13,6 +19,11 @@ local fileSystem = {}
 local fileListCache = nil
 local function invalidateFileListCache()
   fileListCache = nil
+end
+
+local loadedFilesCache = {}
+local function invalidateLoadedFileCache(file)
+  loadedFilesCache[file] = nil
 end
 
 local function init()
@@ -52,6 +63,8 @@ function fileSystem.saveFile(rootPath, saveId, saveState, metadata)
 
     local success = love.thread.getChannel('saveStateSuccess'):pop()
     if success then
+      local filePath = path.getSavedStatePath(rootPath, saveId)
+      invalidateLoadedFileCache(filePath)
       invalidateFileListCache()
       return true
     end
@@ -78,6 +91,8 @@ function fileSystem.deleteFile(rootPath, saveId)
 
     local success = love.thread.getChannel('saveStateDeleteSuccess'):pop()
     if success then
+      local filePath = path.getSavedStatePath(rootPath, saveId)
+      invalidateLoadedFileCache(filePath)
       invalidateFileListCache()
       return true
     end
@@ -86,13 +101,21 @@ end
 
 function fileSystem.loadSaveFile(rootPath, saveId)
   checkRootPath(rootPath)
+  local filePath = path.getSavedStatePath(rootPath, saveId)
+
   local ok, result = pcall(function()
-    return bitser.loads(
-      bitser.loadLoveFile(
-        path.getSavedStatePath(rootPath, saveId)
+    local loadedFile = loadedFilesCache[filePath]
+    return
+      loadedFile or
+      bitser.loads(
+        bitser.loadLoveFile(filePath)
       )
-    )
   end)
+
+  if ok then
+    loadedFilesCache[filePath] = result
+  end
+
   return result, ok
 end
 
@@ -108,10 +131,6 @@ function fileSystem.listSavedFiles(rootPath)
     end)
   end
   return fileListCache
-end
-
-if config.isDevelopment then
-  require 'modules.file-system.test'(fileSystem)
 end
 
 return fileSystem

@@ -8,6 +8,8 @@ local defaults = {
 }
 
 return function(component, options)
+  local r,g,b,a = love.graphics.getColor()
+
   options = options or defaults
   local x, y, width, height = component.x, component.y, component.width, component.height
 
@@ -21,4 +23,6 @@ return function(component, options)
   -- background
   gfx.setColor(options.backgroundColor or defaults.backgroundColor)
   gfx.rectangle('fill', x, y, width, height)
+
+  love.graphics.setColor(r,g,b,a)
 end

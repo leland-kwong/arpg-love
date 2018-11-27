@@ -10,8 +10,6 @@ love.graphics.setDefaultFilter('nearest', 'nearest')
 local msgBus = require 'components.msg-bus'
 msgBus.UPDATE = 'UPDATE'
 require 'main.listeners'
-local userSettingsState = require 'config.user-settings.state'
-userSettingsState.load()
 
 local Console = require 'modules.console.console'
 local groups = require 'components.groups'
@@ -25,7 +23,6 @@ require 'main.inputs'
 local systemsProfiler = require 'components.profiler.component-groups'
 require 'components.groups.dungeon-test'
 require 'components.groups.game-world'
-require 'modules.file-system'
 local MapPointerWorld = require 'components.hud.map-pointer'
 
 local scale = config.scaleFactor
@@ -33,7 +30,7 @@ local scale = config.scaleFactor
 function love.load()
   msgBus.send(msgBus.GAME_LOADED)
   love.keyboard.setKeyRepeat(true)
-  local vw, vh = config.window.width, config.window.height
+  local vw, vh = love.graphics.getWidth(), love.graphics.getHeight()
   love.window.setMode(vw, vh)
   camera
     :setSize(vw, vh)
@@ -47,6 +44,14 @@ function love.load()
     id = 'hudPointerWorld'
   })
   RootScene.create()
+
+  --[[
+    run tests after everything is loaded since some tests rely on the game loop
+  ]]
+  if config.isDevelopment then
+    require 'modules.test'
+    require '_debug'
+  end
 end
 
 local characterSystem = msgBus.send(msgBus.PROFILE_FUNC, {
@@ -102,14 +107,4 @@ end
 
 function love.quit()
   jprof.write('prof.mpack')
-end
-
---[[
-  run tests after everything is loaded since some tests
-  since some of the tests rely on the game loop
-]]
-if config.isDevelopment then
-  require 'modules.test.index'
-  require 'utils.test.index'
-  require '_debug'
 end

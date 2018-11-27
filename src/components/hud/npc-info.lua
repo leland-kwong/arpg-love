@@ -38,8 +38,8 @@ function NpcInfo.init(self)
     h = h,
     color = Color.DEEP_RED,
     fillPercentage = function()
-      local percentage = self.target:getBaseStat('health') /
-        self.target:getCalculatedStat('maxHealth')
+      local percentage = self.target.stats:get('health') /
+        self.target.stats:get('maxHealth')
       return percentage
     end
   }):setParent(self)

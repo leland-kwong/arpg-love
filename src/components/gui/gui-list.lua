@@ -3,6 +3,16 @@ local Component = require 'modules.component'
 local Gui = require 'components.gui.gui'
 local f = require 'utils.functional'
 
+local function iterateChildrenRecursively(children, callback)
+  for _,child in pairs(children) do
+    iterateChildrenRecursively(
+      Component.getChildren(child),
+      callback
+    )
+    callback(child)
+  end
+end
+
 local function scrollbars(self)
   local verticalRatio = self.h / (self.h + self.scrollHeight)
   local horizontalRatio = self.w / (self.w + self.scrollWidth)
@@ -63,24 +73,11 @@ function GuiList.init(self)
 
   local baseDrawOrder = self.drawOrder
 
-  local noop = require 'utils.noop'
-  f.forEach(children, function(child, index)
-    child.drawOrder = function()
-      return baseDrawOrder() + index
-    end
-  end)
-
-  local stencilComponent = Component.create({
-    group = Component.groups.gui,
-    draw = function()
-      -- remove stencil
-      love.graphics.setStencilTest()
-      love.graphics.pop()
-    end,
-    drawOrder = function()
-      return baseDrawOrder() + #children + 1
-    end
-  }):setParent(self)
+  -- disable automatic drawing so we can manually draw it ourself
+  local function disableDraw(child)
+    child:setDrawDisabled(true)
+  end
+  iterateChildrenRecursively(children, disableDraw)
 
   local listNode = Gui.create({
     x = self.x,
@@ -104,13 +101,19 @@ function GuiList.init(self)
     onScroll = function(self)
     end,
     render = function(self)
-
       -- setup stencil
       love.graphics.push()
       love.graphics.stencil(guiStencil, 'replace', 1)
       love.graphics.setStencilTest('greater', 0)
 
+      iterateChildrenRecursively(children, function(child)
+        child:draw()
+      end)
       scrollbars(self)
+
+      -- remove stencil
+      love.graphics.setStencilTest()
+      love.graphics.pop()
     end,
     drawOrder = baseDrawOrder
   }):setParent(self)

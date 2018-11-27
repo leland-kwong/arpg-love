@@ -122,7 +122,7 @@ end
 
 function MainScene.init(self)
   msgBus.send(msgBus.NEW_MAP)
-  Component.get('lightWorld').ambientColor = {0.6,0.6,0.6,1}
+  Component.get('lightWorld'):setAmbientColor({0.6,0.6,0.6,1})
 
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0,0,0,1})
 
@@ -144,11 +144,6 @@ function MainScene.init(self)
   self.listeners = {
     msgBus.on(msgBus.SCENE_STACK_PUSH, function(v)
       msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:serializeAll(self.mapId)
-    end, 1),
-    -- setup default properties in case they don't exist
-    msgBus.on(msgBus.CHARACTER_HIT, function(v)
-      v.damage = v.damage or 0
-      return v
     end, 1),
 
     msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)

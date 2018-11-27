@@ -21,11 +21,7 @@ local attackCooldown = 0
 local hitModifierDuration = attackTime * 1.2
 
 local function triggerAttack(self)
-	local Position = require 'utils.position'
-	local dx, dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
-	self.dx, self.dy = dx, dy
-	local attackPosX, attackPosY = 30 * dx, 30 * dy
-	self.collisionX, self.collisionY = self.x - (self.w/2) + attackPosX, self.y - (self.h/2) + attackPosY
+	self.collisionX, self.collisionY = self.x - (self.w/2), self.y - (self.h/2)
 	self.collisionW, self.collisionH = self.w, self.h
 	local cw = require 'components.collision-worlds'.map
 	cw:queryRect(
@@ -75,6 +71,89 @@ local function triggerAttack(self)
 	end
 end
 
+local WeaponAnimation = Component.createFactory({
+	init = function(self)
+		Component.addToGroup(self, 'all')
+		Component.removeFromGroup(
+			Component.get('WEAPON_CORE'),
+			'all'
+		)
+
+		local tween = require 'modules.tween'
+		self.yPos = -20
+		self.attackAnimationDuration = self.attackTime * 0.6
+		self.attackRecoveryAnimationDuration = self.attackTime * 0.4
+		self.tween = tween.new(self.attackAnimationDuration, self, {
+			yPos = 0,
+		})
+	end,
+	update = function(self, dt)
+		local complete = self.tween:update(dt)
+		if complete and (not self.ending) then
+			self.ending = true
+			local tick = require 'utils.tick'
+			tick.delay(function()
+				self:delete(true)
+				Component.addToGroup(
+					Component.get('WEAPON_CORE'),
+					'all'
+				)
+			end, self.attackRecoveryAnimationDuration)
+
+			local ImpactDispersion = require 'components.abilities.effect-dispersion'
+			ImpactDispersion.create({
+				x = self.x,
+				y = self.y,
+				scale = {
+					x = 0.5,
+					y = 0.4
+				},
+				radius = 2,
+				duration = 10,
+				color = Color.YELLOW
+			})
+
+			self.onImpactFrame()
+
+			local Sound = require 'components.sound'
+			Sound.playEffect('air-slam-impact.wav')
+		end
+	end,
+	drawSprite = function(color, x, y, angle, facingX, stretchY)
+		local AnimationFactory = require 'components.animation-factory'
+		local animation = AnimationFactory:newStaticSprite('companion/companion')
+		local ox, oy = animation:getOffset()
+		love.graphics.setColor(color)
+		love.graphics.draw(
+			AnimationFactory.atlas,
+			animation.sprite,
+			x,
+			y,
+			angle or 0,
+			1 * facingX,
+			-1, -- flip companion upside down
+			ox,oy
+		)
+	end,
+	draw = function(self)
+		local playerRef = Component.get('PLAYER')
+		local facingX = playerRef.facingDirectionX > 0 and 1 or -1
+
+		self.drawSprite({
+			1,1,1,0.3
+		}, self.x, self.y + self.yPos - 15, 0, facingX)
+		self.drawSprite({
+			1,1,1,0.5
+		}, self.x, self.y + self.yPos - 9, 0, facingX)
+		self.drawSprite({
+			1,1,1,0.5
+		}, self.x, self.y + self.yPos - 4, 0, facingX)
+		self.drawSprite({
+			1,1,1,1
+		}, self.x, self.y + self.yPos, 0, facingX)
+	end
+})
+
 local Attack = Component.createFactory(
 	AbilityBase({
 		group = groups.all,
@@ -84,32 +163,18 @@ local Attack = Component.createFactory(
 		cooldown = attackCooldown,
 		opacity = 1,
 		init = function(self)
-			self.animationTween = tween.new(self.impactAnimationDuration, self, { opacity = 0 }, tween.easing.inExpo)
-		end,
-		update = function(self, dt)
-			-- we must trigger after init since the attack gets modified immediately upon creation
-			if (not self.triggered) then
-				triggerAttack(self)
-				self.triggered = true
-			end
-			local complete = self.animationTween:update(dt)
-			if complete then
-				self:delete()
-			end
-		end,
-		draw = function(self)
-			love.graphics.setColor(
-				Color.rgba255(244, 177, 70, 0.3 * self.opacity)
-			)
-			love.graphics.rectangle('fill',
-				self.collisionX,
-				self.collisionY,
-				self.collisionW,
-				self.collisionH
-			)
-		end,
-		drawOrder = function(self)
-			return 1
+			local playerRef = Component.get('PLAYER')
+			self.x = playerRef.x + (playerRef.facingDirectionX * 30)
+			self.y = playerRef.y + (playerRef.facingDirectionY * 30)
+			WeaponAnimation.create({
+				x = self.x,
+				y = self.y,
+				attackTime = self.attackTime,
+				onImpactFrame = function()
+					triggerAttack(self)
+					self:delete()
+				end
+			})
 		end
 	})
 )
@@ -117,7 +182,7 @@ local Attack = Component.createFactory(
 return itemSystem.registerModule({
   name = 'aoe-slam',
   type = itemSystem.moduleTypes.EQUIPMENT_ACTIVE,
-  active = function(item, props)
+	active = function(item, props)
     return {
 			blueprint = Attack,
 			props = props

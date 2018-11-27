@@ -39,6 +39,7 @@ local colors = {
   MED_GRAY = {0.5,0.5,0.5,1},
   MED_DARK_GRAY = {0.3,0.3,0.3,1},
   DARK_GRAY = {0.1,0.1,0.1,1},
+  DARK_GRAY_BLUE = {0.1,0.12,0.125,1},
   CYAN = {0.2,1,1,1},
   BLACK = {0,0,0,1},
   YELLOW = {1,1,0,1},

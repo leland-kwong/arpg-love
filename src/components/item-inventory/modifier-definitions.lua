@@ -24,8 +24,8 @@ return {
   attackTimeReduction = {
     range = RangeCalculator(1, 10, 0.01)
   },
-  percentDamage = {
-    range = RangeCalculator(10, 20, 0.01)
+  attackPower = {
+    range = RangeCalculator(5, 15, 1)
   },
   armor = {
     range = RangeCalculator(10, 100, 1)

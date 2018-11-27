@@ -101,7 +101,7 @@ local FrostSpark = {
               duration = 1,
               modifiers = {
                 moveSpeed = function(target)
-                  return target:getBaseStat('moveSpeed') * -0.5
+                  return target.stats:get('moveSpeed') * -0.5
                 end,
               },
               source = 'FROST_SPARK_SLOW'

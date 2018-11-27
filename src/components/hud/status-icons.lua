@@ -19,8 +19,14 @@ end
 
 function StatusIcons.draw(self)
   local i = 0
-  for entityId,iconDefinition in pairs(group.getAll()) do
-
+  local iconsSortedById = {}
+  local components = group.getAll()
+  for entityId in pairs(components) do
+    table.insert(iconsSortedById, entityId)
+  end
+  table.sort(iconsSortedById)
+  for _,id in ipairs(iconsSortedById) do
+    local iconDefinition = components[id]
     local offsetX = (i * 24)
     local x, y = self.x + offsetX, self.y
     local AnimationFactory = require 'components.animation-factory'
@@ -36,7 +42,7 @@ function StatusIcons.draw(self)
     love.graphics.draw(AnimationFactory.atlas, icon.sprite, x, y)
 
     i = i + 1
-    group.removeComponent(entityId)
+    group.removeComponent(id)
   end
 end
 

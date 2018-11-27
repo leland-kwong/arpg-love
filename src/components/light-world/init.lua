@@ -42,11 +42,10 @@ function drawLights(self)
     local light = self.lights[i]
     local x, y, radius, color, opacity = light[1], light[2], light[3], light[4], light[5]
     local diameter = radius * 2
-    local lightSize = (diameter * scaleAdjustment) / imageHeight
-    local offset = (diameter * scaleAdjustment) / config.scale
 
     love.graphics.setColor(Color.multiplyAlpha(color or defaultLightColor, opacity))
-    love.graphics.draw(lightBlurImg, x - offset, y - offset, 0, lightSize, lightSize)
+    local scale = diameter / 100
+    love.graphics.draw(lightBlurImg, x, y, 0, scale, scale, 200, 200)
   end
   self.lights = {}
 

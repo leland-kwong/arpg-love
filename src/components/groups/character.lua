@@ -32,13 +32,15 @@ msgBus.on(msgBus.CHARACTER_HIT, function(msg)
   local itemSource = entity and entity.source
   msg.itemSource = itemSource
 
+  -- setup default properties in case they don't exist
+  msg.damage = msg.damage or 0
+  msg.lightningDamage = msg.lightningDamage or 0
+
   return msg
 end, 1)
 
 return function(dt)
   for _,c in pairs(groups.character.getAll()) do
-    local hitManager = require 'modules.hit-manager'
-    local hitCount = hitManager(c, dt, c.onDamageTaken)
     if c.isDestroyed then
       if c.destroyedAnimation then
         local complete = c.destroyedAnimation:update(dt)
@@ -62,6 +64,12 @@ return function(dt)
           experience = c.experience
         })
       end
+    else
+      local Stats = require 'modules.stats'
+      c.stats = c.stats.hasChanges and Stats:new(c.baseStats and c:baseStats()) or c.stats
+
+      local hitManager = require 'modules.hit-manager'
+      hitManager(c, dt, c.onDamageTaken)
     end
   end
 end

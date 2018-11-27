@@ -26,8 +26,6 @@ local F = require 'utils.functional'
 local Object = require 'utils.object-utils'
 
 local colMap = collisionWorlds.map
-local keyMap = userSettings.keyboard
-local mouseInputMap = userSettings.mouseInputMap
 
 local startPos = {
   x = config.gridSize * 3,
@@ -125,7 +123,6 @@ end)
 
 msgBus.PLAYER_FULL_HEAL = 'PLAYER_FULL_HEAL'
 msgBus.on(msgBus.PLAYER_FULL_HEAL, function()
-  local rootState = msgBus.send(msgBus.GAME_STATE_GET)
   msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
     amount = math.pow(10, 10),
     source = 'PLAYER_FULL_HEALTH',
@@ -185,8 +182,7 @@ local function updateEnergyRegeneration(energyRegeneration)
   })
 end
 
-local BaseStatModifiers = require'components.state.base-stat-modifiers'
-local Player = Object.extend(BaseStatModifiers(), {
+local Player = {
   id = 'PLAYER',
   autoSave = config.autoSave,
   class = collisionGroups.player,
@@ -196,7 +192,18 @@ local Player = Object.extend(BaseStatModifiers(), {
   facingDirectionX = 1,
   facingDirectionY = 1,
   pickupRadius = 5 * config.gridSize,
-  moveSpeed = 100,
+
+  health = 1,
+  energy = 1,
+  baseStats = function(self)
+    self.__index = self
+    return setmetatable({
+      energyRegeneration = 1,
+      maxHealth = 200,
+      maxEnergy = 100,
+      moveSpeed = 100,
+    }, self)
+  end,
   attackRecoveryTime = 0,
 
   zones = {},
@@ -214,16 +221,10 @@ local Player = Object.extend(BaseStatModifiers(), {
 
     Component.addToGroup(self, groups.character)
     self.listeners = {
-      msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function()
-        local BaseStatModifiers = require'components.state.base-stat-modifiers'
-        return BaseStatModifiers()
-      end, 1),
-      msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function(msgValue)
-        local newModifiers = msgValue
-        msgBus.send(msgBus.GAME_STATE_GET):set('statModifiers', newModifiers)
-        updateHealthRegeneration(newModifiers.healthRegeneration)
-        updateEnergyRegeneration(newModifiers.energyRegeneration)
-      end),
+      -- msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function(msgValue)
+      --   updateHealthRegeneration(self.stats:get('healthRegeneration'))
+      --   updateEnergyRegeneration(self.stats:get('energyRegeneration'))
+      -- end),
 
       msgBus.on(msgBus.GENERATE_LOOT, function(msgValue)
         local LootGenerator = require'components.loot-generator.loot-generator'
@@ -254,6 +255,11 @@ local Player = Object.extend(BaseStatModifiers(), {
         end
       end),
 
+      msgBus.on(msgBus.PASSIVE_SKILLS_TREE_TOGGLE, function()
+        local PassiveTree = require 'components.player.passive-tree'
+        PassiveTree.toggle()
+      end),
+
       msgBus.on(msgBus.KEY_DOWN, function(v)
         local key = v.key
         local keyMap = userSettings.keyboard
@@ -273,10 +279,14 @@ local Player = Object.extend(BaseStatModifiers(), {
         if (keyMap.PAUSE_GAME == key) and (not v.hasModifier) then
           msgBus.send(msgBus.PAUSE_GAME_TOGGLE)
         end
+
+        if (keyMap.PASSIVE_SKILLS_TREE_TOGGLE == key) and (not v.hasModifier) then
+          msgBus.send(msgBus.PASSIVE_SKILLS_TREE_TOGGLE)
+        end
       end),
 
       msgBus.on(msgBus.PLAYER_HEAL_SOURCE_ADD, function(v)
-        HealSource.add(self, v, msgBus.send(msgBus.GAME_STATE_GET))
+        HealSource.add(self, v)
       end),
 
       msgBus.on(msgBus.PLAYER_HEAL_SOURCE_REMOVE, function(v)
@@ -408,10 +418,11 @@ local Player = Object.extend(BaseStatModifiers(), {
 
     msgBus.send(msgBus.PLAYER_INITIALIZED)
   end
-})
+}
 
 local function handleMovement(self, dt)
-  local totalMoveSpeed = self:getCalculatedStat('moveSpeed')
+  local keyMap = userSettings.keyboard
+  local totalMoveSpeed = self.stats:get('moveSpeed')
 
   if self.attackRecoveryTime > 0 then
     totalMoveSpeed = 0
@@ -469,6 +480,8 @@ local function handleAnimation(self, dt, nextX, nextY, moveSpeed)
 end
 
 local function handleAbilities(self, dt)
+  local mouseInputMap = userSettings.mouseInputMap
+  local keyMap = userSettings.keyboard
   -- ACTIVE_ITEM_1
   local isItem1Activate = love.keyboard.isDown(keyMap.ACTIVE_ITEM_1)
   if not self.clickDisabled and isItem1Activate then
@@ -531,13 +544,6 @@ end
 
 local min = math.min
 
-local function updateHealthAndEnergy(rootStore)
-  local state = rootStore:get()
-  local mods = state.statModifiers
-  rootStore:set('health', min(state.health, state.maxHealth + mods.maxHealth))
-  rootStore:set('energy', min(state.energy, state.maxEnergy + mods.maxEnergy))
-end
-
 function Player.handleMapCollision(self, nextX, nextY)
   -- dynamically get the current animation frame's height
   local sx, sy, sw, sh = self.animation.sprite:getViewport()
@@ -573,12 +579,52 @@ local function handleBossMode(self)
   end
 end
 
+function updateLightWorld(camera)
+  local cameraTranslateX, cameraTranslateY = camera:getPosition()
+  local cWidth, cHeight = camera:getSize()
+  local lightWorld = Component.get('lightWorld')
+  lightWorld:setPosition(-cameraTranslateX + cWidth/2, -cameraTranslateY + cHeight/2)
+end
+
+msgBus.PLAYER_UPDATE_START = 'PLAYER_UPDATE_START'
+
 function Player.update(self, dt)
+  msgBus.send(msgBus.PLAYER_UPDATE_START)
+  local Grid = require 'utils.grid'
+  local gameState = require 'main.global-state'.gameState
+  Grid.forEach(gameState:get().equipment, function(item)
+    if (not item) then
+      return
+    end
+    local itemSystem = require 'components.item-inventory.items.item-system'
+    for k,v in pairs(itemSystem.getDefinition(item).baseModifiers) do
+      Component.get('PLAYER').stats:add(k, v)
+    end
+  end)
+  PassiveTree = require 'components.player.passive-tree'
+  PassiveTree.calcModifiers()
+  if (not self.recentlyCreated) then
+    self.recentlyCreated = true
+    msgBus.send(msgBus.PLAYER_FULL_HEAL)
+  end
+
+  local healthRegen = self.stats:get('healthRegeneration')
+  if self.prevHealthRegeneration ~= healthRegen then
+    self.prevHealthRegeneration = healthRegen
+    updateHealthRegeneration(healthRegen)
+  end
+
+  local energyRegen = self.stats:get('energyRegeneration')
+  if self.prevEnergyRegeneration ~= energyRegen then
+    self.prevEnergyRegeneration = energyRegen
+    updateEnergyRegeneration(energyRegen)
+  end
+
   if self.inBossBattle then
     handleBossMode(self)
   end
 
-  local hasPlayerLost = self.rootStore:get().health <= 0
+  local hasPlayerLost = self.stats:get('health') <= 0
   if hasPlayerLost then
     if Component.get('PLAYER_LOSE') then
       return
@@ -589,17 +635,16 @@ function Player.update(self, dt)
   end
 
   self.attackRecoveryTime = self.attackRecoveryTime - dt
-  self.equipmentModifiers = self.rootStore:get().statModifiers
   local nextX, nextY, totalMoveSpeed = handleMovement(self, dt)
   handleAnimation(self, dt, nextX, nextY, totalMoveSpeed)
   handleAbilities(self, dt)
-  updateHealthAndEnergy(self.rootStore)
 
   self:handleMapCollision(nextX, nextY)
   self:handleZoneCollision()
 
   -- update camera to follow player
   camera:setPosition(self.x, self.y, userSettings.camera.speed)
+  updateLightWorld(camera)
 end
 
 local function drawShadow(self, sx, sy, ox, oy)
@@ -635,7 +680,7 @@ function Player.draw(self)
   -- draw light around player
   Component.get('lightWorld'):addLight(
     self.x, self.y,
-    80,
+    40,
     {1,1,1}
   )
 

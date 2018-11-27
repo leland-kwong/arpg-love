@@ -44,8 +44,7 @@ local function setScreenBoundsCollisions()
   -- right
   screenEdgeCollisionWorld:add(BoundsObject(), right, 0, 1, bottom)
   -- bottom
-  local hudHeight = 32
-  screenEdgeCollisionWorld:add(BoundsObject(), 0, bottom - hudHeight, right, 1)
+  screenEdgeCollisionWorld:add(BoundsObject(), 0, bottom, right, 1)
   -- left
   screenEdgeCollisionWorld:add(BoundsObject(), 0, 0, 1, bottom)
 end
@@ -113,6 +112,14 @@ function MapPointerWorld.draw(self)
 
   -- reset pointers list after drawing them
   self.pointers = {}
+end
+
+function MapPointerWorld.drawOrder()
+  local hudTextSmallLayer = Component.get('hudTextSmallLayer')
+  if hudTextSmallLayer then
+    return hudTextSmallLayer:drawOrder() + 1
+  end
+  return 3
 end
 
 return Component.createFactory(MapPointerWorld)

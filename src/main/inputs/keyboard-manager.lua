@@ -4,20 +4,21 @@ local socket = require 'socket'
 local config = require 'config.config'
 local userSettings = require 'config.user-settings'
 
+local keysPressed = {}
+local L_SUPER = 'lgui'
+local R_SUPER = 'rgui'
+local L_CTRL = 'lctrl'
+local R_CTRL = 'rctrl'
+
 local state = {
   keyboard = {
+    keysPressed = keysPressed,
     lastPressed = {
       timeStamp = 0
     },
     isDown = false,
   }
 }
-
-local keysPressed = {}
-local L_SUPER = 'lgui'
-local R_SUPER = 'rgui'
-local L_CTRL = 'lctrl'
-local R_CTRL = 'rctrl'
 
 local function hasModifier()
   return keysPressed[L_SUPER]
@@ -79,3 +80,7 @@ function love.keyreleased(key, scanCode)
     msgBus.send(msgBus.KEY_PRESSED, msg)
   end
 end
+
+return {
+  state = state
+}

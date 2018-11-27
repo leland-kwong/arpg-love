@@ -63,15 +63,15 @@ return itemSystem.registerModule({
       msgBus.send(msgBus.PLAYER_STATS_NEW_MODIFIERS)
     end)
 
-    msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function(mods)
+    msgBus.on(msgBus.PLAYER_UPDATE_START, function(mods)
       if (not state.equipped) then
         return msgBus.CLEANUP
       end
 
-      mods.attackTimeReduction = mods.attackTimeReduction + (props.attackTimeReduction * state.stacks)
-      mods.energyCostReduction = mods.energyCostReduction + (props.energyCostReduction * state.stacks)
-      mods.cooldownReduction = mods.cooldownReduction + (props.cooldownReduction * state.stacks)
-      return mods
+      Component.get('PLAYER').stats
+        :add('attackTimeReduction', props.attackTimeReduction * state.stacks)
+        :add('energyCostReduction', props.energyCostReduction * state.stacks)
+        :add('cooldownReduction', props.cooldownReduction * state.stacks)
     end, 1)
   end,
   tooltip = function(_, props)

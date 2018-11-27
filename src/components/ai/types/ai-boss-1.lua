@@ -45,7 +45,7 @@ end
 
 function AbilityBeamStrike.use(self, state, targetX, targetY)
   local char = Component.get('Erion')
-  local healthRemaining = char.health / char:getCalculatedStat('maxHealth')
+  local healthRemaining = char.stats:get('health') / char.stats:get('maxHealth')
   local socket = require 'socket'
   math.randomseed(socket.gettime())
   local maxNumBeams = healthRemaining <= 0.5 and 5 or 3

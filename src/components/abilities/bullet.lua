@@ -143,11 +143,11 @@ local Bullet = {
           if collisionGroups.matches(col.other.group, self.targetGroup) then
             local isObstacleCollision = collisionGroups.matches(col.other.group, collisionGroups.obstacle)
             if (not isObstacleCollision) then
+              local calcDamage = require 'modules.abilities.calc-damage'
               local msg = {
                 parent = collisionParent,
-                collisionSource = self.colObj,
                 source = self:getId(),
-                damage = random(self.minDamage, self.maxDamage)
+                damage = calcDamage(self)
               }
               msgBus.send(msgBus.CHARACTER_HIT, msg)
             end

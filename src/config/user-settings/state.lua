@@ -1,5 +1,5 @@
 local userSettings = require 'config.user-settings'
-local assign = require 'utils.object-utils'.assign
+local Object = require 'utils.object-utils'
 local msgBus = require 'components.msg-bus'
 
 local M = {}
@@ -26,7 +26,7 @@ function M.load()
   local fs = require 'modules.file-system'
   local loadedSettings, ok = fs.loadSaveFile('', 'settings')
   if ok then
-    assign(userSettings, loadedSettings)
+    Object.assign(userSettings, loadedSettings, nil, nil, true)
   end
   updateDevMode()
   return userSettings

@@ -196,6 +196,11 @@ function M.createFactory(blueprint)
       invalidPropsErrorMsg
     )
 
+    local componentWithDuplicateId = M.get(props.id)
+    if componentWithDuplicateId then
+      componentWithDuplicateId:delete(true)
+    end
+
     local id = blueprint.id or (props and props.id) or uid()
     c._id = id
 
@@ -426,6 +431,10 @@ end
 
 function M.getBlueprint(component)
   return component.blueprint
+end
+
+function M.getChildren(component)
+  return component and component._children or EMPTY
 end
 
 function M.remove(entityId, recursive)
