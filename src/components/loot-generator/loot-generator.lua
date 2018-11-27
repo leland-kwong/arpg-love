@@ -13,6 +13,7 @@ local tick = require 'utils.tick'
 local tween = require 'modules.tween'
 local bump = require 'modules.bump'
 local collisionGroups = require 'modules.collision-groups'
+local drawOrders = require 'modules.draw-orders'
 require 'components.groups.clock'
 
 local itemGroup = groups.all
@@ -29,8 +30,8 @@ shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
 shader:send('outline_width', 1)
 shader:send('outline_color', outlineColor)
 
-local DRAW_ORDER_BACKGROUND = 3
-local DRAW_ORDER_TEXT = DRAW_ORDER_BACKGROUND + 1
+local DRAW_ORDER_BACKGROUND = drawOrders.FloorItemTooltip
+local DRAW_ORDER_TEXT = drawOrders.FloorItemTooltip + 1
 local itemNameTextLayer = GuiText.create({
   group = itemGroup,
   font = require 'components.font'.primary.font,

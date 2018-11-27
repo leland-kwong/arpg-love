@@ -6,6 +6,7 @@ local drawOrders = {
   'BulletPostDraw',
   'LightWorldDraw',
   'SparkDraw',
+  'FloorItemTooltip',
   'MainMenu',
   'Dialog'
 }
