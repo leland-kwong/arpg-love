@@ -105,6 +105,7 @@ local state = {
   },
   mx = 0,
   my = 0,
+  scale = config.scale,
   editorMode = editorModes.EDIT,
 }
 
@@ -148,8 +149,8 @@ function TreeEditor.getMode(self)
 end
 
 local function getTranslate()
-  return state.translate.dxTotal + state.translate.dx,
-    state.translate.dyTotal + state.translate.dy
+  return state.translate.dxTotal + state.translate.dx / state.scale,
+    state.translate.dyTotal + state.translate.dy / state.scale
 end
 
 local function clearSelections()
@@ -616,6 +617,7 @@ function TreeEditor.draw(self)
   local tx, ty = getTranslate()
   love.graphics.push()
   love.graphics.origin()
+  -- love.graphics.scale(config.scale)
   local _editorMode = state.editorMode
 
   -- create background
@@ -714,12 +716,11 @@ function TreeEditor.draw(self)
       local sprite = optionValue and optionValue.image or self.defaultNodeImage
       local animation = AnimationFactory:newStaticSprite(sprite)
       local ox, oy = animation:getOffset()
-      local scale = 2
       love.graphics.draw(
         AnimationFactory.atlas, animation.sprite,
         x, y,
         0,
-        scale, scale,
+        state.scale, state.scale,
         ox, oy
       )
     end

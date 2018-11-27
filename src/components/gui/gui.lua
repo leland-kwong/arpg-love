@@ -66,7 +66,7 @@ local Gui = {
   onFinal = noop,
   collision = true,
   collisionGroup = nil,
-  scale = scale,
+  scale = 1,
   getMousePosition = function(self)
     return love.mouse.getX() / self.scale, love.mouse.getY() / self.scale
   end,
@@ -266,6 +266,12 @@ local function handleEvents(self)
 end
 
 function Gui.update(self, dt)
+  local gameScale = require('config.config').scale
+  local hasChangedScale = self.scale ~= gameScale
+  if (not self.initialProps.scale and hasChangedScale) then
+    self.scale = gameScale
+  end
+
   local posX, posY = self:getPosition()
   self.w, self.h = self.width or self.w, self.height or self.h
   self.colObj:update(posX, posY, self.w, self.h)

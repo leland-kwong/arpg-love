@@ -5,14 +5,13 @@ local noop = require 'utils.noop'
 
 local function getKnobX(self)
   local knobOffsetX = self.knobSize/2
-  return self.x - knobOffsetX + self.value
+  return (self.x - knobOffsetX + self.value)
 end
 
 return Component.createFactory({
   value = 0, -- NOTE: values should be out of 100. This makes it simple since values must be in percentage
   width = 100,
   knobSize = 10,
-  resolutionScale = 2,
 
   -- internal props
   isDragStart = false,
@@ -58,7 +57,7 @@ return Component.createFactory({
       msgBus.on(msgBus.MOUSE_DRAG, function(ev)
         local clamp = require 'utils.math'.clamp
         if self.knob.hovered or self.isDragStart then
-          self.value = clamp(self.beforeDragValue + ev.dx/self.resolutionScale, 0, self.width)
+          self.value = clamp(self.beforeDragValue + ev.dx/self.scale, 0, self.width)
           self.isDragStart = true
           self.knob.x = getKnobX(self)
         end
@@ -71,6 +70,9 @@ return Component.createFactory({
         self.isDragStart = false
       end)
     }
+  end,
+  update = function(self)
+    self.scale = self.knob.scale
   end,
   final = function(self)
     msgBus.off(self.listeners)

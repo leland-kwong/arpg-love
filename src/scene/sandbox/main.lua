@@ -214,11 +214,11 @@ msgBusMainMenu.on(msgBusMainMenu.MENU_ITEM_REMOVE, function(menuOption)
   end
 end)
 
+require 'scene.skill-tree-editor'
 require 'scene.light-test'
 require 'scene.font-test'
 require 'scene.tooltip-test'
 require 'scene.skew-rotate-test'
-require 'scene.skill-tree-editor'
 
 function Sandbox.init(self)
   self.activeSceneMenu = nil
