@@ -69,6 +69,10 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
   w = 100,
   h = 100,
 
+  getRectangle = function(self)
+    return self.x, self.y, self.w, self.h
+  end,
+
   init = function(self)
     Component.addToGroup(self, 'mapStateSerializers')
 
@@ -77,13 +81,11 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
     self.playerVisitedIndices = {}
 
     self.canvas = love.graphics.newCanvas()
+
+    local x,y,w,h = self:getRectangle()
     self.stencil = function()
       love.graphics.rectangle(
-        'fill',
-        self.x,
-        self.y,
-        self.w,
-        self.h
+        'fill', x, y, w, h
       )
     end
     self.blocks = {}
@@ -141,6 +143,11 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
     love.graphics.setStencilTest()
     love.graphics.pop()
 
+    -- border
+    love.graphics.setColor(1,1,1,0.5)
+    love.graphics.setLineWidth(0.5)
+    local x,y,w,h = self:getRectangle()
+    love.graphics.rectangle('line', x, y, w, h)
     drawPlayerPosition(self, centerX, centerY)
   end
 })
