@@ -174,12 +174,13 @@ local function setupSlotInteractions(
           end
 
           local rightClickModule = itemSystem.loadModule(definition.onActivate)
+          local Constants = require 'components.state.constants'
           local rightClickActionBlock = (not itemState.equipped) and
             Block.Row({
               {
                 content = {
                   Color.PALE_YELLOW,
-                  'right-click to '..rightClickModule.tooltip(item)
+                  Constants.glyphs.rightMouseBtn..' to '..rightClickModule.tooltip(item)
                 },
                 width = tooltipWidth,
                 align = 'right',
