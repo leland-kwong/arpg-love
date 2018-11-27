@@ -1,9 +1,13 @@
 local function fontPrimary(fontSize)
   local font = love.graphics.newFont(
-    'built/fonts/bm_mini/bm_mini.ttf',
+    -- 'built/fonts/BMmini_2.ttf',
+    -- 'built/fonts/bm_mini/bm_mini.ttf',
+    -- 'built/fonts/HelvetiPixel.ttf',
+    -- 'built/fonts/HelvetiPixel_2.ttf',
+    'built/fonts/TinyUnicode.ttf',
     fontSize
   )
-  local lineHeight = 1.2
+  local lineHeight = 1
   font:setLineHeight(lineHeight)
 
   return {

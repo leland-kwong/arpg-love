@@ -66,6 +66,7 @@ end
 function GuiTextLayer.init(self)
   self.textGraphic = love.graphics.newText(self.font, '')
   self.tablePool = {}
+  self.shaderFontSize = {self.font:getHeight() * 2, self.font:getHeight() * 2}
 end
 
 function GuiTextLayer.getSize(self)
@@ -74,7 +75,7 @@ end
 
 function GuiTextLayer.draw(self)
   if self.outline then
-    pixelOutlineShader.attach(nil, self.color[4])
+    pixelOutlineShader.attach(nil, self.color[4], nil, self.shaderFontSize)
   end
 
   love.graphics.setColor(self.color)

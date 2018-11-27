@@ -47,10 +47,14 @@ function Block.draw(self)
         col.font
       self.fonts[col.font] = font
     end
-    local textLayer = self.textLayers[col.font]
+    local layer = self.textLayers[col.font] or {}
+    local textLayer = layer.textLayer
     if (not textLayer) then
       textLayer = love.graphics.newText(font)
-      self.textLayers[font] = textLayer
+      self.textLayers[font] = {
+        textLayer = textLayer,
+        shaderFontSize = {font:getHeight() * 2, font:getHeight() * 2}
+      }
     end
 
     -- column background
@@ -74,19 +78,17 @@ function Block.draw(self)
       love.graphics.setColor(1,1,0,1)
       love.graphics.rectangle('line', textX, textY, col.contentWidth, col.contentHeight)
     end
-    textLayer:addf(col.content, col.contentWidth, col.align, textX, textY)
+    textLayer:addf(col.content, col.contentWidth, col.align, math.floor(textX), math.floor(textY))
   end)
 
-
-  local pixelOutlineShader = require 'modules.shaders.pixel-text-outline'
-  if self.textOutline then
-    pixelOutlineShader.attach()
-  end
-
   love.graphics.setColor(1,1,1)
-  for _,textLayer in pairs(self.textLayers) do
-    love.graphics.draw(textLayer)
-    textLayer:clear()
+  local pixelOutlineShader = require 'modules.shaders.pixel-text-outline'
+  for _,layer in pairs(self.textLayers) do
+    if self.textOutline then
+      pixelOutlineShader.attach(nil, nil, nil, layer.shaderFontSize)
+    end
+    love.graphics.draw(layer.textLayer)
+    layer.textLayer:clear()
   end
 
   if self.textOutline then
