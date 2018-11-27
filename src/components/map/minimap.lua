@@ -107,7 +107,12 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
     love.graphics.push()
     love.graphics.origin()
     love.graphics.setCanvas(self.canvas)
-    self:setRenderDisabled(self.isVisitedGridPosition)
+
+    --[[
+      NOTE: disabled for now since there is an issue upon start of game
+      where the minimap at the player's start position does not render immediately
+    ]]
+    -- self:setRenderDisabled(self.isVisitedGridPosition)
   end,
 
   render = function(self, value, gridX, gridY)
