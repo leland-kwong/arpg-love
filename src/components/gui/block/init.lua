@@ -53,7 +53,6 @@ function Block.draw(self)
       textLayer = love.graphics.newText(font)
       self.textLayers[font] = {
         textLayer = textLayer,
-        shaderFontSize = {font:getHeight() * 2, font:getHeight() * 2}
       }
     end
 
@@ -85,7 +84,7 @@ function Block.draw(self)
   local pixelOutlineShader = require 'modules.shaders.pixel-text-outline'
   for _,layer in pairs(self.textLayers) do
     if self.textOutline then
-      pixelOutlineShader.attach(nil, nil, nil, layer.shaderFontSize)
+      pixelOutlineShader.attach()
     end
     love.graphics.draw(layer.textLayer)
     layer.textLayer:clear()
