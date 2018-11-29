@@ -216,7 +216,6 @@ end)
 
 require 'scene.skill-tree-editor'
 require 'scene.light-test'
-require 'scene.font-test'
 require 'scene.tooltip-test'
 require 'scene.skew-rotate-test'
 
