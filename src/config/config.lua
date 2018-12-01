@@ -24,8 +24,8 @@ M.gridSize = 16
 M.scaleFactor = 3
 M.scale = M.scaleFactor
 M.resolution = {
-  w = 640 * 1,
-  h = 360 * 1
+  w = 640,
+  h = 360
 }
 
 M.isDevelopment = false

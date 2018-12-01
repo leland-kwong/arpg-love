@@ -219,7 +219,7 @@ function Console.draw(self)
       InputContext.get()
     },
     edgeOffset,
-    700,
+    375,
     400,
     'left'
   )
@@ -227,7 +227,7 @@ function Console.draw(self)
 
   local logEntries = logger:get()
   gfx.setColor(Color.MED_GRAY)
-  local loggerYPosition = 750
+  local loggerYPosition = 450
   local logSectionTitle = 'LOG'
   gfx.print(logSectionTitle, edgeOffset, loggerYPosition)
   gfx.setColor(Color.WHITE)

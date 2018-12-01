@@ -14,6 +14,8 @@ local Object = require 'utils.object-utils'
 local noop = require 'utils.noop'
 local rebuildTableBySortingKeys = require 'components.skill-tree-editor.rebuild-table-by-sorting-keys'
 local Sound = require 'components.sound'
+local InputContext = require 'modules.input-context'
+
 
 local sounds = {
   NODE_SELECT = 'gui/UI_Animate_Clean_Beeps_Appear_stereo.wav',
@@ -110,13 +112,8 @@ local state = {
 }
 
 function TreeEditor.getMode(self)
-  local InputContext = require 'modules.input-context'
   if 'gui' == InputContext.get() then
     return
-  end
-
-  if (inputState.keyboard.keysPressed.space) then
-    return 'TREE_PANNING'
   end
 
   if editorModes.EDIT == self.editorMode then
@@ -149,8 +146,8 @@ function TreeEditor.getMode(self)
 end
 
 local function getTranslate()
-  return state.translate.dxTotal + state.translate.dx / state.scale,
-    state.translate.dyTotal + state.translate.dy / state.scale
+  return state.translate.dxTotal + state.translate.dx,
+    state.translate.dyTotal + state.translate.dy
 end
 
 local function clearSelections()
@@ -419,15 +416,14 @@ function TreeEditor.handleInputs(self)
           y = y
         })
         clearSelections()
-      end
-
-      if 'TREE_PANNING' == self:getMode() then
+      else
+        -- panning
         local tx = state.translate
         tx.startX = event.startX
         tx.startY = event.startY
-        local snapX, snapY = snapToGrid(event.dx, event.dy)
-        tx.dx = snapX
-        tx.dy = snapY
+        tx.dx = math.floor(event.dx)
+        tx.dy = math.floor(event.dy)
+        InputContext.set('SKILL_TREE_PAN')
       end
     end),
 
@@ -442,6 +438,7 @@ function TreeEditor.handleInputs(self)
       tx.startY = 0
       tx.dx = 0
       tx.dy = 0
+      InputContext.set('gui')
     end),
 
     msgBus.on(msgBus.KEY_PRESSED, function(event)

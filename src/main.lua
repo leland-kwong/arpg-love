@@ -27,14 +27,40 @@ local MapPointerWorld = require 'components.hud.map-pointer'
 
 local scale = config.scaleFactor
 
+local state = {
+  resolution = nil,
+  scale = nil,
+  productionScale = config.scale
+}
+
+local changeCount = 0
+local function setViewport()
+  local currentResolution = state.resolution
+  local isResolutionChange = config.resolution ~= state.resolution
+  local isScaleChange = config.scale ~= state.scale
+  if (isResolutionChange or isScaleChange) then
+    local vw, vh = config.resolution.w * config.scale, config.resolution.h * config.scale
+    love.window.setMode(vw, vh)
+    camera
+      :setSize(vw, vh)
+      :setScale(config.scale)
+
+    state.resolution = config.resolution
+    state.scale = config.scale
+  end
+
+  local isDevModeChange = config.isDevelopment ~= state.isDevelopment
+  if isDevModeChange then
+    config.scale = config.isDevelopment and 2 or state.productionScale
+    config.scaleFactor = config.scale
+    state.isDevelopment = config.isDevelopment
+  end
+end
+
 function love.load()
   msgBus.send(msgBus.GAME_LOADED)
   love.keyboard.setKeyRepeat(true)
-  local vw, vh = love.graphics.getWidth(), love.graphics.getHeight()
-  love.window.setMode(vw, vh)
-  camera
-    :setSize(vw, vh)
-    :setScale(scale)
+  setViewport()
   require 'main.onload'
 
   -- console debugging
@@ -60,6 +86,8 @@ local characterSystem = msgBus.send(msgBus.PROFILE_FUNC, {
 })
 
 function love.update(dt)
+  setViewport()
+
   jprof.push('frame')
 
   systemsProfiler()

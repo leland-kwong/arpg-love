@@ -68,7 +68,8 @@ return function()
   -- reset
   totalAverageExecutionTime = 0
 
-  guiTextLayer:addf(profileData, 400, 'left', 10, 380)
+  local wrapLimit = 400
+  guiTextLayer:addf(profileData, wrapLimit, 'right', love.graphics.getWidth() - wrapLimit - 10, 10)
   -- reset
   profileData = {}
 end
