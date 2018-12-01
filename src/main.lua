@@ -35,6 +35,13 @@ local state = {
 
 local changeCount = 0
 local function setViewport()
+  local isDevModeChange = config.isDevelopment ~= state.isDevelopment
+  if isDevModeChange then
+    config.scale = config.isDevelopment and 2 or state.productionScale
+    config.scaleFactor = config.scale
+    state.isDevelopment = config.isDevelopment
+  end
+
   local currentResolution = state.resolution
   local isResolutionChange = config.resolution ~= state.resolution
   local isScaleChange = config.scale ~= state.scale
@@ -48,20 +55,13 @@ local function setViewport()
     state.resolution = config.resolution
     state.scale = config.scale
   end
-
-  local isDevModeChange = config.isDevelopment ~= state.isDevelopment
-  if isDevModeChange then
-    config.scale = config.isDevelopment and 2 or state.productionScale
-    config.scaleFactor = config.scale
-    state.isDevelopment = config.isDevelopment
-  end
 end
 
 function love.load()
   msgBus.send(msgBus.GAME_LOADED)
   love.keyboard.setKeyRepeat(true)
-  setViewport()
   require 'main.onload'
+  setViewport()
 
   -- console debugging
   local console = Console.create()

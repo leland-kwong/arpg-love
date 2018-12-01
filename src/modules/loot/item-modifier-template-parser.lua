@@ -87,7 +87,6 @@ local modifierParsers = {
     local modifierPropTypeDisplayMapper = require 'components.state.base-stat-modifiers'.propTypesDisplayValue
     for prop,val in pairs(data) do
       local valType = type(val) == 'table' and val.type or 'default'
-      print('valType', valType, prop)
       local parsedVal = statsListParsers[valType](prop, val)
       local constants = require 'components.state.constants'
       table.insert(coloredText, Color.MED_GRAY)

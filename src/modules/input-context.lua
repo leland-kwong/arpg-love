@@ -37,4 +37,8 @@ function InputContext.get()
   return activeContext
 end
 
+function InputContext.reset()
+  InputContext.set('any')
+end
+
 return InputContext

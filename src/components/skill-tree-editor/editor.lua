@@ -423,7 +423,6 @@ function TreeEditor.handleInputs(self)
         tx.startY = event.startY
         tx.dx = math.floor(event.dx)
         tx.dy = math.floor(event.dy)
-        InputContext.set('SKILL_TREE_PAN')
       end
     end),
 
@@ -438,7 +437,6 @@ function TreeEditor.handleInputs(self)
       tx.startY = 0
       tx.dx = 0
       tx.dy = 0
-      InputContext.set('gui')
     end),
 
     msgBus.on(msgBus.KEY_PRESSED, function(event)
@@ -559,6 +557,10 @@ local backgroundColorByEditorMode = {
 }
 
 function TreeEditor.update(self, dt)
+  if (InputContext.get() == 'any') then
+    InputContext.set('SkillTreeBackground')
+  end
+
   local tx, ty = getTranslate()
   local mOffset = mouseCollisionSize
   state.mx, state.my = love.mouse.getX() - tx, love.mouse.getY() - ty
@@ -764,6 +766,7 @@ end
 function TreeEditor.final(self)
   self.autoSave:stop()
   msgBus.off(self.listeners)
+  InputContext.reset('any')
 end
 
 return Component.createFactory(TreeEditor)
