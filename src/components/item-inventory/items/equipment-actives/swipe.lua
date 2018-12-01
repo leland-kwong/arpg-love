@@ -153,8 +153,20 @@ return itemSystem.registerModule({
 	end,
 	tooltip = function(item, props)
 		return {
-			template = 'deals {minDamage} - {maxDamage} area of effect damage in front of the player',
-			data = props
+			template = 'deals {damageRange} area of effect damage in front of the player',
+			data = {
+        damageRange = {
+					type = 'range',
+					from = {
+						prop = 'minDamage',
+						val = props.minDamage
+					},
+					to = {
+						prop = 'maxDamage',
+						val = props.maxDamage
+					},
+				}
+      }
 		}
 	end
 })

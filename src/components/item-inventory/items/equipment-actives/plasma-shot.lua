@@ -36,8 +36,20 @@ return itemSystem.registerModule({
 	end,
 	tooltip = function(item, props)
 		return {
-			template = 'Shoots a plasma shot dealing {minDamage} - {maxDamage} damage.',
-			data = props
+			template = 'Shoots a plasma shot dealing {damageRange} damage.',
+			data = {
+				damageRange = {
+					type = 'range',
+					from = {
+						prop = 'minDamage',
+						val = props.minDamage
+					},
+					to = {
+						prop = 'maxDamage',
+						val = props.maxDamage
+					},
+				}
+			}
 		}
 	end
 })

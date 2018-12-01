@@ -5,6 +5,7 @@ return {
 	glyphs = {
 		leftMouseBtn = '┬',
 		middleMouseBtn = '┴',
-		rightMouseBtn = '┼'
+		rightMouseBtn = '┼',
+		diamondBullet = 'ž'
 	}
 }

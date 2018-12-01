@@ -192,11 +192,14 @@ return itemSystem.registerModule({
       data = {
         title = 'force-field',
         description = {
-          template = 'Gain a forcefield that blocks {baseAbsorption}% damage. '
+          template = 'Gain a forcefield that blocks {baseAbsorption} damage. '
 
-            ..'\n\nFor each nearby enemy gain an extra {bonusAbsorption}% damage reduction.'
+            ..'\n\nFor each nearby enemy gain an extra {bonusAbsorption} damage reduction.'
             ..'\n\nMaximum absorption is capped to 50%.',
-          data = props
+          data = {
+            baseAbsorption = props.baseAbsorption .. '%',
+            bonusAbsorption = props.bonusAbsorption .. '%'
+          }
         }
       }
     }

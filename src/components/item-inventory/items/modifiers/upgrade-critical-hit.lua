@@ -30,11 +30,11 @@ return itemSystem.registerModule({
       type = 'upgrade',
       data = {
         description = {
-          template = 'Attacks have a {chance}% chance to deal {minMultiplier}x - {maxMultiplier}x damage',
+          template = 'Attacks have a {chance} chance to deal {minMultiplier} - {maxMultiplier} damage',
           data = {
-            minMultiplier = 0.2,
-            maxMultiplier = 0.4,
-            chance = 0.25
+            minMultiplier = 0.2 .. 'x',
+            maxMultiplier = 0.4 .. 'x',
+            chance = 0.25 .. '%'
           }
         }
       }

@@ -51,6 +51,7 @@ M.sound = {
   musicVolume = 0.5
 }
 
+M.fullScreen = false
 M.isDevelopment = false
 M.previousVersion = nil -- the last version the game was loaded as
 

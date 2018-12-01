@@ -117,7 +117,7 @@ local function setupSlotInteractions(
           local itemDef = itemSystem.getDefinition(item)
           local rarityColor = itemConfig.rarityColor[item.rarity]
           local tooltipWidth = 250
-          local modifierBackgroundColor = {0.17,0.17,0.17}
+          local modifierBackgroundColor = {0.12,0.12,0.12}
           local titleBlock = {
             content = {
               rarityColor,
@@ -210,12 +210,12 @@ local function setupSlotInteractions(
               titleBlock,
               levelBlock
             }, {
-              marginBottom = 6
+              marginBottom = 3
             }),
             Block.Row({
               itemTypeBlock
             }, {
-              marginBottom = 12
+              marginBottom = 6
             }),
             Block.Row({
               infoBlock
