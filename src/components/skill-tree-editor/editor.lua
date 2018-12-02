@@ -48,6 +48,7 @@ local debugTextLayer = GuiText.create({
 local TreeEditor = {
   debug = {
     -- connectionCount = true,
+    -- selectionTraversal = true,
   },
   nodes = nil,
   nodeValueOptions = {},
@@ -155,8 +156,17 @@ local function clearSelections()
   state.selectedConnection = nil
 end
 
+local debugState = {
+  checkedNodes = {},
+  firstCheckedNode = nil,
+}
+
 local playMode = {
-  isNodeSelectable = function(nodeToCheck, nodeList, nodeValueOptions)
+  --[[
+    Conditions
+    1. One of its neighbors must already be selected or a root node
+  ]]
+  isNodeSelectable = function(self, nodeToCheck, nodeList, nodeValueOptions)
     local nodeValue = nodeToCheck.nodeValue
     local nodeData = nodeValueOptions[nodeValue]
 
@@ -168,19 +178,46 @@ local playMode = {
     end
     return false
   end,
-  isNodeUnselectable = function(nodeToCheck, nodeList)
+  --[[
+    Conditions
+    1. All sibling nodes must be connected to at least a single branch
+  ]]
+  isNodeUnselectable = function(self, nodeToCheck, nodeList, nodeToCheckId)
+    local F = require 'utils.functional'
     local numSelectedSiblingNodes = 0
-    for id in pairs(nodeToCheck.connections) do
-      if nodeList[id].selected then
-        numSelectedSiblingNodes = numSelectedSiblingNodes + 1
-      end
-      if numSelectedSiblingNodes > 1 then
-        return false
-      end
+    local numSiblings = #F.keys(nodeToCheck.connections)
+    local numSiblingsWithConnectionsToAnotherSibling = 0
+
+    local function getMatchCount(fromNodeId, connectionsToMatch, visitedList)
+      visitedList = visitedList or {}
+      debugState.checkedNodes = visitedList
+      local connections = nodeList[fromNodeId].connections
+      return F.reduce(F.keys(connections), function(totalMatchCount, nodeId)
+        local isAlreadyMatched = (nodeId == nodeToCheckId) or visitedList[nodeId]
+        if isAlreadyMatched then
+          return totalMatchCount
+        end
+
+        local isMatch = connectionsToMatch[nodeId] ~= nil
+        local isSelectedNode = nodeList[nodeId].selected
+        local matches = (isMatch and isSelectedNode) and 1 or 0
+        visitedList[nodeId] = true
+        local siblingMatches = isSelectedNode and getMatchCount(nodeId, connectionsToMatch, visitedList) or 0
+        return totalMatchCount + (matches + siblingMatches)
+      end, 0)
     end
-    return true
+
+    local siblings = F.keys(nodeToCheck.connections)
+    local selectedSiblings = F.filter(siblings, function(siblingId)
+      return nodeList[siblingId].selected
+    end)
+    local numSelectedSiblings = #selectedSiblings
+    local nodeIdToWalk = selectedSiblings[1]
+    debugState.firstCheckedNode = nodeIdToWalk
+    local matchCount = getMatchCount(nodeIdToWalk, nodeToCheck.connections)
+    return numSelectedSiblings == matchCount
   end,
-  isConnectionToSelectableNode = function(fromNode, toNode)
+  isConnectionToSelectableNode = function(self, fromNode, toNode)
     if editorModes.PLAY == state.editorMode then
       return fromNode.selected or toNode.selected
     end
@@ -375,8 +412,8 @@ function TreeEditor.handleInputs(self)
             })
           end
         elseif (editorModes.PLAY == state.editorMode) then
-          if ((not node.selected) and (not playMode.isNodeSelectable(node, self.nodes, self.nodeValueOptions))) or
-            (node.selected and (not playMode.isNodeUnselectable(node, self.nodes)))
+          if ((not node.selected) and (not playMode:isNodeSelectable(node, self.nodes, self.nodeValueOptions))) or
+            (node.selected and (not playMode:isNodeUnselectable(node, self.nodes, nodeId)))
           then
             return
           end
@@ -668,7 +705,7 @@ function TreeEditor.draw(self)
       love.graphics.setLineWidth(8)
       if isSelectedConnection then
         love.graphics.setColor(1,0.2,1)
-      elseif playMode.isConnectionToSelectableNode(node, connectionNode) then
+      elseif playMode:isConnectionToSelectableNode(node, connectionNode) then
         love.graphics.setColor(self.colors.nodeConnection.outer)
       else
         love.graphics.setColor(self.colors.nodeConnection.outerNonSelectable)
@@ -681,7 +718,7 @@ function TreeEditor.draw(self)
         state.hoveredConnection[connectionNodeId]
       local color = isHovered and Color.LIME or
         (
-          playMode.isConnectionToSelectableNode(node, connectionNode) and
+          playMode:isConnectionToSelectableNode(node, connectionNode) and
             self.colors.nodeConnection.inner or
             self.colors.nodeConnection.innerNonSelectable
         )
@@ -729,6 +766,18 @@ function TreeEditor.draw(self)
         state.scale, state.scale,
         ox, oy
       )
+
+      if self.debug.selectionTraversal then
+        if checkedNodes[nodeId] then
+          love.graphics.setColor(1,1,0)
+          love.graphics.circle('fill', x, y, 10)
+        end
+
+        if (firstCheckedNode == nodeId) then
+          love.graphics.setColor(1,0,1)
+          love.graphics.circle('fill', x, y, 10)
+        end
+      end
     end
 
     if (editorModes.EDIT == _editorMode) then
