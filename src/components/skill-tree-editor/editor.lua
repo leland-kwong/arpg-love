@@ -81,7 +81,7 @@ local function snapToGrid(x, y)
   return Position.gridToPixels(gridX, gridY, cellSize)
 end
 
-local initialDx, initialDy = snapToGrid(1920/2, 1080/2)
+local initialDx, initialDy = snapToGrid(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)
 local Enum = require 'utils.enum'
 local editorModes = Enum({
   'EDIT',
@@ -561,6 +561,11 @@ function TreeEditor.update(self, dt)
     InputContext.set('SkillTreeBackground')
   end
 
+  local cursorType = ((not state.hoveredNode) and (not state.selectedNode) and (not state.hoveredConnection))
+    and 'move'
+    or 'default'
+  msgBus.send(msgBus.CURSOR_SET, {type = cursorType})
+
   local tx, ty = getTranslate()
   local mOffset = mouseCollisionSize
   state.mx, state.my = love.mouse.getX() - tx, love.mouse.getY() - ty
@@ -766,6 +771,7 @@ end
 function TreeEditor.final(self)
   self.autoSave:stop()
   msgBus.off(self.listeners)
+  msgBus.send(msgBus.CURSOR_SET, {})
   InputContext.reset('any')
 end
 

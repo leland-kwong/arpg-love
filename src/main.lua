@@ -51,6 +51,7 @@ local function setViewport()
     camera
       :setSize(vw, vh)
       :setScale(config.scale)
+    msgBus.send(msgBus.CURSOR_SET, {})
 
     state.resolution = config.resolution
     state.scale = config.scale
