@@ -215,7 +215,8 @@ local playMode = {
     local nodeIdToWalk = selectedSiblings[1]
     debugState.firstCheckedNode = nodeIdToWalk
     local matchCount = getMatchCount(nodeIdToWalk, nodeToCheck.connections)
-    return numSelectedSiblings == matchCount
+    local isOnlyChild = numSelectedSiblings == 1
+    return isOnlyChild or numSelectedSiblings == matchCount
   end,
   isConnectionToSelectableNode = function(self, fromNode, toNode)
     if editorModes.PLAY == state.editorMode then
@@ -768,12 +769,12 @@ function TreeEditor.draw(self)
       )
 
       if self.debug.selectionTraversal then
-        if checkedNodes[nodeId] then
+        if debugState.checkedNodes[nodeId] then
           love.graphics.setColor(1,1,0)
           love.graphics.circle('fill', x, y, 10)
         end
 
-        if (firstCheckedNode == nodeId) then
+        if (debugState.firstCheckedNode == nodeId) then
           love.graphics.setColor(1,0,1)
           love.graphics.circle('fill', x, y, 10)
         end
