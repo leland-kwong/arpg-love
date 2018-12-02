@@ -431,8 +431,10 @@ function TreeEditor.handleInputs(self)
 
       -- update tree translation
       local tx = state.translate
-      tx.dxTotal = tx.dxTotal + tx.dx
-      tx.dyTotal = tx.dyTotal + tx.dy
+      tx.dxTotal, tx.dyTotal = tx.dxTotal + tx.dx, tx.dyTotal + tx.dy
+      if (editorModes.EDIT == state.editorMode) then
+        tx.dxTotal, tx.dyTotal = snapToGrid(tx.dxTotal, tx.dyTotal)
+      end
       tx.startX = 0
       tx.startY = 0
       tx.dx = 0
