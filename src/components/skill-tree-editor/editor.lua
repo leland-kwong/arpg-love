@@ -670,19 +670,38 @@ function TreeEditor.drawTooltip(self)
   love.graphics.pop()
 end
 
-function TreeEditor.draw(self)
-  local tx, ty = getTranslate()
-  love.graphics.push()
-  love.graphics.origin()
-  -- love.graphics.scale(state.scale)
-  local _editorMode = state.editorMode
+local function drawHelpText()
+  local font = require 'components.font'.primary.font
+  local constants = require 'components.state.constants'
+  love.graphics.setColor(1,1,1)
+  love.graphics.setFont(font)
+  local text = {
+    Color.WHITE,
+    constants.glyphs.leftMouseBtn,
+    Color.WHITE,
+    ' drag to move tree\n',
 
+    Color.WHITE,
+    constants.glyphs.middleMouseBtn,
+    Color.WHITE,
+    ' zoom tree'
+  }
+  love.graphics.printf(text, 10, 10, 200, 'left')
+end
+
+function TreeEditor.draw(self)
+  local _editorMode = state.editorMode
   -- create background
   love.graphics.setColor(backgroundColorByEditorMode[_editorMode])
   love.graphics.rectangle(
     'fill',
     0, 0, love.graphics.getWidth(), love.graphics.getHeight()
   )
+  drawHelpText(self)
+
+  local tx, ty = getTranslate()
+  love.graphics.push()
+  love.graphics.origin()
 
   self:drawTreeCenter()
 
@@ -806,7 +825,7 @@ function TreeEditor.draw(self)
         debugTextLayer:add(
           optionValue.name,
           Color.WHITE,
-          x/state.scale, y/state.scale
+          math.floor(x/state.scale), math.floor(y/state.scale)
         )
       end
 
