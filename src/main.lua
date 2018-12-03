@@ -123,7 +123,7 @@ function love.draw()
   camera:detach()
 
   love.graphics.push()
-  love.graphics.scale(config.scaleFactor)
+  love.graphics.scale(camera.scale)
   groups.hud.drawAll()
   require 'components.groups.gui-draw-box'()
   groups.gui.drawAll()

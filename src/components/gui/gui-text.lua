@@ -73,11 +73,6 @@ function GuiTextLayer.getSize(self)
 end
 
 function GuiTextLayer.draw(self)
-  love.graphics.push()
-  love.graphics.origin()
-  local config = require 'config.config'
-  love.graphics.scale(self.scale or config.scale)
-
   if self.outline then
     pixelOutlineShader.attach(nil, self.color[4])
   end
@@ -89,8 +84,6 @@ function GuiTextLayer.draw(self)
   if self.outline then
     pixelOutlineShader.detach()
   end
-
-  love.graphics.pop()
 end
 
 function GuiTextLayer.drawOrder()
