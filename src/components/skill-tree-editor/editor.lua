@@ -35,7 +35,6 @@ local sounds = {
 local mouseCollisionWorld = bump.newWorld(32)
 local mouseCollisionObject = {}
 local mouseCollisionSize = 50
-local cellSize = 25 * config.scale
 mouseCollisionWorld:add(mouseCollisionObject, 0, 0, mouseCollisionSize, mouseCollisionSize)
 
 local debugTextLayer = GuiText.create({
@@ -76,13 +75,6 @@ local TreeEditor = {
   end
 }
 
-local function snapToGrid(x, y)
-  local Position = require 'utils.position'
-  local gridX, gridY = Position.pixelsToGridUnits(x, y, cellSize)
-  return Position.gridToPixels(gridX, gridY, cellSize)
-end
-
-local initialDx, initialDy = snapToGrid(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)
 local Enum = require 'utils.enum'
 local editorModes = Enum({
   'EDIT',
@@ -103,14 +95,24 @@ local state = {
     startY = 0,
     dx = 0,
     dy = 0,
-    dxTotal = initialDx,
-    dyTotal = initialDy
+    dxTotal = 0,
+    dyTotal = 0
   },
   mx = 0,
   my = 0,
   scale = config.scale,
   editorMode = editorModes.EDIT,
 }
+
+local cellSize = 25 * state.scale
+
+local function snapToGrid(x, y)
+  local Position = require 'utils.position'
+  local gridX, gridY = Position.pixelsToGridUnits(x, y, cellSize)
+  return Position.gridToPixels(gridX, gridY, cellSize)
+end
+
+state.initialDx, state.initialDy = snapToGrid(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)
 
 function TreeEditor.getMode(self)
   if 'gui' == InputContext.get() then
