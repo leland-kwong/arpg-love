@@ -241,8 +241,6 @@ local function placeNode(root, nodeId, screenX, screenY, connections, nodeValue,
   local node = Gui.create({
     id = nodeId,
     inputContext = 'treeNode',
-    x = screenX,
-    y = screenY,
     width = size,
     height = size,
     scale = 1,
