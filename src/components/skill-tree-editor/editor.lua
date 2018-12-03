@@ -650,33 +650,127 @@ function TreeEditor.drawTreeCenter(self)
   love.graphics.circle('fill', tx, ty, 10)
 end
 
+local tooltipOptionsMt = {
+  beforeRender = require('utils.noop'),
+  position = function(tt)
+    return 0, 0
+  end,
+  padding = 4,
+  minWidth = 100,
+  maxWidth = 100
+}
+tooltipOptionsMt.__index = tooltipOptionsMt
+local function renderTooltip(blocks, font, options)
+  options = setmetatable(options or {}, tooltipOptionsMt)
+  local tt = {
+    width = 0,
+    height = 0,
+    blocks = {}
+  }
+  local Grid = require 'utils.grid'
+  local rowWidth = 0
+  local rowHeight = 0
+  local currentRow = nil
+  local function setupTooltip(block, col, row)
+    local isNewRow = row ~= currentRow
+    if isNewRow then
+      -- update tooltip dimensions
+      tt.width = math.max(tt.width, rowWidth)
+      tt.height = tt.height + rowHeight
+
+      currentRow = row
+      rowWidth = 0
+      rowHeight = 0
+    end
+
+    table.insert(tt.blocks, {
+      x = rowWidth,
+      y = tt.height,
+      content = block.content,
+      align = block.align or 'left'
+    })
+
+    local tWidth, tHeight = GuiText.getTextSize(block.content, font, options.maxWidth)
+    rowWidth = rowWidth + tWidth
+    rowHeight = math.max(rowHeight, tHeight)
+  end
+  Grid.forEach(blocks, setupTooltip)
+  -- update tooltip final dimensions
+  local clamp = require 'utils.math'.clamp
+  tt.width = clamp(math.max(tt.width, rowWidth), options.minWidth, options.maxWidth) + (options.padding * 2)
+  tt.height = tt.height + rowHeight + (options.padding * 2)
+
+  local x,y = options.position(tt)
+  options.beforeRender(tt, x, y)
+  love.graphics.setFont(font)
+  for _,block in ipairs(tt.blocks) do
+    local xPadding = block.align == 'left' and options.padding or -options.padding
+    love.graphics.printf(
+      block.content,
+      math.floor(x + xPadding + block.x),
+      math.floor(y + options.padding + block.y),
+      tt.width,
+      block.align
+    )
+  end
+end
+
 function TreeEditor.drawTooltip(self)
   if (not state.hoveredNode) then
     return
   end
 
-  local tooltipScale = config.scale
-  local tx, ty = getTranslate()
   local node = self.nodes[state.hoveredNode]
   local dataKey = node.nodeValue
   local optionValue = self.nodeValueOptions[dataKey]
-  local tooltipContent = optionValue and optionValue:description() or self.defaultNodeDescription
-  local width, height = GuiText.getTextSize(tooltipContent, debugTextLayer.font)
-  local padding = 5
-  local x, y = (node.x * cellSize + tx + 10)/tooltipScale, (node.y * cellSize + ty - height - (padding * 2) - 10)/tooltipScale
+  local String = require 'utils.string'
+  local tooltipTitle = String.capitalize(optionValue and optionValue.name or '')
+  local tooltipBody = optionValue and optionValue:description() or self.defaultNodeDescription
+  local tooltipScale = config.scale
+  local tx, ty = getTranslate()
+
+  local font = require 'components.font'.primary.font
   love.graphics.push()
   love.graphics.origin()
   love.graphics.scale(tooltipScale)
-    local rectX, rectY, rectW, rectH = x - padding, y - padding, width + padding*2, height + padding
-    love.graphics.setColor(0,0,0)
-    love.graphics.rectangle('fill', rectX, rectY, rectW, rectH)
-    love.graphics.setColor(1,1,1)
-    love.graphics.rectangle('line', rectX, rectY, rectW, rectH)
-
-    local font = require 'components.font'.primary.font
-    love.graphics.setFont(font)
-    love.graphics.setColor(Color.WHITE)
-    love.graphics.print(tooltipContent, x, y)
+    local constants = require 'components.state.constants'
+    renderTooltip(
+      {
+        {
+          {
+            content = {
+              Color.DEEP_BLUE, tooltipTitle,
+              Color.WHITE, '\n',
+              Color.WHITE, tooltipBody
+            }
+          }
+        },
+        {
+          {
+            content = {
+              Color.PALE_YELLOW, constants.glyphs.leftMouseBtn..' to '..(node.selected and 'unselect' or 'select')
+            },
+            align = 'right'
+          }
+        }
+      },
+      font,
+      {
+        minWidth = 200,
+        maxWidth = 200,
+        padding = 5,
+        position = function(tt)
+          return (node.x * cellSize + cellSize/2 + tx)/tooltipScale - tt.width/2,
+          (node.y * cellSize + ty)/tooltipScale - tt.height
+        end,
+        beforeRender = function(tt, x, y)
+          love.graphics.setColor(0,0,0)
+          love.graphics.rectangle('fill', x, y, tt.width, tt.height)
+          love.graphics.setColor(1,1,1)
+          love.graphics.rectangle('line', x, y, tt.width, tt.height)
+        end
+      }
+    )
   love.graphics.pop()
 end
 
