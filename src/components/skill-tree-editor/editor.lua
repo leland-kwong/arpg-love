@@ -555,7 +555,7 @@ function TreeEditor.handleConnectionInteractions(self)
     for nodeId,node in pairs(self.nodes) do
       for connectionNodeId in pairs(node.connections or {}) do
         local connectionNode = self.nodes[connectionNodeId]
-        local _, len = mouseCollisionWorld:querySegment(node.x, node.y, connectionNode.x, connectionNode.y)
+        local _, len = mouseCollisionWorld:querySegment(node.x * cellSize, node.y * cellSize, connectionNode.x * cellSize, connectionNode.y * cellSize)
         if len > 0 then
           state.hoveredConnection = {
             [nodeId] = true,
