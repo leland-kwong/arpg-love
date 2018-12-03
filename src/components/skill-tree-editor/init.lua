@@ -75,7 +75,7 @@ local nodeValueOptions = {
     image = 'gui-skill-tree_node_blood-rage',
     backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
-      return 'gain '..(self.value.bonus * 100)..'% attack power for each 1% of missing health'
+      return '+'..(self.value.bonus * 100)..'% attack power for each 1% of health missing'
     end
   },
   [7] = {
@@ -87,7 +87,7 @@ local nodeValueOptions = {
     image = 'gui-skill-tree_node_max-health',
     backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
-      return 'gain +'..(self.value.value * 100)..'% maximum health'
+      return '+'..(self.value.value * 100)..'% maximum health'
     end
   },
   [8] = {
@@ -99,7 +99,7 @@ local nodeValueOptions = {
     image = 'gui-skill-tree_node_max-energy',
     backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
-      return 'gain +'..(self.value.value * 100)..'% maximum energy'
+      return '+'..(self.value.value * 100)..'% maximum energy'
     end
   },
   [9] = {
@@ -112,7 +112,7 @@ local nodeValueOptions = {
     image = 'gui-skill-tree_node_max-health-energy',
     backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
-      return 'gain +'..(self.value.bonusHealth * 100)..'% maximum health, and +'..(self.value.bonusEnergy * 100)..'% maximum energy'
+      return '+'..(self.value.bonusHealth * 100)..'% maximum health, and +'..(self.value.bonusEnergy * 100)..'% maximum energy'
     end
   }
 }
