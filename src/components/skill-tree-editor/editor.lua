@@ -48,11 +48,7 @@ local TreeEditor = {
   onSerialize = noop,
   serialize = function(self)
     local ser = require 'utils.ser'
-    local serializedTree = {}
-    for nodeId in pairs(rebuildTableBySortingKeys(self.nodes)) do
-      local node = Component.get(nodeId)
-      serializedTree[nodeId] = node:serialize()
-    end
+    local serializedTree = rebuildTableBySortingKeys(self.nodes)
 
     --[[
       Love's `love.filesystem.write` doesn't support writing to files in the source directory,
@@ -247,19 +243,6 @@ local function placeNode(root, nodeId, gridX, gridY, connections, nodeValue, sel
         love.mouse.getY() - ty
     end,
 
-    serialize = function(self)
-      local dataRef = root.nodes[self:getId()]
-      return {
-        -- store coordinates as grid units
-        x = dataRef.x,
-        y = dataRef.y,
-        size = nodeSize,
-        connections = dataRef.connections,
-        nodeValue = dataRef.nodeValue,
-        selected = dataRef.selected
-      }
-    end,
-
     onPointerMove = function(self)
       -- in any non-edit mode, prevent selection if the node is read only
       if editorModes.EDIT ~= root.editorMode then
@@ -296,7 +279,6 @@ local function placeNode(root, nodeId, gridX, gridY, connections, nodeValue, sel
   root:setNode(nodeId, {
     x = gridX,
     y = gridY,
-    size = size,
     connections = connections or {},
     nodeValue = nodeValue, -- stores the value by the option's key
     selected = selected or false, -- whether the node has been "bought"
