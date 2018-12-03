@@ -93,7 +93,7 @@ local state = {
   },
   mx = 0,
   my = 0,
-  scale = 2,
+  scale = 1,
   editorMode = editorModes.EDIT,
 }
 
@@ -234,7 +234,7 @@ local playMode = {
 }
 
 -- creates a new node and adds it to the node tree
-local function placeNode(root, nodeId, screenX, screenY, connections, nodeValue, selected, size)
+local function placeNode(root, nodeId, gridX, gridY, connections, nodeValue, selected, size)
   size = size or 1
 
   local oScale = state.scale
@@ -253,8 +253,8 @@ local function placeNode(root, nodeId, screenX, screenY, connections, nodeValue,
       local dataRef = root.nodes[self:getId()]
       return {
         -- store coordinates as grid units
-        x = dataRef.x / cellSize,
-        y = dataRef.y / cellSize,
+        x = dataRef.x,
+        y = dataRef.y,
         size = nodeSize,
         connections = dataRef.connections,
         nodeValue = dataRef.nodeValue,
@@ -290,14 +290,14 @@ local function placeNode(root, nodeId, screenX, screenY, connections, nodeValue,
       local size = optionValue and (optionValue.type == 'keystone') and (2 * cellSize) or (cellSize)
       self.width, self.height = size, size
       dataRef.size = size
-      self.x, self.y = dataRef.x, dataRef.y
+      self.x, self.y = dataRef.x * size, dataRef.y * size
     end,
   }):setParent(root)
 
   local nodeId = node:getId()
   root:setNode(nodeId, {
-    x = screenX,
-    y = screenY,
+    x = gridX,
+    y = gridY,
     size = size,
     connections = connections or {},
     nodeValue = nodeValue, -- stores the value by the option's key
@@ -344,8 +344,8 @@ function TreeEditor.loadFromSerializedState(self)
       self,
       id,
       -- restore coordinates as pixel units
-      props.x * cellSize,
-      props.y * cellSize,
+      props.x,
+      props.y,
       props.connections,
       props.nodeValue,
       props.selected
@@ -398,7 +398,7 @@ function TreeEditor.handleInputs(self)
 
       if ('NODE_CREATE' == mode) and (button == 1) then
         local snapX, snapY = snapToGrid(state.mx - cellSize/2, state.my - cellSize/2)
-        placeNode(root, nil, snapX, snapY, nil, nil, nil, cellSize)
+        placeNode(root, nil, snapX/cellSize, snapY/cellSize, nil, nil, nil, cellSize)
       end
 
       if ('NODE_SELECTION' == mode) and (button == 1) then
@@ -514,6 +514,25 @@ function TreeEditor.handleInputs(self)
 end
 
 function TreeEditor.init(self)
+  msgBus.on(msgBus.KEY_PRESSED, function(ev)
+    local function changeScale(ds)
+      local clamp = require 'utils.math'.clamp
+      state.scale = clamp(state.scale + ds, 1, 5)
+    end
+    local handlers = {
+      up = function()
+        changeScale(1)
+      end,
+      down = function()
+        changeScale(-1)
+      end,
+      default = function()
+      end
+    }
+    local cb = handlers[ev.key] or handlers.default
+    cb()
+  end)
+
   -- load default state
   if (not self.nodes) then
     local defaultLayout = 'components.skill-tree-editor.layout'
@@ -641,7 +660,7 @@ function TreeEditor.drawTooltip(self)
   local dataKey = node.nodeValue
   local optionValue = self.nodeValueOptions[dataKey]
   local tooltipContent = optionValue and optionValue:description() or self.defaultNodeDescription
-  local x, y = (node.x + tx)/state.scale, (node.y + ty - 20)/state.scale
+  local x, y = (node.x * cellSize + tx)/state.scale, (node.y * cellSize + ty - 20)/state.scale
   local width, height = GuiText.getTextSize(tooltipContent, debugTextLayer.font)
   local padding = 5
   love.graphics.push()
@@ -651,13 +670,12 @@ function TreeEditor.drawTooltip(self)
     love.graphics.rectangle('fill', rectX, rectY, rectW, rectH)
     love.graphics.setColor(1,1,1)
     love.graphics.rectangle('line', rectX, rectY, rectW, rectH)
+
+    local font = require 'components.font'.primary.font
+    love.graphics.setFont(font)
+    love.graphics.setColor(Color.WHITE)
+    love.graphics.print(tooltipContent, x, y)
   love.graphics.pop()
-  debugTextLayer:add(
-    tooltipContent,
-    Color.WHITE,
-    x,
-    y
-  )
 end
 
 function TreeEditor.draw(self)
@@ -689,10 +707,10 @@ function TreeEditor.draw(self)
   local function drawConnection(node, connectionNode)
     love.graphics.setLineStyle('rough')
     love.graphics.line(
-      node.x + node.size/2 + tx,
-      node.y + node.size/2 + ty,
-      connectionNode.x + connectionNode.size/2 + tx,
-      connectionNode.y + connectionNode.size/2 + ty
+      (node.x * cellSize) + node.size/2 + tx,
+      (node.y * cellSize) + node.size/2 + ty,
+      (connectionNode.x * cellSize) + connectionNode.size/2 + tx,
+      (connectionNode.y * cellSize) + connectionNode.size/2 + ty
     )
   end
 
@@ -736,7 +754,7 @@ function TreeEditor.draw(self)
   love.graphics.setBlendMode('replace')
   for _,node in pairs(self.nodes) do
     local radius = node.size/2
-    local x, y = node.x + node.size/2 + tx, node.y + node.size/2 + ty
+    local x, y = (node.x * cellSize) + node.size/2 + tx, (node.y * cellSize) + node.size/2 + ty
     -- cut-out the areas that overlap the connections
     love.graphics.setColor(0,0,0)
     love.graphics.circle('fill', x, y, radius)
@@ -748,7 +766,7 @@ function TreeEditor.draw(self)
     local dataKey = node.nodeValue
     local optionValue = self.nodeValueOptions[dataKey]
     local radius = node.size/2
-    local x, y = node.x + node.size/2 + tx, node.y + node.size/2 + ty
+    local x, y = (node.x * cellSize) + node.size/2 + tx, (node.y * cellSize) + node.size/2 + ty
 
     if (editorModes.PLAY == _editorMode) or
       (editorModes.PLAY_READ_ONLY == _editorMode) or
