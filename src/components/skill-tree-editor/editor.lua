@@ -514,23 +514,15 @@ function TreeEditor.handleInputs(self)
 end
 
 function TreeEditor.init(self)
-  msgBus.on(msgBus.KEY_PRESSED, function(ev)
+  msgBus.on(msgBus.MOUSE_WHEEL_MOVED, function(ev)
+    local dy = ev[2]
+
     local function changeScale(ds)
       local clamp = require 'utils.math'.clamp
       state.scale = clamp(state.scale + ds, 1, 5)
     end
-    local handlers = {
-      up = function()
-        changeScale(1)
-      end,
-      down = function()
-        changeScale(-1)
-      end,
-      default = function()
-      end
-    }
-    local cb = handlers[ev.key] or handlers.default
-    cb()
+
+    changeScale(dy)
   end)
 
   -- load default state
