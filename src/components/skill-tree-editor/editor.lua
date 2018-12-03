@@ -411,9 +411,16 @@ function TreeEditor.handleInputs(self)
             })
           end
         elseif (editorModes.PLAY == state.editorMode) then
-          if ((not node.selected) and (not playMode:isNodeSelectable(node, self.nodes, self.nodeValueOptions))) or
-            (node.selected and (not playMode:isNodeUnselectable(node, self.nodes, nodeId)))
-          then
+          local isNotSelectable = (
+              (not node.selected)
+              and (not playMode:isNodeSelectable(node, self.nodes, self.nodeValueOptions))
+            ) or
+            (
+              node.selected
+              and (not playMode:isNodeUnselectable(node, self.nodes, nodeId))
+            )
+          if (isNotSelectable) then
+            msgBus.send(msgBus.PLAYER_ACTION_ERROR, 'previous node must be selected first')
             return
           end
           local isSelected = not node.selected
