@@ -694,7 +694,7 @@ local function renderTooltip(blocks, font, options)
   love.graphics.setFont(font)
   local padding = {
     left = options.padding,
-    center = options.padding/2,
+    center = 0,
     right = -options.padding
   }
   for _,block in ipairs(tt.blocks) do
@@ -732,11 +732,10 @@ function TreeEditor.drawTooltip(self)
         {
           {
             content = {
-              Color.DEEP_BLUE, tooltipTitle,
-              Color.WHITE, '\n',
-              Color.WHITE, tooltipBody,
+              Color.WHITE, tooltipTitle,
+              Color.WHITE, '\n\n'..tooltipBody,
             },
-            align = 'center'
+            align = 'left'
           }
         },
         {
@@ -744,22 +743,24 @@ function TreeEditor.drawTooltip(self)
             content = {
               Color.PALE_YELLOW, '\n'..constants.glyphs.leftMouseBtn..' to '..(node.selected and 'unselect' or 'select')
             },
-            align = 'center'
+            align = 'right'
           }
         }
       },
       font,
       {
-        minWidth = 200,
+        minWidth = 0,
         maxWidth = 200,
-        padding = 5,
+        padding = 4,
         position = function(tt)
           return (node.x * cellSize + cellSize/2 + tx)/tooltipScale - tt.width/2,
           (node.y * cellSize + ty)/tooltipScale - tt.height
         end,
         beforeRender = function(tt, x, y)
+          -- background
           love.graphics.setColor(0,0,0)
           love.graphics.rectangle('fill', x, y, tt.width, tt.height)
+          -- border
           love.graphics.setColor(1,1,1)
           love.graphics.rectangle('line', x, y, tt.width, tt.height)
         end
