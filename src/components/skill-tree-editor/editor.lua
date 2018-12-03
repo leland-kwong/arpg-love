@@ -37,13 +37,6 @@ local mouseCollisionObject = {}
 local mouseCollisionSize = 50
 mouseCollisionWorld:add(mouseCollisionObject, 0, 0, mouseCollisionSize, mouseCollisionSize)
 
-local debugTextLayer = GuiText.create({
-  font = require 'components.font'.primary.font,
-  drawOrder = function()
-    return 10
-  end
-})
-
 local TreeEditor = {
   debug = {
     -- connectionCount = true,
@@ -100,11 +93,19 @@ local state = {
   },
   mx = 0,
   my = 0,
-  scale = config.scale,
+  scale = 2,
   editorMode = editorModes.EDIT,
 }
 
-local cellSize = 25 * state.scale
+local debugTextLayer = GuiText.create({
+  font = require 'components.font'.primary.font,
+  drawOrder = function()
+    return 10
+  end
+})
+
+local baseCellSize = 25
+local cellSize = baseCellSize * state.scale
 
 local function snapToGrid(x, y)
   local Position = require 'utils.position'
@@ -236,6 +237,7 @@ local playMode = {
 local function placeNode(root, nodeId, screenX, screenY, connections, nodeValue, selected, size)
   size = size or 1
 
+  local oScale = state.scale
   local node = Gui.create({
     id = nodeId,
     inputContext = 'treeNode',
@@ -293,7 +295,7 @@ local function placeNode(root, nodeId, screenX, screenY, connections, nodeValue,
       self.width, self.height = size, size
       dataRef.size = size
       self.x, self.y = dataRef.x, dataRef.y
-    end
+    end,
   }):setParent(root)
 
   local nodeId = node:getId()
@@ -599,6 +601,9 @@ local backgroundColorByEditorMode = {
 }
 
 function TreeEditor.update(self, dt)
+  cellSize = baseCellSize * state.scale
+  debugTextLayer.scale = state.scale
+
   if (InputContext.get() == 'any') then
     InputContext.set('SkillTreeBackground')
   end
@@ -640,11 +645,11 @@ function TreeEditor.drawTooltip(self)
   local dataKey = node.nodeValue
   local optionValue = self.nodeValueOptions[dataKey]
   local tooltipContent = optionValue and optionValue:description() or self.defaultNodeDescription
-  local x, y = (node.x + tx)/config.scale, (node.y + ty - 20)/config.scale
+  local x, y = (node.x + tx)/state.scale, (node.y + ty - 20)/state.scale
   local width, height = GuiText.getTextSize(tooltipContent, debugTextLayer.font)
   local padding = 5
   love.graphics.push()
-  love.graphics.scale(config.scale)
+  love.graphics.scale(state.scale)
     local rectX, rectY, rectW, rectH = x - padding, y - padding, width + padding*2, height + padding
     love.graphics.setColor(0,0,0)
     love.graphics.rectangle('fill', rectX, rectY, rectW, rectH)
@@ -663,7 +668,7 @@ function TreeEditor.draw(self)
   local tx, ty = getTranslate()
   love.graphics.push()
   love.graphics.origin()
-  -- love.graphics.scale(config.scale)
+  -- love.graphics.scale(state.scale)
   local _editorMode = state.editorMode
 
   -- create background
@@ -795,7 +800,7 @@ function TreeEditor.draw(self)
         debugTextLayer:add(
           optionValue.name,
           Color.WHITE,
-          x/config.scale, y/config.scale
+          x/state.scale, y/state.scale
         )
       end
 
@@ -812,7 +817,7 @@ function TreeEditor.draw(self)
       debugTextLayer:add(
         #F.keys(node.connections),
         Color.WHITE,
-        x/config.scale, y/config.scale
+        x/state.scale, y/state.scale
       )
     end
   end

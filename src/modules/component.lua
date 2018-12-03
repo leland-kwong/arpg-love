@@ -19,7 +19,6 @@ local baseProps = {
   y = 0,
   z = 0, -- axis normal to the x-y plane
   angle = 0,
-  scale = 1,
   outOfBoundsX = 0,
   outOfBoundsY = 0,
   isOutsideViewport = false,

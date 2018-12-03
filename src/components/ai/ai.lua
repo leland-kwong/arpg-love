@@ -489,10 +489,10 @@ local function drawShadow(self, h, w, ox, oy)
     animationFactory.atlas,
     self.animation.sprite,
     self.x,
-    self.y + (h * self.scale / 1.5),
+    self.y + (h / 1.5),
     0,
-    self.scale*0.8 * self.facingDirectionX - heightScaleDiff,
-    -self.scale/2 + heightScaleDiff,
+    0.8 * self.facingDirectionX - heightScaleDiff,
+    -0.5 + heightScaleDiff,
     ox,
     oy
   )
@@ -523,8 +523,8 @@ function drawSprite(self, ox, oy)
     round(self.x),
     round(self.y - self.z),
     0,
-    self.scale * self.facingDirectionX,
-    self.scale,
+    self.facingDirectionX,
+    1,
     round(ox),
     round(oy)
   )
@@ -686,10 +686,10 @@ function Ai.init(self)
       self.class,
       self.x,
       self.y,
-      self.w * self.scale,
-      self.h * self.scale,
-      ox * self.scale,
-      oy + self.z * self.scale
+      self.w,
+      self.h,
+      ox,
+      oy + self.z
     )
     :addToWorld(self.collisionWorld)
   adjustInitialPositionIfNeeded(self)
