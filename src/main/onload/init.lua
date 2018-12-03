@@ -28,11 +28,22 @@ local newLightWorld = LightWorld.create({
 local Notifier = require 'components.hud.notifier'
 local config = require 'config.config'
 local notifierWidth, notifierHeight = 250, 200
-Notifier.create({
-  x = love.graphics.getWidth()/config.scale - notifierWidth,
-  y = love.graphics.getHeight()/config.scale - notifierHeight,
+local notifier = Notifier.create({
+  x = 0,
+  y = 0,
   h = notifierHeight,
   w = notifierWidth
+})
+
+Component.create({
+  init = function(self)
+    Component.addToGroup(self, 'all')
+  end,
+  update = function()
+    notifier.x, notifier.y =
+      love.graphics.getWidth()/config.scale - notifier.w,
+      love.graphics.getHeight()/config.scale - notifier.h
+  end
 })
 
 local ActionError = require 'components.hud.action-error'

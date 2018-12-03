@@ -338,7 +338,19 @@ end
 function TreeEditor.handleInputs(self)
   local root = self
 
+  local function handleZoom(ev)
+    local dy = ev[2]
+
+    local function changeScale(ds)
+      local clamp = require 'utils.math'.clamp
+      state.scale = clamp(state.scale + ds, 1, 5)
+    end
+
+    changeScale(dy)
+  end
+
   self.listeners = {
+    msgBus.on(msgBus.MOUSE_WHEEL_MOVED, handleZoom),
     msgBus.on(msgBus.MOUSE_CLICKED, function(event)
       local mode = self:getMode()
       local _, _, button = unpack(event)
@@ -510,17 +522,6 @@ end
 
 function TreeEditor.init(self)
   self:panTo()
-  local function handleZoom(ev)
-    local dy = ev[2]
-
-    local function changeScale(ds)
-      local clamp = require 'utils.math'.clamp
-      state.scale = clamp(state.scale + ds, 1, 5)
-    end
-
-    changeScale(dy)
-  end
-  msgBus.on(msgBus.MOUSE_WHEEL_MOVED, handleZoom)
 
   -- load default state
   if (not self.nodes) then
