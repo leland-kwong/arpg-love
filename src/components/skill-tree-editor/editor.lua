@@ -647,16 +647,18 @@ function TreeEditor.drawTooltip(self)
     return
   end
 
+  local tooltipScale = config.scale
   local tx, ty = getTranslate()
   local node = self.nodes[state.hoveredNode]
   local dataKey = node.nodeValue
   local optionValue = self.nodeValueOptions[dataKey]
   local tooltipContent = optionValue and optionValue:description() or self.defaultNodeDescription
-  local x, y = (node.x * cellSize + tx)/state.scale, (node.y * cellSize + ty - 20)/state.scale
   local width, height = GuiText.getTextSize(tooltipContent, debugTextLayer.font)
   local padding = 5
+  local x, y = (node.x * cellSize + tx + 10)/tooltipScale, (node.y * cellSize + ty - height - (padding * 2) - 10)/tooltipScale
   love.graphics.push()
-  love.graphics.scale(state.scale)
+  love.graphics.origin()
+  love.graphics.scale(tooltipScale)
     local rectX, rectY, rectW, rectH = x - padding, y - padding, width + padding*2, height + padding
     love.graphics.setColor(0,0,0)
     love.graphics.rectangle('fill', rectX, rectY, rectW, rectH)
