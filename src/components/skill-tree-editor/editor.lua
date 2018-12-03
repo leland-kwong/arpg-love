@@ -703,11 +703,15 @@ local function renderTooltip(blocks, font, options)
   local x,y = options.position(tt)
   options.beforeRender(tt, x, y)
   love.graphics.setFont(font)
+  local padding = {
+    left = options.padding,
+    center = options.padding/2,
+    right = -options.padding
+  }
   for _,block in ipairs(tt.blocks) do
-    local xPadding = block.align == 'left' and options.padding or -options.padding
     love.graphics.printf(
       block.content,
-      math.floor(x + xPadding + block.x),
+      math.floor(x + padding[block.align] + block.x),
       math.floor(y + options.padding + block.y),
       tt.width,
       block.align
@@ -741,16 +745,17 @@ function TreeEditor.drawTooltip(self)
             content = {
               Color.DEEP_BLUE, tooltipTitle,
               Color.WHITE, '\n',
-              Color.WHITE, tooltipBody
-            }
+              Color.WHITE, tooltipBody,
+            },
+            align = 'center'
           }
         },
         {
           {
             content = {
-              Color.PALE_YELLOW, constants.glyphs.leftMouseBtn..' to '..(node.selected and 'unselect' or 'select')
+              Color.PALE_YELLOW, '\n'..constants.glyphs.leftMouseBtn..' to '..(node.selected and 'unselect' or 'select')
             },
-            align = 'right'
+            align = 'center'
           }
         }
       },
