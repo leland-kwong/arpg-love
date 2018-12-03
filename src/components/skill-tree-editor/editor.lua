@@ -113,8 +113,6 @@ local function snapToGrid(x, y)
   return Position.gridToPixels(gridX, gridY, cellSize)
 end
 
-state.initialDx, state.initialDy = snapToGrid(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)
-
 function TreeEditor.getMode(self)
   if 'gui' == InputContext.get() then
     return
@@ -450,8 +448,8 @@ function TreeEditor.handleInputs(self)
         local nodeData = self.nodes[state.movingNode]
         local x, y = snapToGrid(state.mx - nodeData.size/2, state.my - nodeData.size/2)
         self:setNode(state.movingNode, {
-          x = x,
-          y = y
+          x = x/cellSize,
+          y = y/cellSize
         })
         clearSelections()
       else
@@ -513,8 +511,17 @@ function TreeEditor.handleInputs(self)
   }
 end
 
+function TreeEditor.panTo(self, x, y)
+  local shouldCenter = not x
+  if shouldCenter then
+    x, y = snapToGrid(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)
+  end
+  state.translate.dxTotal, state.translate.dyTotal = x, y
+end
+
 function TreeEditor.init(self)
-  msgBus.on(msgBus.MOUSE_WHEEL_MOVED, function(ev)
+  self:panTo()
+  local function handleZoom(ev)
     local dy = ev[2]
 
     local function changeScale(ds)
@@ -523,7 +530,8 @@ function TreeEditor.init(self)
     end
 
     changeScale(dy)
-  end)
+  end
+  msgBus.on(msgBus.MOUSE_WHEEL_MOVED, handleZoom)
 
   -- load default state
   if (not self.nodes) then
@@ -672,6 +680,15 @@ function TreeEditor.drawTooltip(self)
   love.graphics.pop()
 end
 
+local function drawBackground()
+  -- create background
+  love.graphics.setColor(backgroundColorByEditorMode[state.editorMode])
+  love.graphics.rectangle(
+    'fill',
+    0, 0, love.graphics.getWidth(), love.graphics.getHeight()
+  )
+end
+
 local function drawHelpText()
   local font = require 'components.font'.primary.font
   local constants = require 'components.state.constants'
@@ -692,15 +709,9 @@ local function drawHelpText()
 end
 
 function TreeEditor.draw(self)
-  local _editorMode = state.editorMode
-  -- create background
-  love.graphics.setColor(backgroundColorByEditorMode[_editorMode])
-  love.graphics.rectangle(
-    'fill',
-    0, 0, love.graphics.getWidth(), love.graphics.getHeight()
-  )
-  drawHelpText(self)
+  drawBackground(self)
 
+  local _editorMode = state.editorMode
   local tx, ty = getTranslate()
   love.graphics.push()
   love.graphics.origin()
@@ -849,9 +860,10 @@ function TreeEditor.draw(self)
     end
   end
 
-  self:drawTooltip()
-
   love.graphics.pop()
+
+  self:drawTooltip()
+  drawHelpText(self)
 end
 
 function TreeEditor.final(self)
