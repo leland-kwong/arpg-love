@@ -35,7 +35,7 @@ local sounds = {
 local mouseCollisionWorld = bump.newWorld(32)
 local mouseCollisionObject = {}
 local mouseCollisionSize = 50
-local cellSize = 50
+local cellSize = 25 * config.scale
 mouseCollisionWorld:add(mouseCollisionObject, 0, 0, mouseCollisionSize, mouseCollisionSize)
 
 local debugTextLayer = GuiText.create({
