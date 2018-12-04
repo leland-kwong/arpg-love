@@ -608,6 +608,7 @@ function Ai.draw(self)
   local isShocked = self.stats:get('shocked') > 0
   if (isShocked) then
     drawShockEffect(self, ox, oy)
+    love.graphics.setShader(shader)
   end
 
   love.graphics.setBlendMode(oBlendMode)
