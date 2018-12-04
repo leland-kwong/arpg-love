@@ -1,12 +1,12 @@
 uniform vec2 sprite_size;
 uniform float outline_width = 0.0;
 uniform vec4 outline_color;
+
+uniform sampler2D texture_image;
+uniform vec2 texture_scale = vec2(1, 1);
+
 // includes the intercardinal pixels for outline generation
 uniform bool include_corners;
-uniform bool use_drawing_color;
-uniform float alpha = 1.0;
-uniform vec4 fill_color = vec4(1,1,1,1);
-vec4 empty_color = vec4(0,0,0,0);
 
 float pixelSizeX = 1.0 / sprite_size.x;
 float pixelSizeY = 1.0 / sprite_size.y;
@@ -18,8 +18,7 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
 
 	bool hasOutline = outline_width > 0.0;
 	if (!hasOutline) {
-    col.a *= alpha;
-		return col;
+		return col * color;
 	}
 
   float offsetX = pixelSizeX * outline_width;
@@ -41,16 +40,13 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
   bool isEdgePixel = a > 0.0;
   bool isCurrentPixelTransparent = originalAlpha == 0.0;
   bool isTransparentEdge = isCurrentPixelTransparent && isEdgePixel;
+  vec4 texColor = texture2D(texture_image, texture_coords * texture_scale);
   if (isTransparentEdge) {
     vec4 result = vec4(outline_color);
-    result.a *= alpha;
-    return result;
+    result.a *= color.a;
+    return result * texColor;
   }
   else {
-    vec4 result = use_drawing_color
-      ? (isCurrentPixelTransparent ? col : color) * fill_color
-      : col * fill_color;
-    result.a *= alpha;
-		return result;
+		return col * color * texColor;
   }
 }

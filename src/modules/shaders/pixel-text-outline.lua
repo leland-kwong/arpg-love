@@ -12,9 +12,8 @@ function PixelTextShader.attach(outlineColor, alpha, outlineWidth, spriteSize)
   shader:send('sprite_size', spriteSize or defaultSpriteSize)
   shader:send('outline_width', (outlineWidth or 2)/spriteSize[1])
   shader:send('outline_color', outlineColor or defaultOutlineColor)
-  shader:send('use_drawing_color', true)
   shader:send('include_corners', true)
-  shader:send('alpha', alpha or 1)
+  love.graphics.setColor(1,1,1,alpha)
 end
 
 function PixelTextShader.detach()

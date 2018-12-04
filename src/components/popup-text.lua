@@ -84,7 +84,6 @@ function PopupTextBlueprint.draw(self)
   shader:send('sprite_size', spriteSize)
   shader:send('outline_width', 2/16)
   shader:send('outline_color', outlineColor)
-  shader:send('use_drawing_color', true)
   shader:send('include_corners', true)
 
   love.graphics.setShader(shader)

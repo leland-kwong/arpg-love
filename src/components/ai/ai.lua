@@ -24,6 +24,9 @@ local collisionGroups = require 'modules.collision-groups'
 local Console = require 'modules.console.console'
 local Object = require 'utils.object-utils'
 
+local Textures = require 'modules.textures'
+local iceTexture, defaultTexture = Textures.ice, Textures.default
+
 local max, random, abs, min = math.max, math.random, math.abs, math.min
 
 local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
@@ -575,13 +578,15 @@ function Ai.draw(self)
   local w, h = self.animation:getSourceSize()
   drawShadow(self, h, w, ox, oy)
 
-  if (self.outlineColor) then
-    love.graphics.setShader(shader)
-    shader:send('sprite_size', shaderSpriteSize)
-    shader:send('outline_width', 1)
-    shader:send('outline_color', self.outlineColor)
-    shader:send('fill_color', self.fillColor)
-    shader:send('alpha', self.opacity)
+  love.graphics.setShader(shader)
+  shader:send('sprite_size', shaderSpriteSize)
+
+  if self.frozen then
+    shader:send('outline_color', {1,1,1,0.7})
+    shader:send('outline_width', 2)
+    shader:send('texture_scale', {5.5,1})
+    shader:send('include_corners', true)
+    shader:send('texture_image', iceTexture)
   end
 
   if self.hitAnimation and (not self.destroyedAnimation) then
@@ -589,10 +594,15 @@ function Ai.draw(self)
     love.graphics.setColor(3,3,3)
   end
 
-  local texture = animationFactory.atlas
   local r,g,b,a = self.fillColor[1], self.fillColor[2], self.fillColor[3], self.fillColor[4]
   love.graphics.setColor(r, g, b, a * self.opacity)
   drawSprite(self, ox, oy)
+
+  if (self.outlineColor) then
+    shader:send('outline_width', 1)
+    shader:send('outline_color', self.outlineColor)
+    drawSprite(self, ox, oy)
+  end
 
   local isShocked = self.stats:get('shocked') > 0
   if (isShocked) then
@@ -600,9 +610,10 @@ function Ai.draw(self)
   end
 
   love.graphics.setBlendMode(oBlendMode)
-  love.graphics.setShader()
 
-  love.graphics.setColor(1,1,1, self.opacity)
+  shader:send('outline_width', 0)
+  shader:send('texture_image', defaultTexture)
+
   drawStatusEffects(self, statusIcons)
 end
 

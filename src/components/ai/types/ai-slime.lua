@@ -125,8 +125,6 @@ local getRandomProps = Chance({
     __call = function()
       local Color = require 'modules.color'
       return {
-        -- green
-        color = {Color.rgba255(85, 188, 2)},
         name = 'slime'
       }
     end
