@@ -70,7 +70,7 @@
             </struct>
         </struct>
         <key>shapePadding</key>
-        <uint>2</uint>
+        <uint>4</uint>
         <key>jpgQuality</key>
         <uint>80</uint>
         <key>pngOptimizationLevel</key>
@@ -84,7 +84,7 @@
         <key>textureFormat</key>
         <enum type="SettingsBase::TextureFormat">png</enum>
         <key>borderPadding</key>
-        <uint>2</uint>
+        <uint>4</uint>
         <key>maxTextureSize</key>
         <QSize>
             <key>width</key>
@@ -881,16 +881,16 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/gui/gui-dashboard-status-bar-experience.png</key>
+            <key type="filename">custom-art/gui/gui-dashboard-status-bar-fancy-highlight.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>31,1,61,1</rect>
+                <rect>15,1,30,3</rect>
                 <key>scale9Paddings</key>
-                <rect>31,1,61,1</rect>
+                <rect>15,1,30,3</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -934,9 +934,13 @@
                 <false/>
             </struct>
             <key type="filename">custom-art/gui/gui-skill-tree_node_background.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_blood-rage.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree_node_damage-up.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree_node_heavy-strike.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree_node_lightning.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_max-energy.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_max-health-energy.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_max-health.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree_node_speed-up.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
