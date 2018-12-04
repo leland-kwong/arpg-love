@@ -24,7 +24,7 @@ local Hud = {
   rootStore = {}
 }
 
-local healthManaWidth = 62 * 2
+local healthManaWidth = 63 * 2
 
 local function setupExperienceIndicator(self)
   local w, h = healthManaWidth - 2, 2
@@ -98,7 +98,7 @@ function Hud.init(self)
   local StatusBarFancy = require 'components.hud.status-bar-fancy'
   local healthStatusBar = StatusBarFancy.create({
     id = 'healthStatusBar',
-    x = offX - 1,
+    x = offX - 2,
     y = winHeight - barHeight - 17,
     w = healthManaWidth / 2,
     h = barHeight,
@@ -224,7 +224,7 @@ function Hud.init(self)
   }):setParent(self)
 
   local spacing = 27
-  local endXPos = healthStatusBar.x - spacing - 9
+  local endXPos = healthStatusBar.x - spacing - 7
 
   local skillSetup = {
     {
@@ -261,7 +261,7 @@ function Hud.init(self)
       player = self.player,
       rootStore = self.rootStore,
       x = endXPos - (spacing * (i - 1)),
-      y = winHeight - 32 - 2,
+      y = winHeight - 32 - 1,
       slotX = skill.slotX,
       slotY = skill.slotY,
       hudTextLayer = self.hudTextSmallLayer,
@@ -297,8 +297,8 @@ function Hud.init(self)
 
   local MenuButtons = require 'components.hud.menu-buttons'
   MenuButtons.create({
-    x = energyStatusBar.x + 134,
-    y = healthStatusBar.y + 5
+    x = energyStatusBar.x + 133,
+    y = healthStatusBar.y + 6
   }):setParent(self)
 end
 

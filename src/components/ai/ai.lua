@@ -63,6 +63,7 @@ local Ai = {
   invulnerable = false,
   attackRange = 8, -- distance in grid units from the player that the ai will stop moving
   lightRadius = 10,
+  -- frozen = true,
 
   baseStats = function(self)
     return setmetatable({
