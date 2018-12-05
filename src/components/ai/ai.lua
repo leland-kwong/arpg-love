@@ -29,8 +29,8 @@ local iceTexture, defaultTexture = Textures.ice, Textures.default
 
 local max, random, abs, min = math.max, math.random, math.abs, math.min
 
-local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
-local shader = love.graphics.newShader(pixelOutlineShader)
+local Shaders = require 'modules.shaders'
+local shader = Shaders('pixel-outline.fsh')
 local atlasData = animationFactory.atlasData
 local shaderSpriteSize = {atlasData.meta.size.w, atlasData.meta.size.h}
 
@@ -580,6 +580,7 @@ function Ai.draw(self)
   drawShadow(self, h, w, ox, oy)
 
   love.graphics.setShader(shader)
+  shader:send('enabled', true)
   shader:send('sprite_size', shaderSpriteSize)
 
   if self.frozen then

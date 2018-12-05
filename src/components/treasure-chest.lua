@@ -15,9 +15,8 @@ local animation = AnimationFactory:new({
   'treasure-chest'
 }):update(0)
 
-local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
 local outlineColor = {1,1,1,1}
-local shader = love.graphics.newShader(pixelOutlineShader)
+local shader = require('modules.shaders')('pixel-outline.fsh')
 local atlasData = AnimationFactory.atlasData
 shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
 shader:send('outline_width', 1)
@@ -75,6 +74,7 @@ local TreasureChest = extend(Gui, {
 
     if self.hovered then
       love.graphics.setShader(shader)
+      shader:send('enabled', true)
       shader:send('outline_color', self.hovered and outlineColor or Color.BLACK)
     end
 
@@ -87,7 +87,7 @@ local TreasureChest = extend(Gui, {
     )
 
     if self.hovered then
-      love.graphics.setShader()
+      shader:send('enabled', false)
     end
   end,
   drawOrder = function(self)

@@ -49,9 +49,8 @@ function PopupTextBlueprint:new(text, x, y, duration)
   table.insert(self.textObjectsList, {text, x, y, animation, duration})
 end
 
-local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
 local outlineColor = {0,0,0,1}
-local shader = love.graphics.newShader(pixelOutlineShader)
+local shader = require('modules.shaders')('pixel-outline.fsh')
 local w, h = 16, 16
 
 function PopupTextBlueprint.init(self)
@@ -81,6 +80,7 @@ end
 local spriteSize = {w, h}
 
 function PopupTextBlueprint.draw(self)
+  shader:send('enabled', true)
   shader:send('sprite_size', spriteSize)
   shader:send('outline_width', 2/16)
   shader:send('outline_color', outlineColor)
@@ -93,7 +93,8 @@ function PopupTextBlueprint.draw(self)
     self.x,
     self.y
   )
-  love.graphics.setShader()
+
+  shader:send('enabled', false)
 end
 
 return Component.createFactory(PopupTextBlueprint)

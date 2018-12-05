@@ -22,13 +22,10 @@ local function itemMousePosition()
   return camera:getMousePosition()
 end
 
-local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
 local outlineColor = {1,1,1,1}
-local shader = love.graphics.newShader(pixelOutlineShader)
+local Shaders = require 'modules.shaders'
+local shader = Shaders('pixel-outline.fsh')
 local atlasData = AnimationFactory.atlasData
-shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
-shader:send('outline_width', 1)
-shader:send('outline_color', outlineColor)
 
 local DRAW_ORDER_BACKGROUND = drawOrders.FloorItemTooltip
 local DRAW_ORDER_TEXT = drawOrders.FloorItemTooltip + 1
@@ -411,6 +408,10 @@ function LootGenerator.init(self)
 
       if self.hovered then
         love.graphics.setShader(shader)
+        shader:send('enabled', true)
+        shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
+        shader:send('outline_width', 1)
+        shader:send('outline_color', outlineColor)
       end
 
       -- draw item
@@ -424,7 +425,7 @@ function LootGenerator.init(self)
       Component.get('lightWorld'):addLight(centerX, centerY, 17, nil, 0.4)
 
       if self.hovered then
-        love.graphics.setShader()
+        shader:send('enabled', false)
       end
     end,
 
