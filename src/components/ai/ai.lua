@@ -44,7 +44,9 @@ local states = Enum({
 local statDefaults = {
   moveSpeed = 100,
   sightRadius = 14,
-  freelyMove = 0
+  freelyMove = 0,
+
+  freeze = 0
 }
 local statsMt = {
   __index = function(self, k)
@@ -63,7 +65,6 @@ local Ai = {
   invulnerable = false,
   attackRange = 8, -- distance in grid units from the player that the ai will stop moving
   lightRadius = 10,
-  -- frozen = true,
 
   baseStats = function(self)
     return setmetatable({
@@ -363,8 +364,15 @@ function Ai.update(self, dt)
 
   local isIdle = (self:getFiniteState() ~= states.MOVING) and (not self.isInViewOfPlayer) and (not self.isAggravated)
   self:setDrawDisabled(isIdle)
-  if isIdle then
+  self.clock = self.clock + dt
+  self.frameCount = self.frameCount + 1
+
+  if isIdle or self.frozen then
     return
+  end
+
+  if self.onUpdateStart then
+    self.onUpdateStart(self, dt)
   end
 
   local shouldCheckStuckStatus = self:getFiniteState() == states.MOVING and self.dv and (not self.canSeeTarget)
@@ -388,12 +396,6 @@ function Ai.update(self, dt)
   local playerX, playerY = playerRef:getPosition()
 
   local grid = self.grid
-  self.clock = self.clock + dt
-  self.frameCount = self.frameCount + 1
-
-  if self.onUpdateStart then
-    self.onUpdateStart(self, dt)
-  end
 
   local targetX, targetY
   local extraSightRadiusFromAggro = (self.isAggravated and 20 or 0) * self.gridSize

@@ -70,6 +70,13 @@ return function(dt)
 
       local hitManager = require 'modules.hit-manager'
       hitManager(c, dt, c.onDamageTaken)
+      c.frozen = c.stats:get('freeze') > 0
+      local newlyFrozen = c.frozen and (not c.wasFrozen)
+      if newlyFrozen then
+        local Sound = require 'components.sound'
+        Sound.playEffect('freeze_object.wav')
+      end
+      c.wasFrozen = c.frozen
     end
   end
 end

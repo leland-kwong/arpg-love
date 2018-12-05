@@ -591,9 +591,6 @@
             </struct>
             <key type="filename">custom-art/characters/ai-legendaries/legendary-1/legendary-ai-1.png</key>
             <key type="filename">custom-art/characters/eyeball/eyeball.png</key>
-            <key type="filename">custom-art/effects/floor-crack-1.png</key>
-            <key type="filename">custom-art/effects/floor-crack-2.png</key>
-            <key type="filename">custom-art/effects/floor-crack-3.png</key>
             <key type="filename">custom-art/gui/gui-home-button--hover.png</key>
             <key type="filename">custom-art/gui/gui-home-button.png</key>
             <key type="filename">custom-art/gui/gui-inventory-button--hover.png</key>
@@ -601,6 +598,7 @@
             <key type="filename">custom-art/gui/gui-map-pointer.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree-button--hover.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree-button.png</key>
+            <key type="filename">custom-art/items/cube.png</key>
             <key type="filename">custom-art/items/vial-energy.png</key>
             <key type="filename">custom-art/items/vial-health.png</key>
             <key type="filename">custom-art/status-effect-icons/status-frenzy.png</key>
@@ -1197,7 +1195,6 @@
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets</filename>
             <filename>custom-art/status-effect-icons</filename>
-            <filename>custom-art/effects</filename>
             <filename>custom-art/characters</filename>
             <filename>custom-art/gui</filename>
             <filename>custom-art/nova.png</filename>
