@@ -42,30 +42,22 @@ end, 1)
 return function(dt)
   for _,c in pairs(groups.character.getAll()) do
     if c.isDestroyed then
-      local complete = false
+      local destroyCompleted = false
       if c.frozen then
         local Effects = require 'components.effects'
         local sizeMin = c.h/6
         Effects('freeze')(c.x, c.y, c.w/2, 150, 10, 14, sizeMin, sizeMin + 1, 0.5)
-        complete = true
+        destroyCompleted = true
       else
-        if c.destroyedAnimation then
-          complete = c.destroyedAnimation:update(dt)
-        else
-          c.destroyedAnimation = tween.new(0.5, c, {opacity = 0}, tween.easing.outCubic)
-          if c.onDestroyStart then
-            c:onDestroyStart()
-          end
-        end
+        c.destroyedAnimation = c.destroyedAnimation
+          or tween.new(0.5, c, {opacity = 0}, tween.easing.outCubic)
+        destroyCompleted = c.destroyedAnimation:update(dt)
       end
 
-      if complete then
+      if (not c._destroyTriggered) then
+        c._destroyTriggered = true
+        c:onDestroyStart()
         Component.addToGroup(c, lootSystem, c.itemLevel)
-        c:delete(true)
-        if c.onFinal then
-          c:onFinal()
-        end
-
         c.collision:delete()
         msgBus.send(msgBus.ENEMY_DESTROYED, {
           parent = c,
@@ -73,6 +65,13 @@ return function(dt)
           y = c.y,
           experience = c.experience
         })
+      end
+
+      if destroyCompleted then
+        c:delete(true)
+        if c.onFinal then
+          c:onFinal()
+        end
       end
     else
       local Stats = require 'modules.stats'

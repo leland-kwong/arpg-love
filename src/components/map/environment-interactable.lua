@@ -63,17 +63,6 @@ msgBus.on(msgBus.CHARACTER_HIT, function(msgValue)
   end
 end)
 
-msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
-  local component = msgValue.parent
-  if Component.getBlueprint(msgValue.parent) == EnvironmentInteractable then
-    local source = love.audio.newSource(
-      'built/sounds/treasure-cache-demolish.wav',
-      'static'
-    )
-    love.audio.play(source)
-  end
-end)
-
 function EnvironmentInteractable.init(self)
   Component.addToGroup(self, groups.character)
   Component.addToGroup(self, 'autoVisibility')

@@ -305,6 +305,7 @@ local Player = {
           duration = 1,
           width = 4
         }):setParent(self)
+        msgBus.send(msgBus.PLAYER_FULL_HEAL)
       end),
 
       msgBus.on(msgBus.DROP_ITEM_ON_FLOOR, function(item)
