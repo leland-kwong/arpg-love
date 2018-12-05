@@ -90,7 +90,7 @@ local frozenShatterEffect = function(particleImage, particleImageQuad)
       local doneCount = 0
       for i=1, numParticles do
         local p = particles[i]
-        local actualDt = dt / speed / (p.dist / 10)
+        local actualDt = dt / (p.dist / speed)
         p.clock = math.min(1, (p.clock + actualDt))
         local projectileAnimationComplete = p.clock >= 1
         if projectileAnimationComplete then

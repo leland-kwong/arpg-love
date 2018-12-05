@@ -46,7 +46,7 @@ return function(dt)
       if c.frozen then
         local Effects = require 'components.effects'
         local sizeMin = c.h/6
-        Effects('freeze')(c.x, c.y, c.w/2, 0.3, 10, 14, sizeMin, sizeMin + 1, 0.5)
+        Effects('freeze')(c.x, c.y, c.w/2, 150, 10, 14, sizeMin, sizeMin + 1, 0.5)
         complete = true
       else
         if c.destroyedAnimation then
