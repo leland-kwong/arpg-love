@@ -85,7 +85,8 @@ function EnvironmentInteractable.init(self)
   )
   local offsetY = 5
   local w, h = self.animation:getWidth(), self.animation:getHeight()
-  self.h = h
+  self.w, self.h = w, h
+  self.ox, self.oy = self.animation:getOffset()
   local cGroup = collisionGroups.create(
     collisionGroups.environment
   )
@@ -94,9 +95,9 @@ function EnvironmentInteractable.init(self)
     self.x,
     self.y,
     w + 1,
-    h - offsetY,
-    0,
-    -offsetY
+    h,
+    self.ox,
+    self.oy
   ):addToWorld(collisionWorlds.map)
 end
 
@@ -124,7 +125,9 @@ local function draw(self, x, y, scaleX, scaleY)
     y,
     0,
     scaleX or 1,
-    scaleY or 1
+    scaleY or 1,
+    self.ox,
+    self.oy
   )
 end
 
@@ -132,7 +135,8 @@ function EnvironmentInteractable.draw(self)
   local w, h = self.animation:getWidth(), self.animation:getHeight()
   -- shadow
   love.graphics.setColor(0,0,0,0.25 * self.opacity)
-  draw(self, self.x + w * (0.2/2), self.y + h + h/4, 0.8, -0.5)
+  local shadowScale = 0.5
+  draw(self, self.x, self.y + (self.h * shadowScale), 1, -0.5)
 
   local oBlendMode
   if self.state == states.HIT then

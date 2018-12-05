@@ -42,20 +42,29 @@ end, 1)
 return function(dt)
   for _,c in pairs(groups.character.getAll()) do
     if c.isDestroyed then
-      if c.destroyedAnimation then
-        local complete = c.destroyedAnimation:update(dt)
-        if complete then
-          c:delete(true)
-          if c.onFinal then
-            c:onFinal()
+      local complete = false
+      if c.frozen then
+        local FrozenShatterEffect = require 'components.effects'
+        FrozenShatterEffect(c.x, c.y, c.w/2, 0.3, 10, 15, 2, 3, 0.5)
+        complete = true
+      else
+        if c.destroyedAnimation then
+          complete = c.destroyedAnimation:update(dt)
+        else
+          c.destroyedAnimation = tween.new(0.5, c, {opacity = 0}, tween.easing.outCubic)
+          Component.addToGroup(c, lootSystem, c.itemLevel)
+          if c.onDestroyStart then
+            c:onDestroyStart()
           end
         end
-      else
-        c.destroyedAnimation = tween.new(0.5, c, {opacity = 0}, tween.easing.outCubic)
-        Component.addToGroup(c, lootSystem, c.itemLevel)
-        if c.onDestroyStart then
-          c:onDestroyStart()
+      end
+
+      if complete then
+        c:delete(true)
+        if c.onFinal then
+          c:onFinal()
         end
+
         c.collision:delete()
         msgBus.send(msgBus.ENEMY_DESTROYED, {
           parent = c,
