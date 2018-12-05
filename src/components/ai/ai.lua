@@ -367,9 +367,12 @@ function Ai.update(self, dt)
   self.clock = self.clock + dt
   self.frameCount = self.frameCount + 1
 
-  if isIdle or self.frozen then
+  if isIdle then
     return
   end
+
+  local silenced = self.silenced or self.frozen
+  local moveSpeed = self.frozen and 0 or self:getActualSpeed(dt)
 
   if self.onUpdateStart then
     self.onUpdateStart(self, dt)
@@ -401,11 +404,7 @@ function Ai.update(self, dt)
   local extraSightRadiusFromAggro = (self.isAggravated and 20 or 0) * self.gridSize
   local actualSightRadius = self.stats:get('sightRadius') * self.gridSize + extraSightRadiusFromAggro
 
-  if (self.isInViewOfPlayer or self.isAggravated) then
-    -- update ai facing direction
-    self.facingDirectionX = self.vx > 0 and 1 or -1
-    self.facingDirectionY = self.vy > 0 and 1 or -1
-
+  if ((self.isInViewOfPlayer or self.isAggravated)) then
     -- handle hit animation
     if self.hitAnimation then
       local done = self.hitAnimation()
@@ -420,7 +419,12 @@ function Ai.update(self, dt)
       actualSightRadius
     )
 
-    self.animation:update(dt)
+    if (not self.frozen) then
+      -- update ai facing direction
+      self.facingDirectionX = self.vx > 0 and 1 or -1
+      self.facingDirectionY = self.vy > 0 and 1 or -1
+      self.animation:update(dt)
+    end
   end
 
   local canSeeTarget = self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY, self.losDebug)
@@ -441,7 +445,7 @@ function Ai.update(self, dt)
   local abilities = self.abilities
   for i=1, #abilities do
     local ability = abilities[i]
-    if (not self.silenced) then
+    if (not silenced) then
       local canUseAbility = (not self.isAbilityRecovering)
         and (self:getFiniteState() == states.MOVING)
       ability:update(self, dt)
@@ -466,7 +470,7 @@ function Ai.update(self, dt)
 
   local hasTarget = not not self.targetX
   if hasTarget and (self:getFiniteState() ~= states.ATTACKING) then
-    setNextPosition(self, self:getActualSpeed(dt), 40)
+    setNextPosition(self, moveSpeed, 40)
   end
 
   local nextX, nextY = self.x, self.y

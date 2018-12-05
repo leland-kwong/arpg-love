@@ -61,11 +61,13 @@ local modifierHandlers = {
         parent = hitMsg.parent,
         duration = 0.5,
         modifiers = {
-          shocked = 1
+          shocked = 1,
+          freeze = 1
         },
         source = 'INITIATE_SHOCK'
       })
       local multiplier = data.value.value
+      -- hitMsg.damage = 1000
       hitMsg.lightningDamage = hitMsg.lightningDamage + (multiplier * hitMsg.damage)
     end
     return modifiers
