@@ -29,7 +29,7 @@ msgBus.on(msgBus.PROFILE_FUNC, function(profileProps)
         return
       end
       table.insert(profileData, Color.WHITE)
-      table.insert(profileData, '\n'..profileProps.name..' '..string.format('%0.2f', averageTime))
+      table.insert(profileData, profileProps.name..' '..string.format('%0.2f', averageTime)..'\n')
     end
   })(profileProps.call)
 end)
@@ -46,7 +46,7 @@ local function profileFn(groupName, callback)
       totalAverageExecutionTime = totalAverageExecutionTime + averageTime
       if averageTime >= 0.1 then
         table.insert(profileData, Color.WHITE)
-        table.insert(profileData, '\n'..groupName..': '..string.format('%0.2f', averageTime))
+        table.insert(profileData, groupName..': '..string.format('%0.2f', averageTime)..'\n')
       end
     end
   })(callback)
@@ -69,7 +69,7 @@ return function()
   totalAverageExecutionTime = 0
 
   local wrapLimit = 400
-  guiTextLayer:addf(profileData, wrapLimit, 'right', love.graphics.getWidth() - wrapLimit - 10, 10)
+  guiTextLayer:addf(profileData, wrapLimit, 'right', love.graphics.getWidth() - wrapLimit - 5, 5)
   -- reset
   profileData = {}
 end
