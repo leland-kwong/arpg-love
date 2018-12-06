@@ -32,7 +32,7 @@ local frozenShatterEffect = function(particleImage, particleImageQuad)
     for i=1, numParticles do
       local curve = makeCurve(
         randomDirection(),
-        -math.random(0, 5),
+        -math.random(0, 10),
         -math.random(0, 5),
         math.random(0, 2)
       )
