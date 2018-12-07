@@ -100,8 +100,8 @@ function MenuButtons.init(self)
           local drawBox = require 'components.gui.utils.draw-box'
           highlightColor = {Color.multiplyAlpha(Color.YELLOW, math.max(0.2, math.sin(self.clock)))}
           drawBox({
-            x = self.x + 1,
-            y = yPos + 1,
+            x = self.x + 2,
+            y = yPos + 2,
             width = self.w,
             height = self.h
           }, {

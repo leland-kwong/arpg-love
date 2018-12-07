@@ -1,6 +1,7 @@
 local globalState = require 'main.global-state'
 local msgBus = require 'components.msg-bus'
 local MusicManager = require 'main.listeners.music-manager'
+require 'main.listeners.cursors'(msgBus)
 
 local SCENE_STACK_MESSAGE_LAST_PRIORITY = 10
 

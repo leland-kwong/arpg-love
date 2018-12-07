@@ -221,11 +221,6 @@ local Player = {
 
     Component.addToGroup(self, groups.character)
     self.listeners = {
-      -- msgBus.on(msgBus.PLAYER_STATS_NEW_MODIFIERS, function(msgValue)
-      --   updateHealthRegeneration(self.stats:get('healthRegeneration'))
-      --   updateEnergyRegeneration(self.stats:get('energyRegeneration'))
-      -- end),
-
       msgBus.on(msgBus.GENERATE_LOOT, function(msgValue)
         local LootGenerator = require'components.loot-generator.loot-generator'
         local x, y, item = unpack(msgValue)
@@ -305,6 +300,11 @@ local Player = {
           duration = 1,
           width = 4
         }):setParent(self)
+        print(
+          self.stats:get('health'),
+          self.stats:get('maxHealth')
+        )
+        msgBus.send(msgBus.PLAYER_FULL_HEAL)
       end),
 
       msgBus.on(msgBus.DROP_ITEM_ON_FLOOR, function(item)

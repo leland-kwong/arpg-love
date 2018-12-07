@@ -1,10 +1,8 @@
-local electricShockShaderFile = love.filesystem.read('modules/shaders/electric-shock.fsh')
-local electricShockShader = love.graphics.newShader(electricShockShaderFile)
 local noiseImage = love.graphics.newImage('built/images/220px-White-noise-240x180.png')
 noiseImage:setFilter('linear')
 
 local function setElectricShockShader(time, resolution)
-  local shader = electricShockShader
+  local shader = require('modules.shaders')('electric-shock.fsh')
   love.graphics.setShader(shader)
   shader:send('time', time)
   shader:send('speed', 6)

@@ -35,6 +35,13 @@ local state = {
 
 local changeCount = 0
 local function setViewport()
+  local isDevModeChange = config.isDevelopment ~= state.isDevelopment
+  if isDevModeChange then
+    config.scale = config.isDevelopment and 2 or state.productionScale
+    config.scaleFactor = config.scale
+    state.isDevelopment = config.isDevelopment
+  end
+
   local currentResolution = state.resolution
   local isResolutionChange = config.resolution ~= state.resolution
   local isScaleChange = config.scale ~= state.scale
@@ -44,24 +51,18 @@ local function setViewport()
     camera
       :setSize(vw, vh)
       :setScale(config.scale)
+    msgBus.send(msgBus.CURSOR_SET, {})
 
     state.resolution = config.resolution
     state.scale = config.scale
-  end
-
-  local isDevModeChange = config.isDevelopment ~= state.isDevelopment
-  if isDevModeChange then
-    config.scale = config.isDevelopment and 2 or state.productionScale
-    config.scaleFactor = config.scale
-    state.isDevelopment = config.isDevelopment
   end
 end
 
 function love.load()
   msgBus.send(msgBus.GAME_LOADED)
   love.keyboard.setKeyRepeat(true)
-  setViewport()
   require 'main.onload'
+  setViewport()
 
   -- console debugging
   local console = Console.create()
@@ -122,7 +123,7 @@ function love.draw()
   camera:detach()
 
   love.graphics.push()
-  love.graphics.scale(config.scaleFactor)
+  love.graphics.scale(camera.scale)
   groups.hud.drawAll()
   require 'components.groups.gui-draw-box'()
   groups.gui.drawAll()

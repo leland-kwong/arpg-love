@@ -7,4 +7,4 @@ local spriteData = json.decode(
   love.filesystem.read('built/sprite.json')
 )
 
-return Animation(spriteData, spriteAtlas, 1)
+return Animation(spriteData, spriteAtlas, 2)

@@ -100,11 +100,6 @@ local MainScene = {
   isNewGame = false
 }
 
--- custom cursor
-local cursorSize = 64
-local cursor = love.mouse.newCursor('built/images/cursors/crosshair-white.png', cursorSize/2, cursorSize/2)
-love.mouse.setCursor(cursor)
-
 local function restoreComponentsFromState(self, serializedState)
   local classesToRestore = {
     'floorItem',

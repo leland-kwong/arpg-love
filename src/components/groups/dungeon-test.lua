@@ -39,6 +39,10 @@ local function addTreasureCaches(scene)
       },
       serialize = function(self)
         return self.initialProps
+      end,
+      onDestroyStart = function()
+        local Sound = require 'components.sound'
+        Sound.playEffect('treasure-cache-demolish.wav')
       end
     }
     EnvironmentInteractable.create(props):setParent(scene)

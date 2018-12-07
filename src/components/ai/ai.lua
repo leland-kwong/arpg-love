@@ -24,10 +24,13 @@ local collisionGroups = require 'modules.collision-groups'
 local Console = require 'modules.console.console'
 local Object = require 'utils.object-utils'
 
+local Textures = require 'modules.textures'
+local iceTexture, defaultTexture = Textures.ice, Textures.default
+
 local max, random, abs, min = math.max, math.random, math.abs, math.min
 
-local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
-local shader = love.graphics.newShader(pixelOutlineShader)
+local Shaders = require 'modules.shaders'
+local shader = Shaders('pixel-outline.fsh')
 local atlasData = animationFactory.atlasData
 local shaderSpriteSize = {atlasData.meta.size.w, atlasData.meta.size.h}
 
@@ -41,7 +44,9 @@ local states = Enum({
 local statDefaults = {
   moveSpeed = 100,
   sightRadius = 14,
-  freelyMove = 0
+  freelyMove = 0,
+
+  freeze = 0
 }
 local statsMt = {
   __index = function(self, k)
@@ -359,8 +364,18 @@ function Ai.update(self, dt)
 
   local isIdle = (self:getFiniteState() ~= states.MOVING) and (not self.isInViewOfPlayer) and (not self.isAggravated)
   self:setDrawDisabled(isIdle)
+  self.clock = self.clock + dt
+  self.frameCount = self.frameCount + 1
+
   if isIdle then
     return
+  end
+
+  local silenced = self.silenced or self.frozen
+  local moveSpeed = self.frozen and 0 or self:getActualSpeed(dt)
+
+  if self.onUpdateStart then
+    self.onUpdateStart(self, dt)
   end
 
   local shouldCheckStuckStatus = self:getFiniteState() == states.MOVING and self.dv and (not self.canSeeTarget)
@@ -384,22 +399,12 @@ function Ai.update(self, dt)
   local playerX, playerY = playerRef:getPosition()
 
   local grid = self.grid
-  self.clock = self.clock + dt
-  self.frameCount = self.frameCount + 1
-
-  if self.onUpdateStart then
-    self.onUpdateStart(self, dt)
-  end
 
   local targetX, targetY
   local extraSightRadiusFromAggro = (self.isAggravated and 20 or 0) * self.gridSize
   local actualSightRadius = self.stats:get('sightRadius') * self.gridSize + extraSightRadiusFromAggro
 
-  if (self.isInViewOfPlayer or self.isAggravated) then
-    -- update ai facing direction
-    self.facingDirectionX = self.vx > 0 and 1 or -1
-    self.facingDirectionY = self.vy > 0 and 1 or -1
-
+  if ((self.isInViewOfPlayer or self.isAggravated)) then
     -- handle hit animation
     if self.hitAnimation then
       local done = self.hitAnimation()
@@ -414,7 +419,12 @@ function Ai.update(self, dt)
       actualSightRadius
     )
 
-    self.animation:update(dt)
+    if (not self.frozen) then
+      -- update ai facing direction
+      self.facingDirectionX = self.vx > 0 and 1 or -1
+      self.facingDirectionY = self.vy > 0 and 1 or -1
+      self.animation:update(dt)
+    end
   end
 
   local canSeeTarget = self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY, self.losDebug)
@@ -435,7 +445,7 @@ function Ai.update(self, dt)
   local abilities = self.abilities
   for i=1, #abilities do
     local ability = abilities[i]
-    if (not self.silenced) then
+    if (not silenced) then
       local canUseAbility = (not self.isAbilityRecovering)
         and (self:getFiniteState() == states.MOVING)
       ability:update(self, dt)
@@ -460,7 +470,7 @@ function Ai.update(self, dt)
 
   local hasTarget = not not self.targetX
   if hasTarget and (self:getFiniteState() ~= states.ATTACKING) then
-    setNextPosition(self, self:getActualSpeed(dt), 40)
+    setNextPosition(self, moveSpeed, 40)
   end
 
   local nextX, nextY = self.x, self.y
@@ -489,10 +499,10 @@ local function drawShadow(self, h, w, ox, oy)
     animationFactory.atlas,
     self.animation.sprite,
     self.x,
-    self.y + (h * self.scale / 1.5),
+    self.y + (h / 1.5),
     0,
-    self.scale*0.8 * self.facingDirectionX - heightScaleDiff,
-    -self.scale/2 + heightScaleDiff,
+    0.8 * self.facingDirectionX - heightScaleDiff,
+    -0.5 + heightScaleDiff,
     ox,
     oy
   )
@@ -523,8 +533,8 @@ function drawSprite(self, ox, oy)
     round(self.x),
     round(self.y - self.z),
     0,
-    self.scale * self.facingDirectionX,
-    self.scale,
+    self.facingDirectionX,
+    1,
     round(ox),
     round(oy)
   )
@@ -575,13 +585,16 @@ function Ai.draw(self)
   local w, h = self.animation:getSourceSize()
   drawShadow(self, h, w, ox, oy)
 
-  if (self.outlineColor) then
-    love.graphics.setShader(shader)
-    shader:send('sprite_size', shaderSpriteSize)
-    shader:send('outline_width', 1)
-    shader:send('outline_color', self.outlineColor)
-    shader:send('fill_color', self.fillColor)
-    shader:send('alpha', self.opacity)
+  love.graphics.setShader(shader)
+  shader:send('enabled', true)
+  shader:send('sprite_size', shaderSpriteSize)
+
+  if self.frozen then
+    shader:send('outline_color', {1,1,1,0.7})
+    shader:send('outline_width', 2)
+    shader:send('texture_scale', {5.5,1})
+    shader:send('include_corners', true)
+    shader:send('texture_image', iceTexture)
   end
 
   if self.hitAnimation and (not self.destroyedAnimation) then
@@ -589,20 +602,27 @@ function Ai.draw(self)
     love.graphics.setColor(3,3,3)
   end
 
-  local texture = animationFactory.atlas
   local r,g,b,a = self.fillColor[1], self.fillColor[2], self.fillColor[3], self.fillColor[4]
   love.graphics.setColor(r, g, b, a * self.opacity)
   drawSprite(self, ox, oy)
 
+  if (self.outlineColor) then
+    shader:send('outline_width', 1)
+    shader:send('outline_color', self.outlineColor)
+    drawSprite(self, ox, oy)
+  end
+
   local isShocked = self.stats:get('shocked') > 0
   if (isShocked) then
     drawShockEffect(self, ox, oy)
+    love.graphics.setShader(shader)
   end
 
   love.graphics.setBlendMode(oBlendMode)
-  love.graphics.setShader()
 
-  love.graphics.setColor(1,1,1, self.opacity)
+  shader:send('outline_width', 0)
+  shader:send('texture_image', defaultTexture)
+
   drawStatusEffects(self, statusIcons)
 end
 
@@ -686,10 +706,10 @@ function Ai.init(self)
       self.class,
       self.x,
       self.y,
-      self.w * self.scale,
-      self.h * self.scale,
-      ox * self.scale,
-      oy + self.z * self.scale
+      self.w,
+      self.h,
+      ox,
+      oy + self.z
     )
     :addToWorld(self.collisionWorld)
   adjustInitialPositionIfNeeded(self)
