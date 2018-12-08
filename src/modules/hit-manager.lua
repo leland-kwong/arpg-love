@@ -11,8 +11,19 @@ local function rollCritChance(chance)
   return random(1, 1/chance) == 1
 end
 
+local F = require 'utils.functional'
+local elementalCalculators = F.reduce({'lightning', 'cold', 'fire'}, function(calcFns, element)
+  local damageProp = element..'Damage'
+  local resistProp = element..'Resist'
+  calcFns[element] = function(stats, hit)
+    local damage = hit[damageProp]
+    local resistance = hit[resistProp]
+    return damage - (damage * stats:get(resistProp))
+  end
+  return calcFns
+end, {})
+
 local function adjustedDamageTaken(stats, hit)
-  -- damage, lightningDamage, coldDamage, criticalChance, criticalMultiplier
   local damage = hit.damage
   local lightningDamage = hit.lightningDamage
   local coldDamage = hit.coldDamage
@@ -22,15 +33,20 @@ local function adjustedDamageTaken(stats, hit)
   local damageReductionPerArmor = 0.0001
   local damageAfterFlatReduction = math.max(0, damage - stats:get('physicalReduction'))
   local reducedDamageFromArmorResistance = (damageAfterFlatReduction * stats:get('armor') * damageReductionPerArmor)
-  local lightningDamageAfterResistance = lightningDamage - (lightningDamage * stats:get('lightningResist'))
-  local coldDamageAfterResistance = coldDamage - (coldDamage * stats:get('coldResist'))
+  local actualLightningDamage, actualColdDamage =
+    elementalCalculators['lightning'](stats, hit),
+    elementalCalculators['cold'](stats, hit)
   local totalDamage = damageAfterFlatReduction
     - reducedDamageFromArmorResistance
-    + lightningDamageAfterResistance
-    + coldDamageAfterResistance
+    + actualLightningDamage
+    + actualColdDamage
   local criticalMultiplier = rollCritChance(criticalChance) and criticalMultiplier or 0
   local totalDamageWithCrit = totalDamage + (totalDamage * criticalMultiplier)
-  return round(max(0, totalDamageWithCrit)), totalDamage, criticalMultiplier, lightningDamageAfterResistance, coldDamageAfterResistance
+  return round(max(0, totalDamageWithCrit)),
+    totalDamage,
+    criticalMultiplier,
+    actualLightningDamage,
+    actualColdDamage
 end
 
 -- modifiers modify properties such as `maxHealth`, `moveSpeed`, etc...
