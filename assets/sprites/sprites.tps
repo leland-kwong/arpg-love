@@ -538,6 +538,33 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/abilities/frost-orb-core.png</key>
+            <key type="filename">custom-art/status-effect-icons/status-slow.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,5,9,9</rect>
+                <key>scale9Paddings</key>
+                <rect>5,5,9,9</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/abilities/frost-orb-shard.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>1,1,3,1</rect>
+                <key>scale9Paddings</key>
+                <rect>1,1,3,1</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/abilities/frost-spark.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -591,6 +618,9 @@
             </struct>
             <key type="filename">custom-art/characters/ai-legendaries/legendary-1/legendary-ai-1.png</key>
             <key type="filename">custom-art/characters/eyeball/eyeball.png</key>
+            <key type="filename">custom-art/effects/floor-crack-1.png</key>
+            <key type="filename">custom-art/effects/floor-crack-2.png</key>
+            <key type="filename">custom-art/effects/floor-crack-3.png</key>
             <key type="filename">custom-art/gui/gui-home-button--hover.png</key>
             <key type="filename">custom-art/gui/gui-home-button.png</key>
             <key type="filename">custom-art/gui/gui-inventory-button--hover.png</key>
@@ -1077,19 +1107,6 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/status-effect-icons/status-slow.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>5,5,9,9</rect>
-                <key>scale9Paddings</key>
-                <rect>5,5,9,9</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
             <key type="filename">custom-art/tiles/environment-breakable-1.png</key>
             <key type="filename">custom-art/tiles/environment-breakable-2.png</key>
             <key type="filename">custom-art/tiles/environment-breakable-3.png</key>
@@ -1195,6 +1212,7 @@
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets</filename>
             <filename>custom-art/status-effect-icons</filename>
+            <filename>custom-art/effects</filename>
             <filename>custom-art/characters</filename>
             <filename>custom-art/gui</filename>
             <filename>custom-art/nova.png</filename>

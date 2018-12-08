@@ -1,0 +1,59 @@
+<?xml version="1.0" standalone="no" ?>
+<!DOCTYPE project PUBLIC "-//audacityproject-1.3.0//DTD//EN" "http://audacity.sourceforge.net/xml/audacityproject-1.3.0.dtd" >
+<project xmlns="http://audacity.sourceforge.net/xml/" projname="frost-orb_data" version="1.3.0" audacityversion="2.2.2" sel0="5.4690393095" sel1="5.4690393095" vpos="0" h="0.0000000000" zoom="15.9077298730" rate="96000.0" snapto="off" selectionformat="hh:mm:ss + milliseconds" frequencyformat="Hz" bandwidthformat="octaves">
+	<tags>
+		<tag name="encoded_by" value="Originator"/>
+		<tag name="originator_reference" value="OriginatorReference"/>
+		<tag name="encoder" value="Lavf53.18.0"/>
+		<tag name="date" value="2000:00:00"/>
+		<tag name="creation_time" value="00:00:00"/>
+		<tag name="time_reference" value="0"/>
+		<tag name="coding_history" value="CodingHistory"/>
+	</tags>
+	<wavetrack name="frost-orb" channel="0" linked="1" mute="0" solo="0" height="150" minimized="0" isSelected="0" rate="96000" gain="1.0" pan="0.0" colorindex="0">
+		<waveclip offset="0.00000000" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="252690">
+				<waveblock start="0">
+					<simpleblockfile filename="e08082a1.au" len="252690" min="-0.794328" max="0.732726" rms="0.091103"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="frost-orb" channel="1" linked="0" mute="0" solo="0" height="150" minimized="0" isSelected="0" rate="96000" gain="1.0" pan="0.0" colorindex="0">
+		<waveclip offset="0.00000000" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="252690">
+				<waveblock start="0">
+					<simpleblockfile filename="e0808440.au" len="252690" min="-0.665893" max="0.729394" rms="0.081293"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="203234__trp__freezing-rain-ice-heavy-on-roof-77mel-11-4-13" channel="0" linked="1" mute="0" solo="0" height="150" minimized="0" isSelected="1" rate="48000" gain="1.0" pan="0.0" colorindex="0">
+		<waveclip offset="0.00000000" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="262514">
+				<waveblock start="0">
+					<simpleblockfile filename="e080896f.au" len="131257" min="-0.606323" max="0.710876" rms="0.021466"/>
+				</waveblock>
+				<waveblock start="131257">
+					<simpleblockfile filename="e080866f.au" len="131257" min="-0.201996" max="0.211884" rms="0.022185"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="203234__trp__freezing-rain-ice-heavy-on-roof-77mel-11-4-13" channel="1" linked="0" mute="0" solo="0" height="150" minimized="0" isSelected="1" rate="48000" gain="1.0" pan="0.0" colorindex="0">
+		<waveclip offset="0.00000000" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="262514">
+				<waveblock start="0">
+					<simpleblockfile filename="e0808299.au" len="131257" min="-0.432281" max="0.503296" rms="0.021965"/>
+				</waveblock>
+				<waveblock start="131257">
+					<simpleblockfile filename="e08088e7.au" len="131257" min="-0.33429" max="0.414032" rms="0.02303"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+</project>
