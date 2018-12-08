@@ -76,9 +76,9 @@ local Shard = Component.createFactory({
       self.ox, self.oy
     )
   end,
-  drawOrder = function()
-    return 100010
-  end
+  drawOrder = function(self)
+    return Component.groups.all:drawOrder(self)
+  end,
 })
 
 local FrostOrb = Component.createFactory({
@@ -181,8 +181,8 @@ local FrostOrb = Component.createFactory({
       self.oy
     )
   end,
-  drawOrder = function()
-    return 100001
+  drawOrder = function(self)
+    return Component.groups.all:drawOrder(self)
   end,
   onExpire = function(parent)
     parent.expiring = true

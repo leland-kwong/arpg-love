@@ -26,37 +26,13 @@ local function iterateGrid(grid, filterCallbacks)
 	for y=1,#grid do
 		for x=1,#grid[1] do
 			local gridValue = grid[y][x]
-			local callback = filterCallbacks[gridValue]			
+			local callback = filterCallbacks[gridValue]
 			if callback then
 				callback(calcTileValue(grid, x, y), x, y)
 			end
 		end
 	end
 end
-
---[[
-if Global.isDevelopment then
-	local grid = {
-		{0,0,0,0,0,0},
-		{0,0,1,1,0,0},
-		{0,0,1,1,1,0},
-		{0,0,0,1,0,0},
-		{0,0,0,0,0,0},
-	}
-
-	iterateGrid(grid, function(v, x, y) 
-		grid[y][x] = v
-	end)
-	printGrid(grid, '', function(v) 
-		if v > 0 and v < 10 then
-			return "'0"..v.."'"
-		elseif v > 10 then
-			return "'"..v.."'"
-		end
-		return "  "
-	end)
-end
-]]--
 
 return {
 	calcTileIndex = calcTileIndex,

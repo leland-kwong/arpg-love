@@ -39,7 +39,7 @@ local Groups = {
         number of layers between each order. This is to allow multiple different items to be stacked within the same draw order
       ]]
       local orderByTilePosition = floor(component.y / gridSize)
-      local order = orderByTilePosition * self.drawLayersPerGridCell - 2
+      local order = orderByTilePosition * self.drawLayersPerGridCell
       return max(1, order)
     end,
   }),
