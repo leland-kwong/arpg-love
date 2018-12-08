@@ -237,11 +237,10 @@ function Console.draw(self)
     table.insert(output, Color.WHITE)
     table.insert(output, entry..'\n')
   end
-  guiText:addf(output, 400, 'left', edgeOffset, loggerYPosition + guiText.getTextSize(logSectionTitle, guiText.font))
+  guiText:addf(output, 400, 'left', 0, loggerYPosition + guiText.getTextSize(logSectionTitle, guiText.font))
 
   gfx.setCanvas()
   gfx.setBlendMode('alpha', 'premultiplied')
-  gfx.scale(config.scale / 2)
   gfx.draw(canvas)
   gfx.pop()
   gfx.setBlendMode('alpha')
