@@ -68,6 +68,11 @@ function Sound.playEffect(file, modifier)
   local source = love.audio.newSource('built/sounds/'..file, 'static')
   modifier(source)
   love.audio.play(source)
+  return source
+end
+
+function Sound.stopEffect(source)
+  love.audio.stop(source)
 end
 
 return Sound

@@ -1,0 +1,53 @@
+local collisionGroups = require 'modules.collision-groups'
+local itemSystem = require(require('alias').path.itemSystem)
+local Color = require 'modules.color'
+local Sound = require 'components.sound'
+local msgBus = require("components.msg-bus")
+local setProp = require 'utils.set-prop'
+
+local weaponLength = 26
+local bulletColor = {Color.rgba255(252, 122, 255)}
+local muzzleFlashMessage = {
+	color = bulletColor
+}
+
+return itemSystem.registerModule({
+  name = 'frost-orb',
+  type = itemSystem.moduleTypes.EQUIPMENT_ACTIVE,
+  active = function(item, props)
+    return {
+			blueprint = require 'components.abilities.frost-orb',
+			props = {
+        componentGroup = 'all',
+        damage = props.damage,
+        coldDamage = props.coldDamage,
+				target = collisionGroups.create(
+					collisionGroups.enemyAi,
+					collisionGroups.environment
+        ),
+        speed = 150,
+        projectileSpeed = 250,
+        projectileRate = 5,
+        projectileLifeTime = 0.5
+			}
+		}
+	end,
+	tooltip = function(item, props)
+		return {
+			template = 'Shoots an orb of frost that releases shards of ice dealing {damageRange} cold damage.',
+			data = {
+				damageRange = {
+					type = 'range',
+					from = {
+						prop = 'minDamage',
+						val = props.coldDamage[1]
+					},
+					to = {
+						prop = 'maxDamage',
+						val = props.coldDamage[2]
+					},
+				}
+			}
+		}
+	end
+})

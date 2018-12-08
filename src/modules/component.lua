@@ -470,6 +470,7 @@ end
 -- Method for creating components without a factory
 local NodeFactory = M.createFactory({})
 M.create = NodeFactory.create
+M.newId = uid
 
 M.newGroup({
   name = 'emptyGroup'

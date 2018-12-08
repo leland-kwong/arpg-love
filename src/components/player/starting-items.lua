@@ -10,6 +10,7 @@ if config.isDevelopment then
       'base.mock-shoes',
     },
     inventory = {
+      'base.pod-module-frost-orb',
       'base.pod-module-hammer',
       'legendary.augmentation-module-frenzy',
       'legendary.defender-of-aureus',

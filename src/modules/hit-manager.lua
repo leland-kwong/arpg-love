@@ -11,17 +11,26 @@ local function rollCritChance(chance)
   return random(1, 1/chance) == 1
 end
 
-local function adjustedDamageTaken(self, damage, lightningDamage, criticalChance, criticalMultiplier)
+local function adjustedDamageTaken(stats, hit)
+  -- damage, lightningDamage, coldDamage, criticalChance, criticalMultiplier
+  local damage = hit.damage
+  local lightningDamage = hit.lightningDamage
+  local coldDamage = hit.coldDamage
+  local criticalChance = min(1, hit.criticalChance or 0)
+  local criticalMultiplier = hit.criticalMultiplier or 0
+
   local damageReductionPerArmor = 0.0001
-  local damageAfterFlatReduction = damage - self:get('physicalReduction')
-  local reducedDamageFromArmorResistance = (damageAfterFlatReduction * self:get('armor') * damageReductionPerArmor)
-  local lightningDamageAfterResistance = lightningDamage - (lightningDamage * self:get('lightningResist'))
+  local damageAfterFlatReduction = math.max(0, damage - stats:get('physicalReduction'))
+  local reducedDamageFromArmorResistance = (damageAfterFlatReduction * stats:get('armor') * damageReductionPerArmor)
+  local lightningDamageAfterResistance = lightningDamage - (lightningDamage * stats:get('lightningResist'))
+  local coldDamageAfterResistance = coldDamage - (coldDamage * stats:get('coldResist'))
   local totalDamage = damageAfterFlatReduction
     - reducedDamageFromArmorResistance
     + lightningDamageAfterResistance
+    + coldDamageAfterResistance
   local criticalMultiplier = rollCritChance(criticalChance) and criticalMultiplier or 0
   local totalDamageWithCrit = totalDamage + (totalDamage * criticalMultiplier)
-  return round(max(0, totalDamageWithCrit)), totalDamage, criticalMultiplier, lightningDamageAfterResistance
+  return round(max(0, totalDamageWithCrit)), totalDamage, criticalMultiplier, lightningDamageAfterResistance, coldDamageAfterResistance
 end
 
 -- modifiers modify properties such as `maxHealth`, `moveSpeed`, etc...
@@ -36,15 +45,6 @@ local function applyModifiers(self, newModifiers, multiplier)
   end
 end
 
-local function getDamageParams(self, hit)
-  return
-    self,
-    hit.damage or 0,
-    hit.lightningDamage or 0,
-    min(1, hit.criticalChance or 0), -- maximum value of 1
-    hit.criticalMultiplier or 0
-end
-
 --[[
   handles hits taken for a character, managing damage and property modifiers
 
@@ -57,15 +57,18 @@ local function hitManager(_, self, dt, onDamageTaken)
     hitCount = hitCount + 1
 
     if onDamageTaken then
-      local actualDamage, actualNonCritDamage, actualCritMultiplier, actualLightningDamage = adjustedDamageTaken(
-        getDamageParams(self.stats, hit)
-      )
+      local actualDamage,
+        actualNonCritDamage,
+        actualCritMultiplier,
+        actualLightningDamage,
+        actualColdDamage = adjustedDamageTaken(self.stats, hit)
       onDamageTaken(
         self,
         actualDamage,
         actualNonCritDamage,
         actualCritMultiplier,
-        actualLightningDamage
+        actualLightningDamage,
+        actualColdDamage
       )
     end
 
