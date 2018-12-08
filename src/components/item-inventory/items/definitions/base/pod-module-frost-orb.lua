@@ -23,7 +23,7 @@ return {
 		category = itemConfig.category.POD_MODULE,
 
 		info = {
-			cooldown = 0.5,
+			cooldown = 1,
 			attackTime = 0.25,
 			energyCost = 6
 		},
