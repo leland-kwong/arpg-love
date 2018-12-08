@@ -194,7 +194,7 @@ local function findNearestDroppablePosition(startX, startY)
     i = i + 1
   end
 
-  return dropX * config.gridSize, dropY * config.gridSize
+  return (dropX or x1) * config.gridSize, (dropY or y1) * config.gridSize
 end
 
 local LootGenerator = {
