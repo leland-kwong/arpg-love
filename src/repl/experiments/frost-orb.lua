@@ -1,0 +1,80 @@
+-- local Component = require 'modules.component'
+-- local AnimationFactory = require 'components.animation-factory'
+-- local CollisionWorlds = require 'components.collision-worlds'
+-- local bump = require 'modules.bump'
+-- local FrostOrb = require 'components.abilities.frost-orb'
+
+-- local gridSize = 16
+-- local world = bump.newWorld(gridSize)
+
+-- -- setup collision test
+-- Component.create({
+--   id = 'collisionWorld',
+--   init = function(self)
+--     Component.addToGroup(self, 'gui')
+--     self.obstacles = {}
+--     local numObstacles = 20
+--     while #self.obstacles < numObstacles do
+--       local x, y = math.random(0, 10),
+--         math.random(0, 10)
+--       if (y < 2) or (y > 6) then
+--         local o = {
+--           x = x * gridSize,
+--           y = y * gridSize,
+--           size = gridSize,
+--           group = 'obstacle'
+--         }
+--         table.insert(self.obstacles, o)
+--         world:add(o, o.x, o.y, o.size, o.size)
+--       end
+--     end
+
+--     local orbBlocker = {
+--       x = 200,
+--       y = 60,
+--       size = gridSize,
+--       group = 'obstacle'
+--     }
+--     table.insert( self.obstacles, orbBlocker)
+--     world:add(orbBlocker, orbBlocker.x, orbBlocker.y, gridSize, gridSize)
+
+--     local mockEnemy = {
+--       x = 150,
+--       y = 60,
+--       size = gridSize,
+--       group = 'enemyAi',
+--       color = {1,0.4,1}
+--     }
+--     table.insert( self.obstacles, mockEnemy)
+--     world:add(mockEnemy, mockEnemy.x, mockEnemy.y, gridSize, gridSize)
+
+--     self.clock = 0
+--   end,
+--   update = function(self, dt)
+--     self.clock = self.clock + dt
+--     if self.clock > 1 then
+--       self.clock = 0
+--       local collisionGroups = require 'modules.collision-groups'
+--       FrostOrb.create({
+--         target = 'enemyAi',
+--         -- target = collisionGroups.create('enemyAi', 'environment'),
+--         collisionWorld = world,
+--         lifeTime = 5
+--       })
+--     end
+--   end,
+--   draw = function(self)
+--     love.graphics.clear()
+--     love.graphics.origin()
+--     love.graphics.scale(3)
+--     love.graphics.setLineWidth(1)
+--     for i=1, #self.obstacles do
+--       local o = self.obstacles[i]
+--       love.graphics.setColor(o.color or {1,1,0})
+--       love.graphics.rectangle('line', o.x, o.y, o.size, o.size)
+--     end
+--   end,
+--   drawOrder = function()
+--     return 100000
+--   end
+-- })

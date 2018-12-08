@@ -2,6 +2,11 @@
 local userSettingsState = require 'config.user-settings.state'
 userSettingsState.load()
 
+local config = require 'config.config'
+if config.isDevelopment then
+  require 'repl'
+end
+
 require 'modules.file-system'
 
 local Component = require 'modules.component'
