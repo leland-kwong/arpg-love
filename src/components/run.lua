@@ -25,8 +25,7 @@ function love.run()
 
 	-- Main loop time.
 	return function()
-		local isDevelopment = config.isDevelopment
-		local focused = (not isDevelopment) or (isDevelopment and windowFocused)
+		local focused = windowFocused
 
 		-- Process events.
 		if love.event then
@@ -47,21 +46,17 @@ function love.run()
     end
 
 		-- Call update and draw
-		if love.update then
-			if focused and (not paused) then
-				love.update(dt)
-			end
+		if love.update and (not paused) then
+			love.update(dt)
     end -- will pass 0 if love.timer is disabled
 
 		if love.graphics and love.graphics.isActive() then
-			if focused then
-				love.graphics.origin()
-				love.graphics.clear(love.graphics.getBackgroundColor())
+			love.graphics.origin()
+			love.graphics.clear(love.graphics.getBackgroundColor())
 
-				if love.draw then love.draw() end
+			if love.draw then love.draw() end
 
-				love.graphics.present()
-			end
+			love.graphics.present()
 		end
 
 		if love.timer then love.timer.sleep(0.001) end
