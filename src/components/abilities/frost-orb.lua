@@ -6,6 +6,8 @@ local collisionGroups = require 'modules.collision-groups'
 local Shard = Component.createFactory({
   init = function(self)
     Component.addToGroup(self, self.componentGroup)
+    Component.addToGroup(self, 'gameWorld')
+
     self.clock = 0
 
     local length = 1000000
@@ -95,6 +97,8 @@ local FrostOrb = Component.createFactory({
   projectileSpeed = 120,
   init = function(self)
     Component.addToGroup(self, self.componentGroup)
+    Component.addToGroup(self, 'gameWorld')
+
     self.clock = 0
     self.shardClock = 0
     self.rotation = 0
@@ -154,15 +158,27 @@ local FrostOrb = Component.createFactory({
     end
   end,
   draw = function(self, dt)
+    love.graphics.setColor(0,0,0,math.min(0.3, self.opacity))
+    -- shadow
+    self.animation:draw(
+      self.x,
+      self.y + self.animation:getHeight(),
+      self.angle,
+      self.scale/2,
+      self.scale,
+      self.ox,
+      self.oy
+    )
+
     love.graphics.setColor(1,1,1,self.opacity)
-    love.graphics.draw(
-      AnimationFactory.atlas,
-      self.animation.sprite,
+    self.animation:draw(
       self.x,
       self.y,
       self.angle,
-      self.scale, self.scale,
-      self.ox, self.oy
+      self.scale,
+      self.scale,
+      self.ox,
+      self.oy
     )
   end,
   drawOrder = function()
@@ -192,6 +208,9 @@ local FrostOrb = Component.createFactory({
         end
       end
     }):setParent(parent)
+  end,
+  final = function(self)
+    love.audio.stop(self.sound)
   end
 })
 

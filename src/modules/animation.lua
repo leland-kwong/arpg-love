@@ -140,6 +140,15 @@ function meta:isLastFrame()
   return self.index == self.numFrames
 end
 
+function meta:draw(x, y, angle, sx, sy, ox, oy, kx, ky)
+  love.graphics.draw(
+    self.atlas,
+    self.sprite,
+    x, y, angle, sx, sy, ox, oy
+  )
+  return self
+end
+
 -- increments the animation by the time amount
 function meta:update(dt, data)
   self.time = self.time + dt

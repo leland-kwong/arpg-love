@@ -12,5 +12,5 @@ local function clearAllSavedStates()
 end
 
 return function()
-
+  clearAllSavedStates()
 end
