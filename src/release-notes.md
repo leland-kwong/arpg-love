@@ -1,12 +1,25 @@
 # Release notes
 
-## 3.0.1-alpha-hotfix
+## 4.0.0-pre-alpha
+
+New
+
+* Frost-orb ability
+* Cold damage type
+* Added support for **freeze** effect on enemies
+
+Updates
+
+* Changed resolution to be more zoomed in to give a more immersive feel to the game
+* Passive skill tree is now zoomable and has a more tree-like structure.
+
+## 3.0.1-pre-alpha-hotfix
 
 * Fixed issue with tree layout file not found.
 
 ---
 
-## 3.0.0-alpha
+## 3.0.0-pre-alpha
 
 New
 
@@ -20,7 +33,7 @@ Updates
 
 ---
 
-## 3.0.0-alpha
+## 3.0.0-pre-alpha
 
 New
 
@@ -32,7 +45,7 @@ Updates
 * Redesigned HUD to be more sci-fi style while also making it more readable regardless of the background colors
 * Redesigned stats system to be more reliable and flexible
 
-## 2.1.0-alpha
+## 2.1.0-pre-alpha
 
 New
 
@@ -45,7 +58,7 @@ Updates
 
 ---
 
-## 2.0.0-alpha
+## 2.0.0-pre-alpha
 
 **NOTE:** In order to support the latest changes, we've had to delete your existing saved games. We will continue to do this as necessary until the game has reached a more stable state.
 
@@ -67,7 +80,7 @@ New
 
 ---
 
-## 1.2.0-alpha
+## 1.2.0-pre-alpha
 
 * Redesigned UI to be more user friendly and simpler
 * Fixed an issue where some windows 10 users were unable to run the game
