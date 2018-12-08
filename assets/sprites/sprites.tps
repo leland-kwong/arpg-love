@@ -331,132 +331,6 @@
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_97.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_98.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_99.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_1.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_10.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_100.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_101.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_102.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_103.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_104.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_105.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_106.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_107.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_108.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_109.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_11.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_110.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_111.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_112.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_113.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_114.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_115.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_116.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_117.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_118.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_119.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_12.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_120.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_121.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_122.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_123.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_124.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_125.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_126.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_13.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_14.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_15.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_16.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_17.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_18.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_19.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_2.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_20.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_21.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_22.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_23.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_24.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_25.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_26.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_27.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_28.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_29.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_3.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_30.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_31.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_32.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_33.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_34.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_35.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_36.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_37.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_38.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_39.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_4.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_40.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_41.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_42.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_43.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_44.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_45.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_46.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_47.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_48.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_49.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_5.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_50.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_51.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_52.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_53.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_54.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_55.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_56.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_57.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_58.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_59.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_6.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_60.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_61.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_62.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_63.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_64.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_65.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_66.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_67.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_68.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_69.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_7.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_70.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_71.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_72.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_73.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_74.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_75.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_76.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_77.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_78.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_79.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_8.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_80.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_81.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_82.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_83.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_84.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_85.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_86.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_87.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_88.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_89.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_9.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_90.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_91.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_92.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_93.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_94.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_95.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_96.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_97.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_98.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets/helmet_99.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_1.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_10.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_11.png</key>
@@ -1051,6 +925,7 @@
             </struct>
             <key type="filename">custom-art/items/weapon-module-empty.png</key>
             <key type="filename">custom-art/items/weapon-module-fireball.png</key>
+            <key type="filename">custom-art/items/weapon-module-frost-orb.png</key>
             <key type="filename">custom-art/items/weapon-module-hammer.png</key>
             <key type="filename">custom-art/items/weapon-module-initiate.png</key>
             <key type="filename">custom-art/items/weapon-module-lightning-rod.png</key>
@@ -1123,8 +998,6 @@
                 <false/>
             </struct>
             <key type="filename">custom-art/tiles/environment-door.png</key>
-            <key type="filename">custom-art/tiles/wall-5.png</key>
-            <key type="filename">custom-art/tiles/wall-6.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0,0.464286</point_f>
@@ -1193,13 +1066,27 @@
             <key type="filename">custom-art/tiles/wall-4.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0,0.464286</point_f>
+                <point_f>0.1,0.464286</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
                 <rect>4,8,8,15</rect>
                 <key>scale9Paddings</key>
                 <rect>4,8,8,15</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/wall-5.png</key>
+            <key type="filename">custom-art/tiles/wall-6.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.1,0.464286</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,14,8,28</rect>
+                <key>scale9Paddings</key>
+                <rect>4,14,8,28</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -1210,7 +1097,6 @@
             <filename>custom-art/primitives</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors</filename>
-            <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/helmets</filename>
             <filename>custom-art/status-effect-icons</filename>
             <filename>custom-art/effects</filename>
             <filename>custom-art/characters</filename>
