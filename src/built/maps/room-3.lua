@@ -1,13 +1,14 @@
 return {
-  version = "1.1",
+  version = "1.2",
   luaversion = "5.1",
-  tiledversion = "1.1.6",
+  tiledversion = "1.2.1",
   orientation = "orthogonal",
   renderorder = "right-down",
   width = 60,
   height = 80,
   tilewidth = 16,
   tileheight = 16,
+  nextlayerid = 6,
   nextobjectid = 54,
   properties = {},
   tilesets = {
@@ -19,6 +20,7 @@ return {
       tileheight = 56,
       spacing = 0,
       margin = 0,
+      columns = 0,
       tileoffset = {
         x = 0,
         y = 0
@@ -144,6 +146,7 @@ return {
       tileheight = 800,
       spacing = 0,
       margin = 0,
+      columns = 0,
       tileoffset = {
         x = 0,
         y = 0
@@ -175,6 +178,7 @@ return {
   layers = {
     {
       type = "tilelayer",
+      id = 1,
       name = "ground",
       x = 0,
       y = 0,
@@ -271,6 +275,7 @@ return {
     },
     {
       type = "tilelayer",
+      id = 2,
       name = "walls",
       x = 0,
       y = 0,
@@ -367,6 +372,7 @@ return {
     },
     {
       type = "objectgroup",
+      id = 3,
       name = "environment",
       visible = true,
       opacity = 1,
@@ -392,6 +398,7 @@ return {
     },
     {
       type = "objectgroup",
+      id = 4,
       name = "spawn-points",
       visible = true,
       opacity = 1,
@@ -554,6 +561,7 @@ return {
     },
     {
       type = "objectgroup",
+      id = 5,
       name = "unique-enemies",
       visible = true,
       opacity = 1,

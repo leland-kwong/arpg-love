@@ -175,10 +175,7 @@ function MainScene.init(self)
     camera = camera,
     grid = mapGrid,
     tileRenderDefinition = gridTileDefinitions,
-    walkable = Map.WALKABLE,
-    drawOrder = function()
-      return 1
-    end
+    walkable = Map.WALKABLE
   }):setParent(parent)
 
   if serializedState then

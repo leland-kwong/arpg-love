@@ -12,6 +12,7 @@ local lru = require 'utils.lru'
 local memoize = require'utils.memoize'
 local config = require'config.config'
 local Grid = require 'utils.grid'
+local Background = require 'components.map.background'
 
 local animationTypes = {}
 
@@ -81,6 +82,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   tileRenderDefinition = {},
 
   init = function(self)
+    Background.create()
     self.collisionObjectsHash = setupCollisionObjects(self, self.grid, self.gridSize)
 
     local cacheSize = 400
@@ -190,6 +192,10 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
 
   serialize = function(self)
     return self.grid
+  end,
+
+  drawOrder = function()
+    return 2
   end
 })
 
