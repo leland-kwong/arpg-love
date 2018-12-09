@@ -82,8 +82,9 @@ local Shard = Component.createFactory({
 })
 
 local FrostOrb = Component.createFactory({
-  x = 70,
-  y = 60,
+  x = 0,
+  y = 0,
+  startOffset = 10,
   collisionWorld = CollisionWorlds.map,
   lifeTime = 1,
   scale = 1,
@@ -101,11 +102,8 @@ local FrostOrb = Component.createFactory({
     self.shardClock = 0
     self.rotation = 0
 
-    local length = 1000000
-    local x2, y2 = self.x2, self.y2
-    local Position = require 'utils.position'
-    self.dx, self.dy = Position.getDirection(self.x, self.y, x2, y2)
-
+    self.x, self.y = self.x + (self.dx * self.startOffset),
+      self.y + (self.dy * self.startOffset)
     self.animation = AnimationFactory:newStaticSprite('frost-orb-core')
     self.ox, self.oy = self.animation:getOffset()
     self.width, self.height = self.animation:getWidth(), self.animation:getHeight()
