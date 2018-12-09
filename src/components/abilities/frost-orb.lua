@@ -46,7 +46,7 @@ local Shard = Component.createFactory({
           msgBus.send(msgBus.CHARACTER_HIT, {
             parent = cItem.parent,
             source = self.source,
-            coldDamage = math.random(self.coldDamage[1], self.coldDamage[2]),
+            coldDamage = math.random(self.coldDamage.x, self.coldDamage.y),
           })
           msgBus.send(msgBus.CHARACTER_HIT, {
             parent = cItem.parent,
@@ -88,8 +88,6 @@ local FrostOrb = Component.createFactory({
   lifeTime = 1,
   scale = 1,
   opacity = 1,
-  minDamage = 1,
-  maxDamage = 1,
   angle = math.pi + math.pi/2,
   speed = 50,
   projectileRate = 5,

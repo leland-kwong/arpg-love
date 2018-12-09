@@ -85,12 +85,15 @@ local function ActiveEquipmentHandler()
   local function modifyAbility(instance, playerRef)
     local v = instance
     local dmgMultiplier = 1 + (playerRef.stats:get('attackPower') / 100)
-    local min = round(v.minDamage * dmgMultiplier)
-    local max = round(v.maxDamage * dmgMultiplier)
+    local min = (v.minDamage or 0) * dmgMultiplier
+    local max = (v.maxDamage or 0) * dmgMultiplier
 
     -- update instance properties
     v:set('minDamage', min)
       :set('maxDamage', max)
+    if v.coldDamage then
+      v:set('coldDamage', v.coldDamage * dmgMultiplier)
+    end
 
     return v
   end

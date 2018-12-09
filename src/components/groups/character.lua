@@ -20,7 +20,7 @@ hitMessageMt.__index = hitMessageMt
 msgBus.on(msgBus.CHARACTER_HIT, function(msg)
   local sourceValueType = type(msg.source)
   if (not characterHitMessagePropTypes.source[sourceValueType]) then
-    print('[WARNING]: source value type should be a string or number')
+    print('[WARNING]: invalid source value type'..sourceValueType)
   end
 
   -- FIXME: sometimes chain lightning triggers a hit for a non-character component

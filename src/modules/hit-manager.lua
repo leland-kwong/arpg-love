@@ -18,7 +18,10 @@ local elementalCalculators = F.reduce({'lightning', 'cold', 'fire'}, function(ca
   calcFns[element] = function(stats, hit)
     local damage = hit[damageProp]
     local resistance = hit[resistProp]
-    return damage - (damage * stats:get(resistProp))
+    return max(
+      0,
+      damage * (1 - stats:get(resistProp))
+    )
   end
   return calcFns
 end, {})
@@ -31,7 +34,7 @@ local function adjustedDamageTaken(stats, hit)
   local criticalMultiplier = hit.criticalMultiplier or 0
 
   local damageReductionPerArmor = 0.0001
-  local damageAfterFlatReduction = math.max(0, damage - stats:get('physicalReduction'))
+  local damageAfterFlatReduction = max(0, damage - stats:get('physicalResist'))
   local reducedDamageFromArmorResistance = (damageAfterFlatReduction * stats:get('armor') * damageReductionPerArmor)
   local actualLightningDamage, actualColdDamage =
     elementalCalculators['lightning'](stats, hit),

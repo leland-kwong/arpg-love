@@ -673,6 +673,13 @@ local function drawDebug(self)
     local c1 = self.colObj
     local x, y = c1:getPositionWithOffset()
     love.graphics.rectangle('line', x, y, c1.w, c1.h)
+
+
+    love.graphics.setColor(1,0.5,1)
+    local Position = require 'utils.position'
+    local gridSize = 16
+    local gridX, gridY = Position.pixelsToGridUnits(self.x, self.y, gridSize)
+    love.graphics.rectangle('line', gridX * gridSize, gridY * gridSize, gridSize, gridSize)
   end
 end
 

@@ -3,6 +3,7 @@ local msgBus = require("components.msg-bus")
 local itemSystem = require("components.item-inventory.items.item-system")
 local functional = require("utils.functional")
 local AnimationFactory = require 'components.animation-factory'
+local Vec2 = require 'modules.brinevector'
 
 local weaponCooldown = 0.1
 
@@ -30,7 +31,7 @@ return {
 
 		onActivate = require(require('alias').path.items..'.inventory-actives.equip-on-click')(),
 		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.frost-orb')({
-      coldDamage = {1, 2}
+      coldDamage = Vec2(1, 2)
 		})
 	}
 }

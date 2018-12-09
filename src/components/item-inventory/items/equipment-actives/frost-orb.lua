@@ -40,11 +40,11 @@ return itemSystem.registerModule({
 					type = 'range',
 					from = {
 						prop = 'minDamage',
-						val = props.coldDamage[1]
+						val = props.coldDamage.x
 					},
 					to = {
 						prop = 'maxDamage',
-						val = props.coldDamage[2]
+						val = props.coldDamage.y
 					},
 				}
 			}

@@ -185,7 +185,7 @@ return function()
     maxHealth = 25,
     w = spriteWidth,
     h = spriteHeight,
-    physicalReduction = 1,
+    physicalResist = 1,
     animations = animations,
     abilities = {
       DashAbility,
