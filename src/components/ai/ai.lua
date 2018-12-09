@@ -98,6 +98,8 @@ local Ai = {
   onDestroyStart = noop,
   onUpdateStart = nil,
 
+  -- debug = true,
+
   drawOrder = function(self)
     return Component.groups.all:drawOrder(self) + 1
   end
@@ -118,10 +120,6 @@ end
 local aiPathWithAstar = require'modules.flow-field.pathing-with-astar'
 
 function Ai:checkLineOfSight(grid, WALKABLE, targetX, targetY, debug)
-  if not targetX then
-    return false
-  end
-
   local gridX, gridY = self.pxToGridUnits(self.x, self.y, self.gridSize)
   local gridTargetX, gridTargetY = self.pxToGridUnits(targetX, targetY, self.gridSize)
   return LineOfSight(grid, WALKABLE, debug)(
@@ -148,7 +146,7 @@ local function handleAggro(self)
   if hasHits then
     self.isAggravated = true
     if (not previouslyAggravated) then
-      self.neighbors = getNeighbors(self, 10)
+      self.neighbors = getNeighbors(self, 16)
       spreadAggroToAllies(self:getId(), self.neighbors)
       -- put a short delay before setting `isAggravated` to false to prevent aggro spreading to cascade infinitely
       local tick = require 'utils.tick'
@@ -427,7 +425,8 @@ function Ai.update(self, dt)
     end
   end
 
-  local canSeeTarget = self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY, self.losDebug)
+  local canSeeTarget = targetX and
+    self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY, self.losDebug)
   local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
   local isInAggroRange = gridDistFromPlayer <= (actualSightRadius / self.gridSize)
   local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or 99999
