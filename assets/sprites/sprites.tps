@@ -508,6 +508,22 @@
             <key type="filename">custom-art/status-effect-icons/status-frenzy.png</key>
             <key type="filename">custom-art/status-effect-icons/status-legendary-enemy.png</key>
             <key type="filename">custom-art/status-effect-icons/status-shield.png</key>
+            <key type="filename">custom-art/tiles/map-0.png</key>
+            <key type="filename">custom-art/tiles/map-1.png</key>
+            <key type="filename">custom-art/tiles/map-10.png</key>
+            <key type="filename">custom-art/tiles/map-11.png</key>
+            <key type="filename">custom-art/tiles/map-12.png</key>
+            <key type="filename">custom-art/tiles/map-13.png</key>
+            <key type="filename">custom-art/tiles/map-14.png</key>
+            <key type="filename">custom-art/tiles/map-15.png</key>
+            <key type="filename">custom-art/tiles/map-2.png</key>
+            <key type="filename">custom-art/tiles/map-3.png</key>
+            <key type="filename">custom-art/tiles/map-4.png</key>
+            <key type="filename">custom-art/tiles/map-5.png</key>
+            <key type="filename">custom-art/tiles/map-6.png</key>
+            <key type="filename">custom-art/tiles/map-7.png</key>
+            <key type="filename">custom-art/tiles/map-8.png</key>
+            <key type="filename">custom-art/tiles/map-9.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
