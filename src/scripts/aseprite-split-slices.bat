@@ -9,5 +9,3 @@ SET AsepritePath="C:\Program Files\Aseprite\Aseprite.exe"
 
 REM Build sprite sheet
 CALL "%ProjectDir%\src\scripts\texture-packer.bat"
-
-PAUSE
