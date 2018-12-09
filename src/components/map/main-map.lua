@@ -37,22 +37,15 @@ local function setupCollisionObjects(self, grid, gridSize)
       local animation = animationFactory:newStaticSprite(animationName)
       local ox, oy = animation:getSourceOffset()
 
-      --[[
-        Padding around the wall to prevent player and ai from hugging the wall completely. This
-        solves a host of problems including line of sight checks not working properly due to
-        rounding issues on a grid system. A value of 1 is enough to fix this
-      ]]
-      local padding = 3
-
       -- setup collision world objects
       local gridSize = self.gridSize
       local tileX, tileY = x * gridSize, y * gridSize
       return self:addCollisionObject(
         collisionGroups.obstacle,
-        tileX - padding,
-        tileY - padding,
-        gridSize + padding * 2,
-        gridSize + padding * 2,
+        tileX,
+        tileY,
+        gridSize,
+        gridSize,
         ox,
         0
       ):addToWorld(collisionWorlds.map)
@@ -85,7 +78,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     Background.create()
     self.collisionObjectsHash = setupCollisionObjects(self, self.grid, self.gridSize)
 
-    local cacheSize = 400
+    local cacheSize = 1200
     self.wallObjectsPool = require 'components.map.wall-objects-pool'(self.gridSize, cacheSize)
 
     -- IMPORTANT: the cache size should be large enough to contain all the wall tiles on the screen

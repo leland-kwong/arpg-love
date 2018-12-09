@@ -24,15 +24,7 @@ local SpawnerAi = {
   WALKABLE = nil,
 
   colWorld = collisionWorlds.map,
-  pxToGridUnits = function(screenX, screenY, gridSize)
-    typeCheck.validate(gridSize, typeCheck.NUMBER)
-
-    local gridPixelX, gridPixelY = screenX, screenY
-    local gridX, gridY =
-      Math.round(gridPixelX / gridSize),
-      Math.round(gridPixelY / gridSize)
-    return gridX, gridY
-  end,
+  pxToGridUnits = require 'utils.position'.pixelsToGridUnits,
   gridSize = config.gridSize,
 }
 SpawnerAi.__index = SpawnerAi
@@ -78,7 +70,6 @@ local function AiFactory(props)
       self.x * self.gridSize + math.random(0, self.gridSize) * getRandomDirection(),
       self.y * self.gridSize + math.random(0, self.gridSize) * getRandomDirection()
     local props = self.rarity(aiPrototype)
-      :set('debug',             self.debug)
       :set('x',                 spawnX)
       :set('y',                 spawnY)
       :set('collisionWorld',    self.colWorld)
