@@ -1,9 +1,18 @@
-local tileBitmasking = require 'utils.tilemap-bitmask'
-local Grid = require 'utils.grid'
+local dynamicLoad = function(pkg)
+  if package.loaded[pkg] then
+    package.loaded[pkg] = nil
+  end
+  return require(pkg)
+end
+
+local tileBitmasking = dynamicLoad 'utils.tilemap-bitmask'
+local Grid = dynamicLoad 'utils.grid'
+local Camera = dynamicLoad 'modules.camera'
+local camera = Camera()
 local msgBus = require 'components.msg-bus'
 
-local json = require 'lua_modules.json'
-local Animation = require 'modules.animation'
+local json = dynamicLoad 'lua_modules.json'
+local Animation = dynamicLoad 'modules.animation'
 
 local lastModifiedCache = {}
 local function hasFileChanged(path)
@@ -42,8 +51,15 @@ local grid = {
   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
 }
+
 state = state or {
-  scale = 2
+  scale = 2,
+  translate = {
+    x = 0,
+    y = 0,
+    dragStartX = 0,
+    dragStartY = 0
+  }
 }
 
 local newGrid = {}
@@ -55,19 +71,39 @@ local Component = require 'modules.component'
 Component.create({
   id = 'tile-map-test',
   init = function(self)
-    Component.addToGroup(self, 'gui')
+    -- Component.addToGroup(self, 'gui')
+
+    local InputContext = dynamicLoad 'modules.input-context'
+    InputContext.set('Tilemap-test')
+
     self.listeners = {
       msgBus.on(msgBus.MOUSE_WHEEL_MOVED, function(ev)
         local Math = require 'utils.math'
         local dy = ev[2]
         state.scale = Math.clamp(state.scale + dy, 1, 10)
+      end),
+
+      msgBus.on(msgBus.MOUSE_DRAG_START, function(ev)
+        local tx = state.translate
+        tx.dragStartX, tx.dragStartY = tx.x, tx.y
+      end),
+
+      msgBus.on(msgBus.MOUSE_DRAG, function(ev)
+        local tx = state.translate
+        tx.x, tx.y = tx.dragStartX - (ev.dx / camera.scale), tx.dragStartY - (ev.dy / camera.scale)
       end)
     }
   end,
 
+  update = function(self, dt)
+    local tx = state.translate
+    camera:setScale(state.scale, 0.5)
+      :setPosition(tx.x, tx.y)
+      :update(dt)
+  end,
+
   draw = function(self)
-    love.graphics.origin()
-    love.graphics.scale(state.scale)
+    camera:attach()
     love.graphics.clear(0,0,0)
 
     local gridSize = 16
@@ -81,23 +117,31 @@ Component.create({
       )
     end)
 
-    Grid.forEach(newGrid, function(v, x, y)
+    local function drawBase(v, x, y)
       local actualX, actualY = (x - 1) * gridSize, (y) * gridSize
+      local tileCapDefault = AnimationFactory:newStaticSprite('map-0')
+      local ox, oy = tileCapDefault:getSourceOffset()
+      love.graphics.setColor(0,0,0,0.3)
+      tileCapDefault:draw(actualX, actualY + 16, 0, 1, 1, ox, oy)
+
       local tileBase = AnimationFactory:newStaticSprite('map-base-'..v)
       local ox, oy = tileBase:getSourceOffset()
-      love.graphics.setColor(0,0,0,0.25)
-      tileBase:draw(actualX, actualY + 7, 0, 1, 1, ox, oy)
-      love.graphics.setColor(1,1,1)
+      love.graphics.setColor(1,1,1,1)
       tileBase:draw(actualX, actualY, 0, 1, 1, ox, oy)
-    end)
+    end
+    Grid.forEach(newGrid, drawBase)
 
-    Grid.forEach(newGrid, function(v, x, y)
+    local function drawTileCap(v, x, y)
       local actualX, actualY = (x - 1) * gridSize, (y) * gridSize
       love.graphics.setColor(1,1,1)
       local tileCap = AnimationFactory:newStaticSprite('map-'..v)
+      local height = tileCap:getHeight()
       local ox, oy = tileCap:getSourceOffset()
-      tileCap:draw(actualX, actualY - 16, 0, 1, 1, ox, oy)
-    end)
+      tileCap:draw(actualX, actualY - 18, 0, 1, 1, ox, oy)
+    end
+    Grid.forEach(newGrid, drawTileCap)
+
+    camera:detach()
   end,
 
   drawOrder = function()
