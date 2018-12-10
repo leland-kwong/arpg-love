@@ -22,13 +22,24 @@ local Camera = function()
   local lerpDuration = 0
   local lerpTween = nil
 
+  local targetScale = {scale = 1}
+  local lerpScaleDuration = 0
+  local lerpScaleTween = nil
+
   local function lerp(dt, reset)
-    local dist = mathUtils.dist(camera.x, camera.y, targetPosition.x, targetPosition.y)
     local actualDuration = lerpDuration
     if reset then
       lerpTween = tween.new(actualDuration, camera, targetPosition, tween.easing.outExpo)
     end
     lerpTween:update(dt)
+  end
+
+  local function lerpScale(dt, reset)
+    local actualDuration = lerpScaleDuration
+    if reset then
+      lerpScaleTween = tween.new(actualDuration, camera, targetScale, tween.easing.outExpo)
+    end
+    lerpScaleTween:update(dt)
   end
 
   function camera:setSize(w, h)
@@ -60,10 +71,16 @@ local Camera = function()
       local lastTargetPositionX = self.lastTargetPositionX
       local lastTargetPositionY = self.lastTargetPositionY
       local hasChangedPosition = (lastTargetPositionX ~= targetPosition.x) or
-        (lastTargetPositionY ~= targetPosition.y)
+      (lastTargetPositionY ~= targetPosition.y)
       self.lastTargetPositionX = targetPosition.x
       self.lastTargetPositionY = targetPosition.y
       lerp(dt, hasChangedPosition)
+    end
+
+    if (lerpScaleDuration > 0) then
+      local hasChangedScale = self.lastTargetScale ~= targetScale.scale
+      self.lastTargetScale = targetScale.scale
+      lerpScale(dt, hasChangedScale)
     end
 
     if self.shakeComponents then
@@ -114,13 +131,20 @@ local Camera = function()
     love.graphics.setLineWidth(oLineWidth)
   end
 
-  function camera:setScale(scale)
-    self.scale = scale
+  function camera:setScale(scale, _lerpDuration)
+    assert(scale % 1 == 0, 'scale must be integer values')
+    lerpScaleDuration = _lerpDuration or 0
+    if lerpScaleDuration > 0 then
+      targetScale.scale = scale
+    else
+      self.scale = scale
+    end
     return self
   end
 
   function camera:attach()
     love.graphics.push()
+    love.graphics.origin()
     love.graphics.translate(self.w/2, self.h/2)
     love.graphics.scale(self.scale)
     local tx, ty = -self.x, -self.y
