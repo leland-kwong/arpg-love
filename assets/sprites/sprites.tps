@@ -181,156 +181,37 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_1.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_10.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_100.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_101.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_102.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_103.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_104.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_105.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_106.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_107.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_108.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_109.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_11.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_110.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_111.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_112.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_113.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_114.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_115.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_116.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_117.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_118.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_119.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_12.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_120.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_121.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_122.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_123.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_124.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_125.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_126.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_127.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_128.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_129.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_13.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_130.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_131.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_132.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_133.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_134.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_135.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_136.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_137.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_138.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_139.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_14.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_140.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_141.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_142.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_143.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_144.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_145.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_146.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_147.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_148.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_149.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_15.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_150.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_16.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_17.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_18.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_19.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_2.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_20.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_21.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_22.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_23.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_24.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_25.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_26.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_27.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_28.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_29.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_3.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_30.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_31.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_32.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_33.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_34.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_35.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_36.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_37.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_38.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_39.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_4.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_40.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_41.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_42.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_43.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_44.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_45.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_46.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_47.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_48.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_49.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_5.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_50.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_51.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_52.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_53.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_54.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_55.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_56.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_57.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_58.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_59.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_6.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_60.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_61.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_62.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_63.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_64.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_65.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_66.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_67.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_68.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_69.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_7.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_70.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_71.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_72.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_73.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_74.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_75.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_76.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_77.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_78.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_79.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_8.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_80.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_81.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_82.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_83.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_84.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_85.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_86.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_87.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_88.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_89.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_9.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_90.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_91.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_92.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_93.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_94.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_95.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_96.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_97.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_98.png</key>
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_99.png</key>
+            <key type="filename">custom-art/characters/ai-legendaries/legendary-1/legendary-ai-1.png</key>
+            <key type="filename">custom-art/characters/eyeball/eyeball.png</key>
+            <key type="filename">custom-art/effects/floor-crack-1.png</key>
+            <key type="filename">custom-art/effects/floor-crack-2.png</key>
+            <key type="filename">custom-art/effects/floor-crack-3.png</key>
+            <key type="filename">custom-art/gui/gui-home-button--hover.png</key>
+            <key type="filename">custom-art/gui/gui-home-button.png</key>
+            <key type="filename">custom-art/gui/gui-inventory-button--hover.png</key>
+            <key type="filename">custom-art/gui/gui-inventory-button.png</key>
+            <key type="filename">custom-art/gui/gui-map-pointer.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree-button--hover.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree-button.png</key>
+            <key type="filename">custom-art/items/cube.png</key>
+            <key type="filename">custom-art/items/vial-energy.png</key>
+            <key type="filename">custom-art/items/vial-health.png</key>
+            <key type="filename">custom-art/status-effect-icons/status-frenzy.png</key>
+            <key type="filename">custom-art/status-effect-icons/status-legendary-enemy.png</key>
+            <key type="filename">custom-art/status-effect-icons/status-shield.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9Paddings</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_1.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_10.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_11.png</key>
@@ -487,36 +368,6 @@
                 <rect>6,5,12,10</rect>
                 <key>scale9Paddings</key>
                 <rect>6,5,12,10</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">custom-art/characters/ai-legendaries/legendary-1/legendary-ai-1.png</key>
-            <key type="filename">custom-art/characters/eyeball/eyeball.png</key>
-            <key type="filename">custom-art/effects/floor-crack-1.png</key>
-            <key type="filename">custom-art/effects/floor-crack-2.png</key>
-            <key type="filename">custom-art/effects/floor-crack-3.png</key>
-            <key type="filename">custom-art/gui/gui-home-button--hover.png</key>
-            <key type="filename">custom-art/gui/gui-home-button.png</key>
-            <key type="filename">custom-art/gui/gui-inventory-button--hover.png</key>
-            <key type="filename">custom-art/gui/gui-inventory-button.png</key>
-            <key type="filename">custom-art/gui/gui-map-pointer.png</key>
-            <key type="filename">custom-art/gui/gui-skill-tree-button--hover.png</key>
-            <key type="filename">custom-art/gui/gui-skill-tree-button.png</key>
-            <key type="filename">custom-art/items/cube.png</key>
-            <key type="filename">custom-art/items/vial-energy.png</key>
-            <key type="filename">custom-art/items/vial-health.png</key>
-            <key type="filename">custom-art/status-effect-icons/status-frenzy.png</key>
-            <key type="filename">custom-art/status-effect-icons/status-legendary-enemy.png</key>
-            <key type="filename">custom-art/status-effect-icons/status-shield.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,4,8,8</rect>
-                <key>scale9Paddings</key>
-                <rect>4,4,8,8</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -1140,7 +991,6 @@
             <filename>custom-art/tiles</filename>
             <filename>custom-art/primitives</filename>
             <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes</filename>
-            <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors</filename>
             <filename>custom-art/status-effect-icons</filename>
             <filename>custom-art/effects</filename>
             <filename>custom-art/characters</filename>
@@ -1149,6 +999,7 @@
             <filename>custom-art/abilities</filename>
             <filename>custom-art/items</filename>
             <filename>custom-art/light-blur.png</filename>
+            <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_62.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
