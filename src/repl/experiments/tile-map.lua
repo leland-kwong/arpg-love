@@ -22,12 +22,37 @@ local function hasFileChanged(path)
   return newModTime and (lastModified ~= newModTime)
 end
 
-local spriteAtlas = love.graphics.newImage('built/sprite.png')
-local spriteData = json.decode(
-  love.filesystem.read('built/sprite.json')
-)
-
-local AnimationFactory = Animation(spriteData, spriteAtlas, 2)
+local lastModified = {}
+local spriteAtlas, spriteData
+local function hasChanged(path)
+  local info = love.filesystem.getInfo(path)
+  if info and info.modtime then
+    local hasChanged = lastModified[path] ~= info.modtime
+    lastModified[path] = info.modtime
+    return hasChanged
+  end
+  return false
+end
+local checkCount = 0
+local createAnimationFactory = function()
+  local paths = {
+    spriteSheet = 'built/sprite.png',
+    spriteData = 'built/sprite.json'
+  }
+  if (checkCount % 30 == 0) and hasChanged(paths.spriteData) then
+    local ok = pcall(function()
+      spriteAtlas = love.graphics.newImage(paths.spriteSheet)
+      spriteData = json.decode(
+        love.filesystem.read(paths.spriteData)
+      )
+      Animation = dynamicLoad 'modules.animation'
+    end)
+    print(ok and 'sprite sheet reloaded')
+  end
+  checkCount = checkCount + 1
+  return Animation(spriteData, spriteAtlas, 2)
+end
+local AnimationFactory = createAnimationFactory
 
 local grid = {
   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
@@ -130,6 +155,7 @@ Component.create({
   end,
 
   draw = function(self)
+    local af = AnimationFactory()
     camera:attach()
     love.graphics.clear(0,0,0)
 
@@ -137,7 +163,7 @@ Component.create({
 
     love.graphics.setColor(1,1,1)
     Grid.forEach(grid, function(v, x, y)
-      local tile = AnimationFactory:newStaticSprite('floor-1')
+      local tile = AnimationFactory():newStaticSprite('floor-1')
       tile:draw(
         (x - 1) * gridSize,
         (y - 1) * gridSize
@@ -146,12 +172,12 @@ Component.create({
 
     local function drawBase(v, x, y)
       local actualX, actualY = (x - 1) * gridSize, (y) * gridSize
-      local tileCapDefault = AnimationFactory:newStaticSprite('map-0')
+      local tileCapDefault = af:newStaticSprite('map-0')
       local ox, oy = tileCapDefault:getSourceOffset()
       love.graphics.setColor(0,0,0,0.3)
       tileCapDefault:draw(actualX, actualY + 16, 0, 1, 1, ox, oy)
 
-      local tileBase = AnimationFactory:newStaticSprite('map-base-'..v)
+      local tileBase = af:newStaticSprite('map-base-'..v)
       local ox, oy = tileBase:getSourceOffset()
       love.graphics.setColor(1,1,1,1)
       tileBase:draw(actualX, actualY, 0, 1, 1, ox, oy)
@@ -161,10 +187,10 @@ Component.create({
     local function drawTileCap(v, x, y)
       local actualX, actualY = (x - 1) * gridSize, (y) * gridSize
       love.graphics.setColor(1,1,1)
-      local tileCap = AnimationFactory:newStaticSprite('map-'..v)
+      local tileCap = af:newStaticSprite('map-'..v)
       local height = tileCap:getHeight()
       local ox, oy = tileCap:getSourceOffset()
-      tileCap:draw(actualX, actualY - 18, 0, 1, 1, ox, oy)
+      tileCap:draw(actualX, actualY - 16, 0, 1, 1, ox, oy)
     end
     Grid.forEach(newGrid, drawTileCap)
 
