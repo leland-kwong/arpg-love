@@ -56,26 +56,43 @@ local createAnimationFactory = function()
 end
 local AnimationFactory = createAnimationFactory
 
+local floorTileDefs = {
+  [1] = 'floor-1'
+}
+
+local wallTileDefs = {
+  [2] = 'map-door-horiz-1',
+  [3] = 'map-door-horiz-2',
+  [4] = 'map-door-vert-1',
+  [5] = 'map-door-vert-2'
+}
+
 local grid = {
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0,},
-  {0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0,},
-  {0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0,},
-  {0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0,},
-  {0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+  {0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0,},
+  {0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0,},
+  {0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0,},
+  {0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
+  {0, 1, 1, 1, 1, 1, 1, 0, 0, 2, 3, 2, 3, 0, 0, 0, 1, 1, 1, 1, 1, 0,},
+  {0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0,},
+  {0, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0,},
+  {0, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0,},
+  {0, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0,},
+  {0, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0,},
+  {0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0,},
+  {0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0,},
+  {0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0,},
+  {0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
 }
 
 state = state or {
@@ -91,12 +108,11 @@ state = state or {
 local camera = Camera()
 
 local newGrid = {}
-local fillValue = 0
 local function isTileValue(v)
-  return v == fillValue
+  return v == 0
 end
 Grid.forEach(grid, function(v, x, y)
-  if v == fillValue then
+  if isTileValue(v) then
     local newVal = getTileValue(grid, x, y, isTileValue)
     Grid.set(newGrid, x, y, newVal)
   end
@@ -171,8 +187,16 @@ Component.create({
 
     local gridSize = 16
 
-    love.graphics.setColor(1,1,1)
+    local function drawWallShadow(x, y)
+      local actualX, actualY = (x - 1) * gridSize, (y) * gridSize
+      local tileCapDefault = af:newStaticSprite('map-0')
+      local ox, oy = tileCapDefault:getSourceOffset()
+      love.graphics.setColor(0,0,0,0.3)
+      tileCapDefault:draw(actualX, actualY + 16, 0, 1, 1, ox, oy)
+    end
+
     Grid.forEach(grid, function(v, x, y)
+      love.graphics.setColor(1,1,1)
       local tile = AnimationFactory():newStaticSprite('floor-1')
       tile:draw(
         (x - 1) * gridSize,
@@ -180,31 +204,35 @@ Component.create({
       )
     end)
 
+    Grid.forEach(grid, function(v, x, y)
+      if (not floorTileDefs[v]) then
+        drawWallShadow(x, y)
+      end
+    end)
+
     local function drawBase(v, x, y)
       local actualX, actualY = (x - 1) * gridSize, (y) * gridSize
-      local tileCapDefault = af:newStaticSprite('map-0')
-      local ox, oy = tileCapDefault:getSourceOffset()
-      local oBlendMode = love.graphics.getBlendMode()
-      love.graphics.setColor(0,0,0,0.3)
-      tileCapDefault:draw(actualX, actualY + 16, 0, 1, 1, ox, oy)
-      love.graphics.setBlendMode(oBlendMode)
 
-      local tileBase = af:newStaticSprite('map-base-'..v)
+      local tileBase = af:newStaticSprite('map-wall-'..v)
       local ox, oy = tileBase:getSourceOffset()
       love.graphics.setColor(1,1,1,1)
       tileBase:draw(actualX, actualY, 0, 1, 1, ox, oy)
     end
     Grid.forEach(newGrid, drawBase)
 
-    local function drawTileCap(v, x, y)
+    local function drawDoor(v, x, y)
       local actualX, actualY = (x - 1) * gridSize, (y) * gridSize
       love.graphics.setColor(1,1,1)
-      local tileCap = af:newStaticSprite('map-'..v)
-      local height = tileCap:getHeight()
-      local ox, oy = tileCap:getSourceOffset()
-      tileCap:draw(actualX, actualY - 18, 0, 1, 1, ox, oy)
+      local tileDoor = af:newStaticSprite(wallTileDefs[v])
+      local height = tileDoor:getHeight()
+      local ox, oy = tileDoor:getSourceOffset()
+      tileDoor:draw(actualX, actualY - 0, 0, 1, 1, ox, oy)
     end
-    Grid.forEach(newGrid, drawTileCap)
+    Grid.forEach(grid, function(v, x, y)
+      if wallTileDefs[v] then
+        drawDoor(v, x, y)
+      end
+    end)
 
     camera:detach()
     drawScreenCenter()
