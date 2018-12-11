@@ -5,7 +5,7 @@ local dynamicLoad = function(pkg)
   return require(pkg)
 end
 
-local tileBitmasking = dynamicLoad 'utils.tilemap-bitmask'
+local getTileValue = dynamicLoad 'utils.tilemap-bitmask'
 local Grid = dynamicLoad 'utils.grid'
 local Camera = dynamicLoad 'modules.camera'
 local msgBus = require 'components.msg-bus'
@@ -39,7 +39,7 @@ local createAnimationFactory = function()
     spriteSheet = 'built/sprite.png',
     spriteData = 'built/sprite.json'
   }
-  if (checkCount % 30 == 0) and hasChanged(paths.spriteData) then
+  if (checkCount % 60 == 0) and hasChanged(paths.spriteData) then
     local ok = pcall(function()
       spriteAtlas = love.graphics.newImage(paths.spriteSheet)
       spriteData = json.decode(
@@ -63,7 +63,7 @@ local grid = {
   {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0,},
   {0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0,},
   {0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0,},
-  {0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
+  {0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
   {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
   {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
   {0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0,},
@@ -91,9 +91,16 @@ state = state or {
 local camera = Camera()
 
 local newGrid = {}
-tileBitmasking.iterateGrid(grid, function(v, x, y)
-  Grid.set(newGrid, x, y, v)
-end, 0)
+local fillValue = 0
+local function isTileValue(v)
+  return v == fillValue
+end
+Grid.forEach(grid, function(v, x, y)
+  if v == fillValue then
+    local newVal = getTileValue(grid, x, y, isTileValue)
+    Grid.set(newGrid, x, y, newVal)
+  end
+end)
 
 local function drawScreenCenter()
   love.graphics.push()
@@ -195,7 +202,7 @@ Component.create({
       local tileCap = af:newStaticSprite('map-'..v)
       local height = tileCap:getHeight()
       local ox, oy = tileCap:getSourceOffset()
-      tileCap:draw(actualX, actualY - 16, 0, 1, 1, ox, oy)
+      tileCap:draw(actualX, actualY - 18, 0, 1, 1, ox, oy)
     end
     Grid.forEach(newGrid, drawTileCap)
 
