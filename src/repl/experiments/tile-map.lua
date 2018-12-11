@@ -47,7 +47,9 @@ local createAnimationFactory = function()
       )
       Animation = dynamicLoad 'modules.animation'
     end)
-    print(ok and 'sprite sheet reloaded')
+    if ok then
+      print('sprite sheet reloaded')
+    end
   end
   checkCount = checkCount + 1
   return Animation(spriteData, spriteAtlas, 2)
@@ -149,7 +151,8 @@ Component.create({
 
   update = function(self, dt)
     local tx = state.translate
-    camera:setScale(state.scale, 0.5)
+    camera
+      :setScale(state.scale, 0.25)
       :setPosition(tx.x, tx.y)
       :update(dt)
   end,
@@ -174,8 +177,10 @@ Component.create({
       local actualX, actualY = (x - 1) * gridSize, (y) * gridSize
       local tileCapDefault = af:newStaticSprite('map-0')
       local ox, oy = tileCapDefault:getSourceOffset()
+      local oBlendMode = love.graphics.getBlendMode()
       love.graphics.setColor(0,0,0,0.3)
       tileCapDefault:draw(actualX, actualY + 16, 0, 1, 1, ox, oy)
+      love.graphics.setBlendMode(oBlendMode)
 
       local tileBase = af:newStaticSprite('map-base-'..v)
       local ox, oy = tileBase:getSourceOffset()

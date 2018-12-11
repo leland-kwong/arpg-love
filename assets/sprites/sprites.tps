@@ -161,7 +161,7 @@
             <key>scale</key>
             <double>1</double>
             <key>scaleMode</key>
-            <enum type="ScaleMode">Smooth</enum>
+            <enum type="ScaleMode">Fast</enum>
             <key>extrude</key>
             <uint>0</uint>
             <key>trimThreshold</key>
@@ -181,7 +181,7 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_62.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_121.png</key>
             <key type="filename">custom-art/characters/ai-legendaries/legendary-1/legendary-ai-1.png</key>
             <key type="filename">custom-art/characters/eyeball/eyeball.png</key>
             <key type="filename">custom-art/effects/floor-crack-1.png</key>
@@ -795,18 +795,6 @@
                 <false/>
             </struct>
             <key type="filename">custom-art/light-blur.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>100,100,200,200</rect>
-                <key>scale9Paddings</key>
-                <rect>100,100,200,200</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
             <key type="filename">custom-art/nova.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -918,21 +906,33 @@
             <key type="filename">custom-art/tiles/map-base-1.png</key>
             <key type="filename">custom-art/tiles/map-base-10.png</key>
             <key type="filename">custom-art/tiles/map-base-11.png</key>
-            <key type="filename">custom-art/tiles/map-base-12.png</key>
-            <key type="filename">custom-art/tiles/map-base-13.png</key>
-            <key type="filename">custom-art/tiles/map-base-14.png</key>
-            <key type="filename">custom-art/tiles/map-base-15.png</key>
             <key type="filename">custom-art/tiles/map-base-2.png</key>
             <key type="filename">custom-art/tiles/map-base-3.png</key>
-            <key type="filename">custom-art/tiles/map-base-4.png</key>
-            <key type="filename">custom-art/tiles/map-base-5.png</key>
-            <key type="filename">custom-art/tiles/map-base-6.png</key>
-            <key type="filename">custom-art/tiles/map-base-7.png</key>
             <key type="filename">custom-art/tiles/map-base-8.png</key>
             <key type="filename">custom-art/tiles/map-base-9.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.1,0.1</point_f>
+                <point_f>0.1,0.217391</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9Paddings</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/map-base-12.png</key>
+            <key type="filename">custom-art/tiles/map-base-13.png</key>
+            <key type="filename">custom-art/tiles/map-base-14.png</key>
+            <key type="filename">custom-art/tiles/map-base-15.png</key>
+            <key type="filename">custom-art/tiles/map-base-4.png</key>
+            <key type="filename">custom-art/tiles/map-base-5.png</key>
+            <key type="filename">custom-art/tiles/map-base-6.png</key>
+            <key type="filename">custom-art/tiles/map-base-7.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.1,0.227273</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -999,7 +999,7 @@
             <filename>custom-art/abilities</filename>
             <filename>custom-art/items</filename>
             <filename>custom-art/light-blur.png</filename>
-            <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_62.png</filename>
+            <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_121.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
