@@ -119,8 +119,8 @@ local Camera = function()
     local w,e,n,s = self:getBounds()
     local width, height = self:getSize()
     local oLineWidth = love.graphics.getLineWidth()
-    love.graphics.setColor(1,1,1)
-    love.graphics.setLineWidth(2)
+    love.graphics.setColor(1,0,1,0.8)
+    love.graphics.setLineWidth(10)
     love.graphics.rectangle(
       'line',
       w,
