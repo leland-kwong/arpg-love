@@ -41,10 +41,6 @@ local function setupCollisionObjects(self, grid, gridSize)
   local collisionWorlds = require 'components.collision-worlds'
   local collisionGrid = cloneGrid(grid, function(v, x, y)
     if (v ~= nil) and (v ~= Map.WALKABLE) then
-      local animationName = getWallTileAnimationName(self.grid, x, y, isTileValue)
-      local animation = animationFactory:newStaticSprite(animationName)
-      local ox, oy = animation:getSourceOffset()
-
       -- setup collision world objects
       local gridSize = self.gridSize
       local tileX, tileY = x * gridSize, y * gridSize
@@ -53,9 +49,7 @@ local function setupCollisionObjects(self, grid, gridSize)
         tileX,
         tileY,
         gridSize,
-        gridSize,
-        ox,
-        0
+        gridSize
       ):addToWorld(collisionWorlds.map)
     end
   end)

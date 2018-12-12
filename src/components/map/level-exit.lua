@@ -105,7 +105,7 @@ return Component.createFactory({
     end
   end,
   drawOrder = function(self)
-    return Component.groups.all:drawOrder(self) + 10
+    return Component.groups.all:drawOrder(self) + 5
   end,
   serialize = function(self)
     return self.initialProps
