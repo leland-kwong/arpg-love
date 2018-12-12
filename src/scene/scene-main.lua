@@ -128,12 +128,6 @@ function MainScene.init(self)
   local serializedState = msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:consumeSnapshot(self.mapId)
   local Dungeon = require 'modules.dungeon'
   local mapGrid = serializedState and (serializedState.mainMap and serializedState.mainMap[1].state) or Dungeon:getData(self.mapId).grid
-  local gridTileDefinitions = cloneGrid(mapGrid, function(v, x, y)
-    local tileGroup = gridTileTypes[v]
-    if tileGroup then
-      return tileGroup[math.random(1, #tileGroup)]
-    end
-  end)
   self.mapGrid = mapGrid
 
   self.listeners = {
@@ -174,7 +168,6 @@ function MainScene.init(self)
   MainMap.create({
     camera = camera,
     grid = mapGrid,
-    tileRenderDefinition = gridTileDefinitions,
     walkable = Map.WALKABLE
   }):setParent(parent)
 

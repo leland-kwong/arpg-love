@@ -170,7 +170,7 @@ local Component = require 'modules.component'
 Component.create({
   id = 'tile-map-test',
   init = function(self)
-    Component.addToGroup(self, 'gui')
+    -- Component.addToGroup(self, 'gui')
 
     local InputContext = dynamicLoad 'modules.input-context'
     InputContext.set('Tilemap-test')

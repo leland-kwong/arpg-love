@@ -13,6 +13,14 @@ local memoize = require'utils.memoize'
 local config = require'config.config'
 local Grid = require 'utils.grid'
 local Background = require 'components.map.background'
+local getTileValue = require 'utils.tilemap-bitmask'
+
+local isTileValue = function(v)
+  return v == 0
+end
+local function getWallTileAnimationName(grid, x, y)
+  return 'map-wall-'..getTileValue(grid, x, y, isTileValue)
+end
 
 local animationTypes = {}
 
@@ -33,7 +41,7 @@ local function setupCollisionObjects(self, grid, gridSize)
   local collisionWorlds = require 'components.collision-worlds'
   local collisionGrid = cloneGrid(grid, function(v, x, y)
     if (v ~= nil) and (v ~= Map.WALKABLE) then
-      local animationName = self.tileRenderDefinition[y][x]
+      local animationName = getWallTileAnimationName(self.grid, x, y, isTileValue)
       local animation = animationFactory:newStaticSprite(animationName)
       local ox, oy = animation:getSourceOffset()
 
@@ -72,7 +80,6 @@ end
 local blueprint = objectUtils.assign({}, mapBlueprint, {
   group = groups.firstLayer,
   class = collisionGroups.mainMap,
-  tileRenderDefinition = {},
 
   init = function(self)
     Background.create()
@@ -102,11 +109,13 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
 
   onUpdate = function(self, value, x, y, isInViewport, dt)
     local index = Grid.getIndexByCoordinate(self.grid, x, y)
+    local isEmptyTile = value == nil
+    local isWall = value ~= Map.WALKABLE
 
     -- if its unwalkable, add a collision object and create wall tile
-    if (value ~= nil) and (value ~= Map.WALKABLE) then
+    if (isWall) and (not isEmptyTile) then
       renderWallCollisionDebug(self)
-      local animationName = self.tileRenderDefinition[y][x]
+      local animationName = getWallTileAnimationName(self.grid, x, y, isTileValue)
       local animation = getAnimation(self.animationCache, index, animationName)
         :update(dt)
       local tileAbove = Grid.get(self.grid, x, y - 1)
@@ -131,11 +140,12 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
       since the actual walls have some transparency which will otherwise reveal the game's
       background color underneath.
     ]]
-    local isWall = value ~= Map.WALKABLE
     local canvas = isWall and self.wallsCanvas or self.floorCanvas
     local drawQueue = self.drawQueue[isWall and 'walls' or 'floors']
     local function drawFn()
-      local animationName = self.tileRenderDefinition[y][x]
+      local animationName = isWall
+        and getWallTileAnimationName(self.grid, x, y, isTileValue)
+        or 'floor-1'
       local animation = getAnimation(self.animationCache, index, animationName)
         :update(dt)
       local ox, oy = animation:getOffset()
