@@ -200,6 +200,9 @@
             <key type="filename">custom-art/status-effect-icons/status-frenzy.png</key>
             <key type="filename">custom-art/status-effect-icons/status-legendary-enemy.png</key>
             <key type="filename">custom-art/status-effect-icons/status-shield.png</key>
+            <key type="filename">custom-art/tiles/floor-empty.png</key>
+            <key type="filename">custom-art/tiles/map-door-vert-1.png</key>
+            <key type="filename">custom-art/tiles/map-door-vert-2.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -839,7 +842,7 @@
             <key type="filename">custom-art/tiles/environment-door.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0,0.464286</point_f>
+                <point_f>0,0.609756</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -887,31 +890,30 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/tiles/floor-cross-section-0.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,7,8,15</rect>
+                <key>scale9Paddings</key>
+                <rect>4,7,8,15</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/tiles/map-door-horiz-1.png</key>
             <key type="filename">custom-art/tiles/map-door-horiz-2.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0,0.5</point_f>
+                <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>4,9,8,19</rect>
+                <rect>4,9,8,18</rect>
                 <key>scale9Paddings</key>
-                <rect>4,9,8,19</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">custom-art/tiles/map-door-vert-1.png</key>
-            <key type="filename">custom-art/tiles/map-door-vert-2.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0,1.125</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,4,8,8</rect>
-                <key>scale9Paddings</key>
-                <rect>4,4,8,8</rect>
+                <rect>4,9,8,18</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -933,7 +935,7 @@
             <key type="filename">custom-art/tiles/map-wall-9.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.1,0.5</point_f>
+                <point_f>0.1,0.581395</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -953,36 +955,6 @@
                 <rect>9,7,17,13</rect>
                 <key>scale9Paddings</key>
                 <rect>9,7,17,13</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">custom-art/tiles/wall-1.png</key>
-            <key type="filename">custom-art/tiles/wall-2.png</key>
-            <key type="filename">custom-art/tiles/wall-3.png</key>
-            <key type="filename">custom-art/tiles/wall-4.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.1,0.464286</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,8,8,15</rect>
-                <key>scale9Paddings</key>
-                <rect>4,8,8,15</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">custom-art/tiles/wall-5.png</key>
-            <key type="filename">custom-art/tiles/wall-6.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.1,0.464286</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,14,8,28</rect>
-                <key>scale9Paddings</key>
-                <rect>4,14,8,28</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
