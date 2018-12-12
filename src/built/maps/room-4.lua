@@ -31,7 +31,13 @@ return {
         height = 1
       },
       properties = {},
-      terrains = {},
+      terrains = {
+        {
+          name = "Spaceship",
+          tile = 0,
+          properties = {}
+        }
+      },
       tilecount = 17,
       tiles = {
         {

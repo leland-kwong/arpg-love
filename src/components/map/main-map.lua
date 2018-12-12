@@ -15,6 +15,49 @@ local Grid = require 'utils.grid'
 local Background = require 'components.map.background'
 local getTileValue = require 'utils.tilemap-bitmask'
 
+local Chance = require 'utils.chance'
+local gridTileTypes = {
+  -- walkable
+  [1] = Chance({
+    {
+      value = 'floor-1',
+      chance = 30 -- number out of 100
+    },
+    {
+      value = 'floor-2',
+      chance = 20 -- number out of 100
+    },
+    {
+      value = 'floor-3',
+      chance = 45 -- number out of 100
+    },
+    {
+      value = 'floor-4',
+      chance = 45 -- number out of 100
+    },
+    {
+      value = 'floor-5',
+      chance = 25
+    },
+    {
+      value = 'floor-6',
+      chance = 1
+    },
+    {
+      value = 'floor-7',
+      chance = 1
+    },
+    {
+      value = 'floor-8',
+      chance = 1
+    },
+    {
+      value = 'floor-9',
+      chance = 1
+    }
+  })
+}
+
 local isTileValue = function(v)
   return v == 0
 end
@@ -158,7 +201,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
       floorTileCrossSection(self, self.grid, value, x, y)
       local animationName = isWall
         and getWallTileAnimationName(self.grid, x, y, isTileValue)
-        or 'floor-1'
+        or gridTileTypes[1]()
       local animation = getAnimation(self.animationCache, index, animationName)
         :update(dt)
       local ox, oy = animation:getOffset()
