@@ -32,7 +32,7 @@ function StarField.init(self)
     {Color.rgba255(211, 91, 255)}
   }
 
-
+  self.clock = 0
   self.canvas = love.graphics.newCanvas(self.width, self.height)
   love.graphics.push()
   love.graphics.origin()
@@ -62,12 +62,17 @@ function StarField.init(self)
   love.graphics.pop()
 end
 
+function StarField.update(self, dt)
+  self.clock = self.clock + dt
+  self.z = math.sin(self.clock / 3) * 10
+end
+
 function StarField.draw(self)
   local camera = require 'components.camera'
   local x, y = camera:getPosition()
   local ox, oy = x * 0.04, y * 0.04
   love.graphics.push()
-  love.graphics.translate(-400 - ox, -200 - oy)
+  love.graphics.translate(-400 - ox, -200 - oy + self.z)
   love.graphics.setColor(1,1,1)
   love.graphics.draw(self.canvas)
   love.graphics.pop()

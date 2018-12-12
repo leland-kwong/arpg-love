@@ -21,7 +21,7 @@ Component.newGroup({
 
 function MainMapSolidsBlueprint.changeTile(self, animation, x, y, opacity)
   local tileX, tileY = x * self.gridSize, y * self.gridSize
-  local ox, oy = animation:getOffset()
+  local ox, oy = animation:getSourceOffset()
 
   self.ox, self.oy = ox, oy
   self.animation = animation

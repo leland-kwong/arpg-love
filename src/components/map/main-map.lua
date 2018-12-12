@@ -204,7 +204,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
         or gridTileTypes[1]()
       local animation = getAnimation(self.animationCache, index, animationName)
         :update(dt)
-      local ox, oy = animation:getOffset()
+      local ox, oy = animation:getSourceOffset()
       local tileX, tileY = x * self.gridSize, y * self.gridSize
 
       love.graphics.setColor(1,1,1)

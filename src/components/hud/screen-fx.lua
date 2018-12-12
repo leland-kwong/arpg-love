@@ -1,7 +1,6 @@
 local Component = require 'modules.component'
 local groups = require 'components.groups'
 local Color = require 'modules.color'
-local screenScale = require 'config.config'.scaleFactor
 local tween = require 'modules.tween'
 local msgBus = require 'components.msg-bus'
 
@@ -14,11 +13,6 @@ local ScreenFx = {
 }
 
 -- flashes the screen red when the player gets hit
-
-local function getScreenSize()
-  return love.graphics.getWidth() / screenScale,
-    love.graphics.getHeight() / screenScale
-end
 
 function ScreenFx.init(self)
   self.tween = tween.new(1.8, self, {opacity = 0}, tween.easing.outExpo)
