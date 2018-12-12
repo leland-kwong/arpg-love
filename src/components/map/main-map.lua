@@ -22,6 +22,22 @@ local function getWallTileAnimationName(grid, x, y)
   return 'map-wall-'..getTileValue(grid, x, y, isTileValue)
 end
 
+local floorTileCrossSection = function(self, grid, v, x, y)
+  local tileValueBelow = Grid.get(grid, x, y+1)
+  local shouldDrawCrossSection = not tileValueBelow
+  if shouldDrawCrossSection then
+    local tile = animationFactory:newStaticSprite('floor-cross-section-0')
+    local ox, oy = tile:getSourceOffset()
+    tile:draw(
+      x * self.gridSize,
+      (y + 1) * self.gridSize,
+      0,
+      1, 1,
+      ox, oy
+    )
+  end
+end
+
 local animationTypes = {}
 
 local function getAnimation(animationCache, position, name)
@@ -86,8 +102,9 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     -- otherwise we will get significant cache trashing
     self.renderFloorCache = {}
     local rows, cols = #self.grid, #self.grid[1]
-    self.floorCanvas = love.graphics.newCanvas(cols * self.gridSize, rows * self.gridSize)
-    self.wallsCanvas = love.graphics.newCanvas(cols * self.gridSize, rows * self.gridSize)
+    local width, height = cols * self.gridSize, (rows + 3) * self.gridSize
+    self.floorCanvas = love.graphics.newCanvas(width, height)
+    self.wallsCanvas = love.graphics.newCanvas(width, height)
   end,
 
   onUpdateStart = function(self)
@@ -137,6 +154,8 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     local canvas = isWall and self.wallsCanvas or self.floorCanvas
     local drawQueue = self.drawQueue[isWall and 'walls' or 'floors']
     local function drawFn()
+      love.graphics.setColor(1,1,1)
+      floorTileCrossSection(self, self.grid, value, x, y)
       local animationName = isWall
         and getWallTileAnimationName(self.grid, x, y, isTileValue)
         or 'floor-1'

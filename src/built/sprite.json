@@ -511,7 +511,7 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":29},
 	"sourceSize": {"w":16,"h":29},
-	"pivot": {"x":0.5,"y":0.5}
+	"pivot": {"x":0,"y":0}
 },
 "floor-empty":
 {
@@ -1924,6 +1924,6 @@
 	"format": "RGBA8888",
 	"size": {"w":1300,"h":127},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:70f6f191a63c1620978eb9913178e831:926bfe06c7760b679e7c1e14df799cea:68d88b3cf7eafc9b5accfffdfb2fda91$"
+	"smartupdate": "$TexturePacker:SmartUpdate:9ff4df3c853640a2738a39a6c918e511:926bfe06c7760b679e7c1e14df799cea:68d88b3cf7eafc9b5accfffdfb2fda91$"
 }
 }
