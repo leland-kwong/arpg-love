@@ -12,6 +12,9 @@ local msgBus = require 'components.msg-bus'
 
 local json = dynamicLoad 'lua_modules.json'
 local Animation = dynamicLoad 'modules.animation'
+local inputState = require 'main.inputs'.state
+
+local gridSize = 16
 
 local lastModifiedCache = {}
 local function hasFileChanged(path)
@@ -56,43 +59,65 @@ local createAnimationFactory = function()
 end
 local AnimationFactory = createAnimationFactory
 
-local floorTileDefs = {
-  [1] = 'floor-1'
-}
+local floorTileDefs = setmetatable({
+  [1] = 'floor-1',
+  [2] = 'floor-empty'
+}, {
+  __index = function()
+    return 'floor-1'
+  end
+})
+
+local floorTileCrossSection = function(grid, v, x, y)
+  local tileValueBelow = Grid.get(grid, x, y+1)
+  local shouldDrawCrossSection =
+    (
+      (not tileValueBelow)
+      or (tileValueBelow and floorTileDefs[tileValueBelow] == floorTileDefs[2])
+    ) and (floorTileDefs[v] == floorTileDefs[1])
+  if shouldDrawCrossSection then
+    local tile = AnimationFactory():newStaticSprite('floor-cross-section-0')
+    tile:draw(
+      (x - 1) * gridSize,
+      (y) * gridSize
+    )
+  end
+end
 
 local wallTileDefs = {
-  [2] = 'map-door-horiz-1',
-  [3] = 'map-door-horiz-2',
-  [4] = 'map-door-vert-1',
-  [5] = 'map-door-vert-2'
+  [3] = 'map-door-horiz-1',
+  [4] = 'map-door-horiz-2',
+  [5] = 'map-door-vert-1',
+  [6] = 'map-door-vert-2'
 }
 
 local grid = {
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-  {0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 0, 0, 2, 3, 2, 3, 0, 0, 0, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,},
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 3, 4, 3, 4, 0, 0, 0, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1,},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0,},
 }
 
 state = state or {
@@ -111,14 +136,11 @@ local newGrid = {}
 local function isTileValue(v)
   return v == 0
 end
-Grid.forEach(grid, function(v, x, y)
-  if isTileValue(v) then
-    local newVal = getTileValue(grid, x, y, isTileValue)
-    Grid.set(newGrid, x, y, newVal)
-  end
-end)
 
 local function drawScreenCenter()
+  if (not inputState.mouse.drag.isDragging) then
+    return
+  end
   love.graphics.push()
   love.graphics.origin()
   local x, y = love.graphics.getDimensions()
@@ -185,54 +207,64 @@ Component.create({
     camera:attach()
     love.graphics.clear(0,0,0)
 
-    local gridSize = 16
+    love.graphics.setColor(1,1,1,1)
+    local function drawFloorTile(v, x, y)
+      floorTileCrossSection(grid, v, x, y)
 
-    local function drawWallShadow(x, y)
-      local actualX, actualY = (x - 1) * gridSize, (y) * gridSize
+      local floorTile = floorTileDefs[v]
+      local tile = AnimationFactory():newStaticSprite(floorTile)
+      tile:draw(
+        (x - 1) * gridSize,
+        (y - 1) * gridSize
+      )
+    end
+    Grid.forEach(grid, drawFloorTile)
+
+    local function drawWallShadow(v, x, y)
+      if (not isTileValue(v) and not wallTileDefs[v]) then
+        return
+      end
+
+      local tileBelow = Grid.get(grid, x, y + 1)
+      local isEmptyTile = (not tileBelow) or floorTileDefs[tileBelow] == floorTileDefs[2]
+      if (isEmptyTile) then
+        return
+      end
+
+      local actualX, actualY = (x - 1) * gridSize, (y - 1) * gridSize
       local tileCapDefault = af:newStaticSprite('map-0')
       local ox, oy = tileCapDefault:getSourceOffset()
       love.graphics.setColor(0,0,0,0.3)
       tileCapDefault:draw(actualX, actualY + 16, 0, 1, 1, ox, oy)
     end
+    Grid.forEach(grid, drawWallShadow)
 
-    Grid.forEach(grid, function(v, x, y)
-      love.graphics.setColor(1,1,1)
-      local tile = AnimationFactory():newStaticSprite('floor-1')
-      tile:draw(
-        (x - 1) * gridSize,
-        (y - 1) * gridSize
-      )
-    end)
-
-    Grid.forEach(grid, function(v, x, y)
-      if (not floorTileDefs[v]) then
-        drawWallShadow(x, y)
+    love.graphics.setColor(1,1,1,1)
+    local function drawWall(v, x, y)
+      if (not isTileValue(v)) then
+        return
       end
-    end)
-
-    local function drawBase(v, x, y)
-      local actualX, actualY = (x - 1) * gridSize, (y) * gridSize
-
-      local tileBase = af:newStaticSprite('map-wall-'..v)
+      local actualX, actualY = (x - 1) * gridSize, (y - 1) * gridSize
+      local actualValue = getTileValue(grid, x, y, isTileValue)
+      local tileBase = af:newStaticSprite('map-wall-'..actualValue)
       local ox, oy = tileBase:getSourceOffset()
-      love.graphics.setColor(1,1,1,1)
       tileBase:draw(actualX, actualY, 0, 1, 1, ox, oy)
     end
-    Grid.forEach(newGrid, drawBase)
+    Grid.forEach(grid, drawWall)
 
     local function drawDoor(v, x, y)
-      local actualX, actualY = (x - 1) * gridSize, (y) * gridSize
+      if (not wallTileDefs[v]) then
+        return
+      end
+
+      local actualX, actualY = (x - 1) * gridSize, (y - 1) * gridSize
       love.graphics.setColor(1,1,1)
       local tileDoor = af:newStaticSprite(wallTileDefs[v])
       local height = tileDoor:getHeight()
       local ox, oy = tileDoor:getSourceOffset()
       tileDoor:draw(actualX, actualY - 0, 0, 1, 1, ox, oy)
     end
-    Grid.forEach(grid, function(v, x, y)
-      if wallTileDefs[v] then
-        drawDoor(v, x, y)
-      end
-    end)
+    Grid.forEach(grid, drawDoor)
 
     camera:detach()
     drawScreenCenter()
