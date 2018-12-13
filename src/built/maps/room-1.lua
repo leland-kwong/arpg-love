@@ -16,8 +16,8 @@ return {
       name = "action rpg",
       firstgid = 1,
       filename = "../../../assets/maps/action rpg.tsx",
-      tilewidth = 34,
-      tileheight = 56,
+      tilewidth = 36,
+      tileheight = 28,
       spacing = 0,
       margin = 0,
       columns = 0,
@@ -31,14 +31,8 @@ return {
         height = 1
       },
       properties = {},
-      terrains = {
-        {
-          name = "Spaceship",
-          tile = 0,
-          properties = {}
-        }
-      },
-      tilecount = 17,
+      terrains = {},
+      tilecount = 11,
       tiles = {
         {
           id = 0,
@@ -63,42 +57,6 @@ return {
           image = "../../../assets/sprites/custom-art/tiles/floor-4.png",
           width = 16,
           height = 16
-        },
-        {
-          id = 4,
-          image = "../../../assets/sprites/custom-art/tiles/wall-1.png",
-          width = 16,
-          height = 56
-        },
-        {
-          id = 5,
-          image = "../../../assets/sprites/custom-art/tiles/wall-2.png",
-          width = 16,
-          height = 56
-        },
-        {
-          id = 6,
-          image = "../../../assets/sprites/custom-art/tiles/wall-3.png",
-          width = 16,
-          height = 56
-        },
-        {
-          id = 7,
-          image = "../../../assets/sprites/custom-art/tiles/wall-4.png",
-          width = 16,
-          height = 56
-        },
-        {
-          id = 8,
-          image = "../../../assets/sprites/custom-art/tiles/wall-5.png",
-          width = 16,
-          height = 56
-        },
-        {
-          id = 9,
-          image = "../../../assets/sprites/custom-art/tiles/wall-6.png",
-          width = 16,
-          height = 56
         },
         {
           id = 10,
@@ -139,14 +97,14 @@ return {
         {
           id = 22,
           image = "../../../assets/sprites/custom-art/tiles/treasure-chest.png",
-          width = 34,
+          width = 36,
           height = 28
         }
       }
     },
     {
       name = "home-base",
-      firstgid = 44,
+      firstgid = 24,
       filename = "../../../assets/maps/home-base.tsx",
       tilewidth = 960,
       tileheight = 800,
@@ -435,7 +393,7 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 54,
+          x = 77,
           y = 345,
           width = 53,
           height = 53,
@@ -450,8 +408,8 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 544,
-          y = 144,
+          x = 593,
+          y = 148,
           width = 53,
           height = 53,
           rotation = 0,
@@ -495,8 +453,8 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 545,
-          y = 1052,
+          x = 550,
+          y = 1056,
           width = 53,
           height = 53,
           rotation = 0,
@@ -510,8 +468,8 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 807,
-          y = 536,
+          x = 810,
+          y = 589,
           width = 53,
           height = 53,
           rotation = 0,
@@ -540,8 +498,8 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 680,
-          y = 866,
+          x = 677,
+          y = 823,
           width = 53,
           height = 53,
           rotation = 0,

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="60" height="80" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="54">
  <tileset firstgid="1" source="action rpg.tsx"/>
- <tileset firstgid="44" source="home-base.tsx"/>
+ <tileset firstgid="24" source="home-base.tsx"/>
  <layer id="1" name="ground" width="60" height="80">
   <data encoding="csv">
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -174,7 +174,7 @@
   <object id="50" name="entrance to level" type="levelExit" x="48" y="464" width="32" height="16"/>
  </objectgroup>
  <objectgroup color="#ffff00" id="4" name="spawn-points">
-  <object id="29" name="ai-group" type="aiGroup" x="224" y="640" width="53" height="53">
+  <object id="29" name="ai-group" type="aiGroup" x="192" y="640" width="53" height="53">
    <properties>
     <property name="groupSize" type="int" value="4"/>
    </properties>

@@ -625,13 +625,6 @@ function Ai.draw(self)
   drawStatusEffects(self, statusIcons)
 end
 
-local function adjustInitialPositionIfNeeded(self)
-  -- check initial position and move if necessary
-  local actualX, actualY = self.collision:move(self.collision.x, self.collision.y, self.collisionFilter)
-  self.x = actualX
-  self.y = actualY
-end
-
 local function setupAbilities(self)
   local abilityManager = require 'modules.abilities.manager'
   for i=1, #self.abilities do
@@ -711,7 +704,6 @@ function Ai.init(self)
       oy + self.z
     )
     :addToWorld(self.collisionWorld)
-  adjustInitialPositionIfNeeded(self)
 
   self.attackRange = self.attackRange * self.gridSize
   self.getPathWithAstar = Perf({

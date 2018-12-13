@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="60" height="80" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="25">
  <tileset firstgid="1" source="action rpg.tsx"/>
- <tileset firstgid="44" source="home-base.tsx"/>
+ <tileset firstgid="24" source="home-base.tsx"/>
  <layer id="1" name="ground" width="60" height="80">
   <data encoding="csv">
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -183,13 +183,13 @@
    </properties>
    <ellipse/>
   </object>
-  <object id="5" name="ai-group" type="aiGroup" x="54" y="345" width="53" height="53">
+  <object id="5" name="ai-group" type="aiGroup" x="77" y="345" width="53" height="53">
    <properties>
     <property name="groupSize" type="int" value="2"/>
    </properties>
    <ellipse/>
   </object>
-  <object id="6" name="ai-group" type="aiGroup" x="544" y="144" width="53" height="53">
+  <object id="6" name="ai-group" type="aiGroup" x="593" y="148" width="53" height="53">
    <properties>
     <property name="groupSize" type="int" value="4"/>
    </properties>
@@ -207,13 +207,13 @@
    </properties>
    <ellipse/>
   </object>
-  <object id="9" name="ai-group" type="aiGroup" x="545" y="1052" width="53" height="53">
+  <object id="9" name="ai-group" type="aiGroup" x="550" y="1056" width="53" height="53">
    <properties>
     <property name="groupSize" type="int" value="4"/>
    </properties>
    <ellipse/>
   </object>
-  <object id="10" name="ai-group" type="aiGroup" x="807" y="536" width="53" height="53">
+  <object id="10" name="ai-group" type="aiGroup" x="810" y="589" width="53" height="53">
    <properties>
     <property name="groupSize" type="int" value="5"/>
    </properties>
@@ -225,7 +225,7 @@
    </properties>
    <ellipse/>
   </object>
-  <object id="24" name="ai-group" type="aiGroup" x="680" y="866" width="53" height="53">
+  <object id="24" name="ai-group" type="aiGroup" x="677" y="823" width="53" height="53">
    <properties>
     <property name="groupSize" type="int" value="4"/>
    </properties>

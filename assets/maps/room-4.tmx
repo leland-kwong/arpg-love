@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.6" orientation="orthogonal" renderorder="right-down" width="60" height="80" tilewidth="16" tileheight="16" infinite="0" nextobjectid="33">
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="60" height="80" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="33">
  <tileset firstgid="1" source="action rpg.tsx"/>
- <layer name="ground" width="60" height="80">
+ <layer id="1" name="ground" width="60" height="80">
   <data encoding="csv">
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -85,7 +85,7 @@
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 </data>
  </layer>
- <layer name="walls" width="60" height="80">
+ <layer id="2" name="walls" width="60" height="80">
   <data encoding="csv">
 12,12,12,12,0,0,0,0,0,0,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,0,0,0,0,0,0,12,12,12,12,
 12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,
@@ -169,7 +169,7 @@
 12,12,12,12,0,0,0,0,0,0,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,0,0,0,0,0,0,12,12,12,12
 </data>
  </layer>
- <objectgroup color="#ffff00" name="spawn-points">
+ <objectgroup color="#ffff00" id="3" name="spawn-points">
   <object id="12" name="ai-group" type="aiGroup" x="355" y="818" width="53" height="53">
    <properties>
     <property name="groupSize" type="int" value="4"/>
@@ -212,7 +212,7 @@
    </properties>
    <ellipse/>
   </object>
-  <object id="20" name="ai-group" type="aiGroup" x="717" y="974" width="53" height="53">
+  <object id="20" name="ai-group" type="aiGroup" x="765" y="1004" width="53" height="53">
    <properties>
     <property name="groupSize" type="int" value="4"/>
    </properties>
@@ -225,7 +225,7 @@
    <ellipse/>
   </object>
  </objectgroup>
- <objectgroup color="#06cddf" name="environment">
+ <objectgroup color="#06cddf" id="4" name="environment">
   <object id="31" name="entrance to level" type="levelExit" x="864" y="656" width="32" height="16"/>
  </objectgroup>
 </map>

@@ -1,10 +1,4 @@
-local dynamicLoad = function(pkg)
-  if package.loaded[pkg] then
-    package.loaded[pkg] = nil
-  end
-  return require(pkg)
-end
-
+local dynamicLoad = require 'utils.dynamic-require'
 local getTileValue = dynamicLoad 'utils.tilemap-bitmask'
 local Grid = dynamicLoad 'utils.grid'
 local Camera = dynamicLoad 'modules.camera'
@@ -170,7 +164,7 @@ local Component = require 'modules.component'
 Component.create({
   id = 'tile-map-test',
   init = function(self)
-    Component.addToGroup(self, 'gui')
+    -- Component.addToGroup(self, 'gui')
 
     local InputContext = dynamicLoad 'modules.input-context'
     InputContext.set('Tilemap-test')

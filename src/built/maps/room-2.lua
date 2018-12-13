@@ -9,15 +9,15 @@ return {
   tilewidth = 16,
   tileheight = 16,
   nextlayerid = 5,
-  nextobjectid = 25,
+  nextobjectid = 31,
   properties = {},
   tilesets = {
     {
       name = "action rpg",
       firstgid = 1,
       filename = "../../../assets/maps/action rpg.tsx",
-      tilewidth = 34,
-      tileheight = 56,
+      tilewidth = 36,
+      tileheight = 28,
       spacing = 0,
       margin = 0,
       columns = 0,
@@ -31,14 +31,8 @@ return {
         height = 1
       },
       properties = {},
-      terrains = {
-        {
-          name = "Spaceship",
-          tile = 0,
-          properties = {}
-        }
-      },
-      tilecount = 17,
+      terrains = {},
+      tilecount = 11,
       tiles = {
         {
           id = 0,
@@ -63,42 +57,6 @@ return {
           image = "../../../assets/sprites/custom-art/tiles/floor-4.png",
           width = 16,
           height = 16
-        },
-        {
-          id = 4,
-          image = "../../../assets/sprites/custom-art/tiles/wall-1.png",
-          width = 16,
-          height = 56
-        },
-        {
-          id = 5,
-          image = "../../../assets/sprites/custom-art/tiles/wall-2.png",
-          width = 16,
-          height = 56
-        },
-        {
-          id = 6,
-          image = "../../../assets/sprites/custom-art/tiles/wall-3.png",
-          width = 16,
-          height = 56
-        },
-        {
-          id = 7,
-          image = "../../../assets/sprites/custom-art/tiles/wall-4.png",
-          width = 16,
-          height = 56
-        },
-        {
-          id = 8,
-          image = "../../../assets/sprites/custom-art/tiles/wall-5.png",
-          width = 16,
-          height = 56
-        },
-        {
-          id = 9,
-          image = "../../../assets/sprites/custom-art/tiles/wall-6.png",
-          width = 16,
-          height = 56
         },
         {
           id = 10,
@@ -139,7 +97,7 @@ return {
         {
           id = 22,
           image = "../../../assets/sprites/custom-art/tiles/treasure-chest.png",
-          width = 34,
+          width = 36,
           height = 28
         }
       }
@@ -382,8 +340,8 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 443,
-          y = 473,
+          x = 463,
+          y = 410,
           width = 53,
           height = 53,
           rotation = 0,
@@ -397,8 +355,8 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 321,
-          y = 78,
+          x = 307,
+          y = 66,
           width = 53,
           height = 53,
           rotation = 0,
@@ -412,8 +370,8 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 769,
-          y = 510,
+          x = 791,
+          y = 521,
           width = 53,
           height = 53,
           rotation = 0,
@@ -442,8 +400,8 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 569,
-          y = 931,
+          x = 627,
+          y = 873,
           width = 53,
           height = 53,
           rotation = 0,
@@ -457,8 +415,8 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 764,
-          y = 184,
+          x = 806,
+          y = 188,
           width = 53,
           height = 53,
           rotation = 0,
@@ -472,8 +430,8 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 102,
-          y = 381,
+          x = 80,
+          y = 382,
           width = 53,
           height = 53,
           rotation = 0,
@@ -487,8 +445,8 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 641,
-          y = 1019,
+          x = 631,
+          y = 1029,
           width = 53,
           height = 53,
           rotation = 0,
@@ -502,8 +460,8 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 288,
-          y = 1158,
+          x = 309,
+          y = 1133,
           width = 53,
           height = 53,
           rotation = 0,
@@ -517,8 +475,8 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 604,
-          y = 184,
+          x = 573,
+          y = 225,
           width = 53,
           height = 53,
           rotation = 0,
@@ -532,8 +490,8 @@ return {
           name = "ai-group",
           type = "aiGroup",
           shape = "ellipse",
-          x = 755,
-          y = 1019,
+          x = 768,
+          y = 973,
           width = 53,
           height = 53,
           rotation = 0,
