@@ -155,12 +155,12 @@ local itemNamesTooltipLayer = Gui.create({
 
 local function dropItemCollisionFilter(item)
   local collisionGroups = require 'modules.collision-groups'
-  return collisionGroups.matches(item.group, 'floorItem')
+  return collisionGroups.matches(item.group, collisionGroups.create('floorItem', 'obstacle'))
 end
 
 local memoize = require 'utils.memoize'
 local LineOfSight = memoize(require'modules.line-of-sight')
-local function findNearestDroppablePosition(startX, startY)
+local function findNearestDroppablePosition(startX, startY, width, height)
   local config = require 'config.config'
   local Position = require 'utils.position'
   local Map = require 'modules.map-generator.index'
@@ -173,7 +173,14 @@ local function findNearestDroppablePosition(startX, startY)
   local checkDroppablePosition = function(x, y, isBlocked)
     local screenX, screenY = Position.gridToPixels(x, y, config.gridSize)
     if (not isBlocked) and (not dropX) then
-      local _, len = collisionWorlds.map:queryRect(screenX, screenY, config.gridSize, config.gridSize, dropItemCollisionFilter)
+      local threshold = 1
+      local _, len = collisionWorlds.map:queryRect(
+        screenX - threshold,
+        screenY - threshold,
+        width + threshold,
+        height + threshold,
+        dropItemCollisionFilter
+      )
       if (len == 0) then
         dropX, dropY = x, y
       end
@@ -206,19 +213,8 @@ local LootGenerator = {
   item = nil,
 }
 
-local COLLISION_FLOOR_ITEM_TYPE = 'floorItem'
-local function collisionFilter(item, other)
-  if other.group == COLLISION_FLOOR_ITEM_TYPE or collisionGroups.matches(other.group, collisionGroups.obstacle) then
-    return 'slide'
-  end
-  return false
-end
-
 -- parabola that goes up and back down
-local curve = love.math.newBezierCurve(0, 0, 10, -10, 0, 0)
-local function flyoutEasing(t, b, c, d)
-  return c * curve:evaluate(t/d) + b
-end
+local dropHeight = 8
 
 local function drawLegendaryItemEffect(self, x, y, angle)
   local opacity = math.max(0.3, math.sin(self.clock * 2))
@@ -298,7 +294,7 @@ function LootGenerator.init(self)
   })
 
   local sx, sy, sw, sh = animation.sprite:getViewport()
-  self.colObj = self:addCollisionObject(COLLISION_FLOOR_ITEM_TYPE, self.x, self.y, sw, sh)
+  self.colObj = self:addCollisionObject(collisionGroups.floorItem, self.x, self.y, sw, sh)
     :addToWorld(collisionWorlds.map)
 
   Gui.create({
@@ -309,6 +305,7 @@ function LootGenerator.init(self)
     y = self.y,
     w = sw,
     h = sh,
+    tweenClock = 0,
     inputContext = 'loot',
     selected = false,
     animationComplete = false,
@@ -316,28 +313,23 @@ function LootGenerator.init(self)
       Component.addToGroup(self:getId(), 'clock', self)
 
       local direction = math.random(0, 1) == 1 and 1 or -1
-      local xOffset = math.random(10, 20)
-      local yOffset = -10 -- cause item to fly upwards
-      local endStateX = {
-        x = self.x
+      local xOffset = 2 * direction
+      local tweenTarget = {
+        tweenClock = 1
       }
-      local endStateY = {
-        y = self.y
-      }
-      local actualX, actualY = findNearestDroppablePosition(endStateX.x, endStateY.y)
+      local expectedX = self.x + xOffset
+      local actualX, actualY = findNearestDroppablePosition(expectedX, self.y, self.w, self.h)
+
+      local dx = actualX - self.x
+      self.initialX = self.x
+      self.flyOutCurve = love.math.newBezierCurve(0, -5, dx/2, -10, dx, 0)
+
       parent.x = actualX
       parent.y = actualY
-      endStateX.x = actualX
-      -- update initial position to new initial position
-      self.y = actualY - yOffset
-      endStateY.y = actualY
 
       if parent.isNew then
         parent.isNew = false
-        -- y-axis animation
-        self.tween = tween.new(0.5, self, endStateY, flyoutEasing)
-        -- x-axis animation
-        self.tween2 = tween.new(0.5, self, endStateX)
+        self.tween = tween.new(0.5, self, tweenTarget, tween.easing.backIn)
       end
     end,
     getMousePosition = itemMousePosition,
@@ -374,11 +366,15 @@ function LootGenerator.init(self)
 
       -- IMPORTANT: run any update logic before the pickup messages trigger, since those can
       -- cause the item to be deleted part-way through the update method, which will cause race conditions.
-      itemNamesTooltipLayer:add(item, self.x, self.y, self)
+      itemNamesTooltipLayer:add(item, self.x, self.y + self.z, self)
 
       if self.tween then
         local complete = self.tween:update(dt)
-        self.tween2:update(dt)
+
+        local dx, dz = self.flyOutCurve:evaluate(self.tweenClock)
+        self.x, self.z = self.initialX + dx, dz
+
+        -- self.tween2:update(dt)
         if complete then
           self.tween = nil
         end
@@ -394,7 +390,7 @@ function LootGenerator.init(self)
       love.graphics.draw(
         AnimationFactory.atlas,
         animation.sprite,
-        self.x, self.y + (self.h * 1.25),
+        self.x, self.y + (self.h * 1.25) + self.z,
         0,
         1, -0.5
       )
@@ -419,7 +415,7 @@ function LootGenerator.init(self)
       love.graphics.draw(
         AnimationFactory.atlas,
         animation.sprite,
-        self.x, self.y
+        self.x, self.y + self.z
       )
 
       Component.get('lightWorld'):addLight(centerX, centerY, 17, nil, 0.4)
@@ -431,6 +427,10 @@ function LootGenerator.init(self)
 
     onFinal = function(self)
       itemNamesTooltipLayer:delete(item)
+    end,
+
+    drawOrder = function(self)
+      return Component.groups.all:drawOrder(self)
     end
   }):setParent(self)
 end
