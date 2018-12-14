@@ -18,9 +18,9 @@ local function setupChanceFunctions(_, types)
       table.insert(list, t)
     end
   end
-  return function(a, b, c, d, e, f)
+  return function(a)
     local index = math.random(1, #list)
-    return list[index](a, b, c, d, e, f)
+    return list[index](a)
   end
 end
 
