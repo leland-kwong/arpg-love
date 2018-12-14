@@ -100,7 +100,7 @@ local FrostOrb = Component.createFactory({
 
     self.clock = 0
     self.shardClock = 0
-    self.rotation = 0
+    self.rotation = math.random(0, 4) * 0.5
 
     self.x, self.y = self.x + (self.dx * self.startOffset),
       self.y + (self.dy * self.startOffset)
