@@ -4,7 +4,7 @@
         <key>fileFormatVersion</key>
         <int>4</int>
         <key>texturePackerVersion</key>
-        <string>4.10.0</string>
+        <string>4.11.0</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -388,6 +388,7 @@
                 <false/>
             </struct>
             <key type="filename">custom-art/characters/boss-1/beam-strike-glyph-inner.png</key>
+            <key type="filename">custom-art/items/companion/outer.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -572,19 +573,6 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/characters/turret/turret.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>7,11,14,22</rect>
-                <key>scale9Paddings</key>
-                <rect>7,11,14,22</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
             <key type="filename">custom-art/gui/gui-dashboard-abilities-underlay.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -725,16 +713,16 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/items/companion/companion.png</key>
+            <key type="filename">custom-art/items/companion/inner.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>5,4,9,8</rect>
+                <rect>2,2,3,3</rect>
                 <key>scale9Paddings</key>
-                <rect>5,4,9,8</rect>
+                <rect>2,2,3,3</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>

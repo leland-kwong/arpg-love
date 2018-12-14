@@ -12,6 +12,8 @@ local WeaponCore = {
   muzzleFlashDuration = 0,
   recoilDuration = 0,
   recoilDurationRemaining = 0,
+  facingX = 0,
+  facingY = 0,
   drawOrder = function(self)
     -- adjust draw order based on the y-facing direction
     local config = require 'config.config'
@@ -21,11 +23,6 @@ local WeaponCore = {
 }
 
 function WeaponCore.init(self)
-  local frames = {
-    'companion/companion'
-  }
-  self.animation = AnimationFactory:new(frames)
-
   self.listeners = {
     msgBus.on(msgBus.PLAYER_WEAPON_ATTACK, function(msgValue)
       self.recoilDuration = msgValue.attackTime or 0.1
@@ -37,6 +34,46 @@ function WeaponCore.init(self)
       return msgValue
     end)
   }
+
+  Component.create({
+    id = 'familiar',
+    x = 0,
+    y = 0,
+    init = function(self)
+      Component.addToGroup(self, 'all')
+      self.animationInner = AnimationFactory:newStaticSprite('companion/inner')
+      self.animationOuter = AnimationFactory:newStaticSprite('companion/outer')
+
+      self.outerAngle = 0
+      self.clock = 0
+
+      local tween = require 'modules.tween'
+      self.rotTween = tween.new(3, self, { outerAngle = math.pi }, tween.easing.inOutQuart)
+      self.rotDirection = 1
+    end,
+
+    update = function(self, dt)
+      self.clock = self.clock + dt
+      self.z = math.sin(self.clock) * 2
+      local complete = self.rotTween:update(dt)
+      if complete then
+        self.rotDirection = self.rotDirection * -1
+        self.rotTween:reset()
+      end
+    end,
+
+    draw = function(self)
+      love.graphics.setColor(1,1,1)
+      local math = require 'utils.math'
+      local x, y = math.round(self.x) + 0.5, math.round(self.y) + 0.5
+      self.animationOuter:draw(x, y + self.z, self.outerAngle * self.rotDirection)
+      self.animationInner:draw(x, y + self.z)
+    end,
+
+    drawOrder = function(self)
+      return WeaponCore:drawOrder()
+    end
+  })
 end
 
 local max = math.max
@@ -48,7 +85,6 @@ function WeaponCore.update(self, dt)
       dt * self.renderAttachmentAnimationSpeed
     )
   end
-  self.animation:update(dt / 4)
 
   local playerRef = Component.get('PLAYER')
   self.facingX, self.facingY = playerRef.facingDirectionX,
@@ -134,39 +170,13 @@ function WeaponCore.draw(self)
   local recoilDistance = self.recoilDurationRemaining > 0
     and (self.recoilDurationRemaining/self.recoilDuration * recoilMaxDistance)
     or 0
-  local distFromPlayer = 12
+  local distFromPlayer = 14
   local posX = playerX + (self.facingX * distFromPlayer) + recoilDistance * math.sin(-self.angle + halfRad)
   local posY = playerY + (self.facingY * distFromPlayer) + recoilDistance * math.cos(-self.angle + halfRad)
 
-  local centerOffsetX, centerOffsetY = state.animation:getOffset()
-  local facingSide = self.facingX > 0 and 1 or -1
-
-  --shadow
-  love.graphics.setColor(0,0,0,0.17)
-  love.graphics.draw(
-    AnimationFactory.atlas,
-    state.animation.sprite,
-    posX,
-    posY + 15,
-    0,
-    1 * facingSide,
-    -- vertically flip when facing other side so the shadow is in the right position
-    1 / 2,
-    centerOffsetX, centerOffsetY
-  )
-
-  love.graphics.setColor(1,1,1)
-  -- actual graphic
-  love.graphics.draw(
-    AnimationFactory.atlas,
-    state.animation.sprite,
-    posX,
-    posY + self.z,
-    0,
-    1 * facingSide,
-    1,
-    centerOffsetX, centerOffsetY
-  )
+  Component.get('familiar')
+    :set('x', posX)
+    :set('y', posY)
 
   if (self.muzzleFlashDuration > 0) then
     drawMuzzleFlash(

@@ -141,6 +141,9 @@ function meta:isLastFrame()
 end
 
 function meta:draw(x, y, angle, sx, sy, ox, oy, kx, ky)
+  if (not ox) then
+    ox, oy = self:getOffset()
+  end
   love.graphics.draw(
     self.atlas,
     self.sprite,
