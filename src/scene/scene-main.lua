@@ -87,7 +87,7 @@ function MainScene.init(self)
 
   MainMap.create({
     camera = camera,
-    grid = mapGrid,
+    mapId = self.mapId,
     walkable = Map.WALKABLE
   }):setParent(parent)
 

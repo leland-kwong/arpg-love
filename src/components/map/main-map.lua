@@ -14,6 +14,19 @@ local config = require'config.config'
 local Grid = require 'utils.grid'
 local Background = require 'components.map.background'
 local getTileValue = require 'utils.tilemap-bitmask'
+local Dungeon = require 'modules.dungeon'
+
+local generatedTileDefinitionsByMapId = {
+  cache = lru.new(50),
+  get = function(self, mapId)
+    local tileDefs = self.cache:get(mapId)
+    if (not tileDefs) then
+      tileDefs = {}
+      self.cache:set(mapId, tileDefs)
+    end
+    return tileDefs
+  end
+}
 
 local Chance = require 'utils.chance'
 local gridTileTypes = {
@@ -135,6 +148,8 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   class = collisionGroups.mainMap,
 
   init = function(self)
+    self.grid = Dungeon:getData(self.mapId).grid
+    self.tileDefs = generatedTileDefinitionsByMapId:get(self.mapId)
     Background.create()
     self.collisionObjectsHash = setupCollisionObjects(self, self.grid, self.gridSize)
 
@@ -199,9 +214,13 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     local function drawFn()
       love.graphics.setColor(1,1,1)
       floorTileCrossSection(self, self.grid, value, x, y)
-      local animationName = isWall
-        and getWallTileAnimationName(self.grid, x, y, isTileValue)
-        or gridTileTypes[1]()
+      local animationName = Grid.get(self.tileDefs, x, y) or
+        (
+          isWall
+            and getWallTileAnimationName(self.grid, x, y, isTileValue)
+            or gridTileTypes[1]()
+        )
+      Grid.set(self.tileDefs, x, y, animationName)
       local animation = getAnimation(self.animationCache, index, animationName)
         :update(dt)
       local ox, oy = animation:getOffset()
