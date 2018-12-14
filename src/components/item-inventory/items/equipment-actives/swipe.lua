@@ -85,9 +85,9 @@ function Swipe.init(self)
   )
 
   local frames = {}
-  local frameCount = 8
+  local frameCount = 9
   for i=1, frameCount do
-    table.insert(frames, 'ability-swipe-'..i)
+    table.insert(frames, 'swipe/'..i)
   end
   self.animation = AnimationFactory:new(frames):setDuration(self.attackTime)
 

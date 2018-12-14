@@ -7,10 +7,10 @@ function ImpactAnimation.init(self)
   Component.addToGroup(self, 'all')
 
   self.animation = AF:new({
-    'impact-animation-0',
-    'impact-animation-1',
-    'impact-animation-2',
-    'impact-animation-3'
+    'impact-animation/1',
+    'impact-animation/2',
+    'impact-animation/3',
+    'impact-animation/4'
   }):setDuration(0.3)
 end
 

@@ -17,7 +17,7 @@ local Shard = Component.createFactory({
     self.x, self.y = self.x + initialOffset * math.sin(-self.angle),
       self.y + initialOffset * math.cos(-self.angle) - self.z
 
-    self.animation = AnimationFactory:newStaticSprite('frost-orb-shard')
+    self.animation = AnimationFactory:newStaticSprite('frost-orb/frost-orb-shard')
     self.ox, self.oy = self.animation:getOffset()
     local Position = require 'utils.position'
     self.dx, self.dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
@@ -104,7 +104,7 @@ local FrostOrb = Component.createFactory({
 
     self.x, self.y = self.x + (self.dx * self.startOffset),
       self.y + (self.dy * self.startOffset)
-    self.animation = AnimationFactory:newStaticSprite('frost-orb-core')
+    self.animation = AnimationFactory:newStaticSprite('frost-orb/frost-orb-core')
     self.ox, self.oy = self.animation:getOffset()
     self.width, self.height = self.animation:getWidth(), self.animation:getHeight()
 
