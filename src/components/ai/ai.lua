@@ -217,17 +217,17 @@ local function computeObstacleInfluence(self)
   local obstacles, len = self.collision.world:queryRect(
     self.x - self.w,
     self.y - self.h,
-    self.w * 3,
-    self.h * 3,
+    self.w * 2,
+    self.h * 2,
     obstacleFilter
   )
   local dist = 99999
   local no = nil
   for i=1, len do
     local o = obstacles[i]
-    local curDist = Math.dist(self.x, self.y, o.x + o.w/2, o.y + o.h/2) - (o.w * 0.5)
+    local curDist = Math.dist(self.x, self.y, o.x + o.w/2, o.y + o.h/2) - (o.w * 1)
     if curDist < dist then
-      no = o
+      nearestObstacle = o
       dist = curDist
     end
   end
@@ -237,7 +237,7 @@ local function computeObstacleInfluence(self)
 	-- We'll just use the single nearest obstacle.
 	-- A lot of the time this is enough but more complex environments might need influences from all nearby obstacles
   dist = max(0.01, dist - self.w*0.5)
-	local sepX, sepY = Math.normalizeVector(self.x - no.x, self.y - no.y)
+	local sepX, sepY = Math.normalizeVector(self.x - nearestObstacle.x, self.y - nearestObstacle.y)
 
 	return sepX/dist, sepY/dist
 end
@@ -312,8 +312,9 @@ local function setNextPosition(self, speed, radius)
 
   local Vec2 = require 'modules.brinevector'
   self.prevX, self.prevY = self.prevX or 0, self.prevY or 0
-  self.dv = self.dv or Vec2(0, 0)
-  self.dv.x, self.dv.y = self.x - self.prevX, self.y - self.prevY
+  self.dv = self.dv or 0
+  local dist = require 'utils.math'.dist
+  self.dv = self.dv + dist(self.x, self.y, self.prevX, self.prevY)
   self.prevX, self.prevY = self.x, self.y
 end
 
@@ -360,7 +361,9 @@ function Ai.update(self, dt)
   self.neighbors = nil
   handleAggro(self)
 
-  local isIdle = (self:getFiniteState() ~= states.MOVING) and (not self.isInViewOfPlayer) and (not self.isAggravated)
+  local isIdle = (self:getFiniteState() ~= states.MOVING) and
+    (not self.isInViewOfPlayer) and
+    (not self.isAggravated)
   self:setDrawDisabled(isIdle)
   self.clock = self.clock + dt
   self.frameCount = self.frameCount + 1
@@ -384,12 +387,14 @@ function Ai.update(self, dt)
 
     self.checkCount = (self.checkCount or 0) + 1
     if self.checkCount >= 60 then
-      local isStuck = abs(self.dv.x) <= 6 and abs(self.dv.y) <= 6
+      local frameRate = 60
+      local expectedMoveRate = self.moveSpeed / frameRate
+      local isStuck = (self.dv / self.checkCount) < expectedMoveRate
       if isStuck then
         self.targetX = nil
       end
       self.checkCount = 0
-      self.dv = self.dv * 0
+      self.dv = 0
     end
   end
 
@@ -435,7 +440,7 @@ function Ai.update(self, dt)
 
   self.canSeeTarget = canSeeTarget
 
-  if canSeeTarget and (isInAggroRange or self.isAggravated) then
+  if canSeeTarget and (isInAggroRange or self.isAggravated) and targetX then
     self.targetX, self.targetY = targetX, targetY
   end
 
@@ -474,6 +479,7 @@ function Ai.update(self, dt)
 
   local nextX, nextY = self.x, self.y
 
+  -- update animation state
   if (self:getFiniteState() ~= states.ATTACKING) then
     local isMoving = originalX ~= nextX or originalY ~= nextY
     self.animation = isMoving and self.animations.moving or self.animations.idle
@@ -576,6 +582,11 @@ end
 
 function Ai.draw(self)
   debugLineOfSight(self)
+
+  if self.debug and self.targetX then
+    love.graphics.setColor(0,1,0.2)
+    love.graphics.circle('line', self.targetX, self.targetY, 4)
+  end
 
   createLight(self)
 
