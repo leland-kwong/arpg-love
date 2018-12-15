@@ -74,6 +74,8 @@ Component.create({
   y = 250,
   targetX = 600,
   targetY = 200,
+  baseColor = {1.0, 1.0, 1.0},
+  lightColor = {0, 0.7, 1},
   init = function(self)
     Component.addToGroup(self, 'gui')
     Template.create()
@@ -104,21 +106,20 @@ Component.create({
   draw = function(self)
     love.graphics.push()
     love.graphics.origin()
-    love.graphics.clear()
+    local bgColor = {0.2,0.2,0.2}
+    love.graphics.clear(bgColor)
     if self.vertices then
+      local oBlendMode = love.graphics.getBlendMode()
       local Color = require 'modules.color'
-      local c = colors[math.random(1, #colors)]
-
-      love.graphics.setColor(Color.multiplyAlpha(c, 0.2))
       love.graphics.setLineWidth(3)
-
       love.graphics.setLineStyle('rough')
+
+      love.graphics.setBlendMode('alpha')
+      love.graphics.setColor(Color.multiplyAlpha(self.baseColor, 0.3))
       love.graphics.line(self.vertices)
 
-      local lightColor = {0,0.7,1}
-      local oBlendMode = love.graphics.getBlendMode()
       love.graphics.setBlendMode('add', 'alphamultiply')
-      love.graphics.setColor(Color.multiplyAlpha(lightColor, 0.6))
+      love.graphics.setColor(Color.multiplyAlpha(self.lightColor, 0.6))
       lightSource(self.x, self.y, 20)
 
       -- make stencil with lines
@@ -127,7 +128,7 @@ Component.create({
 
       local oBlendMode = love.graphics.getBlendMode()
       love.graphics.setBlendMode('add', 'alphamultiply')
-      love.graphics.setColor(Color.multiplyAlpha(lightColor, 0.9))
+      love.graphics.setColor(Color.multiplyAlpha(self.lightColor, 0.9))
       for i=3, (#self.vertices - 2), 2 do
         local x, y = self.vertices[i], self.vertices[i + 1]
         lightSource(x, y, 60)
