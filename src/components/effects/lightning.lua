@@ -176,14 +176,14 @@ return Component.create({
       love.graphics.setBlendMode('add', 'alphamultiply')
       for i=1, #self.sources do
         local source = self.sources[i]
-        love.graphics.setColor(Color.multiplyAlpha(source.color, 0.6 * source.opacity))
+        love.graphics.setColor(Color.multiplyAlpha(source.color, 0.8 * source.opacity))
 
         -- start point light
         lightSource(source.start.x, source.start.y, source.thickness * 8)
 
         -- end point light
         local lastVertice = #source.vertices - 1
-        love.graphics.setColor(Color.multiplyAlpha(source.color, 0.5 * source.opacity))
+        love.graphics.setColor(Color.multiplyAlpha(source.color, 0.8 * source.opacity))
         lightSource(
           source.vertices[lastVertice],
           source.vertices[lastVertice + 1],

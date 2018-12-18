@@ -15,9 +15,13 @@ local Vec2 = require 'modules.brinevector'
 
 local ChainLightning = {
   group = groups.all,
+  range = 10 * config.gridSize
 }
 
 function ChainLightning.init(self)
+  self.x2 = self.x + self.dx * self.range
+  self.y2 = self.y + self.dy * self.range
+
   local hitBoxSize = config.gridSize
   self.collision = self:addCollisionObject(
     'projectile',
@@ -25,6 +29,16 @@ function ChainLightning.init(self)
     hitBoxSize, hitBoxSize,
     hitBoxSize/2, hitBoxSize/2
   ):addToWorld(collisionWorlds.map)
+end
+
+local function createEffect(start, target)
+  local LightningEffect = require 'components.effects.lightning'
+  LightningEffect:add({
+    start = start,
+    target = target,
+    thickness = 1.5,
+    duration = 0.4
+  })
 end
 
 function ChainLightning.update(self, dt)
@@ -39,7 +53,6 @@ function ChainLightning.update(self, dt)
     end
   )
   local hitTriggered = len > 0
-  local LightningEffect = require 'components.effects.lightning'
   if hitTriggered then
     local alreadyHit = false
     local i=1
@@ -51,12 +64,7 @@ function ChainLightning.update(self, dt)
 
         local start, target = Vec2(self.x, self.y),
           Vec2(actualX, actualY)
-        local source = {
-          start = start,
-          target = target,
-          duration = 0.4
-        }
-        LightningEffect:add(source)
+        createEffect(start, target)
 
         msgBus.send(msgBus.CHARACTER_HIT, {
           parent = parent,
@@ -77,12 +85,7 @@ function ChainLightning.update(self, dt)
   else
     local start, target = Vec2(self.x, self.y),
       Vec2(self.x2, self.y2)
-    local source = {
-      start = start,
-      target = target,
-      duration = 0.4
-    }
-    LightningEffect:add(source)
+    createEffect(start, target)
   end
   self:delete()
 end
