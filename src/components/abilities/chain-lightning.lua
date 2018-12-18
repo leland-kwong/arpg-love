@@ -15,19 +15,21 @@ local Vec2 = require 'modules.brinevector'
 
 local ChainLightning = {
   group = groups.all,
-  range = 10 * config.gridSize
+  range = 10,
+  hitBoxSize = config.gridSize,
 }
 
 function ChainLightning.init(self)
-  self.x2 = self.x + self.dx * self.range
-  self.y2 = self.y + self.dy * self.range
+  local trueRange = self.range * config.gridSize
+  self.x2 = self.x + self.dx * trueRange
+  self.y2 = self.y + self.dy * trueRange
 
-  local hitBoxSize = config.gridSize
+  local hbSize = self.hitBoxSize
   self.collision = self:addCollisionObject(
     'projectile',
     self.x, self.y,
-    hitBoxSize, hitBoxSize,
-    hitBoxSize/2, hitBoxSize/2
+    hbSize, hbSize,
+    hbSize/2, hbSize/2
   ):addToWorld(collisionWorlds.map)
 end
 
