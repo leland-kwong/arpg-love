@@ -83,6 +83,8 @@ function Swipe.init(self)
     Component.get('WEAPON_CORE'),
     'all'
   )
+  local Position = require 'utils.position'
+  self.dx, self.dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
 
   local frames = {}
   local frameCount = 9

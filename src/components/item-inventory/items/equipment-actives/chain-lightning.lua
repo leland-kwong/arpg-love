@@ -18,7 +18,6 @@ return itemSystem.registerModule({
   active = function(item, props)
     local Sound = require 'components.sound'
     Sound.playEffect('energy-beam-1.wav')
-    -- msgBus.send(msgBus.PLAYER_WEAPON_MUZZLE_FLASH, muzzleFlashMessage)
     return {
 			blueprint = require 'components.abilities.chain-lightning',
 			props = {
@@ -28,6 +27,7 @@ return itemSystem.registerModule({
 					collisionGroups.environment,
 					collisionGroups.obstacle
 				),
+				range = 6
 			}
 		}
 	end,
