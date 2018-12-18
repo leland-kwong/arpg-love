@@ -6,6 +6,7 @@ if config.isDevelopment then
       'base.potion-health',
       'base.pod-module-initiate',
       'base.pod-module-swipe',
+      'base.ability-chain-lightning',
       'base.potion-energy',
       'base.mock-shoes',
     },

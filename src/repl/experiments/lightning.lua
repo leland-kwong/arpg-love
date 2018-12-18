@@ -4,24 +4,30 @@ local msgBus = require 'components.msg-bus'
 local lightBlur = love.graphics.newImage('built/images/light-blur.png')
 local Vec2 = require 'modules.brinevector'
 
+print(
+  select(3, unpack({
+    1, 2, 3, 4
+  }))
+)
+
 Component.create({
   id = 'lightning-generator-test',
   init = function(self)
-    Template.create()
+    -- Template.create()
 
-    self.listeners = {
-      msgBus.on(msgBus.MOUSE_CLICKED, function(ev)
-        local x, y = unpack(ev)
-        Component.get('lightning-effect'):add({
-          start = Vec2(150, 300),
-          target = Vec2(x, y),
-          thickness = 2
-        })
-      end)
-    }
+    -- self.listeners = {
+    --   msgBus.on(msgBus.MOUSE_CLICKED, function(ev)
+    --     local x, y = unpack(ev)
+    --     Component.get('lightning-effect'):add({
+    --       start = Vec2(150, 300),
+    --       target = Vec2(x, y),
+    --       thickness = 2
+    --     })
+    --   end)
+    -- }
 
-    local dynamicRequire = require 'utils.dynamic-require'
-    dynamicRequire 'components.effects.lightning'
+    -- local dynamicRequire = require 'utils.dynamic-require'
+    -- dynamicRequire 'components.effects.lightning'
   end,
 
   draw = function()

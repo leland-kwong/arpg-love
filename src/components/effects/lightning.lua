@@ -11,8 +11,8 @@ glowEffect.glow.strength = 5
 glowEffect.glow.min_luma = 0.0
 
 local options = {
-  minDeviation = 10,
-  maxDeviation = 25
+  minDeviation = 5,
+  maxDeviation = 10
 }
 
 local function generateLightning(startPt, target)
@@ -40,7 +40,7 @@ local function generateLightning(startPt, target)
   }
   local remainingDist = totalDist - firstSegmentDist
   local dirIndex = math.random(1, #directions)
-  local lastSegmentDist = math.min(remainingDist, math.random(5, 100))
+  local lastSegmentDist = math.min(remainingDist, math.random(5, 50))
   remainingDist = remainingDist - lastSegmentDist
 
   local function addVertice(dist)
@@ -57,7 +57,7 @@ local function generateLightning(startPt, target)
   local distTraveled = 0
   local nextDistIncrease = 0
   while (remainingDist > 0) do
-    nextDistIncrease = math.min(remainingDist, math.random(20, 150))
+    nextDistIncrease = math.min(remainingDist, math.random(15, 50))
     distTraveled = distTraveled + nextDistIncrease
     remainingDist = remainingDist - nextDistIncrease
     addVertice(distTraveled)
@@ -98,10 +98,10 @@ local addParamsMt = {
 addParamsMt.__index = addParamsMt
 local instanceTweenTarget = {opacity = 0}
 
-Component.create({
+return Component.create({
   id = 'lightning-effect',
   init = function(self)
-    Component.addToGroup(self, 'gui')
+    Component.addToGroup(self, 'all')
 
     self.stencil = function()
       for i=1, #self.sources do
@@ -143,8 +143,19 @@ Component.create({
 
   draw = function(self)
     if #self.sources > 0 then
+      local camera = require 'components.camera'
+
       love.graphics.push()
       love.graphics.origin()
+      love.graphics.scale(camera.scale)
+
+      local cameraTranslateX, cameraTranslateY = camera:getPosition()
+      local cWidth, cHeight = camera:getSize()
+      local tx, ty = -cameraTranslateX + cWidth/2, -cameraTranslateY + cHeight/2
+      love.graphics.push()
+      love.graphics.origin()
+      love.graphics.translate(tx, ty)
+
       love.graphics.setCanvas{self.canvas, stencil=true}
       love.graphics.clear()
 
@@ -199,13 +210,16 @@ Component.create({
       love.graphics.setStencilTest()
 
       love.graphics.setCanvas()
+      love.graphics.pop()
+
       love.graphics.setColor(1,1,1)
       love.graphics.setBlendMode('alpha', 'premultiplied')
-      glowEffect(function()
+      -- glowEffect(function()
         love.graphics.draw(self.canvas)
-      end)
-      love.graphics.setBlendMode(oBlendMode)
+      -- end)
       love.graphics.pop()
+      love.graphics.setBlendMode(oBlendMode)
+
     end
   end,
 

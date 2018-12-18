@@ -83,6 +83,10 @@ function CollisionObject:setParent(parent)
 end
 
 function CollisionObject:delete()
+  if self._deleted then
+    return
+  end
+  self._deleted = true
   self:removeFromWorld(self.world)
   objectCount = objectCount - 1
   return self
