@@ -143,19 +143,6 @@ return Component.create({
 
   draw = function(self)
     if #self.sources > 0 then
-      local camera = require 'components.camera'
-
-      love.graphics.push()
-      love.graphics.origin()
-      love.graphics.scale(camera.scale)
-
-      local cameraTranslateX, cameraTranslateY = camera:getPosition()
-      local cWidth, cHeight = camera:getSize()
-      local tx, ty = -cameraTranslateX + cWidth/2, -cameraTranslateY + cHeight/2
-      love.graphics.push()
-      love.graphics.origin()
-      love.graphics.translate(tx, ty)
-
       love.graphics.setCanvas{self.canvas, stencil=true}
       love.graphics.clear()
 
@@ -210,16 +197,16 @@ return Component.create({
       love.graphics.setStencilTest()
 
       love.graphics.setCanvas()
-      love.graphics.pop()
 
       love.graphics.setColor(1,1,1)
       love.graphics.setBlendMode('alpha', 'premultiplied')
-      -- glowEffect(function()
+      love.graphics.push()
+      love.graphics.origin()
+      glowEffect(function()
         love.graphics.draw(self.canvas)
-      -- end)
+      end)
       love.graphics.pop()
       love.graphics.setBlendMode(oBlendMode)
-
     end
   end,
 
