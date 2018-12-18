@@ -98,6 +98,9 @@ local FrostOrb = Component.createFactory({
     Component.addToGroup(self, self.componentGroup)
     Component.addToGroup(self, 'gameWorld')
 
+    local Position = require 'utils.position'
+    self.dx, self.dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
+
     self.clock = 0
     self.shardClock = 0
     self.rotation = math.random(0, 4) * 0.5

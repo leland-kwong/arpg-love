@@ -5,9 +5,9 @@ local lightBlur = love.graphics.newImage('built/images/light-blur.png')
 local Vec2 = require 'modules.brinevector'
 
 print(
-  select(3, unpack({
-    1, 2, 3, 4
-  }))
+  setmetatable({}, {
+    foo = 'foo'
+  }).foo
 )
 
 Component.create({

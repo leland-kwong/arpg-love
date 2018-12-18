@@ -135,8 +135,6 @@ local function ActiveEquipmentHandler()
       local mx, my = camera:getMousePosition()
       local playerX, playerY = self.player:getPosition()
       local abilityData = activateFn(activeItem)
-      local Position = require 'utils.position'
-      local dx, dy = Position.getDirection(playerX, playerY, mx, my)
       local abilityEntity = abilityData.blueprint.create(
         extend(
           abilityData.props, {
@@ -145,8 +143,6 @@ local function ActiveEquipmentHandler()
           , y = playerY
           , x2 = mx
           , y2 = my
-          , dx = dx
-          , dy = dy
           , source = activeItem.__id
         })
       )

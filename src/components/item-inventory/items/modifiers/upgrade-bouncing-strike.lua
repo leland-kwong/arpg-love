@@ -35,21 +35,22 @@ return itemSystem.registerModule({
       local gridSize = gameConfig.gridSize
       local Map = require 'modules.map-generator.index'
       local losFn = LOS(mapGrid, Map.WALKABLE)
+      local targetsToIgnore = attack.targetsToIgnore or {}
+      targetsToIgnore[currentTarget] = true
 
       local target = findNearestTarget(
         collisionWorlds.map,
-        {currentTarget},
         currentTarget.x,
         currentTarget.y,
         6 * gridSize,
         losFn,
-        gridSize
+        gridSize,
+        function(target)
+          return not targetsToIgnore[target]
+        end
       )
 
       if target then
-        local targetsToIgnore = attack.targetsToIgnore or {}
-        targetsToIgnore[currentTarget] = true
-
         local blueprint = Component.getBlueprint(attack)
         blueprint.create({
           x = attack.x,
