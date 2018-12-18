@@ -10,27 +10,32 @@ local options = {
 }
 
 local function generateLightning(startPt, endPt)
-  local x1, y1, x2, y2 = startPt.x, startPt.y, endPt.x, endPt.y
   local Position = require 'utils.position'
+  local Math = require 'utils.math'
+
+  local x1, y1, x2, y2 = startPt.x, startPt.y, endPt.x, endPt.y
+  local totalDist = Math.dist(x1, y1, x2, y2)
   local dx, dy = Position.getDirection(x1, y1, x2, y2)
-  local firstSegmentDist = math.random(5, 18)
+  local firstSegmentDist = math.min(totalDist, math.random(5, 18))
   local vertices = {
     x1, y1,
     x1 + firstSegmentDist * dx, y1 + firstSegmentDist * dy
   }
+
+  local isSingleSegment = totalDist == firstSegmentDist
+  if isSingleSegment then
+    return vertices
+  end
 
   -- vectors perpendicular to line
   local directions = {
     {-dy, dx},
     {dy, -dx}
   }
+  local remainingDist = totalDist - firstSegmentDist
   local dirIndex = math.random(1, #directions)
-  local Math = require 'utils.math'
-  local totalDist = Math.dist(x1, y1, x2, y2)
-  local lastSegmentDist = math.random(5, 100)
-  local remainingDist = totalDist - firstSegmentDist - lastSegmentDist
-  local nextDistIncrease = math.random(80, 90)
-  local distTraveled = 0
+  local lastSegmentDist = math.min(remainingDist, math.random(5, 100))
+  remainingDist = remainingDist - lastSegmentDist
 
   local function addVertice(dist)
     local length = math.random(options.minDeviation, options.maxDeviation)
@@ -42,11 +47,13 @@ local function generateLightning(startPt, endPt)
     table.insert(vertices, y)
   end
 
+  local distTraveled = 0
+  local nextDistIncrease = 0
   while (remainingDist > 0) do
+    nextDistIncrease = math.min(remainingDist, math.random(20, 150))
     distTraveled = distTraveled + nextDistIncrease
     remainingDist = remainingDist - nextDistIncrease
     addVertice(distTraveled)
-    nextDistIncrease = math.min(remainingDist, math.random(20, 150))
   end
 
   -- add last segment (the last segment's vector is same as original path)
@@ -89,7 +96,8 @@ Component.create({
     }
     self.stencil = function()
       for i=1, #self.sources do
-        love.graphics.line(self.sources[i].vertices)
+        local s= self.sources[i]
+        love.graphics.line(s.vertices)
       end
     end
   end,
@@ -108,6 +116,7 @@ Component.create({
       self.sources = f.map(startPoints, function(start)
         return {
           start = start,
+          endPt = self.target,
           vertices = generateLightning(
             start,
             self.target
@@ -127,11 +136,12 @@ Component.create({
     local Color = require 'modules.color'
 
     if self.sources then
+      -- draw base lines
       for i=1, #self.sources do
         local source = self.sources[i]
-        love.graphics.setLineWidth(4)
         love.graphics.setLineStyle('rough')
 
+        love.graphics.setLineWidth(4)
         love.graphics.setBlendMode('alpha')
         love.graphics.setColor(Color.multiplyAlpha(self.baseColor, 0.2))
         love.graphics.line(source.vertices)
