@@ -157,7 +157,7 @@ Component.create({
   end,
   drawOrder = function()
     local drawOrders = require 'modules.draw-orders'
-    return drawOrders.SparkDraw
+    return drawOrders.BulletPostDraw
   end
 })
 

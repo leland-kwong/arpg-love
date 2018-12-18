@@ -18,15 +18,15 @@ return {
 	},
 
 	properties = {
-		sprite = "weapon-module-frost-orb",
+		sprite = "weapon-module-lightning-rod",
 		title = 'chain-lightning',
 		baseDropChance = 1,
 		category = itemConfig.category.POD_MODULE,
 
 		info = {
 			cooldown = 0,
-			attackTime = 0.2,
-			energyCost = 2
+			attackTime = 0.3,
+			energyCost = 3
 		},
 
 		onActivate = require(require('alias').path.items..'.inventory-actives.equip-on-click')(),

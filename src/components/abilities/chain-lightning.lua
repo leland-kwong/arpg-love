@@ -61,26 +61,27 @@ function ChainLightning.update(self, dt)
     while (i <= len) and (not alreadyHit) do
       local item = cols[i]
       local parent = item.other.parent
+      alreadyHit = true
       if parent then
-        alreadyHit = true
-
         local start, target = Vec2(self.x, self.y),
           Vec2(actualX, actualY)
         createEffect(start, target)
 
-        msgBus.send(msgBus.CHARACTER_HIT, {
-          parent = parent,
-          lightningDamage = math.random(self.lightningDamage.x, self.lightningDamage.y),
-          source = self:getId()
-        })
-        msgBus.send(msgBus.CHARACTER_HIT, {
-          parent = parent,
-          modifiers = {
-            shocked = 1
-          },
-          duration = 0.2,
-          source = 'chain-lightning'
-        })
+        if (not CollisionGroups.matches(item.other.group, 'obstacle')) then
+          msgBus.send(msgBus.CHARACTER_HIT, {
+            parent = parent,
+            lightningDamage = math.random(self.lightningDamage.x, self.lightningDamage.y),
+            source = self:getId()
+          })
+          msgBus.send(msgBus.CHARACTER_HIT, {
+            parent = parent,
+            modifiers = {
+              shocked = 1
+            },
+            duration = 0.2,
+            source = 'chain-lightning'
+          })
+        end
       end
       i = i + 1
     end

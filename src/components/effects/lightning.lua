@@ -211,6 +211,6 @@ return Component.create({
   end,
 
   drawOrder = function(self)
-    return 100000
+    return Component.groups.all:drawOrder(self)
   end
 })
