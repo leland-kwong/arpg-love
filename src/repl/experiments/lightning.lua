@@ -39,7 +39,8 @@ local function generateLightning(startPt, endPt)
 
   local function addVertice(dist)
     local length = math.random(options.minDeviation, options.maxDeviation)
-    dirIndex = dirIndex == 1 and 2 or 1 -- alternate directions
+    dirIndex = math.random(1, #directions)
+    -- dirIndex = dirIndex == 1 and 2 or 1 -- alternate directions
     local dir = directions[dirIndex]
     local startX, startY = x1 + dx * dist, y1 + dy * dist
     local x, y = startX + dir[1] * length, startY + dir[2] * length
