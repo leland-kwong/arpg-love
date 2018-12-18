@@ -3,6 +3,14 @@ local Component = require 'modules.component'
 local msgBus = require 'components.msg-bus'
 local lightBlur = love.graphics.newImage('built/images/light-blur.png')
 local Vec2 = require 'modules.brinevector'
+local moonshine = require 'modules.moonshine'
+
+local glowEffect = moonshine(
+  moonshine.effects.glow
+)
+
+glowEffect.glow.strength = 4
+glowEffect.glow.min_luma = 0.4
 
 local options = {
   minDeviation = 10,
@@ -40,7 +48,6 @@ local function generateLightning(startPt, endPt)
   local function addVertice(dist)
     local length = math.random(options.minDeviation, options.maxDeviation)
     dirIndex = math.random(1, #directions)
-    -- dirIndex = dirIndex == 1 and 2 or 1 -- alternate directions
     local dir = directions[dirIndex]
     local startX, startY = x1 + dx * dist, y1 + dy * dist
     local x, y = startX + dir[1] * length, startY + dir[2] * length
@@ -83,7 +90,7 @@ Component.create({
   x = 350,
   y = 250,
   baseColor = {1.0, 1.0, 1.0},
-  lightColor = {0, 0.7, 1},
+  lightColor = {1, 0.7, 0},
   target = Vec2(700, 400),
   init = function(self)
     Component.addToGroup(self, 'gui')
@@ -101,6 +108,7 @@ Component.create({
         love.graphics.line(s.vertices)
       end
     end
+    self.canvas = love.graphics.newCanvas()
   end,
 
   update = function(self, dt)
@@ -128,14 +136,16 @@ Component.create({
   end,
 
   draw = function(self)
-    love.graphics.push()
-    love.graphics.origin()
     local bgColor = {0.2,0.2,0.2}
     love.graphics.clear(bgColor)
 
+    love.graphics.push()
+    love.graphics.origin()
+    love.graphics.setCanvas{self.canvas, stencil=true}
+    love.graphics.clear()
+
     local oBlendMode = love.graphics.getBlendMode()
     local Color = require 'modules.color'
-
     if self.sources then
       -- draw base lines
       for i=1, #self.sources do
@@ -144,7 +154,7 @@ Component.create({
 
         love.graphics.setLineWidth(4)
         love.graphics.setBlendMode('alpha')
-        love.graphics.setColor(Color.multiplyAlpha(self.baseColor, 0.2))
+        love.graphics.setColor(Color.multiplyAlpha(self.baseColor, 0.4))
         love.graphics.line(source.vertices)
       end
 
@@ -182,11 +192,19 @@ Component.create({
           lightSource(x, y, math.random(40, 60))
         end
       end
+
       love.graphics.setStencilTest()
     end
 
+    love.graphics.setCanvas()
+    love.graphics.setColor(1,1,1)
+    love.graphics.setBlendMode('alpha', 'premultiplied')
+    glowEffect(function()
+      love.graphics.draw(self.canvas)
+    end)
     love.graphics.setBlendMode(oBlendMode)
     love.graphics.pop()
+
   end,
 
   drawOrder = function(self)
