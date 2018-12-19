@@ -41,6 +41,4 @@ local function toggleEntityVisibility(self)
   end
 end
 
-msgBus.on(msgBus.UPDATE, function()
-  toggleEntityVisibility(self)
-end)
+msgBus.on(msgBus.UPDATE, toggleEntityVisibility)
