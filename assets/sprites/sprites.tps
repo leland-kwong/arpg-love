@@ -932,6 +932,8 @@
             <key type="filename">custom-art/tiles/map-wall-10_3.png</key>
             <key type="filename">custom-art/tiles/map-wall-10_4.png</key>
             <key type="filename">custom-art/tiles/map-wall-10_5.png</key>
+            <key type="filename">custom-art/tiles/map-wall-10_6.png</key>
+            <key type="filename">custom-art/tiles/map-wall-10_7.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0,0.581395</point_f>

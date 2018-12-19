@@ -83,15 +83,23 @@ local rollWallTileType = Chance({
   },
   {
     value = 'map-wall-10_3',
-    chance = 40
+    chance = 15
   },
   {
     value = 'map-wall-10_4',
-    chance = 8
+    chance = 10
   },
   {
     value = 'map-wall-10_5',
-    chance = 20
+    chance = 25
+  },
+  {
+    value = 'map-wall-10_6',
+    chance = 15
+  },
+  {
+    value = 'map-wall-10_7',
+    chance = 25
   },
   {
     value = defaultWallType,
@@ -112,9 +120,7 @@ local function rollRandomWallType(self, grid, x, y, tileType)
   local isFrontFacingType = tileType == frontFacing
   if isFrontFacingType then
     local leftTypeIsFrontFacing = getTileValue(grid, x-1, y, isTileValue) == frontFacing
-      -- and getTileFromTileDefinition(self, x-1, y) == defaultWallType
     local rightTypeIsFrontFacing = getTileValue(grid, x+1, y, isTileValue) == frontFacing
-      -- and getTileFromTileDefinition(self, x+1, y) == defaultWallType
     local isInBetweenFrontFacingTypes = leftTypeIsFrontFacing and rightTypeIsFrontFacing
     if isInBetweenFrontFacingTypes then
       local rolledType = rollWallTileType()
