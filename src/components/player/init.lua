@@ -202,6 +202,7 @@ local Player = {
       maxHealth = 200,
       maxEnergy = 100,
       moveSpeed = 100,
+      lightRadius = 50,
     }, self)
   end,
   attackRecoveryTime = 0,
@@ -687,7 +688,7 @@ function Player.draw(self)
   -- draw light around player
   Component.get('lightWorld'):addLight(
     self.x, self.y,
-    40,
+    self.stats:get('lightRadius'),
     {1,1,1}
   )
 

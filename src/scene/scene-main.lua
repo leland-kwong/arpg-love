@@ -37,7 +37,7 @@ end
 
 function MainScene.init(self)
   msgBus.send(msgBus.NEW_MAP)
-  Component.get('lightWorld'):setAmbientColor({0.6,0.6,0.6,1})
+  Component.get('lightWorld'):setAmbientColor({0.5,0.5,0.5,1})
 
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0,0,0,1})
 

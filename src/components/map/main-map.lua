@@ -71,11 +71,82 @@ local gridTileTypes = {
   })
 }
 
+local defaultWallType = 'map-wall-10'
+local rollWallTileType = Chance({
+  {
+    value = 'map-wall-10_1',
+    chance = 4
+  },
+  {
+    value = 'map-wall-10_2',
+    chance = 6
+  },
+  {
+    value = 'map-wall-10_3',
+    chance = 40
+  },
+  {
+    value = 'map-wall-10_4',
+    chance = 8
+  },
+  {
+    value = 'map-wall-10_5',
+    chance = 20
+  },
+  {
+    value = defaultWallType,
+    chance = 40
+  }
+})
+
 local isTileValue = function(v)
   return v == 0
 end
-local function getWallTileAnimationName(grid, x, y)
-  return 'map-wall-'..getTileValue(grid, x, y, isTileValue)
+
+local getTileFromTileDefinition = function(self, x, y)
+  return Grid.get(self.tileDefs, x, y)
+end
+
+local function rollRandomWallType(self, grid, x, y, tileType)
+  local frontFacing = 10
+  local isFrontFacingType = tileType == frontFacing
+  if isFrontFacingType then
+    local leftTypeIsFrontFacing = getTileValue(grid, x-1, y, isTileValue) == frontFacing
+      -- and getTileFromTileDefinition(self, x-1, y) == defaultWallType
+    local rightTypeIsFrontFacing = getTileValue(grid, x+1, y, isTileValue) == frontFacing
+      -- and getTileFromTileDefinition(self, x+1, y) == defaultWallType
+    local isInBetweenFrontFacingTypes = leftTypeIsFrontFacing and rightTypeIsFrontFacing
+    if isInBetweenFrontFacingTypes then
+      local rolledType = rollWallTileType()
+      local isRepeated = (rolledType ~= defaultWallType)
+        and (
+          rolledType == getTileFromTileDefinition(self, x-1, y) -- left
+          or rolledType == getTileFromTileDefinition(self, x+1, y) -- right
+        )
+      return isRepeated and rollRandomWallType(self, grid, x, y, tileType) or rolledType
+    end
+  end
+
+  return 'map-wall-'..tileType
+end
+
+local function getTileAnimationName(self, x, y, isWall)
+  local grid = self.grid
+  local fromCache = getTileFromTileDefinition(self, x, y)
+  if fromCache then
+    return fromCache
+  end
+  local tileType
+  if isWall then
+    tileType = rollRandomWallType(
+      self, grid, x, y,
+      getTileValue(grid, x, y, isTileValue)
+    )
+  else
+    tileType = gridTileTypes[1]()
+  end
+  Grid.set(self.tileDefs, x, y, tileType)
+  return tileType
 end
 
 local floorTileCrossSection = function(self, grid, v, x, y)
@@ -184,7 +255,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     -- if its unwalkable, add a collision object and create wall tile
     if (isWall) and (not isEmptyTile) then
       renderWallCollisionDebug(self)
-      local animationName = getWallTileAnimationName(self.grid, x, y, isTileValue)
+      local animationName = getTileAnimationName(self, x, y, isWall)
       local animation = getAnimation(self.animationCache, index, animationName)
         :update(dt)
       local tileAbove = Grid.get(self.grid, x, y - 1)
@@ -214,13 +285,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     local function drawFn()
       love.graphics.setColor(1,1,1)
       floorTileCrossSection(self, self.grid, value, x, y)
-      local animationName = Grid.get(self.tileDefs, x, y) or
-        (
-          isWall
-            and getWallTileAnimationName(self.grid, x, y, isTileValue)
-            or gridTileTypes[1]()
-        )
-      Grid.set(self.tileDefs, x, y, animationName)
+      local animationName = getTileAnimationName(self, x, y, isWall)
       local animation = getAnimation(self.animationCache, index, animationName)
         :update(dt)
       local ox, oy = animation:getOffset()
