@@ -174,7 +174,7 @@
   <object id="50" name="entrance to level" type="levelExit" x="48" y="464" width="32" height="16"/>
  </objectgroup>
  <objectgroup color="#ffff00" id="4" name="spawn-points">
-  <object id="29" name="ai-group" type="aiGroup" x="192" y="640" width="53" height="53">
+  <object id="29" name="ai-group" type="aiGroup" x="180" y="602" width="53" height="53">
    <properties>
     <property name="groupSize" type="int" value="4"/>
    </properties>
@@ -192,7 +192,7 @@
    </properties>
    <ellipse/>
   </object>
-  <object id="33" name="ai-group" type="aiGroup" x="64" y="704" width="53" height="53">
+  <object id="33" name="ai-group" type="aiGroup" x="76" y="643" width="53" height="53">
    <properties>
     <property name="groupSize" type="int" value="4"/>
    </properties>
@@ -236,6 +236,6 @@
   </object>
  </objectgroup>
  <objectgroup color="#ff007f" id="5" name="unique-enemies">
-  <object id="39" template="ai-legendary.tx" x="93" y="531"/>
+  <object id="39" template="ai-legendary.tx" x="96" y="542"/>
  </objectgroup>
 </map>
