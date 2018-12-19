@@ -103,7 +103,7 @@ local rollWallTileType = Chance({
   },
   {
     value = defaultWallType,
-    chance = 40
+    chance = 37
   }
 })
 
