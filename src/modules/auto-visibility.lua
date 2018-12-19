@@ -21,7 +21,8 @@ local function toggleEntityVisibility(self)
   local width, height = camera:getSize()
   local items, len = collisionWorlds.map:queryRect(
     west - threshold,
-    north - threshold, width + (threshold * 2),
+    north - threshold,
+    width + (threshold * 2),
     height + (threshold * 2),
     visibleItemFilter
   )
