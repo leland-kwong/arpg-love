@@ -68,13 +68,14 @@ function ChainLightning.init(self)
   ):addToWorld(collisionWorlds.map)
 end
 
-local function createEffect(start, target)
+local function createEffect(start, target, hasHit)
   local LightningEffect = require 'components.effects.lightning'
   LightningEffect:add({
     start = start,
     target = target,
     thickness = 1.5,
-    duration = 0.4
+    duration = 0.4,
+    targetPointRadius = hasHit and 12 or 4
   })
 end
 
@@ -104,7 +105,7 @@ function ChainLightning.update(self, dt)
         local targetX, targetY = actualX, actualY
         local start, target = Vec2(self.x, self.y),
           Vec2(targetX, targetY)
-        createEffect(start, target)
+        createEffect(start, target, true)
 
         local isHittable = not CollisionGroups.matches(item.other.group, 'obstacle')
         if isHittable then

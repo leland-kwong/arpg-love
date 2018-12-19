@@ -21,7 +21,7 @@ return itemSystem.registerModule({
     return {
 			blueprint = require 'components.abilities.chain-lightning',
 			props = {
-				lightningDamage = Vec2(2, 4),
+				lightningDamage = Vec2(1, 4),
 				targetGroup = collisionGroups.create(
 					collisionGroups.enemyAi,
 					collisionGroups.environment,

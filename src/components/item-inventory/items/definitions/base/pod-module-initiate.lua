@@ -10,12 +10,7 @@ return {
 	type = "base.pod-module-initiate",
 
 	blueprint = {
-		extraModifiers = {
-			require(require('alias').path.items..'.modifiers.upgrade-bouncing-strike')({
-				experienceRequired = 120,
-				maxBounces = 1
-			})
-		},
+		extraModifiers = {},
 
 		experience = 0,
 	},
@@ -34,8 +29,8 @@ return {
 
 		onActivate = require(require('alias').path.items..'.inventory-actives.equip-on-click')(),
 		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.plasma-shot')({
-			minDamage = 1,
-			maxDamage = 3
+			minDamage = 2,
+			maxDamage = 4
 		})
 	}
 }

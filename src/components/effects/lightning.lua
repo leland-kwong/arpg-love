@@ -91,9 +91,8 @@ local addParamsMt = {
   opacity = 1,
 
   color = {0.4, 0.8, 1},
-  -- color = {1, 0.7, 0},
-
   thickness = 2,
+  targetPointRadius = 4
 }
 addParamsMt.__index = addParamsMt
 local instanceTweenTarget = {opacity = 0}
@@ -174,7 +173,7 @@ return Component.create({
         lightSource(
           source.vertices[lastVertice],
           source.vertices[lastVertice + 1],
-          source.thickness * 4
+          source.thickness * source.targetPointRadius
         )
       end
 
@@ -211,6 +210,6 @@ return Component.create({
   end,
 
   drawOrder = function(self)
-    return Component.groups.all:drawOrder(self)
+    return Component.get('PLAYER'):drawOrder() + 1
   end
 })
