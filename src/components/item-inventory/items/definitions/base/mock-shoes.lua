@@ -14,7 +14,7 @@ return {
 		category = itemConfig.category.SHOES,
 
 		info = {
-			cooldown = 1.5,
+			cooldown = 1.2,
 		},
 
 		baseModifiers = {

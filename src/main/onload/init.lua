@@ -42,12 +42,15 @@ local notifier = Notifier.create({
 
 Component.create({
   init = function(self)
-    Component.addToGroup(self, 'all')
+    Component.addToGroup(self, 'firstLayer')
   end,
-  update = function()
+  update = function(self, dt)
     notifier.x, notifier.y =
       love.graphics.getWidth()/config.scale - notifier.w,
       love.graphics.getHeight()/config.scale - notifier.h
+
+    local gravForce = require 'components.groups.gravitational-force'
+    gravForce(dt)
   end
 })
 
