@@ -79,7 +79,7 @@ local rollWallTileType = Chance({
   },
   {
     value = 'map-wall-10_2',
-    chance = 6
+    chance = 4
   },
   {
     value = 'map-wall-10_3',
@@ -87,7 +87,7 @@ local rollWallTileType = Chance({
   },
   {
     value = 'map-wall-10_4',
-    chance = 10
+    chance = 4
   },
   {
     value = 'map-wall-10_5',
@@ -103,7 +103,7 @@ local rollWallTileType = Chance({
   },
   {
     value = 'map-wall-10_8',
-    chance = 10
+    chance = 4
   },
   {
     value = defaultWallType,
