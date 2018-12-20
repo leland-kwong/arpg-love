@@ -16,7 +16,7 @@ end
 local function toggleEntityVisibility(self)
   local collisionWorlds = require 'components.collision-worlds'
   local camera = require 'components.camera'
-  local threshold = config.gridSize * 1
+  local threshold = config.gridSize * 3
   local west, _, north = camera:getBounds()
   local width, height = camera:getSize()
   local items, len = collisionWorlds.map:queryRect(
