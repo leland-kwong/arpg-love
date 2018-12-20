@@ -221,6 +221,11 @@ local Player = {
     self.state = state
 
     Component.addToGroup(self, groups.character)
+    local Vec2 = require 'modules.brinevector'
+    Component.addToGroup('PLAYER_DEFAULT_FORCE', 'gravForce', {
+      magnitude = Vec2(),
+      actsOn = 'PLAYER'
+    })
     self.listeners = {
       msgBus.on(msgBus.GENERATE_LOOT, function(msgValue)
         local LootGenerator = require'components.loot-generator.loot-generator'
@@ -640,7 +645,10 @@ function Player.update(self, dt)
   handleAnimation(self, dt, nextX, nextY, totalMoveSpeed)
   handleAbilities(self, dt)
 
-  self:handleMapCollision(nextX, nextY)
+  self:handleMapCollision(
+    nextX + self.force.x,
+    nextY + self.force.y
+  )
   self:handleZoneCollision()
 
   -- update camera to follow player
