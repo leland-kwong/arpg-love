@@ -102,6 +102,10 @@ local rollWallTileType = Chance({
     chance = 25
   },
   {
+    value = 'map-wall-10_8',
+    chance = 10
+  },
+  {
     value = defaultWallType,
     chance = 37
   }
