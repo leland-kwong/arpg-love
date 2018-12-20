@@ -24,9 +24,7 @@ return itemSystem.registerModule({
   active = function(item, props)
     local playerRef = Component.get('PLAYER')
     if playerRef then
-      -- Sound.MOVE_SPEED_BOOST:setFilter(speedBoostSoundFilter)
-      -- love.audio.stop(Sound.MOVE_SPEED_BOOST)
-      -- love.audio.play(Sound.MOVE_SPEED_BOOST)
+      Sound.playEffect('dash.wav')
       local magnitude = Vec2(
         playerRef.moveDirectionX * props.distance,
         playerRef.moveDirectionY * props.distance
@@ -40,7 +38,7 @@ return itemSystem.registerModule({
 
       local imageDrawOrder = playerRef:drawOrder()
       Component.create({
-        imageDuration = 0.5,
+        imageDuration = 0.6,
         init = function(self)
           Component.addToGroup(self, 'all')
           self.lifetime = props.duration
