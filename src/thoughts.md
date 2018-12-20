@@ -238,6 +238,8 @@ Ootsby - boids ai improvement
 Lumie1337 - item range calculation
 Gamernissem - passive tree skill ideas
 Funky Hippo - itch website suggestion
+The_Frontline - environment art tips
+ZeceDeKobold - ability ideas
 
 ## Passive system
 
