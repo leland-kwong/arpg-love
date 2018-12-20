@@ -38,7 +38,7 @@ return itemSystem.registerModule({
 
       local imageDrawOrder = playerRef:drawOrder()
       Component.create({
-        imageDuration = 0.6,
+        imageDuration = 0.5,
         init = function(self)
           Component.addToGroup(self, 'all')
           self.lifetime = props.duration
