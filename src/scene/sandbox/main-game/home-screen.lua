@@ -74,7 +74,7 @@ local function renderTitle(self)
   )
   self.guiTextTitleLayer:add(
     config.gameTitle,
-    {Color.rgba255(255, 84, 178)},
+    Color.SKY_BLUE,
     titleX,
     self.y + 20
   )

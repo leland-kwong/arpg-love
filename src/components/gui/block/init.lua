@@ -2,6 +2,14 @@ local Component = require 'modules.component'
 local Row = require 'components.gui.block.row'
 local layout = require 'components.gui.block.layout'
 local objectUtils = require 'utils.object-utils'
+local Box = require 'modules.gui.box'
+
+local boxWorld = Box.new(function()
+  local camera = require 'components.camera'
+  local border = 5
+  local screenWidth, screenHeight = love.graphics.getWidth(), love.graphics.getHeight()
+  return 0, screenWidth / camera.scale, screenHeight / camera.scale, 0, border
+end)
 
 local Block = {
   debug = false,
@@ -32,12 +40,14 @@ function Block.update(self)
 end
 
 function Block.draw(self)
+  local actualX, actualY = boxWorld.move(self, self.x + self.padding*2, self.y + self.padding*2)
+
   if self.background then
     love.graphics.setColor(self.background)
-    love.graphics.rectangle('fill', self.x, self.y, self.width + (self.padding * 2), self.height + (self.padding * 2))
+    love.graphics.rectangle('fill', actualX - self.padding*2, actualY - self.padding*2, self.width + (self.padding * 2), self.height + (self.padding * 2))
   end
 
-  layout(self.rows, self.x + self.padding, self.y + self.padding, function(_, _, col, colPosition)
+  layout(self.rows, actualX - self.padding, actualY - self.padding, function(_, _, col, colPosition)
     local xPos = colPosition.x
     local yPos = colPosition.y
     local font = self.fonts[col.font]
