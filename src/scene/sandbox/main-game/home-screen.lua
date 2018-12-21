@@ -16,8 +16,8 @@ local Camera = require 'components.camera'
 
 local MainGameHomeScene = {
   group = groups.gui,
-  menuX = 300,
-  menuY = 40
+  x = 0,
+  y = 0
 }
 
 function MainGameHomeScene.init(self)
@@ -63,13 +63,22 @@ function MainGameHomeScene.update(self)
 end
 
 local function renderTitle(self)
+  local screenWidth, screenHeight = love.graphics.getDimensions()
+  local titleWidth, titleHeight = GuiText.getTextSize(config.gameTitle, self.guiTextTitleLayer.font)
+  local Position = require 'utils.position'
+  local titleX = Position.boxCenterOffset(
+    titleWidth,
+    titleHeight,
+    screenWidth / Camera.scale,
+    screenHeight / Camera.scale
+  )
   self.guiTextTitleLayer:add(
     config.gameTitle,
-    Color.SKY_BLUE,
-    self.menuX,
-    self.menuY - 20
+    {Color.rgba255(255, 84, 178)},
+    titleX,
+    self.y + 20
   )
-  local screenWidth, screenHeight = love.graphics.getDimensions()
+
   self.guiTextLayer:add(
     config.version,
     Color.WHITE,
