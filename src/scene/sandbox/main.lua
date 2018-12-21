@@ -12,7 +12,7 @@ local objectUtils = require 'utils.object-utils'
 local bitser = require 'modules.bitser'
 
 local function getMenuTabsPosition()
-  return 200, 60
+  return 10, 60
 end
 
 local drawOrder = function()
@@ -147,9 +147,36 @@ local menuOptionPlayGameMenu = {
 local menuOptionNewsPanel = {
   name = 'Latest news',
   value = function()
-    Component.get('newsDialog'):setDisabled(false)
+    -- dont close it if it's already open
+    if Component.get('newsDialog') then
+      return
+    end
+    msgBus.send(msgBus.LATEST_NEWS_TOGGLE)
   end
 }
+
+msgBus.LATEST_NEWS_TOGGLE = 'LATEST_NEWS_TOGGLE'
+msgBus.on(msgBus.LATEST_NEWS_TOGGLE, function()
+  local ref = Component.get('newsDialog')
+  if ref then
+    ref:delete(true)
+  else
+    local camera = require 'components.camera'
+    local LatestNews = require 'scene.latest-news'
+    local menuTabs = Component.get('MainMenuTabs')
+    local x, y = menuTabs.x + menuTabs.width + 2,
+      menuTabs.y
+    local width, height = 240, love.graphics.getHeight() / camera.scale - y - 20
+    LatestNews.create({
+      x = x,
+      y = y,
+      width = width,
+      height = height
+    })
+    -- set selected tab
+    Component.get('MainMenuTabs').value = menuOptionNewsPanel.value
+  end
+end)
 
 msgBus.PLAY_GAME_MENU_TOGGLE = 'PLAY_GAME_MENU_TOGGLE'
 msgBus.on(msgBus.PLAY_GAME_MENU_TOGGLE, function()

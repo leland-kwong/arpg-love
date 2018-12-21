@@ -11,8 +11,7 @@ local GuiDialog = {
   height = 1,
   padding = 0,
   wrapLimit = 20,
-  onClose = function()
-  end
+  onClose = nil -- optional callback. If enabled, the close button will be enabled
 }
 
 function GuiDialog.init(self)
@@ -67,19 +66,21 @@ function GuiDialog.init(self)
     end
   }):setParent(root)
 
-  local sp = self.scrollablePanel
-  -- close button
-  GuiButton.create({
-    padding = 4,
-    x = sp.x + sp.contentWidth - 13,
-    y = sp.y - 20,
-    textLayer = guiTextLayer,
-    text = 'x',
-    onClick = function()
-      root:delete(true)
-      self:onClose()
-    end
-  }):setParent(root)
+  if self.onClose then
+    local sp = self.scrollablePanel
+    -- close button
+    GuiButton.create({
+      padding = 4,
+      x = sp.x + sp.contentWidth - 13,
+      y = sp.y - 20,
+      textLayer = guiTextLayer,
+      text = 'x',
+      onClick = function()
+        root:delete(true)
+        self:onClose()
+      end
+    }):setParent(root)
+  end
 end
 
 function GuiDialog.update(self)

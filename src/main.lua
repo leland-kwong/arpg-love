@@ -16,7 +16,6 @@ local groups = require 'components.groups'
 local config = require 'config.config'
 local camera = require 'components.camera'
 local SceneMain = require 'scene.scene-main'
-local RootScene = require 'scene.sandbox.main'
 local tick = require 'utils.tick'
 local globalState = require 'main.global-state'
 require 'main.inputs'
@@ -61,8 +60,8 @@ end
 function love.load()
   msgBus.send(msgBus.GAME_LOADED)
   love.keyboard.setKeyRepeat(true)
-  require 'main.onload'
   setViewport()
+  require 'main.onload'
 
   -- console debugging
   local console = Console.create()
@@ -70,7 +69,6 @@ function love.load()
   MapPointerWorld.create({
     id = 'hudPointerWorld'
   })
-  RootScene.create()
 
   --[[
     run tests after everything is loaded since some tests rely on the game loop
