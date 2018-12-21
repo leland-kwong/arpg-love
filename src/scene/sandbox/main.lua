@@ -93,13 +93,16 @@ msgBus.on(msgBus.SETTINGS_MENU_TOGGLE, function()
   if activeMenu then
     activeMenu:delete(true)
   else
+    local camera = require 'components.camera'
     -- create settings menu
     local SettingsMenu = require 'scene.settings-menu'
-    local width, height = 240, 400
     local menuTabs = Component.get('MainMenuTabs')
+    local x, y = menuTabs.x + menuTabs.width + 2,
+      menuTabs.y
+    local width, height = 240, love.graphics.getHeight() / camera.scale - y - 20
     local menu = SettingsMenu.create({
-      x = menuTabs.x + menuTabs.width + 2,
-      y = menuTabs.y,
+      x = x,
+      y = y,
       width = width,
       height = height
     })
