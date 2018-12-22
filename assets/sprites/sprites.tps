@@ -830,7 +830,7 @@
             <key type="filename">custom-art/tiles/environment-entrance.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0,0.464286</point_f>
+                <point_f>0,0.448276</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
