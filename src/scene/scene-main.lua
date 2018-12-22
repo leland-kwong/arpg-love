@@ -87,8 +87,7 @@ function MainScene.init(self)
 
   MainMap.create({
     camera = camera,
-    mapId = self.mapId,
-    walkable = Map.WALKABLE
+    mapId = self.mapId
   }):setParent(parent)
 
   if serializedState then

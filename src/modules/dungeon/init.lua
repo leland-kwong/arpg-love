@@ -121,7 +121,9 @@ local objectParsersByType = {
               local Map = require 'modules.map-generator.index'
               local mapGrid = Component.get('MAIN_SCENE').mapGrid
               local Grid = require 'utils.grid'
-              local isTraversable = Grid.get(mapGrid, self.x / config.gridSize, self.y / config.gridSize) == Map.WALKABLE
+              local isTraversable = Map.WALKABLE(
+                Grid.get(mapGrid, self.x / config.gridSize, self.y / config.gridSize)
+              )
               self:setDrawDisabled(not isTraversable)
             end,
             draw = function(self)

@@ -205,7 +205,7 @@ local function setupCollisionObjects(self, grid, gridSize)
   local cloneGrid = require 'utils.clone-grid'
   local collisionWorlds = require 'components.collision-worlds'
   local collisionGrid = cloneGrid(grid, function(v, x, y)
-    if (v ~= Map.WALKABLE) then
+    if (not Map.WALKABLE(v)) then
       local isEmptyTile = v == nil
       if isEmptyTile then
         local hasNeighbor = Grid.walkNeighbors(grid, x, y, neighborCheckCallback, false, true)
@@ -280,7 +280,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   onUpdate = function(self, value, x, y, isInViewport, dt)
     local index = Grid.getIndexByCoordinate(self.grid, x, y)
     local isEmptyTile = value == nil
-    local isWall = value ~= Map.WALKABLE
+    local isWall = not Map.WALKABLE(value)
 
     -- if its unwalkable, add a collision object and create wall tile
     if (isWall) and (not isEmptyTile) then
@@ -295,7 +295,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
           animation,
           x,
           y,
-          tileAbove == Map.WALKABLE and 0.75 or 1,
+          Map.WALKABLE(tileAbove) and 0.75 or 1,
           (i - 1)
         )
       end

@@ -13,7 +13,7 @@ local function randomTreasurePosition(mapGrid, occupiedPositions)
   local x, y = gridX * config.gridSize, gridY * config.gridSize
   if (
     (not Grid.get(occupiedPositions, x, y)) and
-    Grid.get(mapGrid, gridX, gridY) == Map.WALKABLE
+    Map.WALKABLE(Grid.get(mapGrid, gridX, gridY))
   ) then
     return x, y
   end

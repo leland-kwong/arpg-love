@@ -9,7 +9,7 @@ return Component.createFactory(
   objectUtils.assign({}, MapBlueprint, {
     group = groups.all,
     render = function(self, value, x, y, originX, originY)
-      if config.collisionDebug and value ~= Map.WALKABLE then
+      if config.collisionDebug and (not Map.WALKABLE(value)) then
         love.graphics.setColor(1,1,0,0.2)
         local colObj = self.collisionObjectsHash[y][x]
         local renderX, renderY = colObj:getPositionWithOffset()
