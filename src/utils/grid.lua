@@ -25,6 +25,37 @@ function Grid.forEach(grid, callback)
   end
 end
 
+local neighborOffsets = {
+  {-1, -1},
+  {0, -1},
+  {1, 1},
+  {-1, 0},
+  {1, 0},
+  {-1, 1},
+  {0, 1},
+  {1, 1},
+}
+
+local cardinalNeighborOffsets = {
+  neighborOffsets[2],
+  neighborOffsets[4],
+  neighborOffsets[5],
+  neighborOffsets[7],
+}
+
+-- traverses around the neighboring cells around a cell
+function Grid.walkNeighbors(grid, x, y, callback, seed, cardinalOnly)
+  local offsets = cardinalOnly and cardinalNeighborOffsets or neighborOffsets
+  for i=1, #offsets do
+    local o = offsets[i]
+    local xOffset, yOffset = o[1], o[2]
+    local trueX, trueY = x + xOffset, y + yOffset
+    local v = Grid.get(grid, trueX, trueY)
+    seed = callback(seed, v)
+  end
+  return seed
+end
+
 function Grid.getIndexByCoordinate(grid, x, y)
   local numCols = #grid[1]
   return (y * numCols) + x

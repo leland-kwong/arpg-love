@@ -187,13 +187,25 @@ local function addWallTileEntity(self, positionIndex, animation, x, y, opacity)
     :changeTile(animation, x, y, opacity)
 end
 
+local function neighborCheckCallback(hasNeighbor, cellValue)
+  return hasNeighbor or (cellValue ~= nil)
+end
+
 -- Generate all collision objects ahead of time since game elements
 -- like ai will need them for pathing, when they are outside of the viewport.
 local function setupCollisionObjects(self, grid, gridSize)
   local cloneGrid = require 'utils.clone-grid'
   local collisionWorlds = require 'components.collision-worlds'
   local collisionGrid = cloneGrid(grid, function(v, x, y)
-    if (v ~= nil) and (v ~= Map.WALKABLE) then
+    if (v ~= Map.WALKABLE) then
+      local isEmptyTile = v == nil
+      if isEmptyTile then
+        local hasNeighbor = Grid.walkNeighbors(grid, x, y, neighborCheckCallback, false, true)
+        if (not hasNeighbor) then
+          return
+        end
+      end
+
       -- setup collision world objects
       local gridSize = self.gridSize
       local tileX, tileY = x * gridSize, y * gridSize
