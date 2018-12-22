@@ -71,12 +71,8 @@ local gridTileTypes = {
   })
 }
 
-local defaultWallType = 'map-wall-10'
+local defaultWallType = 'map-wall-10_1'
 local rollWallTileType = Chance({
-  {
-    value = 'map-wall-10_1',
-    chance = 4
-  },
   {
     value = 'map-wall-10_2',
     chance = 4
@@ -119,12 +115,21 @@ local getTileFromTileDefinition = function(self, x, y)
   return Grid.get(self.tileDefs, x, y)
 end
 
+local frontFacingTileTypes = {
+  [10] = true,
+  [11] = true
+}
+
 local function rollRandomWallType(self, grid, x, y, tileType)
-  local frontFacing = 10
-  local isFrontFacingType = tileType == frontFacing
+  local isFrontFacingType = frontFacingTileTypes[tileType]
+  local detailTile
   if isFrontFacingType then
-    local leftTypeIsFrontFacing = getTileValue(grid, x-1, y, isTileValue) == frontFacing
-    local rightTypeIsFrontFacing = getTileValue(grid, x+1, y, isTileValue) == frontFacing
+    detailTile = 'map-wall-10_1'
+
+    local leftType = getTileValue(grid, x-1, y, isTileValue)
+    local leftTypeIsFrontFacing = frontFacingTileTypes[leftType]
+    local rightType = getTileValue(grid, x+1, y, isTileValue)
+    local rightTypeIsFrontFacing = frontFacingTileTypes[rightType]
     local isInBetweenFrontFacingTypes = leftTypeIsFrontFacing and rightTypeIsFrontFacing
     if isInBetweenFrontFacingTypes then
       local rolledType = rollWallTileType()
@@ -133,11 +138,14 @@ local function rollRandomWallType(self, grid, x, y, tileType)
           rolledType == getTileFromTileDefinition(self, x-1, y) -- left
           or rolledType == getTileFromTileDefinition(self, x+1, y) -- right
         )
-      return isRepeated and rollRandomWallType(self, grid, x, y, tileType) or rolledType
+      detailTile = isRepeated and rollRandomWallType(self, grid, x, y, tileType) or rolledType
     end
   end
 
-  return 'map-wall-'..tileType
+  return {
+    'map-wall-'..tileType,
+    detailTile
+  }
 end
 
 local function getTileAnimationName(self, x, y, isWall)
@@ -146,17 +154,17 @@ local function getTileAnimationName(self, x, y, isWall)
   if fromCache then
     return fromCache
   end
-  local tileType
+  local tileTypes
   if isWall then
-    tileType = rollRandomWallType(
+    tileTypes = rollRandomWallType(
       self, grid, x, y,
       getTileValue(grid, x, y, isTileValue)
     )
   else
-    tileType = gridTileTypes[1]()
+    tileTypes = {gridTileTypes[1]()}
   end
-  Grid.set(self.tileDefs, x, y, tileType)
-  return tileType
+  Grid.set(self.tileDefs, x, y, tileTypes)
+  return tileTypes
 end
 
 local floorTileCrossSection = function(self, grid, v, x, y)
@@ -182,9 +190,9 @@ local function getAnimation(animationCache, position, name)
   return animationTypes[name]
 end
 
-local function addWallTileEntity(self, positionIndex, animation, x, y, opacity)
+local function addWallTileEntity(self, positionIndex, animation, x, y, opacity, layer)
   local wallTileEntity = self.wallObjectsPool:get()
-    :changeTile(animation, x, y, opacity)
+    :changeTile(animation, x, y, opacity, layer)
 end
 
 local function neighborCheckCallback(hasNeighbor, cellValue)
@@ -277,16 +285,20 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     -- if its unwalkable, add a collision object and create wall tile
     if (isWall) and (not isEmptyTile) then
       renderWallCollisionDebug(self)
-      local animationName = getTileAnimationName(self, x, y, isWall)
-      local animation = getAnimation(self.animationCache, index, animationName)
-        :update(dt)
-      local tileAbove = Grid.get(self.grid, x, y - 1)
-      addWallTileEntity(self, index,
-        animation,
-        x,
-        y,
-        tileAbove == Map.WALKABLE and 0.75 or 1
-      )
+      local animationsList = getTileAnimationName(self, x, y, isWall)
+      for i=1, #animationsList do
+        local animationName = animationsList[i]
+        local animation = getAnimation(self.animationCache, index, animationName)
+          :update(dt)
+        local tileAbove = Grid.get(self.grid, x, y - 1)
+        addWallTileEntity(self, index,
+          animation,
+          x,
+          y,
+          tileAbove == Map.WALKABLE and 0.75 or 1,
+          (i - 1)
+        )
+      end
     end
 
     -- floor tiles
@@ -307,24 +319,27 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     local function drawFn()
       love.graphics.setColor(1,1,1)
       floorTileCrossSection(self, self.grid, value, x, y)
-      local animationName = getTileAnimationName(self, x, y, isWall)
-      local animation = getAnimation(self.animationCache, index, animationName)
-        :update(dt)
-      local ox, oy = animation:getOffset()
-      local tileX, tileY = x * self.gridSize, y * self.gridSize
+      local animationsList = getTileAnimationName(self, x, y, isWall)
+      for i=1, #animationsList do
+        local animationName = animationsList[i]
+        local animation = getAnimation(self.animationCache, index, animationName)
+          :update(dt)
+        local ox, oy = animation:getOffset()
+        local tileX, tileY = x * self.gridSize, y * self.gridSize
 
-      love.graphics.setColor(1,1,1)
-      love.graphics.draw(
-        animation.atlas,
-        animation.sprite,
-        tileX,
-        tileY,
-        0,
-        1,
-        1,
-        ox,
-        oy
-      )
+        love.graphics.setColor(1,1,1)
+        love.graphics.draw(
+          animation.atlas,
+          animation.sprite,
+          tileX,
+          tileY,
+          0,
+          1,
+          1,
+          ox,
+          oy
+        )
+      end
     end
     table.insert(drawQueue, drawFn)
   end,

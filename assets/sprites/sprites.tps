@@ -918,7 +918,7 @@
             <key type="filename">custom-art/tiles/map-wall-10_1.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0,0.58</point_f>
+                <point_f>0,0.37931</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -937,13 +937,26 @@
             <key type="filename">custom-art/tiles/map-wall-10_8.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0,0.581395</point_f>
+                <point_f>0,0.37931</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
                 <rect>4,11,8,21</rect>
                 <key>scale9Paddings</key>
                 <rect>4,11,8,21</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/map-wall-10_9.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0.58</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,13,8,25</rect>
+                <key>scale9Paddings</key>
+                <rect>4,13,8,25</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>

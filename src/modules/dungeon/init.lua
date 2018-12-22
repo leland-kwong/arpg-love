@@ -286,7 +286,9 @@ local function buildDungeon(layoutType, options)
     local blockY = math.floor(blockIndex/numCols)
     local blockWidth, blockHeight = gridBlock.width, gridBlock.height
 
-    local overlapAdjustment = -1 -- this is to prevent walls from doubling up between blocks
+    local overlapAdjustment = 0 --[[
+      the number of cells to overlap between blocks. This is mostly used as an option for making the layout share walls between blocks
+    ]]
     local overlapAdjustmentX, overlapAdjustmentY = (overlapAdjustment * blockX), (overlapAdjustment * blockY)
     local origin = {
       x = (blockX * blockWidth),

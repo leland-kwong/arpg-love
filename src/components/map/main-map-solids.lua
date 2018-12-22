@@ -12,6 +12,7 @@ local MainMapSolidsBlueprint = {
   oy = 0,
   opacity = 1,
   gridSize = 0,
+  layer = 0,
   disabled = true
 }
 
@@ -19,7 +20,7 @@ Component.newGroup({
   name = 'activeWalls'
 })
 
-function MainMapSolidsBlueprint.changeTile(self, animation, x, y, opacity)
+function MainMapSolidsBlueprint.changeTile(self, animation, x, y, opacity, layer)
   local tileX, tileY = x * self.gridSize, y * self.gridSize
   local ox, oy = animation:getOffset()
 
@@ -28,6 +29,7 @@ function MainMapSolidsBlueprint.changeTile(self, animation, x, y, opacity)
   self.x = tileX
   self.y = tileY
   self.opacity = opacity
+  self.layer = layer
 
   return self
 end
@@ -66,7 +68,7 @@ function MainMapSolidsBlueprint.draw(self)
 end
 
 function MainMapSolidsBlueprint.drawOrder(self)
-  return Component.groups.all:drawOrder(self)
+  return Component.groups.all:drawOrder(self) + self.layer
 end
 
 return Component.createFactory(MainMapSolidsBlueprint)
