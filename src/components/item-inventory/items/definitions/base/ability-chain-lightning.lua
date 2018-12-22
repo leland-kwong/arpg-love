@@ -31,7 +31,7 @@ return {
 
 		onActivate = require(require('alias').path.items..'.inventory-actives.equip-on-click')(),
 		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.chain-lightning')({
-      lightningDamage = Vec2(1, 2)
+      lightningDamage = Vec2(1, 5)
 		})
 	}
 }
