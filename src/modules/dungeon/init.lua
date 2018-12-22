@@ -305,14 +305,17 @@ local function buildDungeon(layoutType, options)
       origin.x,
       origin.y,
       function(index, localX, localY)
-        local isEdge =
+        local isBlockEntrance =
           (blockX == 0 and localX == 1) -- west side
           or ((blockX == numCols - 1) and localX == blockWidth) -- east side
           or (blockY == 0 and localY == 1) -- north side
           or ((blockY == numRows - 1) and localY == blockHeight) -- south side
+        local groundLayer = findLayerByName(gridBlock.layers, 'ground')
+        local groundValue = groundLayer.data[index]
 
-        -- close up exits on the perimeter
-        if isEdge then
+        -- close up entrances on the perimeter
+        local hasGroundTile = (groundValue ~= 0)
+        if isBlockEntrance and hasGroundTile then
           return WALL_TILE
         end
 
@@ -322,8 +325,6 @@ local function buildDungeon(layoutType, options)
           return cellTranslationsByLayer.walls[wallValue]
         end
 
-        local groundLayer = findLayerByName(gridBlock.layers, 'ground')
-        local groundValue = groundLayer.data[index]
         return cellTranslationsByLayer.ground[groundValue]
       end,
       gridBlockName
