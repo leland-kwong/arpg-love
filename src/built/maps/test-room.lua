@@ -9,7 +9,7 @@ return {
   tilewidth = 16,
   tileheight = 16,
   nextlayerid = 7,
-  nextobjectid = 58,
+  nextobjectid = 60,
   properties = {},
   tilesets = {
     {
@@ -308,7 +308,23 @@ return {
       offsety = 0,
       draworder = "topdown",
       properties = {},
-      objects = {}
+      objects = {
+        {
+          id = 59,
+          name = "ai-group",
+          type = "aiGroup",
+          shape = "ellipse",
+          x = 528,
+          y = 320,
+          width = 53,
+          height = 53,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["groupSize"] = 2
+          }
+        }
+      }
     },
     {
       type = "objectgroup",
@@ -350,6 +366,19 @@ return {
             { x = 176, y = 48 },
             { x = 0, y = 128 }
           },
+          properties = {}
+        },
+        {
+          id = 58,
+          name = "entrance to level",
+          type = "levelExit",
+          shape = "rectangle",
+          x = 208,
+          y = 0,
+          width = 32,
+          height = 16,
+          rotation = 0,
+          visible = true,
           properties = {}
         }
       }
