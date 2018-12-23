@@ -121,12 +121,22 @@ local WeaponAnimation = Component.createFactory({
 	end,
 	drawSprite = function(color, x, y, angle, facingX, stretchY)
 		local AnimationFactory = require 'components.animation-factory'
-		local animation = AnimationFactory:newStaticSprite('companion/companion')
+		local animation = AnimationFactory:newStaticSprite('companion/inner')
 		local ox, oy = animation:getOffset()
 		love.graphics.setColor(color)
-		love.graphics.draw(
-			AnimationFactory.atlas,
-			animation.sprite,
+		animation:draw(
+			x,
+			y,
+			angle or 0,
+			1 * facingX,
+			-1, -- flip companion upside down
+			ox,oy
+		)
+
+		local animation = AnimationFactory:newStaticSprite('companion/outer')
+		local ox, oy = animation:getOffset()
+		love.graphics.setColor(color)
+		animation:draw(
 			x,
 			y,
 			angle or 0,
