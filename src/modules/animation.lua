@@ -182,6 +182,11 @@ function meta:update(dt, data)
   return self
 end
 
+function meta:reset()
+  self:setFrame(1)
+  return self
+end
+
 function meta:getSpriteSize(spriteName, includePadding)
   local sourceSize = self.frameData[spriteName].sourceSize
   local padding = includePadding and (self.pad * 2) or 0

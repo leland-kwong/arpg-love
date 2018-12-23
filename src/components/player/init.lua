@@ -377,7 +377,7 @@ local Player = {
         'player/character-9',
         'player/character-10',
         'player/character-11'
-      }),
+      }):setDuration(1.25),
       run = animationFactory:new({
         'player/character-15',
         'player/character-16',
@@ -471,11 +471,6 @@ local function handleMovement(self, dt)
     local cellData = Grid.get(self.mapGrid, gridX, gridY)
     local slope = cellData and cellData.slope or 0
     dy = dy + (dx * slope)
-    -- print(
-    --   Inspect(
-    --     Grid.get(self.mapGrid, gridX, gridY)
-    --   )
-    -- )
   end
 
   nextX = nextX + dx
@@ -495,10 +490,12 @@ local function handleAnimation(self, dt, nextX, nextY, moveSpeed)
   -- ANIMATION STATES
   if moving then
     self.animation = self.animations.run
-      :update(moveSpeed/(moveSpeed*2.5)*dt)
+      :setDuration(0.25 - (moveSpeed * 0.0003))
+      :update(dt)
   else
+    self.animations.run:reset()
     self.animation = self.animations.idle
-      :update(dt/12)
+      :update(dt)
   end
 end
 
