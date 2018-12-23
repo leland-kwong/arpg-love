@@ -8,8 +8,8 @@ local Grid = require 'utils.grid'
 
 local COLOR_TILE_OUT_OF_VIEW = {1,1,1,0.3}
 local COLOR_TILE_IN_VIEW = {1,1,1,1}
-local COLOR_WALL = {1,1,1,0.7}
-local COLOR_GROUND = {1,1,1,0.3}
+local COLOR_WALL = {1,1,1,0.8}
+local COLOR_GROUND = {1,1,1,0.4}
 local floor = math.floor
 local minimapTileRenderers = {
   unwalkable = function(self, x, y)
@@ -148,7 +148,7 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
 
     local x,y,w,h = self:getRectangle()
     -- backround
-    love.graphics.setColor(0,0,0,0.1)
+    love.graphics.setColor(0,0,0,0.2)
     love.graphics.rectangle('fill', x, y, w, h)
     -- border
     love.graphics.setLineWidth(0.5)
