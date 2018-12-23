@@ -188,20 +188,28 @@ local objectParsersByType = {
       local coords = obj.polygon
       local x1, y1 = Position.pixelsToGridUnits(coords[1].x, coords[1].y, config.gridSize)
       local x2, y2 = Position.pixelsToGridUnits(coords[2].x, coords[2].y, config.gridSize)
-      local gridHeight = coords[4].y / config.gridSize
+      local gridHeight, gridWidth = coords[4].y / config.gridSize
       local Component = require 'modules.component'
+      local slope = math.abs(coords[2].y/coords[2].x)
+      print(slope)
       for i=1, gridHeight do
+        local Math = require 'utils.math'
         bLine(
           x1, y1,
           x2, y2,
-          function(v, x, y)
+          function(_, x, y, length)
             local rowOffset = i - 1
             local actualX, actualY = (origin.x + x) * config.gridSize + obj.x,
               (origin.y + y + rowOffset) * config.gridSize + obj.y
 
             local Grid = require 'utils.grid'
+            local offsetY = Math.round(slope * (length - 1) * config.gridSize)
             Grid.set(grid, actualX/config.gridSize, actualY/config.gridSize, {
-              opacity = 0,
+              -- opacity = 0,
+              slope = -slope,
+              -- color = {1,1,0},
+              x = obj.x + (x * config.gridSize),
+              y = obj.y + (rowOffset * config.gridSize) - offsetY,
               walkable = true
             })
 
@@ -220,17 +228,6 @@ local objectParsersByType = {
           end
         )
       end
-      -- transform grid to add new walkable tiles for the ramp
-      -- for y=1, gridHeight do
-      --   for x=1, gridWidth do
-      --     grid[origin.y + gridY + y - 1][origin.x + gridX + x - 1] = {
-      --       walkable = true,
-      --       slope = -0.25
-      --     }
-      --   end
-      -- end
-
-      -- print(gridWidth, gridHeight)
     end
   }
 }

@@ -317,16 +317,21 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     local canvas = isWall and self.wallsCanvas or self.floorCanvas
     local drawQueue = self.drawQueue[isWall and 'walls' or 'floors']
     local function drawFn()
-      love.graphics.setColor(1,1,1,value.opacity or 1)
+      if value.color then
+        love.graphics.setColor(value.color)
+      else
+        love.graphics.setColor(1,1,1)
+      end
 
-      floorTileCrossSection(self, self.grid, value, x, y)
+      -- floorTileCrossSection(self, self.grid, value, x, y)
       local animationsList = getTileAnimationName(self, x, y, isWall)
       for i=1, #animationsList do
         local animationName = animationsList[i]
         local animation = getAnimation(self.animationCache, index, animationName)
           :update(dt)
         local ox, oy = animation:getOffset()
-        local tileX, tileY = x * self.gridSize, y * self.gridSize
+        local tileX, tileY = value.x or (x * self.gridSize),
+          value.y or (y * self.gridSize)
 
         love.graphics.draw(
           animation.atlas,
