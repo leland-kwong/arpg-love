@@ -285,7 +285,8 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     -- if its unwalkable, add a collision object and create wall tile
     if (isWall) and (not isEmptyTile) then
       renderWallCollisionDebug(self)
-      local animationsList = getTileAnimationName(self, x, y, isWall)
+      local animationsList = value.animations or
+        getTileAnimationName(self, x, y, isWall)
       for i=1, #animationsList do
         local animationName = animationsList[i]
         local animation = getAnimation(self.animationCache, index, animationName)
@@ -324,7 +325,8 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
       end
 
       -- floorTileCrossSection(self, self.grid, value, x, y)
-      local animationsList = getTileAnimationName(self, x, y, isWall)
+      local animationsList = value.animations or
+        getTileAnimationName(self, x, y, isWall)
       for i=1, #animationsList do
         local animationName = animationsList[i]
         local animation = getAnimation(self.animationCache, index, animationName)

@@ -181,6 +181,7 @@ local objectParsersByType = {
       })
     end,
     ramp = function(obj, grid, origin, blockData)
+      local Grid = require 'utils.grid'
       local config = require 'config.config'
       local Position = require 'utils.position'
       local gridX, gridY = Position.pixelsToGridUnits(obj.x, obj.y, config.gridSize)
@@ -191,42 +192,53 @@ local objectParsersByType = {
       local gridHeight, gridWidth = math.abs(coords[1].y - coords[4].y) / config.gridSize
       local Component = require 'modules.component'
       local slope = math.abs(coords[2].y/coords[2].x)
-      for i=1, gridHeight do
+      local slope2 = math.abs(
+        (coords[3].y - coords[4].y) / (coords[3].x - coords[4].x)
+      )
+
+      -- make sure shape is parallelogram
+      assert(slope == slope2, 'ramp shape must be a parallelogram')
+      assert(coords[1].x == 0 and coords[1].x == 0, 'origin point coordinates must be [0,0]')
+
+      -- setup subGrid for bitmask tiling
+      local subGrid = {}
+
+      for row=1, gridHeight do
         local Math = require 'utils.math'
         bLine(
           x1, y1,
           x2, y2,
           function(_, x, y, length)
-            local rowOffset = i - 1
+            local rowOffset = row - 1
             local actualX, actualY = (origin.x + x) * config.gridSize + obj.x,
               (origin.y + y + rowOffset) * config.gridSize + obj.y
 
-            local Grid = require 'utils.grid'
             local offsetY = Math.round(slope * (length - 1) * config.gridSize)
-            Grid.set(grid, actualX/config.gridSize, actualY/config.gridSize, {
-              -- opacity = 0,
+            local cellData = {
+              type = 'RAMP',
               slope = -slope,
-              -- color = {1,1,0},
               x = obj.x + (x * config.gridSize),
               y = obj.y + (rowOffset * config.gridSize) - offsetY,
               walkable = true
-            })
-
-            -- Component.create({
-            --   x = actualX,
-            --   y = actualY,
-            --   init = function(self)
-            --     Component.addToGroup(self, 'all')
-            --   end,
-
-            --   draw = function(self)
-            --     love.graphics.setColor(1,1,0.5)
-            --     love.graphics.rectangle('fill', self.x, self.y, config.gridSize, config.gridSize)
-            --   end
-            -- })
+            }
+            local gridX, gridY = actualX/config.gridSize, actualY/config.gridSize
+            Grid.set(grid, gridX, gridY, cellData)
+            Grid.set(subGrid, gridX, row, cellData)
           end
         )
       end
+
+      local function isRampTile(v)
+        return v and v.type == 'RAMP'
+      end
+
+      Grid.forEach(subGrid, function(cellData, x, y)
+        local bitmaskTileValue = require 'utils.tilemap-bitmask'
+        local tileValue = bitmaskTileValue(subGrid, x, y, isRampTile)
+        cellData.animations = {
+          'map-ramp-'..tileValue
+        }
+      end)
     end
   }
 }

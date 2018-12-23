@@ -853,6 +853,12 @@
             <key type="filename">custom-art/tiles/floor-8.png</key>
             <key type="filename">custom-art/tiles/floor-9.png</key>
             <key type="filename">custom-art/tiles/map-0.png</key>
+            <key type="filename">custom-art/tiles/map-ramp-11.png</key>
+            <key type="filename">custom-art/tiles/map-ramp-12.png</key>
+            <key type="filename">custom-art/tiles/map-ramp-13.png</key>
+            <key type="filename">custom-art/tiles/map-ramp-15.png</key>
+            <key type="filename">custom-art/tiles/map-ramp-6.png</key>
+            <key type="filename">custom-art/tiles/map-ramp-7.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0,0</point_f>
@@ -889,6 +895,21 @@
                 <rect>4,9,8,18</rect>
                 <key>scale9Paddings</key>
                 <rect>4,9,8,18</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/map-ramp-14.png</key>
+            <key type="filename">custom-art/tiles/map-ramp-3.png</key>
+            <key type="filename">custom-art/tiles/map-ramp-9.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,9,8,17</rect>
+                <key>scale9Paddings</key>
+                <rect>4,9,8,17</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -944,19 +965,6 @@
                 <rect>4,11,8,21</rect>
                 <key>scale9Paddings</key>
                 <rect>4,11,8,21</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">custom-art/tiles/map-wall-10_9.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0,0.58</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,13,8,25</rect>
-                <key>scale9Paddings</key>
-                <rect>4,13,8,25</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
