@@ -13,7 +13,7 @@ local memoize = require'utils.memoize'
 local config = require'config.config'
 local Grid = require 'utils.grid'
 local Background = require 'components.map.background'
-local getTileValue = require 'utils.tilemap-bitmask'
+local bitmaskTileValue = require 'utils.tilemap-bitmask'
 local Dungeon = require 'modules.dungeon'
 
 local generatedTileDefinitionsByMapId = {
@@ -126,9 +126,9 @@ local function rollRandomWallType(self, grid, x, y, tileType)
   if isFrontFacingType then
     detailTile = 'map-wall-10_1'
 
-    local leftType = getTileValue(grid, x-1, y, isTileValue)
+    local leftType = bitmaskTileValue(grid, x-1, y, isTileValue)
     local leftTypeIsFrontFacing = frontFacingTileTypes[leftType]
-    local rightType = getTileValue(grid, x+1, y, isTileValue)
+    local rightType = bitmaskTileValue(grid, x+1, y, isTileValue)
     local rightTypeIsFrontFacing = frontFacingTileTypes[rightType]
     local isInBetweenFrontFacingTypes = leftTypeIsFrontFacing and rightTypeIsFrontFacing
     if isInBetweenFrontFacingTypes then
@@ -158,7 +158,7 @@ local function getTileAnimationName(self, x, y, isWall)
   if isWall then
     tileTypes = rollRandomWallType(
       self, grid, x, y,
-      getTileValue(grid, x, y, isTileValue)
+      bitmaskTileValue(grid, x, y, isTileValue)
     )
   else
     tileTypes = {gridTileTypes[1]()}
