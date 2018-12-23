@@ -9,11 +9,10 @@ local Grid = require 'utils.grid'
 local COLOR_TILE_OUT_OF_VIEW = {1,1,1,0.3}
 local COLOR_TILE_IN_VIEW = {1,1,1,1}
 local COLOR_WALL = {1,1,1,0.7}
-local COLOR_GROUND = {0,0,0,0.2}
+local COLOR_GROUND = {1,1,1,0.3}
 local floor = math.floor
 local minimapTileRenderers = {
-  -- obstacle
-  [0] = function(self, x, y)
+  unwalkable = function(self, x, y)
     love.graphics.setColor(COLOR_WALL)
     local rectSize = 1
     local x = (self.x * rectSize) + x
@@ -23,8 +22,7 @@ local minimapTileRenderers = {
       x, y, rectSize, rectSize
     )
   end,
-  -- walkable
-  [1] = function(self, x, y)
+  walkable = function(self, x, y)
     love.graphics.setColor(COLOR_GROUND)
     local rectSize = 1
     local x = (self.x * rectSize) + x
@@ -95,7 +93,7 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
     for index in pairs(self.visitedIndices) do
       local x, y = Grid.getCoordinateByIndex(self.grid, index)
       local value = Grid.get(self.grid, x, y)
-      local tileRenderer = minimapTileRenderers[value]
+      local tileRenderer = minimapTileRenderers[value.walkable and 'walkable' or 'unwalkable']
       if tileRenderer then
         tileRenderer(self, x, y)
       end
@@ -116,7 +114,7 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
   end,
 
   render = function(self, value, gridX, gridY)
-    local tileRenderer = minimapTileRenderers[value]
+    local tileRenderer = minimapTileRenderers[value.walkable and 'walkable' or 'unwalkable']
     if tileRenderer then
       local index = Grid.getIndexByCoordinate(self.grid, gridX, gridY)
       if self.visitedIndices[index] then
@@ -148,11 +146,15 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
     love.graphics.setStencilTest()
     love.graphics.pop()
 
-    -- border
-    love.graphics.setColor(1,1,1,0.5)
-    love.graphics.setLineWidth(0.5)
     local x,y,w,h = self:getRectangle()
+    -- backround
+    love.graphics.setColor(0,0,0,0.1)
+    love.graphics.rectangle('fill', x, y, w, h)
+    -- border
+    love.graphics.setLineWidth(0.5)
+    love.graphics.setColor(1,1,1,0.5)
     love.graphics.rectangle('line', x, y, w, h)
+
     drawPlayerPosition(self, centerX, centerY)
   end
 })
