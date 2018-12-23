@@ -294,6 +294,7 @@ local function addGridBlock(grid, gridBlockToAdd, startX, startY, transformFn, b
 end
 
 local WALL_TILE = {
+  crossSection = 'floor-cross-section-0',
   walkable = false
 }
 local cellTranslationsByLayer = {
@@ -302,6 +303,7 @@ local cellTranslationsByLayer = {
   },
   ground = {
     [1] = {
+      crossSection = 'floor-cross-section-0',
       walkable = true
     }
   }

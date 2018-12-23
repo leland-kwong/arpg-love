@@ -167,11 +167,11 @@ local function getTileAnimationName(self, x, y, isWall)
   return tileTypes
 end
 
-local floorTileCrossSection = function(self, grid, v, x, y)
+local floorTileCrossSection = function(self, grid, animationName, x, y)
   local tileValueBelow = Grid.get(grid, x, y+1)
   local shouldDrawCrossSection = not tileValueBelow
   if shouldDrawCrossSection then
-    local tile = animationFactory:newStaticSprite('floor-cross-section-0')
+    local tile = animationFactory:newStaticSprite(animationName)
     local ox, oy = tile:getOffset()
     tile:draw(
       x * self.gridSize,
@@ -324,7 +324,9 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
         love.graphics.setColor(1,1,1)
       end
 
-      -- floorTileCrossSection(self, self.grid, value, x, y)
+      if value.crossSection then
+        floorTileCrossSection(self, self.grid, value.crossSection, x, y)
+      end
       local animationsList = value.animations or
         getTileAnimationName(self, x, y, isWall)
       for i=1, #animationsList do
