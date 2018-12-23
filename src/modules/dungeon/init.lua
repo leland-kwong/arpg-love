@@ -191,7 +191,6 @@ local objectParsersByType = {
       local x1, y1 = Position.pixelsToGridUnits(coords[1].x, coords[1].y, config.gridSize)
       local x2, y2 = Position.pixelsToGridUnits(coords[2].x, coords[2].y, config.gridSize)
       local gridHeight, gridWidth = math.abs(coords[1].y - coords[4].y) / config.gridSize
-      local Component = require 'modules.component'
       local slope = coords[2].y/coords[2].x
       local slope2 = (coords[3].y - coords[4].y) / (coords[3].x - coords[4].x)
 
@@ -208,17 +207,18 @@ local objectParsersByType = {
           x2, y2,
           function(_, x, y, length)
             local rowOffset = row - 1
-            local actualX, actualY = (origin.x + x) * config.gridSize + obj.x,
-              (origin.y + y + rowOffset) * config.gridSize + obj.y
 
             local offsetY = Math.round(-slope * (length - 1) * config.gridSize)
             local cellData = {
               type = 'RAMP',
               slope = slope,
-              x = obj.x + (x * config.gridSize),
-              y = obj.y + (rowOffset * config.gridSize) - offsetY,
+              x = obj.x + ((origin.x + x) * config.gridSize),
+              y = obj.y + ((origin.y + rowOffset) * config.gridSize) - offsetY,
               walkable = true
             }
+
+            local actualX, actualY = (origin.x + x) * config.gridSize + obj.x,
+              (origin.y + y + rowOffset) * config.gridSize + obj.y
             local gridX, gridY = actualX/config.gridSize, actualY/config.gridSize
             Grid.set(grid, gridX, gridY, cellData)
             Grid.set(subGrid, gridX, row, cellData)
@@ -230,24 +230,30 @@ local objectParsersByType = {
         return v and v.type == 'RAMP'
       end
 
-      Grid.forEach(subGrid, function(cellData, x, y)
+      local function setupStairSprites(cellData, x, y)
         local bitmaskTileValue = require 'utils.tilemap-bitmask'
         local tileValue = bitmaskTileValue(subGrid, x, y, isRampTile)
         cellData.animations = {
           'map-ramp-'..tileValue
         }
-        local shadowWidth = 2
-        local shadowOffsetX = config.gridSize - ((slope < 0) and (shadowWidth + config.gridSize) or 0)
-        local shadowOffsetY = (slope > 0) and 3 or Math.round(-slope * config.gridSize)
-        cellData.shadow = {
-          sprite = 'pixel-white-1x1',
-          x = cellData.x + shadowOffsetX,
-          y = cellData.y + shadowOffsetY,
-          sx = shadowWidth,
-          sy = 16,
-          color = {0,0,0,0.25}
-        }
-      end)
+
+        local shouldShowShadow = slope ~= 0
+        if shouldShowShadow then
+          local shadowWidth = 2
+          local shadowOffsetX = config.gridSize - ((slope < 0) and (shadowWidth + config.gridSize) or 0)
+          local shadowOffsetY = (slope > 0) and 3 or Math.round(-slope * config.gridSize)
+          cellData.shadow = {
+            sprite = 'pixel-white-1x1',
+            x = cellData.x + shadowOffsetX,
+            y = cellData.y + shadowOffsetY,
+            sx = shadowWidth,
+            sy = 16,
+            color = {0,0,0,0.25}
+          }
+        end
+      end
+
+      Grid.forEach(subGrid, setupStairSprites)
     end
   }
 }

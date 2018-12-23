@@ -93,7 +93,7 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
     for index in pairs(self.visitedIndices) do
       local x, y = Grid.getCoordinateByIndex(self.grid, index)
       local value = Grid.get(self.grid, x, y)
-      local tileRenderer = minimapTileRenderers[value.walkable and 'walkable' or 'unwalkable']
+      local tileRenderer = value and minimapTileRenderers[value.walkable and 'walkable' or 'unwalkable']
       if tileRenderer then
         tileRenderer(self, x, y)
       end
@@ -114,7 +114,7 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
   end,
 
   render = function(self, value, gridX, gridY)
-    local tileRenderer = minimapTileRenderers[value.walkable and 'walkable' or 'unwalkable']
+    local tileRenderer = value and minimapTileRenderers[value.walkable and 'walkable' or 'unwalkable']
     if tileRenderer then
       local index = Grid.getIndexByCoordinate(self.grid, gridX, gridY)
       if self.visitedIndices[index] then

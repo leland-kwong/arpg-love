@@ -168,19 +168,15 @@ local function getTileAnimationName(self, x, y, isWall)
 end
 
 local floorTileCrossSection = function(self, grid, animationName, x, y)
-  local tileValueBelow = Grid.get(grid, x, y+1)
-  local shouldDrawCrossSection = not tileValueBelow
-  if shouldDrawCrossSection then
-    local tile = animationFactory:newStaticSprite(animationName)
-    local ox, oy = tile:getOffset()
-    tile:draw(
-      x * self.gridSize,
-      (y + 1) * self.gridSize,
-      0,
-      1, 1,
-      ox, oy
-    )
-  end
+  local tile = animationFactory:newStaticSprite(animationName)
+  local ox, oy = tile:getOffset()
+  tile:draw(
+    x * self.gridSize,
+    (y + 1) * self.gridSize,
+    0,
+    1, 1,
+    ox, oy
+  )
 end
 
 local animationTypes = {}
@@ -262,6 +258,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     self.renderFloorCache = {}
     local rows, cols = #self.grid, #self.grid[1]
     local width, height = cols * self.gridSize, (rows + 3) * self.gridSize
+    self.crossSectionCanvas = love.graphics.newCanvas(width, height)
     self.floorCanvas = love.graphics.newCanvas(width, height)
     self.wallsCanvas = love.graphics.newCanvas(width, height)
     self.shadowsCanvas = love.graphics.newCanvas(width, height)
@@ -275,7 +272,8 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     self.drawQueue = {
       floors = {},
       walls = {},
-      shadows = {}
+      shadows = {},
+      crossSections = {}
     }
   end,
 
@@ -320,10 +318,6 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     local canvas = isWall and self.wallsCanvas or self.floorCanvas
     local drawQueue = self.drawQueue[isWall and 'walls' or 'floors']
     local function drawFn()
-      if value.crossSection then
-        floorTileCrossSection(self, self.grid, value.crossSection, x, y)
-      end
-
       if value.color then
         love.graphics.setColor(value.color)
       else
@@ -363,11 +357,29 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
       end
       table.insert(self.drawQueue.shadows, drawShadow)
     end
+
+    if value.crossSection then
+      local tileValueBelow = Grid.get(self.grid, x, y+1)
+      local shouldDrawCrossSection = not tileValueBelow
+      if shouldDrawCrossSection then
+        table.insert(self.drawQueue.crossSections, function()
+          love.graphics.setColor(1,1,1)
+          floorTileCrossSection(self, self.grid, value.crossSection, x, y)
+        end)
+      end
+    end
   end,
 
   onUpdateEnd = function(self)
     love.graphics.push()
     love.graphics.origin()
+
+    love.graphics.setCanvas(self.crossSectionCanvas)
+    for i=1, #self.drawQueue.crossSections do
+      local callback = self.drawQueue.crossSections[i]
+      callback()
+    end
+
     love.graphics.setCanvas(self.floorCanvas)
     for i=1, #self.drawQueue.floors do
       local callback = self.drawQueue.floors[i]
@@ -393,6 +405,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   renderEnd = function(self)
     love.graphics.setCanvas()
     love.graphics.setColor(1,1,1)
+    love.graphics.draw(self.crossSectionCanvas)
     love.graphics.draw(self.floorCanvas)
     love.graphics.draw(self.wallsCanvas)
     love.graphics.draw(self.shadowsCanvas)
