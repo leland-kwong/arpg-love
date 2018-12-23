@@ -460,14 +460,14 @@ local function handleMovement(self, dt)
     inputY = 1
   end
 
-  local dx, dy = Position.getDirection(0, 0, inputX, inputY)
-  nextX = nextX + (dx * moveAmount)
-  nextY = nextY + (dy * moveAmount)
+  local vx, vy = Position.getDirection(0, 0, inputX, inputY)
+  local dx, dy = vx * moveAmount + self.force.x,
+    vy * moveAmount + self.force.y
 
   self.facingDirectionX = mDx
   self.facingDirectionY = mDy
-  self.moveDirectionX = dx
-  self.moveDirectionY = dy
+  self.moveDirectionX = vx
+  self.moveDirectionY = vy
 
   return nextX, nextY, totalMoveSpeed
 end
@@ -646,8 +646,8 @@ function Player.update(self, dt)
   handleAbilities(self, dt)
 
   self:handleMapCollision(
-    nextX + self.force.x,
-    nextY + self.force.y
+    nextX,
+    nextY
   )
   self:handleZoneCollision()
 
