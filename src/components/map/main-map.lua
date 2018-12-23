@@ -264,6 +264,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     local width, height = cols * self.gridSize, (rows + 3) * self.gridSize
     self.floorCanvas = love.graphics.newCanvas(width, height)
     self.wallsCanvas = love.graphics.newCanvas(width, height)
+    self.shadowsCanvas = love.graphics.newCanvas(width, height)
   end,
 
   onUpdateStart = function(self)
@@ -273,7 +274,8 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     end
     self.drawQueue = {
       floors = {},
-      walls = {}
+      walls = {},
+      shadows = {}
     }
   end,
 
@@ -318,14 +320,14 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     local canvas = isWall and self.wallsCanvas or self.floorCanvas
     local drawQueue = self.drawQueue[isWall and 'walls' or 'floors']
     local function drawFn()
+      if value.crossSection then
+        floorTileCrossSection(self, self.grid, value.crossSection, x, y)
+      end
+
       if value.color then
         love.graphics.setColor(value.color)
       else
         love.graphics.setColor(1,1,1)
-      end
-
-      if value.crossSection then
-        floorTileCrossSection(self, self.grid, value.crossSection, x, y)
       end
       local animationsList = value.animations or
         getTileAnimationName(self, x, y, isWall)
@@ -351,6 +353,16 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
       end
     end
     table.insert(drawQueue, drawFn)
+
+    if value.shadow then
+      local function drawShadow()
+        local s = value.shadow
+        love.graphics.setColor(s.color)
+        animationFactory:newStaticSprite(s.sprite)
+          :draw(s.x, s.y, nil, s.sx, s.sy)
+      end
+      table.insert(self.drawQueue.shadows, drawShadow)
+    end
   end,
 
   onUpdateEnd = function(self)
@@ -368,6 +380,12 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
       callback()
     end
 
+    love.graphics.setCanvas(self.shadowsCanvas)
+    for i=1, #self.drawQueue.shadows do
+      local callback = self.drawQueue.shadows[i]
+      callback()
+    end
+
     love.graphics.setCanvas()
     love.graphics.pop()
   end,
@@ -377,6 +395,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     love.graphics.setColor(1,1,1)
     love.graphics.draw(self.floorCanvas)
     love.graphics.draw(self.wallsCanvas)
+    love.graphics.draw(self.shadowsCanvas)
   end,
 
   serialize = function(self)

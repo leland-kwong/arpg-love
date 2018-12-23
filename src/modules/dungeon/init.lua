@@ -182,6 +182,7 @@ local objectParsersByType = {
     end,
     ramp = function(obj, grid, origin, blockData)
       local Grid = require 'utils.grid'
+      local Math = require 'utils.math'
       local config = require 'config.config'
       local Position = require 'utils.position'
       local gridX, gridY = Position.pixelsToGridUnits(obj.x, obj.y, config.gridSize)
@@ -191,10 +192,8 @@ local objectParsersByType = {
       local x2, y2 = Position.pixelsToGridUnits(coords[2].x, coords[2].y, config.gridSize)
       local gridHeight, gridWidth = math.abs(coords[1].y - coords[4].y) / config.gridSize
       local Component = require 'modules.component'
-      local slope = math.abs(coords[2].y/coords[2].x)
-      local slope2 = math.abs(
-        (coords[3].y - coords[4].y) / (coords[3].x - coords[4].x)
-      )
+      local slope = coords[2].y/coords[2].x
+      local slope2 = (coords[3].y - coords[4].y) / (coords[3].x - coords[4].x)
 
       -- make sure shape is parallelogram
       assert(slope == slope2, 'ramp shape must be a parallelogram')
@@ -204,7 +203,6 @@ local objectParsersByType = {
       local subGrid = {}
 
       for row=1, gridHeight do
-        local Math = require 'utils.math'
         bLine(
           x1, y1,
           x2, y2,
@@ -213,10 +211,10 @@ local objectParsersByType = {
             local actualX, actualY = (origin.x + x) * config.gridSize + obj.x,
               (origin.y + y + rowOffset) * config.gridSize + obj.y
 
-            local offsetY = Math.round(slope * (length - 1) * config.gridSize)
+            local offsetY = Math.round(-slope * (length - 1) * config.gridSize)
             local cellData = {
               type = 'RAMP',
-              slope = -slope,
+              slope = slope,
               x = obj.x + (x * config.gridSize),
               y = obj.y + (rowOffset * config.gridSize) - offsetY,
               walkable = true
@@ -237,6 +235,17 @@ local objectParsersByType = {
         local tileValue = bitmaskTileValue(subGrid, x, y, isRampTile)
         cellData.animations = {
           'map-ramp-'..tileValue
+        }
+        local shadowWidth = 2
+        local shadowOffsetX = config.gridSize - ((slope < 0) and (shadowWidth + config.gridSize) or 0)
+        local shadowOffsetY = (slope > 0) and 3 or Math.round(-slope * config.gridSize)
+        cellData.shadow = {
+          sprite = 'pixel-white-1x1',
+          x = cellData.x + shadowOffsetX,
+          y = cellData.y + shadowOffsetY,
+          sx = shadowWidth,
+          sy = 16,
+          color = {0,0,0,0.25}
         }
       end)
     end
