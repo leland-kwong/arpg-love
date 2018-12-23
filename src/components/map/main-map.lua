@@ -108,7 +108,7 @@ local rollWallTileType = Chance({
 })
 
 local isTileValue = function(v)
-  return v == 0
+  return v and (not v.walkable)
 end
 
 local getTileFromTileDefinition = function(self, x, y)
@@ -317,7 +317,8 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     local canvas = isWall and self.wallsCanvas or self.floorCanvas
     local drawQueue = self.drawQueue[isWall and 'walls' or 'floors']
     local function drawFn()
-      love.graphics.setColor(1,1,1)
+      love.graphics.setColor(1,1,1,value.opacity or 1)
+
       floorTileCrossSection(self, self.grid, value, x, y)
       local animationsList = getTileAnimationName(self, x, y, isWall)
       for i=1, #animationsList do
@@ -327,7 +328,6 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
         local ox, oy = animation:getOffset()
         local tileX, tileY = x * self.gridSize, y * self.gridSize
 
-        love.graphics.setColor(1,1,1)
         love.graphics.draw(
           animation.atlas,
           animation.sprite,

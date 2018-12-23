@@ -179,6 +179,58 @@ local objectParsersByType = {
           })
         end
       })
+    end,
+    ramp = function(obj, grid, origin, blockData)
+      local config = require 'config.config'
+      local Position = require 'utils.position'
+      local gridX, gridY = Position.pixelsToGridUnits(obj.x, obj.y, config.gridSize)
+      local bLine = require 'utils.bresenham-line'
+      local coords = obj.polygon
+      local x1, y1 = Position.pixelsToGridUnits(coords[1].x, coords[1].y, config.gridSize)
+      local x2, y2 = Position.pixelsToGridUnits(coords[2].x, coords[2].y, config.gridSize)
+      local gridHeight = coords[4].y / config.gridSize
+      local Component = require 'modules.component'
+      for i=1, gridHeight do
+        bLine(
+          x1, y1,
+          x2, y2,
+          function(v, x, y)
+            local rowOffset = i - 1
+            local actualX, actualY = (origin.x + x) * config.gridSize + obj.x,
+              (origin.y + y + rowOffset) * config.gridSize + obj.y
+
+            local Grid = require 'utils.grid'
+            Grid.set(grid, actualX/config.gridSize, actualY/config.gridSize, {
+              opacity = 0,
+              walkable = true
+            })
+
+            -- Component.create({
+            --   x = actualX,
+            --   y = actualY,
+            --   init = function(self)
+            --     Component.addToGroup(self, 'all')
+            --   end,
+
+            --   draw = function(self)
+            --     love.graphics.setColor(1,1,0.5)
+            --     love.graphics.rectangle('fill', self.x, self.y, config.gridSize, config.gridSize)
+            --   end
+            -- })
+          end
+        )
+      end
+      -- transform grid to add new walkable tiles for the ramp
+      -- for y=1, gridHeight do
+      --   for x=1, gridWidth do
+      --     grid[origin.y + gridY + y - 1][origin.x + gridX + x - 1] = {
+      --       walkable = true,
+      --       slope = -0.25
+      --     }
+      --   end
+      -- end
+
+      -- print(gridWidth, gridHeight)
     end
   }
 }
@@ -233,13 +285,17 @@ local function addGridBlock(grid, gridBlockToAdd, startX, startY, transformFn, b
   return grid
 end
 
-local WALL_TILE = 0
+local WALL_TILE = {
+  walkable = false
+}
 local cellTranslationsByLayer = {
   walls = {
     [12] = WALL_TILE
   },
   ground = {
-    [1] = 1
+    [1] = {
+      walkable = true
+    }
   }
 }
 
@@ -292,6 +348,7 @@ local function buildDungeon(layoutType, options)
       the number of cells to overlap between blocks. This is mostly used as an option for making the layout share walls between blocks
     ]]
     local overlapAdjustmentX, overlapAdjustmentY = (overlapAdjustment * blockX), (overlapAdjustment * blockY)
+    -- grid units
     local origin = {
       x = (blockX * blockWidth),
       y = (blockY * blockHeight)

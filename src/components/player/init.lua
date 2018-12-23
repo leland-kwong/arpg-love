@@ -464,6 +464,23 @@ local function handleMovement(self, dt)
   local dx, dy = vx * moveAmount + self.force.x,
     vy * moveAmount + self.force.y
 
+  if self.mapGrid then
+    local Grid = require 'utils.grid'
+    local Position = require 'utils.position'
+    local gridX, gridY = Position.pixelsToGridUnits(nextX, nextY, config.gridSize)
+    local cellData = Grid.get(self.mapGrid, gridX, gridY)
+    local slope = cellData and cellData.slope or 0
+    dy = dy + (dx * slope)
+    -- print(
+    --   Inspect(
+    --     Grid.get(self.mapGrid, gridX, gridY)
+    --   )
+    -- )
+  end
+
+  nextX = nextX + dx
+  nextY = nextY + dy
+
   self.facingDirectionX = mDx
   self.facingDirectionY = mDy
   self.moveDirectionX = vx

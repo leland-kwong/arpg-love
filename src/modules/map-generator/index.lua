@@ -8,7 +8,7 @@ local fi = 1 -- first index of array
 
 local Map = {
 	WALKABLE = function(v)
-		return v == 1
+		return v and v.walkable
 	end
 }
 
