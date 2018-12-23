@@ -490,7 +490,7 @@ local function handleAnimation(self, dt, nextX, nextY, moveSpeed)
   -- ANIMATION STATES
   if moving then
     self.animation = self.animations.run
-      :setDuration(0.25 - (moveSpeed * 0.0003))
+      :setDuration(0.25 - (moveSpeed * 0.0004))
       :update(dt)
   else
     self.animations.run:reset()
