@@ -461,8 +461,16 @@ local function handleMovement(self, dt)
   end
 
   local vx, vy = Position.getDirection(0, 0, inputX, inputY)
-  local dx, dy = vx * moveAmount + self.force.x,
-    vy * moveAmount + self.force.y
+  local gravForces = Component.groups.gravForce.getAll()
+  local forceX, forceY = 0,0
+  for _,v in pairs(gravForces) do
+    if v.actsOn == 'PLAYER' then
+      forceX = forceX + v.magnitude.x
+      forceY = forceY + v.magnitude.y
+    end
+  end
+  local dx, dy = vx * moveAmount + forceX,
+    vy * moveAmount + forceY
 
   if self.mapGrid then
     local Grid = require 'utils.grid'
@@ -672,7 +680,7 @@ end
 
 local function drawShadow(self, sx, sy, ox, oy)
   -- SHADOW
-  love.graphics.setColor(0,0,0,0.2)
+  love.graphics.setColor(0,0,0,0.25)
   love.graphics.draw(
     animationFactory.atlas,
     self.animation.sprite,
