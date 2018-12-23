@@ -188,10 +188,9 @@ local objectParsersByType = {
       local coords = obj.polygon
       local x1, y1 = Position.pixelsToGridUnits(coords[1].x, coords[1].y, config.gridSize)
       local x2, y2 = Position.pixelsToGridUnits(coords[2].x, coords[2].y, config.gridSize)
-      local gridHeight, gridWidth = coords[4].y / config.gridSize
+      local gridHeight, gridWidth = math.abs(coords[1].y - coords[4].y) / config.gridSize
       local Component = require 'modules.component'
       local slope = math.abs(coords[2].y/coords[2].x)
-      print(slope)
       for i=1, gridHeight do
         local Math = require 'utils.math'
         bLine(
