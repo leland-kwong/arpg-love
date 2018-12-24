@@ -123,10 +123,10 @@ local EditorWithDefaults = Object.assign(SkillTreeEditor, {
   defaultNodeDescription = 'not implemented yet',
   colors = {
     nodeConnection = {
-      inner = Color.SKY_BLUE,
-      innerNonSelectable = {Color.multiplyAlpha(Color.SKY_BLUE, 0.1)},
-      outerNonSelectable = {Color.multiplyAlpha(Color.SKY_BLUE, 0)},
-      outer = {Color.multiplyAlpha(Color.SKY_BLUE, 0.2)}
+      inner = {Color.rgba255(217,217,217)},
+      innerNonSelectable = {Color.multiplyAlpha(Color.MED_GRAY, 0.1)},
+      outerNonSelectable = {Color.multiplyAlpha(Color.MED_GRAY, 0)},
+      outer = {Color.multiplyAlpha(Color.WHITE,0.1)}
     }
   },
   parseTreeData = function(treeData)

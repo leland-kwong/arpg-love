@@ -798,6 +798,16 @@ local function drawHelpText()
   love.graphics.printf(text, 10, 10, 200, 'left')
 end
 
+local mask_shader = love.graphics.newShader[[
+   vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
+      if (Texel(texture, texture_coords).a == 0.0) {
+         // a discarded pixel wont be applied as the stencil.
+         discard;
+      }
+      return vec4(1.0);
+   }
+]]
+
 function TreeEditor.draw(self)
   drawBackground(self)
 
@@ -828,6 +838,23 @@ function TreeEditor.draw(self)
     )
   end
 
+  local nodeBackgroundStencil = function()
+    love.graphics.setShader(mask_shader)
+    for _,node in pairs(self.nodes) do
+      local radius = node.size/2
+      local x, y = (node.x * cellSize) + node.size/2 + tx, (node.y * cellSize) + node.size/2 + ty
+      -- cut-out the areas that overlap the connections
+      love.graphics.setColor(0,0,0)
+      local nodeBackground = self.defaultNodeImage
+      local AnimationFactory = require 'components.animation-factory'
+      AnimationFactory:newStaticSprite(nodeBackground):draw(x, y, 0, state.scale, state.scale)
+      -- love.graphics.circle('fill', x, y, radius)
+    end
+    love.graphics.setShader()
+  end
+
+  love.graphics.stencil(nodeBackgroundStencil, 'replace', 1)
+  love.graphics.setStencilTest('notequal', 1)
   -- draw connections
   for nodeId,node in pairs(self.nodes) do
 
@@ -837,10 +864,11 @@ function TreeEditor.draw(self)
 
       local isSelectedConnection = state.selectedConnection and
         (state.selectedConnection[connectionNodeId] and state.selectedConnection[nodeId])
+      local baseWidth = 1 * state.scale
       -- line outline
-      love.graphics.setLineWidth(8)
+      love.graphics.setLineWidth(baseWidth + 4)
       if isSelectedConnection then
-        love.graphics.setColor(1,0.2,1)
+        love.graphics.setColor(1,1,0)
       elseif playMode:isConnectionToSelectableNode(node, connectionNode) then
         love.graphics.setColor(self.colors.nodeConnection.outer)
       else
@@ -858,24 +886,15 @@ function TreeEditor.draw(self)
             self.colors.nodeConnection.inner or
             self.colors.nodeConnection.innerNonSelectable
         )
-      love.graphics.setLineWidth(4)
+      love.graphics.setLineWidth(baseWidth)
       love.graphics.setColor(color)
       drawConnection(node, connectionNode)
       love.graphics.setLineWidth(oLineWidth)
     end
   end
+  love.graphics.setStencilTest()
 
-  love.graphics.setBlendMode('replace')
-  for _,node in pairs(self.nodes) do
-    local radius = node.size/2
-    local x, y = (node.x * cellSize) + node.size/2 + tx, (node.y * cellSize) + node.size/2 + ty
-    -- cut-out the areas that overlap the connections
-    love.graphics.setColor(0,0,0)
-    love.graphics.circle('fill', x, y, radius)
-  end
-  love.graphics.setBlendMode('alpha')
-
-  -- draw nodes
+  -- -- draw nodes
   for nodeId,node in pairs(self.nodes) do
     local dataKey = node.nodeValue
     local optionValue = self.nodeValueOptions[dataKey]
