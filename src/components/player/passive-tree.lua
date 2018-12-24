@@ -125,6 +125,31 @@ local modifierHandlers = {
       :add('maxEnergy', data.value.bonusEnergy * modifiers.maxEnergy)
     return modifiers
   end,
+  percentEnergyRegen = function(nodeId, data, modifiers)
+    modifiers
+      :add('energyRegeneration', function(self)
+        return self.energyRegeneration * data.value.percentBonus
+      end)
+  end,
+  percentHealthRegen = function(nodeId, data, modifiers)
+    modifiers
+      :add('healthRegeneration', function(self)
+        return self.healthRegeneration * data.value.percentBonus
+      end)
+  end,
+  percentHybridRegen = function(nodeId, data, modifiers)
+    modifiers
+      :add('healthRegeneration', function(self)
+        return self.healthRegeneration * data.value.percentHealthRegen
+      end)
+      :add('energyRegeneration', function(self)
+        return self.energyRegeneration * data.value.percentEnergyRegen
+      end)
+      :add('energyRegeneration', function(self)
+        local percentEnergyMissing = 1 - (self:get('energy') / self:get('maxEnergy'))
+        return self.energyRegeneration * percentEnergyMissing
+      end)
+  end,
   statModifier = function(nodeId, data, modifiers)
     local prop = data.value.type
     local percentBonus = data.value.value

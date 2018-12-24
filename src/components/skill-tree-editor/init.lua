@@ -44,6 +44,7 @@ local nodeValueOptions = {
   },
   [4] = {
     name = 'battle suit',
+    image = 'gui-skill-tree_node_root',
     value = {
       value = 0,
       type = 'dummyNode',
@@ -113,6 +114,46 @@ local nodeValueOptions = {
     backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
       return '+'..(self.value.bonusHealth * 100)..'% maximum health\n+'..(self.value.bonusEnergy * 100)..'% maximum energy'
+    end
+  },
+  [10] = {
+    name = 'extra energy regeneration',
+    value = {
+      type = 'percentEnergyRegen',
+      percentBonus = 0.1,
+    },
+    image = 'gui-skill-tree_node_energy-regeneration',
+    backgroundImage = 'gui-skill-tree_node_background',
+    description = function(self)
+      return '+'..(self.value.percentBonus * 100)..'% energy regeneration'
+    end
+  },
+  [11] = {
+    name = 'extra health regeneration',
+    value = {
+      type = 'percentHealthRegen',
+      percentBonus = 0.1,
+    },
+    image = 'gui-skill-tree_node_health-regeneration',
+    backgroundImage = 'gui-skill-tree_node_background',
+    description = function(self)
+      return '+'..(self.value.percentBonus * 100)..'% health regeneration'
+    end
+  },
+  [12] = {
+    name = 'supercharger',
+    value = {
+      type = 'percentHybridRegen',
+      percentEnergyRegen = 0.6,
+      percentEnergyRegenPerMissingEnergy = 0.01,
+      percentHealthRegen = 0.4,
+    },
+    image = 'gui-skill-tree_node_hybrid-regeneration',
+    backgroundImage = 'gui-skill-tree_node_background',
+    description = function(self)
+      return '+'..(self.value.percentEnergyRegen * 100)..'% energy regeneration'
+        ..'\n+'..(self.value.percentHealthRegen * 100)..'% health regeneration'
+        ..'\n\n+'..(self.value.percentEnergyRegenPerMissingEnergy * 100)..'% energy regeneration for each 1% maximum energy missing'
     end
   }
 }
