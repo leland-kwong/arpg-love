@@ -265,7 +265,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   end,
 
   onUpdateStart = function(self)
-    -- release all all active entities (they will get used as needed)
+    -- release all active entities (they will get used as needed)
     for _,entity in pairs(Component.groups.activeWalls.getAll()) do
       self.wallObjectsPool:release(entity)
     end
