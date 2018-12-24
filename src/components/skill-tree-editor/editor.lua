@@ -637,7 +637,7 @@ function TreeEditor.update(self, dt)
     self.direction = 1
   else
     self.direction = self.direction or 1
-    self.clock = (self.clock or 0) + (dt * self.direction) * 2
+    self.clock = (self.clock or 0) + (dt * self.direction) * 4
     if self.clock > math.pi/2 then
       self.direction = -1
     elseif self.clock <= 0 then
