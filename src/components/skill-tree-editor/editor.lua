@@ -65,6 +65,7 @@ local TreeEditor = {
 }
 
 local Enum = require 'utils.enum'
+local baseCellSize = 25
 local editorModes = Enum({
   'EDIT',
 
@@ -89,7 +90,7 @@ local state = {
   },
   mx = 0,
   my = 0,
-  scale = 1,
+  scale = 2,
   editorMode = editorModes.EDIT,
 }
 
@@ -100,7 +101,6 @@ local debugTextLayer = GuiText.create({
   end
 })
 
-local baseCellSize = 25
 local cellSize = baseCellSize * state.scale
 
 local function snapToGrid(x, y)
@@ -515,7 +515,9 @@ end
 function TreeEditor.panTo(self, x, y)
   local shouldCenter = not x
   if shouldCenter then
-    x, y = snapToGrid(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)
+    local halfCell = math.floor(cellSize/2)
+    local offset = -halfCell -- offset the panning of the center to be centered to the grid
+    x, y = love.graphics.getWidth() / 2 + offset, love.graphics.getHeight() / 2 + offset
   end
   state.translate.dxTotal, state.translate.dyTotal = x, y
 end

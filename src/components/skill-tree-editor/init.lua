@@ -83,7 +83,7 @@ local nodeValueOptions = {
     name = 'extra health',
     value = {
       type = 'maxHealth',
-      value = 0.01
+      value = 0.05
     },
     image = 'gui-skill-tree_node_max-health',
     backgroundImage = 'gui-skill-tree_node_background',
@@ -95,7 +95,7 @@ local nodeValueOptions = {
     name = 'extra energy',
     value = {
       type = 'maxEnergy',
-      value = 0.01
+      value = 0.05
     },
     image = 'gui-skill-tree_node_max-energy',
     backgroundImage = 'gui-skill-tree_node_background',
@@ -107,8 +107,8 @@ local nodeValueOptions = {
     name = 'extra health and energy',
     value = {
       type = 'maxHealthEnergy',
-      bonusHealth = 0.01,
-      bonusEnergy = 0.01,
+      bonusHealth = 0.025,
+      bonusEnergy = 0.025,
     },
     image = 'gui-skill-tree_node_max-health-energy',
     backgroundImage = 'gui-skill-tree_node_background',
