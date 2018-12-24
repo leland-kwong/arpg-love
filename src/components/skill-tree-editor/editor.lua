@@ -629,6 +629,19 @@ function TreeEditor.update(self, dt)
   end
   self.mode = self:getMode()
   state.editorMode = self.editorMode or editorModes.EDIT
+
+  if (editorModes.PLAY ~= state.editorMode) then
+    self.clock = 0
+    self.direction = 1
+  else
+    self.direction = self.direction or 1
+    self.clock = (self.clock or 0) + (dt * self.direction) * 2
+    if self.clock > math.pi/2 then
+      self.direction = -1
+    elseif self.clock <= 0 then
+      self.direction = 1
+    end
+  end
 end
 
 function TreeEditor.drawTreeCenter(self)
@@ -857,10 +870,15 @@ function TreeEditor.draw(self)
   love.graphics.setStencilTest('notequal', 1)
   -- draw connections
   for nodeId,node in pairs(self.nodes) do
-
     for connectionNodeId in pairs(node.connections or {}) do
       local oLineWidth = love.graphics.getLineWidth()
       local connectionNode = self.nodes[connectionNodeId]
+      local color = isHovered and Color.LIME or
+        (
+          playMode:isConnectionToSelectableNode(node, connectionNode) and
+            self.colors.nodeConnection.inner or
+            self.colors.nodeConnection.innerNonSelectable
+        )
 
       local isSelectedConnection = state.selectedConnection and
         (state.selectedConnection[connectionNodeId] and state.selectedConnection[nodeId])
@@ -870,7 +888,7 @@ function TreeEditor.draw(self)
       if isSelectedConnection then
         love.graphics.setColor(1,1,0)
       elseif playMode:isConnectionToSelectableNode(node, connectionNode) then
-        love.graphics.setColor(self.colors.nodeConnection.outer)
+        love.graphics.setColor(Color.multiplyAlpha(color, 0.1))
       else
         love.graphics.setColor(self.colors.nodeConnection.outerNonSelectable)
       end
@@ -880,12 +898,6 @@ function TreeEditor.draw(self)
         state.hoveredConnection and
         state.hoveredConnection[nodeId] and
         state.hoveredConnection[connectionNodeId]
-      local color = isHovered and Color.LIME or
-        (
-          playMode:isConnectionToSelectableNode(node, connectionNode) and
-            self.colors.nodeConnection.inner or
-            self.colors.nodeConnection.innerNonSelectable
-        )
       love.graphics.setLineWidth(baseWidth)
       love.graphics.setColor(color)
       drawConnection(node, connectionNode)
@@ -907,6 +919,10 @@ function TreeEditor.draw(self)
     then
       if node.selected then
         love.graphics.setColor(1,1,1)
+      -- highlight selectable nodes
+      elseif editorModes.PLAY == _editorMode and
+          playMode:isNodeSelectable(node, self.nodes, self.nodeValueOptions) then
+        love.graphics.setColor(1,1,1,math.max(math.cos(self.clock), 0.3))
       else
         love.graphics.setColor(1,1,1,0.3)
       end
