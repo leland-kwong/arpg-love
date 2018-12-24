@@ -901,7 +901,11 @@ function TreeEditor.draw(self)
         state.hoveredConnection[nodeId] and
         state.hoveredConnection[connectionNodeId]
       love.graphics.setLineWidth(baseWidth)
-      love.graphics.setColor(color)
+      if isHovered then
+        love.graphics.setColor(Color.LIME)
+      else
+        love.graphics.setColor(color)
+      end
       drawConnection(node, connectionNode)
       love.graphics.setLineWidth(oLineWidth)
     end
