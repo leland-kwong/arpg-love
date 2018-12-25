@@ -33,10 +33,6 @@ local Sandbox = {
 }
 
 local scenes = {
-  aiTest = {
-    name = 'ai',
-    path = 'scene.sandbox.ai.test-scene'
-  },
   guiTest = {
     name = 'gui',
     path = 'scene.sandbox.gui.test-scene'
@@ -45,10 +41,6 @@ local scenes = {
     name = 'particle fx',
     path = 'scene.sandbox.particle-fx.particle-test'
   },
-  groundFlameTest = {
-    name = 'ground flame fx',
-    path = 'scene.sandbox.particle-fx.ground-flame-test'
-  }
 }
 
 local state = {
@@ -223,10 +215,8 @@ local sceneOptionsDebug = {
     end
   },
   menuOptionHomeScreen,
-  menuOptionSceneLoad(scenes.aiTest),
   menuOptionSceneLoad(scenes.guiTest),
   menuOptionSceneLoad(scenes.particleTest),
-  menuOptionSceneLoad(scenes.groundFlameTest),
   menuOptionQuitGame,
 }
 
@@ -247,7 +237,6 @@ end)
 require 'scene.skill-tree-editor'
 require 'scene.light-test'
 require 'scene.tooltip-test'
-require 'scene.skew-rotate-test'
 
 function Sandbox.init(self)
   self.activeSceneMenu = nil
