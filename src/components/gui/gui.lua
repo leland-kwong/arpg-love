@@ -47,6 +47,7 @@ end)
 
 local Gui = {
   group = groups.gui,
+  isGui = true,
   -- props
   x = 1,
   y = 1,
@@ -143,7 +144,60 @@ local function handleScroll(self, dx, dy)
   self.onScroll(self)
 end
 
+msgBus.on('*', function(msgValue, msgType)
+  for _,c in pairs(Component.groups.guiEventNode.getAll()) do
+    local self = c
+    if c.isGui and (not self.eventsDisabled) then
+
+      if guiType.LIST == self.type and
+        msgBus.MOUSE_WHEEL_MOVED == msgType and
+        self.hovered
+      then
+        handleScroll(self, msgValue[1], msgValue[2])
+      end
+
+      if msgBus.MOUSE_CLICKED == msgType then
+        if self.hovered then
+          local isRightClick = msgValue[3] == 2
+          self.onClick(self, isRightClick)
+
+          if guiType.TOGGLE == self.type then
+            self.checked = not self.checked
+            self.onChange(self, self.checked)
+          end
+        end
+      end
+
+      if msgBus.MOUSE_PRESSED == msgType then
+        handleFocusChange(self, self.hovered)
+      end
+
+      if self.hovered and love.mouse.isDown(1) then
+        self.onPointerDown(self)
+      end
+
+      if self.focused and guiType.TEXT_INPUT == self.type then
+        if msgBus.GUI_TEXT_INPUT == msgType then
+          local txt = msgValue
+          self.text = self.text..txt
+          self.onChange(self)
+        end
+
+        -- handle backspace for text input
+        if msgBus.KEY_DOWN == msgType and msgValue.key == 'backspace' then
+          self.text = string.sub(self.text, 1, #self.text - 1)
+          self.onChange(self)
+        end
+      end
+    end
+  end
+
+  return msgValue
+end, 1)
+
 function Gui.init(self)
+  Component.addToGroup(self, 'guiEventNode')
+
   assert(guiType[self.type] ~= nil, 'invalid gui type'..tostring(self.type))
 
   self.w, self.h = self.w or self.width or 1, self.h or self.height or 1
@@ -164,61 +218,6 @@ function Gui.init(self)
     assert(type(self.checked) == 'boolean')
   end
 
-  msgBus.on('*', function(msgValue, msgType)
-    -- cleanup
-    local shouldCleanup = self:isDeleted()
-    if shouldCleanup then
-      return msgBus.CLEANUP
-    end
-
-    if self.eventsDisabled then
-      return
-    end
-
-    if guiType.LIST == self.type and
-      msgBus.MOUSE_WHEEL_MOVED == msgType and
-      self.hovered
-    then
-      handleScroll(self, msgValue[1], msgValue[2])
-    end
-
-    if msgBus.MOUSE_CLICKED == msgType then
-      if self.hovered then
-        local isRightClick = msgValue[3] == 2
-        self.onClick(self, isRightClick)
-
-        if guiType.TOGGLE == self.type then
-          self.checked = not self.checked
-          self.onChange(self, self.checked)
-        end
-      end
-    end
-
-    if msgBus.MOUSE_PRESSED == msgType then
-      handleFocusChange(self, self.hovered)
-    end
-
-    if self.hovered and love.mouse.isDown(1) then
-      self.onPointerDown(self)
-    end
-
-    if self.focused and guiType.TEXT_INPUT == self.type then
-      if msgBus.GUI_TEXT_INPUT == msgType then
-        local txt = msgValue
-        self.text = self.text..txt
-        self.onChange(self)
-      end
-
-      -- handle backspace for text input
-      if msgBus.KEY_DOWN == msgType and msgValue.key == 'backspace' then
-        self.text = string.sub(self.text, 1, #self.text - 1)
-        self.onChange(self)
-      end
-    end
-
-    return msgValue
-  end, 1)
-
   local posX, posY = self:getPosition()
   self.colObj = self:addCollisionObject(
     self.collisionGroup or self.type,
@@ -227,13 +226,6 @@ function Gui.init(self)
   ):addToWorld(collisionWorlds.gui)
 
   self.onCreate(self)
-end
-
-local Lru = require 'utils.lru'
-local mouseCollisionsCache = Lru.new(20)
-local function indexByMouseCoord(x, y)
-  local maxCols = love.graphics.getWidth()
-  return (y * maxCols) + x
 end
 
 local function isDifferent(a, b)
@@ -246,7 +238,6 @@ local function handleEvents(self)
   end
 
   local mx, my = self:getMousePosition()
-  local cacheKey = indexByMouseCoord(mx, my)
   local mouseCollisions = collisionWorlds.gui:queryPoint(mx, my, mouseCollisionFilter)
 
   -- if the collided item is `self`, then we're hovered
