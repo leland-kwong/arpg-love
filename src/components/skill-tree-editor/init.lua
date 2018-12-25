@@ -160,7 +160,7 @@ local nodeValueOptions = {
     name = 'cooldown reduction',
     value = {
       type = 'cooldownReduction',
-      value = 0.03,
+      value = 0.04,
     },
     image = 'gui-skill-tree_node_cooldown-reduction',
     backgroundImage = 'gui-skill-tree_node_background',
