@@ -2,7 +2,7 @@
 -- local GuiText = require 'components.gui.gui-text'
 -- local msgBusMainMenu = require 'components.msg-bus-main-menu'
 -- local Component = require 'modules.component'
--- local Gui = require 'components.gui.gui'
+-- local Gui = dynamicRequire 'components.gui.gui'
 -- local Grid = require 'utils.grid'
 -- local F = require 'utils.functional'
 -- local Color = require 'modules.color'
@@ -44,7 +44,7 @@
 --     return 4
 --   end
 -- })
--- local itemWidth = 150
+-- local itemWidth = 125
 -- local AnimationFactory = require 'components.animation-factory'
 
 -- local maxIconWidth = 0
@@ -55,6 +55,10 @@
 --       id = 'guiNode_'..index,
 --       width = itemWidth + (padding * 2),
 --       height = 40,
+--       onClick = function()
+--         print(item.text, 'clicked')
+--         return false
+--       end,
 --       render = function(self)
 --         local x, y = self.x + padding, self.y + padding
 --         if self.hovered then
@@ -81,13 +85,38 @@
 
 -- local guiList = GuiList2.create({
 --   id = 'gui-list-test',
---   x = 100,
+--   x = 150,
 --   y = 100,
 --   height = 200,
 --   layoutItems = guiContainer_1,
 --   otherItems = {
 --     TextLayer
 --   },
+--   inputContext = 'gui-list-test',
+--   eventPriority = 1,
+--   drawOrder = function()
+--     return drawOrder + 2
+--   end
+-- })
+
+-- Gui.create({
+--   id = 'gui-test-box',
+--   x = 150,
+--   y = 100,
+--   width = 100,
+--   height = 100,
+--   onClick = function()
+--     print('test box clicked')
+--   end,
+--   draw = function(self)
+--     if self.hovered then
+--       love.graphics.setColor(1,1,1)
+--     else
+--       love.graphics.setColor(1,0,1,0.5)
+--     end
+--     love.graphics.rectangle('fill', self.x, self.y, self.width, self.height)
+--   end,
+--   eventPriority = 2,
 --   drawOrder = function()
 --     return drawOrder + 1
 --   end
