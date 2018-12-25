@@ -1,5 +1,4 @@
 local dynamicRequire = require 'utils.dynamic-require'
-local GuiList = dynamicRequire 'components.gui.gui-list'
 local GuiText = require 'components.gui.gui-text'
 local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local Component = require 'modules.component'
@@ -7,6 +6,7 @@ local Gui = require 'components.gui.gui'
 local Grid = require 'utils.grid'
 local F = require 'utils.functional'
 local Color = require 'modules.color'
+local GuiList2 = dynamicRequire 'components.gui.menu-list-2'
 
 local drawOrder = 100000
 
@@ -15,17 +15,6 @@ local TextLayer = GuiText.create({
   font = require 'components.font'.primary.font,
   drawOrder = function()
     return 4
-  end
-})
-
-local guiList = GuiList.create({
-  id = 'gui-list-test',
-  x = 100,
-  y = 100,
-  height = 200,
-  childNodes = {},
-  drawOrder = function()
-    return drawOrder + 1
   end
 })
 
@@ -67,7 +56,7 @@ local guiContainer_1 = F.map(items, function(item, index)
       id = 'guiNode_'..index,
       width = itemWidth + (padding * 2),
       height = 40,
-      draw = function(self)
+      render = function(self)
         local x, y = self.x + padding, self.y + padding
         if self.hovered then
           love.graphics.setColor(1,1,0,0.3)
@@ -91,64 +80,25 @@ local guiContainer_1 = F.map(items, function(item, index)
   }
 end)
 
-local function getRect(layoutGrid)
-  local childrenProcessed = {}
-  local rect = {
-    childRects = {}
-  }
-  local posY = 0
-  local maxWidth = 0
-  local totalHeight = 0
-  for rowOffset=1, #layoutGrid do
-    local posX = 0
-    local totalWidth = 0
-    local rowHeight = 0
-    local row = layoutGrid[rowOffset]
-    for colOffset=1, #row do
-      local col = row[colOffset]
-      if childrenProcessed[col] then
-        error('duplicate child in gui ['..rowOffset..','..colOffset..']')
-      end
-      childrenProcessed[col] = true
-      Grid.set(rect.childRects, colOffset, rowOffset, {
-        x = posX,
-        y = posY
-      })
-      posX = posX + col.width
-      totalWidth = totalWidth + col.width
-      rowHeight = math.max(rowHeight, col.height)
-    end
-    totalHeight = totalHeight + rowHeight
-    maxWidth = math.max(maxWidth, totalWidth)
-    posY = posY + rowHeight
+local guiList = GuiList2.create({
+  id = 'gui-list-test',
+  x = 100,
+  y = 100,
+  height = 200,
+  layoutItems = guiContainer_1,
+  otherItems = {
+    TextLayer
+  },
+  drawOrder = function()
+    return drawOrder + 1
   end
-  rect.width = maxWidth
-  rect.height = totalHeight
-  return rect
-end
+})
 
 Component.create({
-  id = 'gui-list-test-component',
+  id = 'gui-list-test-init',
   init = function(self)
     Component.addToGroup(self, 'gui')
     msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
-  end,
-  guiItems = guiContainer_1,
-  update = function(self, dt)
-    local childNodes = {}
-    local newRect = getRect(self.guiItems)
-    Grid.forEach(newRect.childRects, function(rect, x, y)
-      local guiNode = Grid.get(self.guiItems, x, y)
-      guiNode.x = guiList.x + rect.x
-      guiNode.y = guiList.y + rect.y + guiList.scrollTop
-      table.insert(childNodes, guiNode)
-    end)
-
-    guiList.contentHeight = newRect.height
-    guiList.contentWidth = newRect.width
-    guiList.width = newRect.width
-    table.insert(childNodes, TextLayer)
-    guiList.childNodes = childNodes
   end,
   draw = function()
     love.graphics.clear()

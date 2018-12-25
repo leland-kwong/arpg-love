@@ -3,14 +3,29 @@ local Component = require 'modules.component'
 local Gui = require 'components.gui.gui'
 local f = require 'utils.functional'
 
-local function iterateChildrenRecursively(children, callback)
+local function iterateChildrenRecursively(children, callback, ctx)
   for _,child in pairs(children) do
     iterateChildrenRecursively(
       Component.getChildren(child),
       callback
     )
-    callback(child)
+    callback(child, ctx)
   end
+end
+
+local function sortByDrawOrder(a, b)
+  return a:drawOrder() < b:drawOrder()
+end
+
+local function iterateChildrenSort(child, sortedList)
+  table.insert(sortedList, child)
+end
+
+local function sortChildrenByDrawOrder(children)
+  local sortedList = {}
+  iterateChildrenRecursively(children, iterateChildrenSort, sortedList)
+  table.sort(sortedList, sortByDrawOrder)
+  return sortedList
 end
 
 local function scrollbars(self)
@@ -110,9 +125,13 @@ function GuiList.init(self)
       love.graphics.stencil(guiStencil, 'replace', 1)
       love.graphics.setStencilTest('greater', 0)
 
-      iterateChildrenRecursively(self.children, function(child)
-        child:draw()
-      end)
+      local sortedChildren = sortChildrenByDrawOrder(self.children)
+      for i=1, #sortedChildren do
+        local child = sortedChildren[i]
+        if not child._drawDisabled then
+          child:draw()
+        end
+      end
       scrollbars(self)
 
       -- remove stencil

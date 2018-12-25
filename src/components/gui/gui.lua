@@ -91,6 +91,7 @@ local Gui = {
   focused = false,
   scrollTop = 0,
   scrollLeft = 0,
+  eventsDisabled = false,
 
   -- statics
   types = guiType
@@ -170,6 +171,10 @@ function Gui.init(self)
       return msgBus.CLEANUP
     end
 
+    if self.eventsDisabled then
+      return
+    end
+
     if guiType.LIST == self.type and
       msgBus.MOUSE_WHEEL_MOVED == msgType and
       self.hovered
@@ -236,6 +241,10 @@ local function isDifferent(a, b)
 end
 
 local function handleEvents(self)
+  if self.eventsDisabled then
+    return
+  end
+
   local mx, my = self:getMousePosition()
   local cacheKey = indexByMouseCoord(mx, my)
   local mouseCollisions = collisionWorlds.gui:queryPoint(mx, my, mouseCollisionFilter)
@@ -247,22 +256,22 @@ local function handleEvents(self)
     end
   end
 
-  local isPointerMove = self.hovered
-  local hasPointerPositionChanged = posX ~= self.prevColPosX or posY ~= self.prevColPosY
-  if isPointerMove then
-    self.onPointerMove(self, posX, posY)
-    InputContext.set(self.inputContext)
-  end
-
   local hoverStateChanged = self.hovered ~= self.prevHovered
   if hoverStateChanged then
     if self.hovered then
       self.onPointerEnter(self)
+      self.onPointerMove(self, posX, posY)
+      InputContext.set(self.inputContext)
     else
       self.onPointerLeave(self)
       InputContext.set('any')
     end
   end
+end
+
+function Gui.setEventsDisabled(self, disabled)
+  self.eventsDisabled = disabled
+  return self
 end
 
 function Gui.update(self, dt)
