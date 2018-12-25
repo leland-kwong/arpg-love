@@ -1,5 +1,23 @@
 # Release notes
 
+## 5.0.0-pre-alpha
+
+New
+
+* Added several passive abilities
+* Added Chain Lightning ability
+* Redesigned move speed boost ability to now do a dash
+
+Updates
+
+* Added stairs/ramps for 2-d elevation changes
+* Redesigned skill tree to be more user-friendly and feel more sci-fi like
+
+Fixes
+
+* All Gui elements now properly stay within the screen's viewport
+* Improved enemy spawning to prevent them from spawning outside of the map
+
 ## 4.0.0-pre-alpha
 
 New

@@ -769,7 +769,15 @@ function TreeEditor.drawTooltip(self)
             },
             align = 'right'
           }
-        }
+        },
+        {
+          {
+            content = {
+              Color.MED_GRAY, '(bonuses are multiplied on top of items)'
+            },
+            align = 'right'
+          }
+        },
       },
       font,
       {
