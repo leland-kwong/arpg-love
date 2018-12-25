@@ -21,14 +21,17 @@ return function()
 
   local function generateMapBlockDefinitions()
     local blocks = {
+      'test-room',
       'room-2'
-      -- 'room-boss-1'
     }
     local mapDefinitions = {
+      -- function()
+      --   return 'room-2'
+      -- end,
       function()
         return 'room-3'
       end,
-      mapBlockGenerator,
+      -- mapBlockGenerator,
       mapBlockGenerator,
       mapBlockGenerator,
       mapBlockGenerator
