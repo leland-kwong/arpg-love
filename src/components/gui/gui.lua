@@ -256,12 +256,15 @@ local function handleEvents(self)
     end
   end
 
+  if self.hovered then
+    self.onPointerMove(self, posX, posY)
+    InputContext.set(self.inputContext)
+  end
+
   local hoverStateChanged = self.hovered ~= self.prevHovered
   if hoverStateChanged then
     if self.hovered then
       self.onPointerEnter(self)
-      self.onPointerMove(self, posX, posY)
-      InputContext.set(self.inputContext)
     else
       self.onPointerLeave(self)
       InputContext.set('any')

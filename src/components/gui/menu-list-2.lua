@@ -54,7 +54,7 @@ return Component.createFactory({
       local guiListBottom = guiList.y + guiList.height
       local isInView = (guiNode.y + guiNode.height) >= guiListTop and
         guiNode.y <= guiListBottom
-      guiNode:setDisabled(not isInView)
+      guiNode._isInView = isInView
       table.insert(childNodes, guiNode)
     end)
 

@@ -7,13 +7,17 @@ local function iterateChildrenRecursively(children, callback, ctx)
   for _,child in pairs(children) do
     iterateChildrenRecursively(
       Component.getChildren(child),
-      callback
+      callback,
+      ctx
     )
     callback(child, ctx)
   end
 end
 
 local function sortByDrawOrder(a, b)
+  if (not a.drawOrder) then
+    return false
+  end
   return a:drawOrder() < b:drawOrder()
 end
 
@@ -69,6 +73,11 @@ local GuiList = {
   scrollLeft = 0
 }
 
+ -- disable automatic drawing so we can manually draw it ourself
+local function disableDraw(child)
+  child:setDrawDisabled(true)
+end
+
 function GuiList.init(self)
   local parent = self
   Component.addToGroup(self, 'gui')
@@ -89,12 +98,7 @@ function GuiList.init(self)
   end
 
   local baseDrawOrder = self.drawOrder
-
-  -- disable automatic drawing so we can manually draw it ourself
-  local function disableDraw(child)
-    child:setDrawDisabled(true)
-  end
-  iterateChildrenRecursively(children, disableDraw)
+  iterateChildrenRecursively(self.childNodes, disableDraw)
 
   local listNode = Gui.create({
     x = self.x,
@@ -108,6 +112,8 @@ function GuiList.init(self)
     scrollWidth = 1,
     scrollSpeed = 8,
     onUpdate = function(self)
+      iterateChildrenRecursively(parent.childNodes, disableDraw)
+
       self.children = parent.childNodes
       local width, height, contentWidth, contentHeight =
         parent.width, parent.height, parent.contentWidth, parent.contentHeight
@@ -128,7 +134,7 @@ function GuiList.init(self)
       local sortedChildren = sortChildrenByDrawOrder(self.children)
       for i=1, #sortedChildren do
         local child = sortedChildren[i]
-        if not child._drawDisabled then
+        if child._isInView ~= false then
           child:draw()
         end
       end

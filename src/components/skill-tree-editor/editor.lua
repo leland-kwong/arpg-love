@@ -343,6 +343,10 @@ function TreeEditor.handleInputs(self)
   local root = self
 
   local function handleZoom(ev)
+    if (not InputContext.contains('SkillTreeBackground')) then
+      return
+    end
+
     local dy = ev[2]
 
     local function changeScale(ds)
