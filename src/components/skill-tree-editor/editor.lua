@@ -269,13 +269,15 @@ local function placeNode(root, nodeId, gridX, gridY, connections, nodeValue, sel
       end
       local optionValue = root.nodeValueOptions[nodeValue]
       local AnimationFactory = require 'components.animation-factory'
-      local animation = AnimationFactory:newStaticSprite(optionValue.image)
+      local animation = AnimationFactory:newStaticSprite(
+        optionValue and optionValue.image or root.defaultNodeImage
+      )
       local width, height = animation:getWidth(), animation:getHeight()
       self.width, self.height = width * state.scale, height * state.scale
       local ox, oy = (cellSize - self.width)/2,
         (cellSize - self.height)/2
       dataRef.size = cellSize
-      self.x, self.y = gridX * cellSize + ox, gridY * cellSize + oy
+      self.x, self.y = dataRef.x * cellSize + ox, dataRef.y * cellSize + oy
     end
   }):setParent(root)
 
@@ -455,7 +457,7 @@ function TreeEditor.handleInputs(self)
       if 'NODE_MOVE' == self:getMode() then
         state.movingNode = state.movingNode or state.hoveredNode
         local nodeData = self.nodes[state.movingNode]
-        local x, y = snapToGrid(state.mx - nodeData.size/2, state.my - nodeData.size/2)
+        local x, y = snapToGrid(state.mx - cellSize/2, state.my - cellSize/2)
         self:setNode(state.movingNode, {
           x = x/cellSize,
           y = y/cellSize
@@ -880,7 +882,7 @@ function TreeEditor.draw(self)
       local nodeBackground = self.defaultNodeImage
       local AnimationFactory = require 'components.animation-factory'
       local animation = AnimationFactory
-        :newStaticSprite(optionValue.image or self.defaultNodeImage)
+        :newStaticSprite(optionValue and optionValue.image or self.defaultNodeImage)
       local ox, oy = animation:getOffset()
       animation:draw(
         math.floor(x), math.floor(y),
