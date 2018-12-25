@@ -136,6 +136,10 @@ function meta:getFullWidth()
   return self:getWidth() + (self.pad * 2)
 end
 
+function meta:getFullHeight()
+  return self:getHeight() + (self.pad * 2)
+end
+
 function meta:isLastFrame()
   return self.index == self.numFrames
 end

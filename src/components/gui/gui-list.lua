@@ -46,10 +46,12 @@ end
 
 local GuiList = {
   childNodes = {},
-  width = 0,
-  height = 0,
+  width = 1,
+  height = 1,
   contentWidth = nil,
-  contentHeight = nil
+  contentHeight = nil,
+  scrollTop = 0,
+  scrollLeft = 0
 }
 
 function GuiList.init(self)
@@ -91,12 +93,14 @@ function GuiList.init(self)
     scrollWidth = 1,
     scrollSpeed = 8,
     onUpdate = function(self)
+      self.children = parent.childNodes
       local width, height, contentWidth, contentHeight =
         parent.width, parent.height, parent.contentWidth, parent.contentHeight
       self.w = width
       self.h = height
-      self.scrollHeight = (contentHeight >= height) and (contentHeight - height) or height
+      self.scrollHeight = (contentHeight >= height) and (contentHeight - height) or 0
       self.scrollWidth = (contentWidth >= width) and (contentWidth - width) or width
+      parent.scrollTop = self.scrollTop
     end,
     onScroll = function(self)
     end,
@@ -106,7 +110,7 @@ function GuiList.init(self)
       love.graphics.stencil(guiStencil, 'replace', 1)
       love.graphics.setStencilTest('greater', 0)
 
-      iterateChildrenRecursively(children, function(child)
+      iterateChildrenRecursively(self.children, function(child)
         child:draw()
       end)
       scrollbars(self)
