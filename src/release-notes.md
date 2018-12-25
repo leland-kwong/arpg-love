@@ -18,6 +18,8 @@ Fixes
 * All Gui elements now properly stay within the screen's viewport
 * Improved enemy spawning to prevent them from spawning outside of the map
 
+---
+
 ## 4.0.0-pre-alpha
 
 New
