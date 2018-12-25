@@ -155,6 +155,31 @@ local nodeValueOptions = {
         ..'\n+'..(self.value.percentHealthRegen * 100)..'% health regeneration'
         ..'\n\n+'..(self.value.percentEnergyRegenPerMissingEnergy * 100)..'% energy regeneration for each 1% maximum energy missing'
     end
+  },
+  [13] = {
+    name = 'cooldown reduction',
+    value = {
+      type = 'cooldownReduction',
+      value = 0.03,
+    },
+    image = 'gui-skill-tree_node_cooldown-reduction',
+    backgroundImage = 'gui-skill-tree_node_background',
+    description = function(self)
+      return '+'..(self.value.value * 100)..'% cooldown reduction'
+    end
+  },
+  [14] = {
+    name = 'liquid nitrogen',
+    type = 'keystone',
+    value = {
+      type = 'cooldownReduction',
+      value = 0.1,
+    },
+    image = 'gui-skill-tree_node_cooldown-reduction-2',
+    backgroundImage = 'gui-skill-tree_node_background',
+    description = function(self)
+      return '+'..(self.value.value * 100)..'% cooldown reduction'
+    end
   }
 }
 
@@ -165,7 +190,7 @@ local EditorWithDefaults = Object.assign(SkillTreeEditor, {
   colors = {
     nodeConnection = {
       inner = {Color.rgba255(217,217,217)},
-      innerNonSelectable = {Color.multiplyAlpha(Color.MED_GRAY, 0.1)},
+      innerNonSelectable = {Color.multiplyAlpha(Color.MED_GRAY, 0.2)},
       outerNonSelectable = {Color.multiplyAlpha(Color.MED_GRAY, 0)},
     }
   },

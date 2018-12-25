@@ -267,12 +267,16 @@ local function placeNode(root, nodeId, gridX, gridY, connections, nodeValue, sel
         state.selectedNode = nil
         return
       end
-      local optionValue = root.nodeValueOptions[self.nodeValue]
-      local size = optionValue and (optionValue.type == 'keystone') and (2 * cellSize) or (cellSize)
-      self.width, self.height = size, size
-      dataRef.size = size
-      self.x, self.y = dataRef.x * size, dataRef.y * size
-    end,
+      local optionValue = root.nodeValueOptions[nodeValue]
+      local AnimationFactory = require 'components.animation-factory'
+      local animation = AnimationFactory:newStaticSprite(optionValue.image)
+      local width, height = animation:getWidth(), animation:getHeight()
+      self.width, self.height = width * state.scale, height * state.scale
+      local ox, oy = (cellSize - self.width)/2,
+        (cellSize - self.height)/2
+      dataRef.size = cellSize
+      self.x, self.y = gridX * cellSize + ox, gridY * cellSize + oy
+    end
   }):setParent(root)
 
   local nodeId = node:getId()
@@ -846,8 +850,8 @@ function TreeEditor.draw(self)
   local function drawConnection(node, connectionNode)
     love.graphics.setLineStyle('rough')
     love.graphics.line(
-      (node.x * cellSize) + node.size/2 + tx,
-      (node.y * cellSize) + node.size/2 + ty,
+      (node.x * cellSize) + cellSize/2 + tx,
+      (node.y * cellSize) + cellSize/2 + ty,
       (connectionNode.x * cellSize) + connectionNode.size/2 + tx,
       (connectionNode.y * cellSize) + connectionNode.size/2 + ty
     )
@@ -856,14 +860,22 @@ function TreeEditor.draw(self)
   local nodeBackgroundStencil = function()
     love.graphics.setShader(mask_shader)
     for _,node in pairs(self.nodes) do
-      local radius = node.size/2
       local x, y = (node.x * cellSize) + node.size/2 + tx, (node.y * cellSize) + node.size/2 + ty
+      local dataKey = node.nodeValue
+      local optionValue = self.nodeValueOptions[dataKey]
       -- cut-out the areas that overlap the connections
       love.graphics.setColor(0,0,0)
       local nodeBackground = self.defaultNodeImage
       local AnimationFactory = require 'components.animation-factory'
-      AnimationFactory:newStaticSprite(nodeBackground):draw(x, y, 0, state.scale, state.scale)
-      -- love.graphics.circle('fill', x, y, radius)
+      local animation = AnimationFactory
+        :newStaticSprite(optionValue.image or self.defaultNodeImage)
+      local ox, oy = animation:getOffset()
+      animation:draw(
+        math.floor(x), math.floor(y),
+        0,
+        state.scale, state.scale,
+        math.floor(ox), math.floor(oy)
+      )
     end
     love.graphics.setShader()
   end
@@ -917,7 +929,8 @@ function TreeEditor.draw(self)
     local dataKey = node.nodeValue
     local optionValue = self.nodeValueOptions[dataKey]
     local radius = node.size/2
-    local x, y = (node.x * cellSize) + node.size/2 + tx, (node.y * cellSize) + node.size/2 + ty
+    local x, y = node.x * cellSize + node.size/2 + tx,
+      node.y * cellSize + node.size/2 + ty
 
     if (editorModes.PLAY == _editorMode) or
       (editorModes.PLAY_READ_ONLY == _editorMode) or
@@ -936,12 +949,11 @@ function TreeEditor.draw(self)
       local sprite = optionValue and optionValue.image or self.defaultNodeImage
       local animation = AnimationFactory:newStaticSprite(sprite)
       local ox, oy = animation:getOffset()
-      love.graphics.draw(
-        AnimationFactory.atlas, animation.sprite,
-        x, y,
+      animation:draw(
+        math.floor(x), math.floor(y),
         0,
         state.scale, state.scale,
-        ox, oy
+        math.floor(ox), math.floor(oy)
       )
 
       if self.debug.selectionTraversal then
