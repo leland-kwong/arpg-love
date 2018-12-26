@@ -93,6 +93,7 @@ local Gui = {
   scrollTop = 0,
   scrollLeft = 0,
   eventsDisabled = false,
+  prevHovered = false,
 
   -- statics
   types = guiType
@@ -144,56 +145,101 @@ local function handleScroll(self, dx, dy)
   self.onScroll(self)
 end
 
+local function triggerEvents(c, msgValue, msgType)
+  if (not c.isGui) then
+    return
+  end
+
+  local self = c
+  self.prevHovered = self.hovered
+  if c.eventsDisabled then
+    return
+  end
+
+
+  if guiType.LIST == self.type and
+    msgBus.MOUSE_WHEEL_MOVED == msgType and
+    self.hovered
+  then
+    handleScroll(self, msgValue[1], msgValue[2])
+  end
+
+  if msgBus.MOUSE_CLICKED == msgType then
+    if self.hovered then
+      local isRightClick = msgValue[3] == 2
+      self.onClick(self, isRightClick)
+
+      if guiType.TOGGLE == self.type then
+        self.checked = not self.checked
+        self.onChange(self, self.checked)
+      end
+    end
+  end
+
+  if msgBus.MOUSE_PRESSED == msgType then
+    handleFocusChange(self, self.hovered)
+  end
+
+  if self.hovered and love.mouse.isDown(1) then
+    self.onPointerDown(self)
+  end
+
+  if self.focused and guiType.TEXT_INPUT == self.type then
+    if msgBus.GUI_TEXT_INPUT == msgType then
+      local txt = msgValue
+      self.text = self.text..txt
+      self.onChange(self)
+    end
+
+    -- handle backspace for text input
+    if msgBus.KEY_DOWN == msgType and msgValue.key == 'backspace' then
+      self.text = string.sub(self.text, 1, #self.text - 1)
+      self.onChange(self)
+    end
+  end
+end
+
+local function handleHoverEvents(self)
+  self.hovered = false
+  if self.eventsDisabled then
+    return
+  end
+
+  local mx, my = self:getMousePosition()
+  local mouseCollisions = collisionWorlds.gui:queryPoint(mx, my, mouseCollisionFilter)
+
+  -- if the collided item is `self`, then we're hovered
+  for i=1, #mouseCollisions do
+    if mouseCollisions[i] == self.colObj then
+      self.hovered = true
+    end
+  end
+
+  if self.hovered then
+    self.onPointerMove(self, posX, posY)
+    InputContext.set(self.inputContext)
+  end
+
+  local hoverStateChanged = self.hovered ~= self.prevHovered
+  if hoverStateChanged then
+    if self.hovered then
+      self.onPointerEnter(self)
+    else
+      self.onPointerLeave(self)
+      print('pointer leave', self:getId())
+      InputContext.set('any')
+    end
+  end
+end
+
 Component.create({
   id = 'gui-system-init',
   init = function(self)
     self.listeners = {
       msgBus.on('*', function(msgValue, msgType)
         for _,c in pairs(Component.groups.guiEventNode.getAll()) do
-          local self = c
-          if c.isGui and (not self.eventsDisabled) then
-
-            if guiType.LIST == self.type and
-              msgBus.MOUSE_WHEEL_MOVED == msgType and
-              self.hovered
-            then
-              handleScroll(self, msgValue[1], msgValue[2])
-            end
-
-            if msgBus.MOUSE_CLICKED == msgType then
-              if self.hovered then
-                local isRightClick = msgValue[3] == 2
-                self.onClick(self, isRightClick)
-
-                if guiType.TOGGLE == self.type then
-                  self.checked = not self.checked
-                  self.onChange(self, self.checked)
-                end
-              end
-            end
-
-            if msgBus.MOUSE_PRESSED == msgType then
-              handleFocusChange(self, self.hovered)
-            end
-
-            if self.hovered and love.mouse.isDown(1) then
-              self.onPointerDown(self)
-            end
-
-            if self.focused and guiType.TEXT_INPUT == self.type then
-              if msgBus.GUI_TEXT_INPUT == msgType then
-                local txt = msgValue
-                self.text = self.text..txt
-                self.onChange(self)
-              end
-
-              -- handle backspace for text input
-              if msgBus.KEY_DOWN == msgType and msgValue.key == 'backspace' then
-                self.text = string.sub(self.text, 1, #self.text - 1)
-                self.onChange(self)
-              end
-            end
-          end
+          handleHoverEvents(c)
+          triggerEvents(c, msgValue, msgType)
         end
 
         return msgValue
@@ -242,37 +288,6 @@ local function isDifferent(a, b)
   return a ~= b
 end
 
-local function handleEvents(self)
-  if self.eventsDisabled then
-    return
-  end
-
-  local mx, my = self:getMousePosition()
-  local mouseCollisions = collisionWorlds.gui:queryPoint(mx, my, mouseCollisionFilter)
-
-  -- if the collided item is `self`, then we're hovered
-  for i=1, #mouseCollisions do
-    if mouseCollisions[i] == self.colObj then
-      self.hovered = true
-    end
-  end
-
-  if self.hovered then
-    self.onPointerMove(self, posX, posY)
-    InputContext.set(self.inputContext)
-  end
-
-  local hoverStateChanged = self.hovered ~= self.prevHovered
-  if hoverStateChanged then
-    if self.hovered then
-      self.onPointerEnter(self)
-    else
-      self.onPointerLeave(self)
-      InputContext.set('any')
-    end
-  end
-end
-
 function Gui.setEventsDisabled(self, disabled)
   self.eventsDisabled = disabled
   return self
@@ -289,9 +304,6 @@ function Gui.update(self, dt)
   self.w, self.h = self.width or self.w, self.height or self.h
   self.colObj:update(posX, posY, self.w, self.h)
 
-  self.hovered = false
-  handleEvents(self)
-
   self.onUpdate(self, dt)
 
   if self.scrollNode then
@@ -300,7 +312,6 @@ function Gui.update(self, dt)
     end)
   end
 
-  self.prevHovered = self.hovered
   self.prevColPosX = posX
   self.prevColPosY = posY
   self.prevX = self.x
