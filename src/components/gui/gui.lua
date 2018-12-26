@@ -144,56 +144,66 @@ local function handleScroll(self, dx, dy)
   self.onScroll(self)
 end
 
-msgBus.on('*', function(msgValue, msgType)
-  for _,c in pairs(Component.groups.guiEventNode.getAll()) do
-    local self = c
-    if c.isGui and (not self.eventsDisabled) then
+Component.create({
+  id = 'gui-system-init',
+  init = function(self)
+    self.listeners = {
+      msgBus.on('*', function(msgValue, msgType)
+        for _,c in pairs(Component.groups.guiEventNode.getAll()) do
+          local self = c
+          if c.isGui and (not self.eventsDisabled) then
 
-      if guiType.LIST == self.type and
-        msgBus.MOUSE_WHEEL_MOVED == msgType and
-        self.hovered
-      then
-        handleScroll(self, msgValue[1], msgValue[2])
-      end
+            if guiType.LIST == self.type and
+              msgBus.MOUSE_WHEEL_MOVED == msgType and
+              self.hovered
+            then
+              handleScroll(self, msgValue[1], msgValue[2])
+            end
 
-      if msgBus.MOUSE_CLICKED == msgType then
-        if self.hovered then
-          local isRightClick = msgValue[3] == 2
-          self.onClick(self, isRightClick)
+            if msgBus.MOUSE_CLICKED == msgType then
+              if self.hovered then
+                local isRightClick = msgValue[3] == 2
+                self.onClick(self, isRightClick)
 
-          if guiType.TOGGLE == self.type then
-            self.checked = not self.checked
-            self.onChange(self, self.checked)
+                if guiType.TOGGLE == self.type then
+                  self.checked = not self.checked
+                  self.onChange(self, self.checked)
+                end
+              end
+            end
+
+            if msgBus.MOUSE_PRESSED == msgType then
+              handleFocusChange(self, self.hovered)
+            end
+
+            if self.hovered and love.mouse.isDown(1) then
+              self.onPointerDown(self)
+            end
+
+            if self.focused and guiType.TEXT_INPUT == self.type then
+              if msgBus.GUI_TEXT_INPUT == msgType then
+                local txt = msgValue
+                self.text = self.text..txt
+                self.onChange(self)
+              end
+
+              -- handle backspace for text input
+              if msgBus.KEY_DOWN == msgType and msgValue.key == 'backspace' then
+                self.text = string.sub(self.text, 1, #self.text - 1)
+                self.onChange(self)
+              end
+            end
           end
         end
-      end
 
-      if msgBus.MOUSE_PRESSED == msgType then
-        handleFocusChange(self, self.hovered)
-      end
-
-      if self.hovered and love.mouse.isDown(1) then
-        self.onPointerDown(self)
-      end
-
-      if self.focused and guiType.TEXT_INPUT == self.type then
-        if msgBus.GUI_TEXT_INPUT == msgType then
-          local txt = msgValue
-          self.text = self.text..txt
-          self.onChange(self)
-        end
-
-        -- handle backspace for text input
-        if msgBus.KEY_DOWN == msgType and msgValue.key == 'backspace' then
-          self.text = string.sub(self.text, 1, #self.text - 1)
-          self.onChange(self)
-        end
-      end
-    end
+        return msgValue
+      end, 1)
+    }
+  end,
+  final = function(self)
+    msgBus.off(self.listeners)
   end
-
-  return msgValue
-end, 1)
+})
 
 function Gui.init(self)
   Component.addToGroup(self, 'guiEventNode')
