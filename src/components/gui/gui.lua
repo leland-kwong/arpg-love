@@ -51,7 +51,7 @@ local Gui = {
   -- props
   x = 1,
   y = 1,
-  inputContext = 'gui', -- the input context to set when the entity is hovered
+  -- inputContext = 'gui', -- the input context to set when the entity is hovered
   onClick = noop,
   onKeyPress = noop,
   onChange = noop,
@@ -146,16 +146,7 @@ local function handleScroll(self, dx, dy)
 end
 
 local function triggerEvents(c, msgValue, msgType)
-  if (not c.isGui) then
-    return
-  end
-
   local self = c
-  self.prevHovered = self.hovered
-  if c.eventsDisabled then
-    return
-  end
-
 
   if guiType.LIST == self.type and
     msgBus.MOUSE_WHEEL_MOVED == msgType and
@@ -200,7 +191,6 @@ local function triggerEvents(c, msgValue, msgType)
 end
 
 local function handleHoverEvents(self)
-  self.hovered = false
   if self.eventsDisabled then
     return
   end
@@ -216,8 +206,8 @@ local function handleHoverEvents(self)
   end
 
   if self.hovered then
-    self.onPointerMove(self, posX, posY)
     InputContext.set(self.inputContext)
+    self.onPointerMove(self, posX, posY)
   end
 
   local hoverStateChanged = self.hovered ~= self.prevHovered
@@ -226,24 +216,64 @@ local function handleHoverEvents(self)
       self.onPointerEnter(self)
     else
       self.onPointerLeave(self)
-      print('pointer leave', self:getId())
-      InputContext.set('any')
     end
   end
 end
 
+local eventTypesFilter = {
+  [msgBus.MOUSE_WHEEL_MOVED] = true,
+  [msgBus.MOUSE_CLICKED] = true,
+  [msgBus.MOUSE_PRESSED] = true,
+  [msgBus.GUI_TEXT_INPUT] = true,
+  [msgBus.KEY_DOWN] = true,
+  [msgBus.UPDATE] = true
+}
+
 Component.create({
   id = 'gui-system-init',
   init = function(self)
+
     self.listeners = {
       msgBus.on('*', function(msgValue, msgType)
-        for _,c in pairs(Component.groups.guiEventNode.getAll()) do
-          handleHoverEvents(c)
-          triggerEvents(c, msgValue, msgType)
+        if (not eventTypesFilter[msgType]) then
+          return msgValue
+        end
+
+        local components = Component.groups.guiEventNode.getAll()
+        local sortedComponents = {}
+        for _,c in pairs(components) do
+          if c.isGui then
+            table.insert(sortedComponents, c)
+          end
+        end
+        local function latestEventPriority(a, b)
+          return a.eventPriority > b.eventPriority
+        end
+        table.sort(sortedComponents, latestEventPriority)
+
+        for i=1, #sortedComponents do
+          local c = sortedComponents[i]
+          c.hovered = false
+          if (not c.inputContext) then
+            error('gui component '..c:getId()..' has no input context')
+          end
+          if (
+              InputContext.contains(c.inputContext) or
+              InputContext.contains('any')
+            ) and
+            (not c.eventsDisabled)
+          then
+            handleHoverEvents(c)
+            triggerEvents(c, msgValue, msgType)
+          end
+          c.prevHovered = c.hovered
         end
 
         return msgValue
-      end, 1)
+      end, 1),
+      msgBus.on(msgBus.UPDATE_END, function()
+        InputContext.set('any')
+      end, 100)
     }
   end,
   final = function(self)
@@ -251,11 +281,19 @@ Component.create({
   end
 })
 
+local eventPriority = 0
+local function getDefaultEventPriority()
+  eventPriority = eventPriority + 1
+  return eventPriority
+end
+
 function Gui.init(self)
   Component.addToGroup(self, 'guiEventNode')
 
   assert(guiType[self.type] ~= nil, 'invalid gui type'..tostring(self.type))
 
+  self.inputContext = self.inputContext or self:getId()
+  self.eventPriority = getDefaultEventPriority()
   self.w, self.h = self.w or self.width or 1, self.h or self.height or 1
 
   if guiType.LIST == self.type then

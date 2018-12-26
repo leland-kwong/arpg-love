@@ -36,12 +36,18 @@ end
 local itemPickedUp = nil
 local isDropModeFloor = false
 
-msgBus.on(msgBus.INVENTORY_DROP_MODE_INVENTORY, function()
-  isDropModeFloor = false
+-- msgBus.on(msgBus.INVENTORY_DROP_MODE_INVENTORY, function()
+--   isDropModeFloor = false
+-- end)
+-- msgBus.on(msgBus.INVENTORY_DROP_MODE_FLOOR, function()
+--   isDropModeFloor = true
+-- end)
+
+msgBus.on(msgBus.UPDATE, function()
+  local InputContext = require 'modules.input-context'
+  isDropModeFloor = InputContext.contains('any')
 end)
-msgBus.on(msgBus.INVENTORY_DROP_MODE_FLOOR, function()
-  isDropModeFloor = true
-end)
+
 -- handles dropping items on the floor when its in the floor drop mode
 local function handleItemDrop()
   if (isDropModeFloor and itemPickedUp) then

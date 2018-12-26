@@ -304,7 +304,6 @@ local function setNextPosition(self, speed, radius)
   local nextY = self.y + self.vy * speed * targetDistDamping
 
   if not collidesWithPlayer(self, nextX, nextY) then
-    self.collision:update(nextX, nextY)
     self.x = nextX
     self.y = nextY
   end
@@ -483,6 +482,8 @@ function Ai.update(self, dt)
     local isMoving = originalX ~= nextX or originalY ~= nextY
     self.animation = isMoving and self.animations.moving or self.animations.idle
   end
+
+  self.collision:update(self.x, self.y)
 end
 
 local perf = require'utils.perf'

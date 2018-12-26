@@ -10,12 +10,14 @@ return Component.createFactory({
   init = function(self)
     local parent = self
     Component.addToGroup(self, 'gui')
+    self.inputContext = self.inputContext or self:getId()
     self.guiList = GuiList.create({
       x = self.x,
       y = self.y,
       width = self.width,
       height = self.height,
       childNodes = {},
+      inputContext = parent.inputContext,
       drawOrder = function()
         return parent:drawOrder() + 1
       end
@@ -23,6 +25,7 @@ return Component.createFactory({
     self.interactZone = Gui.create({
       x = self.x,
       y = self.y,
+      inputContext = parent.inputContext,
       onUpdate = function(self)
         self.width = parent.guiList.width
         self.height = parent.guiList.height
@@ -55,6 +58,7 @@ return Component.createFactory({
       local isInView = (guiNode.y + guiNode.height) >= guiListTop and
         guiNode.y <= guiListBottom
       guiNode._isInView = isInView
+      guiNode.inputContext = self.inputContext
       table.insert(childNodes, guiNode)
     end)
 

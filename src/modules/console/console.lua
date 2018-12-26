@@ -133,6 +133,8 @@ function Console.update(self)
   s.currentMemoryUsed = collectgarbage('count')
   s.frameCount = s.frameCount + 1
   s.accumulatedMemoryUsed = s.accumulatedMemoryUsed + s.currentMemoryUsed
+
+  self.previousInputContext = InputContext.get()
 end
 
 local function calcMessageBusHandlers()
@@ -216,7 +218,7 @@ function Console.draw(self)
       Color.WHITE,
       '\ninput context: ',
       Color.YELLOW,
-      InputContext.get()
+      self.previousInputContext
     },
     edgeOffset,
     375,

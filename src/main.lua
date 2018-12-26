@@ -9,6 +9,8 @@ love.graphics.setDefaultFilter('nearest', 'nearest')
 
 local msgBus = require 'components.msg-bus'
 msgBus.UPDATE = 'UPDATE'
+msgBus.UPDATE_END = 'UPDATE_END'
+require 'main.inputs'
 require 'main.listeners'
 
 local Console = require 'modules.console.console'
@@ -18,7 +20,6 @@ local camera = require 'components.camera'
 local SceneMain = require 'scene.scene-main'
 local tick = require 'utils.tick'
 local globalState = require 'main.global-state'
-require 'main.inputs'
 local systemsProfiler = require 'components.profiler.component-groups'
 require 'components.groups.dungeon-test'
 require 'components.groups.game-world'
@@ -97,6 +98,13 @@ function love.update(dt)
   camera:update(dt)
 
   characterSystem(dt)
+  --[[
+    process all gui components first since they always
+    overlay on top of the game. This is guarantees that any gui interactions
+    are prioritized over everything else.
+  ]]
+  groups.gui.updateAll(dt)
+  groups.hud.updateAll(dt)
 
   camera:attach()
   groups.firstLayer.updateAll(dt)
@@ -105,9 +113,8 @@ function love.update(dt)
   groups.debug.updateAll(dt)
   camera:detach()
 
-  groups.hud.updateAll(dt)
-  groups.gui.updateAll(dt)
   groups.system.updateAll(dt)
+  msgBus.send(msgBus.UPDATE_END, dt)
 end
 
 function love.draw()
