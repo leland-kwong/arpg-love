@@ -110,7 +110,7 @@ function GuiList.init(self)
     children = children,
     scrollHeight = 1,
     scrollWidth = 1,
-    scrollSpeed = 8,
+    scrollSpeed = 15,
     onUpdate = function(self)
       iterateChildrenRecursively(parent.childNodes, setupChildren, self)
 
