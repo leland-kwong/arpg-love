@@ -74,8 +74,9 @@ local GuiList = {
 }
 
  -- disable automatic drawing so we can manually draw it ourself
-local function disableDraw(child)
+local function setupChildren(child, self)
   child:setDrawDisabled(true)
+  child.inputContext = self.inputContext
 end
 
 function GuiList.init(self)
@@ -98,7 +99,6 @@ function GuiList.init(self)
   end
 
   local baseDrawOrder = self.drawOrder
-  iterateChildrenRecursively(self.childNodes, disableDraw)
 
   local listNode = Gui.create({
     x = self.x,
@@ -112,7 +112,7 @@ function GuiList.init(self)
     scrollWidth = 1,
     scrollSpeed = 8,
     onUpdate = function(self)
-      iterateChildrenRecursively(parent.childNodes, disableDraw)
+      iterateChildrenRecursively(parent.childNodes, setupChildren, self)
 
       self.children = parent.childNodes
       local width, height, contentWidth, contentHeight =
@@ -146,6 +146,7 @@ function GuiList.init(self)
     end,
     drawOrder = baseDrawOrder
   }):setParent(self)
+  iterateChildrenRecursively(self.childNodes, setupChildren, listNode)
 end
 
 local function removeChildren(self)

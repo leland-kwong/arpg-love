@@ -49,6 +49,18 @@ function SettingsMenu.init(self)
     end
   })
 
+  local list = GuiList.create({
+    x = menuX,
+    y = menuY,
+    width = menuWidth,
+    height = menuHeight,
+    contentHeight = 500,
+    drawOrder = function()
+      return 1100
+    end
+  }):setParent(self)
+  Component.addToGroup(list, 'guiDrawBox')
+
   local function sliderSoundAdjusted(volume)
     local source = love.audio.newSource('built/sounds/gui/volume-adjusted.wav', 'static')
     source:setVolume(volume)
@@ -253,19 +265,7 @@ function SettingsMenu.init(self)
 
   table.insert(childNodes, guiTextTitle)
   table.insert(childNodes, guiTextBody)
-
-  local list = GuiList.create({
-    childNodes = childNodes,
-    x = menuX,
-    y = menuY,
-    width = menuWidth,
-    height = menuHeight,
-    contentHeight = 500,
-    drawOrder = function()
-      return 1100
-    end
-  }):setParent(self)
-  Component.addToGroup(list, 'guiDrawBox')
+  list.childNodes = childNodes
 end
 
 function SettingsMenu.final(self)
