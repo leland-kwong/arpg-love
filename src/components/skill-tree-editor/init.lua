@@ -186,12 +186,29 @@ local nodeValueOptions = {
     type = 'keystone',
     value = {
       type = 'energySteal',
-      value = 0.1,
+      value = 1.0,
+      duration = 0.4,
     },
     image = 'gui-skill-tree_node_energy-steal',
     backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
-      return (self.value.value * 100)..'% of damage you deal is restored as energy'
+      return (self.value.value * 100)..'% of damage you deal is restored as energy over '
+        ..(self.value.duration)..' seconds'
+    end
+  },
+  [16] = {
+    name = 'kinetic healing',
+    type = 'keystone',
+    value = {
+      type = 'lifeSteal',
+      value = 0.5,
+      duration = 0.4,
+    },
+    image = 'gui-skill-tree_node_life-steal',
+    backgroundImage = 'gui-skill-tree_node_background',
+    description = function(self)
+      return (self.value.value * 100)..'% of damage you deal is restored as health over '
+        ..(self.value.duration)..' seconds'
     end
   }
 }

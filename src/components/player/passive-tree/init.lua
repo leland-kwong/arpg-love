@@ -166,18 +166,8 @@ local modifierHandlers = {
   end,
   energySteal = function(nodeId, data)
     onDamageReceivedModifiers[nodeId] = function(msg)
-      local collisionGroups = require 'modules.collision-groups'
-      local c = Component.get(msg.receiverId)
-      if collisionGroups.matches(c.class, 'enemyAi') then
-        local uid = require 'utils.uid'
-        msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
-          amount = data.value.value * msg.totalDamage,
-          source = uid(),
-          duration = data.value.duration,
-          property = 'energy',
-          maxProperty = 'maxEnergy'
-        })
-      end
+      local leech = require 'components.player.passive-tree.passives.leech'
+      leech(data, 'energy', 'maxEnergy', msg, msgBus)
     end
   end
 }
