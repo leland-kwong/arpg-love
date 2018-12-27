@@ -43,20 +43,27 @@ msgBus.on(msgBus.CHARACTER_HIT, function(msg)
 end, 1)
 
 
-local function showHealing(c, prop, previousProp, color)
+local function showHealing(c, prop, previousProp, accumulatedProp, color, isShowFrame)
   local Math = require 'utils.math'
   local propertyChange = Math.round(c[prop] - (c[previousProp] or 0))
   c[previousProp] = c[prop]
-  if propertyChange > 0 then
+  local isHealChange = propertyChange > 0
+  if (isHealChange) then
+    c[accumulatedProp] = (c[accumulatedProp] or 0) + propertyChange
+  end
+
+  local roundedTotal = Math.round(c[accumulatedProp])
+  if isShowFrame and (roundedTotal > 0) then
     local popupText = Component.get('popupText')
-    popupText:new(propertyChange, c.x, c.y - c.h, nil, color)
+    popupText:new(roundedTotal, c.x, c.y - c.h, nil, color)
+    c[accumulatedProp] = 0
   end
 end
 
 local frameCount = 0
 return function(dt)
   frameCount = frameCount + 1
-  local healingNumberFrequency = 15
+  local healingNumberFrequency = 30
   local isShowHealingNumberFrame = (frameCount % healingNumberFrequency == 0)
 
   for componentId,c in pairs(groups.character.getAll()) do
@@ -106,10 +113,10 @@ return function(dt)
       end
       c.wasFrozen = c.frozen
 
-      if isShowHealingNumberFrame and c.showHealing then
+      if c.showHealing then
         local Color = require 'modules.color'
-        showHealing(c, 'health', 'previousHealth', Color.LIME)
-        showHealing(c, 'energy', 'previousEnergy', Color.DEEP_BLUE)
+        showHealing(c, 'health', 'previousHealth', 'accumulatedHealthHeal', Color.LIME, isShowHealingNumberFrame)
+        showHealing(c, 'energy', 'previousEnergy', 'accumulatedEnergyHeal', Color.DEEP_BLUE, isShowHealingNumberFrame)
       end
     end
   end

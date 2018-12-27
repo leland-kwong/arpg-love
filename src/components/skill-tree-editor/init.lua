@@ -187,7 +187,7 @@ local nodeValueOptions = {
     value = {
       type = 'energySteal',
       value = 1.0,
-      duration = 0.4,
+      duration = 0.1,
     },
     image = 'gui-skill-tree_node_energy-steal',
     backgroundImage = 'gui-skill-tree_node_background',
@@ -201,7 +201,7 @@ local nodeValueOptions = {
     type = 'keystone',
     value = {
       type = 'lifeSteal',
-      value = 0.5,
+      value = 0.3,
       duration = 0.4,
     },
     image = 'gui-skill-tree_node_life-steal',

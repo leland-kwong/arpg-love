@@ -169,6 +169,12 @@ local modifierHandlers = {
       local leech = require 'components.player.passive-tree.passives.leech'
       leech(data, 'energy', 'maxEnergy', msg, msgBus)
     end
+  end,
+  lifeSteal = function(nodeId, data)
+    onDamageReceivedModifiers[nodeId] = function(msg)
+      local leech = require 'components.player.passive-tree.passives.leech'
+      leech(data, 'health', 'maxHealth', msg, msgBus)
+    end
   end
 }
 
