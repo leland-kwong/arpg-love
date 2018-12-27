@@ -210,15 +210,6 @@ local function handleHoverEvents(self)
     self.onPointerMove(self, posX, posY)
   end
 
-  local hoverStateChanged = self.hovered ~= self.prevHovered
-  if hoverStateChanged then
-    if self.hovered then
-      self.onPointerEnter(self)
-    else
-      self.onPointerLeave(self)
-    end
-  end
-
   return self.hovered
 end
 
@@ -269,6 +260,14 @@ Component.create({
             local hovered = handleHoverEvents(c)
             if hovered then
               triggerEvents(c, msgValue, msgType)
+            end
+          end
+          local hoverStateChanged = c.hovered ~= c.prevHovered
+          if hoverStateChanged then
+            if c.hovered then
+              c.onPointerEnter(c)
+            else
+              c.onPointerLeave(c)
             end
           end
           c.prevHovered = c.hovered
