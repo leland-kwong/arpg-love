@@ -173,7 +173,7 @@ local modifierHandlers = {
         msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
           amount = data.value.value * msg.totalDamage,
           source = uid(),
-          duration = 0.5,
+          duration = data.value.duration,
           property = 'energy',
           maxProperty = 'maxEnergy'
         })

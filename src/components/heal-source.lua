@@ -3,7 +3,7 @@ local HealSource = {}
 
 local function healRoutine(healSource, tickRate)
 	local amount = healSource.amount
-	local duration = healSource.duration
+	local duration = healSource.duration or 0
 	local isInstantHeal = duration == 0
 	local amountPerTick = isInstantHeal
 		and amount
