@@ -15,17 +15,24 @@ local ExperienceIndicator = {
 
 local hudTextLayer = GuiText.create()
 
-local function getExpInfo(self)
-  local curState = self.rootStore:get()
-  local currentLevel = curState.level
+local memoize = require 'utils.memoize'
+local getCurrentLevel = memoize(function (totalExp)
+  for level=1, #config.levelExperienceRequirements do
+    local expRequired = config.levelExperienceRequirements[level]
+    if expRequired > totalExp then
+      return level - 1
+    end
+  end
+end)
+
+local function getExpInfo(currentLevel, totalExp)
   local currentLevelRequirement = config.levelExperienceRequirements[currentLevel]
   local nextLevelRequirement = config.levelExperienceRequirements[currentLevel + 1]
-  local totalExp = curState.totalExperience
   local currentLevelExp = totalExp - currentLevelRequirement
   local expRequiredForLevelUp = nextLevelRequirement - currentLevelRequirement
   local progress = currentLevelExp / expRequiredForLevelUp
 
-  return totalExp, progress
+  return progress
 end
 
 function ExperienceIndicator.init(self)
@@ -34,15 +41,13 @@ function ExperienceIndicator.init(self)
       return msgBus.CLEANUP
     end
 
+    local currentLevel = self.rootStore:get().level
     self.rootStore:set('totalExperience', function(state)
-      return state.totalExperience + msgValue
+      return math.max(0, state.totalExperience + msgValue)
     end)
-    local totalExp, progress = getExpInfo(self)
-    local isLevelUp = progress >= 1
+    local nextLevel = getCurrentLevel(self.rootStore:get().totalExperience)
+    local isLevelUp = currentLevel < nextLevel
     if isLevelUp then
-      self.rootStore:set('level', function(state)
-        return state.level + 1
-      end)
       love.audio.stop(Sound.levelUp)
       love.audio.play(Sound.levelUp)
       msgBus.send(msgBus.PLAYER_LEVEL_UP)
@@ -50,7 +55,7 @@ function ExperienceIndicator.init(self)
         title = 'level up!',
         description = {
           Color.WHITE, 'you are now level ',
-          Color.CYAN, self.rootStore:get().level
+          Color.CYAN, nextLevel
         }
       })
     end
@@ -58,9 +63,13 @@ function ExperienceIndicator.init(self)
 end
 
 function ExperienceIndicator.update(self)
-  local totalExp, progress = getExpInfo(self)
+  local totalExp = self.rootStore:get().totalExperience
+  local progress = getExpInfo(self.rootStore:get().level, totalExp)
   self.experience = totalExp
   self.progress = progress
+
+  local currentLevel = getCurrentLevel(totalExp)
+  self.rootStore:set('level', currentLevel)
 end
 
 local function drawSegments(self, i, segmentCount, startX, totalWidth)
