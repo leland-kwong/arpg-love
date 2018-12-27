@@ -955,10 +955,7 @@ function TreeEditor.draw(self)
     local x, y = node.x * cellSize + node.size/2 + tx,
       node.y * cellSize + node.size/2 + ty
 
-    if (editorModes.PLAY == _editorMode) or
-      (editorModes.PLAY_READ_ONLY == _editorMode) or
-      (editorModes.PLAY_UNSELECT_ONLY == _editorMode)
-    then
+    if true then
       if node.selected then
         love.graphics.setColor(1,1,1)
       -- highlight selectable nodes
@@ -993,24 +990,9 @@ function TreeEditor.draw(self)
     end
 
     if (editorModes.EDIT == _editorMode) then
-      if node.hovered then
-        love.graphics.setColor(0,1,0)
-      else
-        love.graphics.setColor(1,0.5,0)
-      end
-      love.graphics.circle('fill', x, y, radius)
-
-      if optionValue then
-        debugTextLayer:add(
-          optionValue.name,
-          Color.WHITE,
-          math.floor(x/state.scale), math.floor(y/state.scale)
-        )
-      end
-
       if state.selectedNode == nodeId then
         local oLineWidth = love.graphics.getLineWidth()
-        love.graphics.setLineWidth(2)
+        love.graphics.setLineWidth(3)
         love.graphics.setColor(1,1,1)
         love.graphics.circle('line', x, y, radius + 4)
         love.graphics.setLineWidth(oLineWidth)
