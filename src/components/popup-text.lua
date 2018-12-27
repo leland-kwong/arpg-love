@@ -7,9 +7,12 @@ local TablePool = require 'utils.table-pool'
 local setProp = require 'utils.set-prop'
 local GuiText = require 'components.gui.gui-text'
 
-local lastDirection = 1
+local lastDirection = 0
 local function getDirection()
-  lastDirection = lastDirection * -1
+  lastDirection = lastDirection + 1
+  if lastDirection > 1 then
+    lastDirection = -1
+  end
   return lastDirection
 end
 
@@ -29,7 +32,7 @@ local function animationCo(duration, textWidth)
   local subject = setProp(subjectPool.get())
     :set('offset', 0)
     :set('time', 0)
-    :set('dx', getDirection() * textWidth + 4)
+    :set('dx', getDirection() * (textWidth + 4))
     :set('dy', math.random(0, 2) * 4)
   local posTween = tween.new(duration, subject, tweenEndState, tween.easing.outExpo)
   local complete = false
@@ -58,6 +61,8 @@ function PopupTextBlueprint.init(self)
   self.textObjectsList = {}
 end
 
+local textObjShared = {}
+
 function PopupTextBlueprint.update(self)
   self.textObj:clear()
 
@@ -72,7 +77,9 @@ function PopupTextBlueprint.update(self)
       table.remove(self.textObjectsList, i)
     else
       i = i + 1
-      self.textObj:add({color or self.color, text}, x + (time * dx), y + offsetY + dy)
+      textObjShared[1] = color or self.color
+      textObjShared[2] = text
+      self.textObj:add(textObjShared, x + (time * dx), y + offsetY + dy)
     end
   end
 end
