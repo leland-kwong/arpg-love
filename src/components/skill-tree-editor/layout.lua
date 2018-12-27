@@ -152,10 +152,10 @@ _[33]={x=-2,size=50,selected=false,y=0,nodeValue=13,connections=_[76]}
 _[32]={x=4,size=50,selected=false,y=-1,nodeValue=1,connections=_[75]}
 _[31]={x=8,size=50,selected=false,y=0,nodeValue=5,connections=_[74]}
 _[30]={x=0,size=50,selected=false,y=8,nodeValue=6,connections=_[73]}
-_[29]={x=-2,size=50,selected=false,y=2,nodeValue=10,connections=_[72]}
+_[29]={x=-2,size=50,selected=false,y=2,nodeValue=15,connections=_[72]}
 _[28]={x=0,size=50,selected=true,y=0,nodeValue=4,connections=_[71]}
 _[27]={x=-8,size=50,selected=false,y=2,nodeValue=8,connections=_[70]}
-_[26]={x=-10,size=50,selected=false,y=5,nodeValue=10,connections=_[69]}
+_[26]={x=-10,size=50,selected=false,y=5,nodeValue=15,connections=_[69]}
 _[25]={x=4,size=50,selected=false,y=6,nodeValue=9,connections=_[68]}
 _[24]={x=1,size=50,selected=false,y=4,nodeValue=8,connections=_[67]}
 _[23]={x=-1,size=50,selected=false,y=4,nodeValue=7,connections=_[66]}

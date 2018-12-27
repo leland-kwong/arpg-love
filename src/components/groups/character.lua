@@ -42,8 +42,24 @@ msgBus.on(msgBus.CHARACTER_HIT, function(msg)
   return msg
 end, 1)
 
+
+local function showHealing(c, prop, previousProp, color)
+  local Math = require 'utils.math'
+  local propertyChange = c[prop] - (c[previousProp] or 0)
+  c[previousProp] = c[prop]
+  if propertyChange > 0 then
+    local popupText = Component.get('popupText')
+    popupText:new(Math.round(propertyChange), c.x, c.y - c.h, nil, color)
+  end
+end
+
+local frameCount = 0
 return function(dt)
-  for _,c in pairs(groups.character.getAll()) do
+  frameCount = frameCount + 1
+  local healingNumberFrequency = 15
+  local isShowHealingNumberFrame = (frameCount % healingNumberFrequency == 0)
+
+  for componentId,c in pairs(groups.character.getAll()) do
     if c.isDestroyed then
       local destroyCompleted = false
       if c.frozen then
@@ -89,6 +105,12 @@ return function(dt)
         Sound.playEffect('freeze_object.wav')
       end
       c.wasFrozen = c.frozen
+
+      if isShowHealingNumberFrame and c.showHealing then
+        local Color = require 'modules.color'
+        showHealing(c, 'health', 'previousHealth', Color.LIME)
+        showHealing(c, 'energy', 'previousEnergy', Color.DEEP_BLUE)
+      end
     end
   end
 end

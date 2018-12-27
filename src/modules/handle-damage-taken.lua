@@ -5,6 +5,7 @@ local Sound = require 'components.sound'
 local msgBus = require 'components.msg-bus'
 
 local popupText = PopupTextController.create({
+  id = 'popupText',
   font = require 'components.font'.secondary.font
 })
 local popupTextCritMultiplier = PopupTextController.create({

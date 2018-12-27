@@ -195,6 +195,7 @@ local Player = {
 
   health = 1,
   energy = 1,
+  showHealing = true,
   baseStats = function(self)
     self.__index = self
     return setmetatable({

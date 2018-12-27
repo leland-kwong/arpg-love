@@ -51,6 +51,8 @@ local function GroupMatcher(groupNames)
 
   -- checks if at least one value in groupA exists in groupB
   function Matcher.matches(groupA, groupB)
+    groupA = groupA or ''
+    groupB = groupB or ''
     local matches = groupA == groupB
 
     if matches then

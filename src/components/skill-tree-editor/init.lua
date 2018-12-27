@@ -180,6 +180,19 @@ local nodeValueOptions = {
     description = function(self)
       return '+'..(self.value.value * 100)..'% cooldown reduction'
     end
+  },
+  [15] = {
+    name = 'kinetic energy',
+    type = 'keystone',
+    value = {
+      type = 'energySteal',
+      value = 0.1,
+    },
+    image = 'gui-skill-tree_node_energy-steal',
+    backgroundImage = 'gui-skill-tree_node_background',
+    description = function(self)
+      return (self.value.value * 100)..'% of damage you deal is restored as energy'
+    end
   }
 }
 

@@ -80,6 +80,7 @@ function HealSource.add(self, healSource)
 	local healCo = coroutine.create(healRoutine)
 	-- kick things off
 	coroutine.resume(healCo, healSource, tickRate)
+	assert(healSource.source ~= nil, '[heal-source] source must be provided')
 	-- replace the current source with a new source
 	self.healSources[healSource.source] = healCo
 end

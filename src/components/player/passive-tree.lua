@@ -9,6 +9,7 @@ local fs = require 'modules.file-system'
 
 local onHitModifiers = {}
 local updateModifiers = {}
+local onDamageReceivedModifiers = {}
 local stateByNodeId = {
   get = function(self, nodeId)
     local state = self[nodeId]
@@ -53,6 +54,13 @@ msgBus.on(msgBus.PLAYER_UPDATE_START, function(dt)
     handler(dt)
   end
 end)
+
+msgBus.on(msgBus.DAMAGE_RECEIVED, function(msg)
+  for _,handler in pairs(onDamageReceivedModifiers) do
+    handler(msg)
+  end
+  return msg
+end, 2)
 
 local modifierHandlers = {
   lightningRod = function(nodeId, data, modifiers)
@@ -155,6 +163,22 @@ local modifierHandlers = {
     local percentBonus = data.value.value
     local modFn = statModifiersByTypeAndValue:get(prop, percentBonus)
     return modifiers:add(prop, modFn)
+  end,
+  energySteal = function(nodeId, data)
+    onDamageReceivedModifiers[nodeId] = function(msg)
+      local collisionGroups = require 'modules.collision-groups'
+      local c = Component.get(msg.receiverId)
+      if collisionGroups.matches(c.class, 'enemyAi') then
+        local uid = require 'utils.uid'
+        msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
+          amount = data.value.value * msg.totalDamage,
+          source = uid(),
+          duration = 0.5,
+          property = 'energy',
+          maxProperty = 'maxEnergy'
+        })
+      end
+    end
   end
 }
 
@@ -171,6 +195,7 @@ end
 local calcModifiers = function(treeData)
   onHitModifiers = {}
   updateModifiers = {}
+  onDamageReceivedModifiers = {}
 
   local nodeData = SkillTreeEditor.parseTreeData(treeData)
   local modifiers = Component.get('PLAYER').stats

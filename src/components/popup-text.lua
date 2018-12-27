@@ -41,12 +41,12 @@ local function animationCo(duration, textWidth)
   subjectPool.release(subject)
 end
 
-function PopupTextBlueprint:new(text, x, y, duration)
+function PopupTextBlueprint:new(text, x, y, duration, color)
   duration = duration or 0.3
   local textWidth = GuiText.getTextSize(text, self.font)
   local animation = coroutine.wrap(animationCo)
   animation(duration, textWidth)
-  table.insert(self.textObjectsList, {text, x, y, animation, duration})
+  table.insert(self.textObjectsList, {text, x, y, animation, duration, color})
 end
 
 local outlineColor = {0,0,0,1}
@@ -64,7 +64,7 @@ function PopupTextBlueprint.update(self)
   local i = 1
   while i <= #self.textObjectsList do
     local obj = self.textObjectsList[i]
-    local text, x, y, animation, duration = obj[1], obj[2], obj[3], obj[4], obj[5]
+    local text, x, y, animation, duration, color = obj[1], obj[2], obj[3], obj[4], obj[5], obj[6]
     local offsetY, time, dx, dy, errors = animation(duration)
 
     local isComplete = offsetY == nil
@@ -72,7 +72,7 @@ function PopupTextBlueprint.update(self)
       table.remove(self.textObjectsList, i)
     else
       i = i + 1
-      self.textObj:add(text, x + (time * dx), y + offsetY + dy)
+      self.textObj:add({color or self.color, text}, x + (time * dx), y + offsetY + dy)
     end
   end
 end

@@ -3,6 +3,7 @@ local popupText = PopupTextController.create()
 local min, max, random = math.min, math.max, math.random
 local round = require 'utils.math'.round
 local Object = require 'utils.object-utils'
+local msgBus = require 'components.msg-bus'
 
 local function rollCritChance(chance)
   if chance == 0 then
@@ -64,6 +65,7 @@ local function applyModifiers(self, newModifiers, multiplier)
   end
 end
 
+msgBus.DAMAGE_RECEIVED = 'DAMAGE_RECEIVED'
 --[[
   handles hits taken for a character, managing damage and property modifiers
 
@@ -75,12 +77,19 @@ local function hitManager(_, self, dt, onDamageTaken)
   for hitId,hit in pairs(self.hitData) do
     hitCount = hitCount + 1
 
+    local actualDamage,
+      actualNonCritDamage,
+      actualCritMultiplier,
+      actualLightningDamage,
+      actualColdDamage = adjustedDamageTaken(self.stats, hit)
+    -- send DAMAGE_RECEIVED event
+    if (actualDamage > 0) then
+      msgBus.send(msgBus.DAMAGE_RECEIVED, {
+        receiverId = self:getId(),
+        totalDamage = actualDamage
+      })
+    end
     if onDamageTaken then
-      local actualDamage,
-        actualNonCritDamage,
-        actualCritMultiplier,
-        actualLightningDamage,
-        actualColdDamage = adjustedDamageTaken(self.stats, hit)
       onDamageTaken(
         self,
         actualDamage,
