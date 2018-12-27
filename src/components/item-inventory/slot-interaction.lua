@@ -36,13 +36,6 @@ end
 local itemPickedUp = nil
 local isDropModeFloor = false
 
--- msgBus.on(msgBus.INVENTORY_DROP_MODE_INVENTORY, function()
---   isDropModeFloor = false
--- end)
--- msgBus.on(msgBus.INVENTORY_DROP_MODE_FLOOR, function()
---   isDropModeFloor = true
--- end)
-
 msgBus.on(msgBus.UPDATE, function()
   local InputContext = require 'modules.input-context'
   isDropModeFloor = InputContext.contains('any')
@@ -296,8 +289,9 @@ local function setupSlotInteractions(
           self.tooltip = nil
         end
       end,
-      onClick = function(self, rightClick)
-        if rightClick then
+      onClick = function(self, event)
+        local isRightClick = event[3] == 2
+        if isRightClick then
           local item = getItem()
           local d = itemSystem.getDefinition(item)
           if d and onItemActivate then

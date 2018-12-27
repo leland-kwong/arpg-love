@@ -29,22 +29,6 @@ local function calcInventorySize(slots, slotSize, margin)
   return width, height
 end
 
-local function InteractArea(self)
-  return Gui.create({
-		x = self.x,
-		y = self.y,
-		w = self.w,
-    h = self.h,
-    inputContext = 'inventory',
-    onPointerMove = function()
-			msgBus.send(msgBus.INVENTORY_DROP_MODE_INVENTORY)
-		end,
-		onPointerLeave = function()
-			msgBus.send(msgBus.INVENTORY_DROP_MODE_FLOOR)
-		end
-	})
-end
-
 msgBus.on(msgBus.ALL, function(msg, msgType)
   local rootStore = require 'main.global-state'.gameState
 
@@ -93,8 +77,6 @@ function InventoryBlueprint.init(self)
   -- inventoryX = inventoryX - 100
   self.x = inventoryX + equipmentWidth + panelMargin + statsWidth + panelMargin
   self.y = 60
-
-  InteractArea(self):setParent(self)
 
   local function inventoryOnItemPickupFromSlot(x, y)
     msgBus.send(msgBus.INVENTORY_PICKUP)
@@ -160,7 +142,6 @@ function InventoryBlueprint.draw(self)
 end
 
 function InventoryBlueprint.final(self)
-  msgBus.send(msgBus.INVENTORY_DROP_MODE_FLOOR)
   MenuManager.pop()
 end
 

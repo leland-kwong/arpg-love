@@ -158,8 +158,7 @@ local function triggerEvents(c, msgValue, msgType)
 
   if msgBus.MOUSE_CLICKED == msgType then
     if self.hovered then
-      local isRightClick = msgValue[3] == 2
-      self.onClick(self, isRightClick)
+      self.onClick(self, msgValue)
 
       if guiType.TOGGLE == self.type then
         self.checked = not self.checked
