@@ -45,11 +45,11 @@ end, 1)
 
 local function showHealing(c, prop, previousProp, color)
   local Math = require 'utils.math'
-  local propertyChange = c[prop] - (c[previousProp] or 0)
+  local propertyChange = Math.round(c[prop] - (c[previousProp] or 0))
   c[previousProp] = c[prop]
   if propertyChange > 0 then
     local popupText = Component.get('popupText')
-    popupText:new(Math.round(propertyChange), c.x, c.y - c.h, nil, color)
+    popupText:new(propertyChange, c.x, c.y - c.h, nil, color)
   end
 end
 
