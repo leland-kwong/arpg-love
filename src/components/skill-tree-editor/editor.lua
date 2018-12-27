@@ -237,6 +237,84 @@ local function placeNode(root, nodeId, gridX, gridY, connections, nodeValue, sel
     inputContext = 'treeNode',
     scale = 1,
 
+    onClick = function(self, event)
+      local mode = root:getMode()
+      local _, _, button = unpack(event)
+      local nodeId = self:getId()
+
+      if ('CONNECTION_CREATE' == mode) then
+        local selection = state.selectedNode
+        clearSelections()
+
+        -- make connection between nodes
+        local shouldAddConnection = not not selection
+        if shouldAddConnection then
+          local selectedNodeData = root.nodes[selection]
+          local hoveredNodeData = root.nodes[state.hoveredNode]
+
+          local lineData = {} -- if more points are added, we define a bezier curve
+          root:setNode(state.hoveredNode, {
+            connections = Object.immutableApply(
+              hoveredNodeData.connections, {
+                [selection] = lineData
+              }
+            )
+          })
+          root:setNode(selection, {
+            connections = Object.immutableApply(
+              selectedNodeData.connections, {
+                [state.hoveredNode] = lineData
+              }
+            )
+          })
+          return
+        end
+      end
+
+      if ('NODE_SELECTION' == mode) and (button == 1) then
+        local node = root.nodes[nodeId]
+
+        if (editorModes.PLAY_UNSELECT_ONLY == state.editorMode) then
+          if (node.selected) then
+            Sound.playEffect(sounds.NODE_UNSELECT)
+            root:setNode(nodeId, {
+              selected = false
+            })
+          end
+        elseif (editorModes.PLAY == state.editorMode) then
+          local isNotSelectable = (
+              (not node.selected)
+              and (not playMode:isNodeSelectable(node, root.nodes, root.nodeValueOptions))
+            ) or
+            (
+              node.selected
+              and (not playMode:isNodeUnselectable(node, root.nodes, nodeId))
+            )
+          if (isNotSelectable) then
+            msgBus.send(msgBus.PLAYER_ACTION_ERROR, 'previous node must be selected first')
+            return
+          end
+          local isSelected = not node.selected
+          if isSelected then
+            Sound.playEffect(sounds.NODE_SELECT)
+          else
+            Sound.playEffect(sounds.NODE_UNSELECT)
+          end
+          root:setNode(nodeId, {
+            selected = isSelected
+          })
+          return
+        end
+
+        local alreadySelected = state.selectedNode == nodeId
+        if alreadySelected then
+          state.selectedNode = nil
+        else
+          state.selectedNode = nodeId
+        end
+      end
+    end,
+
     getMousePosition = function(self)
       local tx, ty = getTranslate()
       return love.mouse.getX() - tx,
@@ -345,10 +423,6 @@ function TreeEditor.handleInputs(self)
   local root = self
 
   local function handleZoom(ev)
-    if (not InputContext.contains('SkillTreeBackground')) then
-      return
-    end
-
     local dy = ev[2]
 
     local function changeScale(ds)
@@ -359,100 +433,36 @@ function TreeEditor.handleInputs(self)
     changeScale(dy)
   end
 
-  self.listeners = {
-    msgBus.on(msgBus.MOUSE_WHEEL_MOVED, handleZoom),
-    msgBus.on(msgBus.MOUSE_CLICKED, function(event)
-      local mode = self:getMode()
-      local _, _, button = unpack(event)
-
-      if ('CLEAR_SELECTIONS' == mode) then
-        return clearSelections()
-      end
-
-      if ('CONNECTION_CREATE' == mode) then
-        local selection = state.selectedNode
-        clearSelections()
-
-        -- make connection between nodes
-        local shouldAddConnection = not not selection
-        if shouldAddConnection then
-          local selectedNodeData = root.nodes[selection]
-          local hoveredNodeData = root.nodes[state.hoveredNode]
-
-          local lineData = {} -- if more points are added, we define a bezier curve
-          self:setNode(state.hoveredNode, {
-            connections = Object.immutableApply(
-              hoveredNodeData.connections, {
-                [selection] = lineData
-              }
-            )
-          })
-          self:setNode(selection, {
-            connections = Object.immutableApply(
-              selectedNodeData.connections, {
-                [state.hoveredNode] = lineData
-              }
-            )
-          })
-          return
-        end
-      end
-
+  local Gui = require 'components.gui.gui'
+  Gui.create({
+    id = 'skill-tree',
+    width = love.graphics.getWidth(),
+    height = love.graphics.getHeight(),
+    onClick = function(_, event)
+      local mode = root:getMode()
+      local button = select(3, unpack(event))
       if ('NODE_CREATE' == mode) and (button == 1) then
         local snapX, snapY = snapToGrid(state.mx - cellSize/2, state.my - cellSize/2)
         placeNode(root, nil, snapX/cellSize, snapY/cellSize, nil, nil, nil, cellSize)
       end
 
-      if ('NODE_SELECTION' == mode) and (button == 1) then
-        local nodeId = state.hoveredNode
-        local node = root.nodes[nodeId]
-
-        if (editorModes.PLAY_UNSELECT_ONLY == state.editorMode) then
-          if (node.selected) then
-            Sound.playEffect(sounds.NODE_UNSELECT)
-            self:setNode(nodeId, {
-              selected = false
-            })
-          end
-        elseif (editorModes.PLAY == state.editorMode) then
-          local isNotSelectable = (
-              (not node.selected)
-              and (not playMode:isNodeSelectable(node, self.nodes, self.nodeValueOptions))
-            ) or
-            (
-              node.selected
-              and (not playMode:isNodeUnselectable(node, self.nodes, nodeId))
-            )
-          if (isNotSelectable) then
-            msgBus.send(msgBus.PLAYER_ACTION_ERROR, 'previous node must be selected first')
-            return
-          end
-          local isSelected = not node.selected
-          if isSelected then
-            Sound.playEffect(sounds.NODE_SELECT)
-          else
-            Sound.playEffect(sounds.NODE_UNSELECT)
-          end
-          self:setNode(nodeId, {
-            selected = isSelected
-          })
-          return
-        end
-
-        local alreadySelected = state.selectedNode == nodeId
-        if alreadySelected then
-          state.selectedNode = nil
-        else
-          state.selectedNode = nodeId
-        end
+      if ('CLEAR_SELECTIONS' == mode) then
+        return clearSelections()
       end
 
       if ('CONNECTION_SELECTION' == mode) and (button == 1) then
         clearSelections()
         state.selectedConnection = state.hoveredConnection
       end
-    end),
+    end
+  }):setParent(self)
 
+  self.listeners = {
+    msgBus.on(msgBus.MOUSE_WHEEL_MOVED, function(ev)
+      if InputContext.contains('skill-tree treeNode') then
+        handleZoom(ev)
+      end
+    end),
     msgBus.on(msgBus.MOUSE_DRAG, function(event)
       if 'NODE_MOVE' == self:getMode() then
         state.movingNode = state.movingNode or state.hoveredNode
@@ -533,6 +543,7 @@ function TreeEditor.panTo(self, x, y)
 end
 
 function TreeEditor.init(self)
+  self:handleInputs()
   self:panTo()
 
   -- load default state
@@ -557,8 +568,6 @@ function TreeEditor.init(self)
   love.mouse.setCursor()
 
   Component.addToGroup(self, 'gui')
-
-  self:handleInputs()
 end
 
 function TreeEditor.handleConnectionInteractions(self)
