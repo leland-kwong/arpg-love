@@ -64,6 +64,7 @@ local Gui = {
   onPointerLeave = noop,
   onUpdate = noop,
   onPointerMove = noop,
+  onWheel = noop,
   onFinal = noop,
   collision = true,
   collisionGroup = nil,
@@ -148,11 +149,11 @@ end
 local function triggerEvents(c, msgValue, msgType)
   local self = c
 
-  if guiType.LIST == self.type and
-    msgBus.MOUSE_WHEEL_MOVED == msgType and
-    self.hovered
-  then
-    handleScroll(self, msgValue[1], msgValue[2])
+  if msgBus.MOUSE_WHEEL_MOVED == msgType and self.hovered then
+    self.onWheel(self, msgValue)
+    if guiType.LIST == self.type then
+      handleScroll(self, msgValue[1], msgValue[2])
+    end
   end
 
   if msgBus.MOUSE_CLICKED == msgType then
@@ -192,7 +193,7 @@ end
 
 local function handleHoverEvents(self)
   if self.eventsDisabled then
-    return
+    return false
   end
 
   local mx, my = self:getMousePosition()
@@ -218,6 +219,8 @@ local function handleHoverEvents(self)
       self.onPointerLeave(self)
     end
   end
+
+  return self.hovered
 end
 
 local eventTypesFilter = {
@@ -226,7 +229,7 @@ local eventTypesFilter = {
   [msgBus.MOUSE_PRESSED] = true,
   [msgBus.GUI_TEXT_INPUT] = true,
   [msgBus.KEY_DOWN] = true,
-  [msgBus.UPDATE] = true
+  [msgBus.UPDATE] = true,
 }
 
 Component.create({
@@ -235,7 +238,8 @@ Component.create({
 
     self.listeners = {
       msgBus.on('*', function(msgValue, msgType)
-        if (not eventTypesFilter[msgType]) then
+        local isInputEvent = eventTypesFilter[msgType]
+        if (not isInputEvent) then
           return msgValue
         end
 
@@ -263,8 +267,10 @@ Component.create({
             ) and
             (not c.eventsDisabled)
           then
-            handleHoverEvents(c)
-            triggerEvents(c, msgValue, msgType)
+            local hovered = handleHoverEvents(c)
+            if hovered then
+              triggerEvents(c, msgValue, msgType)
+            end
           end
           c.prevHovered = c.hovered
         end
