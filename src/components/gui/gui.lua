@@ -258,7 +258,7 @@ Component.create({
             (not c.eventsDisabled)
           then
             local hovered = handleHoverEvents(c)
-            if hovered then
+            if hovered or c.focused then
               triggerEvents(c, msgValue, msgType)
             end
           end
