@@ -181,9 +181,6 @@ local playMode = {
   ]]
   isNodeUnselectable = function(self, nodeToCheck, nodeList, nodeToCheckId)
     local F = require 'utils.functional'
-    local numSelectedSiblingNodes = 0
-    local numSiblings = #F.keys(nodeToCheck.connections)
-    local numSiblingsWithConnectionsToAnotherSibling = 0
 
     local function getMatchCount(fromNodeId, connectionsToMatch, visitedList)
       visitedList = visitedList or {}
@@ -211,8 +208,10 @@ local playMode = {
     local numSelectedSiblings = #selectedSiblings
     local nodeIdToWalk = selectedSiblings[1]
     debugState.firstCheckedNode = nodeIdToWalk
+    -- traverse a sibling's branch and get a number of all the selected nodes that match the list of siblings
     local matchCount = getMatchCount(nodeIdToWalk, nodeToCheck.connections)
     local isOnlyChild = numSelectedSiblings == 1
+    print(numSelectedSiblings, matchCount)
     return isOnlyChild or numSelectedSiblings == matchCount
   end,
   isConnectionToSelectableNode = function(self, fromNode, toNode)
