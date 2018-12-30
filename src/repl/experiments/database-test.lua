@@ -159,7 +159,7 @@ Component.create({
     self.angle = self.angle + dt * 4
     self.clock = self.clock + 1
 
-    local db = Db.load('db-perf')
+    local db = Db.load('db-ref')
     db:put('metadata', {
       timestamp = os.clock(),
       bigData = self.bigData
@@ -171,9 +171,10 @@ Component.create({
     love.graphics.origin()
     love.graphics.translate(400, 100)
 
-    local db = Db.load('db-perf')
+    local db = Db.load('db-ref')
     local metadata = db:get('metadata') or {}
     love.graphics.print(metadata.timestamp or '', 0, 100)
+    love.graphics.print(db.changeCount, 0, 130)
 
     love.graphics.rotate(self.angle)
     love.graphics.setColor(1,1,0)

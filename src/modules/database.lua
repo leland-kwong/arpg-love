@@ -77,6 +77,7 @@ local dbMt = {
       :next(function(results)
         self.data[key] = value
         self.index[key] = true
+        self:_incrementChangeCount()
         return results
       end)
   end,
@@ -89,6 +90,7 @@ local dbMt = {
       :next(function(results)
         self.data[key] = nil
         self.index[key] = nil
+        self:_incrementChangeCount()
         return results
       end)
   end,
@@ -138,6 +140,10 @@ local dbMt = {
     end, function(err)
       print('[db destroy error]', err)
     end)
+  end,
+
+  _incrementChangeCount = function(self)
+    self.changeCount = self.changeCount + 1
   end,
 
   _saveDataToDisk = function(self, key, value)
@@ -190,11 +196,12 @@ local function createDbDirectory(directory)
 end
 
 function Db.load(directory)
-  local db = loadedDatabases[directory]
-  if (not db) then
+  local dbRef = loadedDatabases[directory]
+  if (not dbRef) then
     createDbDirectory(directory)
   end
-  db = db or setmetatable({
+  dbRef = dbRef or setmetatable({
+    changeCount = 0,
     loaded = true,
     -- hash table of the data stored where the key is the name of the file, and the value is the file's contents
     data = {},
@@ -214,9 +221,9 @@ function Db.load(directory)
       return splitString(str, '/')
     end
   }, dbMt)
+  loadedDatabases[directory] = dbRef
 
-  loadedDatabases[directory] = db
-  return db
+  return dbRef
 end
 
 return Db
