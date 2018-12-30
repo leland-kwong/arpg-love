@@ -1,13 +1,32 @@
-local msgBus = require 'components.msg-bus'
+local Component = require 'modules.component'
 local Promise = require 'utils.promise'
+
+local pendingPromises = {}
+local function flushPromises()
+  for promiseId,cb in pairs(pendingPromises) do
+    local done = cb()
+    if done then
+      pendingPromises[promiseId] = nil
+    end
+  end
+end
+Component.create({
+  id = 'observable-init',
+  init = function(self)
+    Component.addToGroup(self, 'firstLayer')
+  end,
+  update = flushPromises
+})
 
 local Observable = {}
 local mt = {}
+local promiseId = 0
 mt.__index = mt
 
 function mt.__call(self, fn)
   local d = Promise.new()
-  local listener = msgBus.on(msgBus.UPDATE, function()
+  promiseId = promiseId + 1
+  pendingPromises[promiseId] = function()
     local done, successValue, errors = fn(d)
     if done then
       if errors then
@@ -15,9 +34,9 @@ function mt.__call(self, fn)
       else
         d:resolve(successValue)
       end
-      return msgBus.CLEANUP
     end
-  end)
+    return done
+  end
   return d
 end
 

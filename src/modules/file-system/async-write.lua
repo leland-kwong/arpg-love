@@ -35,11 +35,12 @@ local actionHandlers = {
 local function observeThread()
   local message = love.thread.getChannel('DISK_IO'):demand()
   message = bitser.loads(message)
-  local handler = actionHandlers[message.action]
+  local action, payload, data = message[1], message[2], message[3]
+  local handler = actionHandlers[action]
   if (not handler) then
-    error('invalid action '..message.action)
+    error('invalid action '..action)
   end
-  handler(unpack(message.payload))
+  handler(payload, data)
   observeThread()
 end
 observeThread()

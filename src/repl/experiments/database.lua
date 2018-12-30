@@ -1,5 +1,4 @@
-local dynamicRequire = require 'utils.dynamic-require'
-local Observable = dynamicRequire 'modules.observable'
+local Observable = require 'modules.observable'
 local F = require 'utils.functional'
 local bitser = require 'modules.bitser'
 
@@ -22,11 +21,9 @@ local function diskIo(self, action, file, data)
   local fullPath = self.directory..'/'..file
   local serialized = data and bitser.dumps(data) or nil
   local message = bitser.dumps({
-    action = action,
-    payload = {
-      fullPath,
-      serialized
-    }
+    action,
+    fullPath,
+    serialized,
   })
   love.thread.getChannel('DISK_IO')
     :push(message)
@@ -52,6 +49,18 @@ local loadedDatabases = {}
 
 local defaultKeyFilter = function()
   return true
+end
+
+local function handleSaveAsync()
+  local errorMsg = love.thread.getChannel('saveStateError'):pop()
+  if errorMsg then
+    return true, nil, errorMsg
+  end
+
+  local success = love.thread.getChannel('saveStateSuccess'):pop()
+  if success then
+    return true, true
+  end
 end
 
 local dbMt = {
@@ -133,18 +142,7 @@ local dbMt = {
 
   _saveDataToDisk = function(self, key, value)
     diskIo(self, 'SAVE_STATE', key, value)
-
-    return Observable(function()
-      local errorMsg = love.thread.getChannel('saveStateError'):pop()
-      if errorMsg then
-        return true, nil, errorMsg
-      end
-
-      local success = love.thread.getChannel('saveStateSuccess'):pop()
-      if success then
-        return true, true
-      end
-    end)
+    return Observable(handleSaveAsync)
   end,
 
   _deleteDataFromDisk = function(self, key)

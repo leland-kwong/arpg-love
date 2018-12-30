@@ -1,6 +1,6 @@
 local dynamicRequire = require 'utils.dynamic-require'
 local Db = dynamicRequire 'repl.experiments.database'
-local Observable = dynamicRequire 'modules.observable'
+local Observable = require 'modules.observable'
 
 local function testSuite(description, testFn)
   print('[test] ' .. description)
@@ -149,26 +149,31 @@ Component.create({
   init = function(self)
     Component.addToGroup(self, 'all')
     self.clock = 0
+
+    self.bigData = {}
+    for i=1, 550 do
+      self.bigData[i .. 'a'] = math.random() .. math.random()
+    end
   end,
   update = function(self, dt)
     self.angle = self.angle + dt * 4
     self.clock = self.clock + 1
 
     local db = Db.load('db-perf')
-    -- db:put('foo', math.random())
     db:put('metadata', {
-      timestamp = os.clock()
+      timestamp = os.clock(),
+      bigData = self.bigData
     })
   end,
   draw = function(self)
     love.graphics.clear()
     love.graphics.push()
     love.graphics.origin()
-    love.graphics.translate(350, 100)
+    love.graphics.translate(400, 100)
 
     local db = Db.load('db-perf')
-    local text = db:get('foo') or ''
-    love.graphics.print(text, 0, 100)
+    local metadata = db:get('metadata') or {}
+    love.graphics.print(metadata.timestamp or '', 0, 100)
 
     love.graphics.rotate(self.angle)
     love.graphics.setColor(1,1,0)
