@@ -1,35 +1,24 @@
 local bitser = require 'modules.bitser'
 local path = require 'modules.file-system.path'
 
-function saveFile(rootPath, saveId, data, metadata)
+function saveFile(file, data)
   local _, errors = pcall(function()
-    local saveFolder = path.getSaveDirectory(rootPath, saveId)
-    local folderExists = love.filesystem.getInfo(saveFolder)
-    if (not folderExists) then
-      love.filesystem.createDirectory(saveFolder)
-    end
-    bitser.dumpLoveFile(path.getMetadataPath(rootPath, saveId), metadata)
     bitser.dumpLoveFile(
-      path.getSavedStatePath(rootPath, saveId),
+      file,
       data
     )
   end)
   if errors then
     love.thread.getChannel('saveStateError'):push(errors)
+    return errors
   else
     love.thread.getChannel('saveStateSuccess'):push(true)
   end
 end
 
-function deleteSaveFile(rootPath, saveId)
+function deleteFile(file)
   local ok, errors = pcall(function()
-    local removeFile = require 'modules.file-system.remove-file'
-    removeFile(
-      path.getSaveDirectory(rootPath, saveId)
-    )
-    local success = not love.filesystem.getInfo(
-      path.getSaveDirectory(rootPath, saveId)
-    )
+    return love.filesystem.remove(file)
   end)
   if (not ok) then
     love.thread.getChannel('saveStateDeleteError'):push(errors)
@@ -40,7 +29,7 @@ end
 
 local actionHandlers = {
   SAVE_STATE = saveFile,
-  SAVE_STATE_DELETE = deleteSaveFile
+  SAVE_STATE_DELETE = deleteFile
 }
 
 local function observeThread()

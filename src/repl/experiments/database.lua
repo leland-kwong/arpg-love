@@ -1,8 +1,35 @@
 local dynamicRequire = require 'utils.dynamic-require'
-local fs = dynamicRequire 'modules.file-system'
 local Observable = dynamicRequire 'modules.observable'
 local F = require 'utils.functional'
 local bitser = require 'modules.bitser'
+
+local Component = require 'modules.component'
+Component.create({
+  id = 'database-init',
+  init = function(self)
+    -- start async write thread
+    local source = love.filesystem.read('modules/file-system/async-write.lua')
+    self.thread = love.thread.newThread(source)
+    self.thread:start()
+  end,
+
+  final = function(self)
+    self.thread:release()
+  end
+})
+
+local function diskIo(self, action, file, data)
+  local fullPath = self.directory..'/'..file
+  local message = bitser.dumps({
+    action = action,
+    payload = {
+      fullPath,
+      data and bitser.dumps(data) or nil
+    }
+  })
+  love.thread.getChannel('DISK_IO')
+    :push(message)
+end
 
 -- split a string
 function splitString(str, delimiter)
@@ -37,9 +64,10 @@ local dbMt = {
     assert(value ~= nil, '[put error] a value must be provided')
 
     return self:_saveDataToDisk(key, value)
-      :next(function()
+      :next(function(results)
         self.data[key] = value
         self.index[key] = true
+        return results
       end)
   end,
 
@@ -48,9 +76,10 @@ local dbMt = {
     assert(key ~= nil, '[delete error] a key must be provided')
 
     return self:_deleteDataFromDisk(key)
-      :next(function()
+      :next(function(results)
         self.data[key] = nil
         self.index[key] = nil
+        return results
       end)
   end,
 
@@ -102,24 +131,34 @@ local dbMt = {
   end,
 
   _saveDataToDisk = function(self, key, value)
+    diskIo(self, 'SAVE_STATE', key, value)
+
     return Observable(function()
-      local ok, result = pcall(function()
-        local path = self.directory..'/'..key
-        bitser.dumpLoveFile(path, value)
-      end)
-      return true, ok, result
+      local errorMsg = love.thread.getChannel('saveStateError'):pop()
+      if errorMsg then
+        return true, nil, errorMsg
+      end
+
+      local success = love.thread.getChannel('saveStateSuccess'):pop()
+      if success then
+        return true, true
+      end
     end)
   end,
 
   _deleteDataFromDisk = function(self, key)
-    return Observable(function()
-      local ok, result = pcall(function()
-        local path = self.directory..'/'..key
-        return love.filesystem.remove(path)
-      end)
+    diskIo(self, 'SAVE_STATE_DELETE', key)
 
-      local err = (not ok) and 'error deleting file '..key or nil
-      return true, ok, err
+    return Observable(function()
+      local errorMsg = love.thread.getChannel('saveStateDeleteError'):pop()
+      if errorMsg then
+        return true, nil, errorMsg
+      end
+
+      local success = love.thread.getChannel('saveStateDeleteSuccess'):pop()
+      if success then
+        return true, true
+      end
     end)
   end,
 
@@ -179,132 +218,4 @@ function Db.load(directory)
   return db
 end
 
-local function testSuite(description, testFn)
-  print('[test] ' .. description)
-  testFn()
-end
-
-testSuite(
-  'read iterator',
-  function()
-    local db = Db.load('iterator-test')
-    local puts = {}
-
-    local function tableEqual(t1, t2)
-      for k,v in pairs(t1) do
-        if (t2[k] ~= v) then
-          return false
-        end
-      end
-      return true
-    end
-
-    local data = {
-      ['gameId_data'] = math.random(),
-      ['gameId_metadata'] = math.random(),
-      ['gameId_skill-tree-data'] = math.random(),
-      ['gameId2_skill-tree-data'] = math.random()
-    }
-    for k,v in pairs(data) do
-      table.insert(puts, db:put(k, v))
-    end
-
-    Observable.all(puts)
-      :next(function()
-        local iter = db:readIterator()
-        local savedData = {}
-        for key,value in iter do
-          savedData[key] = value
-        end
-        assert(tableEqual(data, savedData), 'iterator read incorrect')
-
-        db:destroy()
-      end, function(err)
-        print(err)
-      end)
-      :next(nil, function(err)
-        print(err)
-      end)
-  end
-)
-
-testSuite(
-  'file save',
-  function()
-    local db = Db.load('file-save-test')
-    local key,value = 'foo', 'bar'
-    db:put(key, value)
-      :next(function()
-        local result = db:get(key)
-        if (result ~= value) then
-          print('put error')
-        end
-        db:destroy()
-      end, function(err)
-        print(err)
-      end)
-  end
-)
-
-testSuite(
-  'file delete',
-  function()
-    local db = Db.load('file-delete-test')
-    local key, value = 'foo', 'bar'
-    db:put(key, value):next(function()
-      db:delete(key)
-        :next(function()
-          if (db:get(key)) then
-            print('delete did not remove the file')
-          end
-          db:destroy()
-        end)
-    end, function(err)
-      print(err)
-    end)
-  end
-)
-
-testSuite(
-  'database operations are scoped to directory',
-  function()
-    local db1 = Db.load('db-scope-1')
-    local db2 = Db.load('db-scope-2')
-    local key = 'foo'
-    Observable.all({
-      db1:put(key, 'foo1'),
-      db2:put(key, 'foo2')
-    }):next(function()
-      local save1, save2 = db1:get(key), db2:get(key)
-      local success = save1 and save2 and save1 ~= save2
-      if (not success) then
-        print('[ERROR] db operations are not scoped properly')
-      end
-      db1:destroy()
-      db2:destroy()
-    end, function(err)
-      print('scope error')
-    end)
-  end
-)
-
-testSuite(
-  'destroy database',
-  function()
-    local db = Db.load('db-destroy-test')
-    db:put('foo', 'bar')
-      :next(function()
-        db:destroy():next(function()
-          local folderExists = love.filesystem.getInfo(db.directory)
-          assert(not folderExists, 'directory should be destroyed')
-        end, function(err)
-          print(err)
-        end)
-        :next(nil, function(err)
-          print(err)
-        end)
-      end, function(err)
-        print(err)
-      end)
-  end
-)
+return Db
