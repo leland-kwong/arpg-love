@@ -1,7 +1,13 @@
 local Component = require 'modules.component'
 local Promise = require 'utils.promise'
 
-local pendingPromises = {}
+--[[
+  storing this as a global so when we use `dynamicRequire` for liveReloading,
+  the list is shared across contexts
+]]
+globalPendingPromises = globalPendingPromises or {}
+local pendingPromises = globalPendingPromises
+
 local function flushPromises()
   for promiseId,cb in pairs(pendingPromises) do
     local done = cb()
