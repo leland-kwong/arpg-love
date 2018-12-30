@@ -13,8 +13,8 @@ end
 function M.set(setterFn)
   userSettings = setterFn(userSettings)
   updateDevMode()
-  local fs = require 'modules.file-system'
-  return fs.saveFile('', 'settings', userSettings)
+  local Db = require 'modules.database'
+  return Db.load(''):put('settings', userSettings)
     :next(function()
       print('settings saved!')
     end, function(err)
@@ -23,9 +23,9 @@ function M.set(setterFn)
 end
 
 function M.load()
-  local fs = require 'modules.file-system'
-  local loadedSettings, ok = fs.loadSaveFile('', 'settings')
-  if ok then
+  local Db = require 'modules.database'
+  local loadedSettings, err = Db.load(''):get('settings')
+  if (not err) then
     Object.assign(userSettings, loadedSettings, nil, nil, true)
   end
   updateDevMode()

@@ -7,7 +7,7 @@ local MenuList = require 'components.menu-list'
 local msgBus = require 'components.msg-bus'
 local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local Enum = require 'utils.enum'
-local fileSystem = require 'modules.file-system'
+local Db = require 'modules.database'
 local HomeBase = require 'scene.home-base'
 local Color = require 'modules.color'
 local f = require 'utils.functional'
@@ -142,12 +142,18 @@ local function DeleteGameButton(parent, anchorEntity)
 end
 
 local function getMenuOptions(parent)
-  local files = fileSystem.listSavedFiles('saved-states')
-  local isNewFiles = files ~= parent.previousFiles
+  local db = Db.load('saved-states')
+  local hasChanges = db.changeCount ~= parent.previousChangeCount
   if (isNewFiles) then
-    parent.previousFiles = files
-    parent.previousFilesForDisplay = f.map(files, function(fileData)
-      local meta = fileData.metadata
+    parent.previousChangeCount = db.changeCount
+    local fileIter = db:keyIterator()
+    local files = {}
+    for k in fileIter do
+      table.insert(files, k)
+    end
+    parent.previousFilesForDisplay = f.map(files, function(file)
+      local data = db:get(file)
+      local meta = data.metadata
       local dateObject = os.date('*t', meta.lastSaved)
       local extract = require 'utils.object-utils.extract'
       local month, day, year = extract(dateObject, 'month', 'day', 'year')
@@ -167,14 +173,14 @@ local function getMenuOptions(parent)
               :next(nil, function(err)
                 print(err)
               end)
-            fileSystem.deleteFile('saved-states', fileData.id)
+            Db.load('saved-states'):delete(file)
               :next(nil, function(err)
                 print(err)
               end)
           -- load game
           else
             local CreateStore = require 'components.state.state'
-            local loadedState = fileSystem.loadSaveFile('saved-states', fileData.id)
+            local loadedState = Db.load('saved-states'):get(file).data
             msgBus.send(
               msgBus.NEW_GAME,
               {
