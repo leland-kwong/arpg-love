@@ -2,6 +2,15 @@ local dynamicRequire = require 'utils.dynamic-require'
 local Db = dynamicRequire 'modules.database'
 local Observable = dynamicRequire 'modules.observable'
 
+local function tableEqual(t1, t2)
+  for k,v in pairs(t1) do
+    if (t2[k] ~= v) then
+      return false
+    end
+  end
+  return true
+end
+
 local function testSuite(description, testFn)
   print('[test] ' .. description)
   testFn()
@@ -51,15 +60,6 @@ testSuite(
   function()
     local db = Db.load('iterator-test')
     local puts = {}
-
-    local function tableEqual(t1, t2)
-      for k,v in pairs(t1) do
-        if (t2[k] ~= v) then
-          return false
-        end
-      end
-      return true
-    end
 
     local data = {
       ['gameId_data'] = math.random(),
@@ -162,6 +162,34 @@ testSuite(
       end)
   end
 )
+
+testSuite('list databases', function()
+  local rootDb = Db.load('list-test')
+  local dbPaths = {
+    ['list-test/db-1'] = true,
+    ['list-test/db-2'] = true
+  }
+  for path in pairs(dbPaths) do
+    Db.load(path)
+  end
+
+  local function handleError(err)
+    print('[db list test error]', err)
+  end
+  rootDb:put('foo', 'bar')
+    :next(function()
+      local dbListIterator = Db.databaseListIterator('list-test')
+      local dbList = {}
+      for dbPath in dbListIterator do
+        dbList[dbPath] = true
+      end
+      assert(
+        tableEqual(dbPaths, dbList),
+        'incorrect db list'
+      )
+    end, handleError)
+    :next(nil, handleError)
+end)
 
 -- local Component = require 'modules.component'
 -- Component.create({

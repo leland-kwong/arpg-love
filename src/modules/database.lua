@@ -32,6 +32,21 @@ local function diskIo(self, action, file, data)
     :push(message)
 end
 
+local defaultFilter = function()
+  return true
+end
+
+--[[ filter(pattern or function) ]]
+local function createFilter(filter)
+  if (type(filter) == 'string') then
+    local pattern = string.gsub(filter, '%-', '%%-')
+    return function(str)
+      return string.find(str, pattern) ~= nil
+    end
+  end
+  return filter or defaultFilter
+end
+
 -- split a string
 function splitString(str, delimiter)
   local result = { }
@@ -44,10 +59,6 @@ function splitString(str, delimiter)
   end
   table.insert( result, string.sub( str, from  ) )
   return result
-end
-
-local defaultKeyFilter = function()
-  return true
 end
 
 local function handleSaveAsync()
@@ -95,13 +106,7 @@ local dbMt = {
   end,
 
   readIterator = function(self, filter, includeData)
-    if (type(filter) == 'string') then
-      local pattern = string.gsub(filter, '%-', '%%-')
-      filter = function(str)
-        return string.find(str, pattern) ~= nil
-      end
-    end
-    filter = filter or defaultKeyFilter
+    filter = createFilter(filter)
 
     if (includeData == nil) then
       includeData = true
@@ -229,6 +234,24 @@ function Db.load(directory)
   loadedDatabases[directory] = dbRef
 
   return dbRef
+end
+
+-- lists all databases for a given directory
+function Db.databaseListIterator(directory, filter)
+  local items = love.filesystem.getDirectoryItems(directory)
+  filter = createFilter(filter)
+
+  return coroutine.wrap(function()
+    for i=1, #items do
+      local item = items[i]
+      local fullPath = directory..'/'..item
+      local info = love.filesystem.getInfo(fullPath)
+      local isDir = info and (info.type == 'directory')
+      if isDir and filter(item) then
+        coroutine.yield(fullPath)
+      end
+    end
+  end)
 end
 
 return Db
