@@ -1,5 +1,4 @@
 local Component = require 'modules.component'
-local fileSystem = require 'modules.file-system'
 local Color = require 'modules.color'
 local Gui = require 'components.gui.gui'
 local GuiTextInput = require 'components.gui.gui-text-input'

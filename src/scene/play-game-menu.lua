@@ -144,8 +144,8 @@ end
 local function getMenuOptions(parent)
   local db = Db.load('saved-states')
   local hasChanges = db.changeCount ~= parent.previousChangeCount
-  if (isNewFiles) then
-    parent.previousChangeCount = db.changeCount
+  parent.previousChangeCount = db.changeCount
+  if (hasChanges) then
     local fileIter = db:keyIterator()
     local files = {}
     for k in fileIter do
@@ -169,7 +169,7 @@ local function getMenuOptions(parent)
         value = function()
           if parent.state.menuMode == menuModes.DELETE_GAME then
             local PassiveTree = require 'components.player.passive-tree'
-            PassiveTree.deleteState(fileData.id)
+            PassiveTree.deleteState(file)
               :next(nil, function(err)
                 print(err)
               end)
@@ -195,7 +195,7 @@ local function getMenuOptions(parent)
       }
     end)
   end
-  return parent.previousFilesForDisplay
+  return parent.previousFilesForDisplay or {}
 end
 
 function PlayGameMenu.init(self)

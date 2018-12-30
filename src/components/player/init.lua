@@ -82,7 +82,7 @@ end
 
 local function connectAutoSave(parent)
   local tick = require 'utils.tick'
-  local fileSystem = require 'modules.file-system'
+  local Db = require 'modules.database'
   local lastSavedState = nil
   if (not parent.autoSave) then
     return
@@ -94,13 +94,13 @@ local function connectAutoSave(parent)
     local state = rootState:get()
     local hasChanged = state ~= lastSavedState
     if hasChanged then
-      fileSystem.saveFile(
-        'saved-states',
-        rootState:getId(),
-        state,
-        {
-          displayName = state.characterName,
-          lastSaved = os.time(os.date("!*t"))
+      Db.load('saved-states'):put(
+        rootState:getId(), {
+          data = state,
+          metadata = {
+            displayName = state.characterName,
+            lastSaved = os.time(os.date("!*t"))
+          }
         }
       )
       lastSavedState = state

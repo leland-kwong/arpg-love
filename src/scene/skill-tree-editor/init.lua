@@ -53,7 +53,7 @@ msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
     Component.get('mainMenu'):delete(true)
 
     local Db = require 'modules.database'
-    local savedState, err = Db.load(''):get('skill-tree-test')
+    local savedState, err = Db.load('test/skill-tree-test'):get('data')
 
     msgBus.send(msgBus.SCENE_STACK_PUSH, {
       scene = SkillTreeEditor,
@@ -68,7 +68,7 @@ msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
           local success, message = f:write(serializedTreeAsString)
           f:close()
           if success then
-            Db.load(''):put('skill-tree-test', '')
+            Db.load('test/skill-tree-test'):put('data', '')
             msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
               title = '[SKILL TREE] state saved',
             })

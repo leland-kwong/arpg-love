@@ -1,5 +1,4 @@
 local bitser = require 'modules.bitser'
-local path = require 'modules.file-system.path'
 
 function saveFile(file, data)
   local _, errors = pcall(function()
