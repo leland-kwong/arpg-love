@@ -231,7 +231,10 @@ function Db.load(directory)
     index = F.reduce(
       love.filesystem.getDirectoryItems(directory),
       function(filesMap, file)
-        filesMap[file] = true
+        local info = love.filesystem.getInfo(file)
+        if info.type == 'directory' then
+          filesMap[file] = true
+        end
         return filesMap
       end,
       {}
