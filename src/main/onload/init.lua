@@ -7,8 +7,6 @@ if config.isDevelopment then
   require 'repl'
 end
 
-require 'modules.file-system'
-
 local Component = require 'modules.component'
 local drawOrders = require 'modules.draw-orders'
 local LightWorld = require('components.light-world')

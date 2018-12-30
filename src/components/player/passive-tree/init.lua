@@ -5,7 +5,7 @@ local MenuManager = require 'modules.menu-manager'
 local SkillTreeEditor = require 'components.skill-tree-editor'
 local msgBus = require 'components.msg-bus'
 local memoize = require 'utils.memoize'
-local fs = require 'modules.file-system'
+local Db = require 'modules.database'
 
 local onHitModifiers = {}
 local updateModifiers = {}
@@ -182,10 +182,10 @@ local PassiveTree = {}
 
 local rootDir = 'passive-tree-states'
 
-function PassiveTree.getState(saveDir)
-  local fs = require 'modules.file-system'
-  local result, ok = fs.loadSaveFile(rootDir, saveDir)
-  return ok and result or nil
+function PassiveTree.getState(file)
+  local Db = require 'modules.database'
+  local result = Db.load(rootDir):get(file)
+  return result
 end
 
 local calcModifiers = function(treeData)
@@ -222,8 +222,8 @@ end)
 
 function PassiveTree.getUnusedSkillPoints(treeData)
   local gameState = require 'main.global-state'.gameState
-  local saveDir = gameState:getId()
-  treeData = treeData or PassiveTree.getState(saveDir)
+  local file = gameState:getId()
+  treeData = treeData or PassiveTree.getState(file)
   local gameState = require 'main.global-state'.gameState
   -- start out with zero skill points at level 1
   local totalSkillPointsAvailable = gameState:get().level - 1
@@ -231,7 +231,7 @@ function PassiveTree.getUnusedSkillPoints(treeData)
 end
 
 function PassiveTree.deleteState(stateId)
-  return fs.deleteFile(rootDir, stateId)
+  return Db.load(rootDir):delete(stateId)
 end
 
 function PassiveTree.toggle()
@@ -241,8 +241,8 @@ function PassiveTree.toggle()
   end
 
   local gameState = require 'main.global-state'.gameState
-  local saveDir = gameState:getId()
-  local nodesFromSavedState = PassiveTree.getState(saveDir)
+  local file = gameState:getId()
+  local nodesFromSavedState = PassiveTree.getState(file)
   local editor = SkillTreeEditor.create({
     id = 'passiveSkillsTree',
     editorMode = 'PLAY_READ_ONLY',
@@ -261,7 +261,7 @@ function PassiveTree.toggle()
       self.editorMode = PassiveTree.getUnusedSkillPoints(serialized) > 0 and
         'PLAY' or
         'PLAY_UNSELECT_ONLY'
-      fs.saveFile(rootDir, saveDir, serialized)
+      Db.load(rootDir):put(file, serialized)
         :next(function()
           print('passive tree saved')
         end)
