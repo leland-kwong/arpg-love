@@ -1,5 +1,5 @@
 local dynamicRequire = require 'utils.dynamic-require'
-local Db = dynamicRequire 'repl.experiments.database'
+local Db = dynamicRequire 'modules.database'
 local Observable = dynamicRequire 'modules.observable'
 
 local function testSuite(description, testFn)
