@@ -34,9 +34,6 @@ local function defaultState()
 		totalExperience = 0,
 		enemyKillCount = 0,
 
-		--[[ static modifiers ]]
-		statModifiers = baseStatModifiers(),
-
 		inventory = require'utils.make-grid'(11, 9, EMPTY_SLOT),
 
 		--[[ equipped items ]]
