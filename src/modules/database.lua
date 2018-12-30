@@ -2,6 +2,9 @@ local Observable = require 'modules.observable'
 local F = require 'utils.functional'
 local bitser = require 'modules.bitser'
 
+local Db = {}
+local loadedDatabases = {}
+
 local Component = require 'modules.component'
 Component.create({
   id = 'database-init',
@@ -42,10 +45,6 @@ function splitString(str, delimiter)
   table.insert( result, string.sub( str, from  ) )
   return result
 end
-
-local Db = {}
-
-local loadedDatabases = {}
 
 local defaultKeyFilter = function()
   return true
@@ -130,6 +129,10 @@ local dbMt = {
     end
     return Observable.all(deletes):next(function()
       local ok, err = pcall(function()
+        local isRootDir = self.directory == ''
+        if isRootDir then
+          return true
+        end
         return love.filesystem.remove(self.directory)
       end)
       if (not ok) then
@@ -196,6 +199,8 @@ local function createDbDirectory(directory)
 end
 
 function Db.load(directory)
+  assert(directory, '[db load error] directory must be a string')
+
   local dbRef = loadedDatabases[directory]
   if (not dbRef) then
     createDbDirectory(directory)

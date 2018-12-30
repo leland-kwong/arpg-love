@@ -143,6 +143,24 @@ testSuite(
   end
 )
 
+testSuite(
+  'store file at root level (no folder)',
+  function()
+    local db = Db.load('')
+    local key, val = 'root-level-file', 'foo'
+    db:put(key, val)
+      :next(function()
+        assert(
+          db:get(key) == val,
+          '[db-root-level-error] root level file storage failed'
+        )
+        db:destroy()
+      end, function(err)
+        print('[db-root-level-error]', err)
+      end)
+  end
+)
+
 local Component = require 'modules.component'
 Component.create({
   id = 'database-perf-test',
