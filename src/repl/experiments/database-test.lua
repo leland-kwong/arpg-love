@@ -10,16 +10,18 @@ end
 testSuite(
   'file save',
   function()
-    local db = Db.load('file-save-test')
     local key,value = 'foo', 'bar'
-    db:put(key, value)
+
+    local db1 = Db.load('file-save-test')
+    db1:put(key, value)
       :next(function()
-        local result = db:get(key)
+        local result = db1:get(key)
         if (result ~= value) then
           print('put error')
         end
-        db:destroy()
-      end, function(err)
+        db1:destroy()
+      end,
+      function(err)
         print(err)
       end)
   end
@@ -154,51 +156,51 @@ testSuite(
           db:get(key) == val,
           '[db-root-level-error] root level file storage failed'
         )
-        db:destroy()
+        db:delete(key)
       end, function(err)
         print('[db-root-level-error]', err)
       end)
   end
 )
 
-local Component = require 'modules.component'
-Component.create({
-  id = 'database-perf-test',
-  init = function(self)
-    Component.addToGroup(self, 'all')
-    self.clock = 0
+-- local Component = require 'modules.component'
+-- Component.create({
+--   id = 'database-perf-test',
+--   init = function(self)
+--     Component.addToGroup(self, 'all')
+--     self.clock = 0
 
-    self.bigData = {}
-    for i=1, 550 do
-      self.bigData[i .. 'a'] = math.random() .. math.random()
-    end
-  end,
-  update = function(self, dt)
-    self.angle = self.angle + dt * 4
-    self.clock = self.clock + 1
+--     self.bigData = {}
+--     for i=1, 550 do
+--       self.bigData[i .. 'a'] = math.random() .. math.random()
+--     end
+--   end,
+--   update = function(self, dt)
+--     self.angle = self.angle + dt * 4
+--     self.clock = self.clock + 1
 
-    local db = Db.load('db-ref')
-    db:put('metadata', {
-      timestamp = os.clock(),
-      bigData = self.bigData
-    })
-  end,
-  draw = function(self)
-    love.graphics.clear()
-    love.graphics.push()
-    love.graphics.origin()
-    love.graphics.translate(400, 100)
+--     local db = Db.load('test/db-ref')
+--     db:put('metadata', {
+--       timestamp = os.clock(),
+--       bigData = self.bigData
+--     })
+--   end,
+--   draw = function(self)
+--     love.graphics.clear()
+--     love.graphics.push()
+--     love.graphics.origin()
+--     love.graphics.translate(400, 100)
 
-    local db = Db.load('db-ref')
-    local metadata = db:get('metadata') or {}
-    love.graphics.print(metadata.timestamp or '', 0, 100)
-    love.graphics.print(db.changeCount, 0, 130)
+--     local db = Db.load('test/db-ref')
+--     local metadata = db:get('metadata') or {}
+--     love.graphics.print(metadata.timestamp or '', 0, 100)
+--     love.graphics.print(db.changeCount, 0, 130)
 
-    love.graphics.rotate(self.angle)
-    love.graphics.setColor(1,1,0)
-    local size = 50
-    local offset = -size/2
-    love.graphics.rectangle('fill', offset, offset, size, size)
-    love.graphics.pop()
-  end
-})
+--     love.graphics.rotate(self.angle)
+--     love.graphics.setColor(1,1,0)
+--     local size = 50
+--     local offset = -size/2
+--     love.graphics.rectangle('fill', offset, offset, size, size)
+--     love.graphics.pop()
+--   end
+-- })
