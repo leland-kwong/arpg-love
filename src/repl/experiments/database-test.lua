@@ -164,10 +164,10 @@ testSuite(
 )
 
 testSuite('list databases', function()
-  local rootDb = Db.load('list-test')
+  local rootDb = Db.load('test/list-test')
   local dbPaths = {
-    ['list-test/db-1'] = true,
-    ['list-test/db-2'] = true
+    ['test/list-test/db-1'] = true,
+    ['test/list-test/db-2'] = true
   }
   for path in pairs(dbPaths) do
     Db.load(path)
@@ -178,7 +178,7 @@ testSuite('list databases', function()
   end
   rootDb:put('foo', 'bar')
     :next(function()
-      local dbListIterator = Db.databaseListIterator('list-test')
+      local dbListIterator = Db.databaseListIterator('test/list-test')
       local dbList = {}
       for dbPath in dbListIterator do
         dbList[dbPath] = true

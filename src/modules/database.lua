@@ -1,6 +1,7 @@
 local Observable = require 'modules.observable'
 local F = require 'utils.functional'
 local bitser = require 'modules.bitser'
+local lru = require 'utils.lru'
 
 local Db = {}
 local loadedDatabases = {}
@@ -36,15 +37,25 @@ local defaultFilter = function()
   return true
 end
 
---[[ filter(pattern or function) ]]
+local filtersCache = lru.new(200)
+
+--[[ filter(string pattern or function) ]]
 local function createFilter(filter)
+  local fromCache = filtersCache:get(filter)
+  if fromCache then
+    return fromCache
+  end
+
+  local newFilter
   if (type(filter) == 'string') then
     local pattern = string.gsub(filter, '%-', '%%-')
-    return function(str)
+    newFilter = function(str)
       return string.find(str, pattern) ~= nil
     end
   end
-  return filter or defaultFilter
+  newFilter = newFilter or defaultFilter
+  filtersCache:set(newFilter)
+  return newFilter
 end
 
 -- split a string
