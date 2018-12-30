@@ -20,11 +20,12 @@ Component.create({
 
 local function diskIo(self, action, file, data)
   local fullPath = self.directory..'/'..file
+  local serialized = data and bitser.dumps(data) or nil
   local message = bitser.dumps({
     action = action,
     payload = {
       fullPath,
-      data and bitser.dumps(data) or nil
+      serialized
     }
   })
   love.thread.getChannel('DISK_IO')
@@ -170,7 +171,9 @@ local dbMt = {
 
     local path = self.directory..'/'..key
     local ok, result = pcall(function()
-      return bitser.loadLoveFile(path)
+      return bitser.loads(
+        bitser.loadLoveFile(path)
+      )
     end)
     if (not ok) then
       return nil, result
