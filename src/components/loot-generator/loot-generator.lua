@@ -18,6 +18,7 @@ require 'components.groups.clock'
 
 local itemGroup = groups.all
 local tooltipCollisionWorld = bump.newWorld(16)
+local droppedItemsCollisionWorld = bump.newWorld(16)
 local function itemMousePosition()
   return camera:getMousePosition()
 end
@@ -158,52 +159,6 @@ local function dropItemCollisionFilter(item)
   return collisionGroups.matches(item.group, collisionGroups.create('floorItem', 'obstacle'))
 end
 
-local memoize = require 'utils.memoize'
-local LineOfSight = memoize(require'modules.line-of-sight')
-local function findNearestDroppablePosition(startX, startY, width, height)
-  local config = require 'config.config'
-  local Position = require 'utils.position'
-  local Map = require 'modules.map-generator.index'
-
-  local mainSceneRef = Component.get('MAIN_SCENE')
-  if (not mainSceneRef) then
-    return startX, startY
-  end
-  local dropX, dropY
-  local checkDroppablePosition = function(x, y, isBlocked)
-    local screenX, screenY = Position.gridToPixels(x, y, config.gridSize)
-    if (not isBlocked) and (not dropX) then
-      local threshold = 1
-      local _, len = collisionWorlds.map:queryRect(
-        screenX - threshold,
-        screenY - threshold,
-        width + threshold,
-        height + threshold,
-        dropItemCollisionFilter
-      )
-      if (len == 0) then
-        dropX, dropY = x, y
-      end
-    end
-  end
-  local radius = 20
-  local slices = 50
-  local increment = (math.pi * 2) / slices
-  local x1, y1 = Position.pixelsToGridUnits(startX, startY, config.gridSize)
-  local i = 1
-  local startAngle = (math.pi * 2) / math.random(1, 4) * (math.random(0, 1) == 0 and 1 or -1)
-  -- rotate clockwise and raycast till we find a droppable position
-  while (not dropX) and (i < slices) do
-    local angle = startAngle + (i * increment)
-    local x2 = x1 + radius * math.cos(angle)
-    local y2 = y1 + radius * math.sin(angle)
-    LineOfSight(mainSceneRef.mapGrid, Map.WALKABLE, checkDroppablePosition)(x1, y1, x2, y2)
-    i = i + 1
-  end
-
-  return (dropX or x1) * config.gridSize, (dropY or y1) * config.gridSize
-end
-
 local LootGenerator = {
   group = itemGroup,
   isNew = true,
@@ -270,11 +225,52 @@ local function drawLegendaryItemEffectMinimap()
   )
 end
 
+local function setDropPosition(parent, spriteWidth, spriteHeight)
+  local Grid = require 'utils.grid'
+  local config = require 'config.config'
+  local gs = config.gridSize
+  local DroppablePositionSearch = require 'components.loot-generator.droppable-position-search'
+  local searchComplete = false
+  local getDroppablePosition = DroppablePositionSearch(
+    function(grid, x, y, dist)
+      local cellValue = Grid.get(grid, x, y)
+      local isDroppablePosition = (not searchComplete) and (cellValue and cellValue.walkable)
+      if isDroppablePosition then
+        local _, len = collisionWorlds.map:queryRect(x * gs, y * gs, spriteWidth, spriteHeight, dropItemCollisionFilter)
+        searchComplete = len == 0
+        if searchComplete then
+          parent.x = x * gs
+          parent.y = y * gs
+          parent.colObj:update(parent.x, parent.y)
+        end
+      end
+      return isDroppablePosition
+    end
+  )
+  local mapGrid = Component.get('MAIN_SCENE').mapGrid
+  local iterCount = 0
+  local Position = require 'utils.position'
+  local Math = require 'utils.math'
+  local gridX, gridY = Position.pixelsToGridUnits(parent.x, parent.y, gs)
+  local prevC = Grid.get(mapGrid, gridX, gridY)
+  local lootPositionsIterator = getDroppablePosition(
+    mapGrid,
+    gridX, gridY,
+    true, 10
+  )
+  local iterating = true
+  local positions
+  while iterating do
+    local nextPositions = lootPositionsIterator()
+    positions = nextPositions or positions
+    iterating = not not nextPositions
+  end
+end
+
 function LootGenerator.init(self)
   local parent = self
   assert(self.item ~= nil, 'item must be provided')
 
-  local parent = self
   local rootStore = msgBus.send(msgBus.GAME_STATE_GET)
   local screenX, screenY = self.x, self.y
   local item = self.item
@@ -297,40 +293,41 @@ function LootGenerator.init(self)
   self.colObj = self:addCollisionObject(collisionGroups.floorItem, self.x, self.y, sw, sh)
     :addToWorld(collisionWorlds.map)
 
+  setDropPosition(self, sw, sh)
+
   Gui.create({
     isNew = true,
     group = itemGroup,
     -- debug = true,
-    x = self.x,
-    y = self.y,
     w = sw,
     h = sh,
     tweenClock = 0,
     inputContext = 'loot',
     selected = false,
     animationComplete = false,
+    eventPriority = 1,
     onCreate = function(self)
       Component.addToGroup(self:getId(), 'clock', self)
 
-      local direction = math.random(0, 1) == 1 and 1 or -1
-      local xOffset = 2 * direction
-      local tweenTarget = {
-        tweenClock = 1
-      }
-      local expectedX = self.x + xOffset
-      local actualX, actualY = findNearestDroppablePosition(expectedX, self.y, self.w, self.h)
+      -- local direction = math.random(0, 1) == 1 and 1 or -1
+      -- local xOffset = 2 * direction
+      -- local tweenTarget = {
+      --   tweenClock = 1
+      -- }
+      -- local expectedX = self.x + xOffset
+      -- local actualX, actualY = findNearestDroppablePosition(expectedX, self.y, self.w, self.h)
 
-      local dx = actualX - self.x
-      self.initialX = self.x
-      self.flyOutCurve = love.math.newBezierCurve(0, -5, dx/2, -10, dx, 0)
+      -- local dx = actualX - self.x
+      -- self.initialX = self.x
+      -- self.flyOutCurve = love.math.newBezierCurve(0, -5, dx/2, -10, dx, 0)
 
-      parent.x = actualX
-      parent.y = actualY
+      -- parent.x = actualX
+      -- parent.y = actualY
 
-      if parent.isNew then
-        parent.isNew = false
-        self.tween = tween.new(0.5, self, tweenTarget, tween.easing.backIn)
-      end
+      -- if parent.isNew then
+      --   parent.isNew = false
+      --   self.tween = tween.new(0.5, self, tweenTarget, tween.easing.backIn)
+      -- end
     end,
     getMousePosition = itemMousePosition,
     onPointerEnter = function(self)
@@ -349,6 +346,8 @@ function LootGenerator.init(self)
       return true
     end,
     onUpdate = function(self, dt)
+      self.x = parent.x
+      self.y = parent.y
       self.angle = self.angle + dt
 
       local minimap = Component.get('miniMap')
