@@ -187,7 +187,7 @@ local rootDir = 'saved-states'
 
 function PassiveTree.getState(file)
   local Db = require 'modules.database'
-  local result = Db.load(rootDir):get(getSaveFileName(file))
+  local result = Db.load(rootDir):get(file)
   return result
 end
 
@@ -209,7 +209,7 @@ end
 
 function PassiveTree.calcModifiers()
   local gameState = require 'main.global-state'.gameState
-  local saveDir = gameState:getId()
+  local saveDir = getSaveFileName(gameState:getId())
   local treeData = PassiveTree.getState(saveDir)
   return calcModifiers(treeData or {})
 end
@@ -225,7 +225,7 @@ end)
 
 function PassiveTree.getUnusedSkillPoints(treeData)
   local gameState = require 'main.global-state'.gameState
-  local file = gameState:getId()
+  local file = getSaveFileName(gameState:getId())
   treeData = treeData or PassiveTree.getState(file)
   local gameState = require 'main.global-state'.gameState
   -- start out with zero skill points at level 1
