@@ -7,6 +7,10 @@ local msgBus = require 'components.msg-bus'
 local memoize = require 'utils.memoize'
 local Db = require 'modules.database'
 
+local function getSaveFileName(gameId)
+  return gameId..'/passive-tree'
+end
+
 local onHitModifiers = {}
 local updateModifiers = {}
 local onDamageReceivedModifiers = {}
@@ -179,11 +183,11 @@ local modifierHandlers = {
 
 local PassiveTree = {}
 
-local rootDir = 'passive-tree-states'
+local rootDir = 'saved-states'
 
 function PassiveTree.getState(file)
   local Db = require 'modules.database'
-  local result = Db.load(rootDir):get(file)
+  local result = Db.load(rootDir):get(getSaveFileName(file))
   return result
 end
 
@@ -230,7 +234,7 @@ function PassiveTree.getUnusedSkillPoints(treeData)
 end
 
 function PassiveTree.deleteState(stateId)
-  return Db.load(rootDir):delete(stateId)
+  return Db.load(rootDir):delete(getSaveFileName(stateId))
 end
 
 function PassiveTree.toggle()
@@ -240,7 +244,7 @@ function PassiveTree.toggle()
   end
 
   local gameState = require 'main.global-state'.gameState
-  local file = gameState:getId()
+  local file = getSaveFileName(gameState:getId())
   local nodesFromSavedState = PassiveTree.getState(file)
   local editor = SkillTreeEditor.create({
     id = 'passiveSkillsTree',
