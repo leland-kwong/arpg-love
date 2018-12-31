@@ -297,7 +297,7 @@ function Gui.init(self)
   assert(guiType[self.type] ~= nil, 'invalid gui type'..tostring(self.type))
 
   self.inputContext = self.inputContext or self:getId()
-  self.eventPriority = getDefaultEventPriority()
+  self.eventPriority = self.eventPriority or getDefaultEventPriority()
   self.w, self.h = self.w or self.width or 1, self.h or self.height or 1
 
   if guiType.LIST == self.type then
