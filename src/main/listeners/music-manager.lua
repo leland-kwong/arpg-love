@@ -69,12 +69,10 @@ local function setSong(sceneRef)
   end, duration)
 end
 
-msgBus.MUSIC_PLAY = 'MUSIC_PLAY'
 msgBus.on(msgBus.MUSIC_PLAY, function(sceneRef)
   setSong(sceneRef)
 end)
 
-msgBus.MUSIC_STOP = 'MUSIC_STOP'
 msgBus.on(msgBus.MUSIC_STOP, function(sceneRef)
   setSong(sceneRef)
 end)

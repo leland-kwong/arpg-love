@@ -52,7 +52,6 @@ msgBus.on(msgBus.KEY_DOWN, function(v)
   return v
 end)
 
-msgBus.IS_CONSOLE_ENABLED = 'IS_CONSOLE_ENABLED'
 msgBus.on(msgBus.IS_CONSOLE_ENABLED, function()
   return config.enableConsole
 end)

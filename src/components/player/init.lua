@@ -121,7 +121,6 @@ msgBusMainMenu.on(msgBusMainMenu.TOGGLE_MAIN_MENU, function(menuOpened)
   msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, menuOpened)
 end)
 
-msgBus.PLAYER_FULL_HEAL = 'PLAYER_FULL_HEAL'
 msgBus.on(msgBus.PLAYER_FULL_HEAL, function()
   msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
     amount = math.pow(10, 10),
@@ -157,8 +156,6 @@ local function canPickupItem(self, item)
     (not self.mapGrid and true)
   return canWalkToItem
 end
-
-msgBus.PLAYER_INITIALIZED = 'PLAYER_INITIALIZED'
 
 local function updateHealthRegeneration(healthRegeneration)
   local healthRegenerationDuration = math.pow(10, 10)
@@ -614,8 +611,6 @@ function updateLightWorld(camera)
   local lightWorld = Component.get('lightWorld')
   lightWorld:setPosition(-cameraTranslateX + cWidth/2, -cameraTranslateY + cHeight/2)
 end
-
-msgBus.PLAYER_UPDATE_START = 'PLAYER_UPDATE_START'
 
 function Player.update(self, dt)
   msgBus.send(msgBus.PLAYER_UPDATE_START)

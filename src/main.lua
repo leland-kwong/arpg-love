@@ -8,8 +8,6 @@ require 'main.globals'
 love.graphics.setDefaultFilter('nearest', 'nearest')
 
 local msgBus = require 'components.msg-bus'
-msgBus.UPDATE = 'UPDATE'
-msgBus.UPDATE_END = 'UPDATE_END'
 require 'main.inputs'
 require 'main.listeners'
 

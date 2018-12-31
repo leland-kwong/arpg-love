@@ -5,8 +5,6 @@ local userSettings = require 'config.user-settings'
 local abs = math.abs
 require 'main.inputs.keyboard-manager'
 
-msgBus.MOUSE_CLICKED = 'MOUSE_CLICKED'
-
 local state = {
   keyboard = require 'main.inputs.keyboard-manager'.state.keyboard,
   mouse = {
@@ -31,9 +29,6 @@ local state = {
   }
 }
 
-msgBus.MOUSE_DRAG = 'MOUSE_DRAG'
-msgBus.MOUSE_DRAG_START = 'MOUSE_DRAG_START'
-msgBus.MOUSE_DRAG_END = 'MOUSE_DRAG_END'
 local function handleDragEvent()
   local isMouseDown = state.mouse.isDown
   local dragState = state.mouse.drag

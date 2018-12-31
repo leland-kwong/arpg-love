@@ -4,7 +4,6 @@ local windowFocused = true
 
 local paused = false
 
-msgBus.PAUSE_GAME_TOGGLE = 'PAUSE_GAME_TOGGLE'
 msgBus.on(msgBus.PAUSE_GAME_TOGGLE, function()
 	paused = not paused
 end)

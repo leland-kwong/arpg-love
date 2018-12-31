@@ -27,7 +27,6 @@ return function(msgBus)
       return cursor
     end
   }
-  msgBus.CURSOR_SET = 'CURSOR_SET'
   msgBus.on(msgBus.CURSOR_SET, function(msg)
     love.mouse.setCursor(cursorsCache:get(msg.type))
   end)

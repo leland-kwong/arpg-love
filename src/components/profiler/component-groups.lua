@@ -13,7 +13,6 @@ local guiTextLayer = GuiText.create({
 local profileData = {}
 local totalAverageExecutionTime = 0
 
-msgBus.PROFILE_FUNC = 'PROFILE_FUNC'
 msgBus.on(msgBus.PROFILE_FUNC, function(profileProps)
   return require 'utils.perf'({
     resetEvery = 1000,

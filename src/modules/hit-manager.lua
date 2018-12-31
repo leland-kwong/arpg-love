@@ -65,7 +65,6 @@ local function applyModifiers(self, newModifiers, multiplier)
   end
 end
 
-msgBus.DAMAGE_RECEIVED = 'DAMAGE_RECEIVED'
 --[[
   handles hits taken for a character, managing damage and property modifiers
 

@@ -79,7 +79,6 @@ local menuOptionQuitGame = {
   onSelectSoundEnabled = false
 }
 
-msgBus.SETTINGS_MENU_TOGGLE = 'SETTINGS_MENU_TOGGLE'
 msgBus.on(msgBus.SETTINGS_MENU_TOGGLE, function()
   local activeMenu = Component.get('SettingsMenu')
   if activeMenu then
@@ -147,7 +146,6 @@ local menuOptionNewsPanel = {
   end
 }
 
-msgBus.LATEST_NEWS_TOGGLE = 'LATEST_NEWS_TOGGLE'
 msgBus.on(msgBus.LATEST_NEWS_TOGGLE, function()
   local ref = Component.get('newsDialog')
   if ref then
@@ -170,7 +168,6 @@ msgBus.on(msgBus.LATEST_NEWS_TOGGLE, function()
   end
 end)
 
-msgBus.PLAY_GAME_MENU_TOGGLE = 'PLAY_GAME_MENU_TOGGLE'
 msgBus.on(msgBus.PLAY_GAME_MENU_TOGGLE, function()
   local activeMenu = Component.get('PlayGameMenu')
   if activeMenu then
