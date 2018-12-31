@@ -231,6 +231,7 @@ local function setDropPosition(parent, spriteWidth, spriteHeight)
   local gs = config.gridSize
   local DroppablePositionSearch = require 'components.loot-generator.droppable-position-search'
   local searchComplete = false
+  local dropX, dropY = parent.x, parent.y
   local getDroppablePosition = DroppablePositionSearch(
     function(grid, x, y, dist)
       local cellValue = Grid.get(grid, x, y)
@@ -239,9 +240,8 @@ local function setDropPosition(parent, spriteWidth, spriteHeight)
         local _, len = collisionWorlds.map:queryRect(x * gs, y * gs, spriteWidth, spriteHeight, dropItemCollisionFilter)
         searchComplete = len == 0
         if searchComplete then
-          parent.x = x * gs
-          parent.y = y * gs
-          parent.colObj:update(parent.x, parent.y)
+          dropX = x * gs
+          dropY = y * gs
         end
       end
       return isDroppablePosition
@@ -265,6 +265,8 @@ local function setDropPosition(parent, spriteWidth, spriteHeight)
     positions = nextPositions or positions
     iterating = not not nextPositions
   end
+
+  return dropX, dropY
 end
 
 function LootGenerator.init(self)
@@ -293,12 +295,16 @@ function LootGenerator.init(self)
   self.colObj = self:addCollisionObject(collisionGroups.floorItem, self.x, self.y, sw, sh)
     :addToWorld(collisionWorlds.map)
 
-  setDropPosition(self, sw, sh)
+  local originalX, originalY = self.x, self.y
+  local actualX, actualY = setDropPosition(self, sw, sh)
+  self.x, self.y = actualX, actualY
 
   Gui.create({
     isNew = true,
     group = itemGroup,
     -- debug = true,
+    x = originalX,
+    y = originalY,
     w = sw,
     h = sh,
     tweenClock = 0,
@@ -309,25 +315,19 @@ function LootGenerator.init(self)
     onCreate = function(self)
       Component.addToGroup(self:getId(), 'clock', self)
 
-      -- local direction = math.random(0, 1) == 1 and 1 or -1
-      -- local xOffset = 2 * direction
-      -- local tweenTarget = {
-      --   tweenClock = 1
-      -- }
-      -- local expectedX = self.x + xOffset
-      -- local actualX, actualY = findNearestDroppablePosition(expectedX, self.y, self.w, self.h)
-
-      -- local dx = actualX - self.x
-      -- self.initialX = self.x
-      -- self.flyOutCurve = love.math.newBezierCurve(0, -5, dx/2, -10, dx, 0)
-
-      -- parent.x = actualX
-      -- parent.y = actualY
-
-      -- if parent.isNew then
-      --   parent.isNew = false
-      --   self.tween = tween.new(0.5, self, tweenTarget, tween.easing.backIn)
-      -- end
+      if parent.isNew then
+        local tweenTarget = {
+          tweenClock = 1
+        }
+        local dx = actualX - originalX
+        self.initialX = self.x
+        self.flyOutCurve = love.math.newBezierCurve(0, -5, dx/2, -10, dx, 0)
+        parent.isNew = false
+        local Math = require 'utils.math'
+        local dist = Math.dist(self.x, self.y, actualX, actualY)
+        local duration = dist * 0.01
+        self.tween = tween.new(duration, self, tweenTarget, tween.easing.backIn)
+      end
     end,
     getMousePosition = itemMousePosition,
     onPointerEnter = function(self)
