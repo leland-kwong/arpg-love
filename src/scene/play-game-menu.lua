@@ -147,7 +147,11 @@ local function getMenuOptions(parent)
   if (hasChanges) then
     parent.previousChangeCount = db.changeCount
 
-    local files = f.keys(db:keyIterator())
+    local function filterGameStats(key)
+      -- game stat files do not have a '/' in them
+      return string.find(key, '%/') == nil
+    end
+    local files = f.keys(db:keyIterator(filterGameStats))
     parent.previousFilesForDisplay = f.map(files, function(file)
       local data = db:get(file)
       local meta = data.metadata
