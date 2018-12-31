@@ -197,20 +197,6 @@ local sceneOptionsNormal = {
 local sceneOptionsDebug = {
   menuOptionPlayGameMenu,
   menuOptionSettingsMenu,
-  {
-    name = 'main game sandbox',
-    value = function()
-      local msgBus = require 'components.msg-bus'
-      local Scene = require 'scene.sandbox.main-game.main-game-test'
-      msgBus.send(msgBus.NEW_GAME, {
-        scene = Scene,
-        props = {
-          __stateId = 'test-state',
-          characterName = 'test character'
-        }
-      })
-    end
-  },
   menuOptionHomeScreen,
   menuOptionSceneLoad(scenes.guiTest),
   menuOptionSceneLoad(scenes.particleTest),
