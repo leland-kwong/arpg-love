@@ -44,10 +44,15 @@ return setmetatable({
 
 	propTypesCalculator = setmetatable({
 		cooldownReduction = function(cooldown, reduction)
-			return cooldown - (cooldown * reduction)
+			return math.max(0, cooldown - (cooldown * reduction))
 		end,
 		attackTimeReduction = function(attackTime, reduction)
-			return attackTime - (attackTime * reduction)
+			--[[
+				This cannot be zero since this affects animation time.
+				The tweening library that we use does not allow for zero duration values
+			]]
+			local minAttackTime = 0.001
+			return math.max(minAttackTime, attackTime - (attackTime * reduction))
 		end
 	}, {
 		__index = function()
