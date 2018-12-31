@@ -9,6 +9,23 @@ local Dungeon = {
   generated = {}
 }
 
+local WALL_TILE = {
+  crossSection = 'floor-cross-section-0',
+  walkable = false
+}
+
+local cellTranslationsByLayer = {
+  walls = {
+    [12] = WALL_TILE
+  },
+  ground = {
+    [1] = {
+      crossSection = 'floor-cross-section-0',
+      walkable = true
+    }
+  }
+}
+
 local function findLayerByName(layers, name)
   for i=1, #layers do
     if layers[i].name == name then
@@ -87,6 +104,9 @@ local objectParsersByType = {
       local Component = require 'modules.component'
       local AnimationFactory = require 'components.animation-factory'
       local doorGridWidth, doorGridHeight = obj.width / config.gridSize, obj.height / config.gridSize
+
+      local blockOpeningParser = require 'modules.dungeon.layout-object-parsers.block-opening'
+      blockOpeningParser(obj, grid, origin, blockData, cellTranslationsByLayer)
 
       for x=1, doorGridWidth do
         for y=1, doorGridHeight do
@@ -254,6 +274,10 @@ local objectParsersByType = {
       end
 
       Grid.forEach(subGrid, setupStairSprites)
+    end,
+    blockOpening = function(obj, grid, origin, blockData)
+      local blockOpeningParser = require 'modules.dungeon.layout-object-parsers.block-opening'
+      blockOpeningParser(obj, grid, origin, blockData, cellTranslationsByLayer)
     end
   }
 }
@@ -308,22 +332,6 @@ local function addGridBlock(grid, gridBlockToAdd, startX, startY, transformFn, b
   return grid
 end
 
-local WALL_TILE = {
-  crossSection = 'floor-cross-section-0',
-  walkable = false
-}
-local cellTranslationsByLayer = {
-  walls = {
-    [12] = WALL_TILE
-  },
-  ground = {
-    [1] = {
-      crossSection = 'floor-cross-section-0',
-      walkable = true
-    }
-  }
-}
-
 local defaultOptions = {
   -- previous map
   from = {
@@ -354,12 +362,11 @@ local function buildDungeon(layoutType, options)
 
   collisionWorlds.reset(collisionWorlds.zones)
 
-  assert(#gridBlockNames%2 == 0, 'number of grid blocks must be an even number')
-
   local grid = {}
   local numBlocks = #gridBlockNames
   local numCols = columns
   local numRows = numBlocks/numCols
+  local layerProcessingQueue = {}
   for blockIndex=0, (numBlocks - 1) do
     local gridBlockName = gridBlockNames[blockIndex + 1]
     local gridBlock = loadGridBlock(gridBlockName)
@@ -391,20 +398,8 @@ local function buildDungeon(layoutType, options)
       origin.x,
       origin.y,
       function(index, localX, localY)
-        local isBlockEntrance =
-          (blockX == 0 and localX == 1) -- west side
-          or ((blockX == numCols - 1) and localX == blockWidth) -- east side
-          or (blockY == 0 and localY == 1) -- north side
-          or ((blockY == numRows - 1) and localY == blockHeight) -- south side
         local groundLayer = findLayerByName(gridBlock.layers, 'ground')
         local groundValue = groundLayer.data[index]
-
-        -- close up entrances on the perimeter
-        local hasGroundTile = (groundValue ~= 0)
-        if isBlockEntrance and hasGroundTile then
-          return WALL_TILE
-        end
-
         local wallLayer = findLayerByName(gridBlock.layers, 'walls')
         local wallValue = wallLayer.data[index]
         if wallValue ~= 0 then
@@ -420,16 +415,22 @@ local function buildDungeon(layoutType, options)
       'unique-enemies',
       'environment'
     }
-    f.forEach(layersToParse, function(layerName)
-      parseObjectsLayer(
-        layerName,
-        findLayerByName(gridBlock.layers, layerName),
-        grid,
-        origin,
-        blockData,
-        gridBlock
-      )
+    table.insert(layerProcessingQueue, function()
+      f.forEach(layersToParse, function(layerName)
+        parseObjectsLayer(
+          layerName,
+          findLayerByName(gridBlock.layers, layerName),
+          grid,
+          origin,
+          blockData,
+          gridBlock
+        )
+      end)
     end)
+  end
+
+  for _,fn in ipairs(layerProcessingQueue) do
+    fn()
   end
 
   -- create an exit that points back to the previous map

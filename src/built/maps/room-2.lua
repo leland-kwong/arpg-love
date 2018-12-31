@@ -9,7 +9,7 @@ return {
   tilewidth = 16,
   tileheight = 16,
   nextlayerid = 5,
-  nextobjectid = 33,
+  nextobjectid = 41,
   properties = {},
   tilesets = {
     {
@@ -358,6 +358,110 @@ return {
             { x = 96, y = 48 },
             { x = 0, y = 128 }
           },
+          properties = {}
+        },
+        {
+          id = 33,
+          name = "block opening",
+          type = "blockOpening",
+          shape = "rectangle",
+          x = 64,
+          y = 0,
+          width = 96,
+          height = 16,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 34,
+          name = "block opening",
+          type = "blockOpening",
+          shape = "rectangle",
+          x = 0,
+          y = 64,
+          width = 16,
+          height = 96,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 35,
+          name = "block opening",
+          type = "blockOpening",
+          shape = "rectangle",
+          x = 800,
+          y = 0,
+          width = 96,
+          height = 16,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 36,
+          name = "block opening",
+          type = "blockOpening",
+          shape = "rectangle",
+          x = 944,
+          y = 64,
+          width = 16,
+          height = 96,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 37,
+          name = "block opening",
+          type = "blockOpening",
+          shape = "rectangle",
+          x = 944,
+          y = 1120,
+          width = 16,
+          height = 96,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 38,
+          name = "block opening",
+          type = "blockOpening",
+          shape = "rectangle",
+          x = 0,
+          y = 1120,
+          width = 16,
+          height = 96,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 39,
+          name = "block opening",
+          type = "blockOpening",
+          shape = "rectangle",
+          x = 64,
+          y = 1264,
+          width = 96,
+          height = 16,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 40,
+          name = "block opening",
+          type = "blockOpening",
+          shape = "rectangle",
+          x = 800,
+          y = 1264,
+          width = 96,
+          height = 16,
+          rotation = 0,
+          visible = true,
           properties = {}
         }
       }

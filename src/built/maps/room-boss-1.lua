@@ -9,15 +9,15 @@ return {
   tilewidth = 16,
   tileheight = 16,
   nextlayerid = 6,
-  nextobjectid = 25,
+  nextobjectid = 33,
   properties = {},
   tilesets = {
     {
       name = "action rpg",
       firstgid = 1,
       filename = "../../../assets/maps/action rpg.tsx",
-      tilewidth = 34,
-      tileheight = 56,
+      tilewidth = 36,
+      tileheight = 28,
       spacing = 0,
       margin = 0,
       columns = 0,
@@ -31,14 +31,8 @@ return {
         height = 1
       },
       properties = {},
-      terrains = {
-        {
-          name = "Spaceship",
-          tile = 0,
-          properties = {}
-        }
-      },
-      tilecount = 17,
+      terrains = {},
+      tilecount = 11,
       tiles = {
         {
           id = 0,
@@ -63,42 +57,6 @@ return {
           image = "../../../assets/sprites/custom-art/tiles/floor-4.png",
           width = 16,
           height = 16
-        },
-        {
-          id = 4,
-          image = "../../../assets/sprites/custom-art/tiles/wall-1.png",
-          width = 16,
-          height = 56
-        },
-        {
-          id = 5,
-          image = "../../../assets/sprites/custom-art/tiles/wall-2.png",
-          width = 16,
-          height = 56
-        },
-        {
-          id = 6,
-          image = "../../../assets/sprites/custom-art/tiles/wall-3.png",
-          width = 16,
-          height = 56
-        },
-        {
-          id = 7,
-          image = "../../../assets/sprites/custom-art/tiles/wall-4.png",
-          width = 16,
-          height = 56
-        },
-        {
-          id = 8,
-          image = "../../../assets/sprites/custom-art/tiles/wall-5.png",
-          width = 16,
-          height = 56
-        },
-        {
-          id = 9,
-          image = "../../../assets/sprites/custom-art/tiles/wall-6.png",
-          width = 16,
-          height = 56
         },
         {
           id = 10,
@@ -139,7 +97,7 @@ return {
         {
           id = 22,
           image = "../../../assets/sprites/custom-art/tiles/treasure-chest.png",
-          width = 34,
+          width = 36,
           height = 28
         }
       }
