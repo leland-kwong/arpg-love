@@ -21,7 +21,7 @@ return function()
 
   local function generateMapBlockDefinitions()
     local blocks = {
-      'test-room',
+      'ramp-room',
       'room-2'
     }
     local mapDefinitions = {
