@@ -69,6 +69,18 @@ function InventoryBlueprint.init(self)
   self.w = w
   self.h = h
 
+  local parent = self
+  Gui.create({
+    id = 'InventoryPanelRegion',
+    x = parent.x,
+    y = parent.y,
+    inputContext = 'InventoryPanel',
+    onUpdate = function(self)
+      self.w = parent.w
+      self.h = parent.h
+    end,
+  }):setParent(self)
+
   -- center to screen
   local inventoryX = require'utils.position'.boxCenterOffset(
     w + (equipmentWidth + panelMargin) + (statsWidth + panelMargin), h,

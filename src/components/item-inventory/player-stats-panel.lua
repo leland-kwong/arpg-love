@@ -1,6 +1,7 @@
 local Component = require 'modules.component'
 local groups = require 'components.groups'
 local guiTextLayers = require'components.item-inventory.gui-text-layers'
+local Gui = require 'components.gui.gui'
 local GuiText = require'components.gui.gui-text'
 local Color = require'modules.color'
 
@@ -13,6 +14,18 @@ local padding = 5
 local primaryFont = require'components.font'.primary
 
 function PlayerStatsPanel.init(self)
+  local parent = self
+  Gui.create({
+    id = 'StatsPanelRegion',
+    x = parent.x,
+    y = parent.y,
+    inputContext = 'StatsPanel',
+    onUpdate = function(self)
+      self.w = parent.w
+      self.h = parent.h
+    end,
+  }):setParent(self)
+
   self.guiText = GuiText.create({
     font = primaryFont.font
   }):setParent(self)

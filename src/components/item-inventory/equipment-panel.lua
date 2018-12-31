@@ -20,6 +20,18 @@ function EquipmentPanel.init(self)
 		return self.rootStore:get().equipment
 	end
 
+	local parent = self
+  Gui.create({
+    id = 'EquipmentPanelRegion',
+    x = parent.x,
+    y = parent.y,
+    inputContext = 'EquipmentPanel',
+    onUpdate = function(self)
+      self.w = parent.w
+      self.h = parent.h
+    end,
+  }):setParent(self)
+
 	local function onItemPickupFromSlot(slotX, slotY)
 		-- IMPORTANT: make sure we unequip the item before triggering the messages
 		local unequippedItem = self.rootStore:unequipItem(slotX, slotY)
