@@ -17,6 +17,40 @@ local function testSuite(description, testFn)
 end
 
 testSuite(
+  'save with escaped keys',
+  function()
+    local dbPath = 'test/db-escape-key-test'
+    local db = Db.load(dbPath)
+
+    local function handleError(err)
+      print('[escape key test]', err)
+    end
+    local key, val = 'item-2/data', 'foo'
+    --[[
+      normally special characters like "/" are not allowed for file names, so by escaping all keys, we can
+      use any character for our keys
+    ]]
+    db:put(key, val)
+      :next(function()
+        local String = require 'utils.string'
+        local fullPath = dbPath..'/'..String.escape(key)
+        assert(
+          love.filesystem.read(fullPath) ~= nil,
+          'file not saved with escaped key'
+        )
+        assert(db:get('item-2/data') ~= nil, 'escaped key not working for [get]')
+        local F = require 'utils.functional'
+        assert(
+          #F.keys(db:keyIterator()) == 1,
+          'escaped key not working for [keyIterator]'
+        )
+        db:destroy()
+      end, handleError)
+      :next(nil, handleError)
+  end
+)
+
+testSuite(
   'file save',
   function()
     local key,value = 'foo', 'bar'

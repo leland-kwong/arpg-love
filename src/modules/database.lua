@@ -2,9 +2,10 @@ local Observable = require 'modules.observable'
 local F = require 'utils.functional'
 local bitser = require 'modules.bitser'
 local lru = require 'utils.lru'
+local String = require 'utils.string'
 
 local Db = {}
-local loadedDatabases = {}
+local loadedDatabases = lru.new(300)
 
 local Component = require 'modules.component'
 Component.create({
@@ -33,43 +34,11 @@ local function diskIo(self, action, file, data)
     :push(message)
 end
 
-local defaultFilter = function()
-  return true
-end
-
-local filtersCache = lru.new(200)
-
---[[ filter(string pattern or function) ]]
-local function createFilter(filter)
-  local fromCache = filtersCache:get(filter)
-  if fromCache then
-    return fromCache
-  end
-
-  local newFilter
+local function stringFilter(str, filter)
   if (type(filter) == 'string') then
-    local pattern = string.gsub(filter, '%-', '%%-')
-    newFilter = function(str)
-      return string.find(str, pattern) ~= nil
-    end
+    return string.find(str, filter)
   end
-  newFilter = newFilter or defaultFilter
-  filtersCache:set(newFilter)
-  return newFilter
-end
-
--- split a string
-function splitString(str, delimiter)
-  local result = { }
-  local from  = 1
-  local delim_from, delim_to = string.find( str, delimiter, from  )
-  while delim_from do
-    table.insert( result, string.sub( str, from , delim_from-1 ) )
-    from  = delim_to + 1
-    delim_from, delim_to = string.find( str, delimiter, from  )
-  end
-  table.insert( result, string.sub( str, from  ) )
-  return result
+  return (not filter) or filter(str)
 end
 
 local function handleSaveAsync()
@@ -79,6 +48,18 @@ local function handleSaveAsync()
   end
 
   local success = love.thread.getChannel('saveStateSuccess'):pop()
+  if success then
+    return true, true
+  end
+end
+
+local function handleDeleteAsync()
+  local errorMsg = love.thread.getChannel('saveStateDeleteError'):pop()
+  if errorMsg then
+    return true, nil, errorMsg
+  end
+
+  local success = love.thread.getChannel('saveStateDeleteSuccess'):pop()
   if success then
     return true, true
   end
@@ -117,15 +98,13 @@ local dbMt = {
   end,
 
   readIterator = function(self, filter, includeData)
-    filter = createFilter(filter)
-
     if (includeData == nil) then
       includeData = true
     end
 
     return coroutine.wrap(function()
       for key in pairs(self.index) do
-        if filter(key) then
+        if stringFilter(key, filter) then
           local contents, ok = includeData and self:get(key) or nil
           coroutine.yield(key, contents)
         end
@@ -152,7 +131,7 @@ local dbMt = {
         return love.filesystem.remove(self.directory)
       end)
       if (not ok) then
-        error(err)
+        print(err)
       else
         self.loaded = false
       end
@@ -166,24 +145,13 @@ local dbMt = {
   end,
 
   _saveDataToDisk = function(self, key, value)
-    diskIo(self, 'SAVE_STATE', key, value)
+    diskIo(self, 'SAVE_STATE', String.escape(key), value)
     return Observable(handleSaveAsync)
   end,
 
   _deleteDataFromDisk = function(self, key)
-    diskIo(self, 'SAVE_STATE_DELETE', key)
-
-    return Observable(function()
-      local errorMsg = love.thread.getChannel('saveStateDeleteError'):pop()
-      if errorMsg then
-        return true, nil, errorMsg
-      end
-
-      local success = love.thread.getChannel('saveStateDeleteSuccess'):pop()
-      if success then
-        return true, true
-      end
-    end)
+    diskIo(self, 'SAVE_STATE_DELETE', String.escape(key))
+    return Observable(handleDeleteAsync)
   end,
 
   _loadFile = function(self, key)
@@ -192,7 +160,7 @@ local dbMt = {
       return curValue
     end
 
-    local path = self.directory..'/'..key
+    local path = self.directory..'/'..String.escape(key)
     local ok, result = pcall(function()
       return bitser.loads(
         bitser.loadLoveFile(path)
@@ -217,10 +185,11 @@ end
 function Db.load(directory)
   assert(directory, '[db load error] directory must be a string')
 
-  local dbRef = loadedDatabases[directory]
+  local dbRef = loadedDatabases:get(directory)
   if (not dbRef) then
     createDbDirectory(directory)
   end
+
   dbRef = dbRef or setmetatable({
     changeCount = 0,
     loaded = true,
@@ -230,22 +199,21 @@ function Db.load(directory)
     -- index of keys
     index = F.reduce(
       love.filesystem.getDirectoryItems(directory),
-      function(filesMap, file)
-        local info = love.filesystem.getInfo(file)
-        if info.type == 'directory' then
-          filesMap[file] = true
+      function(keyMap, file)
+        local fullPath = directory..'/'..file
+        local info = love.filesystem.getInfo(fullPath)
+        if info and (info.type == 'file') then
+          local originalKey = String.unescape(file)
+          keyMap[originalKey] = true
         end
-        return filesMap
+        return keyMap
       end,
       {}
     ),
 
-    directory = directory,
-    keyParser = function(str)
-      return splitString(str, '/')
-    end
+    directory = directory
   }, dbMt)
-  loadedDatabases[directory] = dbRef
+  loadedDatabases:set(directory, dbRef)
 
   return dbRef
 end
@@ -253,7 +221,6 @@ end
 -- lists all databases for a given directory
 function Db.databaseListIterator(directory, filter)
   local items = love.filesystem.getDirectoryItems(directory)
-  filter = createFilter(filter)
 
   return coroutine.wrap(function()
     for i=1, #items do
@@ -261,7 +228,7 @@ function Db.databaseListIterator(directory, filter)
       local fullPath = directory..'/'..item
       local info = love.filesystem.getInfo(fullPath)
       local isDir = info and (info.type == 'directory')
-      if isDir and filter(item) then
+      if isDir and stringFilter(item, filter) then
         coroutine.yield(fullPath)
       end
     end
