@@ -12,7 +12,7 @@ local function tableEqual(t1, t2)
 end
 
 local function testSuite(description, testFn)
-  print('[test] ' .. description)
+  -- print('[test] ' .. description)
   testFn()
 end
 
@@ -229,40 +229,25 @@ end)
 -- Component.create({
 --   id = 'database-perf-test',
 --   init = function(self)
---     Component.addToGroup(self, 'all')
+--     Component.addToGroup(self, 'gui')
 --     self.clock = 0
-
---     self.bigData = {}
---     for i=1, 550 do
---       self.bigData[i .. 'a'] = math.random() .. math.random()
---     end
---   end,
---   update = function(self, dt)
---     self.angle = self.angle + dt * 4
---     self.clock = self.clock + 1
-
---     local db = Db.load('test/db-ref')
---     db:put('metadata', {
---       timestamp = os.clock(),
---       bigData = self.bigData
---     })
 --   end,
 --   draw = function(self)
---     love.graphics.clear()
 --     love.graphics.push()
 --     love.graphics.origin()
 --     love.graphics.translate(400, 100)
 
---     local db = Db.load('test/db-ref')
---     local metadata = db:get('metadata') or {}
---     love.graphics.print(metadata.timestamp or '', 0, 100)
---     love.graphics.print(db.changeCount, 0, 130)
+--     love.graphics.setColor(0,0,0,0.4)
+--     love.graphics.rectangle('fill', 0, 0, 100, 400)
+--     love.graphics.setColor(1,1,1)
+--     local db = Db.load('saved-states')
+--     local F = require 'utils.functional'
+--     love.graphics.print(
+--       Inspect(
+--         F.keys(db:keyIterator())
+--       )
+--     )
 
---     love.graphics.rotate(self.angle)
---     love.graphics.setColor(1,1,0)
---     local size = 50
---     local offset = -size/2
---     love.graphics.rectangle('fill', offset, offset, size, size)
 --     love.graphics.pop()
 --   end
 -- })
