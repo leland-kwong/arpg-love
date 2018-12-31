@@ -298,6 +298,7 @@ function LootGenerator.init(self)
   local originalX, originalY = self.x, self.y
   local actualX, actualY = setDropPosition(self, sw, sh)
   self.x, self.y = actualX, actualY
+  self.colObj:update(self.x, self.y)
 
   Gui.create({
     isNew = true,
@@ -373,7 +374,6 @@ function LootGenerator.init(self)
         local dx, dz = self.flyOutCurve:evaluate(self.tweenClock)
         self.x, self.z = self.initialX + dx, dz
 
-        -- self.tween2:update(dt)
         if complete then
           self.tween = nil
         end
