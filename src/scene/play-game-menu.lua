@@ -144,13 +144,10 @@ end
 local function getMenuOptions(parent)
   local db = Db.load('saved-states')
   local hasChanges = db.changeCount ~= parent.previousChangeCount
-  parent.previousChangeCount = db.changeCount
   if (hasChanges) then
-    local fileIter = db:keyIterator()
-    local files = {}
-    for k in fileIter do
-      table.insert(files, k)
-    end
+    parent.previousChangeCount = db.changeCount
+
+    local files = f.keys(db:keyIterator())
     parent.previousFilesForDisplay = f.map(files, function(file)
       local data = db:get(file)
       local meta = data.metadata

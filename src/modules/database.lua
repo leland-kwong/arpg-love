@@ -5,7 +5,8 @@ local lru = require 'utils.lru'
 local String = require 'utils.string'
 
 local Db = {}
-local loadedDatabases = lru.new(300)
+--[[ this is a global for live-reload reasons ]]
+loadedDatabases = loadedDatabases or lru.new(300)
 
 local Component = require 'modules.component'
 Component.create({
