@@ -2,6 +2,8 @@
 
 local Grid = {}
 
+Grid.clone = require 'utils.clone-grid'
+
 function Grid.get(grid, x, y)
   local row = grid[y]
   return row and row[x]
