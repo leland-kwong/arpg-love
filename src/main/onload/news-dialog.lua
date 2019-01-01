@@ -14,18 +14,22 @@ Component.create({
     -- show news dialog
     if isNewVersion then
       require 'main.onload.handle-version-change'()
-      userSettingsState.set(function(settings)
-        settings.previousVersion = currentVersion
-        return settings
-      end):next(function()
-        print(
-          'save success'
-        )
-      end, function(err)
-        print('error', err)
-      end)
-      local msgBus = require 'components.msg-bus'
-      msgBus.send(msgBus.LATEST_NEWS_TOGGLE, true)
+        :next(function()
+          userSettingsState.set(function(settings)
+            settings.previousVersion = currentVersion
+            return settings
+          end):next(function()
+            print(
+              'save success'
+            )
+          end, function(err)
+            print('error', err)
+          end)
+          local msgBus = require 'components.msg-bus'
+          msgBus.send(msgBus.LATEST_NEWS_TOGGLE, true)
+        end, function(err)
+          error(err)
+        end)
     else
       self:delete()
     end
