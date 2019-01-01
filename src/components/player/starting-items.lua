@@ -1,42 +1,4 @@
-local config = require 'config.config'
-
-if config.isDevelopment then
-  return {
-    equipment = {
-      'base.potion-health',
-      'base.pod-module-initiate',
-      'base.pod-module-swipe',
-      'base.ability-chain-lightning',
-      'base.potion-energy',
-      'base.mock-shoes',
-    },
-    inventory = {
-      'base.pod-module-frost-orb',
-      'base.pod-module-hammer',
-      'legendary.augmentation-module-frenzy',
-      'legendary.defender-of-aureus',
-      'base.augmentation-module-one',
-    }
-    -- {
-    --   type = 'lightning-rod',
-    --   position = {
-    --     x = 1,
-    --     y = 2
-    --   }
-    -- },
-    -- {
-    --   type = 'mock-armor',
-    --   position = {
-    --     x = 2,
-    --     y = 3
-    --   }
-    -- },
-    -- {
-    --   type = 'pod-module-fireball'
-    -- }
-  }
-else
-  return {
+return {
     equipment = {
       'base.potion-health',
       'base.pod-module-initiate',
@@ -47,4 +9,4 @@ else
     inventory = {
     }
   }
-end
+
