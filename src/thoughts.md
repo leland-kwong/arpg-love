@@ -240,6 +240,8 @@ Gamernissem - passive tree skill ideas
 Funky Hippo - itch website suggestion
 The_Frontline - environment art tips
 ZeceDeKobold - ability ideas
+RobertJDole - relentless play testing
+Kwantuum - pem's algorithm and other algorithmic ideas
 
 ## Passive system
 
