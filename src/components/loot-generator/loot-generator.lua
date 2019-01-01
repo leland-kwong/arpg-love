@@ -429,7 +429,7 @@ function LootGenerator.init(self)
     end,
 
     drawOrder = function(self)
-      return Component.groups.all:drawOrder(self)
+      return 4
     end
   }):setParent(self)
 end
