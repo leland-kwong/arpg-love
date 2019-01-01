@@ -58,10 +58,13 @@ function NewGameDialogBlueprint.init(self)
     self:delete(true)
   end
 
+  local camera = require 'components.camera'
+  local screenWidth, screenHeight = camera:getSize()
+  local width = 250
   local textInput = GuiTextInput.create({
-    x = self.x,
+    x = math.floor(screenWidth/2 - width/2),
     y = self.y,
-    w = 250,
+    w = width,
     padding = 8,
     textLayer = textLayer,
     placeholderText = "what is your name?",
