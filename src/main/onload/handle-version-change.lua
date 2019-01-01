@@ -13,6 +13,9 @@ local function clearAllSavedStates()
   end, function(err)
     print('[clear all files error]', err)
   end)
+
+  local rootDb = Db.load('')
+  rootDb:delete('settings')
 end
 
 return function()
