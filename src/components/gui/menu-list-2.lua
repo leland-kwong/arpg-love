@@ -38,7 +38,7 @@ return Component.createFactory({
 
         guiList.contentHeight = newRect.height
         guiList.contentWidth = newRect.width
-        guiList.width = newRect.width
+        guiList.width = math.max(1, newRect.width)
         for i=1, #self.otherItems do
           local item = self.otherItems[i]
           table.insert(childNodes, item)
@@ -77,7 +77,7 @@ return Component.createFactory({
         Grid.forEach(parent.layoutItems, function(guiNode)
           guiNode:setEventsDisabled(true)
         end)
-      end
+      end,
     }):setParent(parent)
   end,
 })
