@@ -445,8 +445,12 @@ function M.remove(entityId, recursive)
 
   -- this is for legacy reasons when our entites weren't just plain tables
   local entityAsComponent = allComponentsById[entityId]
-  if entityAsComponent.isComponent then
-    local eAsC = entityAsComponent
+  local eAsC = entityAsComponent
+  if (not eAsC) then
+    return
+  end
+
+  if eAsC.isComponent and (not eAsC._deleted) then
     local children = eAsC._children
     if (recursive and children) then
       for _,child in pairs(children) do
@@ -456,6 +460,7 @@ function M.remove(entityId, recursive)
     end
 
     cleanupCollisionObjects(eAsC)
+
     eAsC._deleted = true
     eAsC:final()
   end
