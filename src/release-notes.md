@@ -7,6 +7,10 @@ New
 * Energy leech passive ability
 * Life leech passive ability
 
+Balance
+
+* Increased values for attack time reduction and bonus damage nodes
+
 Fixes
 
 * Items no longer drop in areas that prevent the player from picking them up
