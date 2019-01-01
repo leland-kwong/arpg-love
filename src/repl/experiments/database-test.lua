@@ -33,7 +33,7 @@ testSuite(
     db:put(key, val)
       :next(function()
         local String = require 'utils.string'
-        local fullPath = dbPath..'/'..String.escape(key)
+        local fullPath = db.directory..'/'..String.escape(key)
         assert(
           love.filesystem.read(fullPath) ~= nil,
           'file not saved with escaped key'

@@ -4,7 +4,10 @@ local bitser = require 'modules.bitser'
 local lru = require 'utils.lru'
 local String = require 'utils.string'
 
-local Db = {}
+local Db = {
+  baseDir = 'db'
+}
+
 --[[ this is a global for live-reload reasons ]]
 loadedDatabases = loadedDatabases or lru.new(300)
 
@@ -135,6 +138,7 @@ local dbMt = {
         print(err)
       else
         self.loaded = false
+        loadedDatabases:delete(self.directory)
       end
     end, function(err)
       print('[db destroy error]', err)
@@ -183,12 +187,27 @@ local function createDbDirectory(directory)
   end
 end
 
+local dirNameCache = {
+  cache = lru.new(400),
+  get = function(self, dir)
+    dir = dir or ''
+    local actualDir = self.cache:get(dir)
+    if (not actualDir) then
+      actualDir = Db.baseDir..'/'..dir
+      self.cache:set(dir, actualDir)
+    end
+    return actualDir
+  end
+}
+
 function Db.load(directory)
+  local actualDir = dirNameCache:get(directory)
+
   assert(directory, '[db load error] directory must be a string')
 
-  local dbRef = loadedDatabases:get(directory)
+  local dbRef = loadedDatabases:get(actualDir)
   if (not dbRef) then
-    createDbDirectory(directory)
+    createDbDirectory(actualDir)
   end
 
   dbRef = dbRef or setmetatable({
@@ -199,9 +218,9 @@ function Db.load(directory)
 
     -- index of keys
     index = F.reduce(
-      love.filesystem.getDirectoryItems(directory),
+      love.filesystem.getDirectoryItems(actualDir),
       function(keyMap, file)
-        local fullPath = directory..'/'..file
+        local fullPath = actualDir..'/'..file
         local info = love.filesystem.getInfo(fullPath)
         if info and (info.type == 'file') then
           local originalKey = String.unescape(file)
@@ -212,25 +231,27 @@ function Db.load(directory)
       {}
     ),
 
-    directory = directory
+    directory = actualDir
   }, dbMt)
-  loadedDatabases:set(directory, dbRef)
+  loadedDatabases:set(actualDir, dbRef)
 
   return dbRef
 end
 
 -- lists all databases for a given directory
 function Db.databaseListIterator(directory, filter)
-  local items = love.filesystem.getDirectoryItems(directory)
+  local actualDir = dirNameCache:get(directory)
+  local items = love.filesystem.getDirectoryItems(actualDir)
+  local baseDirLength = #Db.baseDir
 
   return coroutine.wrap(function()
     for i=1, #items do
       local item = items[i]
-      local fullPath = directory..'/'..item
+      local fullPath = actualDir..'/'..item
       local info = love.filesystem.getInfo(fullPath)
       local isDir = info and (info.type == 'directory')
       if isDir and stringFilter(item, filter) then
-        coroutine.yield(fullPath)
+        coroutine.yield(string.sub(fullPath, baseDirLength + 2))
       end
     end
   end)
