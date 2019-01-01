@@ -6,34 +6,34 @@ local Object = require 'utils.object-utils'
 
 local nodeValueOptions = {
   [1] = {
-    name = 'attack speed',
+    name = 'quick strikes',
     value = {
       type = 'attackTimeReduction',
-      value = 0.01
+      value = 0.04
     },
     image = 'gui-skill-tree_node_speed-up',
     backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
-      return '+'..(self.value.value * 100)..'% attack speed'
+      return '+'..(self.value.value * 100)..'% attack time reduction'
     end
   },
   [2] = {
-    name = 'bonus damage',
+    name = 'bonus attack power',
     value = {
       type = 'attackPower',
-      value = 0.02
+      value = 0.1
     },
     image = 'gui-skill-tree_node_damage-up',
     backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
-      return '+'..(self.value.value * 100)..'% damage'
+      return '+'..(self.value.value * 100)..'% attack power'
     end
   },
   [3] = {
     name = 'lightning rod',
     value = {
       type = 'lightningRod',
-      value = 0.1
+      value = 0.2
     },
     type = 'keystone',
     image = 'gui-skill-tree_node_lightning',
@@ -186,8 +186,8 @@ local nodeValueOptions = {
     type = 'keystone',
     value = {
       type = 'energySteal',
-      value = 1.0,
-      duration = 0.1,
+      value = 0.4,
+      duration = 0.4,
     },
     image = 'gui-skill-tree_node_energy-steal',
     backgroundImage = 'gui-skill-tree_node_background',
