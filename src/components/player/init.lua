@@ -117,10 +117,6 @@ local function connectAutoSave(parent)
   }):setParent(parent)
 end
 
-msgBusMainMenu.on(msgBusMainMenu.TOGGLE_MAIN_MENU, function(menuOpened)
-  msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, menuOpened)
-end)
-
 msgBus.on(msgBus.PLAYER_FULL_HEAL, function()
   msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
     amount = math.pow(10, 10),
@@ -225,6 +221,10 @@ local Player = {
       actsOn = 'PLAYER'
     })
     self.listeners = {
+      msgBus.on(msgBus.MOUSE_PRESSED, function()
+        self.isAlreadyAttacking = InputContext.contains('any')
+      end),
+
       msgBus.on(msgBus.GENERATE_LOOT, function(msgValue)
         local LootGenerator = require'components.loot-generator.loot-generator'
         local x, y, item = unpack(msgValue)
@@ -525,7 +525,8 @@ local function handleAbilities(self, dt)
     return
   end
 
-  local canUseAbility = InputContext.contains('any') or
+  local canUseAbility = self.isAlreadyAttacking or
+    InputContext.contains('any') or
     (
       InputContext.contains('loot') and
       (not canPickupItem(self, self.state.itemHovered))
