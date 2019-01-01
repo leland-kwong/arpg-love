@@ -1,5 +1,20 @@
 # Release notes
 
+## 5.1.0-pre-alpha
+
+New
+
+* Energy leech passive ability
+* Life leech passive ability
+
+Fixes
+
+* Items no longer drop in areas that prevent the player from picking them up
+* High attack time reduction no longer causes the game to crash
+* Fixed issue with certain nodes in passive tree being unselectable when they shouldn't be
+
+---
+
 ## 5.0.0-pre-alpha
 
 New
