@@ -336,14 +336,26 @@ function M.newGroup(groupDefinition)
   local drawQueue = Q:new({development = config.debugDrawQueue})
   Group.drawQueue = drawQueue
   local componentsById = {}
+  local newComponentsById = {}
+  local isUpdating = false
   local count = 0
 
   function Group.updateAll(dt)
+    isUpdating = true
+
+    -- merge in new components to master list
+    for k,v in pairs(newComponentsById) do
+      componentsById[k] = v
+    end
+    newComponentsById = {}
+
     for id,c in pairs(componentsById) do
       if (not c._updatedDisabled) then
         c:_update(dt)
       end
     end
+
+    isUpdating = false
 
     return Group
   end
@@ -380,7 +392,15 @@ function M.newGroup(groupDefinition)
     end
 
     allComponentsById[id] = data
-    componentsById[id] = data
+    --[[
+      when we're in the middle of an update loop, we should add new components to a different list
+      to prevent mutating the list which causes the loop to do unintended behavior (duplicate updates, etc...).
+    ]]
+    if isUpdating then
+      newComponentsById[id] = data
+    else
+      componentsById[id] = data
+    end
     if Group.onComponentEnter then
       Group:onComponentEnter(data)
     end
