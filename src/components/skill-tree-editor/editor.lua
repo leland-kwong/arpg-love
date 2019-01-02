@@ -274,11 +274,13 @@ local function placeNode(root, nodeId, gridX, gridY, connections, nodeValue, sel
         local node = root.nodes[nodeId]
 
         if (editorModes.PLAY_UNSELECT_ONLY == state.editorMode) then
-          if (node.selected) then
+          if (node.selected and playMode:isNodeUnselectable(node, root.nodes, nodeId)) then
             Sound.playEffect(sounds.NODE_UNSELECT)
             root:setNode(nodeId, {
               selected = false
             })
+          else
+            msgBus.send(msgBus.PLAYER_ACTION_ERROR, 'neighboring nodes must be unselected first')
           end
         elseif (editorModes.PLAY == state.editorMode) then
           local isNotSelectable = (
