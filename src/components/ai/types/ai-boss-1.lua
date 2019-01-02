@@ -286,7 +286,7 @@ local function lockDoors()
 end
 
 local function cameraActionOnBossEncounter(bossRef, playerRef)
-  playerRef:setUpdateDisabled(true)
+  playerRef:set('cutSceneMode', true)
   bossRef.silenced = true
   local bossOriginalMoveSpeed = bossRef.moveSpeed
   bossRef.moveSpeed = 0
@@ -298,7 +298,7 @@ local function cameraActionOnBossEncounter(bossRef, playerRef)
   tick.delay(function()
     camera:setPosition(playerRef.x, playerRef.y, cameraOutDuration)
     tick.delay(function()
-      playerRef:setUpdateDisabled(false)
+      playerRef:set('cutSceneMode', false)
       bossRef.silenced = false
       bossRef.moveSpeed = bossOriginalMoveSpeed
       lockDoors()

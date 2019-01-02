@@ -442,20 +442,22 @@ local function handleMovement(self, dt)
 
   -- MOVEMENT
   local inputX, inputY = 0, 0
-  if love.keyboard.isDown(keyMap.MOVE_RIGHT) then
-    inputX = 1
-  end
+  if (not self.cutSceneMode) then
+    if love.keyboard.isDown(keyMap.MOVE_RIGHT) then
+      inputX = 1
+    end
 
-  if love.keyboard.isDown(keyMap.MOVE_LEFT) then
-    inputX = -1
-  end
+    if love.keyboard.isDown(keyMap.MOVE_LEFT) then
+      inputX = -1
+    end
 
-  if love.keyboard.isDown(keyMap.MOVE_UP) then
-    inputY = -1
-  end
+    if love.keyboard.isDown(keyMap.MOVE_UP) then
+      inputY = -1
+    end
 
-  if love.keyboard.isDown(keyMap.MOVE_DOWN) then
-    inputY = 1
+    if love.keyboard.isDown(keyMap.MOVE_DOWN) then
+      inputY = 1
+    end
   end
 
   local vx, vy = Position.getDirection(0, 0, inputX, inputY)
@@ -662,7 +664,6 @@ function Player.update(self, dt)
   self.attackRecoveryTime = self.attackRecoveryTime - dt
   local nextX, nextY, totalMoveSpeed = handleMovement(self, dt)
   handleAnimation(self, dt, nextX, nextY, totalMoveSpeed)
-  handleAbilities(self, dt)
 
   self:handleMapCollision(
     nextX,
@@ -671,7 +672,11 @@ function Player.update(self, dt)
   self:handleZoneCollision()
 
   -- update camera to follow player
-  camera:setPosition(self.x, self.y, userSettings.camera.speed)
+  if (not self.cutSceneMode) then
+    handleAbilities(self, dt)
+    camera:setPosition(self.x, self.y, userSettings.camera.speed)
+  end
+
   updateLightWorld(camera)
 end
 
