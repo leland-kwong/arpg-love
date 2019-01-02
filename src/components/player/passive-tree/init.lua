@@ -129,8 +129,6 @@ local modifierHandlers = {
     return modifiers
   end,
   maxHealthEnergy = function(nodeId, data, modifiers)
-    local gameState = require 'main.global-state'.gameState:get()
-
     modifiers
       :add('maxHealth', data.value.bonusHealth * modifiers.maxHealth)
       :add('maxEnergy', data.value.bonusEnergy * modifiers.maxEnergy)
