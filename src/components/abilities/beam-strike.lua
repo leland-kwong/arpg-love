@@ -35,26 +35,25 @@ local beamMiddle = AnimationFactory:newStaticSprite(
 )
 
 -- returns beamX, beamY, beamLength, isImpactFrame
-function createBeam(x1, y1, animationSpeed)
+function createBeam(x1, y1, animationSpeed, frameRate)
   local max = math.max
   return coroutine.create(function()
     local distToTravel = 400
     local initialLength = 200
     local length = initialLength -- beam length
-    local frameRate = 1/60
     local animationSpeed = math.floor(distToTravel / animationSpeed * frameRate)
     local x2, y2 = x1, y1
     -- tween beam position
     while (distToTravel > 0) do
       distToTravel = max(0, distToTravel - animationSpeed)
-      x2, y2 = x1, y1 - distToTravel
+      x2, y2 = x1, y1 - distToTravel - length
       coroutine.yield(x2, y2, length)
     end
     -- tween beam length
     while length > 0 do
       local isImpactFrame = length == initialLength
       length = length - animationSpeed
-      coroutine.yield(x2, y2, max(0, length), isImpactFrame)
+      coroutine.yield(x2, y2 + (initialLength - length), max(0, length), isImpactFrame)
     end
   end)
 end
@@ -92,7 +91,7 @@ function BeamStrike.update(self, dt)
   self.angle = self.angle + dt
   local shouldStartMoving = self.clock >= (self.delay - self.animationSpeed)
   if shouldStartMoving then
-    self.beamCo = self.beamCo or createBeam(self.x, self.y, self.animationSpeed)
+    self.beamCo = self.beamCo or createBeam(self.x, self.y, self.animationSpeed, dt)
     local isAlive, x, y, beamLength, isImpactFrame = coroutine.resume(self.beamCo)
     if isImpactFrame then
       ImpactDispersion.create({
@@ -141,7 +140,7 @@ function BeamStrike.draw(self)
     if (beamLength > 0) then
       -- tail
       local _, tailHeight = beamTail:getOffset()
-      love.graphics.draw(AnimationFactory.atlas, beamTail.sprite, actualX, actualY - beamLength - tailHeight + 1)
+      love.graphics.draw(AnimationFactory.atlas, beamTail.sprite, actualX, actualY - tailHeight + 1)
       -- middle
       love.graphics.draw(AnimationFactory.atlas, beamMiddle.sprite, actualX, actualY + 1, 0, 1, beamLength, 0, 2)
       -- head
