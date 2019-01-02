@@ -210,6 +210,7 @@ return Component.create({
   end,
 
   drawOrder = function(self)
-    return Component.get('PLAYER'):drawOrder() + 1
+    local drawOrders = require 'modules.draw-orders'
+    return drawOrders.BulletDraw
   end
 })
