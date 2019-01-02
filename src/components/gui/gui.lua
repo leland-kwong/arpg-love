@@ -285,6 +285,7 @@ Component.create({
   end
 })
 
+-- event priorities are sorted by highest to lowest
 local eventPriority = 0
 local function getDefaultEventPriority()
   eventPriority = eventPriority + 1

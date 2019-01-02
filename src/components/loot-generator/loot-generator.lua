@@ -16,6 +16,7 @@ local collisionGroups = require 'modules.collision-groups'
 local drawOrders = require 'modules.draw-orders'
 require 'components.groups.clock'
 
+local eventPriority = 1
 local itemGroup = groups.all
 local tooltipCollisionWorld = bump.newWorld(16)
 local droppedItemsCollisionWorld = bump.newWorld(16)
@@ -83,6 +84,7 @@ local itemNamesTooltipLayer = Gui.create({
 
       tooltip.gui = Gui.create({
         group = itemGroup,
+        eventPriority = eventPriority,
         x = tooltip.x,
         y = tooltip.y,
         w = ttWidth,
@@ -312,7 +314,7 @@ function LootGenerator.init(self)
     inputContext = 'loot',
     selected = false,
     animationComplete = false,
-    eventPriority = 1,
+    eventPriority = eventPriority,
     onCreate = function(self)
       Component.addToGroup(self:getId(), 'clock', self)
 
