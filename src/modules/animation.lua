@@ -6,7 +6,6 @@ local abs = math.abs
 local Lru = require 'utils.lru'
 
 local meta = {}
-local spriteCache = Lru.new(1000)
 
 local function createAnimationFactory(
   frameJson,
@@ -39,6 +38,7 @@ function meta:new(aniFrames)
     frame = nil,
     time = 0, -- animation time
     index = 1, -- frame index
+    quads = {}
   }
   setmetatable(animation, self)
   self.__index = self
@@ -72,7 +72,7 @@ function meta:setFrame(index)
   end
 
   local pad = self.pad
-  local sprite = spriteCache:get(frameKey)
+  local sprite = self.quads[frameKey]
   if (not sprite) then
     sprite = love.graphics.newQuad(
       self.frame.frame.x - pad,
@@ -81,7 +81,7 @@ function meta:setFrame(index)
       self.frame.spriteSourceSize.h + (pad * 2),
       self.atlas:getDimensions()
     )
-    spriteCache:set(frameKey, sprite)
+    self.quads[frameKey] = sprite
   end
   self.sprite = sprite
   self.lastIndex = self.index
