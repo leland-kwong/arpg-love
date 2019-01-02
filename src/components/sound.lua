@@ -63,16 +63,56 @@ local defaultModifier = function(v)
   return v
 end
 
+local activeSources = {}
+local default = {
+  maxActiveSources = 10
+}
+
 function Sound.playEffect(file, modifier)
-  modifier = modifier or defaultModifier
-  local source = love.audio.newSource('built/sounds/'..file, 'static')
-  modifier(source)
-  love.audio.play(source)
-  return source
+  local sourceList = activeSources[file]
+  if (not sourceList) then
+    sourceList = {}
+    activeSources[file] = sourceList
+  end
+
+  -- remove all finished sources first
+  local i = 1
+  while i <= #sourceList do
+    local s = sourceList[i]
+    if (not s:isPlaying()) then
+      table.remove(sourceList, i)
+    else
+      i = i + 1
+    end
+  end
+
+  local canPlay = #sourceList < (maxActiveSources or default.maxActiveSources)
+  local activeSource
+  if canPlay then
+    activeSource = love.audio.newSource('built/sounds/'..file, 'static')
+    table.insert(
+      sourceList,
+      activeSource
+    )
+    love.audio.play(activeSource)
+
+    modifier = modifier or defaultModifier
+    modifier(activeSource)
+  end
+
+  return activeSource
 end
 
 function Sound.stopEffect(source)
-  love.audio.stop(source)
+  if source then
+    love.audio.stop(source)
+  end
+end
+
+function Sound.modify(source, action, a, b, c, d, e)
+  if source then
+    source[action](source, a, b, c, d, e)
+  end
 end
 
 return Sound

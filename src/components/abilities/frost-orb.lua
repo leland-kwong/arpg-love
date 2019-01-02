@@ -2,6 +2,7 @@ local Component = require 'modules.component'
 local AnimationFactory = require 'components.animation-factory'
 local CollisionWorlds = require 'components.collision-worlds'
 local collisionGroups = require 'modules.collision-groups'
+local Sound = require 'components.sound'
 
 local Shard = Component.createFactory({
   init = function(self)
@@ -111,7 +112,6 @@ local FrostOrb = Component.createFactory({
     self.ox, self.oy = self.animation:getOffset()
     self.width, self.height = self.animation:getWidth(), self.animation:getHeight()
 
-    local Sound = require 'components.sound'
     self.sound = Sound.playEffect('frost-orb.wav')
   end,
   update = function(self, dt)
@@ -199,7 +199,7 @@ local FrostOrb = Component.createFactory({
       end,
       update = function(self, dt)
         local complete = self.tween:update(dt)
-        parent.sound:setVolume(parent.volume)
+        Sound.modify(parent.sound, 'setVolume', parent.volume)
         if complete then
           parent:delete(true)
           local Sound = require 'components.sound'
@@ -209,7 +209,7 @@ local FrostOrb = Component.createFactory({
     }):setParent(parent)
   end,
   final = function(self)
-    love.audio.stop(self.sound)
+    Sound.stopEffect(self.sound)
   end
 })
 
