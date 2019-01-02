@@ -5,8 +5,12 @@ local iterateGrid = require 'utils.iterate-grid'
 local f = require 'utils.functional'
 local collisionWorlds = require 'components.collision-worlds'
 
+local NULL_CELL = 'NULL_CELL'
 local Dungeon = {
-  generated = {}
+  generated = {},
+  isEmptyTile = function(v)
+    return (v == nil) or (v == NULL_CELL)
+  end
 }
 
 local WALL_TILE = {
@@ -406,7 +410,7 @@ local function buildDungeon(layoutType, options)
           return cellTranslationsByLayer.walls[wallValue]
         end
 
-        return cellTranslationsByLayer.ground[groundValue]
+        return cellTranslationsByLayer.ground[groundValue] or NULL_CELL
       end,
       gridBlockName
     )
@@ -461,6 +465,7 @@ end
 
 -- generates a dungeon and returns the dungeon id
 function Dungeon:new(layoutType, options)
+  assert(type(layoutType) == 'string', 'layout type should be the name of the layout file')
   validateOptions(options)
   -- assign defaults after validating first
   local assign = require 'utils.object-utils'.assign

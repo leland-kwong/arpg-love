@@ -42,8 +42,7 @@ local function iterateActiveGrid(self, cb, a, b, c)
         local value = row[x]
         local isInColViewport = x >= w and x <= e
         local isInViewport = isInRowViewport and isInColViewport
-        local tileExists = value ~= nil
-        if tileExists then
+        if not self.isEmptyTile(value) then
           cb(self, value, x, y, isInViewport, a, b, c)
         end
       end
@@ -60,6 +59,9 @@ local mapBlueprint = {
   grid = {
     {}
   },
+  isEmptyTile = function()
+    return false
+  end,
   onUpdateStart = noop,
   onUpdate = nil,
   onUpdateEnd = noop,
@@ -77,17 +79,6 @@ local mapBlueprint = {
       n = n,
       s = s
     }
-
-    self.playerVisitedIndices = self.playerVisitedIndices or {}
-    local playerRef = Component.get('PLAYER')
-    local Position = require 'utils.position'
-
-    local gridX, gridY = Position.pixelsToGridUnits(playerRef.x, playerRef.y, config.gridSize)
-    local index = Grid.getIndexByCoordinate(self.grid, gridX, gridY)
-    self.isNewGridPosition = (gridX ~= self.lastGridX) or (gridY ~= self.lastGridY)
-    self.isVisitedGridPosition = self.playerVisitedIndices[index]
-    self.playerVisitedIndices[index] = true
-    self.lastGridX, self.lastGridY = gridX, gridY
 
     self.onUpdateStart(self, dt)
     if self.onUpdate then

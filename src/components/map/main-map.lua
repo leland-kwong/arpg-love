@@ -108,7 +108,7 @@ local rollWallTileType = Chance({
 })
 
 local isTileValue = function(v)
-  return v and (not v.walkable)
+  return not Dungeon.isEmptyTile(v) and (not v.walkable)
 end
 
 local getTileFromTileDefinition = function(self, x, y)
@@ -192,7 +192,7 @@ local function addWallTileEntity(self, positionIndex, animation, x, y, opacity, 
 end
 
 local function neighborCheckCallback(hasNeighbor, cellValue)
-  return hasNeighbor or (cellValue ~= nil)
+  return hasNeighbor or not Dungeon.isEmptyTile(cellValue)
 end
 
 -- Generate all collision objects ahead of time since game elements
@@ -202,7 +202,8 @@ local function setupCollisionObjects(self, grid, gridSize)
   local collisionWorlds = require 'components.collision-worlds'
   local collisionGrid = cloneGrid(grid, function(v, x, y)
     if (not Map.WALKABLE(v)) then
-      local isEmptyTile = v == nil
+      local isEmptyTile = Dungeon.isEmptyTile(v)
+      -- ignore any holes in the map
       if isEmptyTile then
         local hasNeighbor = Grid.walkNeighbors(grid, x, y, neighborCheckCallback, false, true)
         if (not hasNeighbor) then
@@ -244,6 +245,8 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   group = groups.firstLayer,
   class = collisionGroups.mainMap,
 
+  isEmptyTile = Dungeon.isEmptyTile,
+
   init = function(self)
     self.grid = Dungeon:getData(self.mapId).grid
     self.tileDefs = generatedTileDefinitionsByMapId:get(self.mapId)
@@ -279,7 +282,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
 
   onUpdate = function(self, value, x, y, isInViewport, dt)
     local index = Grid.getIndexByCoordinate(self.grid, x, y)
-    local isEmptyTile = value == nil
+    local isEmptyTile = Dungeon.isEmptyTile(value)
     local isWall = not Map.WALKABLE(value)
 
     -- if its unwalkable, add a collision object and create wall tile
@@ -360,7 +363,7 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
 
     if value.crossSection then
       local tileValueBelow = Grid.get(self.grid, x, y+1)
-      local shouldDrawCrossSection = not tileValueBelow
+      local shouldDrawCrossSection = Dungeon.isEmptyTile(tileValueBelow)
       if shouldDrawCrossSection then
         table.insert(self.drawQueue.crossSections, function()
           love.graphics.setColor(1,1,1)

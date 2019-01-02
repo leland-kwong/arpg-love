@@ -5,6 +5,7 @@ local mapBlueprint = require 'components.map.map-blueprint'
 local config = require 'config.config'
 local memoize = require 'utils.memoize'
 local Grid = require 'utils.grid'
+local Dungeon = require 'modules.dungeon'
 
 local COLOR_TILE_OUT_OF_VIEW = {1,1,1,0.3}
 local COLOR_TILE_IN_VIEW = {1,1,1,1}
@@ -66,6 +67,8 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
   y = 50,
   w = 100,
   h = 100,
+
+  isEmptyTile = Dungeon.isEmptyTile,
 
   getRectangle = function(self)
     return self.x, self.y, self.w, self.h
