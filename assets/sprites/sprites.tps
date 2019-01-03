@@ -191,7 +191,6 @@
             <key type="filename">custom-art/gui/gui-home-button.png</key>
             <key type="filename">custom-art/gui/gui-inventory-button--hover.png</key>
             <key type="filename">custom-art/gui/gui-inventory-button.png</key>
-            <key type="filename">custom-art/gui/gui-map-pointer.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree-button--hover.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree-button.png</key>
             <key type="filename">custom-art/items/cube.png</key>
@@ -690,14 +689,32 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/gui/gui-map-pointer.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>2,3,5,6</rect>
+                <key>scale9Paddings</key>
+                <rect>2,3,5,6</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/gui/gui-skill-tree_node_background.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree_node_blood-rage.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_cooldown-reduction.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree_node_damage-up.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_energy-regeneration.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_health-regeneration.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree_node_heavy-strike.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_hybrid-regeneration.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree_node_lightning.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree_node_max-energy.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree_node_max-health-energy.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree_node_max-health.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_root.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree_node_speed-up.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -708,6 +725,21 @@
                 <rect>6,6,13,13</rect>
                 <key>scale9Paddings</key>
                 <rect>6,6,13,13</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_cooldown-reduction-2.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_energy-steal.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_life-steal.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>8,8,17,17</rect>
+                <key>scale9Paddings</key>
+                <rect>8,8,17,17</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -985,16 +1017,29 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/tiles/treasure-chest.png</key>
+            <key type="filename">custom-art/tiles/treasure-chest-body.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>9,7,17,13</rect>
+                <rect>9,6,18,12</rect>
                 <key>scale9Paddings</key>
-                <rect>9,7,17,13</rect>
+                <rect>9,6,18,12</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/treasure-chest-lid.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,1.14286</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>9,4,18,7</rect>
+                <key>scale9Paddings</key>
+                <rect>9,4,18,7</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
