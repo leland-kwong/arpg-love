@@ -96,6 +96,7 @@ local function setupSlotInteractions(
       return getSlots()[gridY][gridX]
     end
 
+    local tooltipRef
     local slotSize = self.slotSize
     local guiSlot = Gui.create({
       x = posX,
@@ -107,7 +108,7 @@ local function setupSlotInteractions(
       onUpdate = function(self)
         -- create a tooltip
         local item = getItem()
-        if self.hovered and item and (not self.tooltip) then
+        if self.hovered and item and (not tooltipRef) then
           local itemState = itemSystem.getState(item)
           local Block = require 'components.gui.block'
           local itemConfig = require'components.item-inventory.items.config'
@@ -271,7 +272,7 @@ local function setupSlotInteractions(
 
           table.insert(rows, rightClickActionBlock)
 
-          self.tooltip = Block.create({
+          tooltipRef = Block.create({
             x = posX + self.w,
             y = posY,
             background = {0,0,0,0.9},
@@ -284,9 +285,9 @@ local function setupSlotInteractions(
         end
 
         -- cleanup tooltip
-        if (not self.hovered) and self.tooltip then
-          self.tooltip:delete()
-          self.tooltip = nil
+        if (not self.hovered) and tooltipRef then
+          tooltipRef:delete()
+          tooltipRef = nil
         end
       end,
       onClick = function(self, event)

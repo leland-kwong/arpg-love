@@ -12,12 +12,12 @@ function Test.run()
   local tests = Test.tests
   for i=1, #tests do
     local name, testFn = unpack(tests[i])
-    print('test '..name)
+    print('[test] '..name)
     testFn()
   end
 end
 
-local group = Component.newGroup({ name = 'test-group' })
+local group = Component.newGroup({ name = 'testGroup' })
 local calls = {}
 
 local blueprint = {
@@ -74,6 +74,30 @@ assert(calls.draw[1][1].initialProps == props)
 
 assert(#calls.final == 1)
 assert(calls.final[1][1].initialProps == props)
+
+Test.suite('component created during update loop and removed from system immediately after', function()
+  local childRef
+  local parentRef = Component.create({
+    init = function(self)
+      Component.addToGroup(self, 'testGroup')
+    end,
+    update = function(self)
+      childRef = Component.create({
+          init = function(self)
+            Component.addToGroup(self, 'testGroup')
+          end
+        })
+        :setParent(self)
+      end
+    })
+    Component.groups.testGroup.updateAll(dt)
+    parentRef:delete(true)
+
+  assert(
+    not Component.get(childRef:getId()),
+    'child ref should be removed from system'
+  )
+end)
 
 Test.suite('recursiveDeleteTest', function()
   -- new test group

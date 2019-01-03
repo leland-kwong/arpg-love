@@ -413,6 +413,7 @@ function M.newGroup(groupDefinition)
 
     count = count - 1
     componentsById[id] = nil
+    newComponentsById[id] = nil
     local entity = M.entitiesById[id]
     local component = entity[Group.name]
     if Group.onComponentLeave then
@@ -426,15 +427,12 @@ function M.newGroup(groupDefinition)
   end
 
   function Group.hasComponent(id)
-    return not not componentsById[id]
+    return (not not componentsById[id])
+      or (not not newComponentsById[id])
   end
 
   function Group.getAll()
     return componentsById
-  end
-
-  function Group.get(_, id)
-    return componentsById[id]
   end
 
   M.groups[Group.name] = Group
