@@ -27,25 +27,31 @@ local PopupTextBlueprint = {
 local subjectPool = TablePool.newAuto()
 
 local tweenEndState = {offset = -10, time = 1}
+local tweenEndState2 = {offset = tweenEndState.offset - 4, opacity = 0}
 local function animationCo(duration, textWidth)
   local frame = 0
   local subject = setProp(subjectPool.get())
+    :set('opacity', 1)
     :set('offset', 0)
     :set('time', 0)
     :set('dx', getDirection() * (textWidth + 4))
     :set('dy', math.random(0, 2) * 4)
   local posTween = tween.new(duration, subject, tweenEndState, tween.easing.outExpo)
+  local opacityTween = tween.new(0.2, subject, tweenEndState2, tween.easing.outExpo)
   local complete = false
 
   while (not complete) do
-    complete = posTween:update(1/60)
-    coroutine.yield(subject.offset, subject.time, subject.dx, subject.dy)
+    local complete1 = posTween:update(1/60)
+    if complete1 then
+      complete = opacityTween:update(1/60)
+    end
+    coroutine.yield(subject.offset, subject.time, subject.dx, subject.dy, subject.opacity)
   end
   subjectPool.release(subject)
 end
 
 function PopupTextBlueprint:new(text, x, y, duration, color)
-  duration = duration or 0.3
+  duration = duration or 0.5
   local textWidth = GuiText.getTextSize(text, self.font)
   local animation = coroutine.wrap(animationCo)
   animation(duration, textWidth)
@@ -70,14 +76,15 @@ function PopupTextBlueprint.update(self)
   while i <= #self.textObjectsList do
     local obj = self.textObjectsList[i]
     local text, x, y, animation, duration, color = obj[1], obj[2], obj[3], obj[4], obj[5], obj[6]
-    local offsetY, time, dx, dy, errors = animation(duration)
+    local offsetY, time, dx, dy, opacity, errors = animation(duration)
 
     local isComplete = offsetY == nil
     if isComplete then
       table.remove(self.textObjectsList, i)
     else
       i = i + 1
-      textObjShared[1] = color or self.color
+      local Color = require 'modules.color'
+      textObjShared[1] = {Color.multiplyAlpha(color or self.color, opacity)}
       textObjShared[2] = text
       self.textObj:add(textObjShared, x + (time * dx), y + offsetY + dy)
     end
