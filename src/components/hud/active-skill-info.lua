@@ -314,9 +314,10 @@ function ActiveSkillInfo.update(self, dt)
   self.activeItem = nextActiveItem
 end
 
+local Constants = require 'components.state.constants'
 local mouseBtnToString = {
-  [1] = 'lm',
-  [2] = 'rm'
+  [1] = Constants.glyphs.leftMouseBtn,
+  [2] = Constants.glyphs.rightMouseBtn
 }
 
 local keyboardBtnToString = {
