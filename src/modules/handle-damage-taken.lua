@@ -8,10 +8,6 @@ local popupText = PopupTextController.create({
   id = 'popupText',
   font = require 'components.font'.secondary.font
 })
-local popupTextCritMultiplier = PopupTextController.create({
-  font = require 'components.font'.secondary.font,
-  color = Color.YELLOW
-})
 
 local function hitAnimation()
   local frame = 0
@@ -36,18 +32,12 @@ local function onDamageTaken(self, actualDamage, actualNonCritDamage, criticalMu
   local getTextSize = require 'components.gui.gui-text'.getTextSize
   local offsetCenter = -getTextSize(actualDamage, popupText.font) / 2
   local isCriticalHit = criticalMultiplier > 0
-  if (isCriticalHit) then
-    local critText = criticalMultiplier..'x '
-    popupTextCritMultiplier:new(
-      critText,
-      self.x + offsetCenter - getTextSize(critText, popupText.font),
-      self.y - self.h
-    )
-  end
   popupText:new(
     actualDamage,
     self.x + offsetCenter,
-    self.y - self.h
+    self.y - self.h - self.z,
+    nil,
+    isCriticalHit and Color.YELLOW or Color.WHITE
   )
   self.hitAnimation = coroutine.wrap(hitAnimation)
 

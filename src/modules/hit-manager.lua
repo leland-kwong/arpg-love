@@ -1,5 +1,3 @@
-local PopupTextController = require 'components.popup-text'
-local popupText = PopupTextController.create()
 local min, max, random = math.min, math.max, math.random
 local round = require 'utils.math'.round
 local Object = require 'utils.object-utils'
