@@ -183,15 +183,18 @@ local objectParsersByType = {
       local Component = require 'modules.component'
       local uid = require 'utils.uid'
       local exitId = 'exit-'..uid()
-      local mapId = Dungeon:new(blockData.nextLevel, {
+      local nextLevel = obj.properties.location or blockData.nextLevel
+      local mapId = Dungeon:new({
+        layoutType = nextLevel,
         from = {
           mapId = Component.get('MAIN_SCENE').mapId,
-          exitId = exitId
+          exitId = exitId,
         },
-        nextLevel = blockData.nextLevel
+        nextLevel = blockData.layoutType
       })
       LevelExit.create({
         id = exitId,
+        locationName = nextLevel,
         x = origin.x * config.gridSize + obj.x,
         y = origin.y * config.gridSize + obj.y,
         onEnter = function(self)
@@ -336,30 +339,13 @@ local function addGridBlock(grid, gridBlockToAdd, startX, startY, transformFn, b
   return grid
 end
 
-local defaultOptions = {
-  -- previous map
-  from = {
-    mapId = nil,
-    exitId = nil
-  },
-  nextLevel = '' -- the next layout that the exit should use
-}
-
-local function validateOptions(options)
-  for k,v in pairs(options or {}) do
-    if defaultOptions[k] == nil then
-      error('invalid dungeon option `'..k..'`')
-    end
-  end
-end
-
 --[[
   Initializes and generates a dungeon.
 
   Returns a 2-d grid.
 ]]
-local function buildDungeon(layoutType, options)
-  local layoutGenerator = require('modules.dungeon.layouts.'..layoutType)
+local function buildDungeon(options)
+  local layoutGenerator = require('modules.dungeon.layouts.'..options.layoutType)
   local layout = layoutGenerator()
   local extractProps = require 'utils.object-utils.extract'
   local gridBlockNames, columns, exitPosition = extractProps(layout, 'gridBlockNames', 'columns', 'exitPosition')
@@ -437,13 +423,15 @@ local function buildDungeon(layoutType, options)
     fn()
   end
 
+  local connectsToAnotherMap = options.from.mapId
   -- create an exit that points back to the previous map
-  if options.from.mapId then
+  if connectsToAnotherMap then
     local LevelExit = require 'components.map.level-exit'
     local config = require 'config.config'
     LevelExit.create({
       x = exitPosition.x * config.gridSize,
       y = exitPosition.y * config.gridSize,
+      locationName = options.nextLevel,
       onEnter = function()
         local msgBus = require 'components.msg-bus'
         msgBus.send(msgBus.SCENE_STACK_PUSH, {
@@ -457,15 +445,31 @@ local function buildDungeon(layoutType, options)
     })
   end
 
-  return {
-    grid = grid,
-    name = layoutType
-  }
+  return grid
+end
+
+local defaultOptions = {
+  layoutType = '',
+  -- previous map
+  from = {
+    mapId = nil,
+    exitId = nil
+  },
+  nextLevel = '' -- the next layout that the exit should use
+}
+
+local function validateOptions(options)
+  for k,v in pairs(options or {}) do
+    if defaultOptions[k] == nil then
+      error('invalid dungeon option `'..k..'`')
+    end
+  end
 end
 
 -- generates a dungeon and returns the dungeon id
-function Dungeon:new(layoutType, options)
-  assert(type(layoutType) == 'string', 'layout type should be the name of the layout file')
+function Dungeon:new(options)
+  assert(type(options) == 'table')
+  assert(type(options.layoutType) == 'string', 'layout type should be the name of the layout file')
   validateOptions(options)
   -- assign defaults after validating first
   local assign = require 'utils.object-utils'.assign
@@ -474,7 +478,6 @@ function Dungeon:new(layoutType, options)
   local uid = require 'utils.uid'
   local dungeonId = uid()
   self.generated[dungeonId] = {
-    layoutType = layoutType,
     options = options
   }
   return dungeonId
@@ -486,8 +489,8 @@ function Dungeon:getData(dungeonId)
   if (not dungeon) then
     return nil
   end
-  dungeon.built = dungeon.built or buildDungeon(dungeon.layoutType, dungeon.options)
-  return dungeon.built
+  dungeon.grid = dungeon.grid or buildDungeon(dungeon.options)
+  return dungeon
 end
 
 function Dungeon:remove(dungeonId)

@@ -414,19 +414,6 @@ return {
           properties = {}
         },
         {
-          id = 58,
-          name = "entrance to level",
-          type = "levelExit",
-          shape = "rectangle",
-          x = 208,
-          y = 0,
-          width = 32,
-          height = 16,
-          rotation = 0,
-          visible = true,
-          properties = {}
-        },
-        {
           id = 61,
           name = "ramp-1",
           type = "ramp",

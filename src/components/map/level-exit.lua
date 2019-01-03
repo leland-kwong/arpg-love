@@ -17,6 +17,7 @@ local function collisionFilter(_, other)
 end
 
 return Component.createFactory({
+  locationName = '',
   class = 'environment',
   onEnter = function()
     print('exit entered')
@@ -103,6 +104,21 @@ return Component.createFactory({
         self.collision.h
       )
     end
+
+    require 'components.map-text'
+    local Color = require 'modules.color'
+    local camera = require 'components.camera'
+    local x, y = camera:toScreenCoords(self.x, self.y)
+    local GuiText = require 'components.gui.gui-text'
+    local MapText = Component.get('MapText')
+    local text = self.locationName
+    local textWidth = GuiText.getTextSize(text, MapText.font)
+    MapText:add(
+      text,
+      Color.WHITE,
+      x + animation:getWidth()/2 - textWidth/2,
+      y - oy - 9
+    )
   end,
   drawOrder = function(self)
     return Component.groups.all:drawOrder(self) + 5

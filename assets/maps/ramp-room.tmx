@@ -200,7 +200,6 @@
   <object id="57" name="ramp-1" type="ramp" x="288" y="368">
    <polygon points="0,0 176,-80 176,48 0,128"/>
   </object>
-  <object id="58" name="entrance to level" type="levelExit" x="208" y="0" width="32" height="16"/>
   <object id="61" name="ramp-1" type="ramp" x="656" y="288">
    <polygon points="0,0 176,80 176,208 0,128"/>
   </object>
