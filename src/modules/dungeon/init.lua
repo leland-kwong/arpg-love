@@ -5,12 +5,9 @@ local iterateGrid = require 'utils.iterate-grid'
 local f = require 'utils.functional'
 local collisionWorlds = require 'components.collision-worlds'
 
-local NULL_CELL = 'NULL_CELL'
 local Dungeon = {
   generated = {},
-  isEmptyTile = function(v)
-    return (v == nil) or (v == NULL_CELL)
-  end
+  isEmptyTile = require 'modules.dungeon.modules.is-empty-tile'
 }
 
 local function readTiledFileProperty(path)
@@ -410,7 +407,7 @@ local function buildDungeon(options)
           return cellTranslationsByLayer.walls[wallValue]
         end
 
-        return cellTranslationsByLayer.ground[groundValue] or NULL_CELL
+        return cellTranslationsByLayer.ground[groundValue] or 'NULL_CELL'
       end,
       gridBlockName
     )
