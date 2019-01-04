@@ -623,8 +623,8 @@ local function updateLightWorld(camera)
 end
 
 local function resetInteractStates(self)
-  self.itemHovered = nil
-  self.environmentInteractHovered = nil
+  self.state.itemHovered = nil
+  self.state.environmentInteractHovered = nil
 end
 
 function Player.update(self, dt)
