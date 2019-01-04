@@ -31,7 +31,8 @@ return function(obj, grid, origin, blockData, cellTranslationsByLayer)
         local nx, ny = gridX + ox, gridY + oy
         local cell = Grid.get(grid, nx, ny)
 
-        local isMapCell = not not cell
+        local isEmptyTile = require 'modules.dungeon.modules.is-empty-tile'
+        local isMapCell = not isEmptyTile(cell)
         if (not isMapCell) then
           isTraversable = false
         end
