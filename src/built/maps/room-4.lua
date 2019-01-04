@@ -9,7 +9,7 @@ return {
   tilewidth = 16,
   tileheight = 16,
   nextlayerid = 5,
-  nextobjectid = 42,
+  nextobjectid = 44,
   properties = {},
   tilesets = {
     {
@@ -567,6 +567,21 @@ return {
           rotation = 0,
           visible = true,
           properties = {}
+        },
+        {
+          id = 43,
+          name = "Treasure chest",
+          type = "treasureChest",
+          shape = "rectangle",
+          x = 560,
+          y = 1184,
+          width = 16,
+          height = 16,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["props"] = "../../modules/dungeon/treasure-chest-definitions/starting-items.lua"
+          }
         }
       }
     }
