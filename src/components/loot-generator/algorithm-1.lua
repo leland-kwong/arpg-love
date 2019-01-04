@@ -91,10 +91,14 @@ return function()
   }
 
   local function randomItemByRarity(rarity)
+    if (itemConfig.rarity.LEGENDARY == rarity) then
+      return randomLegendaryItem()()
+    end
+
+    local baseItem = randomBaseItem()()
     local isMagicalOrRare = rarity == itemConfig.rarity.MAGICAL or
       rarity == itemConfig.rarity.RARE
     if isMagicalOrRare then
-      local baseItem = randomBaseItem()()
       local numModifiers = extraModifiersByRarity[rarity]
       local modsToRoll = {}
       local numModsAdded = 0
@@ -113,10 +117,6 @@ return function()
       local title = itemSystem.getDefinition(baseItem).title
       itemSystem.item.setCustomTitle(baseItem, customTitles[rarity](title))
       return baseItem
-    end
-
-    if (itemConfig.rarity.LEGENDARY == rarity) then
-      return randomLegendaryItem()()
     end
 
     return baseItem
