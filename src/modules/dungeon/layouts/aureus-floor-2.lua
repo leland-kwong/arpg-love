@@ -27,7 +27,6 @@ return function()
       end,
       mapBlockGenerator,
       mapBlockGenerator,
-      mapBlockGenerator,
       mapBlockGenerator
     }
     while #mapDefinitions > 0 do
@@ -44,7 +43,7 @@ return function()
 
   return {
     gridBlockNames = generateMapBlockDefinitions(),
-    columns = 3,
+    columns = 4,
     startPosition = {
       x = 3,
       y = 1
