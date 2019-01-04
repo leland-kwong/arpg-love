@@ -13,6 +13,10 @@ local Dungeon = {
   end
 }
 
+local function readTiledFileProperty(path)
+  local absolutePath = string.gsub()
+end
+
 local WALL_TILE = {
   crossSection = 'floor-cross-section-0',
   walkable = false
@@ -106,10 +110,12 @@ local objectParsersByType = {
     treasureChest = function(obj, grid, origin, blockData)
       local TreasureChest = require 'components.treasure-chest'
       local config = require 'config.config'
-      TreasureChest.create({
+      local filePropLoader = require 'modules.dungeon.modules.file-property-loader'
+      local O = require 'utils.object-utils'
+      TreasureChest.create(O.extend({
         x = (origin.x * config.gridSize) + obj.x,
         y = (origin.y * config.gridSize) + obj.y
-      })
+      }, filePropLoader(obj.properties.props)))
     end,
     environmentDoor = function(obj, grid, origin, blockData)
       local config = require 'config.config'
