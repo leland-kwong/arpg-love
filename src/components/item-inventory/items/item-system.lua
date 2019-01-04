@@ -85,6 +85,11 @@ local itemDefaults = {
 }
 -- Factory function that creates a new instance based on the module's instance props.
 function items.create(module)
+	if (type(module) == 'string') then
+		return items.create(
+			require('components.item-inventory.items.definitions.'..module)
+		)
+	end
 	local createFn = factoriesByType[module.type]
 	if not createFn then
 		local ser = require 'utils.ser'
