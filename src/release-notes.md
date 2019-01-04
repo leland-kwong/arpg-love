@@ -1,5 +1,21 @@
 # Release notes
 
+## 5.2.0-pre-alpha
+
+New
+
+* Treasure Chest
+
+Balance
+
+* Reduced *cooldown reduction* and *attack time reduction* item modifier ranges.
+
+Fixes
+
+* Map no longer has issues with random areas not rendering properly
+
+---
+
 ## 5.1.0-pre-alpha
 
 New
