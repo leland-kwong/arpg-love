@@ -7,10 +7,6 @@ return function()
     },
     {
       chance = 1,
-      value = 'room-2'
-    },
-    {
-      chance = 1,
       value = 'room-4'
     },
     {
