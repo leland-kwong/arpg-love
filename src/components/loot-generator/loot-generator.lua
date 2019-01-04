@@ -325,7 +325,7 @@ function LootGenerator.init(self)
         parent.isNew = false
         local Math = require 'utils.math'
         local dist = Math.dist(self.x, self.y, actualX, actualY)
-        local duration = dist * 0.01
+        local duration = math.max(0.001, dist * 0.01)
         self.tween = tween.new(duration, self, tweenTarget, tween.easing.backIn)
       end
     end,

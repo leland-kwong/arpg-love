@@ -9,7 +9,7 @@ return {
   tilewidth = 16,
   tileheight = 16,
   nextlayerid = 5,
-  nextobjectid = 41,
+  nextobjectid = 42,
   properties = {},
   tilesets = {
     {
@@ -96,9 +96,7 @@ return {
         },
         {
           id = 22,
-          image = "../../../assets/sprites/custom-art/tiles/treasure-chest.png",
-          width = 36,
-          height = 28
+          image = "../../../assets/sprites/custom-art/tiles/treasure-chest.png"
         }
       }
     }
@@ -459,6 +457,19 @@ return {
           x = 800,
           y = 1264,
           width = 96,
+          height = 16,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 41,
+          name = "Treasure chest",
+          type = "treasureChest",
+          shape = "rectangle",
+          x = 112,
+          y = 160,
+          width = 16,
           height = 16,
           rotation = 0,
           visible = true,

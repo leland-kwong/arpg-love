@@ -103,6 +103,14 @@ local objectParsersByType = {
     end,
   },
   ['environment'] = {
+    treasureChest = function(obj, grid, origin, blockData)
+      local TreasureChest = require 'components.treasure-chest'
+      local config = require 'config.config'
+      TreasureChest.create({
+        x = (origin.x * config.gridSize) + obj.x,
+        y = (origin.y * config.gridSize) + obj.y
+      })
+    end,
     environmentDoor = function(obj, grid, origin, blockData)
       local config = require 'config.config'
       local Component = require 'modules.component'

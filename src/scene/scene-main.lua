@@ -56,9 +56,6 @@ function MainScene.init(self)
     end, 1),
 
     msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
-      if randomItem then
-        msgBus.send(msgBus.GENERATE_LOOT, {msgValue.x, msgValue.y, randomItem})
-      end
       msgBus.send(msgBus.EXPERIENCE_GAIN, math.floor(msgValue.experience))
     end),
 

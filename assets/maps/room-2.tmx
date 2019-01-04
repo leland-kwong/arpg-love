@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="60" height="80" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="41">
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="60" height="80" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="42">
  <tileset firstgid="1" source="action rpg.tsx"/>
  <layer id="1" name="ground" width="60" height="80">
   <data encoding="csv">
@@ -185,6 +185,11 @@
   <object id="38" name="block opening" type="blockOpening" x="0" y="1120" width="16" height="96"/>
   <object id="39" name="block opening" type="blockOpening" x="64" y="1264" width="96" height="16"/>
   <object id="40" name="block opening" type="blockOpening" x="800" y="1264" width="96" height="16"/>
+  <object id="41" name="Treasure chest" type="treasureChest" x="112" y="160" width="16" height="16">
+   <properties>
+    <property name="id" value="startingGear"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup color="#ffff00" id="4" name="spawn-points">
   <object id="2" name="ai-group" type="aiGroup" x="463" y="410" width="53" height="53">
