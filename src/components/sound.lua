@@ -68,7 +68,7 @@ local default = {
   maxActiveSources = 10
 }
 
-function Sound.playEffect(file, modifier)
+function Sound.playEffect(file, modifier, maxActiveSources)
   local sourceList = activeSources[file]
   if (not sourceList) then
     sourceList = {}

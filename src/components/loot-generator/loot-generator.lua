@@ -91,11 +91,8 @@ local itemNamesTooltipLayer = Gui.create({
         h = ttHeight,
         getMousePosition = itemMousePosition,
         inputContext = 'loot',
-        onPointerEnter = function()
+        onPointerMove = function()
           msgBus.send(msgBus.ITEM_HOVERED, itemParent)
-        end,
-        onPointerLeave = function()
-          msgBus.send(msgBus.ITEM_HOVERED)
         end,
         onUpdate = function(self)
           tooltip.hovered = self.hovered
@@ -333,11 +330,8 @@ function LootGenerator.init(self)
       end
     end,
     getMousePosition = itemMousePosition,
-    onPointerEnter = function(self)
+    onPointerMove = function(self)
       msgBus.send(msgBus.ITEM_HOVERED, self)
-    end,
-    onPointerLeave = function()
-      msgBus.send(msgBus.ITEM_HOVERED)
     end,
     pickup = function()
       local _, errorMsg = rootStore:addItemToInventory(item)

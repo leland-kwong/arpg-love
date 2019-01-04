@@ -135,7 +135,7 @@ msgBus.on(msgBus.PLAYER_FULL_HEAL, function()
   })
 end)
 
-local function canPickupItem(self, item)
+local function canInteractWithItem(self, item)
   if (not item) then
     return false
   end
@@ -210,7 +210,8 @@ local Player = {
 
   init = function(self)
     local state = {
-      itemHovered = nil
+      itemHovered = nil,
+      environmentInteractHovered = nil
     }
     self.state = state
 
@@ -221,6 +222,12 @@ local Player = {
       actsOn = 'PLAYER'
     })
     self.listeners = {
+      msgBus.on('INTERACT_TREASURE_CHEST', function(chest)
+        self.state.environmentInteractHovered = chest
+        local Math = require 'utils.math'
+        return Math.dist(self.x, self.y, chest.x, chest.y) <= self.pickupRadius
+      end),
+
       msgBus.on(msgBus.MOUSE_PRESSED, function()
         self.isAlreadyAttacking = InputContext.contains('any')
       end),
@@ -334,7 +341,7 @@ local Player = {
 
       msgBus.on(msgBus.ITEM_PICKUP, function(msg)
         local item = msg
-        if canPickupItem(self, item) then
+        if canInteractWithItem(self, item) then
           local pickupSuccess = item:pickup()
           if pickupSuccess then
             msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, true)
@@ -530,8 +537,8 @@ local function handleAbilities(self, dt)
   local canUseAbility = self.isAlreadyAttacking or
     InputContext.contains('any') or
     (
-      InputContext.contains('loot') and
-      (not canPickupItem(self, self.state.itemHovered))
+      (InputContext.contains('loot treasureChest')) and
+      (not canInteractWithItem(self, self.state.itemHovered or self.state.environmentInteractHovered))
     )
   if canUseAbility then
     -- SKILL_1
@@ -608,11 +615,16 @@ local function handleBossMode(self)
   end
 end
 
-function updateLightWorld(camera)
+local function updateLightWorld(camera)
   local cameraTranslateX, cameraTranslateY = camera:getPosition()
   local cWidth, cHeight = camera:getSize()
   local lightWorld = Component.get('lightWorld')
   lightWorld:setPosition(-cameraTranslateX + cWidth/2, -cameraTranslateY + cHeight/2)
+end
+
+local function resetInteractStates(self)
+  self.itemHovered = nil
+  self.environmentInteractHovered = nil
 end
 
 function Player.update(self, dt)
@@ -678,6 +690,7 @@ function Player.update(self, dt)
   end
 
   updateLightWorld(camera)
+  resetInteractStates(self)
 end
 
 local function drawShadow(self, sx, sy, ox, oy)

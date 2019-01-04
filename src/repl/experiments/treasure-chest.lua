@@ -2,48 +2,147 @@ local dynamicRequire = require 'utils.dynamic-require'
 local Component = require 'modules.component'
 local AnimationFactory = dynamicRequire 'components.animation-factory'
 local Gui = require 'components.gui.gui'
+local msgBus = require 'components.msg-bus'
+local Color = require 'modules.color'
+
+local bodyGraphic = AnimationFactory:newStaticSprite('treasure-chest-body')
+local lidGraphic = AnimationFactory:newStaticSprite('treasure-chest-lid')
+local bodyWidth = math.max(
+  bodyGraphic:getWidth(),
+  lidGraphic:getWidth()
+)
+
+local speed = 2
+local acceleration = 5
+local emissionAreaWidth = bodyWidth/1.4
+local particleScaleY = 6
+local animation = AnimationFactory:newStaticSprite('pixel-white-1x1')
+local psystem = love.graphics.newParticleSystem(AnimationFactory.atlas, 200)
+local col = {1,1,0.5}
+psystem:setColors(
+  col[1], col[2], col[3], 0,
+  col[1], col[2], col[3], 1,
+  col[1], col[2], col[3], 0
+)
+-- psystem:setEmissionRate(10)
+psystem:setQuads(animation.sprite)
+psystem:setOffset(animation:getOffset())
+psystem:setDirection(-math.pi / 2)
+psystem:setSpeed(speed)
+psystem:setLinearAcceleration(
+  0,
+  0,
+  0,
+  -acceleration
+) -- move particles in all random directions
+psystem:setSizes(1, 1, 1, 1)
+psystem:setSizeVariation(1)
+psystem:setEmissionArea('ellipse', emissionAreaWidth, 2, 0, false)
+Component.create({
+  id = 'TreasureChestParticleSystem',
+  init = function(self)
+    Component.addToGroup(self, 'all')
+  end,
+  update = function(self, dt)
+    psystem:update(dt)
+  end,
+  draw = function()
+    love.graphics.setColor(1,1,1)
+    love.graphics.draw(psystem, 0, 0, 0, 1, particleScaleY, 0, 10/particleScaleY)
+  end,
+  drawOrder = function(self)
+    return 5
+  end
+})
 
 local TreasureChest = Component.createFactory({
+  -- debug = true,
   lidOffsetY = 0,
   init = function(self)
     local parent = self
     Component.addToGroup(self, 'all')
 
-    self.bodyGraphic = AnimationFactory:newStaticSprite('treasure-chest-body')
-    self.lidGraphic = AnimationFactory:newStaticSprite('treasure-chest-lid')
-
-    self.width = math.max(
-      self.bodyGraphic:getWidth(),
-      self.lidGraphic:getWidth()
-    )
     self.height = 27
 
-    Gui.create({
+    self.interactNode = Gui.create({
       group = 'all',
-      x = parent.x - parent.width/2,
+      inputContext = 'treasureChest',
+      x = parent.x - bodyWidth/2,
       y = parent.y - 15,
-      width = parent.width,
+      width = bodyWidth,
       height = parent.height,
+      opened = false,
       getMousePosition = function(self)
         local camera = require 'components.camera'
-        local mx, my = camera:getMousePosition()
-        return mx, my
+        return camera:getMousePosition()
+      end,
+      onPointerMove = function(self)
+        self.canOpen = msgBus.send('INTERACT_TREASURE_CHEST', self)
       end,
       onClick = function(self)
-        print('chest clicked')
-        local tween = require 'modules.tween'
-        parent.tween = tween.new(1, parent, {lidOffsetY = -200}, tween.easing.inExpo)
+        if self.opened then
+          return
+        end
+
+        if self.canOpen == true then
+          self.opened = true
+          local tween = require 'modules.tween'
+          parent.tween = tween.new(1, parent, {lidOffsetY = -600}, tween.easing.inExpo)
+
+          local Sound = require 'components.sound'
+          Sound.playEffect('treasure-open.wav')
+        end
       end
     }):setParent(self)
+
+    local collisionWorlds = require 'components.collision-worlds'
+    local collisionYAdjustment = 6
+    self:addCollisionObject('obstacle', self.interactNode.x, self.interactNode.y + collisionYAdjustment, self.interactNode.width, self.interactNode.height - collisionYAdjustment)
+      :addToWorld(collisionWorlds.map)
+
+    self.particleClock = 0
   end,
   update = function(self, dt)
     if self.tween then
       local complete = self.tween:update(dt)
     end
+
+    self.particleClock = self.particleClock + dt
+    if self.particleClock > 0.1 then
+      self.particleClock = 0
+      psystem:setParticleLifetime(0.9)
+      psystem:setPosition(self.x, self.y / particleScaleY)
+      psystem:emit(1)
+    end
   end,
   draw = function(self)
-    self.bodyGraphic:draw(self.x, self.y)
-    self.lidGraphic:draw(self.x, self.y + self.lidOffsetY)
+    local lightWorldRef = Component.get('lightWorld')
+    if lightWorldRef then
+      lightWorldRef:addLight(self.x, self.y, 15, Color.SKY_BLUE)
+    end
+
+    love.graphics.setColor(0,0,0,0.4)
+    bodyGraphic:draw(self.x, self.y + 4, nil, nil, -1)
+
+    local Shaders = require 'modules.shaders'
+    local shader = Shaders('pixel-outline.fsh')
+    if self.interactNode.hovered then
+      local atlasData = AnimationFactory.atlasData
+      love.graphics.setShader(shader)
+      shader:send('enabled', true)
+      shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
+      shader:send('outline_width', 1)
+      shader:send('outline_color', Color.WHITE)
+    end
+
+    love.graphics.setColor(1,1,1)
+    bodyGraphic:draw(self.x, self.y)
+    lidGraphic:draw(self.x, self.y + self.lidOffsetY)
+
+    shader:send('enabled', false)
+  end,
+  drawOrder = function(self)
+    return Component.groups.all:drawOrder(self)
   end
 })
 
@@ -51,8 +150,17 @@ Component.create({
   id = 'TreasureChestTest',
   init = function(self)
     Component.addToGroup(self, 'all')
+
     TreasureChest.create({
-      id = 'mockTreasureChest'
+      id = 'mockTreasureChest',
+      x = 8 * 16,
+      y = 4 * 16
+    })
+
+    TreasureChest.create({
+      id = 'mockTreasureChest2',
+      x = 8 * 16,
+      y = 8 * 16
     })
   end,
 })
