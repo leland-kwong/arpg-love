@@ -7,35 +7,25 @@ return function()
     },
     {
       chance = 1,
-      value = 'room-2'
-    },
-    {
-      chance = 1,
       value = 'room-4'
     },
     {
       chance = 1,
-      value = 'room-5'
+      value = 'room-3'
     }
   })
 
   local function generateMapBlockDefinitions()
     local blocks = {
-      'ramp-room',
-      'room-2'
+      'room-2',
     }
+
     local mapDefinitions = {
-      -- function()
-      --   return 'room-2'
-      -- end,
-      function()
-        return 'room-3'
-      end,
-      -- mapBlockGenerator,
       mapBlockGenerator,
       mapBlockGenerator,
       mapBlockGenerator
     }
+
     while #mapDefinitions > 0 do
       local index = math.random(1, #mapDefinitions)
       local block = table.remove(mapDefinitions, index)()
@@ -47,10 +37,10 @@ return function()
 
   return {
     gridBlockNames = generateMapBlockDefinitions(),
-    columns = 3,
+    columns = 2,
     startPosition = {
-      x = 3,
-      y = 1
+      x = 4,
+      y = 6
     },
     exitPosition = {
       x = 3,
