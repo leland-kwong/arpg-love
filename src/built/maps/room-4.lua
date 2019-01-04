@@ -16,8 +16,8 @@ return {
       name = "action rpg",
       firstgid = 1,
       filename = "../../../assets/maps/action rpg.tsx",
-      tilewidth = 36,
-      tileheight = 28,
+      tilewidth = 16,
+      tileheight = 16,
       spacing = 0,
       margin = 0,
       columns = 0,
@@ -32,7 +32,7 @@ return {
       },
       properties = {},
       terrains = {},
-      tilecount = 11,
+      tilecount = 10,
       tiles = {
         {
           id = 0,
@@ -93,12 +93,6 @@ return {
           image = "../../../assets/sprites/custom-art/tiles/floor-10.png",
           width = 16,
           height = 16
-        },
-        {
-          id = 22,
-          image = "../../../assets/sprites/custom-art/tiles/treasure-chest.png",
-          width = 36,
-          height = 28
         }
       }
     }
@@ -462,7 +456,7 @@ return {
           name = "entrance to level",
           type = "levelExit",
           shape = "rectangle",
-          x = 864,
+          x = 384,
           y = 656,
           width = 32,
           height = 16,
