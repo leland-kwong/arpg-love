@@ -104,7 +104,7 @@ function MainScene.init(self)
       local entranceYOffset = 3 * config.gridSize
       playerStartPos = {x = x + entranceXOffset, y = y + entranceYOffset}
     else
-      local defaultStartPosition = {x = 4 * config.gridSize, y = 5 * config.gridSize}
+      local defaultStartPosition = {x = 4 * config.gridSize, y = 10 * config.gridSize}
       playerStartPos = defaultStartPosition
     end
   end
