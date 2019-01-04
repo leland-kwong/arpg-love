@@ -1,10 +1,4 @@
 local itemConfig = require("components.item-inventory.items.config")
-local msgBus = require("components.msg-bus")
-local itemSystem = require("components.item-inventory.items.item-system")
-local functional = require("utils.functional")
-local AnimationFactory = require 'components.animation-factory'
-
-local weaponCooldown = 0.1
 
 return {
 	type = "base.pod-module-initiate",
