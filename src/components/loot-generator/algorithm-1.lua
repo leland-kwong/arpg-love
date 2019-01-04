@@ -147,7 +147,7 @@ return function()
 
   --[[
     {itemLevel}
-    {dropRate} - out of 100%, where every 100% guarantees at least one item
+    {dropRate}
   ]]
   local function generateRandomItem(itemLevel, dropRate, minRarity, maxRarity)
     assert(type(itemLevel) == 'number')
@@ -155,8 +155,8 @@ return function()
     assert(type(minRarity) == 'number' and type(maxRarity) == 'number')
 
     local lootList = {}
-    local multiplier = 100
-    local randMax = 100 * multiplier
+    local multiplier = 90
+    local randMax = 100 * 100
 
     -- if this is over 0 then that means we should roll again for a chance at more items
     while getRate(dropRate) > 0 do
