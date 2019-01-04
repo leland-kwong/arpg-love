@@ -7,7 +7,6 @@ uniform vec2 texture_scale = vec2(1, 1);
 
 // includes the intercardinal pixels for outline generation
 uniform bool include_corners;
-uniform bool enabled = false;
 uniform bool pure_color = false; // the output will be based on the provided color and the texel's alpha
 
 float pixelSizeX = 1.0 / sprite_size.x;
@@ -19,7 +18,7 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
 	vec4 col = texture2D(texture, texture_coords);
 
 	bool hasOutline = outline_width > 0.0;
-	if (!hasOutline || !enabled) {
+	if (!hasOutline) {
 		return (pure_color && col.a > 0) ? color : col * color;
 	}
 

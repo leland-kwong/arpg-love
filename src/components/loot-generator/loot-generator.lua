@@ -399,7 +399,6 @@ function LootGenerator.init(self)
 
       if self.hovered then
         love.graphics.setShader(shader)
-        shader:send('enabled', true)
         shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
         shader:send('outline_width', 1)
         shader:send('outline_color', outlineColor)
@@ -416,7 +415,7 @@ function LootGenerator.init(self)
       Component.get('lightWorld'):addLight(centerX, centerY, 17, nil, 0.4)
 
       if self.hovered then
-        shader:send('enabled', false)
+        shader:send('outline_width', 0)
       end
     end,
 

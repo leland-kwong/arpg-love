@@ -74,7 +74,6 @@ local TreasureChest = extend(Gui, {
 
     if self.hovered then
       love.graphics.setShader(shader)
-      shader:send('enabled', true)
       shader:send('outline_color', self.hovered and outlineColor or Color.BLACK)
     end
 
@@ -87,7 +86,7 @@ local TreasureChest = extend(Gui, {
     )
 
     if self.hovered then
-      shader:send('enabled', false)
+      shader:send('outline_width', 0)
     end
   end,
   drawOrder = function(self)

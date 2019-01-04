@@ -596,7 +596,6 @@ function Ai.draw(self)
   drawShadow(self, h, w, ox, oy)
 
   love.graphics.setShader(shader)
-  shader:send('enabled', true)
   shader:send('sprite_size', shaderSpriteSize)
 
   if self.frozen then

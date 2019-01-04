@@ -94,7 +94,6 @@ end
 local spriteSize = {w, h}
 
 function PopupTextBlueprint.draw(self)
-  shader:send('enabled', true)
   shader:send('sprite_size', spriteSize)
   shader:send('outline_width', 2/16)
   shader:send('outline_color', outlineColor)
@@ -108,7 +107,7 @@ function PopupTextBlueprint.draw(self)
     self.y
   )
 
-  shader:send('enabled', false)
+  shader:send('outline_width', 0)
 end
 
 return Component.createFactory(PopupTextBlueprint)
