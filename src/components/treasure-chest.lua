@@ -73,17 +73,19 @@ local handleTreasureOpen = function(self, parent)
       delay = parent.delay or 0.25,
       x = self.x,
       y = self.y,
-      itemData = parent.itemData
+      itemData = parent.itemData,
+      guaranteedItems = parent.guaranteedItems
     })
   end
 end
 
 return Component.createFactory({
+  guaranteedItems = {},
   itemData = {
     level = 1,
-    dropRate = 200,
+    dropRate = 0,
     minRarity = itemConfig.rarity.NORMAL,
-    maxRarity = itemConfig.rarity.LEGENDARY,
+    maxRarity = itemConfig.rarity.NORMAL,
   },
   -- debug = true,
   lidOffsetY = 0,
