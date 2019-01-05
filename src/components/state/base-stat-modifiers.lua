@@ -31,7 +31,10 @@ return setmetatable({
 		TODO: add prop type handlers for transforming values. This way we can easily see how properties are being calculated.
 	]]
 	propTypesDisplayValue = setmetatable({
-		attackTime = valueTypeHandlers.time,
+		attackTime = function(v)
+			local Math = require 'utils.math'
+			return Math.round(1/v, 1)..' attacks/sec'
+		end,
 		cooldown = valueTypeHandlers.time,
 		increasedAttackSpeed = valueTypeHandlers.percent,
 		energyCostReduction = valueTypeHandlers.percent,
