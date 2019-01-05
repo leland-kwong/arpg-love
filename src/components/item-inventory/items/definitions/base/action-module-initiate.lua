@@ -1,7 +1,7 @@
 local itemConfig = require("components.item-inventory.items.config")
 
 return {
-	type = "base.pod-module-initiate",
+	type = "base.action-module-initiate",
 
 	blueprint = {
 		extraModifiers = {},
@@ -13,7 +13,7 @@ return {
 		sprite = "weapon-module-initiate",
 		title = 'r-1 initiate',
 		baseDropChance = 1,
-		category = itemConfig.category.POD_MODULE,
+		category = itemConfig.category.ACTION_MODULE,
 
 		info = {
 			cooldown = 0.1,

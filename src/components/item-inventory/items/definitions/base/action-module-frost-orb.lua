@@ -8,7 +8,7 @@ local Vec2 = require 'modules.brinevector'
 local weaponCooldown = 0.1
 
 return {
-	type = "base.pod-module-frost-orb",
+	type = "base.action-module-frost-orb",
 
 	blueprint = {
 		extraModifiers = {
@@ -21,7 +21,7 @@ return {
 		sprite = "weapon-module-frost-orb",
 		title = 'frost-orb',
 		baseDropChance = 1,
-		category = itemConfig.category.POD_MODULE,
+		category = itemConfig.category.ACTION_MODULE,
 
 		info = {
 			cooldown = 1,

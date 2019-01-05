@@ -21,7 +21,7 @@ return {
 		sprite = "weapon-module-lightning-rod",
 		title = 'chain-lightning',
 		baseDropChance = 1,
-		category = itemConfig.category.POD_MODULE,
+		category = itemConfig.category.ACTION_MODULE,
 
 		info = {
 			cooldown = 0,

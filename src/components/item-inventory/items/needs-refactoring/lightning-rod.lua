@@ -18,7 +18,7 @@ return {
 		sprite = "weapon-module-lightning-rod",
 		title = 'The lightning rod',
 		baseDropChance = 1,
-		category = config.category.POD_MODULE,
+		category = config.category.ACTION_MODULE,
 	}
 
 	-- 	actionSpeed = 0.1,

@@ -45,7 +45,7 @@ local muzzleFlashMessage = {
 }
 
 return itemSystem.registerType({
-	type = 'pod-module-fireball',
+	type = 'action-module-fireball',
 
 	create = function()
 		return {
@@ -69,7 +69,7 @@ return itemSystem.registerType({
 		title = 'tz-819 mortar',
 		rarity = itemConfig.rarity.LEGENDARY,
 		baseDropChance = 1,
-		category = itemConfig.category.POD_MODULE,
+		category = itemConfig.category.ACTION_MODULE,
 
 		levelRequirement = 3,
 		actionSpeed = 0.4,

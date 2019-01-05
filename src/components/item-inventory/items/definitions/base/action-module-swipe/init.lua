@@ -3,7 +3,7 @@ local itemConfig = require 'components.item-inventory.items.config'
 local itemSource = 'H_2_HAMMER'
 
 return {
-	type = 'base.pod-module-swipe',
+	type = 'base.action-module-swipe',
 
 	blueprint = {
 		extraModifiers = {},
@@ -15,7 +15,7 @@ return {
 		sprite = "weapon-module-swipe",
 		title = 'swipe',
 		baseDropChance = 1,
-		category = itemConfig.category.POD_MODULE,
+		category = itemConfig.category.ACTION_MODULE,
 
 		levelRequirement = 1,
 
