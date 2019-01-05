@@ -148,14 +148,6 @@ return Component.createFactory({
       psystem:setPosition(self.x, self.y / particleScaleY)
       psystem:emit(1)
     end
-
-    if self.canOpen then
-      Component.addToGroup(self:getId(), 'interactableIndicators', {
-        x = self.x,
-        y = self.y,
-        icon = 'gui-map-pointer'
-      })
-    end
   end,
   draw = function(self)
     local lightWorldRef = Component.get('lightWorld')
@@ -166,10 +158,19 @@ return Component.createFactory({
     love.graphics.setColor(0,0,0,0.4)
     bodyGraphic:draw(self.x, self.y + 4, nil, nil, -1)
 
+    love.graphics.setColor(1,1,1)
+
+    if self.canOpen then
+      Component.addToGroup(self:getId(), 'interactableIndicators', {
+        x = self.interactNode.x,
+        y = self.y
+      })
+    end
+
     local Shaders = require 'modules.shaders'
     local shader = Shaders('pixel-outline.fsh')
-    local canInteract = not self.opened
-    if canInteract then
+
+    if (not self.opened) then
       if self.interactNode.hovered then
         local atlasData = AnimationFactory.atlasData
         love.graphics.setShader(shader)
@@ -179,8 +180,8 @@ return Component.createFactory({
       end
     end
 
-    love.graphics.setColor(1,1,1)
     bodyGraphic:draw(self.x, self.y)
+
     if self.lidOpacity > 0 then
       love.graphics.setColor(1,1,1,self.lidOpacity)
       lidGraphic:draw(self.x, self.y + self.lidOffsetY)

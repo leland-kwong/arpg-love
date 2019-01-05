@@ -313,6 +313,7 @@ function LootGenerator.init(self)
     animationComplete = false,
     eventPriority = eventPriority,
     onCreate = function(self)
+      self.clock = 0
       Component.addToGroup(self:getId(), 'clock', self)
 
       if parent.isNew then
@@ -343,6 +344,7 @@ function LootGenerator.init(self)
       return true
     end,
     onUpdate = function(self, dt)
+      self.clock = self.clock + dt
       self.x = parent.x
       self.y = parent.y
       self.angle = self.angle + dt
@@ -399,13 +401,6 @@ function LootGenerator.init(self)
         drawLegendaryItemEffect(self, centerX, centerY, self.angle)
       end
 
-      if self.hovered then
-        love.graphics.setShader(shader)
-        shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
-        shader:send('outline_width', 1)
-        shader:send('outline_color', outlineColor)
-      end
-
       -- draw item
       love.graphics.setColor(1,1,1)
 
@@ -413,10 +408,16 @@ function LootGenerator.init(self)
         require 'components.interactable-indicators'
         local uid = require 'utils.uid'
         Component.addToGroup(uid(), 'interactableIndicators', {
-          x = self.x + self.w/2,
-          y = self.y,
-          icon = 'gui-map-pointer'
+          x = self.x,
+          y = self.y + (self.h / 2)
         })
+      end
+
+      if self.hovered then
+        love.graphics.setShader(shader)
+        shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
+        shader:send('outline_width', 1)
+        shader:send('outline_color', outlineColor)
       end
 
       love.graphics.draw(
@@ -427,9 +428,7 @@ function LootGenerator.init(self)
 
       Component.get('lightWorld'):addLight(centerX, centerY, 17, nil, 0.4)
 
-      if self.hovered then
-        shader:send('outline_width', 0)
-      end
+      shader:send('outline_width', 0)
     end,
 
     onFinal = function(self)

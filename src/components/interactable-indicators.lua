@@ -8,15 +8,18 @@ Component.create({
     self.clock = 0
   end,
   update = function(self, dt)
-    self.clock = self.clock + (dt * 4)
+    self.clock = self.clock + (dt * 2)
   end,
   draw = function(self)
     local interactables = Component.groups.interactableIndicators.getAll()
-    local offsetY = (4 * math.sin(self.clock))
+    local offset = math.sin(self.clock)
     for _,interact in pairs(interactables) do
-      love.graphics.setColor(1,1,1,0.5)
-      local icon = AnimationFactory:newStaticSprite(interact.icon)
-      icon:draw(interact.x, interact.y, 0, 1, -1, nil, offsetY - 15)
+      love.graphics.setColor(1,1,1,1)
+      local icon = AnimationFactory:newStaticSprite(interact.icon or 'gui-arrow-small')
+      local orientation = icon.orientation or 'left'
+      if orientation == 'left' then
+        icon:draw(interact.x - icon:getWidth() + offset, interact.y, math.pi/2)
+      end
     end
     Component.clearGroup('interactableIndicators')
   end,

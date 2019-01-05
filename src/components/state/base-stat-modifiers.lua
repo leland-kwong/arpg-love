@@ -45,6 +45,18 @@ return setmetatable({
 		end
 	}),
 
+	propTypesDisplayKey = setmetatable({
+		increasedActionSpeed = 'action speed',
+		default = function(key)
+			local camelCaseHumanized = require 'utils.camel-case-humanized'
+			return camelCaseHumanized(key)
+		end
+	}, {
+		__index = function(self, k)
+			return rawget(self, 'default')(k)
+		end
+	}),
+
 	propTypesCalculator = setmetatable({
 		cooldownReduction = function(cooldown, reduction)
 			return math.max(0, cooldown - (cooldown * reduction))

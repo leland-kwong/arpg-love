@@ -59,6 +59,7 @@ function PlayerStatsPanel.draw(self)
   local statValues = {}
   local camelCaseHumanized = require 'utils.camel-case-humanized'
   local modifierPropTypeDisplayMapper = require 'components.state.base-stat-modifiers'.propTypesDisplayValue
+  local propTypesDisplayKey = require 'components.state.base-stat-modifiers'.propTypesDisplayKey
   local playerRef = Component.get('PLAYER')
   local propsByAlphabetical = {}
   for stat in playerRef.stats:forEach() do
@@ -67,7 +68,7 @@ function PlayerStatsPanel.draw(self)
   table.sort(propsByAlphabetical)
   for _,stat in pairs(propsByAlphabetical) do
     local val = playerRef.stats:get(stat)
-    local statType = camelCaseHumanized(stat)..':\n'
+    local statType = propTypesDisplayKey[stat]..':\n'
     local displayValueMapper = modifierPropTypeDisplayMapper[stat]
     local statValue = displayValueMapper(val or 0)..'\n'
     local statValueColor = val > 0 and Color.LIME or Color.WHITE
