@@ -69,7 +69,7 @@ return itemSystem.registerModule({
       end
 
       Component.get('PLAYER').stats
-        :add('attackSpeed', props.attackSpeed * state.stacks)
+        :add('increasedAttackSpeed', props.increasedAttackSpeed * state.stacks)
         :add('energyCostReduction', props.energyCostReduction * state.stacks)
         :add('cooldownReduction', props.cooldownReduction * state.stacks)
     end, 1)
@@ -90,7 +90,7 @@ return itemSystem.registerModule({
             'Gain increased offensive capabilities at the expense of increased energy cost.'
 
             ..'\n\nWhenever you hit an enemy, gain a frenzy stack that gives:'
-              ..'\n\t+{attackSpeed} attack speed'
+              ..'\n\t+{increasedAttackSpeed} attack speed'
               ..'\n\t+{cooldownReduction} cooldown reduction'
               ..'\n\t+{energyCostReduction} energy cost reduction'
 

@@ -8,7 +8,7 @@ local nodeValueOptions = {
   [1] = {
     name = 'quick strikes',
     value = {
-      type = 'attackSpeed',
+      type = 'increasedAttackSpeed',
       value = 0.04
     },
     image = 'gui-skill-tree_node_speed-up',

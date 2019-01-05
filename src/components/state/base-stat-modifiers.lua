@@ -33,7 +33,7 @@ return setmetatable({
 	propTypesDisplayValue = setmetatable({
 		attackTime = valueTypeHandlers.time,
 		cooldown = valueTypeHandlers.time,
-		attackSpeed = valueTypeHandlers.percent,
+		increasedAttackSpeed = valueTypeHandlers.percent,
 		energyCostReduction = valueTypeHandlers.percent,
 		cooldownReduction = valueTypeHandlers.percent,
 	}, {
@@ -49,11 +49,10 @@ return setmetatable({
 		--[[
 			attack speed increases the number of actions per second
 		]]
-		attackSpeed = function(attackTime, bonusAttackSpeed)
+		increasedAttackSpeed = function(attackTime, bonusincreasedAttackSpeed)
 			local attacksPerSec = 1/attackTime
-			local newAttackRate = (attacksPerSec * (bonusAttackSpeed + 1))
+			local newAttackRate = (attacksPerSec * (bonusincreasedAttackSpeed + 1))
 			local newAttackTime = 1/newAttackRate
-			print(newAttackRate, newAttackTime)
 			return newAttackTime
 		end
 	}, {
@@ -72,7 +71,7 @@ return setmetatable({
 			energyRegeneration = base.energyRegeneration,
 			armor = 0,
 			cooldownReduction = 0, -- multiplier
-			attackSpeed = 0, -- multiplier
+			increasedAttackSpeed = 0, -- multiplier
 			moveSpeed = 0, -- flat increase
 			fireResist = 0,
 			coldResist = 0,
