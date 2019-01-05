@@ -1,99 +1,64 @@
 local Component = require 'modules.component'
 local GuiText = require 'components.gui.gui-text'
-local GuiList = require 'components.gui.gui-list'
-local GuiButton = require 'components.gui.gui-button'
 local Color = require 'modules.color'
+local Component = require 'modules.component'
+local Gui = require 'components.gui.gui'
+local drawBox = require 'components.gui.utils.draw-box'
+
+local DrawOrders = require 'modules.draw-orders'
+local DialogText = GuiText.create({
+  id = 'DialogText',
+  group = 'all',
+  font = require 'components.font'.primary.font,
+  drawOrder = function()
+    return DrawOrders.Dialog + 1
+  end
+})
 
 local GuiDialog = {
-  title = nil,
-  text = '',
-  width = 1,
-  height = 1,
-  padding = 0,
-  wrapLimit = 20,
-  onClose = nil -- optional callback. If enabled, the close button will be enabled
+  padding = 5
 }
 
 function GuiDialog.init(self)
-  local root = self
-  self.font = self.font or require('components.font').primary.font
-  local guiTextLayer = GuiText.create({
-    font = root.font,
-    outline = true,
-    drawOrder = self.drawOrder
-  })
-  Component.addToGroup(self, 'gui')
+  local parent = self
+  Component.addToGroup(self, 'all')
+  self.scriptPosition = 1
 
-  if root.title then
-    Component.create({
-      init = function(self)
-        Component.addToGroup(self, 'gui')
-      end,
-      draw = function()
-        guiTextLayer:add(root.title, Color.YELLOW, root.x, root.y - 25 + root.padding)
-      end,
-      drawOrder = self.drawOrder
-    }):setParent(root)
+  self.advanceDialog = function()
+    print('advance dialog')
+    self.scriptPosition = self.scriptPosition + 1
   end
 
-  local textNode = Component.create({
-    x = self.x,
-    y = self.y,
-    init = function(self)
-      Component.addToGroup(self, 'gui')
+  Gui.create({
+    onUpdate = function(self)
+      self.width = love.graphics.getWidth()
+      self.height = love.graphics.getHeight()
     end,
-    draw = function(self)
-      love.graphics.setFont(root.font)
-      love.graphics.setColor(1,1,1)
-      love.graphics.printf(root.text, self.x + root.padding, self.y + root.padding, root.wrapLimit)
-    end,
+    onClick = parent.advanceDialog,
     drawOrder = function()
-      return root:drawOrder() + 1
+      return DrawOrders.Dialog + 2
     end
-  })
-  self.scrollablePanel = GuiList.create({
-    x = self.x,
-    y = self.y,
-    width = self.width,
-    height = self.height,
-    contentWidth = self.width,
-    contentHeight = 0,
-    childNodes = {
-      textNode
-    },
-    drawOrder = function()
-      return root:drawOrder() + 1
-    end
-  }):setParent(root)
-
-  if self.onClose then
-    local sp = self.scrollablePanel
-    -- close button
-    GuiButton.create({
-      padding = 4,
-      x = sp.x + sp.contentWidth - 13,
-      y = sp.y - 20,
-      textLayer = guiTextLayer,
-      text = 'x',
-      onClick = function()
-        root:delete(true)
-        self:onClose()
-      end
-    }):setParent(root)
-  end
+  }):setParent(parent)
 end
 
-function GuiDialog.update(self)
-  self.wrapLimit = (self.width - self.padding * 2)
-  local width, height = GuiText.getTextSize(self.text, self.font, self.wrapLimit)
-  self.scrollablePanel.contentHeight = height + self.padding * 2
+function GuiDialog.update(self, dt)
+  local endOfDialog = self.scriptPosition > #self.script
+  if (endOfDialog) then
+    return self:delete(true)
+  end
+
+  local script = self.script[self.scriptPosition]
+  local width, height = DialogText.getTextSize(script.text, DialogText.font)
+  self.width, self.height = width + self.padding*2, height + self.padding*2
+  DialogText:add(script.text, Color.WHITE, self.x + self.padding, self.y + self.padding)
 end
 
 function GuiDialog.draw(self)
-  local guiDrawBox = require 'components.gui.utils.draw-box'
-  guiDrawBox(self.scrollablePanel, {
-    borderColor = Color.YELLOW
-  })
+  drawBox(self)
+end
+
+function GuiDialog.drawOrder()
+  return DrawOrders.Dialog
 end
 
 return Component.createFactory(GuiDialog)

@@ -505,6 +505,34 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/characters/npc-quest-master/character-1.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-10.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-11.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-12.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-13.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-14.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-15.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-16.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-17.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-18.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-19.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-2.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-20.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-21.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-22.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-23.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-24.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-25.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-26.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-27.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-28.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-3.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-4.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-5.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-6.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-7.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-8.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-9.png</key>
             <key type="filename">custom-art/characters/player/character-1.png</key>
             <key type="filename">custom-art/characters/player/character-10.png</key>
             <key type="filename">custom-art/characters/player/character-11.png</key>
@@ -582,6 +610,19 @@
                 <rect>16,9,32,18</rect>
                 <key>scale9Paddings</key>
                 <rect>16,9,32,18</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-arrow-small.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>2,2,3,3</rect>
+                <key>scale9Paddings</key>
+                <rect>2,2,3,3</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>

@@ -413,13 +413,6 @@ local Player = {
       self.colObj.ox,
       self.colObj.oy
     ):addToWorld(collisionWorlds.player)
-    self.zoneCollision = self:addCollisionObject(
-      'player',
-      1,
-      1,
-      1,
-      1
-    ):addToWorld(collisionWorlds.zones)
 
     WeaponCore.create({
       x = self.x,
@@ -597,15 +590,6 @@ local function zoneCollisionFilter()
   return 'cross'
 end
 
-function Player.handleZoneCollision(self)
-  local x, y = math.floor(self.x / config.gridSize), math.floor(self.y / config.gridSize)
-  local _, _, zones, len = self.zoneCollision:move(x, y, zoneCollisionFilter)
-  self.zones = zones
-  for i=1, len do
-    zones[i] = zones[i].other
-  end
-end
-
 local function handleBossMode(self)
   -- destroy active portal
   local playerPortal = Component.get('playerPortal')
@@ -680,7 +664,6 @@ function Player.update(self, dt)
     nextX,
     nextY
   )
-  self:handleZoneCollision()
 
   -- update camera to follow player
   if (not self.cutSceneMode) then
@@ -695,14 +678,12 @@ end
 local function drawShadow(self, sx, sy, ox, oy)
   -- SHADOW
   love.graphics.setColor(0,0,0,0.25)
-  love.graphics.draw(
-    animationFactory.atlas,
-    self.animation.sprite,
+  self.animation:draw(
     self.x,
     self.y + self.h/2,
     math.rad(self.angle),
     sx,
-    -sy / 2,
+    -sy / 4,
     ox,
     oy
   )

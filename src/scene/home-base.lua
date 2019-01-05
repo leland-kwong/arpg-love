@@ -17,6 +17,7 @@ local inspect = require 'utils.inspect'
 local defaultMapLayout = 'aureus'
 
 local HomeBase = {
+  id = 'HomeBase',
   group = groups.firstLayer,
   zoneTitle = 'Mothership',
   x = 0,
@@ -53,6 +54,13 @@ function HomeBase.init(self)
 
   local previousScene = sceneManager:getLastItem()
   local Dungeon = require 'modules.dungeon'
+
+  local homeBaseMapId = Dungeon:new({
+    layoutType = 'home-base'
+  })
+  print(
+    Dungeon:getData(homeBaseMapId)
+  )
 
   Portal.create({
     x = startPosition.x,

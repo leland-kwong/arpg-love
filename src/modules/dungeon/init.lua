@@ -298,6 +298,11 @@ local objectParsersByType = {
       local blockOpeningParser = require 'modules.dungeon.layout-object-parsers.block-opening'
       blockOpeningParser(obj, grid, origin, blockData, cellTranslationsByLayer)
     end
+  },
+  ['objects'] = {
+    npc = function(obj, grid, origin, blockData)
+
+    end
   }
 }
 
@@ -330,13 +335,6 @@ local function loadGridBlock(file)
 end
 
 local function addGridBlock(grid, gridBlockToAdd, startX, startY, transformFn, blockName)
-  collisionWorlds.zones:add(
-    {name = blockName},
-    startX,
-    startY,
-    gridBlockToAdd.width,
-    gridBlockToAdd.height
-  )
   local numCols = gridBlockToAdd.width
   local area = gridBlockToAdd.width * gridBlockToAdd.height
   for i=0, (area - 1) do
@@ -361,8 +359,6 @@ local function buildDungeon(options)
   local layout = layoutGenerator()
   local extractProps = require 'utils.object-utils.extract'
   local gridBlockNames, columns, exitPosition = extractProps(layout, 'gridBlockNames', 'columns', 'exitPosition')
-
-  collisionWorlds.reset(collisionWorlds.zones)
 
   local grid = {}
   local numBlocks = #gridBlockNames
@@ -415,7 +411,8 @@ local function buildDungeon(options)
     local layersToParse = {
       'spawn-points',
       'unique-enemies',
-      'environment'
+      'environment',
+      'objects'
     }
     table.insert(layerProcessingQueue, function()
       f.forEach(layersToParse, function(layerName)
