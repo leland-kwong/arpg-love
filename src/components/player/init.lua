@@ -222,10 +222,9 @@ local Player = {
       actsOn = 'PLAYER'
     })
     self.listeners = {
-      msgBus.on('INTERACT_TREASURE_CHEST', function(chest)
-        self.state.environmentInteractHovered = chest
-        local Math = require 'utils.math'
-        return Math.dist(self.x, self.y, chest.x, chest.y) <= self.pickupRadius
+      msgBus.on('INTERACT_TREASURE_CHEST', function(item)
+        self.state.environmentInteractHovered = item
+        return canInteractWithItem(self, item)
       end),
 
       msgBus.on(msgBus.MOUSE_PRESSED, function()
