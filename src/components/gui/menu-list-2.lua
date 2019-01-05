@@ -30,7 +30,7 @@ return Component.createFactory({
 
           local guiListTop = guiList.y
           local guiListBottom = guiList.y + guiList.height
-          local isInView = (guiNode.y + guiNode.height) >= guiListTop and
+          local isInView = (guiNode.y + (guiNode.height or 0)) >= guiListTop and
             guiNode.y <= guiListBottom
           guiNode._isInView = isInView
           table.insert(childNodes, guiNode)

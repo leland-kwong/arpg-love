@@ -25,7 +25,7 @@ function M.init(self)
         {
           Gui.create({
             width = 100,
-            height = 100,
+            label = 'spawn ai',
             onClick = function()
               closeMenu()
 
@@ -63,16 +63,36 @@ function M.init(self)
               })
               MenuManager.push(spawnOverlay)
             end,
+            onUpdate = function(self)
+              self.height = select(2, Text.getTextSize(self.label, text.font))
+            end,
             draw = function(self)
-              text:add('spawn ai', {1,1,1}, self.x, self.y)
+              text:add(self.label, {1,1,1}, self.x, self.y)
             end
           }),
-          -- Gui.create({
-          --   width = 100,
-          --   height = 200,
-          --   draw = function(self)
-          --   end
-          -- })
+        },
+        {
+          Gui.create({
+            width = 100,
+            label = 'generate item',
+            onUpdate = function(self)
+              self.height = select(2, Text.getTextSize(self.label, text.font))
+            end,
+            onClick = function()
+              local itemSystem = require 'components.item-inventory.items.item-system'
+              local playerRef = Component.get('PLAYER')
+              Component.addToGroup(os.clock(), 'loot', {
+                x = playerRef.x,
+                y = playerRef.y,
+                guaranteedItems = {
+                  itemSystem.create('legendary.augmentation-module-frenzy')
+                }
+              })
+            end,
+            draw = function(self)
+              text:add(self.label, {1,1,1}, self.x, self.y)
+            end
+          })
         }
       }
       local devMenu = MenuList2.create({
