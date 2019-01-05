@@ -91,7 +91,7 @@ function Swipe.init(self)
   for i=1, frameCount do
     table.insert(frames, 'swipe/'..i)
   end
-  self.animation = AnimationFactory:new(frames):setDuration(self.attackTime)
+  self.animation = AnimationFactory:new(frames):setDuration(self.actionSpeed)
 
   local playerRef = Component.get('PLAYER')
   self.angle = (math.atan2(self.dx, self.dy) * -1) + (math.pi/2)

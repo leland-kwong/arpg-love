@@ -25,7 +25,7 @@ return {
 
 		info = {
 			cooldown = 1,
-			attackTime = 0.25,
+			actionSpeed = 0.25,
 			energyCost = 6
 		},
 

@@ -25,7 +25,7 @@ end
 -- deals damage with a chance to slow
 local FrostShot = {
   range = 10,
-  attackTime = 0.3,
+  actionSpeed = 0.3,
   cooldown = 1
 }
 
@@ -125,7 +125,7 @@ return function()
     attacking = animationFactory:new({
       'eyeball/eyeball',
       'eyeball/eyeball',
-    }):setDuration(FrostShot.attackTime),
+    }):setDuration(FrostShot.actionSpeed),
     idle = animationFactory:new({
       'eyeball/eyeball'
     }),

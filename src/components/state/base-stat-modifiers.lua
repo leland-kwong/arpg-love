@@ -31,12 +31,12 @@ return setmetatable({
 		TODO: add prop type handlers for transforming values. This way we can easily see how properties are being calculated.
 	]]
 	propTypesDisplayValue = setmetatable({
-		attackTime = function(v)
+		actionSpeed = function(v)
 			local Math = require 'utils.math'
-			return Math.round(1/v, 1)..' attacks/sec'
+			return Math.round(1/v, 1)..' actions/sec'
 		end,
 		cooldown = valueTypeHandlers.time,
-		increasedAttackSpeed = valueTypeHandlers.percent,
+		increasedActionSpeed = valueTypeHandlers.percent,
 		energyCostReduction = valueTypeHandlers.percent,
 		cooldownReduction = valueTypeHandlers.percent,
 	}, {
@@ -50,11 +50,11 @@ return setmetatable({
 			return math.max(0, cooldown - (cooldown * reduction))
 		end,
 		--[[
-			attack speed increases the number of actions per second
+			action speed increases the number of actions per second
 		]]
-		increasedAttackSpeed = function(attackTime, bonusincreasedAttackSpeed)
-			local attacksPerSec = 1/attackTime
-			local newAttackRate = (attacksPerSec * (bonusincreasedAttackSpeed + 1))
+		increasedActionSpeed = function(actionSpeed, bonusincreasedActionSpeed)
+			local attacksPerSec = 1/actionSpeed
+			local newAttackRate = (attacksPerSec * (bonusincreasedActionSpeed + 1))
 			local newAttackTime = 1/newAttackRate
 			return newAttackTime
 		end
@@ -66,7 +66,7 @@ return setmetatable({
 }, {
 	__call = function()
 		return setmetatable({
-			attackPower = 0, -- total damage increase
+			actionPower = 0, -- total damage increase
 			energyCostReduction = 0, -- multiplier
 			maxHealth = 0,
 			maxEnergy = 0,
@@ -74,7 +74,7 @@ return setmetatable({
 			energyRegeneration = base.energyRegeneration,
 			armor = 0,
 			cooldownReduction = 0, -- multiplier
-			increasedAttackSpeed = 0, -- multiplier
+			increasedActionSpeed = 0, -- multiplier
 			moveSpeed = 0, -- flat increase
 			fireResist = 0,
 			coldResist = 0,

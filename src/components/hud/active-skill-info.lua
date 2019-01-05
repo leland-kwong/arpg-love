@@ -84,7 +84,7 @@ local function ActiveEquipmentHandler()
   local round = require 'utils.math'.round
   local function modifyAbility(instance, playerRef)
     local v = instance
-    local dmgMultiplier = 1 + (playerRef.stats:get('attackPower') / 100)
+    local dmgMultiplier = 1 + (playerRef.stats:get('actionPower') / 100)
     local min = (v.minDamage or 0) * dmgMultiplier
     local max = (v.maxDamage or 0) * dmgMultiplier
 
@@ -129,8 +129,8 @@ local function ActiveEquipmentHandler()
         return skill
       end
 
-      local attackTime = itemSystem.getDefinition(activeItem).info.attackTime or 0
-      local actualAttackTime = propTypesCalculator.increasedAttackSpeed(attackTime, Component.get('PLAYER').stats:get('increasedAttackSpeed'))
+      local actionSpeed = itemSystem.getDefinition(activeItem).info.actionSpeed or 0
+      local actualAttackTime = propTypesCalculator.increasedActionSpeed(actionSpeed, Component.get('PLAYER').stats:get('increasedActionSpeed'))
 
       local mx, my = camera:getMousePosition()
       local playerX, playerY = self.player:getPosition()
@@ -138,7 +138,7 @@ local function ActiveEquipmentHandler()
       local abilityEntity = abilityData.blueprint.create(
         extend(
           abilityData.props, {
-            attackTime = actualAttackTime
+            actionSpeed = actualAttackTime
           , x = playerX
           , y = playerY
           , x2 = mx
@@ -159,7 +159,7 @@ local function ActiveEquipmentHandler()
       msgBus.send(
         msgBus.PLAYER_WEAPON_ATTACK,
         {
-          attackTime = actualAttackTime,
+          actionSpeed = actualAttackTime,
           source = activeItem.__id,
           fromPos = Vec2(playerX, playerY),
           targetPos = Vec2(mx, my)

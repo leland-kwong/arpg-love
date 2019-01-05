@@ -16,9 +16,9 @@ local hammerWorld = bump.newWorld(4)
 local hitModifers = {
 	armor = -200
 }
-local attackTime = 0.3
+local actionSpeed = 0.3
 local attackCooldown = 0
-local hitModifierDuration = attackTime * 1.2
+local hitModifierDuration = actionSpeed * 1.2
 
 local function triggerAttack(self)
 	self.collisionX, self.collisionY = self.x - (self.w/2), self.y - (self.h/2)
@@ -81,8 +81,8 @@ local WeaponAnimation = Component.createFactory({
 
 		local tween = require 'modules.tween'
 		self.yPos = -20
-		self.attackAnimationDuration = self.attackTime * 0.6
-		self.attackRecoveryAnimationDuration = self.attackTime * 0.4
+		self.attackAnimationDuration = self.actionSpeed * 0.6
+		self.attackRecoveryAnimationDuration = self.actionSpeed * 0.4
 		self.tween = tween.new(self.attackAnimationDuration, self, {
 			yPos = 0,
 		})
@@ -179,7 +179,7 @@ local Attack = Component.createFactory(
 			WeaponAnimation.create({
 				x = self.x,
 				y = self.y,
-				attackTime = self.attackTime,
+				actionSpeed = self.actionSpeed,
 				onImpactFrame = function()
 					triggerAttack(self)
 					self:delete()

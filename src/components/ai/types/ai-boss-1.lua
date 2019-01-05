@@ -13,7 +13,7 @@ local msgBus = require 'components.msg-bus'
 local bossId = 'Erion'
 
 local AbilityBeamStrike = {
-  attackTime = 0.8,
+  actionSpeed = 0.8,
   range = 20,
   cooldown = 3,
   beamDelay = 1
@@ -92,7 +92,7 @@ function AbilityBeamStrike.update(self, state, dt)
   end
 
   state.clock = (state.clock or 0) + dt
-  if (state.clock > AbilityBeamStrike.attackTime) then
+  if (state.clock > AbilityBeamStrike.actionSpeed) then
     return false
   end
   return true
@@ -126,7 +126,7 @@ end
 
 local MultiShot = {
   range = 14,
-  attackTime = 0.4,
+  actionSpeed = 0.4,
   cooldown = 1
 }
 
@@ -157,7 +157,7 @@ end
 function MultiShot.update(_, state, dt)
   if state.isNewAttack then
     state.clock = state.clock + dt
-    local isAbilityComplete = state.clock >= MultiShot.attackTime
+    local isAbilityComplete = state.clock >= MultiShot.actionSpeed
     if isAbilityComplete then
       state.isNewAttack = false
     end
@@ -168,7 +168,7 @@ end
 
 local SpawnMinions = {
   range = 40,
-  attackTime = 0.3,
+  actionSpeed = 0.3,
   cooldown = 2,
   maxMinions = 8
 }
@@ -258,7 +258,7 @@ function SpawnMinions.update(_, state, dt)
       end
     end
     state.clock = state.clock + dt
-    local isReady = state.clock > SpawnMinions.attackTime
+    local isReady = state.clock > SpawnMinions.actionSpeed
     return (not isReady)
   end
   return false

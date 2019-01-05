@@ -8,25 +8,25 @@ local nodeValueOptions = {
   [1] = {
     name = 'quick strikes',
     value = {
-      type = 'increasedAttackSpeed',
+      type = 'increasedActionSpeed',
       value = 0.04
     },
     image = 'gui-skill-tree_node_speed-up',
     backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
-      return '+'..(self.value.value * 100)..'% attack speed'
+      return '+'..(self.value.value * 100)..'% action speed'
     end
   },
   [2] = {
-    name = 'bonus attack power',
+    name = 'bonus action power',
     value = {
-      type = 'attackPower',
+      type = 'actionPower',
       value = 0.1
     },
     image = 'gui-skill-tree_node_damage-up',
     backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
-      return '+'..(self.value.value * 100)..'% attack power'
+      return '+'..(self.value.value * 100)..'% action power'
     end
   },
   [3] = {
@@ -76,7 +76,7 @@ local nodeValueOptions = {
     image = 'gui-skill-tree_node_blood-rage',
     backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
-      return '+'..(self.value.bonus * 100)..'% attack power for each 1% of health missing'
+      return '+'..(self.value.bonus * 100)..'% action power for each 1% of health missing'
     end
   },
   [7] = {

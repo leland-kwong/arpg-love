@@ -33,7 +33,7 @@ return {
 		-- renderAnimation = 'weapon-hammer-attachment',
 
 		info = {
-			attackTime = 0.42,
+			actionSpeed = 0.42,
 			cooldown = 0.1,
 			energyCost = 2
 		},

@@ -30,7 +30,7 @@ local WeaponCore = {
 function WeaponCore.init(self)
   self.listeners = {
     msgBus.on(msgBus.PLAYER_WEAPON_ATTACK, function(msgValue)
-      self.recoilDuration = msgValue.attackTime or 0.1
+      self.recoilDuration = msgValue.actionSpeed or 0.1
       self.recoilDurationRemaining = self.recoilDuration
     end),
     msgBus.on(msgBus.PLAYER_WEAPON_MUZZLE_FLASH, function(msgValue)

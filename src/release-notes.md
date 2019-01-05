@@ -8,11 +8,11 @@ New
 
 Rework
 
-* *attack time* has been changed to *attack speed*. Attack speed now represents number of attacks per second, and bonus attack speed now multiplies the number of attacks per second.
+* *attack time* has been changed to *action speed*. action speed now represents number of actions per second, and bonus action speed now multiplies the number of actions per second.
 
 Balance
 
-* Reduced *cooldown reduction* and *attack speed* item modifier ranges.
+* Reduced *cooldown reduction* and *action speed* item modifier ranges.
 
 Fixes
 
@@ -29,12 +29,12 @@ New
 
 Balance
 
-* Increased values for attack speed and bonus damage nodes
+* Increased values for action speed and bonus damage nodes
 
 Fixes
 
 * Items no longer drop in areas that prevent the player from picking them up
-* High attack speed no longer causes the game to crash
+* High action speed no longer causes the game to crash
 * Fixed issue with certain nodes in passive tree being unselectable when they shouldn't be
 
 ---
@@ -83,7 +83,7 @@ Updates
 New
 
 * Passive skill tree. You can access this by pressing the **o** key or pressing the button in the HUD.
-* `Percent damage` property has been renamed to `Attack power`. This stat still works the same as before by increasing damage dealt by 1% per attack power.
+* `Percent damage` property has been renamed to `Attack power`. This stat still works the same as before by increasing damage dealt by 1% per action power.
 
 Updates
 
@@ -97,7 +97,7 @@ Updates
 New
 
 * Passive skill tree. You can access this by pressing the **o** key or pressing the button in the HUD.
-* `Percent damage` property has been renamed to `Attack power`. This stat still works the same as before by increasing damage dealt by 1% per attack power.
+* `Percent damage` property has been renamed to `Attack power`. This stat still works the same as before by increasing damage dealt by 1% per action power.
 
 Updates
 

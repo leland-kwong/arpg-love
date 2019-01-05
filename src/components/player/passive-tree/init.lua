@@ -83,10 +83,10 @@ local modifierHandlers = {
     return modifiers
   end,
   bloodRage = function(nodeId, data, modifiers)
-    Component.get('PLAYER').stats:add('attackPower', function(self)
+    Component.get('PLAYER').stats:add('actionPower', function(self)
       local percentHealthMissing = 1 - self:get('health') / self:get('maxHealth')
       local totalBonusPercentage = data.value.bonus * percentHealthMissing * 100
-      return self.attackPower * totalBonusPercentage
+      return self.actionPower * totalBonusPercentage
     end)
     return modifiers
   end,

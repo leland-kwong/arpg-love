@@ -154,7 +154,7 @@ local item = {
     baseModifiers = {
       -- instance-level base modifiers
       armor =                         {0, 1}, -- min-max range to roll with
-      attackPower =                 {0, 1}, -- percent damage increase to all damage types
+      actionPower =                 {0, 1}, -- percent damage increase to all damage types
       weaponDamage =                  {0, 1},
       moveSpeed =                     {0, 0},
       healthRegen =                   {0, 1},
@@ -164,10 +164,10 @@ local item = {
       lightningResist =               {0, 1},
       fireResist =                    {0, 1},
       coldResist =                    {0, 1},
-      attackTime =                    {0, 0},
+      actionSpeed =                    {0, 0},
       energyCost =                    {0, 0},
       flatPhysicalDamageReduced =     {0, 1},
-      attackTimeReduced =             {0, 1},  -- percent attack speed
+      actionSpeedReduced =             {0, 1},  -- percent action speed
       cooldownReduced =               {0, 1},  -- percent cooldown reduction
       energyCostReduced =             {0, 1},  -- percent energy cost reduction
       extraExperience =               {0, 1}   -- percent extra experience
@@ -254,7 +254,7 @@ Ideas
 
 Nodes
 
-- +1% attack speed
+- +1% action speed
 - sharp: +1% damage
 - +2% movespeed
 - +2% health regeneration

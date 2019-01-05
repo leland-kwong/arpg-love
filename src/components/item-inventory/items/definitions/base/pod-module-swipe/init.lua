@@ -20,7 +20,7 @@ return {
 		levelRequirement = 1,
 
 		info = {
-			attackTime = 0.2,
+			actionSpeed = 0.2,
 			cooldown = 0.1,
 			energyCost = 1
 		},

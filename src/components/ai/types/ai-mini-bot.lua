@@ -22,7 +22,7 @@ end
 
 local PelletShot = {
   range = 8,
-  attackTime = 0.25,
+  actionSpeed = 0.25,
   cooldown = 0.8
 }
 
@@ -52,7 +52,7 @@ function PelletShot.update(self, state, dt)
     or self.animations.idle
   if state.isNewAttack then
     state.clock = state.clock + dt
-    local isAbilityComplete = state.clock >= PelletShot.attackTime
+    local isAbilityComplete = state.clock >= PelletShot.actionSpeed
     if isAbilityComplete then
       state.isNewAttack = false
     end

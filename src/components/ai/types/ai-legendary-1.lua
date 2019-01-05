@@ -73,7 +73,7 @@ local DissipateEffect = Component.createFactory(DissipateEffectBlueprint)
 
 local MultiShot = {
   range = 14,
-  attackTime = 0.4,
+  actionSpeed = 0.4,
   cooldown = 1
 }
 
@@ -104,7 +104,7 @@ end
 function MultiShot.update(_, state, dt)
   if state.isNewAttack then
     state.clock = state.clock + dt
-    local isAbilityComplete = state.clock >= MultiShot.attackTime
+    local isAbilityComplete = state.clock >= MultiShot.actionSpeed
     if isAbilityComplete then
       state.isNewAttack = false
     end
@@ -120,7 +120,7 @@ return function(props)
     attacking = animationFactory:new({
       'ai-legendaries/legendary-1/legendary-ai-1',
       'ai-legendaries/legendary-1/legendary-ai-1'
-    }):setDuration(MultiShot.attackTime),
+    }):setDuration(MultiShot.actionSpeed),
     idle = animationFactory:new({
       'ai-legendaries/legendary-1/legendary-ai-1'
     }),

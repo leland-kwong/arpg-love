@@ -21,7 +21,7 @@ return {
 		category = config.category.POD_MODULE,
 	}
 
-	-- 	attackTime = 0.1,
+	-- 	actionSpeed = 0.1,
 	-- 	energyCost = function(self)
 	-- 		return 4
 	-- 	end,

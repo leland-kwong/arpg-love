@@ -72,7 +72,7 @@ return itemSystem.registerType({
 		category = itemConfig.category.POD_MODULE,
 
 		levelRequirement = 3,
-		attackTime = 0.4,
+		actionSpeed = 0.4,
 		energyCost = function(self)
 			return 2
 		end,

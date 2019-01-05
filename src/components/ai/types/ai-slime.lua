@@ -43,7 +43,7 @@ end
 
 local DashAbility = {
   range = 6,
-  attackTime = 0.2,
+  actionSpeed = 0.2,
   cooldown = 2
 }
 
@@ -63,13 +63,13 @@ function DashAbility.update(_, state, dt)
     return false
   end
   state.clock = state.clock + dt
-  local isAbilityInFlight = state.clock < DashAbility.attackTime
+  local isAbilityInFlight = state.clock < DashAbility.actionSpeed
   return isAbilityInFlight
 end
 
 local SlimeSlap =  {
   range = 3,
-  attackTime = 0.7,
+  actionSpeed = 0.7,
   cooldown = 0.4
 }
 
@@ -145,7 +145,7 @@ return function()
       'slime/slime9',
       'slime/slime10',
       'slime/slime11',
-    }):setDuration(SlimeSlap.attackTime),
+    }):setDuration(SlimeSlap.actionSpeed),
     idle = animationFactory:new({
       'slime/slime12',
       'slime/slime13',

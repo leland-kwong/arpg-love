@@ -42,7 +42,7 @@ local PunchAttack = Component.createFactory({
 
 local PunchAbility = {
   range = 1.5,
-  attackTime = 0.5,
+  actionSpeed = 0.5,
   cooldown = 0.3
 }
 
@@ -102,7 +102,7 @@ return function()
       'melee-bot/melee-bot-4',
       'melee-bot/melee-bot-5',
       'melee-bot/melee-bot-6',
-    }):setDuration(PunchAbility.attackTime),
+    }):setDuration(PunchAbility.actionSpeed),
     idle = animationFactory:new({
       'melee-bot/melee-bot-7',
       'melee-bot/melee-bot-8',
@@ -119,7 +119,7 @@ return function()
       -- recovery frames
       'melee-bot/melee-bot-13',
       'melee-bot/melee-bot-12',
-    }):setDuration(PunchAbility.attackTime)
+    }):setDuration(PunchAbility.actionSpeed)
   }
 
   local attackRange = 1.5
