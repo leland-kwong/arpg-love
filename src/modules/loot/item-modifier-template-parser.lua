@@ -56,6 +56,10 @@ local tooltipParsers = {
   end
 }
 
+local statsListKey = {
+  increasedActionSpeed = 'action speed'
+}
+
 local modifierParsers = {
   baseStatsList = function(data)
     local coloredText = {}
@@ -99,7 +103,7 @@ local modifierParsers = {
       if valType == 'default' then
         table.insert(coloredText, colors.statBodyText)
         local camelCaseHumanized = require 'utils.camel-case-humanized'
-        local displayKey = ' '..camelCaseHumanized(prop)
+        local displayKey = ' '..(statsListKey[prop] or camelCaseHumanized(prop))
         table.insert(coloredText, displayKey)
       end
       i = i + 1
