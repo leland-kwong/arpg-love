@@ -377,7 +377,7 @@ function LootGenerator.init(self)
         end
       end
 
-      self.canInteract = msgBus.send('INTERACT_TREASURE_CHEST', self)
+      self.canInteract = msgBus.send('INTERACT_ENVIRONMENT_OBJECT', self)
     end,
     draw = function(self)
       if (not parent.isInViewOfPlayer) then

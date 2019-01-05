@@ -222,7 +222,7 @@ local Player = {
       actsOn = 'PLAYER'
     })
     self.listeners = {
-      msgBus.on('INTERACT_TREASURE_CHEST', function(item)
+      msgBus.on('INTERACT_ENVIRONMENT_OBJECT', function(item)
         self.state.environmentInteractHovered = item
         return canInteractWithItem(self, item)
       end),

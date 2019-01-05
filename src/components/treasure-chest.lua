@@ -135,7 +135,7 @@ return Component.createFactory({
     end
 
     self.canOpen = (not self.opened) and
-      msgBus.send('INTERACT_TREASURE_CHEST', self)
+      msgBus.send('INTERACT_ENVIRONMENT_OBJECT', self)
 
     if self.tween then
       local complete = self.tween:update(dt)
