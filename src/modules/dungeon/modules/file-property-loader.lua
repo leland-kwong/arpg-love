@@ -3,6 +3,10 @@
 ]]
 
 local function readTiledFileProperty(path)
+  if (not path) then
+    return nil
+  end
+
   local normalizedPath = string.gsub(
     string.gsub(path, '%.%.%/',''),
     '%/', '.'
