@@ -6,9 +6,13 @@ New
 
 * Treasure Chest
 
+Rework
+
+* *attack time* has been changed to *attack speed*. Attack speed now represents number of attacks per second, and bonus attack speed now multiplies the number of attacks per second.
+
 Balance
 
-* Reduced *cooldown reduction* and *attack time reduction* item modifier ranges.
+* Reduced *cooldown reduction* and *attack speed* item modifier ranges.
 
 Fixes
 
@@ -25,12 +29,12 @@ New
 
 Balance
 
-* Increased values for attack time reduction and bonus damage nodes
+* Increased values for attack speed and bonus damage nodes
 
 Fixes
 
 * Items no longer drop in areas that prevent the player from picking them up
-* High attack time reduction no longer causes the game to crash
+* High attack speed no longer causes the game to crash
 * Fixed issue with certain nodes in passive tree being unselectable when they shouldn't be
 
 ---
