@@ -374,6 +374,8 @@ function LootGenerator.init(self)
           self.tween = nil
         end
       end
+
+      self.canInteract = msgBus.send('INTERACT_TREASURE_CHEST', self)
     end,
     draw = function(self)
       if (not parent.isInViewOfPlayer) then
@@ -406,6 +408,17 @@ function LootGenerator.init(self)
 
       -- draw item
       love.graphics.setColor(1,1,1)
+
+      if (self.canInteract) then
+        require 'components.interactable-indicators'
+        local uid = require 'utils.uid'
+        Component.addToGroup(uid(), 'interactableIndicators', {
+          x = self.x + self.w/2,
+          y = self.y,
+          icon = 'gui-map-pointer'
+        })
+      end
+
       love.graphics.draw(
         AnimationFactory.atlas,
         animation.sprite,

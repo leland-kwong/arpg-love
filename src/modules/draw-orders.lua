@@ -7,6 +7,7 @@ local drawOrders = {
   'LightWorldDraw',
   'SparkDraw',
   'MapText',
+  'InteractableIndicator',
   'FloorItemTooltip',
   'MainMenu',
   'Dialog'

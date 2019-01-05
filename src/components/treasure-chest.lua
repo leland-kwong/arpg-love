@@ -151,7 +151,7 @@ return Component.createFactory({
 
     if self.canOpen then
       Component.addToGroup(self:getId(), 'interactableIndicators', {
-        x = self.x - 6,
+        x = self.x,
         y = self.y,
         icon = 'gui-map-pointer'
       })
