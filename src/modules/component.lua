@@ -152,6 +152,13 @@ function M.removeFromGroup(id, group)
   return M
 end
 
+function M.clearGroup(group)
+  local groupName = getGroupName(group)
+  for id in pairs(M.groups[groupName].getAll()) do
+    M.removeFromGroup(id, groupName)
+  end
+end
+
 --[[
   x[NUMBER]
   y[NUMBER]

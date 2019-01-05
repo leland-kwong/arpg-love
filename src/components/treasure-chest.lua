@@ -4,6 +4,7 @@ local Gui = require 'components.gui.gui'
 local msgBus = require 'components.msg-bus'
 local Color = require 'modules.color'
 local itemConfig = require(require('alias').path.items..'.config')
+require 'components.interactable-indicators'
 
 local bodyGraphic = AnimationFactory:newStaticSprite('treasure-chest-body')
 local lidGraphic = AnimationFactory:newStaticSprite('treasure-chest-lid')
@@ -60,7 +61,7 @@ local handleTreasureOpen = function(self, parent)
     return
   end
 
-  if self.canOpen == true then
+  if parent.canOpen == true then
     parent.opened = true
     local tween = require 'modules.tween'
     parent.tween = tween.new(1, parent, {lidOffsetY = -300, lidOpacity = 0}, tween.easing.inExpo)
@@ -115,9 +116,6 @@ return Component.createFactory({
         local camera = require 'components.camera'
         return camera:getMousePosition()
       end,
-      onPointerMove = function(self)
-        self.canOpen = msgBus.send('INTERACT_TREASURE_CHEST', self)
-      end,
       onClick = function(self)
         handleTreasureOpen(self, parent)
       end
@@ -136,6 +134,9 @@ return Component.createFactory({
       return
     end
 
+    self.canOpen = (not self.opened) and
+      msgBus.send('INTERACT_TREASURE_CHEST', self)
+
     if self.tween then
       local complete = self.tween:update(dt)
     end
@@ -146,6 +147,14 @@ return Component.createFactory({
       psystem:setParticleLifetime(0.9)
       psystem:setPosition(self.x, self.y / particleScaleY)
       psystem:emit(1)
+    end
+
+    if self.canOpen then
+      Component.addToGroup(self:getId(), 'interactableIndicators', {
+        x = self.x - 6,
+        y = self.y,
+        icon = 'gui-map-pointer'
+      })
     end
   end,
   draw = function(self)
