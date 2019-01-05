@@ -63,7 +63,7 @@ local handleTreasureOpen = function(self, parent)
   if self.canOpen == true then
     parent.opened = true
     local tween = require 'modules.tween'
-    parent.tween = tween.new(1, parent, {lidOffsetY = -600}, tween.easing.inExpo)
+    parent.tween = tween.new(1, parent, {lidOffsetY = -300, lidOpacity = 0}, tween.easing.inExpo)
 
     local Sound = require 'components.sound'
     Sound.playEffect('treasure-open.wav')
@@ -94,10 +94,12 @@ return Component.createFactory({
   end,
   -- debug = true,
   lidOffsetY = 0,
+  lidOpacity = 1,
   init = function(self)
     local parent = self
     Component.addToGroup(self, 'all')
     Component.addToGroup(self, 'gameWorld')
+    Component.addToGroup(self, 'autoVisibility')
 
     self.height = 27
 
@@ -129,6 +131,11 @@ return Component.createFactory({
     self.particleClock = 0
   end,
   update = function(self, dt)
+    self:setDrawDisabled(not self.isInViewOfPlayer)
+    if (not self.isInViewOfPlayer) then
+      return
+    end
+
     if self.tween then
       local complete = self.tween:update(dt)
     end
@@ -165,7 +172,10 @@ return Component.createFactory({
 
     love.graphics.setColor(1,1,1)
     bodyGraphic:draw(self.x, self.y)
-    lidGraphic:draw(self.x, self.y + self.lidOffsetY)
+    if self.lidOpacity > 0 then
+      love.graphics.setColor(1,1,1,self.lidOpacity)
+      lidGraphic:draw(self.x, self.y + self.lidOffsetY)
+    end
 
     shader:send('outline_width', 0)
   end,
