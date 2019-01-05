@@ -19,12 +19,20 @@ local function generateLoot(c, item, delay)
 end
 
 local EMPTY = {}
+local default = {
+  itemData = {
+    level = 1,
+    dropRate = 0,
+    minRarity = itemConfig.rarity.NORMAL,
+    maxRarity = itemConfig.rarity.NORMAL,
+  },
+}
 
 return {
   system = Component.newSystem({
     name = 'loot',
     onComponentEnter = function(_, c)
-      local iData = c.itemData
+      local iData = c.itemData or default.itemData
       local delayBetweenDrops = c.delay or 0.1
 
       for i=1, #(c.guaranteedItems or EMPTY) do

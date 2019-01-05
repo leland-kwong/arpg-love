@@ -68,25 +68,30 @@ local handleTreasureOpen = function(self, parent)
     local Sound = require 'components.sound'
     Sound.playEffect('treasure-open.wav')
 
+    local lootData = parent.lootData()
     local uid = require 'utils.uid'
     Component.addToGroup(uid(), 'loot', {
       delay = parent.delay or 0.25,
       x = self.x,
       y = self.y,
-      itemData = parent.itemData,
-      guaranteedItems = parent.guaranteedItems
+      itemData = lootData.itemData,
+      guaranteedItems = lootData.guaranteedItems
     })
   end
 end
 
 return Component.createFactory({
-  guaranteedItems = {},
-  itemData = {
-    level = 1,
-    dropRate = 0,
-    minRarity = itemConfig.rarity.NORMAL,
-    maxRarity = itemConfig.rarity.NORMAL,
-  },
+  lootData = function()
+    return {
+      guaranteedItems = {},
+      itemData = {
+        level = 1,
+        dropRate = 0,
+        minRarity = itemConfig.rarity.NORMAL,
+        maxRarity = itemConfig.rarity.NORMAL,
+      },
+    }
+  end,
   -- debug = true,
   lidOffsetY = 0,
   init = function(self)
