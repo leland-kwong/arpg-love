@@ -285,7 +285,7 @@ local function setupSlotInteractions(
         end
 
         -- cleanup tooltip
-        if (not self.hovered) and tooltipRef then
+        if (not self.hovered or itemPickedUp) and tooltipRef then
           tooltipRef:delete()
           tooltipRef = nil
         end
