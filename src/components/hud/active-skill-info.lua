@@ -130,7 +130,7 @@ local function ActiveEquipmentHandler()
       end
 
       local attackTime = itemSystem.getDefinition(activeItem).info.attackTime or 0
-      local actualAttackTime = propTypesCalculator.attackTimeReduction(attackTime, Component.get('PLAYER').stats:get('attackTimeReduction'))
+      local actualAttackTime = propTypesCalculator.attackSpeed(attackTime, Component.get('PLAYER').stats:get('attackSpeed'))
 
       local mx, my = camera:getMousePosition()
       local playerX, playerY = self.player:getPosition()

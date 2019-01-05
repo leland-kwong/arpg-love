@@ -21,7 +21,7 @@ return {
   cooldownReduction = {
     range = RangeCalculator(1, 5, 0.01),
   },
-  attackTimeReduction = {
+  attackSpeed = {
     range = RangeCalculator(1, 5, 0.01)
   },
   attackPower = {

@@ -33,7 +33,7 @@ return setmetatable({
 	propTypesDisplayValue = setmetatable({
 		attackTime = valueTypeHandlers.time,
 		cooldown = valueTypeHandlers.time,
-		attackTimeReduction = valueTypeHandlers.percent,
+		attackSpeed = valueTypeHandlers.percent,
 		energyCostReduction = valueTypeHandlers.percent,
 		cooldownReduction = valueTypeHandlers.percent,
 	}, {
@@ -46,13 +46,15 @@ return setmetatable({
 		cooldownReduction = function(cooldown, reduction)
 			return math.max(0, cooldown - (cooldown * reduction))
 		end,
-		attackTimeReduction = function(attackTime, reduction)
-			--[[
-				This cannot be zero since this affects animation time.
-				The tweening library that we use does not allow for zero duration values
-			]]
-			local minAttackTime = 0.001
-			return math.max(minAttackTime, attackTime - (attackTime * reduction))
+		--[[
+			attack speed increases the number of actions per second
+		]]
+		attackSpeed = function(attackTime, bonusAttackSpeed)
+			local attacksPerSec = 1/attackTime
+			local newAttackRate = (attacksPerSec * (bonusAttackSpeed + 1))
+			local newAttackTime = 1/newAttackRate
+			print(newAttackRate, newAttackTime)
+			return newAttackTime
 		end
 	}, {
 		__index = function()
@@ -70,7 +72,7 @@ return setmetatable({
 			energyRegeneration = base.energyRegeneration,
 			armor = 0,
 			cooldownReduction = 0, -- multiplier
-			attackTimeReduction = 0, -- multiplier
+			attackSpeed = 0, -- multiplier
 			moveSpeed = 0, -- flat increase
 			fireResist = 0,
 			coldResist = 0,

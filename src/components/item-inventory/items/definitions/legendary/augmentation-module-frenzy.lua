@@ -23,7 +23,7 @@ return {
 			require 'components.item-inventory.items.modifiers.frenzy'({
 				maxStacks = 30,
 				resetStackDelay = 2,
-				attackTimeReduction = 0.01,
+				attackSpeed = 0.01,
 				energyCostReduction = -0.1,
 				cooldownReduction = 0.005
 			}),

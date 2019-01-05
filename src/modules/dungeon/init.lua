@@ -108,11 +108,12 @@ local objectParsersByType = {
       local TreasureChest = require 'components.treasure-chest'
       local config = require 'config.config'
       local filePropLoader = require 'modules.dungeon.modules.file-property-loader'
-      local O = require 'utils.object-utils'
-      TreasureChest.create(O.extend({
+      local defaultTreasure = require 'modules.dungeon.treasure-chest-definitions.default'
+      TreasureChest.create({
+        lootData = filePropLoader(obj.properties.props) or defaultTreasure,
         x = (origin.x * config.gridSize) + obj.x,
         y = (origin.y * config.gridSize) + obj.y
-      }, filePropLoader(obj.properties.props)))
+      })
     end,
     environmentDoor = function(obj, grid, origin, blockData)
       local config = require 'config.config'

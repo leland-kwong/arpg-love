@@ -8,13 +8,13 @@ local nodeValueOptions = {
   [1] = {
     name = 'quick strikes',
     value = {
-      type = 'attackTimeReduction',
+      type = 'attackSpeed',
       value = 0.04
     },
     image = 'gui-skill-tree_node_speed-up',
     backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
-      return '+'..(self.value.value * 100)..'% attack time reduction'
+      return '+'..(self.value.value * 100)..'% attack speed'
     end
   },
   [2] = {
