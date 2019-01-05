@@ -109,7 +109,7 @@ local modifierParsers = {
   activeAbility = function(data)
     local coloredText = {}
 
-    table.insert(coloredText, Color.LIGHT_GRAY)
+    table.insert(coloredText, Color.LIME)
     table.insert(coloredText, 'active skill: ')
 
     local parsed = parser(data.template, data.data)
