@@ -63,6 +63,26 @@ function Object.deepCopy(t1)
 	return copy
 end
 
+function Object.deepEqual(t1, t2)
+	if (not t1) or (not t2) then
+		return false
+	end
+
+	for k,v in pairs(t1) do
+		if (type(v) == 'table') then
+			if not Object.deepEqual(v, t2[k]) then
+				print(k, t2[k], v)
+				return false
+			end
+		else
+			if (t2[k] ~= v) then
+				return false
+			end
+		end
+  end
+  return true
+end
+
 -- Does a shallow comparison of properties.
 -- If changes exist we return a new copy with the changes merged into the source table
 function Object.immutableApply(t1, t2)

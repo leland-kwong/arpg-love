@@ -57,19 +57,19 @@ function M.reduce(t, reducer, seed)
 	return result
 end
 
-function M.keys(tableOrIterator)
+function M.keys(iterable)
 	local keys = {}
 	local i = 1
 
-	if (type(tableOrIterator) == 'table') then
-		for k,_ in pairs(tableOrIterator) do
+	if (type(iterable) == 'table') then
+		for k,_ in pairs(iterable) do
 			keys[i] = k
 			i = i + 1
 		end
 		return keys
 	end
 
-	for k,_ in tableOrIterator do
+	for k,_ in iterable do
 		keys[i] = k
 		i = i + 1
 	end
