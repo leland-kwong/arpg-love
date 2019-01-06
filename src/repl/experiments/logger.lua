@@ -1,100 +1,8 @@
-local bitser = require 'modules.bitser'
-local String = require 'utils.string'
 local dynamicRequire = require 'utils.dynamic-require'
 local O = dynamicRequire 'utils.object-utils'
 local Observable = require 'modules.observable'
-
-local logSeparator = '___LOG___'
-
-local Component = require 'modules.component'
-Component.create({
-  id = 'logger-init',
-  init = function(self)
-    if (not logAppendThread) then
-      -- start async write thread
-      local source = love.filesystem.read('repl/async-write.lua')
-      logAppendThread = love.thread.newThread(source)
-      logAppendThread:start()
-    end
-  end,
-})
-
-local Log = {}
-
-local mainChannel = love.thread.getChannel('ASYNC_WRITE_TEST')
-local function threadSend(action, a, b)
-  mainChannel:push(action)
-  mainChannel:push(a)
-  mainChannel:push(b == nil and '' or b)
-end
-
-function Log.append(path, entry)
-  threadSend(
-    'APPEND',
-    path,
-    bitser.dumps(entry)..logSeparator
-  )
-
-  return Observable(function()
-    local channel = love.thread.getChannel('logAppend')
-    if channel:getCount() > 0 then
-      local success = channel:pop()
-      local err = (not success) and 'log append error'
-      return true, success, err
-    end
-  end)
-end
-
-function Log.readStream(path, onData, onError, onComplete, seed)
-  local noop = require 'utils.noop'
-  onData = onData or noop
-  onError = onError or noop
-  onComplete = onComplete or noop
-
-  threadSend(
-    'READ',
-    path
-  )
-
-  local readChannel = love.thread.getChannel('logRead.'..path)
-  local msgBus = require 'components.msg-bus'
-  msgBus.on('UPDATE', function()
-    local count = readChannel:getCount()
-    local done = false
-    while (not done) do
-      local message = readChannel:pop()
-      if message == 'done' then
-        done = true
-        onComplete(seed)
-        return msgBus.CLEANUP
-      else
-        if message then
-          seed = onData(seed, bitser.loads(message))
-        else
-          done = true
-        end
-      end
-    end
-  end)
-end
-
-function Log.delete(path)
-  threadSend(
-    'DELETE',
-    path
-  )
-
-  return Observable(function()
-    local channel = love.thread.getChannel('logDelete')
-    local success = channel:pop()
-    if success ~= nil then
-      if success then
-        return true, true
-      end
-      return true, false, 'log delete error'
-    end
-  end)
-end
+local Log = require 'modules.log-db'
+local F = require 'utils.functional'
 
 local Test = {
   setup = function(options)
@@ -177,7 +85,6 @@ test(
     }
     local logPath = 'test/log-read-stream.log'
     Log.delete(logPath)
-    local F = require 'utils.functional'
     Observable.all(
       F.map(entries, function(entry)
         return Log.append(logPath, entry)
@@ -192,5 +99,132 @@ test(
     end, function(err)
       print(err)
     end)
+  end
+)
+
+test(
+  'mergedLog',
+  function()
+    --[[
+      SCHEMA
+
+      local Enum = require 'utils.enum'
+      local entryTypes = Enum({
+        'ENEMY_KILL',
+        'ITEM_ACQUIRE'
+      })
+      local entrySchema = {
+        type = entryTypes,
+        data = {
+          id = id -- string
+        }
+      }
+
+      local finalLog = {
+        enemiesKilled = {
+          [enemyId] = killCount
+        },
+        itemsAcquired = {
+          [itemId] = acquiredCount
+        }
+      }
+    ]]
+
+    local entryTypes = {
+      ENEMY_KILL = 1,
+      ITEM_ACQUIRE = 2
+    }
+
+    local srcDir = love.filesystem.getWorkingDirectory()
+    local json = require 'lua_modules.json'
+    local F = require 'utils.functional'
+    local dbData = json.decode(
+      love.filesystem.read('enemies.cdb')
+    )
+    local enemyData = F.reduce(
+      F.find(dbData.sheets, function(sheet)
+        return sheet.name == 'enemies'
+      end).lines,
+      function(data, enemy)
+        data[enemy.id] = enemy
+        return data
+      end,
+      {}
+    )
+
+    local finalLog = {
+      enemiesKilled = {},
+      itemsAcquired = {}
+    }
+
+    local entryHandlers = {
+      [entryTypes.ENEMY_KILL] = function(finalLog, entry)
+        local curValue = finalLog.enemiesKilled[entry.id] or 0
+        finalLog.enemiesKilled[entry.id] = curValue + 1
+      end,
+      [entryTypes.ITEM_ACQUIRE] = function(finalLog, entry)
+        local curValue = finalLog.itemsAcquired[entry.id] or 0
+        finalLog.itemsAcquired[entry.id] = curValue + 1
+      end
+    }
+
+    local logPath = 'test/merged-log.log'
+    Log.delete(logPath)
+
+    local ts = Time()
+    local entryCount = 0
+    Log.readStream(logPath, function(_, entry)
+      entryCount = entryCount + 1
+      entryHandlers[entry.type](finalLog, entry)
+    end, nil, function()
+      print(
+        Inspect({
+          finalLog = finalLog,
+          executionTime = Time() - ts,
+          entryCount = entryCount
+        })
+      )
+    end)
+
+    -- Log.tail(logPath, function(entry)
+    --   entryHandlers[entry.type](finalLog, entry)
+    -- end)
+
+    -- local tick = require 'utils.tick'
+    -- tick.recur(function()
+    --   for i=1, 20 do
+    --     Observable.all(
+    --       Log.append(logPath, {
+    --         type = entryTypes.ENEMY_KILL,
+    --         id = 'e1',
+    --       })
+    --       ,Log.append(logPath, {
+    --         type = entryTypes.ENEMY_KILL,
+    --         id = 'e1'
+    --       })
+    --       ,Log.append(logPath, {
+    --         type = entryTypes.ENEMY_KILL,
+    --         id = 'e1'
+    --       })
+    --       ,Log.append(logPath, {
+    --         type = entryTypes.ITEM_ACQUIRE,
+    --         id = 'CHAIN_LIGHTNING'
+    --       })
+    --       ,Log.append(logPath, {
+    --         type = entryTypes.ITEM_ACQUIRE,
+    --         id = 'HAMMER_TIME'
+    --       })
+    --     ):next(function()
+    --     end, function(err)
+    --       print(err)
+    --     end)
+    --   end
+    -- end, 1/60)
+
+    -- tick.recur(function()
+    --   print(
+    --     Inspect(finalLog)
+    --   )
+    -- end, 1)
   end
 )

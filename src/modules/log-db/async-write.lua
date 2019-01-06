@@ -76,6 +76,8 @@ local function appendEntry(path, data)
   end)
   local channel = love.thread.getChannel('logAppend')
   channel:push(ok)
+  love.thread.getChannel('logTail.'..path)
+    :push(data)
   if (not ok) then
     print(ok)
   end
@@ -87,13 +89,7 @@ local function readLogFile(path)
 
   local logAsString = file:read('*a')
   local channel = love.thread.getChannel('logRead.'..path)
-  local String = require 'utils.string'
-  local entries = String.split(logAsString, logSeparator)
-  --ignore the last entry since it is empty
-  for i=1, (#entries) - 1 do
-    channel:push(entries[i])
-  end
-  channel:push('done')
+  channel:push(logAsString)
 end
 
 local actionHandlers = {
