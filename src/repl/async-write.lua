@@ -2,6 +2,7 @@
 local lru = require 'utils.lru'
 
 local logSeparator = '___LOG___'
+local dirPrefix = 'log/'
 
 local function getDirFromPath(path)
   local lastSlash, s, e = path, string.find(path, '/[^/]*$')
@@ -21,14 +22,15 @@ local logCache = {
   get = function(self, path)
     local file = self.files:get(path)
     if (not file) then
+      local actualPath = dirPrefix..path
       -- create directory if needed
-      local dir = getDirFromPath(path)
+      local dir = getDirFromPath(actualPath)
       local info = love.filesystem.getInfo(dir)
       if (not info) then
         love.filesystem.createDirectory(dir)
       end
 
-      file = openFile(path)
+      file = openFile(actualPath)
       self.files:set(path, file)
     end
     return file
@@ -44,10 +46,11 @@ local logCache = {
 
 local function deleteLogFile(path)
   local file = logCache:unset(path)
-  local info = love.filesystem.getInfo(path)
+  local actualPath = dirPrefix..path
+  local info = love.filesystem.getInfo(actualPath)
   local channel = love.thread.getChannel('logDelete')
   if info then
-    local success = love.filesystem.remove(path)
+    local success = love.filesystem.remove(actualPath)
     channel:push(success)
   else
     channel:push(true)
