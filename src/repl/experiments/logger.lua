@@ -120,7 +120,7 @@ local test = Test.setup({
 test(
   'append',
   function()
-    local logPath = 'test/log/log-append-test.log'
+    local logPath = 'test/log-append.log'
     Log.delete(logPath)
     local data = { foo = 'bar\n\n'..os.clock() }
     Log.append(logPath, data)
@@ -147,7 +147,7 @@ test(
       print(err)
     end
 
-    local logPath = 'test/log/log-delete-test.log'
+    local logPath = 'test/log-delete.log'
     Log.delete(logPath)
     Log.append(logPath, 'foo')
       :next(function()
@@ -175,7 +175,7 @@ test(
         bar = 'bar'
       }
     }
-    local logPath = 'test/log/log-read-stream-test.log'
+    local logPath = 'test/log-read-stream.log'
     Log.delete(logPath)
     local F = require 'utils.functional'
     Observable.all(
