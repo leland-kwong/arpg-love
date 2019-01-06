@@ -11,9 +11,12 @@ local function tableEqual(t1, t2)
   return true
 end
 
+local enabled = false
 local function testSuite(description, testFn)
   -- print('[test] ' .. description)
-  testFn()
+  if enabled then
+    testFn()
+  end
 end
 
 testSuite(
