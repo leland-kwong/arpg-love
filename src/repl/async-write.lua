@@ -1,6 +1,8 @@
 --Threaded log append/read
 local lru = require 'utils.lru'
 
+local logSeparator = '___LOG___'
+
 local function getDirFromPath(path)
   local lastSlash, s, e = path, string.find(path, '/[^/]*$')
   return string.sub(path, 1, s)
@@ -30,8 +32,28 @@ local logCache = {
       self.files:set(path, file)
     end
     return file
+  end,
+  unset = function(self, path)
+    local file = self.files:get(path)
+    if file then
+      file:close()
+      self.files:delete(path)
+    end
   end
 }
+
+local function deleteLogFile(path)
+  local file = logCache:unset(path)
+  local info = love.filesystem.getInfo(path)
+  local channel = love.thread.getChannel('logDelete')
+  if info then
+    local success = love.filesystem.remove(path)
+    channel:push(success)
+  else
+    channel:push(true)
+  end
+end
+
 local queue = {}
 
 local numArgs = 3
@@ -49,26 +71,32 @@ local function appendEntry(path, data)
     file:seek('end')
     return file:write(data)
   end)
+  local channel = love.thread.getChannel('logAppend')
+  channel:push(ok)
   if (not ok) then
-    love.thread.getChannel('logAppendError'):push(errors)
-  else
-    love.thread.getChannel('logAppendSuccess'):push(true)
+    print(ok)
   end
 end
 
 local function readLogFile(path)
   local file = logCache:get(path)
   file:seek('set')
-  local output = ''
-  for line in file:lines() do
-    output = output..line
+
+  local logAsString = file:read('*a')
+  local channel = love.thread.getChannel('logRead.'..path)
+  local String = require 'utils.string'
+  local entries = String.split(logAsString, logSeparator)
+  --ignore the last entry since it is empty
+  for i=1, (#entries) - 1 do
+    channel:push(entries[i])
   end
-  love.thread.getChannel('logRead'):push(output)
+  channel:push('done')
 end
 
 local actionHandlers = {
   APPEND = appendEntry,
-  READ = readLogFile
+  READ = readLogFile,
+  DELETE = deleteLogFile
 }
 
 local function observeThread()

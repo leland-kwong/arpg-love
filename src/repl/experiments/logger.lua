@@ -4,7 +4,7 @@ local dynamicRequire = require 'utils.dynamic-require'
 local O = dynamicRequire 'utils.object-utils'
 local Observable = require 'modules.observable'
 
-local logSeparator = '___LOG___\n'
+local logSeparator = '___LOG___'
 
 local Component = require 'modules.component'
 Component.create({
@@ -21,65 +21,79 @@ Component.create({
 
 local Log = {}
 
+local mainChannel = love.thread.getChannel('ASYNC_WRITE_TEST')
+local function threadSend(action, a, b)
+  mainChannel:push(action)
+  mainChannel:push(a)
+  mainChannel:push(b == nil and '' or b)
+end
+
 function Log.append(path, entry)
-  local channel = love.thread.getChannel('ASYNC_WRITE_TEST')
-  channel:push('APPEND')
-  channel:push(path)
-  channel:push(
+  threadSend(
+    'APPEND',
+    path,
     bitser.dumps(entry)..logSeparator
   )
 
   return Observable(function()
-    local errorMsg = love.thread.getChannel('logAppendError'):pop()
-    if errorMsg then
-      return true, nil, errorMsg
-    end
-
-    local success = love.thread.getChannel('logAppendSuccess'):pop()
-    if success then
-      return true, true
+    local channel = love.thread.getChannel('logAppend')
+    if channel:getCount() > 0 then
+      local success = channel:pop()
+      local err = (not success) and 'log append error'
+      return true, success, err
     end
   end)
 end
 
-local function parseLog(log)
-  return coroutine.wrap(function()
-    if (not log) then
-      return
-    end
-    local entries = String.split(log, logSeparator)
-    -- skip the last one since it is empty
-    for i=1, (#entries) - 1 do
-      coroutine.yield(
-        bitser.loads(entries[i])
-      )
-    end
-  end)
-end
+function Log.readStream(path, onData, onError, onComplete, seed)
+  local noop = require 'utils.noop'
+  onData = onData or noop
+  onError = onError or noop
+  onComplete = onComplete or noop
 
-function Log.load(path)
-  return parseLog(
-    love.filesystem.read(path)
+  threadSend(
+    'READ',
+    path
   )
+
+  local readChannel = love.thread.getChannel('logRead.'..path)
+  local msgBus = require 'components.msg-bus'
+  msgBus.on('UPDATE', function()
+    local count = readChannel:getCount()
+    local done = false
+    while (not done) do
+      local message = readChannel:pop()
+      if message == 'done' then
+        done = true
+        onComplete(seed)
+        return msgBus.CLEANUP
+      else
+        if message then
+          seed = onData(seed, bitser.loads(message))
+        else
+          done = true
+        end
+      end
+    end
+  end)
 end
 
 function Log.delete(path)
-  love.filesystem.remove(path)
-end
-
-function Log.reduce(path, callback, seed)
-  for entry in Log.load(path) do
-    seed = callback(seed, entry)
-  end
-  return seed
-end
-
-local function reduceToFile(fromPath, toPath, callback, seed)
-  local result = Log.reduce(fromPath, callback, seed)
-  return love.filesystem.write(
-    toPath,
-    bitser.dumps(result)
+  threadSend(
+    'DELETE',
+    path
   )
+
+  return Observable(function()
+    local channel = love.thread.getChannel('logDelete')
+    local success = channel:pop()
+    if success ~= nil then
+      if success then
+        return true, true
+      end
+      return true, false, 'log delete error'
+    end
+  end)
 end
 
 local Test = {
@@ -91,156 +105,92 @@ local Test = {
     options.afterEach = options.afterEach or noop
 
     return function(description, testFn)
-      options.beforeEach()
-      testFn()
+      options.beforeEach(testFn)
       options.afterEach()
     end
   end
 }
 
-local logPath = 'test/log/log.log'
 local test = Test.setup({
-  beforeEach = function()
-    -- Log.delete(logPath)
+  beforeEach = function(onReady)
+    onReady()
   end
 })
-
-local function readLog()
-  local channel = love.thread.getChannel('ASYNC_WRITE_TEST')
-  channel:push('READ')
-  channel:push(logPath)
-  channel:push('')
-  Observable(function()
-    local logString = love.thread.getChannel('logRead'):pop()
-    if logString then
-      return true, logString
-    end
-  end)
-    :next(function(logString)
-      print('\n\n')
-      print(logString)
-    end, function(err)
-      print(err)
-    end)
-end
 
 test(
   'append',
   function()
-    local tick = require 'utils.tick'
-    tick.recur(function()
-      local entry = { foo = 'bar\n\n'..os.clock() }
-      Log.append(logPath, entry)
-        :next(function()
-          -- Log.delete(logPath)
-
-          -- assert(
-          --   love.filesystem.read(logPath) == (bitser.dumps(entry)..logSeparator),
-          --   'log append failed'
-          -- )
-          readLog()
-        end, function(err)
-          print(err)
-        end)
-        :next(nil, function(err)
-          print(err)
-        end)
-    end, 1)
+    local logPath = 'test/log/log-append-test.log'
+    Log.delete(logPath)
+    local data = { foo = 'bar\n\n'..os.clock() }
+    Log.append(logPath, data)
+      :next(function()
+        Log.readStream(logPath, function(entries, entry)
+          table.insert(entries, entry)
+          return entries
+        end, nil, function(entries)
+          assert(O.deepEqual(data, entries[1]), 'log append fail')
+        end, {})
+      end, function(err)
+        print(err)
+      end)
+      :next(nil, function(err)
+        print(err)
+      end)
   end
 )
 
--- test(
---   'load',
---   function()
---     local entries = {
---       'foo',
---       'bar'
---     }
---     for i=1, #entries do
---       Log.append(logPath, entries[i])
---     end
---     local logIterator = Log.load(logPath)
+test(
+  'delete',
+  function()
+    local function handleError(err)
+      print(err)
+    end
 
---     local loadedLog = {}
---     for entry in logIterator do
---       table.insert(loadedLog, entry)
---     end
+    local logPath = 'test/log/log-delete-test.log'
+    Log.delete(logPath)
+    Log.append(logPath, 'foo')
+      :next(function()
+        Log.delete(logPath)
+          :next(function()
+            Log.readStream(logPath, function(entries, entry)
+              table.insert(entries, entry)
+              return entries
+            end, nil, function(entries)
+              assert(#entries == 0, 'log delete fail')
+            end, {})
+          end, handleError)
+      end, handleError)
+  end
+)
 
---     assert(O.deepEqual(entries, loadedLog), 'log load failed')
---   end
--- )
-
--- test(
---   'delete',
---   function()
---     Log.append(logPath, 'foo')
---     Log.delete(logPath)
---     assert(love.filesystem.read(logPath) == nil, 'log delete fail')
---   end
--- )
-
--- test(
---   'reduce',
---   function()
---     local entries = {
---       {
---         foo = 'foo'
---       },
---       {
---         bar = 'bar'
---       }
---     }
-
---     for _,entry in ipairs(entries) do
---       Log.append(logPath, entry)
---     end
-
---     local reducedLog = Log.reduce(
---       logPath,
---       function(finalLog, entry)
---         return O.extend(finalLog, entry)
---       end,
---       {}
---     )
-
---     assert(
---       O.deepEqual({
---         foo = 'foo',
---         bar = 'bar'
---       }, reducedLog),
---       'log reduce failure'
---     )
---   end
--- )
-
--- test(
---   'reduce to single file',
---   function()
---     local entries = {
---       'foobar',
---       'bazcux'
---     }
---     for _,entry in ipairs(entries) do
---       Log.append(logPath, entry)
---     end
-
---     local pathToSaveTo = 'test/log/reduced-log.data'
---     reduceToFile(
---       logPath,
---       pathToSaveTo,
---       function(result, entry)
---         result = result..entry
---         return result
---       end,
---       ''
---     )
-
---     assert(
---       entries[1]..entries[2] ==
---       bitser.loads(
---         love.filesystem.read(pathToSaveTo)
---       ),
---       'reduce log to a single file failure'
---     )
---   end
--- )
+test(
+  'readStream',
+  function()
+    local entries = {
+      {
+        foo = 'foo'
+      },
+      {
+        bar = 'bar'
+      }
+    }
+    local logPath = 'test/log/log-read-stream-test.log'
+    Log.delete(logPath)
+    local F = require 'utils.functional'
+    Observable.all(
+      F.map(entries, function(entry)
+        return Log.append(logPath, entry)
+      end)
+    ):next(function()
+      Log.readStream(logPath, function(newEntries, entry)
+        table.insert(newEntries, entry)
+        return newEntries
+      end, nil, function(newEntries)
+        assert(O.deepEqual(entries, newEntries))
+      end, {})
+    end, function(err)
+      print(err)
+    end)
+  end
+)
