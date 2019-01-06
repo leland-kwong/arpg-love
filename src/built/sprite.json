@@ -1411,7 +1411,7 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":8,"w":14,"h":16},
 	"sourceSize": {"w":14,"h":16},
-	"pivot": {"x":0.571429,"y":0.5}
+	"pivot": {"x":0.571429,"y":0.500001}
 },
 "npc-quest-master/character-11":
 {
@@ -1456,7 +1456,7 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":5,"w":14,"h":18},
 	"sourceSize": {"w":14,"h":18},
-	"pivot": {"x":0.571429,"y":0.611111}
+	"pivot": {"x":0.571429,"y":0.611112}
 },
 "npc-quest-master/character-16":
 {
@@ -1519,7 +1519,7 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":5,"w":14,"h":19},
 	"sourceSize": {"w":14,"h":19},
-	"pivot": {"x":0.571429,"y":0.578947}
+	"pivot": {"x":0.571429,"y":0.578948}
 },
 "npc-quest-master/character-23":
 {
@@ -1537,7 +1537,7 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":5,"w":14,"h":18},
 	"sourceSize": {"w":14,"h":18},
-	"pivot": {"x":0.571429,"y":0.611111}
+	"pivot": {"x":0.571429,"y":0.611112}
 },
 "npc-quest-master/character-25":
 {
@@ -1555,7 +1555,7 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":8,"w":14,"h":16},
 	"sourceSize": {"w":14,"h":16},
-	"pivot": {"x":0.571429,"y":0.5}
+	"pivot": {"x":0.571429,"y":0.500001}
 },
 "npc-quest-master/character-27":
 {
@@ -2410,6 +2410,6 @@
 	"format": "RGBA8888",
 	"size": {"w":1477,"h":126},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:787b548df83c0f0731a6201b4f9a57e7:14ca82d89d40ac6719ccf3a6a9c2c8eb:68d88b3cf7eafc9b5accfffdfb2fda91$"
+	"smartupdate": "$TexturePacker:SmartUpdate:cfff690dbf569c8dce60a5eefe35fa67:14ca82d89d40ac6719ccf3a6a9c2c8eb:68d88b3cf7eafc9b5accfffdfb2fda91$"
 }
 }

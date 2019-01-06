@@ -1,9 +1,10 @@
 return function(msgBus)
   -- custom cursor
-  local cursorBaseSize = 18
+  local cursorBaseSize = 22
   local cursorImages = {
     default = 'cursor-target',
     move = 'cursor-move',
+    speech = 'cursor-speech',
   }
   local cursorsCache = {
     cursors = {},
