@@ -136,7 +136,7 @@ local menuOptionPlayGameMenu = {
 }
 
 local menuOptionNewsPanel = {
-  name = 'Latest news',
+  name = 'Patch notes',
   value = function()
     -- dont close it if it's already open
     if Component.get('newsDialog') then
