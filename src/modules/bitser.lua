@@ -374,6 +374,11 @@ end, loadData = function(data, size)
 	Buffer_newDataReader(data, size)
 	return deserialize_value({})
 end, loads = function(str)
+	local isEmpty = str == ''
+	if isEmpty then
+		return {}
+	end
+
 	Buffer_newReader(str)
 	return deserialize_value({})
 end, register = function(name, resource)
