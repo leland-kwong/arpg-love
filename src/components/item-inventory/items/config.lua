@@ -77,7 +77,7 @@ config.equipmentCategorySilhouette = {
 	[equipmentCategory.ACTION_MODULE] = 'weapon-module-empty',
 	[consumableCategory.CONSUMABLE] = 'vial-health',
 	[equipmentCategory.HELMET] = 'helmet_106',
-	[equipmentCategory.BODY_ARMOR] = 'armor_121',
+	[equipmentCategory.BODY_ARMOR] = 'body-armor-basic',
 	[equipmentCategory.SHOES] = 'shoe_1',
 	[equipmentCategory.AUGMENTATION] = 'augmentation-one'
 }
