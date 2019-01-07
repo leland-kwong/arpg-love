@@ -131,70 +131,73 @@ local getRandomProps = Chance({
   }
 })
 
-return function()
-  local animations = {
-    attacking = animationFactory:new({
-      'slime/slime1',
-      'slime/slime2',
-      'slime/slime3',
-      'slime/slime4',
-      'slime/slime5',
-      'slime/slime6',
-      'slime/slime7',
-      'slime/slime8',
-      'slime/slime9',
-      'slime/slime10',
-      'slime/slime11',
-    }):setDuration(SlimeSlap.actionSpeed),
-    idle = animationFactory:new({
-      'slime/slime12',
-      'slime/slime13',
-      'slime/slime14',
-      'slime/slime15',
-      'slime/slime16'
-    }):setDuration(0.7),
-    moving = animationFactory:new({
-      'slime/slime12',
-      'slime/slime13',
-      'slime/slime14',
-      'slime/slime15',
-      'slime/slime16'
-    }):setDuration(0.3)
-  }
-
-  local attackRange = 3
-  local spriteWidth, spriteHeight = animations.idle:getSourceSize()
-
-  local randomProps = getRandomProps()
-  local dataSheet = {
-    name = randomProps.name,
-    properties = {
-      'melee',
-      'dashes in when near'
+return {
+  type = 'ai-slime',
+  create = function()
+    local animations = {
+      attacking = animationFactory:new({
+        'slime/slime1',
+        'slime/slime2',
+        'slime/slime3',
+        'slime/slime4',
+        'slime/slime5',
+        'slime/slime6',
+        'slime/slime7',
+        'slime/slime8',
+        'slime/slime9',
+        'slime/slime10',
+        'slime/slime11',
+      }):setDuration(SlimeSlap.actionSpeed),
+      idle = animationFactory:new({
+        'slime/slime12',
+        'slime/slime13',
+        'slime/slime14',
+        'slime/slime15',
+        'slime/slime16'
+      }):setDuration(0.7),
+      moving = animationFactory:new({
+        'slime/slime12',
+        'slime/slime13',
+        'slime/slime14',
+        'slime/slime15',
+        'slime/slime16'
+      }):setDuration(0.3)
     }
-  }
 
-  return {
-    modifierNames = {},
-    itemData = {
-      level = 2,
-      dropRate = 30
-    },
-    dataSheet = dataSheet,
-    moveSpeed = 75,
-    maxHealth = 25,
-    w = spriteWidth,
-    h = spriteHeight,
-    physicalResist = 1,
-    animations = animations,
-    abilities = {
-      DashAbility,
-      SlimeSlap,
-    },
-    armor = 900,
-    experience = 2,
-    attackRange = attackRange,
-    fillColor = randomProps.color,
-    onDestroyStart = onDestroyStart
-  }
-end
+    local attackRange = 3
+    local spriteWidth, spriteHeight = animations.idle:getSourceSize()
+
+    local randomProps = getRandomProps()
+    local dataSheet = {
+      name = randomProps.name,
+      properties = {
+        'melee',
+        'dashes in when near'
+      }
+    }
+
+    return {
+      modifierNames = {},
+      itemData = {
+        level = 2,
+        dropRate = 30
+      },
+      dataSheet = dataSheet,
+      moveSpeed = 75,
+      maxHealth = 25,
+      w = spriteWidth,
+      h = spriteHeight,
+      physicalResist = 1,
+      animations = animations,
+      abilities = {
+        DashAbility,
+        SlimeSlap,
+      },
+      armor = 900,
+      experience = 2,
+      attackRange = attackRange,
+      fillColor = randomProps.color,
+      onDestroyStart = onDestroyStart
+    }
+  end
+}

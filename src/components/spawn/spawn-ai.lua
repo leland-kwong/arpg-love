@@ -107,12 +107,12 @@ local function AiFactory(props)
   local spawnX, spawnY =
     self.x * self.gridSize,
     self.y * self.gridSize
-  local spawnedAi = f.map(self.types, function(aiType)
+  local spawnedAi = f.map(self.types, function(aiFactory)
     local aiPrototype
-    if (type(aiType) == 'function') then
-      aiPrototype = setProp(aiType())
+    if (type(aiFactory) == 'table') then
+      aiPrototype = setProp(aiFactory.create())
     else
-      aiPrototype = setProp(aiTypes.typeDefs[aiType]())
+      aiPrototype = setProp(aiTypes.typeDefs[aiFactory].create())
     end
     local props = self.rarity(aiPrototype)
       :set('x',                 spawnX)

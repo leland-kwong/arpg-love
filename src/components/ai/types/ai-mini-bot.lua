@@ -61,54 +61,57 @@ function PelletShot.update(self, state, dt)
   return false
 end
 
-return function()
-  local animations = {
-    attacking = animationFactory:new({
-      'ai-1/ai-6'
-    }),
-    moving = animationFactory:new({
-      'ai-1/ai-0',
-      'ai-1/ai-1',
-      'ai-1/ai-2',
-      'ai-1/ai-3',
-      'ai-1/ai-4',
-      'ai-1/ai-5',
-    }):setDuration(1),
-    idle = animationFactory:new({
-      'ai-1/ai-6',
-      'ai-1/ai-7',
-      'ai-1/ai-8',
-      'ai-1/ai-9'
-    }):setDuration(0.6)
-  }
-
-  local attackRange = 8
-  local spriteWidth, spriteHeight = animations.idle:getSourceSize()
-  local dataSheet = {
-    name = 'minibot',
-    properties = {
-      'ranged'
+return {
+  type = 'ai-minibot',
+  create = function()
+    local animations = {
+      attacking = animationFactory:new({
+        'ai-1/ai-6'
+      }),
+      moving = animationFactory:new({
+        'ai-1/ai-0',
+        'ai-1/ai-1',
+        'ai-1/ai-2',
+        'ai-1/ai-3',
+        'ai-1/ai-4',
+        'ai-1/ai-5',
+      }):setDuration(1),
+      idle = animationFactory:new({
+        'ai-1/ai-6',
+        'ai-1/ai-7',
+        'ai-1/ai-8',
+        'ai-1/ai-9'
+      }):setDuration(0.6)
     }
-  }
 
-  return {
-    dataSheet = dataSheet,
-    armor = 250,
-    moveSpeed = 65,
-    maxHealth = 20,
-    itemData = {
-      level = 1,
-      dropRate = 20
-    },
-    experience = 1,
-    w = spriteWidth,
-    h = spriteHeight,
-    animations = animations,
-    abilities = {
-      PelletShot
-    },
-    attackRange = attackRange,
-    fillColor = fillColor,
-    onDestroyStart = onDestroyStart
-  }
-end
+    local attackRange = 8
+    local spriteWidth, spriteHeight = animations.idle:getSourceSize()
+    local dataSheet = {
+      name = 'minibot',
+      properties = {
+        'ranged'
+      }
+    }
+
+    return {
+      dataSheet = dataSheet,
+      armor = 250,
+      moveSpeed = 65,
+      maxHealth = 20,
+      itemData = {
+        level = 1,
+        dropRate = 20
+      },
+      experience = 1,
+      w = spriteWidth,
+      h = spriteHeight,
+      animations = animations,
+      abilities = {
+        PelletShot
+      },
+      attackRange = attackRange,
+      fillColor = fillColor,
+      onDestroyStart = onDestroyStart
+    }
+  end
+}

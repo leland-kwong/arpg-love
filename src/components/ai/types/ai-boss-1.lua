@@ -216,7 +216,7 @@ function SpawnMinions.update(_, state, dt)
   if state.isNewSpawn and (minionCount < maxNumMinions) then
     if (state.clock == 0) then
       local Spawn = require 'components.spawn.spawn-ai'
-      local minionType = require 'components.ai.types'.types.MELEE_BOT
+      local minionType = require 'components.ai.types.ai-melee-bot'
       local playerRef = Component.get('PLAYER')
       local config = require 'config.config'
       local minions = Spawn({
@@ -350,80 +350,84 @@ local function keepBossActive()
   end
 end
 
-return function(props)
-  local aiProps = AiEyeball()
+return {
+  type = 'boss-1',
+  legendary = true,
+  create = function(props)
+    local aiProps = AiEyeball.create()
 
-  aiProps.onInit = function(self)
-    local function handleBossDeath(msg)
-      local isBoss = msg.parent == Component.get(bossId)
-      if isBoss then
-        local camera = require 'components.camera'
-        camera:shake(4, 60, 5)
+    aiProps.onInit = function(self)
+      local function handleBossDeath(msg)
+        local isBoss = msg.parent == Component.get(bossId)
+        if isBoss then
+          local camera = require 'components.camera'
+          camera:shake(4, 60, 5)
 
-        for _,minion in pairs(Component.groups.boss1Minions.getAll()) do
-          Component.remove(minion:getId(), true)
+          for _,minion in pairs(Component.groups.boss1Minions.getAll()) do
+            Component.remove(minion:getId(), true)
+          end
         end
       end
-    end
-    local msgBus = require 'components.msg-bus'
-    msgBus.on(msgBus.ENEMY_DESTROYED, handleBossDeath)
+      local msgBus = require 'components.msg-bus'
+      msgBus.on(msgBus.ENEMY_DESTROYED, handleBossDeath)
 
-    Component.create({
-      init = function(self)
-        Component.addToGroup(self, 'all')
-      end,
-      update = function()
-        keepBossActive()
+      Component.create({
+        init = function(self)
+          Component.addToGroup(self, 'all')
+        end,
+        update = function()
+          keepBossActive()
+        end
+      }):setParent(self)
+    end
+
+    aiProps.onFinal = function()
+      local function openDoor(door)
+        door:disable()
       end
-    }):setParent(self)
-  end
-
-  aiProps.onFinal = function()
-    local function openDoor(door)
-      door:disable()
+      forEachDoor(openDoor)
     end
-    forEachDoor(openDoor)
-  end
 
-  aiProps.id = bossId
-  aiProps.lightRadius = 40
-  local Color = require 'modules.color'
-  aiProps.lightColor = Color.SKY_BLUE
-  aiProps.attackRange = 12
-  aiProps.maxHealth = 400
+    aiProps.id = bossId
+    aiProps.lightRadius = 40
+    local Color = require 'modules.color'
+    aiProps.lightColor = Color.SKY_BLUE
+    aiProps.attackRange = 12
+    aiProps.maxHealth = 400
 
-  local animations = {
-    attacking = animationFactory:new({
-      'boss-1/boss-1',
-      'boss-1/boss-1'
-    }),
-    idle = animationFactory:new({
-      'boss-1/boss-1'
-    }),
-    moving = animationFactory:new({
-      'boss-1/boss-1'
-    })
-  }
-  local spriteWidth, spriteHeight = animations.idle:getSourceSize()
-  aiProps.itemData.minRarity = itemConfig.rarity.MAGICAL
-  aiProps.itemData.maxRarity = itemConfig.rarity.RARE
-  aiProps.itemData.dropRate = aiProps.itemData.dropRate * 30
-
-  aiProps.animations = animations
-  aiProps.w = spriteWidth
-  aiProps.h = spriteHeight
-  aiProps.dataSheet = {
-    name = 'Erion, Guardian of Aureus',
-    properties = {
-      'ranged',
-      'beam-strike',
-      'minion-spawn',
-      'slow-on-hit',
-      'multi-shot'
+    local animations = {
+      attacking = animationFactory:new({
+        'boss-1/boss-1',
+        'boss-1/boss-1'
+      }),
+      idle = animationFactory:new({
+        'boss-1/boss-1'
+      }),
+      moving = animationFactory:new({
+        'boss-1/boss-1'
+      })
     }
-  }
-  table.insert(aiProps.abilities, AbilityBeamStrike)
-  table.insert(aiProps.abilities, SpawnMinions)
-  table.insert(aiProps.abilities, MultiShot)
-  return aiProps
-end
+    local spriteWidth, spriteHeight = animations.idle:getSourceSize()
+    aiProps.itemData.minRarity = itemConfig.rarity.MAGICAL
+    aiProps.itemData.maxRarity = itemConfig.rarity.RARE
+    aiProps.itemData.dropRate = aiProps.itemData.dropRate * 30
+
+    aiProps.animations = animations
+    aiProps.w = spriteWidth
+    aiProps.h = spriteHeight
+    aiProps.dataSheet = {
+      name = 'Erion, Guardian of Aureus',
+      properties = {
+        'ranged',
+        'beam-strike',
+        'minion-spawn',
+        'slow-on-hit',
+        'multi-shot'
+      }
+    }
+    table.insert(aiProps.abilities, AbilityBeamStrike)
+    table.insert(aiProps.abilities, SpawnMinions)
+    table.insert(aiProps.abilities, MultiShot)
+    return aiProps
+  end
+}
