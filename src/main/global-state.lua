@@ -3,6 +3,7 @@ local sceneManager = require 'scene.manager'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local CreateStore = require 'components.state.state'
+local UiState = require 'components.state.ui-state'
 local Lru = require 'utils.lru'
 
 local function newStateStorage()
@@ -18,6 +19,7 @@ local globalState = {
   backgroundColor = {0.2,0.2,0.2},
   sceneStack = sceneManager,
   gameState = CreateStore(),
+  uiState = UiState(),
   stateSnapshot = {
     serializedStateByMapId = newStateStorage(),
     serializeAll = function(self, mapId)

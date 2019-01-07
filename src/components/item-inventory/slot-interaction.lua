@@ -13,6 +13,8 @@ local groups = require 'components.groups'
 local boxCenterOffset = Position.boxCenterOffset
 local drawItem = require 'components.item-inventory.draw-item'
 local Lru = require 'utils.lru'
+local GlobalState = require 'main.global-state'
+local InputContext = require 'modules.input-context'
 
 local drawOrders = {
   GUI_SLOT = 3,
@@ -32,20 +34,22 @@ local function getSprite(name)
   return sprite
 end
 
--- currently picked up item. We can only have one item picked up at a time
-local itemPickedUp = nil
-local isDropModeFloor = false
-
-msgBus.on(msgBus.UPDATE, function()
-  local InputContext = require 'modules.input-context'
-  isDropModeFloor = InputContext.contains('any')
-end)
+local uiState = GlobalState.uiState
+local pickedUpitem = {
+  set = function(newItem)
+    uiState:set('pickedUpItem', newItem)
+  end,
+  get = function()
+    return uiState:get().pickedUpItem
+  end
+}
 
 -- handles dropping items on the floor when its in the floor drop mode
 local function handleItemDrop()
-  if (isDropModeFloor and itemPickedUp) then
-    msgBus.send(msgBus.DROP_ITEM_ON_FLOOR, itemPickedUp)
-    itemPickedUp = nil
+  local isDropModeFloor = InputContext.contains('any')
+  if (isDropModeFloor and pickedUpitem.get()) then
+    msgBus.send(msgBus.DROP_ITEM_ON_FLOOR, pickedUpitem.get())
+    pickedUpitem.set(nil)
     msgBus.on(msgBus.MOUSE_CLICKED, function()
       msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
       return msgBus.CLEANUP
@@ -66,12 +70,12 @@ Gui.create({
   type = Gui.types.INTERACT,
   inputContext = 'InventoryMenu',
   draw = function()
-    if itemPickedUp then
+    if pickedUpitem.get() then
       local gameScale = config.scaleFactor
       local mx, my = love.mouse.getX() / gameScale, love.mouse.getY() / gameScale
-      local sprite = itemSystem.getDefinition(itemPickedUp).sprite
+      local sprite = itemSystem.getDefinition(pickedUpitem.get()).sprite
       local sw, sh = animationFactory:getSpriteSize(sprite, true)
-      drawItem(itemPickedUp, mx - sw/2, my - sh/2)
+      drawItem(pickedUpitem.get(), mx - sw/2, my - sh/2)
     end
   end,
   drawOrder = function()
@@ -80,14 +84,20 @@ Gui.create({
 })
 
 -- sets up interactable gui nodes and renders the contents in each slot
+local hoveredBgColor = {1,1,1,0.5}
 local defaultSlotBackground = {0.1,0.1,0.1,1}
+local defaultGetCustomProps = function()
+  local O = require 'utils.object-utils'
+  return O.EMPTY
+end
 local function setupSlotInteractions(
   self, getSlots, margin,
   onItemPickupFromSlot, onItemDropToSlot, onItemActivate,
-  slotRenderer
+  slotRenderer, getCustomProps
 )
   local rootStore = self.rootStore
   local initialSlots = getSlots()
+  getCustomProps = getCustomProps or defaultGetCustomProps
   -- setup the grid interaction
   require'utils.iterate-grid'(initialSlots, function(_, gridX, gridY)
     local posX, posY = getSlotPosition(gridX, gridY, self.x, self.y, self.slotSize, margin)
@@ -285,10 +295,12 @@ local function setupSlotInteractions(
         end
 
         -- cleanup tooltip
-        if (not self.hovered or itemPickedUp) and tooltipRef then
+        if (not self.hovered or pickedUpitem.get()) and tooltipRef then
           tooltipRef:delete()
           tooltipRef = nil
         end
+
+        self.customProps = getCustomProps(getItem(), self.x, self.y, gridX, gridY, self.w, self.h)
       end,
       onClick = function(self, event)
         local isRightClick = event[3] == 2
@@ -301,26 +313,30 @@ local function setupSlotInteractions(
           return
         end
         local x, y = gridX, gridY
-        local curPickedUpItem = itemPickedUp
+        local curPickedUpItem = pickedUpitem.get()
         -- if an item hasn't already been picked up, then we're in pickup mode
-        local isPickingUp = (not itemPickedUp)
+        local isPickingUp = (not pickedUpitem.get())
         if isPickingUp then
-          itemPickedUp = onItemPickupFromSlot(x, y)
+          pickedUpitem.set(onItemPickupFromSlot(x, y))
         -- drop picked up item to slot
         elseif curPickedUpItem then
           local itemSwap = onItemDropToSlot(curPickedUpItem, x, y)
-          itemPickedUp = itemSwap
+          pickedUpitem.set(itemSwap)
         end
       end,
       drawOrder = function(self)
         return drawOrders.GUI_SLOT
       end,
       render = function(self)
-        if self.hovered then
-          love.graphics.setColor(1,1,1,0.5)
-        else
-          love.graphics.setColor(defaultSlotBackground)
-        end
+        love.graphics.setColor(
+          self.hovered and
+            hoveredBgColor or
+            (
+              self.customProps.backgroundColor or
+              defaultSlotBackground
+            )
+        )
+
         -- slot background
         love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
 
