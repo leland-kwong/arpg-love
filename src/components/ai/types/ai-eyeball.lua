@@ -120,6 +120,37 @@ function FrostShot.update(self, state)
   end
 end
 
+local heightChange = 4
+local mt = {
+  -- debug = true,
+  scale = 1,
+  z = 10,
+  heightOffset = math.random(0, heightChange),
+  heightChange = heightChange,
+  moveSpeed = 85,
+  maxHealth = 17,
+  experience = 1,
+  armor = 250,
+  attackRange = 10,
+  onUpdateStart = function(self, dt)
+    self.heightOffset = self.heightOffset + (dt * self.heightChange)
+    if self.heightOffset >= 4 then
+      self.heightChange = abs(self.heightChange) * -1
+    end
+    if self.heightOffset <= 0 then
+      self.heightChange = abs(self.heightChange)
+    end
+    -- update z position for levitation effect
+    self:setPosition(
+      self.x,
+      self.y,
+      self.z + dt * self.heightChange
+    )
+  end,
+  onDestroyStart = onDestroyStart
+}
+mt.__index = mt
+
 return {
   type = 'ai-eyeball',
   create = function()
@@ -138,52 +169,24 @@ return {
 
     local spriteWidth, spriteHeight = animations.idle:getSourceSize()
 
-    local heightChange = 4
-    local dataSheet = {
-      name = 'i-229',
-      properties = {
-        'ranged',
-        'slow on hit'
-      }
-    }
-    return {
-      dataSheet = dataSheet,
-      -- debug = true,
-      scale = 1,
-      z = 10,
+    return setmetatable({
       itemData = {
         level = 1,
         dropRate = 20
       },
-      heightOffset = math.random(0, heightChange),
-      heightChange = heightChange,
-      moveSpeed = 85,
-      maxHealth = 17,
-      experience = 1,
+      dataSheet = {
+        name = 'i-229',
+        properties = {
+          'ranged',
+          'slow on hit'
+        }
+      },
       w = spriteWidth,
       h = spriteHeight,
       animations = animations,
-      armor = 250,
       abilities = {
         FrostShot
       },
-      attackRange = 10,
-      onUpdateStart = function(self, dt)
-        self.heightOffset = self.heightOffset + (dt * self.heightChange)
-        if self.heightOffset >= 4 then
-          self.heightChange = abs(self.heightChange) * -1
-        end
-        if self.heightOffset <= 0 then
-          self.heightChange = abs(self.heightChange)
-        end
-        -- update z position for levitation effect
-        self:setPosition(
-          self.x,
-          self.y,
-          self.z + dt * self.heightChange
-        )
-      end,
-      onDestroyStart = onDestroyStart
-    }
+    }, mt)
   end
 }
