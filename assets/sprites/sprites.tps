@@ -181,39 +181,6 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_121.png</key>
-            <key type="filename">custom-art/characters/ai-legendaries/legendary-1/legendary-ai-1.png</key>
-            <key type="filename">custom-art/characters/eyeball/eyeball.png</key>
-            <key type="filename">custom-art/effects/floor-crack-1.png</key>
-            <key type="filename">custom-art/effects/floor-crack-2.png</key>
-            <key type="filename">custom-art/effects/floor-crack-3.png</key>
-            <key type="filename">custom-art/gui/gui-home-button--hover.png</key>
-            <key type="filename">custom-art/gui/gui-home-button.png</key>
-            <key type="filename">custom-art/gui/gui-inventory-button--hover.png</key>
-            <key type="filename">custom-art/gui/gui-inventory-button.png</key>
-            <key type="filename">custom-art/gui/gui-skill-tree-button--hover.png</key>
-            <key type="filename">custom-art/gui/gui-skill-tree-button.png</key>
-            <key type="filename">custom-art/items/cube.png</key>
-            <key type="filename">custom-art/items/vial-energy.png</key>
-            <key type="filename">custom-art/items/vial-health.png</key>
-            <key type="filename">custom-art/status-effect-icons/status-frenzy.png</key>
-            <key type="filename">custom-art/status-effect-icons/status-legendary-enemy.png</key>
-            <key type="filename">custom-art/status-effect-icons/status-shield.png</key>
-            <key type="filename">custom-art/tiles/floor-empty.png</key>
-            <key type="filename">custom-art/tiles/map-door-vert-1.png</key>
-            <key type="filename">custom-art/tiles/map-door-vert-2.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,4,8,8</rect>
-                <key>scale9Paddings</key>
-                <rect>4,4,8,8</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_1.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_10.png</key>
             <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_11.png</key>
@@ -370,6 +337,38 @@
                 <rect>6,5,12,10</rect>
                 <key>scale9Paddings</key>
                 <rect>6,5,12,10</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/characters/ai-legendaries/legendary-1/legendary-ai-1.png</key>
+            <key type="filename">custom-art/characters/eyeball/eyeball.png</key>
+            <key type="filename">custom-art/effects/floor-crack-1.png</key>
+            <key type="filename">custom-art/effects/floor-crack-2.png</key>
+            <key type="filename">custom-art/effects/floor-crack-3.png</key>
+            <key type="filename">custom-art/gui/gui-home-button--hover.png</key>
+            <key type="filename">custom-art/gui/gui-home-button.png</key>
+            <key type="filename">custom-art/gui/gui-inventory-button--hover.png</key>
+            <key type="filename">custom-art/gui/gui-inventory-button.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree-button--hover.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree-button.png</key>
+            <key type="filename">custom-art/items/cube.png</key>
+            <key type="filename">custom-art/items/vial-energy.png</key>
+            <key type="filename">custom-art/items/vial-health.png</key>
+            <key type="filename">custom-art/status-effect-icons/status-frenzy.png</key>
+            <key type="filename">custom-art/status-effect-icons/status-legendary-enemy.png</key>
+            <key type="filename">custom-art/status-effect-icons/status-shield.png</key>
+            <key type="filename">custom-art/tiles/floor-empty.png</key>
+            <key type="filename">custom-art/tiles/map-door-vert-1.png</key>
+            <key type="filename">custom-art/tiles/map-door-vert-2.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9Paddings</key>
+                <rect>4,4,8,8</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -787,6 +786,7 @@
             <key type="filename">custom-art/items/augmentation-defender.png</key>
             <key type="filename">custom-art/items/augmentation-one.png</key>
             <key type="filename">custom-art/items/augmentation-rage.png</key>
+            <key type="filename">custom-art/items/body-armor-basic.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -1098,7 +1098,6 @@
             <filename>custom-art/abilities</filename>
             <filename>custom-art/items</filename>
             <filename>custom-art/light-blur.png</filename>
-            <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/armors/armor_121.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
