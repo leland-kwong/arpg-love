@@ -90,6 +90,7 @@ local defaultGetCustomProps = function()
   local O = require 'utils.object-utils'
   return O.EMPTY
 end
+
 local function setupSlotInteractions(
   self, getSlots, margin,
   onItemPickupFromSlot, onItemDropToSlot, onItemActivate,
@@ -295,7 +296,7 @@ local function setupSlotInteractions(
         end
 
         -- cleanup tooltip
-        if (not self.hovered or pickedUpitem.get()) and tooltipRef then
+        if ((not self.hovered or not item) and tooltipRef) then
           tooltipRef:delete()
           tooltipRef = nil
         end
