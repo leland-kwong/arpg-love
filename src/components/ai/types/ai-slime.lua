@@ -193,7 +193,7 @@ return {
         DashAbility,
         SlimeSlap,
       },
-      armor = 900,
+      armor = 700,
       experience = 2,
       attackRange = attackRange,
       fillColor = randomProps.color,
