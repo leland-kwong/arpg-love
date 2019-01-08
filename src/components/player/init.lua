@@ -24,6 +24,8 @@ local MenuManager = require 'modules.menu-manager'
 local InputContext = require 'modules.input-context'
 local F = require 'utils.functional'
 local Object = require 'utils.object-utils'
+local EventLog = require 'modules.log-db.events-log'
+
 
 local colMap = collisionWorlds.map
 
@@ -310,10 +312,6 @@ local Player = {
           duration = 1,
           width = 4
         }):setParent(self)
-        print(
-          self.stats:get('health'),
-          self.stats:get('maxHealth')
-        )
         msgBus.send(msgBus.PLAYER_FULL_HEAL)
       end),
 
@@ -419,6 +417,17 @@ local Player = {
     }):setParent(self)
 
     msgBus.send(msgBus.PLAYER_INITIALIZED)
+
+    self.gameId = msgBus.send('GAME_STATE_GET'):getId()
+    EventLog.compact(self.gameId)
+      :next(function()
+        EventLog.start(self.gameId)
+      end, function(err)
+        msgBus.send('LOG_ERROR', err)
+      end)
+      :next(nil, function(err)
+        msgBus.send('LOG_ERROR', err)
+      end)
   end
 }
 

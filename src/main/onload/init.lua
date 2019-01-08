@@ -1,3 +1,5 @@
+require 'modules.log-db.error-log'
+
 -- load up user settings on game start
 local userSettingsState = require 'config.user-settings.state'
 userSettingsState.load()

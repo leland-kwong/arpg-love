@@ -3,6 +3,7 @@ local String = require 'utils.string'
 local dynamicRequire = require 'utils.dynamic-require'
 local O = dynamicRequire 'utils.object-utils'
 local Observable = require 'modules.observable'
+local msgBus = require 'components.msg-bus'
 
 local logSeparator = '_LOG_'
 
@@ -40,6 +41,11 @@ function Log.append(path, entry)
     if channel:getCount() > 0 then
       local success = channel:pop()
       local err = (not success) and 'log append error'
+
+      if success then
+        msgBus.send('logTail.'..path, entry)
+      end
+
       return true, success, err
     end
   end)
@@ -59,16 +65,22 @@ function Log.readStream(path, onData, onError, onComplete, seed)
   local readChannel = love.thread.getChannel('logRead.'..path)
   local msgBus = require 'components.msg-bus'
   msgBus.on('UPDATE', function()
-    local message = readChannel:pop()
-    if message then
-      local String = require 'utils.string'
-      local entries = String.split(message, logSeparator)
-      for i=1, (#entries) - 1 do
+    local ok, err = pcall(function()
+      local message = readChannel:pop()
+      if message then
+        local String = require 'utils.string'
+        local entries = String.split(message, logSeparator)
+        for i=1, (#entries) - 1 do
           local data = entries[i]
-        seed = onData(seed, bitser.loads(data))
+          seed = onData(seed, bitser.loads(data))
+        end
+        onComplete(seed)
+        return msgBus.CLEANUP
       end
-      onComplete(seed)
-      return msgBus.CLEANUP
+    end)
+
+    if (not ok) then
+      onError(err)
     end
   end)
 end
@@ -92,16 +104,10 @@ function Log.delete(path)
 end
 
 function Log.tail(path, onData, onError)
-  local msgBus = require 'components.msg-bus'
-  local readChannel = love.thread.getChannel('logTail.'..path)
-  local listener = msgBus.on('UPDATE', function()
-    local count = readChannel:getCount()
-    for i=1, count do
-      onData(
-        bitser.loads(readChannel:pop())
-      )
-    end
-  end)
+  assert(type(path) == 'string', 'invalid `path`')
+  assert(type(onData) == 'function', '`onData` must be a function')
+
+  local listener = msgBus.on('logTail.'..path, onData)
 
   local function close()
     msgBus.off(listener)

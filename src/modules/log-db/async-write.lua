@@ -1,7 +1,6 @@
 --Threaded log append/read
 local lru = require 'utils.lru'
 
-local logSeparator = '___LOG___'
 local dirPrefix = 'log/'
 
 local function getDirFromPath(path)
@@ -76,20 +75,23 @@ local function appendEntry(path, data)
   end)
   local channel = love.thread.getChannel('logAppend')
   channel:push(ok)
-  love.thread.getChannel('logTail.'..path)
-    :push(data)
   if (not ok) then
     print(ok)
   end
 end
 
 local function readLogFile(path)
-  local file = logCache:get(path)
-  file:seek('set')
+  local ok, err = pcall(function()
+    local file = logCache:get(path)
+    file:seek('set')
 
-  local logAsString = file:read('*a')
-  local channel = love.thread.getChannel('logRead.'..path)
-  channel:push(logAsString)
+    local logAsString = file:read('*a')
+    local channel = love.thread.getChannel('logRead.'..path)
+    channel:push(logAsString)
+  end)
+  if not ok then
+    print(err)
+  end
 end
 
 local actionHandlers = {
