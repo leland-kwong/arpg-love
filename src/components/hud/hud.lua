@@ -28,7 +28,7 @@ local healthManaWidth = 63 * 2
 
 local function setupExperienceIndicator(self)
   local w, h = healthManaWidth - 2, 2
-  local winWidth, winHeight = love.graphics.getWidth() / scale, love.graphics.getHeight() / scale
+  local winWidth, winHeight = camera:getSize()
   local offX, offY = Position.boxCenterOffset(w, h, winWidth, winHeight)
   ExperienceIndicator.create({
     rootStore = self.rootStore,
@@ -51,11 +51,12 @@ function Hud.init(self)
         :consumeSnapshot(mainSceneRef.mapId)
     local minimapW, minimapH = 100, 100
     local minimapMargin = 5
+    local cameraWidth = camera:getSize()
     Minimap.create({
       camera = camera,
       grid = mainSceneRef.mapGrid,
-      x = love.graphics.getWidth()/config.scale - minimapW - minimapMargin,
-      y = minimapH + minimapMargin,
+      x = cameraWidth - minimapW - minimapMargin,
+      y = minimapMargin,
       w = minimapW,
       h = minimapH,
       scale = config.scale,
@@ -80,7 +81,7 @@ function Hud.init(self)
     end
   }):setParent(self)
 
-  local winWidth, winHeight = love.graphics.getWidth() / scale, love.graphics.getHeight() / scale
+  local winWidth, winHeight = camera:getSize()
   local barHeight = 18
   local offX, offY = Position.boxCenterOffset(healthManaWidth, barHeight, winWidth, winHeight)
 
