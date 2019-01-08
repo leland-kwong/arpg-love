@@ -25,7 +25,6 @@ function GuiDialog.init(self)
   self.scriptPosition = 1
 
   self.advanceDialog = function()
-    print('advance dialog')
     self.scriptPosition = self.scriptPosition + 1
   end
 
@@ -47,7 +46,19 @@ function GuiDialog.update(self, dt)
     return self:delete(true)
   end
 
+  local isNewScript = self.script ~= self.lastScript
+  self.lastScript = self.script
+
+  if isNewScript then
+    self.scriptPosition = 1
+    self.lastScriptPosition = nil
+  end
+
+  local isNewScriptPosition = self.scriptPosition ~= self.lastScriptPosition
+  self.lastScriptPosition = self.scriptPosition
+
   local script = self.script[self.scriptPosition]
+
   local width, height = DialogText.getTextSize(script.text, DialogText.font)
   self.width, self.height = width + self.padding*2, height + self.padding*2
   DialogText:add(script.text, Color.WHITE, self.x + self.padding, self.y + self.padding)
