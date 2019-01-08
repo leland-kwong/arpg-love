@@ -1,5 +1,5 @@
 SET SourceDir=C:\Users\lelandkwong\Projects\arpg-love
-SET DestDir=C:\Users\lelandkwong\Projects\arpg-love
+SET DestDir=C:\Users\lelandkwong\Projects\arpg-love\builds
 SET GameName=citizen_of_nowhere
 
 CD /D "C:\Program Files\7-Zip"
