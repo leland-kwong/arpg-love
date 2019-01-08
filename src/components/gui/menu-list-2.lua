@@ -4,6 +4,40 @@ local getRect = require 'utils.rect'
 local GuiList = require 'components.gui.gui-list'
 local Gui = require 'components.gui.gui'
 
+local function setupChildNodes(self)
+  local childNodes = {}
+  local newRect = getRect(self.layoutItems)
+  local guiList = self.guiList
+  Grid.forEach(newRect.childRects, function(rect, x, y)
+    local guiNode = Grid.get(self.layoutItems, x, y)
+    guiNode.x = guiList.x + rect.x
+    guiNode.y = guiList.y + rect.y + guiList.scrollTop
+
+    local guiListTop = guiList.y
+    local guiListBottom = guiList.y + guiList.height
+    local isInView = (guiNode.y + (guiNode.height or 0)) >= guiListTop and
+      guiNode.y <= guiListBottom
+    guiNode._isInView = isInView
+    table.insert(childNodes, guiNode)
+  end)
+
+  guiList.contentHeight = newRect.height
+  guiList.contentWidth = newRect.width
+  if self.autoWidth then
+    local newWidth = math.max(1, newRect.width)
+    guiList.width = newWidth
+    self.width = newWidth
+  else
+    guiList.width = self.width
+  end
+  for i=1, #self.otherItems do
+    local item = self.otherItems[i]
+    table.insert(childNodes, item)
+  end
+
+  return childNodes
+end
+
 return Component.createFactory({
   width = 1,
   height = 1,
@@ -21,36 +55,7 @@ return Component.createFactory({
         Component.addToGroup(self, 'gui')
       end,
       update = function(_, dt)
-        local childNodes = {}
-        local newRect = getRect(self.layoutItems)
-        local guiList = self.guiList
-        Grid.forEach(newRect.childRects, function(rect, x, y)
-          local guiNode = Grid.get(self.layoutItems, x, y)
-          guiNode.x = guiList.x + rect.x
-          guiNode.y = guiList.y + rect.y + guiList.scrollTop
-
-          local guiListTop = guiList.y
-          local guiListBottom = guiList.y + guiList.height
-          local isInView = (guiNode.y + (guiNode.height or 0)) >= guiListTop and
-            guiNode.y <= guiListBottom
-          guiNode._isInView = isInView
-          table.insert(childNodes, guiNode)
-        end)
-
-        guiList.contentHeight = newRect.height
-        guiList.contentWidth = newRect.width
-        if self.autoWidth then
-          local newWidth = math.max(1, newRect.width)
-          guiList.width = newWidth
-          self.width = newWidth
-        else
-          guiList.width = self.width
-        end
-        for i=1, #self.otherItems do
-          local item = self.otherItems[i]
-          table.insert(childNodes, item)
-        end
-        guiList.childNodes = childNodes
+        parent.guiList.childNodes = setupChildNodes(parent)
       end
     }):setParent(self)
 
@@ -61,6 +66,7 @@ return Component.createFactory({
         return parent:drawOrder()
       end
     }):setParent(parent)
+
     self.interactZone = Gui.create({
       inputContext = parent.inputContext,
       onUpdate = function(self)
@@ -81,6 +87,8 @@ return Component.createFactory({
         end)
       end,
     }):setParent(parent)
+
+    self.guiList.childNodes = setupChildNodes(self)
   end,
 
   update = function(self)
