@@ -83,10 +83,10 @@ function GuiList.init(self)
   local parent = self
   Component.addToGroup(self, 'gui')
 
-  self.contentWidth = self.contentWidth or self.width
-  self.contentHeight = self.contentHeight or self.height
-  local children, width, height, contentWidth, contentHeight =
-    self.childNodes, self.width, self.height, self.contentWidth, self.contentHeight
+  -- self.contentWidth = self.contentWidth or self.width
+  -- self.contentHeight = self.contentHeight or self.height
+  -- local children, width, height, contentWidth, contentHeight =
+  --   self.childNodes, self.width, self.height, self.contentWidth, self.contentHeight
 
   local function guiStencil()
     love.graphics.rectangle(
@@ -100,7 +100,7 @@ function GuiList.init(self)
 
   local baseDrawOrder = self.drawOrder
 
-  local listNode = Gui.create({
+  self.listNode = Gui.create({
     x = self.x,
     y = self.y,
     inputContext = self.inputContext,
@@ -112,6 +112,9 @@ function GuiList.init(self)
     scrollWidth = 1,
     scrollSpeed = 15,
     onUpdate = function(self)
+      parent.contentWidth = parent.contentWidth or parent.width
+      parent.contentHeight = parent.contentHeight or parent.height
+
       iterateChildrenRecursively(parent.childNodes, setupChildren, self)
 
       self.children = parent.childNodes
@@ -120,7 +123,7 @@ function GuiList.init(self)
       self.w = width
       self.h = height
       self.scrollHeight = (contentHeight >= height) and (contentHeight - height) or 0
-      self.scrollWidth = (contentWidth >= width) and (contentWidth - width) or width
+      self.scrollWidth = (contentWidth >= width) and (contentWidth - width) or 0
       parent.scrollTop = self.scrollTop
     end,
     onScroll = function(self)
@@ -146,7 +149,12 @@ function GuiList.init(self)
     end,
     drawOrder = baseDrawOrder
   }):setParent(self)
-  iterateChildrenRecursively(self.childNodes, setupChildren, listNode)
+  iterateChildrenRecursively(self.childNodes, setupChildren, self.listNode)
+end
+
+function GuiList.update(self)
+  local list = self.listNode
+  list.x, list.y = self.x, self.y
 end
 
 local function removeChildren(self)

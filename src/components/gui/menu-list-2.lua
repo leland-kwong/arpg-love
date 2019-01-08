@@ -9,6 +9,7 @@ return Component.createFactory({
   height = 1,
   layoutItems = {}, -- 2-d array
   otherItems = {}, -- other components that should be added to the list for clipping
+  autoWidth = true,
   init = function(self)
     local parent = self
     Component.addToGroup(self, 'gui')
@@ -38,22 +39,22 @@ return Component.createFactory({
 
         guiList.contentHeight = newRect.height
         guiList.contentWidth = newRect.width
-        guiList.width = math.max(1, newRect.width)
+        if self.autoWidth then
+          local newWidth = math.max(1, newRect.width)
+          guiList.width = newWidth
+          self.width = newWidth
+        else
+          guiList.width = self.width
+        end
         for i=1, #self.otherItems do
           local item = self.otherItems[i]
           table.insert(childNodes, item)
         end
         guiList.childNodes = childNodes
-
-        self.width = guiList.width
       end
     }):setParent(self)
 
     self.guiList = GuiList.create({
-      x = self.x,
-      y = self.y,
-      width = self.width,
-      height = self.height,
       childNodes = {},
       inputContext = parent.inputContext,
       drawOrder = function()
@@ -61,12 +62,13 @@ return Component.createFactory({
       end
     }):setParent(parent)
     self.interactZone = Gui.create({
-      x = self.x,
-      y = self.y,
       inputContext = parent.inputContext,
       onUpdate = function(self)
-        self.width = parent.guiList.width
-        self.height = parent.guiList.height
+        local guiList = parent.guiList
+        self.x = guiList.x
+        self.y = guiList.y
+        self.width = guiList.width
+        self.height = guiList.height
       end,
       onPointerEnter = function()
         Grid.forEach(parent.layoutItems, function(guiNode)
@@ -80,4 +82,12 @@ return Component.createFactory({
       end,
     }):setParent(parent)
   end,
+
+  update = function(self)
+    self.guiList.x, self.guiList.y = self.x, self.y
+    if (not self.autoWidth) then
+      self.guiList.width = self.width
+    end
+    self.guiList.height = self.height
+  end
 })

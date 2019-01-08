@@ -51,7 +51,7 @@ function GuiTextLayer.addf(self, formattedText, wrapLimit, alignMode, x, y)
   self.textGraphic:addf(
     formattedText, -- [TABLE]
     wrapLimit,
-    alignMode,
+    alignMode or 'left',
     x,
     y
   )
@@ -78,7 +78,7 @@ function GuiTextLayer.draw(self)
   end
 
   love.graphics.setColor(self.color)
-  love.graphics.draw(self.textGraphic, x, y)
+  love.graphics.draw(self.textGraphic)
   self.textGraphic:clear()
 
   if self.outline then

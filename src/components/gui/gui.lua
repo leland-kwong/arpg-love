@@ -344,7 +344,8 @@ function Gui.update(self, dt)
   end
 
   local posX, posY = self:getPosition()
-  self.w, self.h = self.width or self.w, self.height or self.h
+  -- minimum width is needed for `bump` library to not fail for zero sized collision objects
+  self.w, self.h = math.max(1, self.width or self.w), math.max(1, self.height or self.h)
   self.colObj:update(posX, posY, self.w, self.h)
 
   self.onUpdate(self, dt)
