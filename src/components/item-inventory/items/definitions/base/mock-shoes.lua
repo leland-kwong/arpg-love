@@ -18,14 +18,14 @@ return {
 		},
 
 		baseModifiers = {
-			moveSpeed = 40,
+			moveSpeed = 10,
 			armor = 50
 		},
 
 		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'(),
 		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.movespeed-boost')({
-			distance = 8,
-			duration = 15/60,
+			distance = 4,
+			duration = 10/60,
 		})
 	}
 }
