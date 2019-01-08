@@ -35,14 +35,9 @@ local function toggleConsole()
   })
 end
 
-local function toggleDevMenu()
-  msgBus.send(msgBus.DEV_MENU_SHOW)
-end
-
 local keyActions = setmetatable({
   o = toggleCollisionDebug,
-  c = toggleConsole,
-  d = toggleDevMenu
+  c = toggleConsole
 }, {
   __index = function()
     local noop = require 'utils.noop'
