@@ -1,10 +1,10 @@
 local M = {}
 
-function M.forEach(array, callback)
+function M.forEach(array, callback, ctx)
 	local len = array and #array or 0
 	for i=1, len do
 		local value = array[i]
-		callback(value, i)
+		callback(value, i, ctx)
 	end
 end
 
@@ -32,6 +32,17 @@ function M.find(tbl, predicate)
 		end
 	end
 	return nil
+end
+
+local function concatInsert(item, index, newList)
+	table.insert(newList, item)
+end
+
+function M.concat(table1, table2)
+	local newList = {}
+	M.forEach(table1, concatInsert, newList)
+	M.forEach(table2, concatInsert, newList)
+	return newList
 end
 
 function M.filter(t, filterFn)
