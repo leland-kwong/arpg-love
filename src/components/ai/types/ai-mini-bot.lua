@@ -61,8 +61,11 @@ function PelletShot.update(self, state, dt)
   return false
 end
 
-return {
-  type = 'ai-minibot',
+local AiBlueprint = require 'components.ai.create-blueprint'
+return AiBlueprint({
+  baseProps = {
+    type = 'ai-minibot',
+  },
   create = function()
     local animations = {
       attacking = animationFactory:new({
@@ -114,4 +117,4 @@ return {
       onDestroyStart = onDestroyStart
     }
   end
-}
+})

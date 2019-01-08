@@ -131,8 +131,18 @@ local getRandomProps = Chance({
   }
 })
 
-return {
-  type = 'ai-slime',
+local AiBlueprint = require 'components.ai.create-blueprint'
+return AiBlueprint({
+  baseProps = {
+    type = 'ai-slime',
+    moveSpeed = 75,
+    maxHealth = 25,
+    physicalResist = 1,
+    armor = 700,
+    experience = 2,
+    attackRange = 3,
+    onDestroyStart = onDestroyStart
+  },
   create = function()
     local animations = {
       attacking = animationFactory:new({
@@ -164,7 +174,6 @@ return {
       }):setDuration(0.3)
     }
 
-    local attackRange = 3
     local spriteWidth, spriteHeight = animations.idle:getSourceSize()
 
     local randomProps = getRandomProps()
@@ -177,27 +186,19 @@ return {
     }
 
     return {
-      modifierNames = {},
       itemData = {
         level = 2,
         dropRate = 30
       },
+      fillColor = randomProps.color,
       dataSheet = dataSheet,
-      moveSpeed = 75,
-      maxHealth = 25,
       w = spriteWidth,
       h = spriteHeight,
-      physicalResist = 1,
       animations = animations,
       abilities = {
         DashAbility,
         SlimeSlap,
       },
-      armor = 700,
-      experience = 2,
-      attackRange = attackRange,
-      fillColor = randomProps.color,
-      onDestroyStart = onDestroyStart
     }
   end
-}
+})

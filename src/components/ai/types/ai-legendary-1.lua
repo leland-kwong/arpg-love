@@ -113,8 +113,11 @@ function MultiShot.update(_, state, dt)
   return false
 end
 
-return {
-  type = 'legendary-eyeball',
+local AiBlueprint = require 'components.ai.create-blueprint'
+return AiBlueprint({
+  baseProps = {
+    type = 'legendary-eyeball',
+  },
   legendary = true,
   create = function(props)
     local aiProps = AiEyeball.create()
@@ -162,4 +165,4 @@ return {
     table.insert(aiProps.abilities, MultiShot)
     return aiProps
   end
-}
+})

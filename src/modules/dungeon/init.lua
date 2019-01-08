@@ -56,7 +56,7 @@ local objectParsersByType = {
           return ai:set('rarityColor', Color.RARITY_LEGENDARY)
             :set('armor', ai.armor * 1.2)
             :set('moveSpeed', ai.moveSpeed * 1.5)
-            :set('experience', 10)
+            :set('experience', ai.experience * 3)
         end,
         target = function()
           return Component.get('PLAYER')

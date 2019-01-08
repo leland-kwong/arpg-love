@@ -13,14 +13,16 @@ local typeDefs = F.reduce(
   F.filter(
     F.map(files, function(key)
       local key = string.sub(key, 1, -5)
-      return require(aiTypesPath..key)
+      local definition = require(aiTypesPath..key)
+      assert(definition._isAi, 'ai definitions must be created using `create-blueprint`')
+      return definition
     end),
     function(item)
-      return not item.legendary
+      return not item.legendary and item.baseProps
     end
   ),
   function(defs, item)
-    defs[item.type] = item
+    defs[item.baseProps.type] = item
     return defs
   end,
   {}

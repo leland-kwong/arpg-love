@@ -92,8 +92,11 @@ function PunchAbility.update(self, state, dt)
   return false
 end
 
-return {
-  type = 'ai-melee-bot',
+local AiBlueprint = require 'components.ai.create-blueprint'
+return AiBlueprint({
+  baseProps = {
+    type = 'ai-melee-bot',
+  },
   create = function()
     local animations = {
       moving = animationFactory:new({
@@ -154,4 +157,4 @@ return {
       onDestroyStart = onDestroyStart
     }
   end
-}
+})

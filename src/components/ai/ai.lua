@@ -40,16 +40,9 @@ local states = Enum({
   'FREE_MOVING'
 })
 
-local statDefaults = {
-  moveSpeed = 100,
-  sightRadius = 14,
-  freelyMove = 0,
-
-  freeze = 0
-}
 local statsMt = {
   __index = function(self, k)
-    return self.baseStats[k] or self.defaults[k]
+    return self.baseStats[k]
   end
 }
 
@@ -67,12 +60,9 @@ local Ai = {
 
   baseStats = function(self)
     return setmetatable({
-      baseStats = self,
-      defaults = statDefaults
+      baseStats = self
     }, statsMt)
   end,
-
-  experience = 1, -- amount of experience the ai grants when destroyed
 
   frameCount = 0,
   clock = 0, -- amount of time the ai has been alive

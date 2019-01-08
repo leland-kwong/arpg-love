@@ -122,6 +122,7 @@ end
 
 local heightChange = 4
 local mt = {
+  type = 'ai-eyeball',
   -- debug = true,
   scale = 1,
   z = 10,
@@ -149,10 +150,10 @@ local mt = {
   end,
   onDestroyStart = onDestroyStart
 }
-mt.__index = mt
 
-return {
-  type = 'ai-eyeball',
+local AiBlueprint = require 'components.ai.create-blueprint'
+return AiBlueprint({
+  baseProps = mt,
   create = function()
     local animations = {
       attacking = animationFactory:new({
@@ -169,7 +170,7 @@ return {
 
     local spriteWidth, spriteHeight = animations.idle:getSourceSize()
 
-    return setmetatable({
+    return {
       itemData = {
         level = 1,
         dropRate = 20
@@ -187,6 +188,6 @@ return {
       abilities = {
         FrostShot
       },
-    }, mt)
+    }
   end
-}
+})
