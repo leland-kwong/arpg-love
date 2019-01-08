@@ -6,15 +6,24 @@ local Promise = require 'utils.promise'
   the list is shared across contexts
 ]]
 globalPendingPromises = globalPendingPromises or {}
+globalPromiseCallbacks = globalPromiseCallbacks or {}
 local pendingPromises = globalPendingPromises
+local promiseCallbacks = globalPromiseCallbacks
 
 local function flushPromises()
   local i = 1
   while i <= #pendingPromises do
-    local cb = pendingPromises[i]
-    local done = cb()
+    local promise = pendingPromises[i]
+    local cb = promiseCallbacks[i]
+    local done, successValue, errors = cb(promise)
     if done then
+      if errors then
+        promise:reject(errors)
+      else
+        promise:resolve(successValue)
+      end
       table.remove(pendingPromises, i)
+      table.remove(promiseCallbacks, i)
     else
       i = i + 1
     end
@@ -35,17 +44,8 @@ mt.__index = mt
 
 function mt.__call(self, fn)
   local d = Promise.new()
-  table.insert(pendingPromises, function()
-    local done, successValue, errors = fn(d)
-    if done then
-      if errors then
-        d:reject(errors)
-      else
-        d:resolve(successValue)
-      end
-    end
-    return done
-  end)
+  table.insert(promiseCallbacks, fn)
+  table.insert(pendingPromises, d)
   return d
 end
 
