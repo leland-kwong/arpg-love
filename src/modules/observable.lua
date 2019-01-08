@@ -9,13 +9,18 @@ globalPendingPromises = globalPendingPromises or {}
 local pendingPromises = globalPendingPromises
 
 local function flushPromises()
-  for promiseId,cb in pairs(pendingPromises) do
+  local i = 1
+  while i <= #pendingPromises do
+    local cb = pendingPromises[i]
     local done = cb()
     if done then
-      pendingPromises[promiseId] = nil
+      table.remove(pendingPromises, i)
+    else
+      i = i + 1
     end
   end
 end
+
 Component.create({
   id = 'observable-init',
   init = function(self)
@@ -26,13 +31,11 @@ Component.create({
 
 local Observable = {}
 local mt = {}
-local promiseId = 0
 mt.__index = mt
 
 function mt.__call(self, fn)
   local d = Promise.new()
-  promiseId = promiseId + 1
-  pendingPromises[promiseId] = function()
+  table.insert(pendingPromises, function()
     local done, successValue, errors = fn(d)
     if done then
       if errors then
@@ -42,7 +45,7 @@ function mt.__call(self, fn)
       end
     end
     return done
-  end
+  end)
   return d
 end
 
