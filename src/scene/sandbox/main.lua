@@ -198,6 +198,7 @@ local sceneOptionsDebug = {
   menuOptionPlayGameMenu,
   menuOptionSettingsMenu,
   menuOptionHomeScreen,
+  menuOptionNewsPanel,
   menuOptionSceneLoad(scenes.guiTest),
   menuOptionSceneLoad(scenes.particleTest),
   menuOptionQuitGame,
