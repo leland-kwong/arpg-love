@@ -32,7 +32,12 @@ function Notifier.init(self)
           icon = icon
         }
       ]]
-      assert(type(msgValue.description) == 'table', 'description should be a love text object')
+      assert(
+        (
+          (msgValue.description == nil) or
+          (type(msgValue.description) == 'table')
+        ), 'description should be a love text object'
+      )
       msgValue.timestamp = os.date('%X')
       self.eventLog:add(msgValue)
       self.opacity = 1
