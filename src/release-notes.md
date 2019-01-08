@@ -1,5 +1,11 @@
 # RELEASE NOTES
 
+## 6.0.0-pre-alpha
+
+BALANCE
+
+* Reduce movement speed of mock shoes from *40* to *10*
+
 ## 5.2.0-pre-alpha
 
 NEW
