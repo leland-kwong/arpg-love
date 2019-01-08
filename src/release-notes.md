@@ -4,7 +4,7 @@
 
 BALANCE
 
-* Reduce movement speed of mock shoes from *40* to *10*
+* Reduce movement speed of mock shoes from **40** to **10**.
 
 ## 5.2.0-pre-alpha
 
