@@ -71,7 +71,6 @@ function Object.deepEqual(t1, t2)
 	for k,v in pairs(t1) do
 		if (type(v) == 'table') then
 			if not Object.deepEqual(v, t2[k]) then
-				print(k, t2[k], v)
 				return false
 			end
 		else

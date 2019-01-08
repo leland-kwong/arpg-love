@@ -58,9 +58,6 @@ function HomeBase.init(self)
   local homeBaseMapId = Dungeon:new({
     layoutType = 'home-base'
   })
-  print(
-    Dungeon:getData(homeBaseMapId)
-  )
 
   Portal.create({
     x = startPosition.x,
