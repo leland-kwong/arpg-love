@@ -17,7 +17,8 @@ local function getCompactedLog(gameId)
   if (not inMemoryLog) then
     local defaultLog = {
       enemiesKilled = {},
-      itemsAcquired = {}
+      itemsAcquired = {},
+      quests = {}
     }
     db:put(eventLogDbKey(gameId), defaultLog)
     inMemoryLog = defaultLog
@@ -32,12 +33,32 @@ end
 
 local entryHandlers = {
   ENEMY_KILL = function(finalLog, entry)
-    local curValue = finalLog.enemiesKilled[entry.type] or 0
-    finalLog.enemiesKilled[entry.type] = curValue + 1
+    local enemyType = entry.data.type
+    local curValue = finalLog.enemiesKilled[enemyType] or 0
+    finalLog.enemiesKilled[enemyType] = curValue + 1
   end,
   ITEM_ACQUIRE = function(finalLog, entry)
-    local curValue = finalLog.itemsAcquired[entry.type] or 0
-    finalLog.itemsAcquired[entry.type] = curValue + 1
+    local itemType = entry.data.type
+    local curValue = finalLog.itemsAcquired[enemyType] or 0
+    finalLog.itemsAcquired[enemyType] = curValue + 1
+  end,
+  QUEST_NEW = function(finalLog, entry)
+    local ok, err = pcall(function()
+      finalLog.quests[entry.data.id] = entry.data
+    end)
+
+    if (not ok) then
+      msgBus.send('LOG_ERROR', err)
+    end
+  end,
+  QUEST_COMPLETE = function(finalLog, entry)
+    local ok, err = pcall(function()
+      finalLog.quests[entry.data.id].completed = true
+    end)
+
+    if (not ok) then
+      msgBus.send('LOG_ERROR', err)
+    end
   end
 }
 
@@ -96,6 +117,41 @@ function EventLog.compact(gameId)
   end)
 end
 
+local function setupListeners(self)
+  return {
+    msgBus.on('QUEST_NEW', function(msg)
+      Log.append(gameId, {
+        event = 'QUEST_NEW',
+        data = {
+          id = msg.questId,
+          title = msg.title,
+          description = msg.description,
+          completed = false
+        }
+      })
+    end),
+    msgBus.on('QUEST_COMPLETE', function(msg)
+      Log.append(gameId, {
+        event = 'QUEST_COMPLETE',
+        data = {
+          id = msg.questId
+        }
+      })
+    end),
+    msgBus.on('ENEMY_DESTROYED', function(msg)
+      local isEnemy = msg.parent.class == 'enemyAi'
+      if isEnemy then
+        Log.append(gameId, {
+          event = 'ENEMY_KILL',
+          data = {
+            type = msg.parent.type
+          }
+        })
+      end
+    end)
+  }
+end
+
 function EventLog.start(gameId)
   Component.create({
     id = 'EventLog',
@@ -103,26 +159,13 @@ function EventLog.start(gameId)
       Component.addToGroup(self, 'firstLayer')
 
       self.cleanupTailLog = Log.tail(gameId, function(entry)
-        updateInMemoryLog(gameId, entry)
-
         print(
-          Inspect(
-            getCompactedLog(gameId)
-          )
+          Inspect(entry)
         )
+        updateInMemoryLog(gameId, entry)
       end)
 
-      self.listeners = {
-        msgBus.on('ENEMY_DESTROYED', function(msg)
-          local isEnemy = msg.parent.class == 'enemyAi'
-          if isEnemy then
-            Log.append(gameId, {
-              event = 'ENEMY_KILL',
-              type = msg.parent.type
-            })
-          end
-        end)
-      }
+      self.listeners = setupListeners(self)
     end,
     final = function(self)
       if self.cleanupTailLog then
@@ -131,6 +174,10 @@ function EventLog.start(gameId)
       msgBus.off(self.listeners)
     end
   })
+end
+
+function EventLog.read(gameId)
+  return getCompactedLog(gameId)
 end
 
 return EventLog

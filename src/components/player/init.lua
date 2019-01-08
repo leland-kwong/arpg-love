@@ -247,6 +247,26 @@ local Player = {
         }):setParent(parent)
       end),
 
+      msgBus.on('QUEST_LOG_TOGGLE', function()
+        local activeLog = Component.get('QuestLog')
+        if activeLog then
+          activeLog:delete(true)
+        else
+          local dynamic = require 'utils.dynamic-require'
+          local QuestLog = dynamic 'components.hud.quest-log'
+          local cameraWidth = camera:getSize()
+          local uiWidth = 160
+          local offset =5
+          QuestLog.create({
+            id = 'QuestLog',
+            x = cameraWidth - uiWidth - offset,
+            y = 100,
+            width = uiWidth,
+            height = 200,
+          })
+        end
+      end),
+
       msgBus.on(msgBus.INVENTORY_TOGGLE, function()
         local activeInventory = Component.get('MENU_INVENTORY')
         if (not activeInventory) then
@@ -270,6 +290,10 @@ local Player = {
       msgBus.on(msgBus.KEY_DOWN, function(v)
         local key = v.key
         local keyMap = userSettings.keyboard
+
+        if (keyMap.QUEST_LOG_TOGGLE == key) and (not v.hasModifier) then
+          msgBus.send('QUEST_LOG_TOGGLE')
+        end
 
         if (keyMap.INVENTORY_TOGGLE == key) and (not v.hasModifier) then
           msgBus.send(msgBus.INVENTORY_TOGGLE)
