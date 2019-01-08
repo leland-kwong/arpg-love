@@ -370,7 +370,6 @@ local Player = {
       end
     end
 
-    local CreateStore = require'components.state.state'
     self.rootStore = msgBus.send(msgBus.GAME_STATE_GET)
     self.dir = DIRECTION_RIGHT
 
