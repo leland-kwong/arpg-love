@@ -3,6 +3,7 @@ local Gui = require 'components.gui.gui'
 local msgBus = require 'components.msg-bus'
 local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local MenuManager = require 'modules.menu-manager'
+local dynamic = require 'utils.dynamic-require'
 
 -- msgBus.send(msgBus.EXPERIENCE_GAIN, 10000)
 
@@ -10,17 +11,28 @@ local M = {
   id = 'dev-components'
 }
 
+local function closeMenu()
+  Component.remove('DEV_MENU', true)
+end
+
 function M.init(self)
   self.listeners = {
-    msgBus.on(msgBus.DEV_MENU_SHOW, function()
+    msgBus.on('KEY_PRESSED', function(ev)
+      if ev.key == 'f1' then
+        msgBus.send(msgBus.DEV_MENU_TOGGLE)
+      end
+    end),
+    msgBus.on(msgBus.DEV_MENU_TOGGLE, function()
+      if Component.get('DEV_MENU') then
+        closeMenu()
+        return
+      end
+
       local MenuList2 = require 'components.gui.menu-list-2'
       local Text = require 'components.gui.gui-text'
       local text = Text.create({
         font = require 'components.font'.primary.font
       })
-      local function closeMenu()
-        Component.remove('DEV_MENU', true)
-      end
       local layoutItems = {
         {
           Gui.create({
@@ -48,7 +60,7 @@ function M.init(self)
                       return Component.get('PLAYER')
                     end,
                     types = {
-                      aiTypes.types.SLIME
+                      'ai-slime'
                     }
                   })
                 end,
@@ -93,6 +105,25 @@ function M.init(self)
               text:add(self.label, {1,1,1}, self.x, self.y)
             end
           })
+        },
+        {
+          Gui.create({
+            width = 100,
+            label = 'read event log',
+            onUpdate = function(self)
+              self.height = select(2, Text.getTextSize(self.label, text.font))
+            end,
+            onClick = function()
+              closeMenu()
+              local EventLog = dynamic('modules.log-db.events-log')
+              EventLog.read(
+                msgBus.send('GAME_STATE_GET'):getId()
+              )
+            end,
+            draw = function(self)
+              text:add(self.label, {1,1,1}, self.x, self.y)
+            end
+          })
         }
       }
       local devMenu = MenuList2.create({
@@ -117,7 +148,7 @@ function M.init(self)
       MenuManager.push(devMenu)
 
       Component.addToGroup('DEV_MENU_BOX_DRAW', 'guiDrawBox', devMenu)
-    end)
+    end),
   }
 end
 
