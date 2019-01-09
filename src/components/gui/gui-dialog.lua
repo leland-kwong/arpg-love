@@ -159,7 +159,7 @@ function GuiDialog.update(self, dt)
   self.width, self.height = bodyWidth + self.padding*2
     ,bodyHeight + self.padding*2 + titleHeight + optionsMarginTop
 
-  self.x, self.y = camera:toScreenCoords(script.position.x, script.position.y - self.height - self.optionsTotalHeight)
+  self.x, self.y = camera:toScreenCoords(self.renderPosition.x, self.renderPosition.y - self.height - self.optionsTotalHeight)
 
   DialogText:addf(script.text, wrapLimit, 'left', self.x + self.padding, self.y + self.padding + titleHeight)
   if script.title then
