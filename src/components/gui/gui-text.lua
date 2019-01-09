@@ -73,6 +73,11 @@ function GuiTextLayer.getSize(self)
 end
 
 function GuiTextLayer.draw(self)
+  local isEmpty = self:getSize() == 0
+  if isEmpty then
+    return
+  end
+
   if self.outline then
     pixelOutlineShader.attach(nil, self.color[4])
   end
