@@ -117,7 +117,11 @@ function EventLog.compact(gameId)
   end)
 end
 
-local function setupListeners(self)
+local function setupListeners(self, gameId)
+  local function handleAppendError(err)
+    msgBus.send('LOG_ERROR', err)
+  end
+
   return {
     msgBus.on('QUEST_NEW', function(msg)
       Log.append(gameId, {
@@ -128,7 +132,7 @@ local function setupListeners(self)
           description = msg.description,
           completed = false
         }
-      })
+      }):next(nil, handleAppendError)
     end),
     msgBus.on('QUEST_COMPLETE', function(msg)
       Log.append(gameId, {
@@ -136,7 +140,7 @@ local function setupListeners(self)
         data = {
           id = msg.questId
         }
-      })
+      }):next(nil, handleAppendError)
     end),
     msgBus.on('ENEMY_DESTROYED', function(msg)
       local isEnemy = msg.parent.class == 'enemyAi'
@@ -146,7 +150,7 @@ local function setupListeners(self)
           data = {
             type = msg.parent.type
           }
-        })
+        }):next(nil, handleAppendError)
       end
     end)
   }
@@ -157,15 +161,15 @@ function EventLog.start(gameId)
     id = 'EventLog',
     init = function(self)
       Component.addToGroup(self, 'firstLayer')
-
       self.cleanupTailLog = Log.tail(gameId, function(entry)
         print(
+          'log entry - ',
           Inspect(entry)
         )
         updateInMemoryLog(gameId, entry)
       end)
 
-      self.listeners = setupListeners(self)
+      self.listeners = setupListeners(self, gameId)
     end,
     final = function(self)
       if self.cleanupTailLog then
