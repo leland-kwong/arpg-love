@@ -34,9 +34,11 @@ return function(layoutGrid)
         x = posX,
         y = posY
       })
-      posX = posX + col.width or 0
-      totalWidth = totalWidth + col.width or 0
-      rowHeight = math.max(rowHeight, col.height or 0)
+      local colWidth = col.width or 0
+      local colHeight = col.height or 0
+      posX = posX + colWidth
+      totalWidth = totalWidth + colWidth
+      rowHeight = math.max(rowHeight, colHeight)
     end
     totalHeight = totalHeight + rowHeight
     maxWidth = math.max(maxWidth, totalWidth)
