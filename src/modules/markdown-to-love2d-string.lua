@@ -83,7 +83,6 @@ local formatColors = {
 
 return function(md)
   local parsed = parseMarkdown(md)
-  -- print(parsed.newString)
   local strings = {}
   for key,data in Parser(parsed.newString, parsed.definitions) do
     if (not data) then
