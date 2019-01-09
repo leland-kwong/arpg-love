@@ -90,7 +90,7 @@ function MenuButtons.init(self)
       end,
       draw = function(self)
         local Color = require 'modules.color'
-        local highlightColor = nil
+        local highlightColor = Color.YELLOW
         local badgeValue = b.badge and b.badge() or 0
         badgeValue = (badgeValue > 0) and badgeValue or nil
         if badgeValue and (badgeValue > 9) then
@@ -110,23 +110,20 @@ function MenuButtons.init(self)
             y
           )
           local drawBox = require 'components.gui.utils.draw-box'
-          highlightColor = {Color.multiplyAlpha(Color.YELLOW, math.max(0.2, math.sin(self.clock)))}
           drawBox({
-            x = self.x + 2,
-            y = yPos + 2,
+            x = self.x,
+            y = yPos,
             width = self.w,
             height = self.h
           }, {
             borderWidth = 2,
-            borderColor = highlightColor
+            borderColor = {Color.multiplyAlpha(highlightColor, math.max(0.2, math.sin(self.clock)))},
+            backgroundColor = Color.TRANSPARENT
           })
         end
 
         local animation = self.hovered and b.hoverAni or b.normalAni
-        if highlightColor then
-          love.graphics.setColor(highlightColor)
-        end
-
+        love.graphics.setColor(showBadge and highlightColor or Color.WHITE)
         love.graphics.draw(
           AnimationFactory.atlas,
           animation.sprite,
