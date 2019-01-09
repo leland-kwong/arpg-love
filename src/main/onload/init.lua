@@ -19,6 +19,7 @@ local RootScene = require 'scene.sandbox.main'
 RootScene.create()
 
 require 'modules.auto-visibility'
+require 'components.map-text'
 require 'components.status-icons'
 require 'main.onload.news-dialog'
 

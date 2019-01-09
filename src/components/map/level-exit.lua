@@ -105,18 +105,17 @@ return Component.createFactory({
       )
     end
 
-    require 'components.map-text'
-    local Color = require 'modules.color'
-    local camera = require 'components.camera'
     local GuiText = require 'components.gui.gui-text'
-    local MapText = Component.get('MapText')
     local text = self.locationName
-    local textWidth = GuiText.getTextSize(text, MapText.font)
-    MapText:add(
-      text,
-      Color.WHITE,
-      self.x + animation:getWidth()/2 - textWidth/2,
-      self.y - oy - 9
+    Component.addToGroup(
+      Component.newId(),
+      'mapText',
+      {
+        text = text,
+        x = self.x + width/2,
+        y = self.y - oy - 9,
+        align = 'center'
+      }
     )
   end,
   drawOrder = function(self)
