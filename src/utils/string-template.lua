@@ -12,7 +12,7 @@ local function TemplateParser(options)
   return function(txt, data)
     local i = 1
     return coroutine.wrap(function()
-      while i < #txt do
+      while i <= #txt do
         local start, _end = string.find(txt, pattern, i)
         if start == nil then
           local isLastStringFragment = i > 1
