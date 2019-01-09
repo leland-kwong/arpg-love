@@ -5,6 +5,7 @@ local GuiDialog = dynamicRequire 'components.gui.gui-dialog'
 local GlobalState = require 'main.global-state'
 local msgBus = require 'components.msg-bus'
 local Md = dynamicRequire 'modules.markdown-to-love2d-string'
+dynamicRequire 'components.map-text'
 
 local Quests = {
   ['1-1'] = {
@@ -35,41 +36,50 @@ end
 local function makeDialog(self)
   local gameState = msgBus.send('GAME_STATE_GET'):get()
   local characterName = gameState.characterName or ''
-  self.dialog = GuiDialog.create({
-    id = 'QuestMasterSpeechBubble',
-    scriptActions = {
-      acceptQuest = function(self)
-        self.script = {
+  local textPosition = {
+    x = self.x + 12,
+    y = self.y
+  }
+  local actions = {
+    acceptQuest = function()
+      self.dialog.script = {
+        {
+          position = textPosition,
           text = "Thank you, I'll be here when you're done."
         }
-        -- add new quest to log
-        msgBus.send('QUEST_NEW', {
-          questId = 'the-beginning',
-          title = 'The beginning',
-          description = 'Take out R1 the Mad, retrieve his brain and return it to Lisa.'
-        })
-      end,
-      rejectQuest = function(self)
-        self.script = {
-          text = "Oh well then."
+      }
+      -- add new quest to log
+      msgBus.send('QUEST_NEW', {
+        questId = 'the-beginning',
+        title = 'The beginning',
+        description = 'Take out R1 the Mad, retrieve his brain and return it to Lisa.'
+      })
+    end,
+    rejectQuest = function()
+      self.dialog.script = {
+        {
+          position = textPosition,
+          text = "Nevermind then."
         }
-      end
-    },
+      }
+    end
+  }
+
+  self.dialog = GuiDialog.create({
+    id = 'QuestMasterSpeechBubble',
     script = {
       {
-        position = {
-          x = self.x + 10,
-          y = self.y - 30
-        },
-        title = self.name,
+        position = textPosition,
         text = Md("Hi "..characterName..", there is an evil robot who goes by the name of **R1 the mad**."
           .." Find him in **Aureus**, take him out, and retrieve his **brain**.").formatted,
         options = {
           {
-            label = "Got it."
+            label = "Got it.",
+            action = actions.acceptQuest
           },
           {
-            label = "I'm too scared, I'll pass on it this time."
+            label = "I'm too scared, I'll pass on it this time.",
+            action = actions.rejectQuest
           }
         }
       },
@@ -95,13 +105,14 @@ local QuestMaster = Component.createFactory({
 
     local Gui = require 'components.gui.gui'
     local width, height = self.animation:getWidth(), self.animation:getHeight()
+    local nameHeight = 12
     self.interactNode = Gui.create({
       group = 'all',
       width = width,
-      height = height,
+      height = height + nameHeight,
       onUpdate = function(self)
         self.x = parent.x - width/2
-        self.y = parent.y - height/2
+        self.y = parent.y - height/2 - nameHeight
 
         local msgBus = require 'components.msg-bus'
         local isInDialogue = self.hovered or
@@ -124,11 +135,20 @@ local QuestMaster = Component.createFactory({
 
     local config = require 'config.config'
     local gs = config.gridSize
-    -- self.x, self.y = (origin.x * gs) + obj.x,
-    --   (origin.y * gs) + obj.y
   end,
   draw = function(self)
     drawShadow(self, 1, 1)
+
+    Component.addToGroup(
+      Component.newId(),
+      'mapText',
+      {
+        text = self.name,
+        x = self.interactNode.x + self.interactNode.width/2,
+        y = self.interactNode.y,
+        align = 'center'
+      }
+    )
 
     local Shaders = require 'modules.shaders'
     local shader = Shaders('pixel-outline.fsh')
@@ -152,13 +172,13 @@ local QuestMaster = Component.createFactory({
 Component.create({
   id = 'QuestMasterExample',
   group = 'all',
-  init = function()
+  init = function(self)
     QuestMaster.create({
       id = 'QuestMaster',
       name = 'Lisa',
       x = 450,
       y = 350
-    })
+    }):setParent(self)
   end,
   update = function(self)
   end

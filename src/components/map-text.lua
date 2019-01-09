@@ -1,7 +1,6 @@
 local Component = require 'modules.component'
 local GuiText = require 'components.gui.gui-text'
 
-
 Component.create({
   id = 'MapText',
   init = function(self)
@@ -13,7 +12,7 @@ Component.create({
         local DrawOrders = require 'modules.draw-orders'
         return DrawOrders.MapText
       end,
-    })
+    }):setParent(self)
   end,
   update = function(self)
     local components = Component.groups.mapText.getAll()

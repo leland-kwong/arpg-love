@@ -297,6 +297,10 @@ function Gui.init(self)
 
   assert(guiType[self.type] ~= nil, 'invalid gui type'..tostring(self.type))
 
+  if self.initialProps.update then
+    error('may not override `update` method, use `onUpdate` instead')
+  end
+
   self.inputContext = self.inputContext or self:getId()
   self.eventPriority = self.eventPriority or getDefaultEventPriority()
   self.w, self.h = self.w or self.width or 1, self.h or self.height or 1

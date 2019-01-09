@@ -100,6 +100,11 @@ return Component.createFactory({
   end,
 
   update = function(self)
+    local isNewLayoutItems = self.layoutItems ~= self.prevLayoutItems
+    self.prevLayoutItems = self.layoutItems
+    if isNewLayoutItems then
+      self.guiList.childNodes = setupChildNodes(self)
+    end
     self.guiList.x, self.guiList.y = self.x, self.y
     if (not self.autoWidth) then
       self.guiList.width = self.width
