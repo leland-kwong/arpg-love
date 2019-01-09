@@ -59,9 +59,13 @@ function GuiDialog.update(self, dt)
 
   local script = self.script[self.scriptPosition]
 
-  local width, height = DialogText.getTextSize(script.text, DialogText.font)
-  self.width, self.height = width + self.padding*2, height + self.padding*2
-  DialogText:add(script.text, Color.WHITE, self.x + self.padding, self.y + self.padding)
+  DialogText:add(script.title..'\n---\n', Color.SKY_BLUE, self.x + self.padding, self.y + self.padding)
+  local _, titleHeight = DialogText:getSize()
+
+  self.x, self.y = script.position.x, script.position.y
+  DialogText:addf(script.text, 200, 'left', self.x + self.padding, self.y + self.padding + titleHeight)
+  local bodyWidth, bodyHeight = DialogText:getSize()
+  self.width, self.height = bodyWidth + self.padding*2, bodyHeight + self.padding*2 + titleHeight
 end
 
 function GuiDialog.draw(self)
