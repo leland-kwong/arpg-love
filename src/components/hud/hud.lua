@@ -159,7 +159,7 @@ function Hud.init(self)
     local aniLeft = AnimationFactory:newStaticSprite('gui-dashboard-menu-left')
     local aniMiddle = AnimationFactory:newStaticSprite('gui-dashboard-menu-middle')
     local aniRight = AnimationFactory:newStaticSprite('gui-dashboard-menu-right')
-    local y = healthStatusBar.y
+    local y = healthStatusBar.y - 1
     local x = offX - 2 + aniStatusBar:getWidth() + aniVialUnderlay:getWidth()
 
     local ox = aniLeft:getOffset()
