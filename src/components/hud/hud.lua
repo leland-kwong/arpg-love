@@ -160,26 +160,42 @@ function Hud.init(self)
     local aniMiddle = AnimationFactory:newStaticSprite('gui-dashboard-menu-middle')
     local aniRight = AnimationFactory:newStaticSprite('gui-dashboard-menu-right')
     local y = healthStatusBar.y
-    local x = offX - 4 + aniStatusBar:getWidth() + aniVialUnderlay:getWidth()
+    local x = offX - 2 + aniStatusBar:getWidth() + aniVialUnderlay:getWidth()
+
+    local ox = aniLeft:getOffset()
     love.graphics.setColor(1,1,1)
     love.graphics.draw(
       AnimationFactory.atlas,
       aniLeft.sprite,
       x,
-      y + 2
+      y + 2,
+      0,
+      1, 1,
+      ox
     )
-    local middleWidth = 1
+
+    local middleWidth = 17
+    local ox = aniMiddle:getOffset()
     love.graphics.draw(
       AnimationFactory.atlas,
       aniMiddle.sprite,
       x + aniLeft:getWidth(),
-      y + 2
+      y + 2,
+      0,
+      middleWidth,
+      1,
+      ox
     )
+
+    local ox = aniRight:getOffset()
     love.graphics.draw(
       AnimationFactory.atlas,
       aniRight.sprite,
       x + aniLeft:getWidth() + middleWidth,
-      y
+      y,
+      0,
+      1, 1,
+      ox
     )
   end
 

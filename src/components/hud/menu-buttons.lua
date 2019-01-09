@@ -58,17 +58,29 @@ function MenuButtons.init(self)
         msgBus.send(msgBus.PASSIVE_SKILLS_TREE_TOGGLE)
       end
     },
+    {
+      displayValue = 'Quests (u)',
+      normalAni = AnimationFactory:newStaticSprite('gui-quest-log-button'),
+      hoverAni = AnimationFactory:newStaticSprite('gui-quest-log-button--hover'),
+      badge = function()
+        return 0
+      end,
+      onClick = function()
+        msgBus.send('QUEST_LOG_TOGGLE')
+      end
+    }
   }
 
   for index=1, #buttons do
     local b = buttons[index]
+    local ox, oy = b.normalAni:getOffset()
     local spriteWidth, spriteHeight = b.normalAni:getSourceSize()
     local drawIndex = index - 1
     local margin = 2
     local spacing = (drawIndex * spriteWidth) + (drawIndex * margin)
     Gui.create({
-      x = parent.x + spacing,
-      y = parent.y,
+      x = parent.x + spacing + ox,
+      y = parent.y + oy,
       group = Component.groups.hud,
       type = Gui.types.BUTTON,
       onClick = b.onClick,
@@ -111,22 +123,17 @@ function MenuButtons.init(self)
         end
 
         local animation = self.hovered and b.hoverAni or b.normalAni
+        if highlightColor then
+          love.graphics.setColor(highlightColor)
+        end
+
         love.graphics.draw(
           AnimationFactory.atlas,
           animation.sprite,
           self.x,
-          yPos
+          yPos,
+          0, 1, 1, ox, oy
         )
-
-        if highlightColor then
-          love.graphics.setColor(highlightColor)
-          love.graphics.draw(
-            AnimationFactory.atlas,
-            animation.sprite,
-            self.x,
-            yPos
-          )
-        end
 
         if self.hovered then
           showTooltip(self.x, yPos, b.displayValue)
