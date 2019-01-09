@@ -30,6 +30,11 @@ local function threadSend(action, a, b)
 end
 
 function Log.append(path, entry)
+  assert(
+    type(path) == 'string',
+    'invalid path'
+  )
+
   threadSend(
     'APPEND',
     path,
