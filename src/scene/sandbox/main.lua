@@ -10,6 +10,7 @@ local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local config = require 'config.config'
 local objectUtils = require 'utils.object-utils'
 local bitser = require 'modules.bitser'
+local F = require 'utils.functional'
 
 local function getMenuTabsPosition()
   return 10, 60
@@ -190,19 +191,16 @@ local sceneOptionsNormal = {
   menuOptionPlayGameMenu,
   menuOptionSettingsMenu,
   menuOptionHomeScreen,
-  menuOptionNewsPanel,
-  menuOptionQuitGame
+  menuOptionNewsPanel
 }
 
-local sceneOptionsDebug = {
-  menuOptionPlayGameMenu,
-  menuOptionSettingsMenu,
-  menuOptionHomeScreen,
-  menuOptionNewsPanel,
+local sceneOptionsDebug = F.concat(sceneOptionsNormal, {
   menuOptionSceneLoad(scenes.guiTest),
   menuOptionSceneLoad(scenes.particleTest),
-  menuOptionQuitGame,
-}
+  menuOptionQuitGame
+})
+
+table.insert(sceneOptionsNormal, menuOptionQuitGame)
 
 msgBusMainMenu.on(msgBusMainMenu.MENU_ITEM_ADD, function(menuOption)
   table.insert(sceneOptionsDebug, #sceneOptionsDebug - 1, menuOption)
