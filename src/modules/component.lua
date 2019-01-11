@@ -204,8 +204,7 @@ function M.createFactory(blueprint)
       componentWithDuplicateId:delete(true)
     end
 
-    local id = blueprint.id or (props and props.id) or uid()
-    c._id = id
+    c._id = blueprint.id or props.id or uid()
 
     setmetatable(c, entityMt)
 
