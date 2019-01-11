@@ -7,10 +7,10 @@ local function toHex(number)
 	return string.format('%x', number)
 end
 
-local seed = toHex(socket.gettime() * 10000)
+local seed = toHex(socket.gettime() * 10000)..'_'
 local increment = 0
 local function uid()
-	local newId = seed.."_"..increment
+	local newId = seed..increment
 	-- increment
 	increment = increment + 1
 	return newId
