@@ -444,7 +444,6 @@ function M.newGroup(groupDefinition)
 end
 
 M.newSystem = M.newGroup
-M.systems = M.groups
 
 function M.get(id)
   return allComponentsById[id]
