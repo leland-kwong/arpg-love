@@ -301,7 +301,7 @@ function Gui.init(self)
     error('may not override `update` method, use `onUpdate` instead')
   end
 
-  self.inputContext = self.inputContext or self:getId()
+  self.inputContext = self.inputContext or self:getId()..'_input-context'
   self.eventPriority = self.eventPriority or getDefaultEventPriority()
   self.w, self.h = self.w or self.width or 1, self.h or self.height or 1
 

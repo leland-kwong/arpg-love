@@ -73,7 +73,9 @@ function GuiTextLayer.getSize(self)
 end
 
 function GuiTextLayer.draw(self)
-  local isEmpty = self:getSize() == 0
+  local textWidth = self:getSize()
+  local isEmpty = textWidth == 0
+
   if isEmpty then
     return
   end
