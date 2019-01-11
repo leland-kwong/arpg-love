@@ -19,9 +19,6 @@ local baseProps = {
   y = 0,
   z = 0, -- axis normal to the x-y plane
   angle = 0,
-  outOfBoundsX = 0,
-  outOfBoundsY = 0,
-  isOutsideViewport = false,
 
   drawOrder = function(self)
     return 1
@@ -351,8 +348,10 @@ function M.newGroup(groupDefinition)
     isUpdating = true
 
     -- merge in new components to master list
-    for k,v in pairs(newComponentsById) do
-      componentsById[k] = v
+    for entityId,c in pairs(newComponentsById) do
+      if M.get(entityId) then
+        componentsById[entityId] = c
+      end
     end
     newComponentsById = {}
 
@@ -469,25 +468,24 @@ function M.remove(entityId, recursive)
   )
 
   -- this is for legacy reasons when our entites weren't just plain tables
-  local entityAsComponent = allComponentsById[entityId]
-  local eAsC = entityAsComponent
-  if (not eAsC) then
+  local entity = allComponentsById[entityId]
+  if (not entity) then
     return
   end
 
-  if eAsC.isComponent and (not eAsC._deleted) then
-    local children = eAsC._children
+  if entity.isComponent and (not entity._deleted) then
+    local children = entity._children
     if (recursive and children) then
       for _,child in pairs(children) do
         child:delete(true)
       end
-      eAsC._children = nil
+      entity._children = nil
     end
 
-    cleanupCollisionObjects(eAsC)
+    cleanupCollisionObjects(entity)
 
-    eAsC._deleted = true
-    eAsC:final()
+    entity._deleted = true
+    entity:final()
   end
 
   local ownGroups = M.entitiesById[entityId] or EMPTY
