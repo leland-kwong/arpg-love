@@ -36,7 +36,7 @@ local callbacks = {
   end,
 }
 
-local GuiTextInput = objectUtils.extend(Gui, {
+local GuiTextInput = objectUtils.assign({}, Gui, {
   padding = 0,
   textColor = Color.WHITE,
   borderColor = Color.PRIMARY,
