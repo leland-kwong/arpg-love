@@ -193,12 +193,6 @@ function M.createFactory(blueprint)
       not props.isComponent,
       'props cannot be a component object'
     )
-    -- type check
-    if isDevelopment then
-      tc.validate(c.x, tc.NUMBER, false) -- x-axis position
-      tc.validate(c.y, tc.NUMBER, false) -- y-axis position
-      tc.validate(c.angle, tc.NUMBER, false)
-    end
 
     local c = setProp({
       -- by keeping initial props as its own property, we can keep the input values immutable.
