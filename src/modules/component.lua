@@ -161,7 +161,6 @@ end
   y[NUMBER]
   initialProps[table] - a key/value hash of properties
 ]]
-local invalidPropsErrorMsg = 'props cannot be a component object'
 
 local uniqueIds = {}
 
@@ -187,27 +186,13 @@ function M.createFactory(blueprint)
   end
 
   function blueprint.create(props)
-    props = props or {}
-    assert(type(props) == 'table', 'props must be of type `table` or `nil`')
-    local c = setProp({
-      -- by keeping initial props as its own property, we can keep the input values immutable.
-      initialProps = props,
-      blueprint = blueprint
-    }, isDevelopment)
+    props = props or objectUtils.EMPTY
+
+    assert(type(props) == 'table', 'props must be of type `table`')
     assert(
-      not c.isComponent,
-      invalidPropsErrorMsg
+      not props.isComponent,
+      'props cannot be a component object'
     )
-
-    local componentWithDuplicateId = M.get(props.id)
-    if componentWithDuplicateId then
-      componentWithDuplicateId:delete(true)
-    end
-
-    c._id = blueprint.id or props.id or uid()
-
-    setmetatable(c, entityMt)
-
     -- type check
     if isDevelopment then
       tc.validate(c.x, tc.NUMBER, false) -- x-axis position
@@ -215,8 +200,22 @@ function M.createFactory(blueprint)
       tc.validate(c.angle, tc.NUMBER, false)
     end
 
+    local c = setProp({
+      -- by keeping initial props as its own property, we can keep the input values immutable.
+      initialProps = props,
+      blueprint = blueprint
+    }, isDevelopment)
+
+    local componentWithDuplicateId = M.get(props.id)
+    if componentWithDuplicateId then
+      componentWithDuplicateId:delete(true)
+    end
+
+    local id = blueprint.id or props.id or uid()
+    c._id = id
     -- add to all components list
     allComponentsById[id] = c
+    setmetatable(c, entityMt)
 
     -- add component to default group
     if c.group then
