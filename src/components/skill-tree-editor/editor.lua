@@ -273,14 +273,14 @@ local function placeNode(root, nodeId, gridX, gridY, connections, nodeValue, sel
       if ('NODE_SELECTION' == mode) and (button == 1) then
         local node = root.nodes[nodeId]
 
-        if (editorModes.PLAY_UNSELECT_ONLY == state.editorMode) then
-          if (node.selected and playMode:isNodeUnselectable(node, root.nodes, nodeId)) then
+        if (editorModes.PLAY_UNSELECT_ONLY == state.editorMode and node.selected) then
+          if (playMode:isNodeUnselectable(node, root.nodes, nodeId)) then
             Sound.playEffect(sounds.NODE_UNSELECT)
             root:setNode(nodeId, {
               selected = false
             })
           else
-            msgBus.send(msgBus.PLAYER_ACTION_ERROR, 'neighboring nodes must be unselected first')
+            msgBus.send(msgBus.PLAYER_ACTION_ERROR, 'tree must fully connected')
           end
         elseif (editorModes.PLAY == state.editorMode) then
           local isNotSelectable = (
@@ -292,7 +292,7 @@ local function placeNode(root, nodeId, gridX, gridY, connections, nodeValue, sel
               and (not playMode:isNodeUnselectable(node, root.nodes, nodeId))
             )
           if (isNotSelectable) then
-            msgBus.send(msgBus.PLAYER_ACTION_ERROR, 'previous node must be selected first')
+            msgBus.send(msgBus.PLAYER_ACTION_ERROR, 'tree must fully connected')
             return
           end
           local isSelected = not node.selected
