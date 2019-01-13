@@ -69,7 +69,7 @@ function M.new()
 		ALL = MESSAGE_TYPE_ALL
 	}
 	local msgHandlersByMessageType = {}
-	local queue = Q:new()
+	local queue = Q:new({ context = 'msgBus' })
 
 	--[[
 	@msgType - Used by a reducer to determine how to handle the value.
