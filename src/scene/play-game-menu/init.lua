@@ -146,9 +146,11 @@ end
 
 local function getMenuOptions(parent)
   local db = Db.load('saved-states')
-  local hasChanges = db.changeCount ~= parent.previousChangeCount
+  local hasChanges = db.changeCount ~= parent.previousChangeCount or
+    parent.state.previousMenuMode ~= parent.state.menuMode
   if (hasChanges) then
     parent.previousChangeCount = db.changeCount
+    parent.state.previousMenuMode = parent.state.menuMode
 
     local function filterGameStats(key)
       -- game stat files do not have a '/' in them
@@ -162,14 +164,21 @@ local function getMenuOptions(parent)
       local extract = require 'utils.object-utils.extract'
       local month, day, year = extract(dateObject, 'month', 'day', 'year')
       local saveDateHumanized = month .. '-' .. day .. '-' .. year
-      return {
-        name = {
-          Color.WHITE,
-          meta.displayName..'\n',
+      local name = {
+        Color.WHITE,
+        meta.displayName..'\n',
 
-          Color.LIGHT_GRAY,
-          'last played: '..saveDateHumanized
-        },
+        Color.LIGHT_GRAY,
+        'last played: '..saveDateHumanized
+      }
+
+      if menuModes.DELETE_GAME == parent.state.menuMode then
+        table.insert(name, #name + 1, Color.RED)
+        table.insert(name, #name + 1, '\nDELETE')
+      end
+
+      return {
+        name = name,
         value = function()
           if parent.state.menuMode == menuModes.DELETE_GAME then
             local PassiveTree = require 'components.player.passive-tree'
