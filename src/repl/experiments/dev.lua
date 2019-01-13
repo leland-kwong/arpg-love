@@ -1,7 +1,7 @@
 local Component = require 'modules.component'
 local Gui = require 'components.gui.gui'
 local msgBus = require 'components.msg-bus'
-local msgBusMainMenu = require 'components.msg-bus-main-menu'
+local msgBus = require 'components.msg-bus'
 local MenuManager = require 'modules.menu-manager'
 local dynamic = require 'utils.dynamic-require'
 
@@ -165,7 +165,7 @@ function M.init(self)
           return 100000
         end
       })
-      msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
+      msgBus.send(msgBus.TOGGLE_MAIN_MENU, false)
       MenuManager.clearAll()
       MenuManager.push(devMenu)
 

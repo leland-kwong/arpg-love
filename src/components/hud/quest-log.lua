@@ -2,7 +2,7 @@ local Component = require 'modules.component'
 local Gui = require 'components.gui.gui'
 local MenuList2 = require 'components.gui.menu-list-2'
 local GuiText = require 'components.gui.gui-text'
-local msgBusMainMenu = require 'components.msg-bus-main-menu'
+local msgBus = require 'components.msg-bus'
 local msgBus = require 'components.msg-bus'
 local Color = require 'modules.color'
 local MenuManager = require 'modules.menu-manager'
@@ -16,7 +16,7 @@ function QuestLog.init(self)
   Component.addToGroup(self, 'gui')
   Component.addToGroup(self, 'gameWorld')
 
-  msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
+  msgBus.send(msgBus.TOGGLE_MAIN_MENU, false)
   MenuManager.clearAll()
   MenuManager.push(self)
 

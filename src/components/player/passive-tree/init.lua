@@ -301,8 +301,8 @@ function PassiveTree.toggle()
       return editor:drawOrder() + 1
     end
   }):setParent(editor)
-  local msgBusMainMenu = require 'components.msg-bus-main-menu'
-  msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
+  local msgBus = require 'components.msg-bus'
+  msgBus.send(msgBus.TOGGLE_MAIN_MENU, false)
   MenuManager.clearAll()
   MenuManager.push(editor)
 end

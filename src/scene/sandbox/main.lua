@@ -6,7 +6,7 @@ local MenuList = require 'components.menu-list'
 local Component = require 'modules.component'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
-local msgBusMainMenu = require 'components.msg-bus-main-menu'
+local msgBus = require 'components.msg-bus'
 local config = require 'config.config'
 local objectUtils = require 'utils.object-utils'
 local bitser = require 'modules.bitser'
@@ -109,8 +109,8 @@ local menuOptionHomeScreen = {
       scene = HomeScreen
     })
     msgBus.send(msgBus.GAME_UNLOADED)
-    msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
-    msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, true)
+    msgBus.send(msgBus.TOGGLE_MAIN_MENU, false)
+    msgBus.send(msgBus.TOGGLE_MAIN_MENU, true)
   end
 }
 
@@ -202,11 +202,11 @@ local sceneOptionsDebug = F.concat(sceneOptionsNormal, {
 
 table.insert(sceneOptionsNormal, menuOptionQuitGame)
 
-msgBusMainMenu.on(msgBusMainMenu.MENU_ITEM_ADD, function(menuOption)
+msgBus.on(msgBus.MENU_ITEM_ADD, function(menuOption)
   table.insert(sceneOptionsDebug, #sceneOptionsDebug - 1, menuOption)
 end)
 
-msgBusMainMenu.on(msgBusMainMenu.MENU_ITEM_REMOVE, function(menuOption)
+msgBus.on(msgBus.MENU_ITEM_REMOVE, function(menuOption)
   local options = sceneOptionsDebug
   for i=1, #options do
     local option= options[i]
@@ -252,7 +252,7 @@ function Sandbox.init(self)
   menuOptionHomeScreen.value()
 
   self.listeners = {
-    msgBusMainMenu.on(msgBusMainMenu.TOGGLE_MAIN_MENU, function(enabled)
+    msgBus.on(msgBus.TOGGLE_MAIN_MENU, function(enabled)
       local MenuManager = require 'modules.menu-manager'
       if (enabled ~= nil) then
         MenuManager.clearAll()
@@ -280,7 +280,7 @@ function Sandbox.update(self)
 end
 
 function Sandbox.final(self)
-  msgBusMainMenu.off(self.listeners)
+  msgBus.off(self.listeners)
 end
 
 return Component.createFactory(Sandbox)

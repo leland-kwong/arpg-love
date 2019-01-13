@@ -1,7 +1,7 @@
 local Component = require 'modules.component'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
-local msgBusMainMenu = require 'components.msg-bus-main-menu'
+local msgBus = require 'components.msg-bus'
 local LightWorld = require 'components.light-world'
 local camera = require 'components.camera'
 
@@ -66,7 +66,7 @@ end
 
 local Factory = Component.createFactory(LightTest)
 
-msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
+msgBus.send(msgBus.MENU_ITEM_ADD, {
   name = 'lighting test',
   value = function()
     msgBus.send(msgBus.SCENE_STACK_PUSH, {

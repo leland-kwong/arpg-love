@@ -1,7 +1,7 @@
 local Component = require 'modules.component'
 local SkillTreeEditor = require 'components.skill-tree-editor'
 local msgBus = require 'components.msg-bus'
-local msgBusMainMenu = require 'components.msg-bus-main-menu'
+local msgBus = require 'components.msg-bus'
 
 local skillTreeId = 'passiveSkillsTree'
 
@@ -46,10 +46,10 @@ local function editorModesToggleButtons()
   end)
 end
 
-msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
+msgBus.send(msgBus.MENU_ITEM_ADD, {
   name = 'passive tree',
   value = function()
-    msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
+    msgBus.send(msgBus.TOGGLE_MAIN_MENU, false)
     Component.get('mainMenu'):delete(true)
 
     local Db = require 'modules.database'
@@ -80,6 +80,6 @@ msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
     })
 
     editorModesToggleButtons()
-    msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
+    msgBus.send(msgBus.TOGGLE_MAIN_MENU, false)
   end
 })

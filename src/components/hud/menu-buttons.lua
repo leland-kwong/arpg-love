@@ -1,7 +1,7 @@
 local Component = require 'modules.component'
 local Gui = require 'components.gui.gui'
 local msgBus = require 'components.msg-bus'
-local msgBusMainMenu = require 'components.msg-bus-main-menu'
+local msgBus = require 'components.msg-bus'
 local AnimationFactory = require 'components.animation-factory'
 local font = require 'components.font'
 local GuiText = require 'components.gui.gui-text'
@@ -34,7 +34,7 @@ function MenuButtons.init(self)
       normalAni = AnimationFactory:newStaticSprite('gui-home-button'),
       hoverAni = AnimationFactory:newStaticSprite('gui-home-button--hover'),
       onClick = function()
-        msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU)
+        msgBus.send(msgBus.TOGGLE_MAIN_MENU)
       end
     },
     {

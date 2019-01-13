@@ -1,5 +1,5 @@
 local msgBus = require 'components.msg-bus'
-local msgBusMainMenu = require 'components.msg-bus-main-menu'
+local msgBus = require 'components.msg-bus'
 local socket = require 'socket'
 local config = require 'config.config'
 local userSettings = require 'config.user-settings'
@@ -52,13 +52,13 @@ function love.keypressed(key, scanCode, isRepeated)
     local MenuManager = require 'modules.menu-manager'
     if MenuManager.hasItems() then
       MenuManager.clearAll()
-      msgBusMainMenu.send(
-        msgBusMainMenu.TOGGLE_MAIN_MENU,
+      msgBus.send(
+        msgBus.TOGGLE_MAIN_MENU,
         false
       )
     else
-      msgBusMainMenu.send(
-        msgBusMainMenu.TOGGLE_MAIN_MENU,
+      msgBus.send(
+        msgBus.TOGGLE_MAIN_MENU,
         true
       )
     end

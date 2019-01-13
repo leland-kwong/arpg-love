@@ -102,7 +102,7 @@ function HomeBase.init(self)
 
   self.listeners = {
     msgBus.on(msgBus.PORTAL_ENTER, function()
-      local msgBusMainMenu = require 'components.msg-bus-main-menu'
+      local msgBus = require 'components.msg-bus'
       local hasPreviousScene = sceneManager:canPop()
       if (not hasPreviousScene) then
         local Dungeon = require 'modules.dungeon'

@@ -54,8 +54,8 @@ end)
 function InventoryBlueprint.init(self)
   Component.addToGroup(self:getId(), 'pixelRound', self)
 
-  local msgBusMainMenu = require 'components.msg-bus-main-menu'
-  msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
+  local msgBus = require 'components.msg-bus'
+  msgBus.send(msgBus.TOGGLE_MAIN_MENU, false)
   MenuManager.clearAll()
   MenuManager.push(self)
 

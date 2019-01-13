@@ -5,7 +5,7 @@ local GuiButton = require 'components.gui.gui-button'
 local GuiTextInput = require 'components.gui.gui-text-input'
 local MenuList = require 'components.menu-list'
 local msgBus = require 'components.msg-bus'
-local msgBusMainMenu = require 'components.msg-bus-main-menu'
+local msgBus = require 'components.msg-bus'
 local Enum = require 'utils.enum'
 local Db = require 'modules.database'
 local HomeBase = require 'scene.home-base'
@@ -118,7 +118,7 @@ local function NewGameButton(parent)
           parent:delete(true)
         end
       })
-      msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
+      msgBus.send(msgBus.TOGGLE_MAIN_MENU, false)
     end,
     onUpdate = function(self)
       self.hidden = parent.state.menuMode == menuModes.DELETE_GAME
@@ -192,7 +192,7 @@ local function getMenuOptions(parent)
                 props = loadedState
               }
             )
-            msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
+            msgBus.send(msgBus.TOGGLE_MAIN_MENU, false)
             parent:delete(true)
           end
         end,

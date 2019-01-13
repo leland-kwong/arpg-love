@@ -1,6 +1,6 @@
 local Component = require 'modules.component'
 local msgBus = require 'components.msg-bus'
-local msgBusMainMenu = require 'components.msg-bus-main-menu'
+local msgBus = require 'components.msg-bus'
 local Block = require 'components.gui.block'
 local Color = require 'modules.color'
 local font = require 'components.font'
@@ -130,7 +130,7 @@ end
 
 local Scene = Component.createFactory(TooltipTest)
 
-msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
+msgBus.send(msgBus.MENU_ITEM_ADD, {
   name = 'tooltip test',
   value = function()
     msgBus.send(msgBus.SCENE_STACK_REPLACE, {
