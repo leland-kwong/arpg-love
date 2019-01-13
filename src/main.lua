@@ -74,7 +74,6 @@ function love.load()
   ]]
   if config.isDevelopment then
     require 'modules.test'
-    require '_debug'
   end
 end
 

@@ -225,6 +225,9 @@ local eventTypesFilter = {
 Component.create({
   id = 'gui-system-init',
   init = function(self)
+    local function latestEventPriority(a, b)
+      return a.eventPriority > b.eventPriority
+    end
 
     self.listeners = {
       msgBus.on('*', function(msgValue, msgType)
@@ -240,9 +243,7 @@ Component.create({
             table.insert(sortedComponents, c)
           end
         end
-        local function latestEventPriority(a, b)
-          return a.eventPriority > b.eventPriority
-        end
+
         table.sort(sortedComponents, latestEventPriority)
 
         for i=1, #sortedComponents do
@@ -301,7 +302,7 @@ function Gui.init(self)
     error('may not override `update` method, use `onUpdate` instead')
   end
 
-  self.inputContext = self.inputContext or self:getId()..'_input-context'
+  self.inputContext = self.inputContext or self:getId()
   self.eventPriority = self.eventPriority or getDefaultEventPriority()
   self.w, self.h = self.w or self.width or 1, self.h or self.height or 1
 

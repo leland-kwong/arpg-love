@@ -5,6 +5,9 @@ local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local MenuManager = require 'modules.menu-manager'
 local dynamic = require 'utils.dynamic-require'
 
+-- require 'repl.components.components-system-queue-debug'
+
+
 -- msgBus.send(msgBus.EXPERIENCE_GAIN, 10000)
 
 local M = {
@@ -16,6 +19,25 @@ local function closeMenu()
 end
 
 function M.init(self)
+  for i=1, 3 do
+    local quest = {
+      questId = i,
+      title = i..'. R1 the Mad',
+      description = 'Kill r1 the mad and retrieve his brain.'
+    }
+    msgBus.send('QUEST_NEW', quest)
+  end
+
+  msgBus.send('QUEST_COMPLETE', {
+    questId = 1
+  })
+  -- msgBus.send('QUEST_COMPLETE', {
+  --   questId = 2
+  -- })
+  msgBus.send('QUEST_COMPLETE', {
+    questId = 3
+  })
+
   self.listeners = {
     msgBus.on('KEY_PRESSED', function(ev)
       if ev.key == 'f1' then

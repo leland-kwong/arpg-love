@@ -7,17 +7,21 @@ local Q = {}
 
 local defaultOptions = {
   development = false,
+  context = '',
+  beforeFlush = noop,
 }
 
 function Q:new(options)
   options = assign({}, defaultOptions, options)
+
   local queue = {
     list = nil, -- list of calls grouped by their order
     orders = nil, -- list of orders (priority)
     length = 0, -- num of calls added to the queue
+    flushed = true,
+    beforeFlush = options.beforeFlush,
     development = options.development,
-    beforeFlush = noop,
-    ready = true
+    context = options.context
   }
   setmetatable(queue, self)
   self.__index = self
@@ -35,8 +39,8 @@ local max, min = math.max, math.min
 
 -- insert callback with maximum 2 arguments
 function Q:add(order, cb, a, b, c)
-  local isNewQueue = not self.list
-  if isNewQueue then
+  if self.flushed then
+    self.flushed = false
     self.list = {}
     self.orders = {}
   end
@@ -71,8 +75,7 @@ function Q:flush()
   local list = self.list or emptyList
   local orders = self.orders or emptyList
   table.sort(orders)
-  self.list = nil
-  self.orders = nil
+  self.flushed = true
   for i=1, #orders do
     local order = orders[i]
     local row = list[order]
@@ -82,12 +85,9 @@ function Q:flush()
       item[1](item[2])
     end
   end
+
   self.length = 0
   return self
-end
-
-function Q:onBeforeFlush(fn)
-  self.beforeFlush = fn
 end
 
 function Q:getStats()
