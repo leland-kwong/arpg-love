@@ -7,6 +7,7 @@ Component.create({
   init = function(self)
     self.logTailCleanup = Log.tail('error.log', function(event)
       print(
+        '[ERROR]\n',
         Inspect(event)
       )
     end)
