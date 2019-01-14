@@ -88,7 +88,6 @@ function Notifier.draw(self)
 
     local content = {
       Color.YELLOW, e.title..'\n',
-      Color.MED_GRAY, e.timestamp..'\n'
     }
 
     for i=1, #(e.description or {}) do
