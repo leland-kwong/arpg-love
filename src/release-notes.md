@@ -88,18 +88,6 @@ UPDATES
 * Redesigned HUD to be more sci-fi style while also making it more readable regardless of the background colors
 * Redesigned stats system to be more reliable and flexible
 
-## 3.0.0-pre-alpha
-
-NEW
-
-* Passive skill tree. You can access this by pressing the **o** key or pressing the button in the HUD.
-* `Percent damage` property has been renamed to `Attack power`. This stat still works the same as before by increasing damage dealt by 1% per action power.
-
-UPDATES
-
-* Redesigned HUD to be more sci-fi style while also making it more readable regardless of the background colors
-* Redesigned stats system to be more reliable and flexible
-
 ## 2.1.0-pre-alpha
 
 NEW
@@ -125,7 +113,7 @@ NEW
 * Various HUD updates
 * Right-click to equip now automatically equips to the next available slot if available. Otherwise it equips to the first slot that matches that item type.
 
-### Bug FIXES
+FIXES
 
 * Player should no longer randomly teleport
 * Hugging the wall no longer prevents ai from engaging player
