@@ -756,6 +756,32 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/gui/gui-panel-dialogue.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>23,20,46,39</rect>
+                <key>scale9Paddings</key>
+                <rect>23,20,46,39</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-panel-menu.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>24,20,48,40</rect>
+                <key>scale9Paddings</key>
+                <rect>24,20,48,40</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/gui/gui-skill-tree_node_background.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree_node_blood-rage.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree_node_cooldown-reduction.png</key>

@@ -1,0 +1,57 @@
+{ "frames": {
+   "gui.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 2048, "h": 1024 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 2048, "h": 1024 },
+    "sourceSize": { "w": 2048, "h": 1024 },
+    "duration": 100
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.9-x64",
+  "format": "RGBA8888",
+  "size": { "w": 2048, "h": 1024 },
+  "scale": "1",
+  "slices": [
+   { "name": "home-button", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 33, "y": 114, "w": 16, "h": 16 } }] },
+   { "name": "inventory-button", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 49, "y": 114, "w": 16, "h": 16 } }] },
+   { "name": "home-button--hover", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 33, "y": 98, "w": 16, "h": 16 } }] },
+   { "name": "inventory-button--hover", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 49, "y": 98, "w": 16, "h": 16 } }] },
+   { "name": "map-pointer", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 36, "y": 137, "w": 9, "h": 12 } }] },
+   { "name": "skill-tree_node_lightning", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 165, "y": 0, "w": 33, "h": 33 } }] },
+   { "name": "skill-tree_node_background", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 103, "y": 4, "w": 25, "h": 25 } }] },
+   { "name": "skill-tree_node_speed-up", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 169, "y": 37, "w": 25, "h": 25 } }] },
+   { "name": "skill-tree_node_damage-up", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 203, "y": 4, "w": 25, "h": 25 } }] },
+   { "name": "skill-tree_node_heavy-strike", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 231, "y": 0, "w": 33, "h": 33 } }] },
+   { "name": "skill-tree-button", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 65, "y": 114, "w": 16, "h": 16 } }] },
+   { "name": "skill-tree-button--hover", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 65, "y": 98, "w": 16, "h": 16 } }] },
+   { "name": "dashboard-menu-left", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 380, "y": 198, "w": 4, "h": 28 } }] },
+   { "name": "dashboard-menu-middle", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 384, "y": 198, "w": 1, "h": 28 } }] },
+   { "name": "dashboard-menu-right", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 385, "y": 198, "w": 49, "h": 28 } }] },
+   { "name": "dashboard-vials-underlay", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 315, "y": 192, "w": 63, "h": 38 } }] },
+   { "name": "dashboard-status-bars-underlay", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 181, "y": 195, "w": 134, "h": 34 } }] },
+   { "name": "dashboard-status-bar-fancy", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 187, "y": 174, "w": 60, "h": 18 } }] },
+   { "name": "dashboard-abilities-underlay", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 35, "y": 192, "w": 146, "h": 37 } }] },
+   { "name": "dashboard-status-bar-fancy-highlight", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 187, "y": 160, "w": 60, "h": 5 } }] },
+   { "name": "skill-tree_node_blood-rage", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 264, "y": 0, "w": 33, "h": 33 } }] },
+   { "name": "skill-tree_node_max-energy", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 202, "y": 37, "w": 25, "h": 25 } }] },
+   { "name": "skill-tree_node_max-health", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 235, "y": 37, "w": 25, "h": 25 } }] },
+   { "name": "skill-tree_node_max-health-energy", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 268, "y": 37, "w": 25, "h": 25 } }] },
+   { "name": "skill-tree_node_energy-regeneration", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 202, "y": 70, "w": 25, "h": 25 } }] },
+   { "name": "skill-tree_node_health-regeneration", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 235, "y": 70, "w": 25, "h": 25 } }] },
+   { "name": "skill-tree_node_hybrid-regeneration", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 264, "y": 66, "w": 33, "h": 33 } }] },
+   { "name": "skill-tree_node_root", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 136, "y": 4, "w": 25, "h": 25 } }] },
+   { "name": "skill-tree_node_cooldown-reduction", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 202, "y": 103, "w": 25, "h": 25 } }] },
+   { "name": "skill-tree_node_cooldown-reduction-2", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 231, "y": 99, "w": 33, "h": 33 } }] },
+   { "name": "skill-tree_node_energy-steal", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 264, "y": 99, "w": 33, "h": 33 } }] },
+   { "name": "skill-tree_node_life-steal", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 297, "y": 99, "w": 33, "h": 33 } }] },
+   { "name": "arrow-small", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 49, "y": 142, "w": 7, "h": 7 } }] },
+   { "name": "quest-log-button--hover", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 81, "y": 98, "w": 16, "h": 16 } }] },
+   { "name": "quest-log-button", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 81, "y": 114, "w": 16, "h": 16 } }] },
+   { "name": "panel-dialogue", "color": "#f3ce52ff", "keys": [{ "frame": 0, "bounds": {"x": 11, "y": 429, "w": 66, "h": 42 }, "center": {"x": 28, "y": 16, "w": 10, "h": 10 } }] },
+   { "name": "panel-menu", "color": "#f3ce52ff", "keys": [{ "frame": 0, "bounds": {"x": 10, "y": 321, "w": 64, "h": 53 }, "center": {"x": 27, "y": 22, "w": 10, "h": 10 } }] }
+  ]
+ }
+}
