@@ -79,7 +79,6 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
 
     -- 1-d array of visited indices
     self.visitedIndices = self.visitedIndices or {}
-    self.playerVisitedIndices = {}
 
     self.canvas = love.graphics.newCanvas()
 
