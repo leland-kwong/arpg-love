@@ -60,14 +60,14 @@ end
 
 function Grid.getIndexByCoordinate(grid, x, y)
   local numCols = #grid[1]
-  return (y * numCols) + x
+  return ((y - 1) * numCols) + x
 end
 
-local floor = math.floor
+local ceil = math.ceil
 function Grid.getCoordinateByIndex(grid, index)
   local numCols = #grid[1]
-  local y = floor(index / numCols)
-  local x = index - (y * numCols)
+  local y = ceil(index / numCols)
+  local x = index - ((y-1) * numCols)
   return x, y
 end
 
