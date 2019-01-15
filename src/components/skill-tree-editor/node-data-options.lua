@@ -63,9 +63,11 @@ return Component.createFactory({
       }
     end)
 
+    local padding = 10
     self.guiList = GuiList2.create({
-      x = parent.x,
-      y = parent.y,
+      x = parent.x + padding,
+      y = parent.y + padding,
+      padding = padding,
       height = parent.height,
       layoutItems = guiContainer_1,
       otherItems = {
