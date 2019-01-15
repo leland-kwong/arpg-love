@@ -9,7 +9,7 @@ local formatTypes = Enum({
 
 local function parseBold(newString, definitions)
   -- SIDE-EFFECT
-  local boldPattern = '%*%*[^ *][^*\n]+%*%*'
+  local boldPattern = '%*%*[^*\n]+%*%*'
 
   return string.gsub(newString, boldPattern, function(group)
     local id = uid()
@@ -23,7 +23,7 @@ local function parseBold(newString, definitions)
 end
 
 local function parseEmphasis(newString, definitions)
-  local emphasisPattern = '%*[^ *][^*\n]+%*'
+  local emphasisPattern = '%*[^*\n]+%*'
 
   return string.gsub(newString, emphasisPattern, function(group)
     local id = uid()
@@ -83,19 +83,22 @@ local formatColors = {
 
 return function(md)
   local parsed = parseMarkdown(md)
+  local plainText = ''
   local strings = {}
   for key,data in Parser(parsed.newString, parsed.definitions) do
     if (not data) then
       table.insert(strings, formatColors.default)
       table.insert(strings, key)
+      plainText = plainText .. key
     else
       table.insert(strings, formatColors[data.formatType])
       table.insert(strings, data.text)
+      plainText = plainText .. data.text
     end
   end
 
   return {
-    plainText = parsed.newString,
+    plainText = plainText,
     formatted = strings
   }
 end

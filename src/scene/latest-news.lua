@@ -32,16 +32,16 @@ return Component.createFactory({
           end,
           onUpdate = function(self)
             self.width = parent.width
+            self.wrapLimit = self.width
 
             local GuiText = require 'components.gui.gui-text'
-            local height = select(2, GuiText.getTextSize(self.content.plainText, Fonts.primary.font))
+            local height = select(2, GuiText.getTextSize(self.content.plainText, Fonts.primary.font, self.wrapLimit))
             self.height = height
           end,
           render = function(self)
             love.graphics.setColor(1,1,1)
             love.graphics.setFont(Fonts.primary.font)
-            local padding = 5
-            love.graphics.printf(self.content.formatted, self.x + padding, self.y + padding, self.width - padding*2)
+            love.graphics.printf(self.content.formatted, self.x, self.y, self.wrapLimit)
           end
         })
       }
