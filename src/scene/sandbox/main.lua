@@ -13,7 +13,7 @@ local bitser = require 'modules.bitser'
 local F = require 'utils.functional'
 
 local function getMenuTabsPosition()
-  return 10, 60
+  return 15, 60
 end
 
 local drawOrder = function()
@@ -89,7 +89,7 @@ msgBus.on(msgBus.SETTINGS_MENU_TOGGLE, function()
     -- create settings menu
     local SettingsMenu = require 'scene.settings-menu'
     local menuTabs = Component.get('MainMenuTabs')
-    local x, y = menuTabs.x + menuTabs.width + 2,
+    local x, y = menuTabs.x + menuTabs.width + 24,
       menuTabs.y
     local width, height = 240, love.graphics.getHeight() / camera.scale - y - 20
     local menu = SettingsMenu.create({
@@ -155,7 +155,7 @@ msgBus.on(msgBus.LATEST_NEWS_TOGGLE, function()
     local camera = require 'components.camera'
     local LatestNews = require 'scene.latest-news'
     local menuTabs = Component.get('MainMenuTabs')
-    local x, y = menuTabs.x + menuTabs.width + 2,
+    local x, y = menuTabs.x + menuTabs.width + 24,
       menuTabs.y
     local width, height = 240, love.graphics.getHeight() / camera.scale - y - 20
     LatestNews.create({
@@ -181,7 +181,7 @@ msgBus.on(msgBus.PLAY_GAME_MENU_TOGGLE, function()
     local PlayGameMenu = require 'scene.play-game-menu'
     local menuTabs = Component.get('MainMenuTabs')
     local menu = PlayGameMenu.create({
-      x = menuTabs.x + menuTabs.width + 2,
+      x = menuTabs.x + menuTabs.width + 24,
       y = menuTabs.y,
     })
   end
@@ -232,7 +232,7 @@ function Sandbox.init(self)
         id = 'MainMenuTabs',
         x = x,
         y = y,
-        width = 150,
+        width = 120,
         options = {},
         onSelect = function(name, value)
           value()

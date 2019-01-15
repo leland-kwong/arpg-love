@@ -17,7 +17,7 @@ local PlayGameMenu = {
   id = 'PlayGameMenu',
   x = 300,
   y = 40,
-  padding = 10
+  -- padding = 10
 }
 
 local menuModes = Enum({
@@ -212,8 +212,8 @@ local function getMenuOptions(parent)
 end
 
 function PlayGameMenu.init(self)
-  self.innerX = self.x + self.padding
-  self.innerY = self.y + self.padding
+  self.innerX = self.x
+  self.innerY = self.y
 
   Component.addToGroup(self, 'gui')
   MenuManager.clearAll()
@@ -236,7 +236,10 @@ function PlayGameMenu.init(self)
     options = getMenuOptions(self),
     onSelect = function(name, value)
       value()
-    end
+    end,
+    drawOrder = function()
+      return 2
+    end,
   }):setParent(self)
 
   self.newGameBtn = NewGameButton(self)
@@ -245,12 +248,14 @@ end
 
 function PlayGameMenu.update(self)
   self.list.options = getMenuOptions(self)
-  self.width = self.list.width + (self.padding * 2)
-  self.height = self.newGameBtn.y - self.innerY + self.newGameBtn.h + (self.padding * 2)
-  Component.addToGroup(self, 'guiDrawBox')
+  self.width = self.list.width
+  self.height = self.newGameBtn.y - self.innerY + self.newGameBtn.h
 end
 
 function PlayGameMenu.draw(self)
+  local drawBox = require 'components.gui.utils.draw-box'
+  drawBox(self)
+
   if self.state.menuMode == menuModes.DELETE_GAME then
     self.guiTextLayer:addf(
       {
@@ -263,6 +268,10 @@ function PlayGameMenu.draw(self)
       self.y + 235
     )
   end
+end
+
+function PlayGameMenu.draworder()
+  return 1
 end
 
 return Component.createFactory(PlayGameMenu)
