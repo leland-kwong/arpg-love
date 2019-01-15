@@ -31,13 +31,6 @@ function PlayerStatsPanel.init(self)
   }):setParent(self)
 end
 
-local function drawBackground(self)
-  love.graphics.setColor(0.2, 0.2, 0.2, 1)
-  love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
-  love.graphics.setColor(Color.multiplyAlpha(Color.SKY_BLUE, 0.5))
-  love.graphics.rectangle('line', self.x, self.y, self.w, self.h)
-end
-
 local function drawCharacterName(self, characterName)
   self.guiText:add(characterName, Color.SKY_BLUE, self.x + padding, self.y + padding)
 end
@@ -45,7 +38,8 @@ end
 function PlayerStatsPanel.draw(self)
   local rootStore = self.rootStore
 
-  drawBackground(self)
+  local drawBox = require 'components.gui.utils.draw-box'
+  drawBox(self)
   drawCharacterName(self, rootStore:get().characterName)
 
   local i = 0
@@ -78,7 +72,7 @@ function PlayerStatsPanel.draw(self)
     table.insert(statValues, statValueColor)
     table.insert(statValues, statValue)
   end
-  local wrapLimit = 155
+  local wrapLimit = self.w - 10
   self.guiText:addf(statNames, wrapLimit, 'left', self.x + padding, self.y + originY + 16)
   self.guiText:addf(statValues, wrapLimit, 'right', self.x + padding, self.y + originY + 16)
 end

@@ -60,8 +60,8 @@ end
 msgBus.on(msgBus.MOUSE_PRESSED, handleItemDrop)
 
 local function getSlotPosition(gridX, gridY, offsetX, offsetY, slotSize, margin)
-  local posX, posY = ((gridX - 1) * slotSize) + (gridX * margin) + offsetX,
-    ((gridY - 1) * slotSize) + (gridY * margin) + offsetY
+  local posX, posY = ((gridX - 1) * slotSize) + ((gridX - 1) * margin) + offsetX,
+    ((gridY - 1) * slotSize) + ((gridY - 1) * margin) + offsetY
   return posX, posY
 end
 
@@ -96,7 +96,6 @@ local function setupSlotInteractions(
   onItemPickupFromSlot, onItemDropToSlot, onItemActivate,
   slotRenderer, getCustomProps
 )
-  local rootStore = self.rootStore
   local initialSlots = getSlots()
   getCustomProps = getCustomProps or defaultGetCustomProps
   -- setup the grid interaction
@@ -114,7 +113,6 @@ local function setupSlotInteractions(
       y = posY,
       w = slotSize,
       h = slotSize,
-      inputContext = self.inputContext,
       type = Gui.types.INTERACT,
       onUpdate = function(self)
         -- create a tooltip
@@ -362,7 +360,7 @@ local function setupSlotInteractions(
           slotRenderer(item, self.x, self.y, gridX, gridY, self.w, self.h)
         end
       end
-    }):setParent(self)
+    }):setParent(self.rootComponent)
 
     Component.create({
       init = function(self)
@@ -375,7 +373,7 @@ local function setupSlotInteractions(
       drawOrder = function()
         return drawOrders.GUI_SLOT_ITEM
       end
-    }):setParent(self)
+    }):setParent(self.rootComponent)
   end)
 end
 

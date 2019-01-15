@@ -98,7 +98,12 @@ function EquipmentPanel.init(self)
 	end
 
 	setupSlotInteractions(
-		self,
+		{
+			x = self.x + 2,
+			y = self.y + 2,
+			slotSize = self.slotSize,
+			rootComponent = self
+		},
 		getSlots,
 		15,
 		onItemPickupFromSlot,
@@ -127,13 +132,10 @@ end
 
 function EquipmentPanel.draw(self)
 	local x, y, w, h = self.x, self.y, self.w, self.h
-	guiTextLayers.title:add('Equipment', Color.WHITE, x, self.y - 15)
+	guiTextLayers.title:add('Equipment', Color.WHITE, x, self.y - 25)
 
-	love.graphics.setColor(0.2,0.2,0.2, 1)
-	love.graphics.rectangle('fill', x, y, w, h)
-
-	love.graphics.setColor(Color.multiplyAlpha(Color.SKY_BLUE, 0.5))
-  love.graphics.rectangle('line', x, y, w, h)
+	local drawBox = require 'components.gui.utils.draw-box'
+	drawBox(self)
 end
 
 return Component.createFactory(EquipmentPanel)

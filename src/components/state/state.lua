@@ -34,7 +34,7 @@ local function defaultState()
 		totalExperience = 0,
 		enemyKillCount = 0,
 
-		inventory = require'utils.make-grid'(11, 9, EMPTY_SLOT),
+		inventory = require'utils.make-grid'(10, 8, EMPTY_SLOT),
 
 		--[[ equipped items ]]
 		equipment = require'utils.make-grid'(2, 5, EMPTY_SLOT),
