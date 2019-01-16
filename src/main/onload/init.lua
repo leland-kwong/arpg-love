@@ -7,6 +7,9 @@ userSettingsState.load()
 local config = require 'config.config'
 if config.isDevelopment then
   require 'repl'
+
+  local Console = require 'modules.console.console'
+  local console = Console.create()
 end
 
 local Component = require 'modules.component'
@@ -22,6 +25,8 @@ require 'modules.auto-visibility'
 require 'components.map-text'
 require 'components.status-icons'
 require 'main.onload.news-dialog'
+require 'components.groups.dungeon-test'
+require 'components.groups.game-world'
 
 local width, height = love.graphics.getDimensions()
 

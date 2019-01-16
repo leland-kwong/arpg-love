@@ -11,7 +11,6 @@ local msgBus = require 'components.msg-bus'
 require 'main.inputs'
 require 'main.listeners'
 
-local Console = require 'modules.console.console'
 local groups = require 'components.groups'
 local config = require 'config.config'
 local camera = require 'components.camera'
@@ -61,9 +60,6 @@ function love.load()
   love.keyboard.setKeyRepeat(true)
   setViewport()
   require 'main.onload'
-
-  -- console debugging
-  local console = Console.create()
 
   MapPointerWorld.create({
     id = 'hudPointerWorld'
