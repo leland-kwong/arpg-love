@@ -11,12 +11,6 @@ return {
 				maxHealth = 1,
 				healthRegeneration = 1
 			}),
-			require(require('alias').path.items..'.modifiers.upgrade-critical-hit')({
-				experienceRequired = 40,
-				chance = 0.25,
-				minMultiplier = 0.2,
-				maxMultiplier = 0.4
-			}),
 		},
 
 		experience = 0,
