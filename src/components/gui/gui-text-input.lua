@@ -80,17 +80,11 @@ local GuiTextInput = objectUtils.assign({}, Gui, {
     -- text box
     love.graphics.setColor(ctrlColor)
     local lineWidth = 1
-    love.graphics.setLineWidth(lineWidth)
-    love.graphics.rectangle(
-      'line',
-      posX + lineWidth/2,
-      posY + lineWidth/2,
-      self.w - lineWidth,
-      boxHeight - lineWidth
-    )
+    local drawBox = require 'components.gui.utils.draw-box'
+    drawBox(self, 'textInput')
 
     -- placeholder text
-    local placeholderOffX, placeholderOffY = 0, 0
+    local placeholderOffX, placeholderOffY = 0, -4
     local cx, cy = Position.boxCenterOffset(self.w, textHeight, self.w + (lineWidth * 2), boxHeight + (lineWidth))
     local textX, textY = posX + lineWidth + 5, posY + cy
     local hasContent = #self.text > 0

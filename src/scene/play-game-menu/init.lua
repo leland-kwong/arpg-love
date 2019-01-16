@@ -79,11 +79,14 @@ function NewGameDialogBlueprint.init(self)
         startNewGame()
         parent.onNewGameEnter()
       end
+    end,
+    drawOrder = function()
+      return 3
     end
   }):setParent(self)
 
   GuiButton.create({
-    padding = 8,
+    padding = 10,
     textLayer = textLayer,
     text = 'START GAME',
     onClick = function()
@@ -92,7 +95,10 @@ function NewGameDialogBlueprint.init(self)
     onUpdate = function(self)
       self:setDrawDisabled(not state.isValid)
       self.x = textInput.x + textInput.w - self.w
-      self.y = textInput.y + textInput.h + 1
+      self.y = textInput.y + textInput.h - 4
+    end,
+    drawOrder = function()
+      return 4
     end
   }):setParent(self)
 
@@ -107,7 +113,6 @@ local function NewGameButton(parent)
     textLayer = parent.guiTextLayer,
     x = parent.innerX,
     y = parent.innerY + 250,
-    padding = 5,
     onClick = function(self)
       local HomeScreen = require('scene.sandbox.main-game.home-screen')
       msgBus.send(msgBus.SCENE_STACK_REPLACE, {
@@ -129,7 +134,6 @@ end
 local function DeleteGameButton(parent, anchorEntity)
   return GuiButton.create({
     textLayer = parent.guiTextLayer,
-    padding = 5,
     onClick = function()
       -- toggle modes
       local mode = parent.state.menuMode == menuModes.NORMAL and
@@ -249,7 +253,7 @@ end
 function PlayGameMenu.update(self)
   self.list.options = getMenuOptions(self)
   self.width = self.list.width
-  self.height = self.newGameBtn.y - self.innerY + self.newGameBtn.h
+  self.height = self.newGameBtn.y - self.innerY
 end
 
 function PlayGameMenu.draw(self)

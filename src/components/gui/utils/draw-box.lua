@@ -118,6 +118,9 @@ local styles = {
   button = {
     spriteName = 'button',
     adjustH = 2
+  },
+  textInput = {
+    spriteName = 'text-input'
   }
 }
 
