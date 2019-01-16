@@ -252,8 +252,7 @@ local Player = {
         if activeLog then
           activeLog:delete(true)
         else
-          local dynamic = require 'utils.dynamic-require'
-          local QuestLog = dynamic 'components.hud.quest-log'
+          local QuestLog = require 'components.hud.quest-log'
           local cameraWidth = camera:getSize()
           local uiWidth = 160
           local offset =5
