@@ -314,8 +314,8 @@ function Hud.init(self)
 
   local MenuButtons = require 'components.hud.menu-buttons'
   MenuButtons.create({
-    x = energyStatusBar.x + 133,
-    y = healthStatusBar.y + 6
+    x = energyStatusBar.x + 135,
+    y = healthStatusBar.y + 7
   }):setParent(self)
 end
 
