@@ -2,15 +2,16 @@ local json = require 'lua_modules.json'
 local dynamic = require 'utils.dynamic-require'
 local AnimationFactory = dynamic 'components.animation-factory'
 
+local guiSpriteData = json.decode(
+  love.filesystem.read('built/sprite-gui.json')
+)
+local F = require 'utils.functional'
+local guiSpriteData = F.reduce(guiSpriteData.meta.slices, function(data, slice)
+  data[slice.name] = slice
+  return data
+end, {})
+
 local function setupSlice9(spriteName)
-  local guiSpriteData = json.decode(
-    love.filesystem.read('built/sprite-gui.json')
-  )
-  local F = require 'utils.functional'
-  local guiSpriteData = F.reduce(guiSpriteData.meta.slices, function(data, slice)
-    data[slice.name] = slice
-    return data
-  end, {})
   local padding = 2 -- sprite sheet padding
 
   local slice9Data = guiSpriteData[spriteName].keys[1]
