@@ -78,7 +78,7 @@ local Shard = Component.createFactory({
     )
   end,
   drawOrder = function(self)
-    return Component.groups.all:drawOrder(self)
+    return 4
   end,
 })
 
