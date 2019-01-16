@@ -39,7 +39,7 @@ local callbacks = {
 local GuiTextInput = objectUtils.assign({}, Gui, {
   padding = 0,
   textColor = Color.WHITE,
-  borderColor = Color.PRIMARY,
+  borderColor = Color.WHITE,
   cursorColor = Color.YELLOW,
   init = function(self)
     assert(
@@ -79,7 +79,7 @@ local GuiTextInput = objectUtils.assign({}, Gui, {
 
     -- text box
     love.graphics.setColor(ctrlColor)
-    local lineWidth = 2
+    local lineWidth = 1
     love.graphics.setLineWidth(lineWidth)
     love.graphics.rectangle(
       'line',

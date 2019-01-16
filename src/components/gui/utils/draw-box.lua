@@ -108,16 +108,26 @@ local setupSlice9 = memoize(function (spriteName)
 end)
 
 local styles = {
-  panel = 'panel-menu',
-  tooltip = 'panel-dialogue'
+  panel = {
+    spriteName = 'panel-menu',
+    adjustH = 2 -- there is a small amount of 3-d drop shadow effect, so this is to account for that
+  },
+  tooltip = {
+    spriteName = 'panel-dialogue'
+  },
+  button = {
+    spriteName = 'button',
+    adjustH = 2
+  }
 }
 
 local function slice9(box, styleName)
-  local graphics = setupSlice9(styles[styleName] or styles.panel)
+  local s = styles[styleName] or styles.panel
+  local graphics = setupSlice9(s.spriteName)
   local spritePadding = 2 -- sprite sheet padding
   local bPadding = box.padding or 10
   -- the slices don't all have equal dimensions, this makes it easier for us to calculate the dimensions with padding
-  local adjustW, adjustH = 0, 2
+  local adjustW, adjustH = s.adjustW or 0, s.adjustH or 0
 
   love.graphics.setColor(1,1,1)
 
