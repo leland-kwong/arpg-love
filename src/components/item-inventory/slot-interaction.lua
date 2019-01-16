@@ -178,7 +178,7 @@ local function setupSlotInteractions(
                   fontSize = font.primary.fontSize,
                 }
               }, {
-                marginBottom = blockPadding
+                marginTop = blockPadding
               })
             end
           end
@@ -232,7 +232,6 @@ local function setupSlotInteractions(
             }, {
               marginBottom = blockPadding
             }),
-            activeAbilityBlock,
           }
 
           local functional = require 'utils.functional'
@@ -252,34 +251,15 @@ local function setupSlotInteractions(
                   font = font.primary.font,
                   fontSize = font.primary.fontSize,
                   -- background = modifierBackgroundColor,
-                  padding = blockPadding,
+                  -- padding = blockPadding,
                 }
               }, extraModifiersRowProps))
-              -- experience required help text
-              local experienceRequired = modifier.props and modifier.props.experienceRequired or 0
-              if (experienceRequired - item.experience) > 0 then
-                table.insert(rows, Block.Row({
-                  {
-                    content = {
-                      Color.LIME,
-                      item.experience..'/'..experienceRequired..' experience required'
-                    },
-                    align = 'right',
-                    width = tooltipWidth,
-                    font = font.primary.font,
-                    fontSize = font.primary.fontSize,
-                    background = modifierBackgroundColor,
-                    padding = blockPadding
-                  },
-                }, {
-                  marginTop = -blockPadding
-                }))
-              end
             end
           end
           functional.forEach(itemSystem.getDefinition(item).extraModifiers or {}, showExtraModifiers)
           functional.forEach(item.extraModifiers, showExtraModifiers)
 
+          table.insert(rows, activeAbilityBlock)
           table.insert(rows, rightClickActionBlock)
 
           tooltipRef = Block.create({
@@ -296,10 +276,8 @@ local function setupSlotInteractions(
           Component.create({
             group = 'gui',
             draw = function()
-              if tooltipRef then
-                local drawBox = require 'components.gui.utils.draw-box'
-                drawBox(tooltipRef, 'tooltip')
-              end
+              local drawBox = require 'components.gui.utils.draw-box'
+              drawBox(tooltipRef, 'tooltip')
             end,
             drawOrder = function()
               return drawOrders.GUI_SLOT_TOOLTIP
@@ -309,7 +287,7 @@ local function setupSlotInteractions(
 
         -- cleanup tooltip
         if ((not self.hovered or not item) and tooltipRef) then
-          tooltipRef:delete()
+          tooltipRef:delete(true)
           tooltipRef = nil
         end
 
