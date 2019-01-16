@@ -1,6 +1,7 @@
 local json = require 'lua_modules.json'
 local dynamic = require 'utils.dynamic-require'
 local AnimationFactory = dynamic 'components.animation-factory'
+local memoize = require 'utils.memoize'
 
 local guiSpriteData = json.decode(
   love.filesystem.read('built/sprite-gui.json')
@@ -11,7 +12,7 @@ local guiSpriteData = F.reduce(guiSpriteData.meta.slices, function(data, slice)
   return data
 end, {})
 
-local function setupSlice9(spriteName)
+local setupSlice9 = memoize(function (spriteName)
   local padding = 2 -- sprite sheet padding
 
   local slice9Data = guiSpriteData[spriteName].keys[1]
@@ -104,11 +105,15 @@ local function setupSlice9(spriteName)
       )
     }
   }
-end
+end)
 
-local menuPanelGraphics = setupSlice9('panel-menu')
+local styles = {
+  panel = 'panel-menu',
+  tooltip = 'panel-dialogue'
+}
 
-local function slice9(box)
+local function slice9(box, styleName)
+  local graphics = setupSlice9(styles[styleName] or styles.panel)
   local spritePadding = 2 -- sprite sheet padding
   local bPadding = box.padding or 10
   -- the slices don't all have equal dimensions, this makes it easier for us to calculate the dimensions with padding
@@ -116,14 +121,14 @@ local function slice9(box)
 
   love.graphics.setColor(1,1,1)
 
-  local s1 = menuPanelGraphics.slices[1]
-  local s3 = menuPanelGraphics.slices[3]
-  local s7 = menuPanelGraphics.slices[7]
+  local s1 = graphics.slices[1]
+  local s3 = graphics.slices[3]
+  local s7 = graphics.slices[7]
 
   local slice1W, slice1H = select(3, s1.graphic.sprite:getViewport())
   local slice3W, slice3H = select(3, s3.graphic.sprite:getViewport())
   local slice7W, slice7H = select(3, s7.graphic.sprite:getViewport())
-  local sf = menuPanelGraphics.scaleFactor
+  local sf = graphics.scaleFactor
   local cornersWidth = slice1W + slice3W
   local cornersHeight = slice1H + slice7H
   local actualWidth = math.max(0, (box.w or box.width) - cornersWidth + bPadding*2)
@@ -136,26 +141,26 @@ local function slice9(box)
 
   s1.graphic:draw(x + s1.ox, y + s1.oy, 0, 1, 1, 0, 0)
 
-  local s2 = menuPanelGraphics.slices[2]
+  local s2 = graphics.slices[2]
   s2.graphic:draw(x + s2.ox, y + s2.oy, 0, w, 1, 0, 0)
 
   s3.graphic:draw(xRight, y + s3.oy, 0, 1, 1, 0, 0)
 
-  local s4 = menuPanelGraphics.slices[4]
+  local s4 = graphics.slices[4]
   s4.graphic:draw(x + s4.ox, y + s4.oy, 0, 1, h, 0, 0)
 
-  local s5 = menuPanelGraphics.slices[5]
+  local s5 = graphics.slices[5]
   s5.graphic:draw(x + s5.ox, y + s5.oy, 0, w, h, 0, 0)
 
-  local s6 = menuPanelGraphics.slices[6]
+  local s6 = graphics.slices[6]
   s6.graphic:draw(xRight, y + s6.oy, 0, 1, h, 0, 0)
 
   s7.graphic:draw(x + s7.ox, yBottom, 0, 1, 1, 0, 0)
 
-  local s8 = menuPanelGraphics.slices[8]
+  local s8 = graphics.slices[8]
   s8.graphic:draw(x + s8.ox, yBottom, 0, w, 1, 0, 0)
 
-  local s9 = menuPanelGraphics.slices[9]
+  local s9 = graphics.slices[9]
   s9.graphic:draw(xRight, yBottom, 0, 1, 1, 0, 0)
 end
 

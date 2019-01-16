@@ -6,7 +6,7 @@ local Box = require 'modules.gui.box'
 
 local boxWorld = Box.new(function()
   local camera = require 'components.camera'
-  local border = 5
+  local border = 15
   local screenWidth, screenHeight = love.graphics.getWidth(), love.graphics.getHeight()
   return 0, screenWidth / camera.scale, screenHeight / camera.scale, 0, border
 end)
@@ -17,18 +17,14 @@ local Block = {
   background = nil, -- background color of tooltip (includes padding)
   padding = 0, -- padding around tooltip content
   textOutline = false,
-  rows = objectUtils.setReadOnly({})
+  rows = objectUtils.setReadOnly({}),
+  width = 0,
+  height = 0
 }
 
 Block.Row = Row
 
-function Block.init(self)
-  assert(type(self.rows) == 'table', '`rows` are required')
-  self.fonts = {}
-  self.textLayers = {}
-end
-
-function Block.update(self)
+function Block.updateDimensions(self)
   local w, h = 0, 0
   for i=1, #self.rows do
     local row = self.rows[i]
@@ -37,17 +33,30 @@ function Block.update(self)
   end
   self.width = w
   self.height = h
+
+  self.x, self.y = boxWorld.move(self, self.x, self.y)
+end
+
+function Block.init(self)
+  assert(type(self.rows) == 'table', '`rows` are required')
+  self.fonts = {}
+  self.textLayers = {}
+  self:updateDimensions()
+end
+
+function Block.update(self)
+  self:updateDimensions()
 end
 
 function Block.draw(self)
-  local actualX, actualY = boxWorld.move(self, self.x + self.padding*2, self.y + self.padding*2)
+  local actualX, actualY = self.x, self.y
 
   if self.background then
     love.graphics.setColor(self.background)
-    love.graphics.rectangle('fill', actualX - self.padding*2, actualY - self.padding*2, self.width + (self.padding * 2), self.height + (self.padding * 2))
+    love.graphics.rectangle('fill', actualX, actualY, self.width, self.height)
   end
 
-  layout(self.rows, actualX - self.padding, actualY - self.padding, function(_, _, col, colPosition)
+  layout(self.rows, actualX, actualY, function(_, _, col, colPosition)
     local xPos = colPosition.x
     local yPos = colPosition.y
     local font = self.fonts[col.font]

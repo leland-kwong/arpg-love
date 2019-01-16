@@ -20,7 +20,8 @@ local drawOrders = {
   GUI_SLOT = 3,
   GUI_SLOT_ITEM = 4,
   GUI_ITEM_PICKED_UP = 5,
-  GUI_SLOT_TOOLTIP = 6
+  GUI_SLOT_TOOLTIP = 6,
+  GUI_SLOT_TOOLTIP_CONTENT = 7
 }
 
 local spriteCache = Lru.new(100)
@@ -250,7 +251,7 @@ local function setupSlotInteractions(
                   width = tooltipWidth,
                   font = font.primary.font,
                   fontSize = font.primary.fontSize,
-                  background = modifierBackgroundColor,
+                  -- background = modifierBackgroundColor,
                   padding = blockPadding,
                 }
               }, extraModifiersRowProps))
@@ -284,13 +285,26 @@ local function setupSlotInteractions(
           tooltipRef = Block.create({
             x = posX + self.w,
             y = posY,
-            background = {0,0,0,0.9},
+            padding = 10,
             rows = rows,
-            padding = blockPadding,
+            drawOrder = function()
+              return drawOrders.GUI_SLOT_TOOLTIP_CONTENT
+            end
+          }):setParent(self)
+
+          -- tooltip box background
+          Component.create({
+            group = 'gui',
+            draw = function()
+              if tooltipRef then
+                local drawBox = require 'components.gui.utils.draw-box'
+                drawBox(tooltipRef, 'tooltip')
+              end
+            end,
             drawOrder = function()
               return drawOrders.GUI_SLOT_TOOLTIP
             end
-          }):setParent(self)
+          }):setParent(tooltipRef)
         end
 
         -- cleanup tooltip
