@@ -264,14 +264,6 @@ function SpawnMinions.update(_, state, dt)
   return false
 end
 
-local function isPlayerInRoom()
-  local playerRef = Component.get('PLAYER')
-  local F = require 'utils.functional'
-  return F.find(playerRef.zones, function(z)
-    return z.name == 'room-boss-1'
-  end)
-end
-
 local function forEachDoor(callback)
   for _,door in pairs(Component.groups.bossDoors.getAll()) do
     callback(door)
@@ -325,7 +317,7 @@ local function keepBossActive()
     )
   end
 
-  local encounterSightRange = 40
+  local encounterSightRange = 200
   local battleSightRange = 80
   if (not bossRef.encountered) then
     bossRef.health = bossRef.maxHealth
@@ -336,17 +328,30 @@ local function keepBossActive()
 
   -- keep boss active even when it is outside of the viewport
   local isNearPlayer = bossDistFromPlayer < (encounterSightRange * config.gridSize)
-  if isPlayerInRoom() and isNearPlayer and bossRef.canSeeTarget then
-    if (not bossRef.encountered) then
-      bossRef.encountered = true
-      cameraActionOnBossEncounter(bossRef, playerRef)
-    end
+  local isBossTriggered = false
+  local triggeredZones = Component.groups.triggeredZones.getAll()
 
-    msgBus.send(msgBus.CHARACTER_HIT, {
-      parent = bossRef,
-      damage = 0,
-      source = 'BOSS_NEAR_PLAYER_AGGRO'
-    })
+  for _,entity in pairs(triggeredZones) do
+    if entity.name == 'bossEncounteredZone' then
+      isBossTriggered = true
+    end
+  end
+
+
+  if isBossTriggered then
+    -- -- aggro the boss by touching him
+    -- msgBus.send(msgBus.CHARACTER_HIT, {
+    --   parent = bossRef,
+    --   damage = 0,
+    --   source = 'BOSS_NEAR_PLAYER_AGGRO'
+    -- })
+
+    -- if bossRef.canSeeTarget then
+      if (not bossRef.encountered) then
+        bossRef.encountered = true
+        cameraActionOnBossEncounter(bossRef, playerRef)
+      end
+    -- end
   end
 end
 

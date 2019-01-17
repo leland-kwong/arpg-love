@@ -39,6 +39,12 @@ local function findLayerByName(layers, name)
   end
 end
 
+local function toWorldCoords(obj, origin)
+  local config = require 'config.config'
+  return (origin.x * config.gridSize) + obj.x,
+    (origin.y * config.gridSize) + obj.y
+end
+
 local objectParsersByType = {
   ['unique-enemies'] = {
     legendaryEnemy = function(obj, grid, origin)
@@ -104,16 +110,51 @@ local objectParsersByType = {
     end,
   },
   ['environment'] = {
+    triggerZone = function(obj, grid, origin, blockData)
+      local Component = require 'modules.component'
+      local x, y = toWorldCoords(obj, origin)
+      Component.create({
+        x = x,
+        y = y,
+        w = obj.width,
+        h = obj.height,
+        name = obj.name,
+        init = function(self)
+          Component.addToGroup(self, 'all')
+          Component.addToGroup(self, 'autoVisibility')
+          Component.addToGroup(self, 'gameWorld')
+          self.colObj = self:addCollisionObject('hotSpot', self.x, self.y, self.w, self.h)
+            :addToWorld(collisionWorlds.map)
+        end,
+        update = function(self)
+          if (not self.isInViewOfPlayer) then
+            return
+          end
+          local len = select(4, self.colObj:check(self.x, self.y, function(item, other)
+            local collisionGroups = require 'modules.collision-groups'
+            return collisionGroups.matches(other.group, 'player') and 'slide' or false
+          end))
+          if len > 0 then
+            Component.addToGroup(self, 'triggeredZones')
+          else
+            Component.removeFromGroup(self, 'triggeredZones')
+          end
+        end
+      })
+    end,
+
     treasureChest = function(obj, grid, origin, blockData)
       local TreasureChest = require 'components.treasure-chest'
       local config = require 'config.config'
       local filePropLoader = require 'modules.dungeon.modules.file-property-loader'
       local defaultTreasure = require 'modules.dungeon.treasure-chest-definitions.default'
+      local x, y = toWorldCoords(obj, origin)
       TreasureChest.create({
         lootData = filePropLoader(obj.properties.props) or defaultTreasure,
-        x = (origin.x * config.gridSize) + obj.x,
-        y = (origin.y * config.gridSize) + obj.y
+        x = x,
+        y = y
       })
+
     end,
     environmentDoor = function(obj, grid, origin, blockData)
       local config = require 'config.config'
@@ -204,11 +245,12 @@ local objectParsersByType = {
         },
         nextLevel = blockData.layoutType
       })
+      local x, y = toWorldCoords(obj, origin)
       LevelExit.create({
         id = exitId,
         locationName = nextLevel,
-        x = origin.x * config.gridSize + obj.x,
-        y = origin.y * config.gridSize + obj.y,
+        x = x,
+        y = y,
         onEnter = function(self)
           msgBus.send(msgBus.SCENE_STACK_PUSH, {
             scene = require 'scene.scene-main',
