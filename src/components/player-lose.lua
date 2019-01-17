@@ -22,7 +22,6 @@ function PlayerLose.init(self)
   Component.addToGroup(self:getId(), 'hud', self)
   msgBus.on('*', function(_, msgType)
     if restartEvents[msgType] then
-      consoleLog('trigger')
       local HomeBase = require 'scene.home-base'
       msgBus.send(msgBus.SCENE_STACK_PUSH, {
         scene = HomeBase
