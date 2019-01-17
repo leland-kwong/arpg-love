@@ -7,6 +7,81 @@ local msgBus = require 'components.msg-bus'
 local Md = dynamicRequire 'modules.markdown-to-love2d-string'
 dynamicRequire 'components.map-text'
 
+local function testQuests()
+  local QuestLog = dynamicRequire 'components.hud.quest-log'
+  local camera = require 'components.camera'
+  local cameraWidth = camera:getSize()
+  local uiWidth = 160
+  local offset = 15
+  QuestLog.create({
+    id = 'QuestLog',
+    x = cameraWidth - uiWidth - offset,
+    y = 100,
+    width = uiWidth,
+    height = 200,
+  })
+
+  for i=1, 5 do
+    local quest = {
+      id = i,
+      title = 'R1 the Mad #'..i,
+      subTasks = {
+        {
+          id = i..'-1',
+          description = 'Look for him in **Aureus**',
+          completed = false
+        },
+        {
+          id = i..'-2',
+          description = 'Take him out',
+          completed = false
+        },
+        {
+          id = i..'-3',
+          description = 'Return his brain to **Lisa**',
+          completed = false
+        }
+      }
+    }
+    msgBus.send('QUEST_NEW', quest)
+  end
+
+  msgBus.send('QUEST_NEW', {
+    id = 'hiddenTreasure',
+    title = 'Hidden treasure',
+    subTasks = {
+      {
+        id = 'hiddenTreasure-1',
+        description = 'Find the treasure hidden beneath the ruins **south** of **Aureus**',
+        completed = false
+      },
+      {
+        id = 'hiddenTreasure-2',
+        description = 'Find the treasure hidden beneath the ruins **south** of **Aureus**',
+        completed = false
+      }
+    }
+  })
+
+  msgBus.send('QUEST_TASK_COMPLETE', {
+    questId = 1,
+    taskId = '1-1'
+  })
+  msgBus.send('QUEST_TASK_COMPLETE', {
+    questId = 1,
+    taskId = '1-2'
+  })
+  msgBus.send('QUEST_TASK_COMPLETE', {
+    questId = 1,
+    taskId = '1-3'
+  })
+
+  msgBus.send('QUEST_TASK_COMPLETE', {
+    questId = 2,
+    taskId = '2-1'
+  })
+end
+
 local Quests = {
   ['1-1'] = {
     title = 'The Menace',
@@ -40,61 +115,72 @@ local function makeDialog(self)
     x = self.x + 12,
     y = self.y
   }
-  local actions = {
-    acceptQuest = function()
-      self.dialog.script = {
-        {
-          position = textPosition,
-          text = "Thank you, I'll be here when you're done."
-        }
-      }
+
+  local nextScript = coroutine.wrap(function()
+    local nextScript
+    local actions = {}
+
+    actions.acceptQuest = function()
+      local time = os.time()
       -- add new quest to log
       msgBus.send('QUEST_NEW', {
-        questId = 'the-beginning',
-        title = 'The beginning',
-        description = 'Take out R1 the Mad, retrieve his brain and return it to Lisa.'
+        id = 'quest #'..time,
+        title = 'The beginning '..time,
+        subTasks = {
+          {
+            id = 'the-beginning_1',
+            description = 'Take out **R1 the Mad**'
+          },
+          {
+            id = 'the-beginning_2',
+            description = 'Bring his **brain** to **Lisa**'
+          }
+        }
       })
-    end,
-    rejectQuest = function()
-      self.dialog.script = {
+
+      nextScript = nil
+    end
+
+    actions.rejectQuest = function()
+      nextScript = nil
+    end
+
+    nextScript = {
+      text = "Hi "..characterName..", there is an evil robot who goes by the name of **R1 the mad**."
+        .." Find him in **Aureus**, take him out, and retrieve his **brain**.",
+      defaultOption = function()
+        nextScript = nil
+      end,
+      options = {
         {
-          position = textPosition,
-          text = "Nevermind then."
+          label = "Got it.",
+          action = actions.acceptQuest
+        },
+        {
+          label = "I'm too scared, I'll pass on it this time.",
+          action = actions.rejectQuest
         }
       }
+    }
+
+    while true do
+      coroutine.yield(nextScript)
     end
-  }
+  end)
 
   self.dialog = GuiDialog.create({
     id = 'QuestMasterSpeechBubble',
-    script = {
-      {
-        position = textPosition,
-        text = Md("Hi "..characterName..", there is an evil robot who goes by the name of **R1 the mad**."
-          .." Find him in **Aureus**, take him out, and retrieve his **brain**.").formatted,
-        options = {
-          {
-            label = "Got it.",
-            action = actions.acceptQuest
-          },
-          {
-            label = "I'm too scared, I'll pass on it this time.",
-            action = actions.rejectQuest
-          }
-        }
-      },
-    }
+    renderPosition = textPosition,
+    nextScript = nextScript
   }):setParent(self)
 end
 
-local QuestMaster = Component.createFactory({
+local Npc = Component.createFactory({
   name = 'Npc name',
   init = function(self)
     local parent = self
     Component.addToGroup(self, 'all')
     Component.addToGroup(self, 'npcs')
-
-    makeDialog(self)
 
     self.animation = AnimationFactory:new({
       'npc-quest-master/character-8',
@@ -115,18 +201,22 @@ local QuestMaster = Component.createFactory({
         self.y = parent.y - height/2 - nameHeight
 
         local msgBus = require 'components.msg-bus'
-        local isInDialogue = self.hovered or
+        local isInDialogue = (parent.canInteract and self.hovered) or
           (parent.dialog and (not parent.dialog:isDeleted()))
         msgBus.send('CURSOR_SET', {
           type = isInDialogue and 'speech' or 'default'
         })
+
+        parent.canInteract = msgBus.send('INTERACT_ENVIRONMENT_OBJECT', self)
       end,
       getMousePosition = function()
         local camera = require 'components.camera'
         return camera:getMousePosition()
       end,
       onClick = function()
-        makeDialog(parent)
+        if parent.canInteract then
+          makeDialog(parent)
+        end
       end
     }):setParent(parent)
   end,
@@ -135,6 +225,21 @@ local QuestMaster = Component.createFactory({
 
     local config = require 'config.config'
     local gs = config.gridSize
+
+    local lightWorld = Component.get('lightWorld')
+    lightWorld:addLight(self.x, self.y, 20)
+
+    if self.canInteract then
+      Component.addToGroup(
+        Component.newId(),
+        'interactableIndicators', {
+          icon = 'cursor-speech',
+          -- orientation =
+          x = self.x + self.interactNode.w,
+          y = self.y - 4
+        }
+      )
+    end
   end,
   draw = function(self)
     drawShadow(self, 1, 1)
@@ -173,12 +278,14 @@ Component.create({
   id = 'QuestMasterExample',
   group = 'all',
   init = function(self)
-    QuestMaster.create({
+    Npc.create({
       id = 'QuestMaster',
       name = 'Lisa',
       x = 450,
       y = 350
     }):setParent(self)
+
+    testQuests()
   end,
   update = function(self)
   end
