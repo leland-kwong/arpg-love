@@ -90,27 +90,30 @@ local function connectAutoSave(parent)
     return
   end
 
+  local rootState = require 'main.global-state'.gameState
+  local sessionStartTime = os.time()
+  local initialPlayTime = rootState:get().playTime
   local function saveState()
-    local rootState = msgBus.send(msgBus.GAME_STATE_GET)
     rootState:set('isNewGame', false)
     local state = rootState:get()
-    local hasChanged = state ~= lastSavedState
-    if hasChanged then
-      local date = require 'utils.date'
-      Db.load('saved-states'):put(
-        rootState:getId(), {
-          data = state,
-          metadata = {
-            displayName = state.characterName,
-            playTime = tostring(
-              date.diff(os.time(), state.createdAt)
-            ),
-            playerLevel = state.level
-          }
+    local date = require 'utils.date'
+    local sessionDuration = os.time() - sessionStartTime
+    local totalPlayTime = initialPlayTime + sessionDuration
+    rootState:set('playTime', totalPlayTime)
+    Db.load('saved-states'):put(
+      rootState:getId(), {
+        data = state,
+        metadata = {
+          displayName = state.characterName,
+          playTime = totalPlayTime,
+          playerLevel = state.level
         }
-      )
-      lastSavedState = state
-    end
+      }
+    ):next(nil, function(err)
+      msgBus.send('LOG_ERROR', err)
+    end)
+    lastSavedTime = currentTime
+    lastSavedState = state
   end
   local autoSaveTimer = tick.recur(saveState, 0.5)
   Component.create({

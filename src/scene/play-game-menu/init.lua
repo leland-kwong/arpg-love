@@ -165,8 +165,8 @@ local function getMenuOptions(parent)
       local data = db:get(file)
       local meta = data.metadata
       local extract = require 'utils.object-utils.extract'
-      local date = require 'utils.date'
-      local dateObj = date(meta.playTime)
+      local Time = require 'utils.time'
+      local playTime = meta.playTime
       local name = {
         Color.WHITE,
         meta.displayName..'\n',
@@ -179,10 +179,10 @@ local function getMenuOptions(parent)
         Color.LIGHT_GRAY,
         '\nPLAY TIME: ',
         Color.WHITE,
-        math.floor(dateObj:spandays())
-        ..':'..string.format('%02d', math.floor(dateObj:spanhours()))
-        ..':'..string.format('%02d', math.floor(dateObj:spanminutes()))
-        ..':'..string.format('%02d', math.floor(dateObj:spanseconds()%60))
+        math.floor(Time.toDays(playTime))
+        ..':'..string.format('%02d', math.floor(Time.toHours(playTime)%24))
+        ..':'..string.format('%02d', math.floor(Time.toMinutes(playTime)%60))
+        ..':'..string.format('%02d', playTime%60)
       }
 
       if menuModes.DELETE_GAME == parent.state.menuMode then
@@ -199,9 +199,14 @@ local function getMenuOptions(parent)
               :next(nil, function(err)
                 print(err)
               end)
-            Db.load('saved-states'):delete(file)
+            local Observable = require 'modules.observable'
+            local EventLog = require 'modules.log-db.events-log'
+            Observable.all({
+              Db.load('saved-states'):delete(file),
+              EventLog.cleanup(file)
+            })
               :next(nil, function(err)
-                print(err)
+                msgBus.send('LOG_ERROR', err)
               end)
           -- load game
           else
