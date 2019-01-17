@@ -17,20 +17,6 @@ local DialogText = GuiText.create({
   end
 })
 
-local HoverRectangle = Gui.create({
-  id = 'DialogHoverRectangle',
-  render = function(self)
-    if self.show then
-      love.graphics.setColor(self.color)
-      love.graphics.rectangle('line', self.x, self.y, self.width, self.height)
-    end
-    self.show = false
-  end,
-  drawOrder = function()
-    return DrawOrders.Dialog + 10
-  end
-})
-
 local GuiDialog = {
   padding = 5,
   wrapLimit = 200
@@ -67,13 +53,16 @@ local function renderScriptOptions(parent)
         id = 'script-option-'..index,
         padding = 5,
         height = select(2, GuiText.getTextSize(option.label, DialogText.font)),
-        onClick = option.action,
+        onClick = function()
+          parent.script = option.action()
+        end,
         onUpdate = function(self)
-          local previousOption = options[index - 1]
-          local previousItemHeight = previousOption and
-            select(2, GuiText.getTextSize(previousOption.label, DialogText.font)) or
-            0
-          self.x, self.y = parent.x, parent.y + parent.height + previousItemHeight
+          local previousHeights = 0
+          for i=1, (index - 1) do
+            local o = options[i]
+            previousHeights = previousHeights + select(2, GuiText.getTextSize(o.label, DialogText.font))
+          end
+          self.x, self.y = parent.x, parent.y + parent.height + previousHeights
           self.innerX, self.innerY = self.x + self.padding, self.y + self.padding
           self.width = parent.width
           self.innerWidth = parent.width - (parent.padding * 2)
@@ -81,15 +70,23 @@ local function renderScriptOptions(parent)
         render = function(self)
           local c = self.hovered and Color.LIME or Color.DEEP_BLUE
           love.graphics.setColor(c)
-          DialogText:addf({c, option.label}, self.innerWidth, 'left', self.innerX + self.padding, self.y)
+          local Constants = require 'components.state.constants'
+          local bullet = Constants.glyphs.diamondBullet
+          local formattedString = {
+            Color.MED_GRAY,
+            bullet..' ',
+            c, option.label
+          }
+          DialogText:addf(formattedString, self.innerWidth, 'left', self.innerX + self.padding, self.y)
 
           if self.hovered then
-            HoverRectangle.show = self.hovered
-            HoverRectangle.color = c
-            HoverRectangle.x = self.innerX
-            HoverRectangle.y = self.y
-            HoverRectangle.width = self.innerWidth
-            HoverRectangle.height = self.height
+            local h = parent.HoverRectangle
+            h.show = self.hovered
+            h.color = c
+            h.x = self.innerX
+            h.y = self.y
+            h.width = self.innerWidth
+            h.height = self.height
           end
         end,
         drawOrder = function()
@@ -102,28 +99,38 @@ end
 
 function GuiDialog.init(self)
   local parent = self
+
+  self.HoverRectangle = Gui.create({
+    render = function(self)
+      if self.show then
+        love.graphics.setColor(self.color)
+        love.graphics.rectangle('line', self.x, self.y, self.width, self.height)
+      end
+      self.show = false
+    end,
+    drawOrder = function()
+      return DrawOrders.Dialog + 10
+    end
+  }):setParent(self)
+
   Component.addToGroup(self, 'gui')
-  self.scriptPosition = 1
 
   self.advanceDialog = function()
-    self.scriptPosition = self.scriptPosition + 1
+    self.script.defaultOption()
   end
 
   createToggleOverlayArea(parent)
     :setParent(parent)
 end
 
-function GuiDialog.isNewScriptPosition(self)
-  return self.scriptPosition ~= self.lastScriptPosition
-end
-
 function GuiDialog.getCurrentScript(self)
-  return self.script[self.scriptPosition]
+  return self.script
 end
 
 function GuiDialog.update(self, dt)
   local parent = self
-  local endOfDialog = (self.scriptPosition > #self.script) or (not self.script)
+  self.script = self.nextScript()
+  local endOfDialog = not self.script
   if (endOfDialog) then
     return self:delete(true)
   end
@@ -131,13 +138,6 @@ function GuiDialog.update(self, dt)
 
   local isNewScript = self.script ~= self.lastScript
   self.lastScript = self.script
-
-  if isNewScript then
-    self.scriptPosition = 1
-    self.lastScriptPosition = nil
-  end
-
-  self.lastScriptPosition = self.scriptPosition
 
   local script = self:getCurrentScript()
   script.options = script.options or {}
@@ -161,7 +161,8 @@ function GuiDialog.update(self, dt)
 
   self.x, self.y = camera:toScreenCoords(self.renderPosition.x, self.renderPosition.y - self.height - self.optionsTotalHeight)
 
-  DialogText:addf(script.text, wrapLimit, 'left', self.x + self.padding, self.y + self.padding + titleHeight)
+  local markdownToLove2d = require 'modules.markdown-to-love2d-string'
+  DialogText:addf(markdownToLove2d(script.text).formatted, wrapLimit, 'left', self.x + self.padding, self.y + self.padding + titleHeight)
   if script.title then
     DialogText:add(script.title, Color.SKY_BLUE, self.x + self.padding, self.y + self.padding)
   end
@@ -173,7 +174,7 @@ function GuiDialog.draw(self)
     y = self.y,
     width = self.width,
     height = self.height + self.optionsTotalHeight + (self.optionsTotalHeight > 0 and self.padding or 0)
-  })
+  }, 'tooltip')
 end
 
 function GuiDialog.drawOrder()
