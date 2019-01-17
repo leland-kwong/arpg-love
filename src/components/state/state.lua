@@ -28,6 +28,7 @@ local function defaultState()
 	return {
 		__stateId = stateId,
 		characterName = characterName,
+		createdAt = os.time(),
 		isNewGame = true,
 
 		level = 1,

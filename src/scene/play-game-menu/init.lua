@@ -164,16 +164,25 @@ local function getMenuOptions(parent)
     parent.previousFilesForDisplay = f.map(files, function(file)
       local data = db:get(file)
       local meta = data.metadata
-      local dateObject = os.date('*t', meta.lastSaved)
       local extract = require 'utils.object-utils.extract'
-      local month, day, year = extract(dateObject, 'month', 'day', 'year')
-      local saveDateHumanized = month .. '-' .. day .. '-' .. year
+      local date = require 'utils.date'
+      local dateObj = date(meta.playTime)
       local name = {
         Color.WHITE,
         meta.displayName..'\n',
 
         Color.LIGHT_GRAY,
-        'last played: '..saveDateHumanized
+        'LVL: ',
+        Color.WHITE,
+        meta.playerLevel or '',
+
+        Color.LIGHT_GRAY,
+        '\nPLAY TIME: ',
+        Color.WHITE,
+        math.floor(dateObj:spandays())
+        ..':'..string.format('%02d', math.floor(dateObj:spanhours()))
+        ..':'..string.format('%02d', math.floor(dateObj:spanminutes()))
+        ..':'..string.format('%02d', math.floor(dateObj:spanseconds()%60))
       }
 
       if menuModes.DELETE_GAME == parent.state.menuMode then
