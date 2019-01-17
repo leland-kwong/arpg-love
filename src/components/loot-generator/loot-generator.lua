@@ -408,8 +408,9 @@ function LootGenerator.init(self)
         require 'components.interactable-indicators'
         local uid = require 'utils.uid'
         Component.addToGroup(uid(), 'interactableIndicators', {
-          x = self.x,
-          y = self.y + (self.h / 2)
+          x = self.x + self.w,
+          y = self.y + (self.h / 2),
+          rotation = -math.pi/2
         })
       end
 

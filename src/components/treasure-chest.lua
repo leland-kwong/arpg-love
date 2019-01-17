@@ -162,8 +162,9 @@ return Component.createFactory({
 
     if self.canOpen then
       Component.addToGroup(self:getId(), 'interactableIndicators', {
-        x = self.interactNode.x,
-        y = self.y
+        x = self.interactNode.x + self.interactNode.w,
+        y = self.y,
+        rotation = -math.pi/2
       })
     end
 

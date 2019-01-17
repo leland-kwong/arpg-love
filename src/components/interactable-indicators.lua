@@ -16,10 +16,7 @@ Component.create({
     for _,interact in pairs(interactables) do
       love.graphics.setColor(1,1,1,1)
       local icon = AnimationFactory:newStaticSprite(interact.icon or 'gui-arrow-small')
-      local orientation = icon.orientation or 'left'
-      if orientation == 'left' then
-        icon:draw(interact.x - icon:getWidth() + offset, interact.y, math.pi/2)
-      end
+      icon:draw(interact.x + offset, interact.y, interact.rotation or 0)
     end
     Component.clearGroup('interactableIndicators')
   end,
