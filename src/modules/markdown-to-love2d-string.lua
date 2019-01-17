@@ -75,7 +75,7 @@ end
 local Parser = StringTemplate()
 
 local formatColors = {
-  default = {1,1,1},
+  default = {0.95,0.95,0.95},
   [formatTypes.BOLD] = {1,0.8,0},
   [formatTypes.EM] = {1,0.8,0},
   [formatTypes.HEADING] = {0,1,0.8}

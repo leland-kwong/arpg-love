@@ -6,11 +6,79 @@ local msgBus = require 'components.msg-bus'
 local msgBus = require 'components.msg-bus'
 local Color = require 'modules.color'
 local MenuManager = require 'modules.menu-manager'
+local F = require 'utils.functional'
+local Constants = require 'components.state.constants'
+local getRect = require 'utils.rect'
+local markdownToLove2d = require 'modules.markdown-to-love2d-string'
+local Grid = require 'utils.grid'
 
 local QuestLog = {
   width = 0,
   height = 0
 }
+
+local colors = {
+  questTitle = {0,0.85,1},
+  completed = Color.MED_GRAY
+}
+
+local calcCompleted = function(completeCount, task)
+  return completeCount + (task.completed and 1 or 0)
+end
+
+local function layoutQuests(quests, wrapLimit, font)
+  local questsList = F.reduce(F.keys(quests), function(list, questId)
+    table.insert(list, quests[questId])
+    return list
+  end, {})
+  local glyphs = Constants.glyphs
+  local layout = F.reduce(questsList, function(layout, quest)
+    local checkIcon = (questCompleted and glyphs.checkboxChecked or glyphs.checkbox)..' '
+    local w,h = GuiText.getTextSize(checkIcon..quest.title, font, wrapLimit)
+    local numTasks = #quest.subTasks
+    local numTasksCompleted = F.reduce(quest.subTasks, calcCompleted, 0)
+    local questCompleted = numTasks == numTasksCompleted
+    table.insert(layout, {
+      {
+        text = {
+          questCompleted and colors.completed or Color.WHITE,
+          checkIcon,
+
+          colors.questTitle,
+          quest.title
+        },
+        type = 'questTitle',
+        width = w,
+        height = h,
+        paddingTop = 8
+      }
+    })
+
+    F.forEach(quest.subTasks, function(task)
+      local paddingLeft = 10
+      local parsedString = markdownToLove2d(task.description)
+      local checkIcon = (task.completed and glyphs.checkboxChecked or glyphs.checkbox) .. ' '
+      local w,h = GuiText.getTextSize(checkIcon..parsedString.plainText, font, wrapLimit - paddingLeft)
+      local formattedString = parsedString.formatted
+      table.insert(formattedString, 1, checkIcon)
+      table.insert(formattedString, 1, task.completed and colors.completed or Color.WHITE)
+      return table.insert(layout, {
+        {
+          text = formattedString,
+          type = 'task',
+          width = w,
+          height = h,
+          paddingTop = 1,
+          paddingLeft = paddingLeft
+        }
+      })
+    end)
+
+    return layout
+  end, {})
+  local rect = getRect(layout)
+  return rect
+end
 
 function QuestLog.init(self)
   Component.addToGroup(self, 'gui')
@@ -25,20 +93,8 @@ function QuestLog.init(self)
     font = require 'components.font'.primary.font
   }):setParent(self)
   self.bodyText = bodyText
-
-  self.log = MenuList2.create({
-    x = self.x,
-    y = self.y,
-    height = self.height,
-    inputContext = 'any',
-    layoutItems = {},
-    otherItems = {
-      bodyText
-    },
-    autoWidth = false,
-    drawOrder = function()
-      return 2
-    end
+  self.titleText = GuiText.create({
+    font = require 'components.font'.secondary.font
   }):setParent(self)
 
   self.guiNodes = {
@@ -59,33 +115,44 @@ function QuestLog.init(self)
           local padding = 5
           local wrapLimit = parent.width - padding
           local titleText = {Color.SKY_BLUE, 'QUESTS'}
-          bodyText:addf(titleText, wrapLimit, 'center', self.x + padding, self.y + padding)
-          local titleWidth, titleHeight = bodyText:getSize()
+          parent.titleText:addf(titleText, wrapLimit, 'center', self.x + padding, self.y + padding)
+          local titleWidth, titleHeight = parent.titleText:getSize()
 
-          local questList = {}
-
-          for _,info in pairs(log.quests) do
-            if (not info.completed) then
-              table.insert(questList, {1,1,0})
-              table.insert(questList, '\n'..info.title..'\n')
-
-              table.insert(questList, {0.9,0.9,0.9})
-              table.insert(questList, info.description..'\n')
-            end
-          end
-
-          if (#questList > 0) then
+          if (#F.keys(log.quests) > 0) then
             local offsetY = 16
-            bodyText:addf(questList, wrapLimit, nil, self.x + padding, self.y + offsetY)
-            local textWidth, textHeight = bodyText:getSize()
-            self.width, self.height = math.max(titleWidth, textWidth), titleHeight + textHeight + offsetY
+            local rect = layoutQuests(log.quests, wrapLimit, bodyText.font)
+            Grid.forEach(rect.childRects, function(layoutBlock, x, y)
+              bodyText:addf(
+                layoutBlock.colData.text,
+                layoutBlock.width,
+                'left',
+                self.x + padding + layoutBlock.x,
+                self.y + padding + offsetY + layoutBlock.y
+              )
+            end)
+            self.width, self.height = math.max(titleWidth, rect.width),
+              titleHeight + rect.height + offsetY
           end
         end
       })
     }
   }
 
-  self.log.layoutItems = self.guiNodes
+  self.log = MenuList2.create({
+    x = self.x,
+    y = self.y,
+    height = self.height,
+    inputContext = 'any',
+    layoutItems = self.guiNodes,
+    otherItems = {
+      bodyText,
+      parent.titleText
+    },
+    autoWidth = false,
+    drawOrder = function()
+      return 2
+    end
+  }):setParent(self)
 end
 
 function QuestLog.update(self)
@@ -98,10 +165,8 @@ function QuestLog.draw(self)
   local log = self.log
   local bw = 1
   local x, y, width, height = log.x - bw, log.y - bw, log.width + bw * 2, log.height + bw * 2
-  love.graphics.setColor(0.1,0.1,0.1,0.95 * opacity)
-  love.graphics.rectangle('fill', x, y, width, height)
-  love.graphics.setColor(Color.multiplyAlpha(Color.MED_GRAY, opacity))
-  love.graphics.rectangle('line', x, y, width, height)
+  local drawBox = require 'components.gui.utils.draw-box'
+  drawBox(self)
 end
 
 function QuestLog.drawOrder(self)

@@ -26,16 +26,19 @@ return function(layoutGrid)
     local row = layoutGrid[rowOffset]
     for colOffset=1, #row do
       local col = row[colOffset]
-      if childrenProcessed[col] then
-        error('duplicate child in gui ['..rowOffset..','..colOffset..']')
-      end
-      childrenProcessed[col] = true
+      local pLeft = (col.paddingLeft or 0)
+      local pRight = (col.paddingRight or 0)
+      local pTop = (col.paddingTop or 0)
+      local pBot = (col.paddingBottom or 0)
+      local colWidth = (col.width or 0) + pLeft + pRight
+      local colHeight = (col.height or 0) + pTop + pBot
       Grid.set(rect.childRects, colOffset, rowOffset, {
-        x = posX,
-        y = posY
+        x = posX + pLeft,
+        y = posY + pTop,
+        width = colWidth,
+        height = colHeight,
+        colData = col
       })
-      local colWidth = col.width or 0
-      local colHeight = col.height or 0
       posX = posX + colWidth
       totalWidth = totalWidth + colWidth
       rowHeight = math.max(rowHeight, colHeight)

@@ -6,6 +6,8 @@ return {
 		leftMouseBtn = '┬',
 		middleMouseBtn = '┴',
 		rightMouseBtn = '┼',
-		diamondBullet = 'ž'
+		diamondBullet = 'ž',
+		checkbox = 'ż',
+		checkboxChecked = 'Ž',
 	}
 }
