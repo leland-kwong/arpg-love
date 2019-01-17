@@ -39,10 +39,6 @@ local setupSlice9 = memoize(function (spriteName)
     }
   end
 
-  print(
-    Inspect(slice9Data)
-  )
-
   return {
     scaleFactor = {
       w = slice9Data.center.w,
