@@ -51,9 +51,21 @@ local entryHandlers = {
       msgBus.send('LOG_ERROR', err)
     end
   end,
-  QUEST_COMPLETE = function(finalLog, entry)
+  QUEST_TASK_COMPLETE = function(finalLog, entry)
     local ok, err = pcall(function()
-      finalLog.quests[entry.data.id].completed = true
+      local quest = finalLog.quests[entry.data.questId]
+      local F = require 'utils.functional'
+      local O = require 'utils.object-utils'
+      local newSubTasksState = F.map(quest.subTasks, function(task)
+        local isTaskToComplete = task.id == entry.data.taskId
+        if isTaskToComplete then
+          return O.assign({}, task, {
+            completed = true
+          })
+        end
+        return task
+      end)
+      quest.subTasks = newSubTasksState
     end)
 
     if (not ok) then
@@ -127,18 +139,25 @@ local function setupListeners(self, gameId)
       Log.append(gameId, {
         event = 'QUEST_NEW',
         data = {
-          id = msg.questId,
           title = msg.title,
-          description = msg.description,
-          completed = false
+          id = msg.id,
+          --[[
+            subTask {
+              id = STRING,
+              description = LOVE2D_FORMATTED_STRING,
+              completed = BOOL
+            }
+          ]]
+          subTasks = msg.subTasks,
         }
       }):next(nil, handleAppendError)
     end),
-    msgBus.on('QUEST_COMPLETE', function(msg)
+    msgBus.on('QUEST_TASK_COMPLETE', function(msg)
       Log.append(gameId, {
-        event = 'QUEST_COMPLETE',
+        event = 'QUEST_TASK_COMPLETE',
         data = {
-          id = msg.questId
+          questId = msg.questId,
+          taskId = msg.taskId
         }
       }):next(nil, handleAppendError)
     end),
@@ -162,10 +181,10 @@ function EventLog.start(gameId)
     init = function(self)
       Component.addToGroup(self, 'firstLayer')
       self.cleanupTailLog = Log.tail(gameId, function(entry)
-        print(
-          'log entry - ',
-          Inspect(entry)
-        )
+        -- print(
+        --   'log entry - ',
+        --   Inspect(entry)
+        -- )
         updateInMemoryLog(gameId, entry)
       end)
 
