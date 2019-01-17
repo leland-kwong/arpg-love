@@ -259,7 +259,7 @@ local Player = {
           local QuestLog = require 'components.hud.quest-log'
           local cameraWidth = camera:getSize()
           local uiWidth = 160
-          local offset =5
+          local offset = 15
           QuestLog.create({
             id = 'QuestLog',
             x = cameraWidth - uiWidth - offset,
