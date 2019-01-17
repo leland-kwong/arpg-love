@@ -265,7 +265,7 @@ local function setupSlotInteractions(
           tooltipRef = Block.create({
             x = posX + self.w,
             y = posY,
-            padding = 10,
+            padding = 15,
             rows = rows,
             drawOrder = function()
               return drawOrders.GUI_SLOT_TOOLTIP_CONTENT
