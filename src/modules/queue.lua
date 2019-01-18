@@ -25,8 +25,8 @@ function Q:new(options)
   return queue
 end
 
--- insert callback with maximum 3 arguments
-function Q:add(order, cb, a, b, c)
+-- insert callback with 1 argument
+function Q:add(order, cb, a)
   -- ignore empty callbacks
   if (not cb) then
     return
@@ -56,8 +56,11 @@ function Q:flush()
   local list = self.list
   local orders = self.orders
   table.sort(orders)
+
+  -- create new lists before flushing since during flushing there may be new callbacks being added
   self.list = {}
   self.orders = {}
+
   for i=1, #orders do
     local order = orders[i]
     local row = list[order]
