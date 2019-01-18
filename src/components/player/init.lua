@@ -307,7 +307,7 @@ local Player = {
 
         if (keyMap.PORTAL_OPEN == key) and (not v.hasModifier) then
           if self.inBossBattle then
-            msgBus.send(msgBus.PLAYER_ACTION_ERROR, "cannot portal in here")
+            msgBus.send(msgBus.PLAYER_ACTION_ERROR, 'we cannot portal during boss')
             return
           end
           msgBus.send(msgBus.PORTAL_OPEN)

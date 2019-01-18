@@ -317,8 +317,7 @@ local function keepBossActive()
     )
   end
 
-  local encounterSightRange = 200
-  local battleSightRange = 80
+  local battleSightRange = 150
   if (not bossRef.encountered) then
     bossRef.health = bossRef.maxHealth
     bossRef.sightRadius = encounterSightRange
@@ -327,7 +326,6 @@ local function keepBossActive()
   end
 
   -- keep boss active even when it is outside of the viewport
-  local isNearPlayer = bossDistFromPlayer < (encounterSightRange * config.gridSize)
   local isBossTriggered = false
   local triggeredZones = Component.groups.triggeredZones.getAll()
 
@@ -339,19 +337,10 @@ local function keepBossActive()
 
 
   if isBossTriggered then
-    -- -- aggro the boss by touching him
-    -- msgBus.send(msgBus.CHARACTER_HIT, {
-    --   parent = bossRef,
-    --   damage = 0,
-    --   source = 'BOSS_NEAR_PLAYER_AGGRO'
-    -- })
-
-    -- if bossRef.canSeeTarget then
-      if (not bossRef.encountered) then
-        bossRef.encountered = true
-        cameraActionOnBossEncounter(bossRef, playerRef)
-      end
-    -- end
+    if (not bossRef.encountered) then
+      bossRef.encountered = true
+      cameraActionOnBossEncounter(bossRef, playerRef)
+    end
   end
 end
 
@@ -374,6 +363,9 @@ return AiBlueprint({
           for _,minion in pairs(Component.groups.boss1Minions.getAll()) do
             Component.remove(minion:getId(), true)
           end
+
+          local playerRef = Component.get('PLAYER')
+          playerRef.inBossBattle = false
         end
       end
       local msgBus = require 'components.msg-bus'
