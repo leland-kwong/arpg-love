@@ -627,6 +627,19 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/gui/gui-button.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,3,11,7</rect>
+                <key>scale9Paddings</key>
+                <rect>5,3,11,7</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/gui/gui-dashboard-abilities-underlay.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -731,6 +744,32 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/gui/gui-exclamation-mark.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>2,4,3,7</rect>
+                <key>scale9Paddings</key>
+                <rect>2,4,3,7</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-input-box-label.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,2,9,4</rect>
+                <key>scale9Paddings</key>
+                <rect>5,2,9,4</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/gui/gui-map-pointer.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -811,6 +850,19 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/gui/gui-text-input.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>7,7,13,14</rect>
+                <key>scale9Paddings</key>
+                <rect>7,7,13,14</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/items/augmentation-defender.png</key>
             <key type="filename">custom-art/items/augmentation-one.png</key>
             <key type="filename">custom-art/items/augmentation-rage.png</key>
@@ -884,6 +936,87 @@
                 <rect>25,25,50,50</rect>
                 <key>scale9Paddings</key>
                 <rect>25,25,50,50</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/mouse-cursors/cursor-move-2x.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>11,11,21,22</rect>
+                <key>scale9Paddings</key>
+                <rect>11,11,21,22</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/mouse-cursors/cursor-move-3x.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,17,31,33</rect>
+                <key>scale9Paddings</key>
+                <rect>16,17,31,33</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/mouse-cursors/cursor-move.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,6,11,11</rect>
+                <key>scale9Paddings</key>
+                <rect>5,6,11,11</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/mouse-cursors/cursor-speech-2x.png</key>
+            <key type="filename">custom-art/mouse-cursors/cursor-target-2x.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>11,11,22,22</rect>
+                <key>scale9Paddings</key>
+                <rect>11,11,22,22</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/mouse-cursors/cursor-speech-3x.png</key>
+            <key type="filename">custom-art/mouse-cursors/cursor-target-3x.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>17,17,33,33</rect>
+                <key>scale9Paddings</key>
+                <rect>17,17,33,33</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/mouse-cursors/cursor-speech.png</key>
+            <key type="filename">custom-art/mouse-cursors/cursor-target.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>6,6,11,11</rect>
+                <key>scale9Paddings</key>
+                <rect>6,6,11,11</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -1126,6 +1259,7 @@
             <filename>custom-art/abilities</filename>
             <filename>custom-art/items</filename>
             <filename>custom-art/light-blur.png</filename>
+            <filename>custom-art/mouse-cursors</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

@@ -5,6 +5,7 @@ local GuiDialog = dynamicRequire 'components.gui.gui-dialog'
 local GlobalState = require 'main.global-state'
 local msgBus = require 'components.msg-bus'
 local Md = dynamicRequire 'modules.markdown-to-love2d-string'
+local scriptRoutines = require 'components.quest-log.script-routines'
 dynamicRequire 'components.map-text'
 
 local Quests = {
@@ -33,7 +34,7 @@ local function drawShadow(self, sx, sy, ox, oy)
   )
 end
 
-local function makeDialog(self)
+local function makeDialog(self, questList)
   local gameState = msgBus.send('GAME_STATE_GET'):get()
   local characterName = gameState.characterName or ''
   local textPosition = {
@@ -41,16 +42,16 @@ local function makeDialog(self)
     y = self.y
   }
 
-  local scriptRoutines = require 'components.quest-log.script-routines'
   self.dialog = GuiDialog.create({
     id = 'QuestMasterSpeechBubble',
     renderPosition = textPosition,
-    nextScript = coroutine.wrap(scriptRoutines.startingOut)
+    nextScript = coroutine.wrap(scriptRoutines.create(questList))
   }):setParent(self)
 end
 
 local Npc = Component.createFactory({
   name = 'Npc name',
+  questList = {},
   init = function(self)
     local parent = self
     Component.addToGroup(self, 'all')
@@ -88,8 +89,8 @@ local Npc = Component.createFactory({
         return camera:getMousePosition()
       end,
       onClick = function()
-        if parent.canInteract then
-          makeDialog(parent)
+        if parent.canInteract and parent.hasNewQuest then
+          makeDialog(parent, parent.questList)
         end
       end
     }):setParent(parent)
@@ -113,6 +114,10 @@ local Npc = Component.createFactory({
         }
       )
     end
+
+    local nextQuest = scriptRoutines.getNextQuest(self.questList)
+    self.hasNewQuest = nextQuest ~= nil
+    self.questAlreadyActive = scriptRoutines.isActiveQuest(nextQuest)
   end,
   draw = function(self)
     drawShadow(self, 1, 1)
@@ -130,6 +135,12 @@ local Npc = Component.createFactory({
 
     local Shaders = require 'modules.shaders'
     local shader = Shaders('pixel-outline.fsh')
+
+    if self.hasNewQuest and (not self.questAlreadyActive) then
+      love.graphics.setColor(1,0.8,0)
+      AnimationFactory:newStaticSprite('gui-exclamation-mark')
+        :draw(self.x, self.y - 30)
+    end
 
     if self.interactNode.hovered then
       local atlasData = AnimationFactory.atlasData
@@ -155,7 +166,11 @@ Component.create({
       id = 'QuestMaster',
       name = 'Lisa',
       x = 450,
-      y = 350
+      y = 350,
+      questList = {
+        'the-beginning',
+        'boss-1'
+      }
     }):setParent(self)
   end,
   update = function(self)
