@@ -33,11 +33,11 @@ local function layoutQuests(quests, wrapLimit, font)
   end, {})
   local glyphs = Constants.glyphs
   local layout = F.reduce(questsList, function(layout, quest)
-    local checkIcon = (questCompleted and glyphs.checkboxChecked or glyphs.checkbox)..' '
-    local w,h = GuiText.getTextSize(checkIcon..quest.title, font, wrapLimit)
     local numTasks = #quest.subTasks
     local numTasksCompleted = F.reduce(quest.subTasks, calcCompleted, 0)
     local questCompleted = numTasks == numTasksCompleted
+    local checkIcon = (questCompleted and glyphs.checkboxChecked or glyphs.checkbox)..' '
+    local w,h = GuiText.getTextSize(checkIcon..quest.title, font, wrapLimit)
     table.insert(layout, {
       {
         text = {

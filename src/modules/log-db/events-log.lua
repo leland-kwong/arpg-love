@@ -42,9 +42,31 @@ local entryHandlers = {
     local curValue = finalLog.itemsAcquired[enemyType] or 0
     finalLog.itemsAcquired[enemyType] = curValue + 1
   end,
-  QUEST_NEW = function(finalLog, entry)
+  QUEST_ADD = function(finalLog, entry)
     local ok, err = pcall(function()
       finalLog.quests[entry.data.id] = entry.data
+    end)
+
+    if (not ok) then
+      msgBus.send('LOG_ERROR', err)
+    end
+  end,
+  QUEST_TASK_UPDATE = function(finalLog, entry)
+    local ok, err = pcall(function()
+      local quest = finalLog.quests[entry.data.questId]
+      local nextState = entry.data.nextState
+      local F = require 'utils.functional'
+      local O = require 'utils.object-utils'
+      local newSubTasksState = F.map(quest.subTasks, function(task)
+        local isTaskToComplete = task.id == entry.data.taskId
+        if isTaskToComplete then
+          return O.assign({}, task, {
+            state = nextState
+          })
+        end
+        return task
+      end)
+      quest.subTasks = newSubTasksState
     end)
 
     if (not ok) then
@@ -135,22 +157,17 @@ local function setupListeners(self, gameId)
   end
 
   return {
-    msgBus.on('QUEST_NEW', function(msg)
+    msgBus.on('QUEST_ADD', function(msg)
       Log.append(gameId, {
-        event = 'QUEST_NEW',
-        data = {
-          title = msg.title,
-          id = msg.id,
-          --[[
-            subTask {
-              id = STRING,
-              description = LOVE2D_FORMATTED_STRING,
-              completed = BOOL
-            }
-          ]]
-          subTasks = msg.subTasks,
-        }
+        event = 'QUEST_ADD',
+        data = msg
       }):next(nil, handleAppendError)
+    end),
+    msgBus.on('QUEST_TASK_UPDATE', function(msg)
+      Log.append(gameId, {
+        event = 'QUEST_TASK_UPDATE',
+        data = msg
+      })
     end),
     msgBus.on('QUEST_TASK_COMPLETE', function(msg)
       Log.append(gameId, {
@@ -190,6 +207,7 @@ function EventLog.start(gameId)
 
       self.listeners = setupListeners(self, gameId)
     end,
+
     final = function(self)
       if self.cleanupTailLog then
         self.cleanupTailLog()
@@ -201,6 +219,14 @@ end
 
 function EventLog.read(gameId)
   return getCompactedLog(gameId)
+end
+
+function EventLog.cleanup(gameId)
+  local Observable = require 'modules.observable'
+  return Observable.all({
+    Db.load('saved-states'):delete(eventLogDbKey(gameId)),
+    Log.delete(gameId)
+  })
 end
 
 return EventLog

@@ -28,6 +28,10 @@ local HomeBase = {
 }
 
 function HomeBase.init(self)
+  local dynamic = require 'utils.dynamic-require'
+  local questHandlers = dynamic 'components.quest-log.quest-handlers'
+  questHandlers.start()
+
   msgBus.send(msgBus.NEW_MAP)
   Component.get('lightWorld'):setAmbientColor({1,1,1,1})
 

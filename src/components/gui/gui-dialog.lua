@@ -7,6 +7,7 @@ local drawBox = require 'components.gui.utils.draw-box'
 local MenuList2 = require 'components.gui.menu-list-2'
 local camera = require 'components.camera'
 local F = require 'utils.functional'
+local msgBus = require 'components.msg-bus'
 
 local DrawOrders = require 'modules.draw-orders'
 local DialogText = GuiText.create({
@@ -54,7 +55,7 @@ local function renderScriptOptions(parent)
         padding = 5,
         height = select(2, GuiText.getTextSize(option.label, DialogText.font)),
         onClick = function()
-          parent.script = option.action()
+          msgBus.send('NPC_CHAT_ACTION', { action = option.action })
         end,
         onUpdate = function(self)
           local previousHeights = 0
@@ -116,7 +117,7 @@ function GuiDialog.init(self)
   Component.addToGroup(self, 'gui')
 
   self.advanceDialog = function()
-    self.script.defaultOption()
+    msgBus.send('NPC_CHAT_ACTION', { action = self.script.defaultOption })
   end
 
   createToggleOverlayArea(parent)
