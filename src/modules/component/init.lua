@@ -3,6 +3,7 @@ local isDevelopment = config.isDevelopment
 local tc = require 'utils.type-check'
 local uid = require 'utils.uid'
 local objectUtils = require 'utils.object-utils'
+local dynamicRequire = require 'utils.dynamic-require'
 
 local allComponentsById = {}
 local M = {
@@ -91,7 +92,7 @@ function M.clearGroup(group)
   end
 end
 
-M.createFactory = require 'modules.component.create-factory'(M)
+M.createFactory = dynamicRequire 'modules.component.create-factory'(M)
 
 function M.newGroup(groupDefinition)
   assert(type(groupDefinition.name) == 'string', 'group name must be a string')
@@ -195,7 +196,7 @@ function M.newGroup(groupDefinition)
     end
     -- remove global reference
     entity[Group.name] = nil
-    if (type(component) ~= 'table') or component._deleted then
+    if (type(component) ~= 'table' and (not Component.isComponent)) then
       allComponentsById[id] = nil
     end
   end
@@ -234,7 +235,6 @@ function M.remove(entityId, recursive)
     'entity id must be a number or string'
   )
 
-  -- this is for legacy reasons when our entites weren't just plain tables
   local entity = allComponentsById[entityId]
   if (not entity) then
     return
@@ -260,6 +260,7 @@ function M.remove(entityId, recursive)
     M.removeFromGroup(entityId, group)
   end
   M.entitiesById[entityId] = nil
+  allComponentsById[entityId] = nil
 end
 
 -- Method for creating components without a factory
