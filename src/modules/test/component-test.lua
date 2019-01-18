@@ -119,7 +119,7 @@ Test.suite('nonRecursiveDeleteTest', function()
   local c1 = factory.create()
   local c2 = factory.create():setParent(c1)
   c1:delete()
-  assert(not c2:isDeleted(), 'non-recursive deletes should not delete their children')
+  assert(not Component.get(c1:getId()), 'non-recursive deletes should not delete their children')
 end)
 
 Test.suite('testUniqueIds', function()
