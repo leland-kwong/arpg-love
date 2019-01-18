@@ -56,9 +56,10 @@ local function layoutQuests(quests, wrapLimit, font)
 
     F.forEach(quest.subTasks, function(task)
       local paddingLeft = 10
+      local paddingRight = 3
       local parsedString = markdownToLove2d(task.description)
       local checkIcon = (task.completed and glyphs.checkboxChecked or glyphs.checkbox) .. ' '
-      local w,h = GuiText.getTextSize(checkIcon..parsedString.plainText, font, wrapLimit - paddingLeft)
+      local w,h = GuiText.getTextSize(checkIcon..parsedString.plainText, font, wrapLimit - paddingLeft - paddingRight)
       local formattedString = parsedString.formatted
       table.insert(formattedString, 1, checkIcon)
       table.insert(formattedString, 1, task.completed and colors.completed or Color.WHITE)
@@ -69,7 +70,8 @@ local function layoutQuests(quests, wrapLimit, font)
           width = w,
           height = h,
           paddingTop = 1,
-          paddingLeft = paddingLeft
+          paddingLeft = paddingLeft,
+          paddingRight = paddingRight
         }
       })
     end)
@@ -90,12 +92,11 @@ function QuestLog.init(self)
 
   local parent = self
   local bodyText = GuiText.create({
-    font = require 'components.font'.primary.font
+    font = require 'components.font'.primary.font,
+    -- outline = false,
+    color = {1,1,1,0.7}
   }):setParent(self)
   self.bodyText = bodyText
-  self.titleText = GuiText.create({
-    font = require 'components.font'.secondary.font
-  }):setParent(self)
 
   self.guiNodes = {
     {
@@ -113,10 +114,10 @@ function QuestLog.init(self)
           )
 
           local padding = 5
-          local wrapLimit = parent.width - padding
+          local wrapLimit = parent.width - padding*2
           local titleText = {Color.SKY_BLUE, 'QUESTS'}
-          parent.titleText:addf(titleText, wrapLimit, 'center', self.x + padding, self.y + padding)
-          local titleWidth, titleHeight = parent.titleText:getSize()
+          bodyText:addf(titleText, wrapLimit, 'left', self.x + padding, self.y)
+          local titleWidth, titleHeight = bodyText:getSize()
 
           if (#F.keys(log.quests) > 0) then
             local offsetY = 16
@@ -127,7 +128,7 @@ function QuestLog.init(self)
                 layoutBlock.width,
                 'left',
                 self.x + padding + layoutBlock.x,
-                self.y + padding + offsetY + layoutBlock.y
+                self.y + offsetY + layoutBlock.y
               )
             end)
             self.width, self.height = math.max(titleWidth, rect.width),
@@ -165,8 +166,6 @@ function QuestLog.draw(self)
   local log = self.log
   local bw = 1
   local x, y, width, height = log.x - bw, log.y - bw, log.width + bw * 2, log.height + bw * 2
-  local drawBox = require 'components.gui.utils.draw-box'
-  drawBox(self)
 end
 
 function QuestLog.drawOrder(self)
