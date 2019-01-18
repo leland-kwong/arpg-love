@@ -8,17 +8,8 @@ local function set(self, prop, value)
   return self
 end
 
-local function setWithUndefinedCheck(self, prop, value)
-  local isUndefinedProp = self[prop] == nil
-  if isUndefinedProp then
-    error('property '..prop..' is not defined')
-  end
-  self[prop] = value
-  return self
-end
-
-local function setProp(obj, isDevelopment)
-  obj.set = isDevelopment and setWithUndefinedCheck or set
+local function setProp(obj)
+  obj.set = set
   return obj
 end
 
