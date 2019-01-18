@@ -23,15 +23,15 @@ local function setupChildNodes(self)
 
   guiList.contentHeight = newRect.height
   guiList.contentWidth = newRect.width
-  if self.autoWidth then
-    local newWidth = math.max(1, newRect.width)
+  if self.maxWidth then
+    local newWidth = math.min(self.maxWidth, newRect.width)
     guiList.width = newWidth
     self.width = newWidth
   else
     guiList.width = self.width
   end
-  if self.autoHeight then
-    local newHeight = math.max(1, newRect.height)
+  if self.maxHeight then
+    local newHeight = math.min(self.maxHeight, newRect.height)
     guiList.height = newHeight
     self.height = newHeight
   else
@@ -50,8 +50,8 @@ return Component.createFactory({
   height = 1,
   layoutItems = {}, -- 2-d array
   otherItems = {}, -- other components that should be added to the list for clipping
-  autoWidth = true,
-  autoHeight = false,
+  maxWidth = nil,
+  maxHeight = nil,
   init = function(self)
     local parent = self
     Component.addToGroup(self, 'gui')
