@@ -114,6 +114,7 @@ local objectParsersByType = {
       local Component = require 'modules.component'
       local x, y = toWorldCoords(obj, origin)
       Component.create({
+        class = 'environment',
         x = x,
         y = y,
         w = obj.width,
@@ -139,6 +140,9 @@ local objectParsersByType = {
           else
             Component.removeFromGroup(self, 'triggeredZones')
           end
+        end,
+        serialize = function(self)
+          return self.initialProps
         end
       })
     end,

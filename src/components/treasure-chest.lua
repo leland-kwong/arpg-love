@@ -95,12 +95,13 @@ return Component.createFactory({
     }
   end,
   -- debug = true,
-  state = {
-    opened = false,
-    lidOffsetY = 0,
-    lidOpacity = 1,
-  },
   init = function(self)
+    self.state = self.state or {
+      opened = false,
+      lidOffsetY = 0,
+      lidOpacity = 1
+    }
+
     local parent = self
     Component.addToGroup(self, 'all')
     Component.addToGroup(self, 'gameWorld')

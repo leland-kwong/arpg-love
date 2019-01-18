@@ -269,6 +269,10 @@ local function setDropPosition(parent, spriteWidth, spriteHeight)
 end
 
 function LootGenerator.init(self)
+  self.state = self.state or {
+    dropComplete = false
+  }
+
   local parent = self
   assert(self.item ~= nil, 'item must be provided')
 
@@ -295,9 +299,13 @@ function LootGenerator.init(self)
     :addToWorld(collisionWorlds.map)
 
   local originalX, originalY = self.x, self.y
-  local actualX, actualY = setDropPosition(self, sw, sh)
-  self.x, self.y = actualX, actualY
-  self.colObj:update(self.x, self.y)
+  local actualX, actualY = originalX, originalY
+  if (not self.state.dropComplete) then
+    self.state.dropComplete = true
+    actualX, actualY = setDropPosition(self, sw, sh)
+    self.x, self.y = actualX, actualY
+    self.colObj:update(self.x, self.y)
+  end
 
   Gui.create({
     isNew = true,
@@ -451,7 +459,8 @@ function LootGenerator.serialize(self)
   return Object.immutableApply(self.initialProps, {
     x = self.x,
     y = self.y,
-    isNew = self.isNew
+    isNew = self.isNew,
+    state = self.state
   })
 end
 
