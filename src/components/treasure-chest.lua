@@ -57,14 +57,14 @@ Component.create({
 })
 
 local handleTreasureOpen = function(self, parent)
-  if parent.opened then
+  if parent.state.opened then
     return
   end
 
   if parent.canOpen == true then
-    parent.opened = true
+    parent.state.opened = true
     local tween = require 'modules.tween'
-    parent.tween = tween.new(1, parent, {lidOffsetY = -300, lidOpacity = 0}, tween.easing.inExpo)
+    parent.tween = tween.new(1, parent.state, {lidOffsetY = -300, lidOpacity = 0}, tween.easing.inExpo)
 
     local Sound = require 'components.sound'
     Sound.playEffect('treasure-open.wav')
@@ -82,6 +82,7 @@ local handleTreasureOpen = function(self, parent)
 end
 
 return Component.createFactory({
+  class = 'environment',
   lootData = function()
     return {
       guaranteedItems = {},
@@ -94,8 +95,11 @@ return Component.createFactory({
     }
   end,
   -- debug = true,
-  lidOffsetY = 0,
-  lidOpacity = 1,
+  state = {
+    opened = false,
+    lidOffsetY = 0,
+    lidOpacity = 1,
+  },
   init = function(self)
     local parent = self
     Component.addToGroup(self, 'all')
@@ -134,7 +138,7 @@ return Component.createFactory({
       return
     end
 
-    self.canOpen = (not self.opened) and
+    self.canOpen = (not self.state.opened) and
       msgBus.send('INTERACT_ENVIRONMENT_OBJECT', self)
 
     if self.tween then
@@ -171,7 +175,7 @@ return Component.createFactory({
     local Shaders = require 'modules.shaders'
     local shader = Shaders('pixel-outline.fsh')
 
-    if (not self.opened) then
+    if (not self.state.opened) then
       if self.interactNode.hovered then
         local atlasData = AnimationFactory.atlasData
         love.graphics.setShader(shader)
@@ -183,14 +187,20 @@ return Component.createFactory({
 
     bodyGraphic:draw(self.x, self.y)
 
-    if self.lidOpacity > 0 then
-      love.graphics.setColor(1,1,1,self.lidOpacity)
-      lidGraphic:draw(self.x, self.y + self.lidOffsetY)
+    if self.state.lidOpacity > 0 then
+      love.graphics.setColor(1,1,1,self.state.lidOpacity)
+      lidGraphic:draw(self.x, self.y + self.state.lidOffsetY)
     end
 
     shader:send('outline_width', 0)
   end,
   drawOrder = function(self)
     return Component.groups.all:drawOrder(self)
+  end,
+  serialize = function(self)
+    local O = require 'utils.object-utils'
+    return O.assign({}, self.initialProps, {
+      state = self.state
+    })
   end
 })
