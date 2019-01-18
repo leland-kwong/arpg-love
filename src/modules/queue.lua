@@ -1,5 +1,3 @@
-local perf = require 'utils.perf'
-local typeCheck = require 'utils.type-check'
 local noop = require 'utils.noop'
 local assign = require 'utils.object-utils'.assign
 
@@ -15,10 +13,9 @@ function Q:new(options)
   options = assign({}, defaultOptions, options)
 
   local queue = {
-    list = nil, -- list of calls grouped by their order
-    orders = nil, -- list of orders (priority)
+    list = {}, -- list of calls grouped by their order
+    orders = {}, -- list of orders (priority)
     length = 0, -- num of calls added to the queue
-    flushed = true,
     beforeFlush = options.beforeFlush,
     development = options.development,
     context = options.context
@@ -28,29 +25,14 @@ function Q:new(options)
   return queue
 end
 
-local orderError = function(order)
-  local valid = type(order) == 'number'
-    and order > 0
-    and order % 1 == 0 -- must be integer
-  if valid then return true end
-  return false, 'order must be greater than 0 and an integer, received `'..tostring(order)..'`'
-end
-local max, min = math.max, math.min
-
--- insert callback with maximum 2 arguments
+-- insert callback with maximum 3 arguments
 function Q:add(order, cb, a, b, c)
-  if self.flushed then
-    self.flushed = false
-    self.list = {}
-    self.orders = {}
+  -- ignore empty callbacks
+  if (not cb) then
+    return
   end
 
-  if self.development then
-    typeCheck.validate(
-      order,
-      orderError
-    )
-  end
+  assert(type(order) == 'number', 'order must be an integer')
 
   local list = self.list[order]
   local isNewOrder = not list
@@ -69,18 +51,17 @@ function Q:add(order, cb, a, b, c)
 end
 
 -- iterate callbacks by `order` and clears the queue
-local emptyList = {}
 function Q:flush()
   self:beforeFlush()
-  local list = self.list or emptyList
-  local orders = self.orders or emptyList
+  local list = self.list
+  local orders = self.orders
   table.sort(orders)
-  self.flushed = true
+  self.list = {}
+  self.orders = {}
   for i=1, #orders do
     local order = orders[i]
     local row = list[order]
-    local rowLen = row and #row or 0
-    for j=1, rowLen do
+    for j=1, #row do
       local item = row[j]
       item[1](item[2])
     end
