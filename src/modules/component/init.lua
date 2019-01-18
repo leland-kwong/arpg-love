@@ -194,9 +194,11 @@ function M.newGroup(groupDefinition)
     if Group.onComponentLeave then
       Group:onComponentLeave(component)
     end
-    -- remove global reference
+
     entity[Group.name] = nil
-    if (type(component) ~= 'table' and (not Component.isComponent)) then
+
+    -- remove global reference if no more groups
+    if objectUtils.isEmpty(entity) then
       allComponentsById[id] = nil
     end
   end
