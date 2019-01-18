@@ -12,9 +12,11 @@ local getRect = require 'utils.rect'
 local markdownToLove2d = require 'modules.markdown-to-love2d-string'
 local Grid = require 'utils.grid'
 
+local padding = 5
+
 local QuestLog = {
   width = 0,
-  height = 0
+  height = 0,
 }
 
 local colors = {
@@ -93,8 +95,7 @@ function QuestLog.init(self)
   local parent = self
   local bodyText = GuiText.create({
     font = require 'components.font'.primary.font,
-    -- outline = false,
-    color = {1,1,1,0.7}
+    color = {1,1,1,1},
   }):setParent(self)
   self.bodyText = bodyText
 
@@ -113,7 +114,6 @@ function QuestLog.init(self)
             msgBus.send('GAME_STATE_GET'):getId()
           )
 
-          local padding = 5
           local wrapLimit = parent.width - padding*2
           local titleText = {Color.SKY_BLUE, 'QUESTS'}
           bodyText:addf(titleText, wrapLimit, 'left', self.x + padding, self.y)
@@ -142,14 +142,13 @@ function QuestLog.init(self)
   self.log = MenuList2.create({
     x = self.x,
     y = self.y,
-    height = self.height,
+    maxHeight = self.height,
     inputContext = 'any',
     layoutItems = self.guiNodes,
     otherItems = {
       bodyText,
       parent.titleText
     },
-    autoWidth = false,
     drawOrder = function()
       return 2
     end
@@ -166,6 +165,9 @@ function QuestLog.draw(self)
   local log = self.log
   local bw = 1
   local x, y, width, height = log.x - bw, log.y - bw, log.width + bw * 2, log.height + bw * 2
+
+  love.graphics.setColor(0,0,0,0.2)
+  love.graphics.rectangle('fill', self.x - padding, self.y - padding, self.width + padding*2, self.log.height + padding*2)
 end
 
 function QuestLog.drawOrder(self)
