@@ -28,14 +28,16 @@ local function setupChildNodes(self)
     guiList.width = newWidth
     self.width = newWidth
   else
-    guiList.width = self.width
+    guiList.width = newRect.width
+    self.width = guiList.width
   end
   if self.maxHeight then
     local newHeight = math.min(self.maxHeight, newRect.height)
     guiList.height = newHeight
     self.height = newHeight
   else
-    guiList.width = self.width
+    guiList.height = newRect.height
+    self.heiht = guiList.heiht
   end
   for i=1, #self.otherItems do
     local item = self.otherItems[i]
