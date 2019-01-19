@@ -1,8 +1,5 @@
 local Component = require 'modules.component'
 local groups = require 'components.groups'
-local collisionWorlds = require 'components.collision-worlds'
-local collisionObject = require 'modules.collision'
-local f = require 'utils.functional'
 
 local MainMapSolidsBlueprint = {
   animation = nil,
