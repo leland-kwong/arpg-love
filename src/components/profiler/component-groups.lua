@@ -59,6 +59,7 @@ end
 
 return function()
   if (not msgBus.send(msgBus.IS_CONSOLE_ENABLED)) then
+    profileData = {}
     return
   end
   -- add total average execution time
