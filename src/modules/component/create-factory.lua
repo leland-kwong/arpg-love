@@ -153,9 +153,9 @@ return function(M)
     end
 
     function blueprint:setPosition(x, y, z)
-      self.x = x
-      self.y = y
-      self.z = z
+      self.x = x or self.x
+      self.y = y or self.y
+      self.z = z or self.z
       return self
     end
 
