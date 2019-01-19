@@ -14,19 +14,11 @@ local M = {
 local EMPTY = objectUtils.EMPTY
 
 local function cleanupCollisionObjects(self)
-  if self.class == 'treasureChest' then
-    print('before', #self.collisionObjects)
-  end
-
   if self.collisionObjects then
     for i=1, #self.collisionObjects do
       self.collisionObjects[i]:delete()
     end
     self.collisionObjects = nil
-  end
-
-  if self.class == 'treasureChest' then
-    print('after', self.collisionObjects)
   end
 end
 
