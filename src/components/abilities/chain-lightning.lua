@@ -133,12 +133,13 @@ function ChainLightning.update(self, dt)
           if t then
             self.initialProps.__index = self.initialProps
             local props = setmetatable({
+              id = self:getId(),
               x = targetX,
               y = targetY,
               x2 = t.x,
               y2 = t.y,
               numBounces = self.numBounces + 1,
-              targetsHit = self.targetsHit
+              targetsHit = self.targetsHit,
             }, self.initialProps)
             ChainLightning.create(props)
           end
