@@ -42,7 +42,6 @@ function Q:add(order, cb, a)
     table.insert(self.orders, order)
   end
 
-  local itemIndex = self.length + 1
   local item = {cb, a}
 
   list[#list + 1] = item
