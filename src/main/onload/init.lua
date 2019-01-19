@@ -28,13 +28,10 @@ require 'main.onload.news-dialog'
 require 'components.groups.dungeon-test'
 require 'components.groups.game-world'
 
-local width, height = love.graphics.getDimensions()
 
 local newLightWorld = LightWorld.create({
   id = 'lightWorld',
   group = Component.groups.all,
-  width = width,
-  height = height,
   drawOrder = function()
     return drawOrders.LightWorldDraw
   end
