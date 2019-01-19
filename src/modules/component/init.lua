@@ -74,7 +74,7 @@ function M.addToGroup(id, group, data)
 end
 
 function M.removeFromGroup(id, group)
-  local isIdComponent = type(id) == 'table'
+  local isIdComponent = (type(id) == 'table') and id.isComponent
   id = isIdComponent and id:getId() or id
   local name = getGroupName(group)
   local group = M.groups[name]
@@ -198,7 +198,8 @@ function M.newGroup(groupDefinition)
     entity[Group.name] = nil
 
     -- remove global reference if no more groups
-    if objectUtils.isEmpty(entity) then
+    local isPlainTable = objectUtils.isEmpty(entity) and (not component.isComponent)
+    if isPlainTable then
       allComponentsById[id] = nil
     end
   end
