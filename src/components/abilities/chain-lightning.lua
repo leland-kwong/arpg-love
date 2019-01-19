@@ -17,22 +17,19 @@ local memoize = require 'utils.memoize'
 local LOS = memoize(require 'modules.line-of-sight')
 
 local targetsHitCache = {
-  cache = lru.new(100),
-  addTarget = function(self, lightningId, target)
-    local targetsById = self.cache:get(lightningId)
-    if (not targetsById) then
-      targetsById = {}
-      self.cache:set(lightningId, targetsById)
-    end
-    targetsById[target] = true
+  new = function(self)
+    self.__index = self
+    return setmetatable({}, self)
   end,
-  has = function(self, lightningId, target)
-    local targetsById = self.cache:get(lightningId)
-    return targetsById and targetsById[target]
+  add = function(self, target)
+    self[target] = true
+  end,
+  has = function(self, target)
+    return self[target]
   end
 }
 
-local function findNearestTarget(lightningId, targetX, targetY)
+local function findNearestTarget(targetsHit, targetX, targetY)
   local mainSceneRef = Component.get('MAIN_SCENE')
   local mapGrid = mainSceneRef.mapGrid
   local gridSize = config.gridSize
@@ -40,7 +37,7 @@ local function findNearestTarget(lightningId, targetX, targetY)
   local losFn = LOS(mapGrid, Map.WALKABLE)
   local getNearestTarget = require 'modules.find-nearest-target'
   return getNearestTarget(collisionWorlds.map, targetX, targetY, 6 * gridSize, losFn, gridSize, function(target)
-    return not targetsHitCache:has(lightningId, target)
+    return not targetsHit:has(target)
   end)
 end
 
@@ -66,6 +63,8 @@ function ChainLightning.init(self)
     hbSize, hbSize,
     hbSize/2, hbSize/2
   ):addToWorld(collisionWorlds.map)
+
+  self.targetsHit = self.targetsHit or targetsHitCache:new()
 end
 
 local function createEffect(start, target, hasHit)
@@ -84,8 +83,11 @@ function ChainLightning.update(self, dt)
     self.x2,
     self.y2,
     function(item, other)
-      if targetsHitCache:has(self:getId(), other.parent) then
+      if self.targetsHit:has(other.parent) then
         return false
+      end
+      if (CollisionGroups.matches(other.group, 'obstacle')) then
+        return 'slide'
       end
       if (CollisionGroups.matches(other.group, self.targetGroup)) then
         return 'touch'
@@ -102,13 +104,15 @@ function ChainLightning.update(self, dt)
       local parent = item.other.parent
       alreadyHit = true
       if parent then
-        local targetX, targetY = actualX, actualY
-        local start, target = Vec2(self.x, self.y),
-          Vec2(targetX, targetY)
-        createEffect(start, target, true)
+        local targetX, targetY = parent.x, parent.y
+
+        local start = Vec2(self.x, self.y)
 
         local isHittable = not CollisionGroups.matches(item.other.group, 'obstacle')
         if isHittable then
+          local targetPos = Vec2(targetX, targetY)
+          createEffect(start, targetPos, true)
+
           msgBus.send(msgBus.CHARACTER_HIT, {
             parent = parent,
             lightningDamage = math.random(self.lightningDamage.x, self.lightningDamage.y),
@@ -122,19 +126,19 @@ function ChainLightning.update(self, dt)
             duration = 0.2,
             source = 'chain-lightning'
           })
-          targetsHitCache:addTarget(self:getId(), parent)
+          self.targetsHit:add(parent)
 
           local canBounce = self.numBounces < self.maxBounces
-          local t = canBounce and findNearestTarget(self:getId(), targetX, targetY)
+          local t = canBounce and findNearestTarget(self.targetsHit, targetX, targetY)
           if t then
             self.initialProps.__index = self.initialProps
             local props = setmetatable({
-              id = self:getId(),
               x = targetX,
               y = targetY,
               x2 = t.x,
               y2 = t.y,
-              numBounces = self.numBounces + 1
+              numBounces = self.numBounces + 1,
+              targetsHit = self.targetsHit
             }, self.initialProps)
             ChainLightning.create(props)
           end
@@ -142,7 +146,8 @@ function ChainLightning.update(self, dt)
       end
       i = i + 1
     end
-  else
+  -- show wiff if nothing hits
+  elseif (self.numBounces == 0) then
     local start, target = Vec2(self.x, self.y),
       Vec2(self.x2, self.y2)
     createEffect(start, target)
