@@ -83,7 +83,7 @@ local function ActiveEquipmentHandler()
 
   local round = require 'utils.math'.round
   local function modifyAbility(instance, playerRef)
-    local v = instance
+    local v = setProp(instance)
     local dmgMultiplier = 1 + (playerRef.stats:get('actionPower') / 100)
     local min = (v.minDamage or 0) * dmgMultiplier
     local max = (v.maxDamage or 0) * dmgMultiplier
@@ -91,6 +91,9 @@ local function ActiveEquipmentHandler()
     -- update instance properties
     v:set('minDamage', min)
       :set('maxDamage', max)
+    if v.lightningDamage then
+      v:set('lightningDamage', v.lightningDamage * dmgMultiplier)
+    end
     if v.coldDamage then
       v:set('coldDamage', v.coldDamage * dmgMultiplier)
     end
@@ -136,19 +139,18 @@ local function ActiveEquipmentHandler()
       local playerX, playerY = self.player:getPosition()
       local abilityData = activateFn(activeItem)
       local abilityEntity = abilityData.blueprint.create(
-        extend(
-          abilityData.props, {
-            actionSpeed = actualAttackTime
-          , x = playerX
-          , y = playerY
-          , x2 = mx
-          , y2 = my
-          , source = activeItem.__id
-        })
-      )
-      local instance = modifyAbility(
-        abilityEntity,
-        playerRef
+        modifyAbility(
+          extend(
+            abilityData.props, {
+              actionSpeed = actualAttackTime
+            , x = playerX
+            , y = playerY
+            , x2 = mx
+            , y2 = my
+            , source = activeItem.__id
+          }),
+          playerRef
+        )
       )
       local baseCooldown = itemSystem.getDefinition(activeItem).info.cooldown or 0
       local actualCooldown = propTypesCalculator.cooldownReduction(baseCooldown, Component.get('PLAYER').stats:get('cooldownReduction'))
