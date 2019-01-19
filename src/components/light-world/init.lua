@@ -13,7 +13,6 @@ local LightWorld = {
 }
 
 function LightWorld.init(self)
-  local width, height = self.width, self.height
   self.canvas = love.graphics.newCanvas(4096, 4096)
   self.lights = {}
 end
