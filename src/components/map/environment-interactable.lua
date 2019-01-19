@@ -56,10 +56,6 @@ msgBus.on(msgBus.CHARACTER_HIT, function(msgValue)
   local component = msgValue.parent
   if Component.getBlueprint(msgValue.parent) == EnvironmentInteractable then
     component.hitAnimation = coroutine.wrap(hitAnimation)
-
-    local source = love.audio.newSource('built/sounds/attack-impact-1.wav', 'static')
-    source:setVolume(0.4)
-    love.audio.play(source)
   end
 end)
 
