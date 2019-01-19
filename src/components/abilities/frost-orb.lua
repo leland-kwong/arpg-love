@@ -4,6 +4,10 @@ local CollisionWorlds = require 'components.collision-worlds'
 local collisionGroups = require 'modules.collision-groups'
 local Sound = require 'components.sound'
 
+local function obstacleFilter(item)
+  return collisionGroups.matches(item.group, 'obstacle') and 'slide' or false
+end
+
 local Shard = Component.createFactory({
   init = function(self)
     Component.addToGroup(self, self.componentGroup)
@@ -124,18 +128,14 @@ local FrostOrb = Component.createFactory({
       self:onExpire()
     end
 
-    self.x, self.y = self.x + self.speed * dt * self.dx, self.y + self.speed * dt * self.dy
-    local items, len = self.collisionWorld:queryRect(self.x - self.ox, self.y - self.oy, self.width, self.height)
-    if (len > 0) then
-      for i=1, len do
-        if collisionGroups.matches(items[i].group, 'obstacle') then
-          self:onExpire()
-        end
-      end
-    end
-
     if self.expiring then
       return
+    end
+
+    self.x, self.y = self.x + self.speed * dt * self.dx, self.y + self.speed * dt * self.dy
+    local items, len = self.collisionWorld:queryRect(self.x - self.ox, self.y - self.oy, self.width, self.height, obstacleFilter)
+    if (len > 0) then
+      self:onExpire()
     end
 
     local shardRate = 0.125 / self.projectileRate
