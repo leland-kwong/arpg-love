@@ -304,8 +304,6 @@ local function keepBossActive()
   local bossRef = Component.get(bossId)
   local isBossDestroyed = not bossRef
 
-  playerRef.inBossBattle = (not isBossDestroyed) and bossRef.encountered
-
   local bossDistFromPlayer = calcDist(playerRef.x, playerRef.y, bossRef.x, bossRef.y)
 
   local showBossPointer = (bossDistFromPlayer < 200 * config.gridSize) and ((not bossRef.isInViewOfPlayer) or (not bossRef.canSeeTarget))
@@ -338,6 +336,7 @@ local function keepBossActive()
 
   if isBossTriggered then
     if (not bossRef.encountered) then
+      playerRef.inBossBattle = true
       bossRef.encountered = true
       cameraActionOnBossEncounter(bossRef, playerRef)
     end
