@@ -3,7 +3,6 @@ local isDevelopment = config.isDevelopment
 local tc = require 'utils.type-check'
 local uid = require 'utils.uid'
 local objectUtils = require 'utils.object-utils'
-local dynamicRequire = require 'utils.dynamic-require'
 
 local allComponentsById = {}
 local M = {
@@ -92,7 +91,7 @@ function M.clearGroup(group)
   end
 end
 
-M.createFactory = dynamicRequire 'modules.component.create-factory'(M)
+M.createFactory = require 'modules.component.create-factory'(M)
 
 function M.newGroup(groupDefinition)
   assert(type(groupDefinition.name) == 'string', 'group name must be a string')
@@ -201,6 +200,7 @@ function M.newGroup(groupDefinition)
     local isPlainTable = objectUtils.isEmpty(entity) and (not component.isComponent)
     if isPlainTable then
       allComponentsById[id] = nil
+      M.entitiesById[id] = nil
     end
   end
 
