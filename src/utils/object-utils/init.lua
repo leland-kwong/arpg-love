@@ -115,6 +115,13 @@ function Object.setReadOnly(o)
 	return o
 end
 
+function Object.isEmpty(t)
+	for _ in pairs(t) do
+    return false
+  end
+  return true
+end
+
 Object.EMPTY = Object.setReadOnly({})
 
 return Object
