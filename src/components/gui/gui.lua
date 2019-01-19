@@ -158,7 +158,8 @@ local function triggerEvents(c, msgValue, msgType)
 
   if msgBus.MOUSE_CLICKED == msgType then
     if self.hovered then
-      self.onClick(self, msgValue)
+      local mx, my = self:getMousePosition()
+      self.onClick(self, {x = mx, y = my})
 
       if guiType.TOGGLE == self.type then
         self.checked = not self.checked
@@ -207,7 +208,7 @@ local function handleHoverEvents(self)
 
   if self.hovered then
     InputContext.set(self.inputContext)
-    self.onPointerMove(self, posX, posY)
+    self.onPointerMove(self, {x = mx, y = my})
   end
 
   return self.hovered
