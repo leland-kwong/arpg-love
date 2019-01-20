@@ -52,10 +52,6 @@ msgBus.on(msgBus.KEY_DOWN, function(v)
   return v
 end)
 
-msgBus.on(msgBus.IS_CONSOLE_ENABLED, function()
-  return config.enableConsole
-end)
-
 local Console = {
   name = 'Console',
   resetMaxEveryNumFrames = 60,

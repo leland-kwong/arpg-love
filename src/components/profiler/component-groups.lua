@@ -3,6 +3,7 @@ local GuiText = require 'components.gui.gui-text'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local Color = require 'modules.color'
+local config = require 'config.config'
 
 local guiTextLayer = GuiText.create({
   group = Component.groups.system,
@@ -17,7 +18,7 @@ msgBus.on(msgBus.PROFILE_FUNC, function(profileProps)
   return require 'utils.perf'({
     resetEvery = 1000,
     done = function(_, totalTime, callCount)
-      if (not msgBus.send(msgBus.IS_CONSOLE_ENABLED)) then
+      if (not config.enableConsole) then
         return
       end
 
@@ -37,7 +38,7 @@ local function profileFn(groupName, callback)
   return require'utils.perf'({
     resetEvery = 1000,
     done = function(_, totalTime, callCount)
-      if (not msgBus.send(msgBus.IS_CONSOLE_ENABLED)) then
+      if (not config.enableConsole) then
         return
       end
 
@@ -58,7 +59,7 @@ for k,group in pairs(groups) do
 end
 
 return function()
-  if (not msgBus.send(msgBus.IS_CONSOLE_ENABLED)) then
+  if (not config.enableConsole) then
     profileData = {}
     return
   end
