@@ -61,6 +61,10 @@ function NewGameDialogBlueprint.init(self)
   local camera = require 'components.camera'
   local screenWidth, screenHeight = camera:getSize()
   local width = 250
+  local keyHandlers = {
+    SUBMIT = 'return',
+    CANCEL = 'escape'
+  }
   local textInput = GuiTextInput.create({
     x = math.floor(screenWidth/2 - width/2),
     y = self.y,
@@ -71,13 +75,19 @@ function NewGameDialogBlueprint.init(self)
     onUpdate = function(self)
       state.characterName = self.text
       state.isValid = #self.text > 0
+
+      Gui.setFocus(self)
     end,
     onKeyPress = function(self, ev)
-      local isSubmitEvent = ev.key == 'return'
-      if isSubmitEvent then
+      if (keyHandlers.SUBMIT == ev.key) then
         -- create new game
         startNewGame()
         parent.onNewGameEnter()
+      end
+
+      if (keyHandlers.CANCEL == ev.key) then
+        parent:delete(true)
+        parent.onCancel()
       end
     end,
     drawOrder = function()
@@ -101,8 +111,6 @@ function NewGameDialogBlueprint.init(self)
       return 4
     end
   }):setParent(self)
-
-  Gui.setFocus(textInput)
 end
 
 local NewGameDialog = Component.createFactory(NewGameDialogBlueprint)
@@ -121,6 +129,9 @@ local function NewGameButton(parent)
       NewGameDialog.create({
         onNewGameEnter = function()
           parent:delete(true)
+        end,
+        onCancel = function()
+          msgBus.send(msgBus.TOGGLE_MAIN_MENU, true)
         end
       })
       msgBus.send(msgBus.TOGGLE_MAIN_MENU, false)
