@@ -46,6 +46,7 @@ Component.create({
   draw = function(self)
     if #self.line >= 4 then
       love.graphics.setColor(1,1,1)
+      love.graphics.setLineWidth(1)
       love.graphics.line(self.line)
     end
     local font = require 'components.font'.primaryLarge.font
