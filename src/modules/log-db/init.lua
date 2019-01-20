@@ -70,7 +70,7 @@ function Log.readStream(path, onData, onError, onComplete, seed)
   local readChannel = love.thread.getChannel('logRead.'..path)
   local msgBus = require 'components.msg-bus'
   msgBus.on('UPDATE', function()
-    local ok, err = pcall(function()
+    local ok, result = pcall(function()
       local message = readChannel:pop()
       if message then
         local String = require 'utils.string'
@@ -85,8 +85,10 @@ function Log.readStream(path, onData, onError, onComplete, seed)
     end)
 
     if (not ok) then
-      onError(err)
+      onError(result)
     end
+
+    return result
   end)
 end
 
