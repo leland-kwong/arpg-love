@@ -8,16 +8,6 @@ local Md = dynamicRequire 'modules.markdown-to-love2d-string'
 local scriptRoutines = require 'components.quest-log.script-routines'
 dynamicRequire 'components.map-text'
 
-local Quests = {
-  ['1-1'] = {
-    title = 'The Menace',
-    description = 'Find and kill *R-1 the Mad* in *Aureus-floor-2*',
-    condition = function()
-
-    end
-  }
-}
-
 local function drawShadow(self, sx, sy, ox, oy)
   local sh = select(3, self.animation.sprite:getViewport())
   local ox, oy = self.animation:getSourceOffset()
