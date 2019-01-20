@@ -1,89 +1,295 @@
--- local dynamicRequire = require 'utils.dynamic-require'
--- local scriptRoutines = dynamicRequire 'components.quest-log.script-routines'
--- local Component = require 'modules.component'
--- local msgBus = require 'components.msg-bus'
--- local EventLog = dynamicRequire 'modules.log-db.events-log'
--- local questHandlers = dynamicRequire 'components.quest-log.quest-handlers'
--- dynamicRequire 'components.quest-log.script-routines'
--- local gameId = 'game-562'
+local dynamicRequire = require 'utils.dynamic-require'
+local Component = require 'modules.component'
+local msgBus = require 'components.msg-bus'
 
--- EventLog.start(gameId)
--- questHandlers.start(gameId)
+local conversationMt = {
+  text = '',
+  options = {} -- list of conversation options
+}
+conversationMt.__index = conversationMt
 
--- local questId = 'the-beginning'
+local dialogueRoutine = function(dialogue)
+  return coroutine.create(function()
+    for i=1, #dialogue do
+      coroutine.yield(
+        setmetatable(dialogue[i], conversationMt)
+      )
+    end
+  end)
+end
 
--- Component.create({
---   id = 'dialogeTest',
---   group = 'firstLayer',
---   previousScript = nil,
---   init = function(self)
---     local Log = require 'modules.log-db'
---     local Db = require 'modules.database'
---     self.logTailStop = Log.tail(gameId, function(entry)
---       -- print(
---       --   Inspect(entry)
---       -- )
---       -- print(
---       --   Inspect(
---       --     Db.load('saved-states'):get(gameId..'/event-log')
---       --   )
---       -- )
---     end)
+local function giveExperienceAction(exp)
+  return {
+    action = 'giveReward',
+    data = {
+      experience = exp
+    }
+  }
+end
 
---     self.listeners = {
---       msgBus.on('KEY_PRESSED', function(msg)
---         local hotKeys = {
---           RESET = 'r',
---           RUN = 'return'
---         }
+local conversations = {
+  conversation_1 = {
+    {
+      actionOnly = true,
+      actions = {
+        giveExperienceAction(100)
+      }
+    },
+    {
+      text = 'Hello fellow space traveler...'
+    },
+    {
+      text = 'Choose a path:',
+      options = {
+        {
+          label = 'What items you got?',
+          actions = {
+            {
+              action = 'nextConversation',
+              data = {
+                id = 'conversation_2'
+              }
+            }
+          }
+        },
+        {
+          label = 'What quests you got?',
+          actions = {
+            {
+              action = 'nextConversation',
+              data = {
+                id = 'conversation_3'
+              }
+            }
+          }
+        },
+        {
+          label = 'Claim reward test',
+          actions = {
+            giveExperienceAction(100)
+          }
+        }
+      },
+    },
+  },
 
---         if hotKeys.RESET == msg.key then
---           msgBus.send('QUEST_REMOVE', {
---             id = questId
---           })
+  conversation_2 = {
+    {
+      text = 'Choose a reward:',
+      options = {
+        {
+          label = 'sickass ring',
+          actions = {
+            {
+              action = 'giveReward',
+              data = {
+                item = 'sickass ring'
+              }
+            },
+            {
+              action = 'nextConversation',
+              data = {
+                id = 'conversation_2_choice_1'
+              }
+            }
+          },
+        },
+        {
+          label = 'cool boots',
+          actions = {
+            {
+              action = 'giveReward',
+              data = {
+                item = 'cool boots'
+              }
+            },
+            {
+              action = 'nextConversation',
+              data = {
+                id = 'conversation_2_choice_2'
+              }
+            }
+          },
+        }
+      }
+    }
+  },
+  conversation_2_choice_1 = {
+    {
+      text = 'Sickass ring eh? Fine choice!'
+    }
+  },
+  conversation_2_choice_2 = {
+    {
+      text = 'Cool boots eh? Fine choice!'
+    }
+  },
 
---           Component.addToGroup(
---             Component.newId(),
---             'scriptActions',
---             {
---               action = 'NEXT_SCRIPT',
---               payload = {
---                 npcName = 'lisa',
---                 scriptId = questId
---               }
---             }
---           )
---         end
+  conversation_3 = {
+    {
+      text = 'Here are some quests for ya:',
+      options = {
+        {
+          label = 'Kill minibots',
+          actions = {
+            {
+              action = 'giveQuest',
+              data = {
+                id = 'killMinibots',
+                count = 5
+              }
+            }
+          }
+        },
+        {
+          label = 'Kill slimes',
+          actions = {
+            {
+              action = 'giveQuest',
+              data = {
+                id = 'killSlimes',
+                count = 5
+              }
+            }
+          }
+        }
+      }
+    }
+  },
 
---         if hotKeys.RUN == msg.key then
---           msgBus.send('QUEST_REMOVE', {
---             id = questId
---           })
+  conversation_goodbye = {
+    { text = 'See ya.' }
+  }
+}
 
---           msgBus.send('QUEST_ADD', {
---             id = questId
---           })
+Component.create({
+  id = 'dialogueExample',
+  group = 'firstLayer',
+  init = function(self)
+    local GuiText = require 'components.gui.gui-text'
+    self.guiText = GuiText.create({
+      font = require 'components.font'.primary.font
+    }):setParent(self)
 
---           msgBus.send('QUEST_TASK_COMPLETE', {
---             questId = questId,
---             taskId = 'the-beginning_1'
---           })
---         end
---       end)
---     }
---   end,
---   update = function(self)
---     local nextScript = scriptRoutines.nextScript('lisa')
---     local isNewScript = self.previousScript ~= nextScript
---     if isNewScript then
---       self.previousScript = nextScript
---       print(
---         Inspect(nextScript)
---       )
---     end
---   end,
---   final = function(self)
---     self.logTailStop()
---     msgBus.off(self.listeners)
---   end
--- })
+    local function startConversation(self, conversation)
+      self.conversate = dialogueRoutine(conversation)
+      local _, nextScript = coroutine.resume(self.conversate)
+
+      self.nextScript = nextScript
+    end
+
+    local actions = {
+      nextConversation = function(data)
+        startConversation(self, conversations[data.id])
+      end,
+      giveReward = function(reward)
+        print(
+          'give reward!\n',
+          Inspect(reward)
+        )
+      end,
+      giveQuest = function(quest)
+        print(
+          'give quest!\n',
+          Inspect(quest)
+        )
+      end
+    }
+
+    local function execActions(actionsList)
+      for i=1, #actionsList do
+        local a = actionsList[i]
+        actions[a.action](a.data)
+      end
+    end
+
+    local function continueConversation(conversationId)
+      if conversationId then
+        actions.nextConversation({ id = conversationId })
+      else
+        local isAlive, nextScript = coroutine.resume(self.conversate)
+        self.nextScript = nextScript
+      end
+      if self.nextScript and self.nextScript.actionOnly then
+        execActions(self.nextScript.actions)
+        continueConversation()
+      end
+    end
+
+    local function endConversation()
+      actions.nextConversation({
+        id = 'conversation_goodbye'
+      })
+    end
+
+    continueConversation('conversation_1')
+
+    self.listeners = {
+      msgBus.on('KEY_PRESSED', function(msg)
+        local hotKeys = {
+          RESTART_CONVO = 'r',
+          CONTINUE_CONVO = 'return',
+          END_CONVO = 'e'
+        }
+
+        if hotKeys.END_CONVO == msg.key then
+          endConversation()
+        end
+
+        if hotKeys.RESTART_CONVO == msg.key then
+          continueConversation('conversation_1')
+        end
+
+        local isOptionSelect = tonumber(msg.key)
+        if isOptionSelect then
+          local options = self.nextScript.options
+          -- select option
+          local optionId = tonumber(msg.key)
+          local option = options[optionId]
+          if option then
+            continueConversation()
+            execActions(option.actions)
+          else
+            msgBus.send('PLAYER_ACTION_ERROR', 'invalid option '..optionId..' selected')
+          end
+        end
+
+        if hotKeys.CONTINUE_CONVO == msg.key then
+          if (not self.nextScript) then
+            continueConversation('conversation_1')
+          elseif (#self.nextScript.options == 0) then
+            continueConversation()
+          end
+        end
+      end)
+    }
+  end,
+  update = function(self)
+    local isNewScript = self.previousScript ~= self.nextScript
+    if isNewScript and self.nextScript then
+        print(self.nextScript.text)
+    end
+    self.previousScript = self.nextScript
+  end,
+  draw = function(self)
+    if self.nextScript then
+      self.guiText:addf({{1,1,1}, self.nextScript.text}, 200, 'left', 150, 100)
+
+      -- handle options
+      local options = self.nextScript.options
+      local w, h = self.guiText:getSize()
+      local lineHeight = 20
+      for i=1, #options do
+        local o = options[i]
+        local optionsText = {
+          {1,1,0}, i..'. ',
+          {1,1,1}, o.label
+        }
+        self.guiText:addf(optionsText, 200, 'left', 150, 100 + (lineHeight * i))
+      end
+    end
+  end,
+  final = function(self)
+    msgBus.off(self.listeners)
+  end
+})
