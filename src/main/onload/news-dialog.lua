@@ -3,6 +3,7 @@ local userSettings = require 'config.user-settings'
 local userSettingsState = require 'config.user-settings.state'
 
 Component.create({
+  id = 'newsDialog',
   init = function(self)
     Component.addToGroup(self, 'gui')
 
@@ -34,14 +35,4 @@ Component.create({
       self:delete()
     end
   end
-
-  -- update = function(self)
-  --   self.dialog = self.dialog or createDialog(self)
-  --   local d = self.dialog
-  --   if d then
-  --     local vWidth, vHeight = love.graphics.getDimensions()
-  --     local x, y = Position.boxCenterOffset(d.width, d.height, vWidth/2, vHeight/2)
-  --     d.x, d.y = x, y
-  --   end
-  -- end
 })
