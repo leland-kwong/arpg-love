@@ -73,7 +73,7 @@ local function createEffect(start, target, hasHit)
     start = start,
     target = target,
     thickness = 1.5,
-    duration = 0.4,
+    duration = 0.3,
     targetPointRadius = hasHit and 12 or 4
   })
 end
@@ -143,6 +143,10 @@ function ChainLightning.update(self, dt)
             }, self.initialProps)
             ChainLightning.create(props)
           end
+        elseif (self.numBounces == 0) then
+          local start, target = Vec2(self.x, self.y),
+            Vec2(actualX, actualY)
+          createEffect(start, target)
         end
       end
       i = i + 1
