@@ -174,7 +174,8 @@ local function triggerEvents(c, msgValue, msgType)
   end
 
   if self.hovered and love.mouse.isDown(1) then
-    self.onPointerDown(self)
+    local mx, my = self:getMousePosition()
+    self.onPointerDown(self, O.assign({}, msgValue, {x = mx, y = my}))
   end
 
   if self.focused and guiType.TEXT_INPUT == self.type then
