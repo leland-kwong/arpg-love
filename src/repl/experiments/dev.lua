@@ -1,9 +1,9 @@
 local Component = require 'modules.component'
 local Gui = require 'components.gui.gui'
 local msgBus = require 'components.msg-bus'
-local msgBus = require 'components.msg-bus'
 local MenuManager = require 'modules.menu-manager'
-local dynamic = require 'utils.dynamic-require'
+
+-- require 'repl.components.break-screen'
 
 -- require 'repl.components.components-system-queue-debug'
 
@@ -19,24 +19,30 @@ local function closeMenu()
 end
 
 function M.init(self)
-  for i=1, 3 do
-    local quest = {
-      questId = i,
-      title = i..'. R1 the Mad',
-      description = 'Kill r1 the mad and retrieve his brain.'
-    }
-    msgBus.send('QUEST_NEW', quest)
-  end
+  local MenuList2 = require 'components.gui.menu-list-2'
+  local Text = require 'components.gui.gui-text'
+  local text = Text.create({
+    font = require 'components.font'.primary.font
+  }):setParent(self)
 
-  msgBus.send('QUEST_COMPLETE', {
-    questId = 1
-  })
-  -- msgBus.send('QUEST_COMPLETE', {
-  --   questId = 2
-  -- })
-  msgBus.send('QUEST_COMPLETE', {
-    questId = 3
-  })
+  local function MenuItem(props)
+    return Gui.create({
+      width = 100,
+      label = props.label,
+      onClick = props.onClick,
+      onUpdate = function(self)
+        self.height = select(2, Text.getTextSize(self.label, text.font))
+      end,
+      draw = function(self)
+        text:add(self.label, {1,1,1}, self.x, self.y)
+
+        if self.hovered then
+          love.graphics.setColor(1,1,0,0.3)
+          love.graphics.rectangle('line', self.x, self.y, self.w, self.h)
+        end
+      end
+    })
+  end
 
   self.listeners = {
     msgBus.on('KEY_PRESSED', function(ev)
@@ -50,15 +56,9 @@ function M.init(self)
         return
       end
 
-      local MenuList2 = require 'components.gui.menu-list-2'
-      local Text = require 'components.gui.gui-text'
-      local text = Text.create({
-        font = require 'components.font'.primary.font
-      })
       local layoutItems = {
         {
-          Gui.create({
-            width = 100,
+          MenuItem({
             label = 'spawn ai',
             onClick = function()
               closeMenu()
@@ -82,7 +82,7 @@ function M.init(self)
                       return Component.get('PLAYER')
                     end,
                     types = {
-                      'ai-slime'
+                      'ai-minibot'
                     }
                   })
                 end,
@@ -97,21 +97,11 @@ function M.init(self)
               })
               MenuManager.push(spawnOverlay)
             end,
-            onUpdate = function(self)
-              self.height = select(2, Text.getTextSize(self.label, text.font))
-            end,
-            draw = function(self)
-              text:add(self.label, {1,1,1}, self.x, self.y)
-            end
           }),
         },
         {
-          Gui.create({
-            width = 100,
+         MenuItem({
             label = 'generate item',
-            onUpdate = function(self)
-              self.height = select(2, Text.getTextSize(self.label, text.font))
-            end,
             onClick = function()
               local itemSystem = require 'components.item-inventory.items.item-system'
               local playerRef = Component.get('PLAYER')
@@ -119,32 +109,59 @@ function M.init(self)
                 x = playerRef.x,
                 y = playerRef.y,
                 guaranteedItems = {
-                  itemSystem.create('legendary.augmentation-module-frenzy')
+                  itemSystem.create('base.action-module-hammer')
                 }
               })
             end,
-            draw = function(self)
-              text:add(self.label, {1,1,1}, self.x, self.y)
-            end
           })
         },
         {
-          Gui.create({
-            width = 100,
-            label = 'read event log',
-            onUpdate = function(self)
-              self.height = select(2, Text.getTextSize(self.label, text.font))
-            end,
+          MenuItem({
+            label = 'Dummy object',
             onClick = function()
               closeMenu()
-              local EventLog = dynamic('modules.log-db.events-log')
-              EventLog.read(
-                msgBus.send('GAME_STATE_GET'):getId()
-              )
+              local camera = require 'components.camera'
+              local width, height = camera:getSize()
+
+              local EnvironmentInteractable = require 'components.map.environment-interactable'
+              local mx, my = camera:getMousePosition()
+              local displayObject = EnvironmentInteractable.create({
+                x = mx,
+                y = my
+              })
+
+              -- cover full-screen to prevent click-through
+              local clickOverlay = Gui.create({
+                width = width,
+                height = height,
+                onUpdate = function(self)
+                  local west, _, north = camera:getBounds()
+                  self:setPosition(west, north)
+                end,
+                getMousePosition = function()
+                  return camera:getMousePosition()
+                end,
+                onPointerMove = function(_, ev)
+                  displayObject:setPosition(ev.x, ev.y)
+                end,
+                onClick = function(self, ev)
+                  EnvironmentInteractable.create({
+                    x = ev.x,
+                    y = ev.y,
+                    maxHealth = math.pow(100, 100)
+                  })
+                end,
+                render = function()
+                  love.graphics.setColor(1,1,1)
+                  love.graphics.print('click to place dummy object', 100, 100)
+                end,
+                onFinal = function()
+                  displayObject:delete(true)
+                  MenuManager.pop()
+                end
+              })
+              MenuManager.push(clickOverlay)
             end,
-            draw = function(self)
-              text:add(self.label, {1,1,1}, self.x, self.y)
-            end
           })
         }
       }
