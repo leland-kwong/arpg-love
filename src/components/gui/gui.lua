@@ -10,6 +10,7 @@ local noop = require 'utils.noop'
 local f = require 'utils.functional'
 local InputContext = require 'modules.input-context'
 local min, max = math.min, math.max
+local O = require 'utils.object-utils'
 
 local COLLISION_CROSS = 'cross'
 local mouseCollisionFilter = function()
@@ -159,7 +160,7 @@ local function triggerEvents(c, msgValue, msgType)
   if msgBus.MOUSE_CLICKED == msgType then
     if self.hovered then
       local mx, my = self:getMousePosition()
-      self.onClick(self, {x = mx, y = my})
+      self.onClick(self, O.assign({}, msgValue, {x = mx, y = my}))
 
       if guiType.TOGGLE == self.type then
         self.checked = not self.checked
