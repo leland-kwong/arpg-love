@@ -335,10 +335,6 @@ function Gui.init(self)
   self.onCreate(self)
 end
 
-local function isDifferent(a, b)
-  return a ~= b
-end
-
 function Gui.setEventsDisabled(self, disabled)
   self.eventsDisabled = disabled
   return self
