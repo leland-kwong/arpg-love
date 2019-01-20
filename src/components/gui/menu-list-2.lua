@@ -23,21 +23,26 @@ local function setupChildNodes(self)
 
   guiList.contentHeight = newRect.height
   guiList.contentWidth = newRect.width
-  if self.maxWidth then
-    local newWidth = math.min(self.maxWidth, newRect.width)
-    guiList.width = newWidth
-    self.width = newWidth
-  else
-    guiList.width = newRect.width
-    self.width = guiList.width
+
+  if (not self.fixedWidth) then
+    if self.maxWidth then
+      local newWidth = math.min(self.maxWidth, newRect.width)
+      guiList.width = newWidth
+      self.width = newWidth
+    else
+      guiList.width = newRect.width
+      self.width = guiList.width
+    end
   end
-  if self.maxHeight then
-    local newHeight = math.min(self.maxHeight, newRect.height)
-    guiList.height = newHeight
-    self.height = newHeight
-  else
-    guiList.height = newRect.height
-    self.heiht = guiList.heiht
+  if (not self.fixedHeight) then
+    if self.maxHeight then
+      local newHeight = math.min(self.maxHeight, newRect.height)
+      guiList.height = newHeight
+      self.height = newHeight
+    else
+      guiList.height = newRect.height
+      self.height = guiList.height
+    end
   end
   for i=1, #self.otherItems do
     local item = self.otherItems[i]
@@ -48,13 +53,23 @@ local function setupChildNodes(self)
 end
 
 return Component.createFactory({
-  width = 1,
-  height = 1,
   layoutItems = {}, -- 2-d array
   otherItems = {}, -- other components that should be added to the list for clipping
   maxWidth = nil,
   maxHeight = nil,
+  fixedHeight = false,
+  fixedWidth = false,
   init = function(self)
+    if self.height then
+      self.fixedHeight = true
+    end
+    self.height = self.height or 1
+
+    if self.width then
+      self.fixedWidth = true
+    end
+    self.width = self.width or 1
+
     local parent = self
     Component.addToGroup(self, 'gui')
     self.inputContext = self.inputContext or self:getId()
