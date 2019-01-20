@@ -119,10 +119,9 @@ end
 
 function Gui.setFocus(entity)
   local focusedEntity = getFocusedEntity()
-  if focusedEntity then
-    handleFocusChange(focusedEntity, false)
+  if (focusedEntity ~= entity) then
+    handleFocusChange(entity, true)
   end
-  handleFocusChange(entity, true)
 end
 
 local function handleScroll(self, dx, dy)
