@@ -119,8 +119,8 @@ function QuestLog.init(self)
           bodyText:addf(titleText, wrapLimit, 'left', self.x + padding, self.y)
           local titleWidth, titleHeight = bodyText:getSize()
 
+          local offsetY = 16
           if (#F.keys(log.quests) > 0) then
-            local offsetY = 16
             local rect = layoutQuests(log.quests, wrapLimit, bodyText.font)
             Grid.forEach(rect.childRects, function(layoutBlock, x, y)
               bodyText:addf(
@@ -133,6 +133,8 @@ function QuestLog.init(self)
             end)
             self.width, self.height = math.max(titleWidth, rect.width),
               titleHeight + rect.height + offsetY
+          else
+            self.width, self.height = titleWidth, titleHeight
           end
         end
       })
