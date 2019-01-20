@@ -28,8 +28,10 @@ Component.create({
           end)
           local msgBus = require 'components.msg-bus'
           msgBus.send(msgBus.LATEST_NEWS_TOGGLE, true)
+          self:delete()
         end, function(err)
           error(err)
+          self:delete()
         end)
     else
       self:delete()
