@@ -104,7 +104,7 @@ local Conversation = {
         end
 
         local isAlive, nextScript = coroutine.resume(self.conversate)
-        self.nextScript = nextScript
+        self.nextScript = isAlive and nextScript or nil
         autoAdvanceIfNeeded(self, nextScript)
 
         return self
@@ -128,7 +128,7 @@ local Conversation = {
       end,
 
       hasOptions = function(self)
-        return (not self:isDone()) and #self.nextScript.options > 0
+        return ((not self:isDone()) and (#self.nextScript.options > 0))
       end,
 
       get = function(self)
