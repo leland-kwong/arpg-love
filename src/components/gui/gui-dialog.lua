@@ -12,6 +12,7 @@ local msgBus = require 'components.msg-bus'
 local DrawOrders = require 'modules.draw-orders'
 local DialogText = GuiText.create({
   id = 'DialogText',
+  group = 'all',
   font = require 'components.font'.primary.font,
   drawOrder = function()
     return DrawOrders.Dialog + 1
@@ -28,10 +29,10 @@ local function createToggleOverlayArea(parent)
     onUpdate = function(self)
       self.x = 0
       self.y = 0
-      self.width = love.graphics.getWidth()
-      self.height = love.graphics.getHeight()
+      self.width = love.graphics.getWidth()/2
+      self.height = love.graphics.getHeight()/2
     end,
-    onClick = parent.advanceDialog,
+    onClick = parent.onResume,
     drawOrder = function()
       return DrawOrders.Dialog + 2
     end
@@ -39,7 +40,7 @@ local function createToggleOverlayArea(parent)
 end
 
 local function renderScriptOptions(parent)
-  local options = parent:getCurrentScript().options or {}
+  local options = parent.getOptions() or {}
   local isNewOptions = options ~= parent.previousOptions
   if isNewOptions then
     if parent.renderedOptions then
@@ -49,22 +50,26 @@ local function renderScriptOptions(parent)
     end
     parent.previousOptions = options
     parent.renderedOptions = F.map(options, function(option, index)
+      local padding = 4
       return Gui.create({
         group = 'all',
         id = 'script-option-'..index,
-        padding = 5,
-        height = select(2, GuiText.getTextSize(option.label, DialogText.font)),
+        height = select(2, GuiText.getTextSize(option, DialogText.font)) + 1 + padding,
+        getMousePosition = function()
+          local camera = require 'components.camera'
+          return camera:getMousePosition()
+        end,
         onClick = function()
-          msgBus.send('NPC_CHAT_ACTION', { action = option.action })
+          parent.onOptionSelect(index)
         end,
         onUpdate = function(self)
           local previousHeights = 0
           for i=1, (index - 1) do
             local o = options[i]
-            previousHeights = previousHeights + select(2, GuiText.getTextSize(o.label, DialogText.font))
+            previousHeights = previousHeights + select(2, GuiText.getTextSize(o, DialogText.font)) + padding
           end
           self.x, self.y = parent.x, parent.y + parent.height + previousHeights
-          self.innerX, self.innerY = self.x + self.padding, self.y + self.padding
+          self.innerX, self.innerY = self.x + padding, self.y + padding
           self.width = parent.width
           self.innerWidth = parent.width - (parent.padding * 2)
         end,
@@ -76,12 +81,12 @@ local function renderScriptOptions(parent)
           local formattedString = {
             Color.MED_GRAY,
             bullet..' ',
-            c, option.label
+            c, option
           }
-          DialogText:addf(formattedString, self.innerWidth, 'left', self.innerX + self.padding, self.y)
+          DialogText:addf(formattedString, self.innerWidth, 'left', self.innerX + padding, self.y + padding-1)
 
           if self.hovered then
-            local h = parent.HoverRectangle
+            local h = parent.optionHighlightRectangle
             h.show = self.hovered
             h.color = c
             h.x = self.innerX
@@ -101,7 +106,8 @@ end
 function GuiDialog.init(self)
   local parent = self
 
-  self.HoverRectangle = Gui.create({
+  self.optionHighlightRectangle = Gui.create({
+    group = 'all',
     render = function(self)
       if self.show then
         love.graphics.setColor(self.color)
@@ -114,11 +120,7 @@ function GuiDialog.init(self)
     end
   }):setParent(self)
 
-  Component.addToGroup(self, 'gui')
-
-  self.advanceDialog = function()
-    msgBus.send('NPC_CHAT_ACTION', { action = self.script.defaultOption })
-  end
+  Component.addToGroup(self, 'all')
 
   createToggleOverlayArea(parent)
     :setParent(parent)
@@ -130,43 +132,30 @@ end
 
 function GuiDialog.update(self, dt)
   local parent = self
-  self.script = self.nextScript()
-  local endOfDialog = not self.script
+  local endOfDialog = self.isDone()
   if (endOfDialog) then
-    return self:delete(true)
+    self:delete(true)
+    self.onDone()
+    return
   end
   wrapLimit = self.wrapLimit
 
-  local isNewScript = self.script ~= self.lastScript
-  self.lastScript = self.script
-
-  local script = self:getCurrentScript()
-  script.options = script.options or {}
-
-  local titleHeight = 0
-  if script.title then
-    titleHeight = select(2, DialogText.getTextSize(script.title, DialogText.font, self.wrapLimit))
-  end
-
-  local bodyWidth, bodyHeight = DialogText.getTextSize(script.text, DialogText.font, self.wrapLimit)
+  local bodyWidth, bodyHeight = DialogText.getTextSize(self.getText(), DialogText.font, self.wrapLimit)
 
   renderScriptOptions(self)
 
   local letterHeight = GuiText.getTextSize('a', DialogText.font)
-  local optionsMarginTop = (#script.options > 0) and (letterHeight) or 0
+  local optionsMarginTop = (#self:getOptions() > 0) and (letterHeight) or 0
   self.optionsTotalHeight = F.reduce(self.renderedOptions, function(totalHeight, optionNode)
     return totalHeight + optionNode.height
   end, 0)
   self.width, self.height = bodyWidth + self.padding*2
-    ,bodyHeight + self.padding*2 + titleHeight + optionsMarginTop
+    ,bodyHeight + self.padding*2 + optionsMarginTop
 
-  self.x, self.y = camera:toScreenCoords(self.renderPosition.x, self.renderPosition.y - self.height - self.optionsTotalHeight)
+  self.x, self.y = self.renderPosition.x, self.renderPosition.y - self.height - self.optionsTotalHeight
 
   local markdownToLove2d = require 'modules.markdown-to-love2d-string'
-  DialogText:addf(markdownToLove2d(script.text).formatted, wrapLimit, 'left', self.x + self.padding, self.y + self.padding + titleHeight)
-  if script.title then
-    DialogText:add(script.title, Color.SKY_BLUE, self.x + self.padding, self.y + self.padding)
-  end
+  DialogText:addf(markdownToLove2d(self.getText()).formatted, wrapLimit, 'left', self.x + self.padding, self.y + self.padding)
 end
 
 function GuiDialog.draw(self)

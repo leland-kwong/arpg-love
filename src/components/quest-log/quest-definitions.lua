@@ -1,10 +1,10 @@
 
-return {
-  ['the-beginning'] = {
+local definitions = {
+  quest_1 = {
     title = 'The beginning',
     subTasks = {
       {
-        id = 'the-beginning_1',
+        id = 'quest_1_1',
         -- description = 'Take out **R-19 the Mad**'
         description = 'kill **5** **mini bots**',
         requirements = {
@@ -16,28 +16,13 @@ return {
         }
       },
     },
-    -- script = {
-    --   text = "Hi [characterName], there is an evil robot who goes by the name of **R1 the mad**."
-    --     .." Find him in **Aureus**, take him out, and retrieve his **brain**.",
-    --   defaultOption = 'closeChat',
-    --   options = {
-    --     {
-    --       label = "Got it.",
-    --       action = 'acceptQuest'
-    --     },
-    --     {
-    --       label = "I'm too scared, I'll pass on it this time.",
-    --       action = 'rejectQuest'
-    --     }
-    --   }
-    -- }
   },
 
-  ['boss-1'] = {
+  quest_2 = {
     title = 'Something lurking',
     subTasks = {
       {
-        id = 'boss-1_1',
+        id = 'quest_2_1',
         description = 'Find and take out **R-19 the mad** in **Aureus**',
         requirements = {
           killEnemy = {
@@ -48,8 +33,11 @@ return {
         }
       },
       {
-        id = 'boss-1_2',
+        id = 'quest_2_2',
         description = 'Check back with **Lisa** at home',
+        preRequisites = {
+          'quest_2_1'
+        },
         requirements = {
           npcInteract = {
             npcName = 'Lisa'
@@ -59,3 +47,5 @@ return {
     }
   }
 }
+
+return definitions

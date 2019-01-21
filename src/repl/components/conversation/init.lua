@@ -18,7 +18,7 @@ end
 
 local function startConversation(self, conversation)
   self.conversate = dialogueRoutine(conversation)
-  local _, nextScript = coroutine.resume(self.conversate)
+  local isAlive, nextScript = coroutine.resume(self.conversate)
 
   self.nextScript = nextScript
   return nextScript
@@ -26,7 +26,11 @@ end
 
 local defaultActionsMt = {
   nextConversation = function(self, data)
-    return startConversation(self, self.conversationMap[data.id])
+    local conversationId = data.id
+    local nextScript = startConversation(self, self.conversationMap[conversationId])
+    self:_autoAdvanceIfNeeded(nextScript)
+    self.conversationId = conversationId
+    return nextScript
   end,
 
   giveReward = function(_, reward)
@@ -54,21 +58,9 @@ local Conversation = {
     local actions = setmetatable(customActions or {}, defaultActionsMt)
 
     local execActions = function(self, actionsList)
-      for i=1, #actionsList do
+      for i=1, #(actionsList or {}) do
         local a = actionsList[i]
         actions[a.action](self, a.data)
-      end
-    end
-
-    --[[
-      For action blocks we want to trigger them immediately
-      and automatically move to the next block in the conversation
-    ]]
-    local function autoAdvanceIfNeeded(self, nextScript)
-      local autoAdvance = nextScript and nextScript.actionOnly
-      if autoAdvance then
-        execActions(self, nextScript.actions)
-        self:resume()
       end
     end
 
@@ -81,8 +73,6 @@ local Conversation = {
       set = function(self, conversationId)
         if conversationId then
           local nextScript = actions.nextConversation(self, { id = conversationId })
-          autoAdvanceIfNeeded(self, nextScript)
-          self.conversationId = conversationId
         elseif (not conversationId) then
           self:stop()
         end
@@ -97,6 +87,10 @@ local Conversation = {
         end
       end,
 
+      is = function(self, conversationId)
+        return self.conversationId == conversationId
+      end,
+
       resume = function(self, optionSelected)
         -- prevent resuming if an option must be chosen
         if (not optionSelected) and self:hasOptions() then
@@ -105,9 +99,21 @@ local Conversation = {
 
         local isAlive, nextScript = coroutine.resume(self.conversate)
         self.nextScript = isAlive and nextScript or nil
-        autoAdvanceIfNeeded(self, nextScript)
+        self:_autoAdvanceIfNeeded(nextScript)
 
         return self
+      end,
+
+      --[[
+        For action blocks we want to trigger them immediately
+        and automatically move to the next block in the conversation
+      ]]
+      _autoAdvanceIfNeeded = function(self, nextScript)
+        local autoAdvance = nextScript and nextScript.actionOnly
+        if autoAdvance then
+          execActions(self, nextScript.actions)
+          self:resume()
+        end
       end,
 
       -- returns option selection success

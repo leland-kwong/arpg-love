@@ -4,7 +4,7 @@ local questDefinitions = dynamicRequire('components.quest-log.quest-definitions'
 return {
   quests = questDefinitions,
   completedTasks = {
-    ['the-beginning_1'] = true,
-    ['boss-1_1'] = true
+    ['quest_1_1'] = true,
+    ['quest_2_1'] = true
   }
 }

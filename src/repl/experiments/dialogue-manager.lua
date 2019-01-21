@@ -28,12 +28,12 @@ local conversations = {
         {
           label = 'What items you got?',
           actions = {
-            {
-              action = 'nextConversation',
-              data = {
-                id = 'conversation_2'
-              }
-            }
+            -- {
+            --   action = 'nextConversation',
+            --   data = {
+            --     id = 'conversation_2'
+            --   }
+            -- }
           }
         },
         {
@@ -55,6 +55,9 @@ local conversations = {
         }
       },
     },
+    {
+      text = 'Excellent choice!'
+    }
   },
 
   conversation_2 = {
@@ -150,7 +153,7 @@ local Conversation = dynamicRequire 'repl.components.conversation'
 
 Component.create({
   id = 'dialogueExample',
-  group = 'firstLayer',
+  -- group = 'firstLayer',
   init = function(self)
     local GuiText = require 'components.gui.gui-text'
     self.guiText = GuiText.create({
@@ -161,10 +164,10 @@ Component.create({
     self.conversation = conversation
 
     local function endConversation()
-      conversation:continue('conversation_goodbye')
+      conversation:set('conversation_goodbye')
     end
 
-    conversation:continue('conversation_1')
+    conversation:set('conversation_1')
 
     self.listeners = {
       msgBus.on('KEY_PRESSED', function(msg)
@@ -179,7 +182,7 @@ Component.create({
         end
 
         if hotKeys.RESTART_CONVO == msg.key then
-          conversation:continue('conversation_1')
+          conversation:set('conversation_1')
         end
 
         local isOptionSelect = tonumber(msg.key)
@@ -194,9 +197,9 @@ Component.create({
 
         if hotKeys.CONTINUE_CONVO == msg.key then
           if (not self.conversation:get()) then
-            conversation:continue('conversation_1')
+            conversation:set('conversation_1')
           elseif (#self.conversation:get().options == 0) then
-            conversation:continue()
+            conversation:resume()
           end
         end
       end)
@@ -216,7 +219,8 @@ Component.create({
   draw = function(self)
     if (self.conversation:get()) then
       local nextScript = self.conversation:get()
-      self.guiText:addf({{1,1,1}, nextScript.text}, 200, 'left', 150, 100)
+      local x = 300
+      self.guiText:addf({{1,1,1}, nextScript.text}, 200, 'left', x, 100)
 
       -- handle options
       local options = nextScript.options
@@ -228,7 +232,7 @@ Component.create({
           {1,1,0}, i..'. ',
           {1,1,1}, o.label
         }
-        self.guiText:addf(optionsText, 200, 'left', 150, 100 + (lineHeight * i))
+        self.guiText:addf(optionsText, 200, 'left', x, 100 + (lineHeight * i))
       end
     end
   end,
