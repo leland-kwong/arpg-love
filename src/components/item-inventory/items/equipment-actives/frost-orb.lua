@@ -18,7 +18,7 @@ return itemSystem.registerModule({
     return {
 			blueprint = require 'components.abilities.frost-orb',
 			props = {
-        componentGroup = 'all',
+        group = 'all',
         damage = props.damage,
         coldDamage = props.coldDamage,
 				target = collisionGroups.create(

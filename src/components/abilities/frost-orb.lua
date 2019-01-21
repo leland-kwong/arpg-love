@@ -3,6 +3,7 @@ local AnimationFactory = require 'components.animation-factory'
 local CollisionWorlds = require 'components.collision-worlds'
 local collisionGroups = require 'modules.collision-groups'
 local Sound = require 'components.sound'
+local Color = require 'modules.color'
 
 local function obstacleFilter(item)
   return collisionGroups.matches(item.group, 'obstacle') and 'slide' or false
@@ -10,7 +11,6 @@ end
 
 local Shard = Component.createFactory({
   init = function(self)
-    Component.addToGroup(self, self.componentGroup)
     Component.addToGroup(self, 'gameWorld')
 
     self.clock = 0
@@ -69,8 +69,7 @@ local Shard = Component.createFactory({
     end
   end,
   draw = function(self)
-    love.graphics.setColor(self.color or {1,1,1})
-    -- love.graphics.setColor(1,1,1)
+    love.graphics.setColor(self.color or Color.WHITE)
     love.graphics.draw(
       AnimationFactory.atlas,
       self.animation.sprite,
@@ -87,6 +86,7 @@ local Shard = Component.createFactory({
 })
 
 local FrostOrb = Component.createFactory({
+  group = 'all',
   x = 0,
   y = 0,
   startOffset = 10,
@@ -100,7 +100,6 @@ local FrostOrb = Component.createFactory({
   projectileLifeTime = 1,
   projectileSpeed = 120,
   init = function(self)
-    Component.addToGroup(self, self.componentGroup)
     Component.addToGroup(self, 'gameWorld')
 
     local Position = require 'utils.position'
@@ -148,7 +147,7 @@ local FrostOrb = Component.createFactory({
         coldDamage = self.coldDamage,
         collisionWorld = self.collisionWorld,
         target = self.target,
-        componentGroup = self.componentGroup,
+        group = self.group,
         lifeTime = self.projectileLifeTime,
         speed = self.projectileSpeed,
         source = self:getId()
@@ -190,7 +189,7 @@ local FrostOrb = Component.createFactory({
     local tween = require 'modules.tween'
     Component.create({
       init = function(self)
-        Component.addToGroup(self, parent.componentGroup)
+        Component.addToGroup(self, parent.group)
         self.tween = tween.new(0.25, parent, {
           opacity = 0,
           scale = 0,
