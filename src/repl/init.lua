@@ -17,18 +17,26 @@ local function reloadFile(file)
 end
 
 Component.create({
+  updateFrequency = 0.1,
   init = function(self)
     Component.addToGroup(self, 'all')
+    self.clock = 0
   end,
   update = function(self, dt)
-    local rootDir = '/repl/experiments'
-    local files = love.filesystem.getDirectoryItems(rootDir)
-    for _,f in ipairs(files) do
-      local ok, result = pcall(function()
-        return reloadFile(rootDir..'/'..f)
-      end)
-      if (not ok) then
-        print('[ERROR]', result)
+    self.clock = self.clock + dt
+
+    if self.clock >= self.updateFrequency then
+      self.clock = 0
+
+      local rootDir = '/repl/active-experiments'
+      local files = love.filesystem.getDirectoryItems(rootDir)
+      for _,f in ipairs(files) do
+        local ok, result = pcall(function()
+          return reloadFile(rootDir..'/'..f)
+        end)
+        if (not ok) then
+          print('[ERROR]', result)
+        end
       end
     end
   end,
