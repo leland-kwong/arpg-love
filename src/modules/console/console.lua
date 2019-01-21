@@ -17,12 +17,6 @@ local font = love.graphics.newFont(
 )
 font:setLineHeight(1)
 
-local guiText = GuiText.create({
-  font = font,
-  group = groups.system,
-  outline = false
-})
-
 local function toggleCollisionDebug()
   msgBus.send(msgBus.SET_CONFIG, {
     collisionDebug = (not config.collisionDebug)
@@ -234,7 +228,7 @@ function Console.draw(self)
     table.insert(output, Color.WHITE)
     table.insert(output, entry..'\n')
   end
-  guiText:addf(output, 400, 'left', 0, loggerYPosition + guiText.getTextSize(logSectionTitle, guiText.font))
+  gfx.printf(output, 0, loggerYPosition + GuiText.getTextSize(logSectionTitle, font), 400, 'left')
 
   gfx.setCanvas()
   gfx.setBlendMode('alpha', 'premultiplied')
