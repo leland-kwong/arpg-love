@@ -1,0 +1,62 @@
+-- local Component = require 'modules.component'
+-- local dynamicRequire = require 'utils.dynamic-require'
+-- local QuestLog = dynamicRequire('components.hud.quest-log')
+
+-- local log = dynamicRequire 'repl.shared.quest-log'
+
+-- local questRequirementHandlers = {
+--   killEnemy = function(props, questId, taskid)
+--   end,
+
+--   npcInteract = function(props, questId, taskid)
+--   end
+-- }
+
+-- Component.create({
+--   id = 'questHandler',
+--   log = log,
+--   init = function(self)
+--     Component.addToGroup(self, 'all')
+--     self.activeTasks = {}
+--   end,
+--   update = function(self, dt)
+--     for questId,q in pairs(self.log.quests) do
+--       for _,t in ipairs(q.subTasks) do
+--         local Grid = require 'utils.grid'
+--         if (not Grid.get(self.activeTasks, questId, t.id)) then
+--           Grid.set(self.activeTasks, questId, t.id, true)
+
+--           for name,props in pairs(t.requirements) do
+--             local initFn = questRequirementHandlers[name]
+--             initFn(props, questId, t.id)
+--           end
+--         end
+--       end
+--     end
+--   end,
+--   final = function()
+--     for _,entity in pairs(Component.groups.questHandlers.getAll()) do
+--       entity:delete(true)
+--     end
+--   end
+-- })
+
+-- Component.create({
+--   id = 'questManager',
+--   init = function(self)
+--     Component.addToGroup(self, 'system')
+--     self.questLog = QuestLog.create({
+--       id = 'QuestLog',
+--       x = 100,
+--       y = 100,
+--       width = 160,
+--       height = 200,
+--     })
+--     self.log = log
+--   end,
+--   update = function(self)
+--     self.questLog.log = self.log
+--   end,
+--   final = function(self)
+--   end
+-- })

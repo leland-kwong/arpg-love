@@ -16,21 +16,21 @@ return {
         }
       },
     },
-    script = {
-      text = "Hi [characterName], there is an evil robot who goes by the name of **R1 the mad**."
-        .." Find him in **Aureus**, take him out, and retrieve his **brain**.",
-      defaultOption = 'closeChat',
-      options = {
-        {
-          label = "Got it.",
-          action = 'acceptQuest'
-        },
-        {
-          label = "I'm too scared, I'll pass on it this time.",
-          action = 'rejectQuest'
-        }
-      }
-    }
+    -- script = {
+    --   text = "Hi [characterName], there is an evil robot who goes by the name of **R1 the mad**."
+    --     .." Find him in **Aureus**, take him out, and retrieve his **brain**.",
+    --   defaultOption = 'closeChat',
+    --   options = {
+    --     {
+    --       label = "Got it.",
+    --       action = 'acceptQuest'
+    --     },
+    --     {
+    --       label = "I'm too scared, I'll pass on it this time.",
+    --       action = 'rejectQuest'
+    --     }
+    --   }
+    -- }
   },
 
   ['boss-1'] = {
@@ -49,27 +49,11 @@ return {
       },
       {
         id = 'boss-1_2',
-        description = 'Collect **5** **scrap metal** pieces',
+        description = 'Check back with **Lisa** at home',
         requirements = {
-          killEnemy = {
-            count = {
-              ['legendary-eyeball'] = 1
-            }
+          npcInteract = {
+            npcName = 'Lisa'
           }
-        }
-      }
-    },
-    script = {
-      text = 'I feel something shaking up a storm deep under Aureus. You should check it out.',
-      defaultOption = 'closeChat',
-      options = {
-        {
-          label = "Got it.",
-          action = 'acceptQuest'
-        },
-        {
-          label = "I'm too scared, I'll pass on it this time.",
-          action = 'rejectQuest'
         }
       }
     }

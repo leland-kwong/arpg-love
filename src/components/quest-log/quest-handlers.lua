@@ -57,13 +57,6 @@ local requirementHandlers = {
                 })
 
                 local isTaskCompleted = O.deepEqual(nextState.killEnemy, requirements)
-                print(
-                  Inspect({
-                    taskCompleted = isTaskCompleted,
-                    state = nextState,
-                    requirements = requirements
-                  })
-                )
                 if isTaskCompleted then
                   msgBus.send('QUEST_TASK_COMPLETE', {
                     questId = questId,
