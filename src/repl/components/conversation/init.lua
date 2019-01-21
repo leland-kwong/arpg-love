@@ -79,8 +79,7 @@ local Conversation = {
       conversationId = nil,
 
       set = function(self, conversationId)
-        local isNewConvo = conversationId ~= self.conversationId
-        if isNewConvo then
+        if conversationId then
           local nextScript = actions.nextConversation(self, { id = conversationId })
           autoAdvanceIfNeeded(self, nextScript)
           self.conversationId = conversationId
@@ -89,6 +88,13 @@ local Conversation = {
         end
 
         return self
+      end,
+
+      setIfDifferent = function(self, conversationId)
+        local isNewConvo = conversationId ~= self.conversationId
+        if isNewConvo then
+          self:set(conversationId)
+        end
       end,
 
       resume = function(self, optionSelected)
@@ -100,10 +106,6 @@ local Conversation = {
         local isAlive, nextScript = coroutine.resume(self.conversate)
         self.nextScript = nextScript
         autoAdvanceIfNeeded(self, nextScript)
-
-        if self:isDone() then
-          self:stop()
-        end
 
         return self
       end,
@@ -142,7 +144,7 @@ local Conversation = {
         self.nextScript = nil
         self.conversationId = nil
         return self
-      end,
+      end
     }
 
     return c
