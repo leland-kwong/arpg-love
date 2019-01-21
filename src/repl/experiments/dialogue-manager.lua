@@ -2,22 +2,6 @@ local dynamicRequire = require 'utils.dynamic-require'
 local Component = require 'modules.component'
 local msgBus = require 'components.msg-bus'
 
-local conversationMt = {
-  text = '',
-  options = {} -- list of conversation options
-}
-conversationMt.__index = conversationMt
-
-local dialogueRoutine = function(dialogue)
-  return coroutine.create(function()
-    for i=1, #dialogue do
-      coroutine.yield(
-        setmetatable(dialogue[i], conversationMt)
-      )
-    end
-  end)
-end
-
 local function giveExperienceAction(exp)
   return {
     action = 'giveReward',
@@ -162,6 +146,8 @@ local conversations = {
   }
 }
 
+local Conversation = dynamicRequire 'repl.components.conversation'
+
 Component.create({
   id = 'dialogueExample',
   group = 'firstLayer',
@@ -171,58 +157,14 @@ Component.create({
       font = require 'components.font'.primary.font
     }):setParent(self)
 
-    local function startConversation(self, conversation)
-      self.conversate = dialogueRoutine(conversation)
-      local _, nextScript = coroutine.resume(self.conversate)
-
-      self.nextScript = nextScript
-    end
-
-    local actions = {
-      nextConversation = function(data)
-        startConversation(self, conversations[data.id])
-      end,
-      giveReward = function(reward)
-        print(
-          'give reward!\n',
-          Inspect(reward)
-        )
-      end,
-      giveQuest = function(quest)
-        print(
-          'give quest!\n',
-          Inspect(quest)
-        )
-      end
-    }
-
-    local function execActions(actionsList)
-      for i=1, #actionsList do
-        local a = actionsList[i]
-        actions[a.action](a.data)
-      end
-    end
-
-    local function continueConversation(conversationId)
-      if conversationId then
-        actions.nextConversation({ id = conversationId })
-      else
-        local isAlive, nextScript = coroutine.resume(self.conversate)
-        self.nextScript = nextScript
-      end
-      if self.nextScript and self.nextScript.actionOnly then
-        execActions(self.nextScript.actions)
-        continueConversation()
-      end
-    end
+    local conversation = Conversation:new(conversations)
+    self.conversation = conversation
 
     local function endConversation()
-      actions.nextConversation({
-        id = 'conversation_goodbye'
-      })
+      conversation:continue('conversation_goodbye')
     end
 
-    continueConversation('conversation_1')
+    conversation:continue('conversation_1')
 
     self.listeners = {
       msgBus.on('KEY_PRESSED', function(msg)
@@ -237,46 +179,47 @@ Component.create({
         end
 
         if hotKeys.RESTART_CONVO == msg.key then
-          continueConversation('conversation_1')
+          conversation:continue('conversation_1')
         end
 
         local isOptionSelect = tonumber(msg.key)
         if isOptionSelect then
-          local options = self.nextScript.options
           -- select option
           local optionId = tonumber(msg.key)
-          local option = options[optionId]
-          if option then
-            continueConversation()
-            execActions(option.actions)
-          else
+          local success = conversation:selectOption(optionId)
+          if (not success) then
             msgBus.send('PLAYER_ACTION_ERROR', 'invalid option '..optionId..' selected')
           end
         end
 
         if hotKeys.CONTINUE_CONVO == msg.key then
-          if (not self.nextScript) then
-            continueConversation('conversation_1')
-          elseif (#self.nextScript.options == 0) then
-            continueConversation()
+          if (not self.conversation:get()) then
+            conversation:continue('conversation_1')
+          elseif (#self.conversation:get().options == 0) then
+            conversation:continue()
           end
         end
       end)
     }
   end,
   update = function(self)
-    local isNewScript = self.previousScript ~= self.nextScript
-    if isNewScript and self.nextScript then
-        print(self.nextScript.text)
+    local isNewConvo = self.previousConvo ~= self.conversation
+    if isNewConvo and (self.conversation:get()) then
+        -- print(
+        --   Inspect(
+        --     self.conversation:get()
+        --   )
+        -- )
     end
-    self.previousScript = self.nextScript
+    self.previousConvo = self.conversation
   end,
   draw = function(self)
-    if self.nextScript then
-      self.guiText:addf({{1,1,1}, self.nextScript.text}, 200, 'left', 150, 100)
+    if (self.conversation:get()) then
+      local nextScript = self.conversation:get()
+      self.guiText:addf({{1,1,1}, nextScript.text}, 200, 'left', 150, 100)
 
       -- handle options
-      local options = self.nextScript.options
+      local options = nextScript.options
       local w, h = self.guiText:getSize()
       local lineHeight = 20
       for i=1, #options do
