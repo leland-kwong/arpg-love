@@ -62,6 +62,10 @@ local function setSong(sceneRef)
   love.audio.play(song)
 
   local duration = 5
+
+  if bgMusic.songQueue then
+    bgMusic.songQueue:stop()
+  end
   -- local duration = song:getDuration('seconds')
   bgMusic.songQueue = tick.delay(function()
     bgMusic.currentlyPlaying = nil
