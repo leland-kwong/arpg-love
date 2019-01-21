@@ -196,7 +196,7 @@ local FrostOrb = Component.createFactory({
           opacity = 0,
           scale = 0,
           volume = 0
-        })
+        }, tween.easing.outQuad)
       end,
       update = function(self, dt)
         local complete = self.tween:update(dt)
