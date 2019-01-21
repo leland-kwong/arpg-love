@@ -1,3 +1,4 @@
+-- Creates a conversation thread that we can resume at any time
 
 local conversationMt = {
   text = '',
@@ -20,28 +21,37 @@ local function startConversation(self, conversation)
   local _, nextScript = coroutine.resume(self.conversate)
 
   self.nextScript = nextScript
+  return nextScript
 end
 
-local Conversation = {
-  new = function(self, conversationMap)
+local defaultActionsMt = {
+  nextConversation = function(self, data)
+    return startConversation(self, self.conversationMap[data.id])
+  end,
 
-    local actions = {
-      nextConversation = function(self, data)
-        startConversation(self, conversationMap[data.id])
-      end,
-      giveReward = function(_, reward)
-        print(
-          'give reward!\n',
-          Inspect(reward)
-        )
-      end,
-      giveQuest = function(_, quest)
-        print(
-          'give quest!\n',
-          Inspect(quest)
-        )
-      end
-    }
+  giveReward = function(_, reward)
+    print(
+      'give reward!\n',
+      Inspect(reward)
+    )
+  end,
+
+  giveQuest = function(_, quest)
+    print(
+      'give quest!\n',
+      Inspect(quest)
+    )
+  end
+}
+defaultActionsMt.__index = defaultActionsMt
+
+local Conversation = {
+  new = function(self, conversationMap, customActions)
+
+    if customActions and customActions.nextConversation then
+      error('`nextConversation` action may not be redefined')
+    end
+    local actions = setmetatable(customActions or {}, defaultActionsMt)
 
     local execActions = function(self, actionsList)
       for i=1, #actionsList do
@@ -50,20 +60,52 @@ local Conversation = {
       end
     end
 
+    --[[
+      For action blocks we want to trigger them immediately
+      and automatically move to the next block in the conversation
+    ]]
+    local function autoAdvanceIfNeeded(self, nextScript)
+      local autoAdvance = nextScript and nextScript.actionOnly
+      if autoAdvance then
+        execActions(self, nextScript.actions)
+        self:resume()
+      end
+    end
+
     local c = {
       nextScript = nil,
 
-      continue = function(self, conversationId)
-        if conversationId then
-          actions.nextConversation(self, { id = conversationId })
-        else
-          local isAlive, nextScript = coroutine.resume(self.conversate)
-          self.nextScript = nextScript
+      conversationMap = conversationMap,
+      conversationId = nil,
+
+      set = function(self, conversationId)
+        local isNewConvo = conversationId ~= self.conversationId
+        if isNewConvo then
+          local nextScript = actions.nextConversation(self, { id = conversationId })
+          autoAdvanceIfNeeded(self, nextScript)
+          self.conversationId = conversationId
+        elseif (not conversationId) then
+          self:stop()
         end
-        if self.nextScript and self.nextScript.actionOnly then
-          execActions(self, self.nextScript.actions)
-          self:continue()
+
+        return self
+      end,
+
+      resume = function(self, optionSelected)
+        -- prevent resuming if an option must be chosen
+        if (not optionSelected) and self:hasOptions() then
+          return self
         end
+
+        local isAlive, nextScript = coroutine.resume(self.conversate)
+        self.nextScript = nextScript
+        autoAdvanceIfNeeded(self, nextScript)
+
+        if self:isDone() then
+          self:stop()
+        end
+
+        return self
       end,
 
       -- returns option selection success
@@ -75,12 +117,16 @@ local Conversation = {
         local options = self.nextScript.options
         local o = options[optionNumber]
         if o then
-          -- self:continue()
+          self:resume(true)
           execActions(self, o.actions)
           return true
         end
 
         return false
+      end,
+
+      hasOptions = function(self)
+        return (not self:isDone()) and #self.nextScript.options > 0
       end,
 
       get = function(self)
@@ -90,7 +136,13 @@ local Conversation = {
 
       isDone = function(self)
         return self.nextScript == nil
-      end
+      end,
+
+      stop = function(self)
+        self.nextScript = nil
+        self.conversationId = nil
+        return self
+      end,
     }
 
     return c
