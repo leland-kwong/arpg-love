@@ -26,6 +26,8 @@ local Shard = Component.createFactory({
     self.ox, self.oy = self.animation:getOffset()
     local Position = require 'utils.position'
     self.dx, self.dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
+    local sourceRef = Component.get(self.source)
+    self.dx, self.dy = self.dx + (sourceRef.dx * 0.5), self.dy + (sourceRef.dy * 0.5)
   end,
   update = function(self, dt)
     self.clock = self.clock + dt
