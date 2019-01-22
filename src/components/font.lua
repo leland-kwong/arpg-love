@@ -32,9 +32,24 @@ local function fontSecondary(fontSize)
   }
 end
 
+local function fontDebug(fontSize)
+  local font = love.graphics.newFont(
+    'built/fonts/Roboto_Mono/RobotoMono-Medium.ttf',
+    12
+  )
+  local lineHeight = 1
+  font:setLineHeight(lineHeight)
+  return {
+    fontSize = fontSize,
+    lineHeight = lineHeight,
+    font = font
+  }
+end
+
 return {
   primary = fontPrimary(8),
   primaryLarge = fontPrimary(16),
   secondary = fontSecondary(8),
-  secondaryLarge = fontSecondary(16)
+  secondaryLarge = fontSecondary(16),
+  debug = fontDebug(12)
 }

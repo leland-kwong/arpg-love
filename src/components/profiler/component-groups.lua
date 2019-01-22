@@ -7,7 +7,7 @@ local config = require 'config.config'
 
 local guiTextLayer = GuiText.create({
   group = Component.groups.system,
-  font = require'components.font'.primaryLarge.font,
+  font = require'components.font'.debug.font,
   outline = false
 })
 
