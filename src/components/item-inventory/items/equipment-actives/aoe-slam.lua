@@ -81,8 +81,8 @@ local WeaponAnimation = Component.createFactory({
 
 		local tween = require 'modules.tween'
 		self.yPos = -20
-		self.attackAnimationDuration = self.actionSpeed * 0.6
-		self.attackRecoveryAnimationDuration = self.actionSpeed * 0.4
+		self.attackAnimationDuration = self.actionSpeed * 0.2
+		self.attackRecoveryAnimationDuration = self.actionSpeed * 0.8
 		self.tween = tween.new(self.attackAnimationDuration, self, {
 			yPos = 0,
 		})

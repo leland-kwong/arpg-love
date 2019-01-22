@@ -1,5 +1,4 @@
 local Component = require 'modules.component'
-local memoize = require 'utils.memoize'
 local config = require 'config.config'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
@@ -12,7 +11,6 @@ local Position = require 'utils.position'
 local Color = require 'modules.color'
 local camera = require 'components.camera'
 local Vec2 = require 'modules.brinevector'
-local lru = require 'utils.lru'
 local memoize = require 'utils.memoize'
 local LOS = memoize(require 'modules.line-of-sight')
 
@@ -44,8 +42,8 @@ end
 local ChainLightning = {
   group = groups.all,
   range = 10,
-  maxBounces = 2,
-  numBounces = 0,
+  maxBounces = 0,
+  _numBounces = 0,
   hitBoxSize = config.gridSize,
 }
 
@@ -72,7 +70,7 @@ local function createEffect(start, target, hasHit)
   LightningEffect:add({
     start = start,
     target = target,
-    thickness = 1.5,
+    thickness = 1.4,
     duration = 0.3,
     targetPointRadius = hasHit and 12 or 4
   })
@@ -128,7 +126,7 @@ function ChainLightning.update(self, dt)
           })
           self.targetsHit:add(parent)
 
-          local canBounce = self.numBounces < self.maxBounces
+          local canBounce = self._numBounces < self.maxBounces
           local t = canBounce and findNearestTarget(self.targetsHit, targetX, targetY)
           if t then
             self.initialProps.__index = self.initialProps
@@ -138,12 +136,12 @@ function ChainLightning.update(self, dt)
               y = targetY,
               x2 = t.x,
               y2 = t.y,
-              numBounces = self.numBounces + 1,
+              _numBounces = self._numBounces + 1,
               targetsHit = self.targetsHit,
             }, self.initialProps)
             ChainLightning.create(props)
           end
-        elseif (self.numBounces == 0) then
+        elseif (self._numBounces == 0) then
           local start, target = Vec2(self.x, self.y),
             Vec2(actualX, actualY)
           createEffect(start, target)
@@ -152,7 +150,7 @@ function ChainLightning.update(self, dt)
       i = i + 1
     end
   -- show wiff if nothing hits
-  elseif (self.numBounces == 0) then
+  elseif (self._numBounces == 0) then
     local start, target = Vec2(self.x, self.y),
       Vec2(self.x2, self.y2)
     createEffect(start, target)

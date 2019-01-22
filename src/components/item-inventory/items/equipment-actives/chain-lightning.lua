@@ -27,14 +27,28 @@ return itemSystem.registerModule({
 					collisionGroups.environment,
 					collisionGroups.obstacle
 				),
-				range = 6
+				range = 6,
+				maxBounces = 2
 			}
 		}
 	end,
 	tooltip = function(item, props)
 		return {
-			template = 'Releases a chain of lightning dealing damage.',
-			data = {}
+			template = 'Release a chain of lightning dealing {damageRange} damage per target. Chains up to {maxBounces} times.',
+			data = {
+				damageRange = {
+					type = 'range',
+					from = {
+						prop = 'minDamage',
+						val = props.lightningDamage.x
+					},
+					to = {
+						prop = 'maxDamage',
+						val = props.lightningDamage.y
+					},
+				},
+				maxBounces = props.maxBounces
+			}
 		}
 	end
 })

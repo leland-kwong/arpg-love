@@ -5,10 +5,8 @@ local functional = require("utils.functional")
 local AnimationFactory = require 'components.animation-factory'
 local Vec2 = require 'modules.brinevector'
 
-local weaponCooldown = 0.1
-
 return {
-	type = "base.ability-chain-lightning",
+	type = "base.action-module-chain-lightning",
 
 	blueprint = {
 		extraModifiers = {
@@ -25,7 +23,7 @@ return {
 
 		info = {
 			cooldown = 0,
-			actionSpeed = 0.35,
+			actionSpeed = 0.3,
 			energyCost = 3
 		},
 

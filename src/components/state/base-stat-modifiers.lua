@@ -15,7 +15,7 @@ local valueTypeHandlers = {
 }
 
 local function passThrough(v)
-	return v > 0 and round(v) or v
+	return round(v)
 end
 
 local baseStatModifiersMt = {
@@ -39,6 +39,12 @@ return setmetatable({
 		increasedActionSpeed = valueTypeHandlers.percent,
 		energyCostReduction = valueTypeHandlers.percent,
 		cooldownReduction = valueTypeHandlers.percent,
+		energyRegeneration = function(v)
+			return string.format('%1g', v)
+		end,
+		healthRegeneration = function(v)
+			return string.format('%1g', v)
+		end
 	}, {
 		__index = function()
 			return passThrough

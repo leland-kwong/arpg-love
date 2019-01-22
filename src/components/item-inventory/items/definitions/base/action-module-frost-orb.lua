@@ -26,7 +26,7 @@ return {
 		info = {
 			cooldown = 1.1,
 			actionSpeed = 0.35,
-			energyCost = 6
+			energyCost = 8
 		},
 
 		onActivate = require(require('alias').path.items..'.inventory-actives.equip-on-click')(),

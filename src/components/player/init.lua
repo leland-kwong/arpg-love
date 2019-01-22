@@ -204,7 +204,7 @@ local Player = {
       energyRegeneration = 1,
       maxHealth = 200,
       maxEnergy = 100,
-      moveSpeed = 100,
+      moveSpeed = 80,
       lightRadius = 50,
     }, self)
   end,

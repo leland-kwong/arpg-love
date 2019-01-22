@@ -228,11 +228,7 @@ function M.remove(entityId, recursive)
   )
 
   local entity = allComponentsById[entityId]
-  if (not entity) then
-    return
-  end
-
-  if entity.isComponent and (not entity._deleted) then
+  if entity and entity.isComponent and (not entity._deleted) then
     local children = entity._children
     if (recursive and children) then
       for _,child in pairs(children) do
