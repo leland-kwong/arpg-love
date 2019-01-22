@@ -157,7 +157,6 @@ function M.newGroup(groupDefinition)
       count = count + 1
     end
 
-    allComponentsById[id] = data
     --[[
       when we're in the middle of an update loop, we should add new components to a different list
       to prevent mutating the list which causes the loop to do unintended behavior (duplicate updates, etc...).
@@ -189,9 +188,7 @@ function M.newGroup(groupDefinition)
     entity[Group.name] = nil
 
     -- remove global reference if no more groups
-    local isPlainTable = objectUtils.isEmpty(entity) and (not component.isComponent)
-    if isPlainTable then
-      allComponentsById[id] = nil
+    if objectUtils.isEmpty(entity) then
       M.entitiesById[id] = nil
     end
   end
