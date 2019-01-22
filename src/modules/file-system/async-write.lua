@@ -31,7 +31,7 @@ local actionHandlers = {
   SAVE_STATE_DELETE = deleteFile
 }
 
-local function observeThread()
+while true do
   local message = love.thread.getChannel('DISK_IO'):demand()
   message = bitser.loads(message)
   local action, payload, data = message[1], message[2], message[3]
@@ -40,6 +40,4 @@ local function observeThread()
     error('invalid action '..action)
   end
   handler(payload, data)
-  observeThread()
 end
-observeThread()
