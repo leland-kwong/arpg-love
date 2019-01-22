@@ -25,7 +25,8 @@ M.keyboard = {
   PORTAL_OPEN = 't',
   PAUSE_GAME = 'p',
   PASSIVE_SKILLS_TREE_TOGGLE = 'o',
-  QUEST_LOG_TOGGLE = 'u'
+  QUEST_LOG_TOGGLE = 'u',
+  MAP_TOGGLE = 'm'
 }
 
 -- these actions may not be remapped

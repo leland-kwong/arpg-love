@@ -15,6 +15,8 @@ local MenuManager = {
 local activeMenu = nil
 
 function MenuManager.push(menu)
+  assert(menu ~= nil, '[MenuManager] menu component must be provided')
+
   stack:push(menu)
   activeMenu = menu
   return MenuManager

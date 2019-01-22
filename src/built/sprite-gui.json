@@ -54,7 +54,10 @@
    { "name": "panel-menu", "color": "#f3ce52ff", "keys": [{ "frame": 0, "bounds": {"x": 10, "y": 321, "w": 64, "h": 53 }, "center": {"x": 27, "y": 22, "w": 10, "h": 10 } }] },
    { "name": "button", "color": "#ffd54dff", "keys": [{ "frame": 0, "bounds": {"x": 521, "y": 294, "w": 21, "h": 13 }, "center": {"x": 5, "y": 5, "w": 10, "h": 1 } }] },
    { "name": "text-input", "color": "#ffd54dff", "keys": [{ "frame": 0, "bounds": {"x": 609, "y": 398, "w": 26, "h": 28 }, "center": {"x": 8, "y": 8, "w": 10, "h": 10 } }] },
-   { "name": "input-box-label", "color": "#ffd54dff", "keys": [{ "frame": 0, "bounds": {"x": 609, "y": 387, "w": 19, "h": 8 }, "center": {"x": 3, "y": 6, "w": 10, "h": 1 } }] }
+   { "name": "input-box-label", "color": "#ffd54dff", "keys": [{ "frame": 0, "bounds": {"x": 609, "y": 387, "w": 19, "h": 8 }, "center": {"x": 3, "y": 6, "w": 10, "h": 1 } }] },
+   { "name": "exclamation-mark", "color": "#ffd54dff", "keys": [{ "frame": 0, "bounds": {"x": 61, "y": 135, "w": 6, "h": 14 } }] },
+   { "name": "zone-1", "color": "#ffd54dff", "keys": [{ "frame": 0, "bounds": {"x": 896, "y": 64, "w": 352, "h": 192 } }] },
+   { "name": "panel-menu-translucent", "color": "#ffd54dff", "keys": [{ "frame": 0, "bounds": {"x": 10, "y": 448, "w": 64, "h": 53 }, "center": {"x": 27, "y": 22, "w": 10, "h": 10 } }] }
   ]
  }
 }

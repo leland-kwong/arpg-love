@@ -24,6 +24,7 @@ RootScene.create()
 require 'modules.auto-visibility'
 require 'components.map-text'
 require 'components.status-icons'
+require 'components.hud.player-position-indicator'
 require 'main.onload.news-dialog'
 require 'components.groups.dungeon-test'
 require 'components.groups.game-world'

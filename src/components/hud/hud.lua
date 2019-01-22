@@ -12,6 +12,7 @@ local HudStatusIcons = require 'components.hud.status-icons'
 local camera = require 'components.camera'
 local msgBus = require 'components.msg-bus'
 local Position = require 'utils.position'
+local AnimationFactory = require 'components.animation-factory'
 local scale = require 'config.config'.scaleFactor
 local Color = require 'modules.color'
 local config = require 'config.config'
@@ -41,6 +42,60 @@ local function setupExperienceIndicator(self)
     end
   }):setParent(self)
 end
+
+local menuButtonsList = {
+  {
+    displayValue = 'Main Menu (esc)',
+    normalAni = AnimationFactory:newStaticSprite('gui-home-button'),
+    hoverAni = AnimationFactory:newStaticSprite('gui-home-button--hover'),
+    onClick = function()
+      msgBus.send(msgBus.TOGGLE_MAIN_MENU)
+    end
+  },
+  {
+    displayValue = 'Inventory (i)',
+    normalAni = AnimationFactory:newStaticSprite('gui-inventory-button'),
+    hoverAni = AnimationFactory:newStaticSprite('gui-inventory-button--hover'),
+    onClick = function()
+      msgBus.send(msgBus.INVENTORY_TOGGLE)
+    end
+  },
+  {
+    displayValue = 'Skill Tree (o)',
+    normalAni = AnimationFactory:newStaticSprite('gui-skill-tree-button'),
+    hoverAni = AnimationFactory:newStaticSprite('gui-skill-tree-button--hover'),
+    badge = function()
+      local PlayerPassiveTree = require 'components.player.passive-tree'
+      local unusedSkillPoints = PlayerPassiveTree.getUnusedSkillPoints()
+      return unusedSkillPoints
+    end,
+    onClick = function()
+      msgBus.send(msgBus.PASSIVE_SKILLS_TREE_TOGGLE)
+    end
+  },
+  {
+    displayValue = 'Quests (u)',
+    normalAni = AnimationFactory:newStaticSprite('gui-quest-log-button'),
+    hoverAni = AnimationFactory:newStaticSprite('gui-quest-log-button--hover'),
+    badge = function()
+      return 0
+    end,
+    onClick = function()
+      msgBus.send('QUEST_LOG_TOGGLE')
+    end
+  },
+  {
+    displayValue = 'Map (m)',
+    normalAni = AnimationFactory:newStaticSprite('gui-quest-log-button'),
+    hoverAni = AnimationFactory:newStaticSprite('gui-quest-log-button--hover'),
+    badge = function()
+      return 0
+    end,
+    onClick = function()
+      msgBus.send('MAP_TOGGLE')
+    end
+  },
+}
 
 function Hud.init(self)
   local root = self
@@ -154,7 +209,7 @@ function Hud.init(self)
     )
   end
 
-  local function drawMenuButtonsUnderlay()
+  local function drawMenuButtonsUnderlay(buttonDefinitions)
     local AnimationFactory = require 'components.animation-factory'
     local aniLeft = AnimationFactory:newStaticSprite('gui-dashboard-menu-left')
     local aniMiddle = AnimationFactory:newStaticSprite('gui-dashboard-menu-middle')
@@ -174,7 +229,9 @@ function Hud.init(self)
       ox
     )
 
-    local middleWidth = 17
+    local numButtons = #buttonDefinitions
+    local buttonMargin = 2
+    local middleWidth = (numButtons * 14) + (numButtons * buttonMargin) + 7 - (aniLeft:getWidth() + aniRight:getWidth())
     local ox = aniMiddle:getOffset()
     love.graphics.draw(
       AnimationFactory.atlas,
@@ -207,7 +264,7 @@ function Hud.init(self)
       drawStatusBarUnderlay()
       drawVialUnderlay()
       drawAbilityUnderlay()
-      drawMenuButtonsUnderlay()
+      drawMenuButtonsUnderlay(menuButtonsList)
     end,
     drawOrder = function(self)
       return 1
@@ -315,7 +372,8 @@ function Hud.init(self)
   local MenuButtons = require 'components.hud.menu-buttons'
   MenuButtons.create({
     x = energyStatusBar.x + 135,
-    y = healthStatusBar.y + 7
+    y = healthStatusBar.y + 7,
+    buttonDefinitions = menuButtonsList
   }):setParent(self)
 end
 

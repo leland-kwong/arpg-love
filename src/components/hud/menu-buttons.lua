@@ -8,7 +8,8 @@ local GuiText = require 'components.gui.gui-text'
 local Color = require 'modules.color'
 
 local MenuButtons = {
-  group = Component.groups.hud
+  group = Component.groups.hud,
+  buttons = {}
 }
 
 local tooltipText = GuiText.create({
@@ -32,57 +33,15 @@ end
 function MenuButtons.init(self)
   local parent = self
 
-  local buttons = {
-    {
-      displayValue = 'Main Menu (esc)',
-      normalAni = AnimationFactory:newStaticSprite('gui-home-button'),
-      hoverAni = AnimationFactory:newStaticSprite('gui-home-button--hover'),
-      onClick = function()
-        msgBus.send(msgBus.TOGGLE_MAIN_MENU)
-      end
-    },
-    {
-      displayValue = 'Inventory (i)',
-      normalAni = AnimationFactory:newStaticSprite('gui-inventory-button'),
-      hoverAni = AnimationFactory:newStaticSprite('gui-inventory-button--hover'),
-      onClick = function()
-        msgBus.send(msgBus.INVENTORY_TOGGLE)
-      end
-    },
-    {
-      displayValue = 'Skill Tree (o)',
-      normalAni = AnimationFactory:newStaticSprite('gui-skill-tree-button'),
-      hoverAni = AnimationFactory:newStaticSprite('gui-skill-tree-button--hover'),
-      badge = function()
-        local PlayerPassiveTree = require 'components.player.passive-tree'
-        local unusedSkillPoints = PlayerPassiveTree.getUnusedSkillPoints()
-        return unusedSkillPoints
-      end,
-      onClick = function()
-        msgBus.send(msgBus.PASSIVE_SKILLS_TREE_TOGGLE)
-      end
-    },
-    {
-      displayValue = 'Quests (u)',
-      normalAni = AnimationFactory:newStaticSprite('gui-quest-log-button'),
-      hoverAni = AnimationFactory:newStaticSprite('gui-quest-log-button--hover'),
-      badge = function()
-        return 0
-      end,
-      onClick = function()
-        msgBus.send('QUEST_LOG_TOGGLE')
-      end
-    }
-  }
-
-  for index=1, #buttons do
-    local b = buttons[index]
+  for index=1, #self.buttonDefinitions do
+    local b = self.buttonDefinitions[index]
     local ox, oy = b.normalAni:getOffset()
     local spriteWidth, spriteHeight = b.normalAni:getSourceSize()
     local drawIndex = index - 1
     local margin = 2
     local spacing = (drawIndex * spriteWidth) + (drawIndex * margin)
     Gui.create({
+      id = 'menu-button-'..index,
       x = parent.x + spacing,
       y = parent.y,
       group = Component.groups.hud,

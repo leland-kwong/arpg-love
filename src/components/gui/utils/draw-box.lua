@@ -108,6 +108,10 @@ local styles = {
     spriteName = 'panel-menu',
     adjustH = 2 -- there is a small amount of 3-d drop shadow effect, so this is to account for that
   },
+  panelTranslucent = {
+    spriteName = 'panel-menu-translucent',
+    adjustH = 2 -- there is a small amount of 3-d drop shadow effect, so this is to account for that
+  },
   tooltip = {
     spriteName = 'panel-dialogue'
   },

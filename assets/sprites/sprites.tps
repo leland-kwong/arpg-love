@@ -342,9 +342,6 @@
             </struct>
             <key type="filename">custom-art/characters/ai-legendaries/legendary-1/legendary-ai-1.png</key>
             <key type="filename">custom-art/characters/eyeball/eyeball.png</key>
-            <key type="filename">custom-art/effects/floor-crack-1.png</key>
-            <key type="filename">custom-art/effects/floor-crack-2.png</key>
-            <key type="filename">custom-art/effects/floor-crack-3.png</key>
             <key type="filename">custom-art/gui/gui-home-button--hover.png</key>
             <key type="filename">custom-art/gui/gui-home-button.png</key>
             <key type="filename">custom-art/gui/gui-inventory-button--hover.png</key>
@@ -389,6 +386,7 @@
             </struct>
             <key type="filename">custom-art/characters/boss-1/beam-strike-glyph-inner.png</key>
             <key type="filename">custom-art/characters/companion/outer.png</key>
+            <key type="filename">custom-art/effects/cloud.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -796,6 +794,19 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/gui/gui-panel-menu-translucent.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,13,32,27</rect>
+                <key>scale9Paddings</key>
+                <rect>16,13,32,27</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/gui/gui-panel-menu.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -860,6 +871,19 @@
                 <rect>7,7,13,14</rect>
                 <key>scale9Paddings</key>
                 <rect>7,7,13,14</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-zone-1.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>88,48,176,96</rect>
+                <key>scale9Paddings</key>
+                <rect>88,48,176,96</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>

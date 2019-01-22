@@ -305,6 +305,10 @@ local Player = {
           msgBus.send(msgBus.INVENTORY_TOGGLE)
         end
 
+        if (keyMap.MAP_TOGGLE == key) and (not v.hasModifier) then
+          msgBus.send('MAP_TOGGLE')
+        end
+
         if (keyMap.PORTAL_OPEN == key) and (not v.hasModifier) then
           if self.inBossBattle then
             msgBus.send(msgBus.PLAYER_ACTION_ERROR, 'we cannot portal during boss')
