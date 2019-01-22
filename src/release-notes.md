@@ -1,5 +1,16 @@
 # RELEASE NOTES
 
+## 6.1.0-pre-alpha
+
+BALANCE
+
+* Many abilities have been adjusted to make things feel a bit more balanced. As always, we'll continue to adjust things as needed.
+* Many item modifier values have been reduced to make them less overpowered.
+
+FIXES
+
+* Fixed an issue with memory leaks.
+
 ## 6.0.0-pre-alpha
 
 BALANCE
