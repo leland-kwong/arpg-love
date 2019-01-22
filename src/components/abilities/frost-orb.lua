@@ -9,6 +9,19 @@ local function obstacleFilter(item)
   return collisionGroups.matches(item.group, 'obstacle') and 'slide' or false
 end
 
+Component.create({
+  id = 'FrostOrbHitCounter',
+  group = 'all',
+  update = function(self, dt)
+    for id,target in pairs(Component.groups.frostOrbTargets.getAll()) do
+      target.hitClock = target.hitClock + dt
+      if (target.hitClock >= target.minTimeBetweenHits) then
+        Component.removeFromGroup(id, 'frostOrbTargets')
+      end
+    end
+  end
+})
+
 local Shard = Component.createFactory({
   init = function(self)
     Component.addToGroup(self, 'gameWorld')
@@ -48,23 +61,31 @@ local Shard = Component.createFactory({
           cItem.group,
           self.target
         )
-        if isHit then
+        local hitParent = cItem.parent
+        local sourceId = self.source
+        local hitCoolingDown = isHit and Component.groups.frostOrbTargets.getAll()[sourceId]
+        if isHit and (not hitCoolingDown) then
           local msgBus = require 'components.msg-bus'
+          Component.addToGroup(sourceId, 'frostOrbTargets', {
+            hitClock = 0,
+            minTimeBetweenHits = 0.15
+          })
           msgBus.send(msgBus.CHARACTER_HIT, {
-            parent = cItem.parent,
-            source = self.source,
+            parent = hitParent,
+            source = sourceId,
             coldDamage = math.random(self.coldDamage.x, self.coldDamage.y),
           })
           msgBus.send(msgBus.CHARACTER_HIT, {
-            parent = cItem.parent,
+            parent = hitParent,
             source = Component.newId(),
             modifiers = {
               freeze = math.random(0, 3) == 1 and 1 or 0
             },
             duration = 0.5
           })
-          self:delete(true)
-        elseif collisionGroups.matches(cItem.group, 'obstacle') then
+          -- self:delete(true)
+        end
+        if collisionGroups.matches(cItem.group, 'obstacle') then
           self:delete(true)
         end
       end
@@ -182,7 +203,7 @@ local FrostOrb = Component.createFactory({
     )
   end,
   drawOrder = function(self)
-    return Component.groups.all:drawOrder(self)
+    return 5
   end,
   onExpire = function(parent)
     parent.expiring = true

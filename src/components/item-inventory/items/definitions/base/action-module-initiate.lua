@@ -17,7 +17,7 @@ return {
 
 		info = {
 			cooldown = 0.1,
-			actionSpeed = 0.25,
+			actionSpeed = 0.2,
 			energyCost = 1
 		},
 

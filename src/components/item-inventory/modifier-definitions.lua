@@ -31,18 +31,18 @@ return {
     range = RangeCalculator(10, 100, 1)
   },
   maxHealth = {
-    range = RangeCalculator(50, 100, 1)
+    range = RangeCalculator(20, 50, 1)
   },
   healthRegeneration = {
-    range = RangeCalculator(1, 2, 1)
+    range = RangeCalculator(0.5, 1, 1)
   },
   maxEnergy = {
     range = RangeCalculator(10, 20, 1)
   },
   energyRegeneration = {
-    range = RangeCalculator(1, 2, 1)
+    range = RangeCalculator(0.4, 1, 1)
   },
   moveSpeed = {
-    range = RangeCalculator(10, 15, 1)
+    range = RangeCalculator(2, 5, 1)
   },
 }

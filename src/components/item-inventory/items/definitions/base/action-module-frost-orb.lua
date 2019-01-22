@@ -24,14 +24,15 @@ return {
 		category = itemConfig.category.ACTION_MODULE,
 
 		info = {
-			cooldown = 1,
-			actionSpeed = 0.25,
+			cooldown = 1.1,
+			actionSpeed = 0.35,
 			energyCost = 6
 		},
 
 		onActivate = require(require('alias').path.items..'.inventory-actives.equip-on-click')(),
 		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.frost-orb')({
-      coldDamage = Vec2(1, 2)
+			coldDamage = Vec2(1, 2),
+			lifeTime = 0.5
 		})
 	}
 }

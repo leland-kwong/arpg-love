@@ -28,7 +28,7 @@ return itemSystem.registerModule({
         speed = 150,
         projectileSpeed = 250,
         projectileRate = 5,
-        projectileLifeTime = 0.5
+        projectileLifeTime = props.lifeTime or 0.5
 			}
 		}
 	end,

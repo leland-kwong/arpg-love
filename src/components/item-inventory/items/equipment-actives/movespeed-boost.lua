@@ -49,7 +49,6 @@ return itemSystem.registerModule({
           local shouldMakeImages = self.lifetime > 0
           if shouldMakeImages then
             local colorChange = (#self.images * 40)
-            -- local color = {Color.rgba255(244, 65, 244 - colorChange)}
             local color = {Color.rgba255(244 - colorChange, 244, 65)}
 
             local ox, oy = playerRef.animation:getSourceOffset()
@@ -93,8 +92,8 @@ return itemSystem.registerModule({
               image.sprite,
               image.position.x,
               image.position.y,
-              math.rad(playerRef.angle),
-              1,
+              0,
+              playerRef.facingDirectionX > 0 and 1 or -1,
               1,
               image.ox,
               image.oy
