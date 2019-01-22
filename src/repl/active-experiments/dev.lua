@@ -45,6 +45,9 @@ function M.init(self)
   end
 
   self.listeners = {
+    msgBus.on('*', function(_, msgType)
+      -- print(msgType)
+    end),
     msgBus.on('KEY_PRESSED', function(ev)
       if ev.key == 'f1' then
         msgBus.send(msgBus.DEV_MENU_TOGGLE)
