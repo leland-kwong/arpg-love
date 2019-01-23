@@ -74,6 +74,6 @@ return Component.createFactory({
     love.graphics.setStencilTest()
   end,
   drawOrder = function(self)
-    return Component.groups.all:drawOrder(self) + 1
+    return Component.groups.all:drawOrder(self)
   end
 })

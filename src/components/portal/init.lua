@@ -118,7 +118,8 @@ local Portal = {
     local PortalAnimation = require 'components.portal.animation'
     PortalAnimation.create({
       x = self.x,
-      y = self.y
+      y = self.y,
+      z = 6
     }):setParent(self)
   end,
   update = function(self, dt)
