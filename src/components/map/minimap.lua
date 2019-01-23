@@ -16,8 +16,8 @@ local minimapTileRenderers = {
   unwalkable = function(self, x, y)
     love.graphics.setColor(COLOR_WALL)
     local rectSize = 1
-    local x = (self.x * rectSize) + x
-    local y = (self.y * rectSize) + y
+    local x = x
+    local y = y
     love.graphics.rectangle(
       'fill',
       x, y, rectSize, rectSize
@@ -26,8 +26,8 @@ local minimapTileRenderers = {
   walkable = function(self, x, y)
     love.graphics.setColor(COLOR_GROUND)
     local rectSize = 1
-    local x = (self.x * rectSize) + x
-    local y = (self.y * rectSize) + y
+    local x = x
+    local y = y
     love.graphics.rectangle(
       'fill',
       x, y, rectSize, rectSize
@@ -140,7 +140,7 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
     local cameraX, cameraY  = self.camera:getPosition()
     local Position = require 'utils.position'
     local tx, ty = centerX - cameraX/self.gridSize, centerY - cameraY/self.gridSize
-    love.graphics.translate(tx, ty)
+    love.graphics.translate(self.x + tx, self.y + ty)
     love.graphics.setColor(1,1,1,1)
     love.graphics.setBlendMode('alpha')
     love.graphics.draw(self.canvas)

@@ -67,12 +67,18 @@ local zonesLayer = F.find(overworldMapDefinition.layers, function(layer)
 end)
 
 local function getNextPlayerPosition(self)
-  local zoneData = F.find(zonesLayer.objects, function(zone)
-    return zone.name == 'zone_1_1'
-  end)
-  local x, y = self.x + zoneData.x,
-    self.y + zoneData.y
-  return x, y
+  local playerRef = Component.get('PLAYER')
+  if playerRef then
+    return playerRef.x, playerRef.y
+  end
+
+  return 0,0
+  -- local zoneData = F.find(zonesLayer.objects, function(zone)
+  --   return zone.name == 'zone_1_1'
+  -- end)
+  -- local x, y = self.x + zoneData.x,
+  --   self.y + zoneData.y
+  -- return x, y
 end
 
 local mask_shader = love.graphics.newShader[[
@@ -104,8 +110,8 @@ local OverworldMap = Component.createFactory({
         startY = 0,
         dx = 0,
         dy = 0,
-        x = w/2 - playerX,
-        y = h/2 - playerY
+        x = w/2 - playerX/16,
+        y = h/2 - playerY/16
       },
       scale = 1,
       nextScale = 2
@@ -184,20 +190,29 @@ local OverworldMap = Component.createFactory({
       -- move to final translation
       love.graphics.translate(tx, ty)
 
-      local mapZone = AnimationFactory:newStaticSprite('gui-zone-1')
-      mapZone:draw(
-        self.x,
-        self.y
-      )
+      local minimapRef = Component.get('miniMap')
+      local gridSize = 16
+      if minimapRef then
+        local camera = require 'components.camera'
+        local cameraX, cameraY  = camera:getPosition()
+        local tx, ty = centerX - cameraX/gridSize, centerY - cameraY/gridSize
+        love.graphics.draw(minimapRef.canvas, 0, 0)
+      end
+
+      -- local mapZone = AnimationFactory:newStaticSprite('gui-zone-1')
+      -- mapZone:draw(
+      --   self.x,
+      --   self.y
+      -- )
 
       local playerX, playerY = getNextPlayerPosition(self)
       PlayerPositionIndicator(
-        playerX, playerY, self.clock
+        playerX/gridSize, playerY/gridSize, self.clock
       )
 
     love.graphics.pop()
-
     love.graphics.setStencilTest()
+
   end,
   drawOrder = function()
     return 9
