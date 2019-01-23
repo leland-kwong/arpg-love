@@ -74,6 +74,17 @@ local menuButtonsList = {
     end
   },
   {
+    displayValue = 'Map (m)',
+    normalAni = AnimationFactory:newStaticSprite('gui-main-map-button'),
+    hoverAni = AnimationFactory:newStaticSprite('gui-main-map-button--hover'),
+    badge = function()
+      return 0
+    end,
+    onClick = function()
+      msgBus.send('MAP_TOGGLE')
+    end
+  },
+  {
     displayValue = 'Quests (u)',
     normalAni = AnimationFactory:newStaticSprite('gui-quest-log-button'),
     hoverAni = AnimationFactory:newStaticSprite('gui-quest-log-button--hover'),
@@ -82,17 +93,6 @@ local menuButtonsList = {
     end,
     onClick = function()
       msgBus.send('QUEST_LOG_TOGGLE')
-    end
-  },
-  {
-    displayValue = 'Map (m)',
-    normalAni = AnimationFactory:newStaticSprite('gui-quest-log-button'),
-    hoverAni = AnimationFactory:newStaticSprite('gui-quest-log-button--hover'),
-    badge = function()
-      return 0
-    end,
-    onClick = function()
-      msgBus.send('MAP_TOGGLE')
     end
   },
 }
