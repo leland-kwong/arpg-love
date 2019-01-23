@@ -53,15 +53,32 @@ local function drawDynamicBlocks(self)
   local oBlendMode = love.graphics.getBlendMode()
   love.graphics.setBlendMode('alpha', 'premultiplied')
 
-  for coordIndex, renderFn in pairs(self.blocks) do
-    local x, y = Grid.getCoordinateByIndex(self.grid, coordIndex)
-    love.graphics.push()
-    love.graphics.origin()
-    love.graphics.translate(x, y)
-    love.graphics.scale(1)
-    renderFn()
-    love.graphics.pop()
-  end
+  love.graphics.push()
+
+    for coordIndex, renderFn in pairs(self.blocks) do
+      local x, y = Grid.getCoordinateByIndex(self.grid, coordIndex)
+      love.graphics.origin()
+      love.graphics.translate(x, y)
+      love.graphics.scale(1)
+      renderFn()
+    end
+
+    for _,c in pairs(Component.groups.questObjects.getAll()) do
+      local x,y = c.x/config.gridSize,
+        c.y/config.gridSize
+      love.graphics.origin()
+      love.graphics.translate(x, y)
+      love.graphics.scale(1)
+
+      local AnimationFactory = require 'components.animation-factory'
+      local Color = require 'modules.color'
+      local questGraphic = AnimationFactory:newStaticSprite('gui-quest-point')
+      love.graphics.setColor(Color.PALE_YELLOW)
+      questGraphic:draw(0, 0)
+    end
+
+  love.graphics.pop()
+
   self.blocks = {}
 
   love.graphics.setCanvas()

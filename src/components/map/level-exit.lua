@@ -46,13 +46,15 @@ return Component.createFactory({
   end,
   update = function(self)
     local minimapRef = Component.get('miniMap')
-    self.minimapRenderer = self.minimapRenderer or function()
-      love.graphics.setColor(minimapColor)
-      love.graphics.rectangle('fill', 0, 0, 2, 1)
-      -- entrance direction
-      love.graphics.circle('fill', 1, 3, 2)
+    if minimapRef then
+      self.minimapRenderer = self.minimapRenderer or function()
+        love.graphics.setColor(minimapColor)
+        love.graphics.rectangle('fill', 0, 0, 2, 1)
+        -- entrance direction
+        love.graphics.circle('fill', 1, 3, 2)
+      end
+      minimapRef:renderBlock(self.gridX, self.gridY, self.minimapRenderer)
     end
-    minimapRef:renderBlock(self.gridX, self.gridY, self.minimapRenderer)
 
     local calcDist = require 'utils.math'.dist
     local distFromPlayer = calcDist(

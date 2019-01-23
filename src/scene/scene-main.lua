@@ -68,7 +68,7 @@ function MainScene.init(self)
       local x, y = playerRef:getPosition()
       self.portal
         :set('locationName', 'home')
-        :setPosition(x, y)
+        :setPosition(x, y - 18)
         :setParent(self)
     end),
 
