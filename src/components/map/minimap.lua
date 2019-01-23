@@ -51,7 +51,7 @@ local function drawDynamicBlocks(self)
   for coordIndex, renderFn in pairs(self.blocks) do
     local x, y = Grid.getCoordinateByIndex(self.grid, coordIndex)
     love.graphics.push()
-    love.graphics.translate(self.x + x, self.y + y)
+    love.graphics.translate(x, y)
     renderFn()
     love.graphics.pop()
   end
