@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="60" height="80" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="63">
  <tileset firstgid="1" source="action rpg.tsx"/>
- <tileset firstgid="24" source="home-base.tsx"/>
+ <tileset firstgid="23" source="home-base.tsx"/>
  <layer id="1" name="ground" width="60" height="80">
   <data encoding="csv">
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -247,6 +247,10 @@
   </object>
  </objectgroup>
  <objectgroup color="#ff007f" id="5" name="unique-enemies">
-  <object id="39" template="ai-legendary.tx" x="96" y="542"/>
+  <object id="39" template="ai-legendary.tx" x="96" y="542">
+   <properties>
+    <property name="id" value="r-19-the-mad"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>

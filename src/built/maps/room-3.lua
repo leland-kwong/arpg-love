@@ -16,8 +16,8 @@ return {
       name = "action rpg",
       firstgid = 1,
       filename = "../../../assets/maps/action rpg.tsx",
-      tilewidth = 36,
-      tileheight = 28,
+      tilewidth = 16,
+      tileheight = 16,
       spacing = 0,
       margin = 0,
       columns = 0,
@@ -32,7 +32,7 @@ return {
       },
       properties = {},
       terrains = {},
-      tilecount = 11,
+      tilecount = 10,
       tiles = {
         {
           id = 0,
@@ -93,18 +93,12 @@ return {
           image = "../../../assets/sprites/custom-art/tiles/floor-10.png",
           width = 16,
           height = 16
-        },
-        {
-          id = 22,
-          image = "../../../assets/sprites/custom-art/tiles/treasure-chest.png",
-          width = 36,
-          height = 28
         }
       }
     },
     {
       name = "home-base",
-      firstgid = 24,
+      firstgid = 23,
       filename = "../../../assets/maps/home-base.tsx",
       tilewidth = 960,
       tileheight = 800,
@@ -668,7 +662,9 @@ return {
           height = 48,
           rotation = 0,
           visible = true,
-          properties = {}
+          properties = {
+            ["id"] = "r-19-the-mad"
+          }
         }
       }
     }

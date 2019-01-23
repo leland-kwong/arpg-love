@@ -814,6 +814,19 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/gui/gui-quest-point.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.466667,0.466667</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,4,7,7</rect>
+                <key>scale9Paddings</key>
+                <rect>4,4,7,7</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/gui/gui-skill-tree_node_background.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree_node_blood-rage.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree_node_cooldown-reduction.png</key>
