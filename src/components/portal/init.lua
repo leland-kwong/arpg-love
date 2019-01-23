@@ -113,6 +113,12 @@ local Portal = {
       offset,
       offset - offset * 0.6
     ):addToWorld(collisionWorlds.map)
+
+    local PortalAnimation = require 'components.portal.animation'
+    PortalAnimation.create({
+      x = self.x,
+      y = self.y
+    }):setParent(self)
   end,
   update = function(self, dt)
     self.angle = self.angle + dt * 20
@@ -125,34 +131,6 @@ local Portal = {
     local portalActionEnabled = len > 0
     self.teleportButton:setDisabled(not portalActionEnabled)
     self.collision:update(self.x, self.y)
-  end,
-  draw = function(self)
-    local scaleXDiff = 1 - scaleX
-    local x, y = self.x, self.y
-    local offset = {x = 50, y = 30}
-    love.graphics.setColor(0,0.7,1,0.3)
-    love.graphics.circle('fill', x, y, spiralSize)
-    love.graphics.circle('fill', x, y, spiralSize * 0.8)
-    love.graphics.circle('fill', x, y, spiralSize * 0.5)
-    love.graphics.setColor(0,0.3,0.5,0.3)
-    love.graphics.circle('fill', x, y, spiralSize * 0.2)
-
-    love.graphics.stencil(self.spiralStencil, 'replace', 1)
-    love.graphics.setStencilTest("greater", 0)
-    love.graphics.setColor(1,1,1,0.3)
-    local teleportSpiral = loadImage('built/images/fibonnaci-spiral.png')
-    love.graphics.draw(
-      teleportSpiral,
-      x, y,
-      self.angle,
-      1, 1,
-      offset.x,
-      offset.y
-    )
-    love.graphics.setStencilTest()
-  end,
-  drawOrder = function(self)
-    return self.group:drawOrder(self) + 1
   end
 }
 
