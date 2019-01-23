@@ -24,7 +24,7 @@ return {
 
 		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'(),
 		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.movespeed-boost')({
-			distance = 4,
+			distance = 5,
 			duration = 6/60,
 		})
 	}
