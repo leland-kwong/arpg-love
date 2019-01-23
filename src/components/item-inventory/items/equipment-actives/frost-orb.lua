@@ -34,7 +34,7 @@ return itemSystem.registerModule({
 	end,
 	tooltip = function(item, props)
 		return {
-			template = 'Shoots an orb of frost that releases shards of ice dealing {damageRange} cold damage.',
+			template = 'Creates an orb of frost that releases piercing shards of ice dealing {damageRange} cold damage.',
 			data = {
 				damageRange = {
 					type = 'range',
