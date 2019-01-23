@@ -17,7 +17,7 @@ return Component.createFactory({
   w = 1,
   h = 1,
   group = 'all',
-  color = {1,0,1},
+  color = {1,0.9,0},
   init = function(self)
     self.rect1 = {
       scale = 0,
@@ -55,7 +55,7 @@ return Component.createFactory({
     if lightWorld then
       lightWorld:addLight(self.x, self.y, 20, self.color)
     end
-    love.graphics.setColor(0,0,0)
+    love.graphics.setColor(0,0,0,0.7)
     self.drawRectangle()
 
     love.graphics.setColor(self.color)

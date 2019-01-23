@@ -91,14 +91,15 @@ local Portal = {
         return camera:getMousePosition()
       end,
       draw = function(self)
-        love.graphics.setColor(
-          self.hovered and Color.YELLOW or Color.PRIMARY
-        )
+        love.graphics.setColor(Color.multiplyAlpha(Color.BLACK, 0.8))
         local paddingOffset = padding/2
         love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
-        love.graphics.setColor(Color.BLACK)
-        love.graphics.rectangle('line', self.x, self.y, self.w, self.h)
-        guiText:add(self.portalTooltipText, Color.BLACK, self.x + paddingOffset, self.y + paddingOffset + Font.primary.lineHeight)
+        guiText:add(self.portalTooltipText, Color.WHITE, self.x + paddingOffset, self.y + paddingOffset + Font.primary.lineHeight)
+
+        if self.hovered then
+          love.graphics.setColor(1,1,1)
+          love.graphics.rectangle('line', self.x, self.y, self.w, self.h)
+        end
       end,
       drawOrder = guiDrawOrder
     }):setParent(self)
