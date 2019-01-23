@@ -225,25 +225,16 @@ end
 local SkillBarPreDraw = Component.create({
   setSkill = function(self, skillId, drawFn)
     self.drawBySkillId[skillId] = drawFn
-
-    local oBlendMode = love.graphics.getBlendMode()
-    love.graphics.setBlendMode('alpha', 'premultiplied')
-    love.graphics.setCanvas(self.canvas)
-    love.graphics.clear()
-    for _,drawFn in pairs(self.drawBySkillId) do
-      drawFn()
-    end
-    love.graphics.setCanvas()
-    love.graphics.setBlendMode(oBlendMode)
   end,
   init = function(self)
     Component.addToGroup(self, 'hud')
     self.drawBySkillId = {}
-    self.canvas = love.graphics.newCanvas()
   end,
   draw = function(self)
     love.graphics.setColor(1,1,1)
-    love.graphics.draw(self.canvas)
+    for _,drawFn in pairs(self.drawBySkillId) do
+      drawFn()
+    end
   end,
   drawOrder = function()
     return 2
@@ -283,16 +274,6 @@ function ActiveSkillInfo.init(self)
     end)
   }
 
-  local itemRenderRef = ItemRender.create({
-    draw = function()
-      love.graphics.setColor(1,1,1)
-      skillHandlers[parent.skillId].draw(parent)
-    end,
-    drawOrder = function(self)
-      return self.group:drawOrder(self) + 3
-    end
-  })
-  Component.addToGroup(itemRenderRef:getId(), 'gameWorld', itemRenderRef)
   self.canvas = love.graphics.newCanvas()
 end
 
@@ -345,12 +326,16 @@ function ActiveSkillInfo.draw(self)
   if self.activeItem then
     local boxSize = self.size
     local cooldown, skillCooldown = skillHandlers[self.skillId].getStats()
-    local progress = (skillCooldown - cooldown) / skillCooldown
-    local offsetY = progress * boxSize
-    love.graphics.setColor(1,1,1,0.2)
-    love.graphics.rectangle('fill', self.x, self.y + offsetY, boxSize, boxSize - offsetY)
 
+    local AnimationFactory = require 'components.animation-factory'
+    local pixel = AnimationFactory:newStaticSprite('pixel-white-1x1')
     if cooldown > 0 then
+      local progress = (skillCooldown - cooldown) / skillCooldown
+      local offsetY = progress * boxSize
+      love.graphics.setColor(1,1,1,0.2)
+      -- white box showing cooldown
+      pixel:draw(self.x, self.y + offsetY, 0, boxSize, boxSize - offsetY)
+
       local p = 5 -- padding
       self.hudTextLayer:add(
         string.format('%.1f', cooldown),
@@ -365,14 +350,15 @@ function ActiveSkillInfo.draw(self)
     if (attackRecoveryTime > 0) and (skill.type == 'EQUIPMENT') then
       love.graphics.setBlendMode('add')
       love.graphics.setColor(1,0,0,0.4)
-      love.graphics.rectangle('fill', self.x, self.y, boxSize, boxSize)
+      -- box overlay showing skill unable to be used
+      pixel:draw(self.x, self.y, 0, boxSize, boxSize)
       love.graphics.setBlendMode('alpha')
     end
   end
 end
 
 function ActiveSkillInfo.drawOrder()
-  return SkillBarPreDraw:drawOrder() + 1
+  return SkillBarPreDraw:drawOrder() + 0.1
 end
 
 function ActiveSkillInfo.final(self)
