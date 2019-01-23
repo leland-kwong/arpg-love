@@ -23,12 +23,12 @@ function math_utils.normalizeVector(a, b)
   end
 end
 
-function math_utils.clamp(v, a, b)
-	if (v < a) then
-		return a
+function math_utils.clamp(v, min, max)
+	if (v < min) then
+		return min
 	end
-	if (v > b) then
-		return b
+	if (v > max) then
+		return max
 	end
 	return v
 end
