@@ -39,12 +39,6 @@ return setmetatable({
 		increasedActionSpeed = valueTypeHandlers.percent,
 		energyCostReduction = valueTypeHandlers.percent,
 		cooldownReduction = valueTypeHandlers.percent,
-		energyRegeneration = function(v)
-			return string.format('%1g', v)
-		end,
-		healthRegeneration = function(v)
-			return string.format('%1g', v)
-		end
 	}, {
 		__index = function()
 			return passThrough

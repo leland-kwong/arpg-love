@@ -203,7 +203,7 @@ local FrostOrb = Component.createFactory({
     )
   end,
   drawOrder = function(self)
-    return 5
+    return Component.groups.all:drawOrder(self) + 1
   end,
   onExpire = function(parent)
     parent.expiring = true
