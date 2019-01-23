@@ -1,5 +1,5 @@
 local Component = require 'modules.component'
-local lightBlur = love.graphics.newImage('built/images/light-blur.png')
+local AnimationFactory = require 'components.animation-factory'
 local Vec2 = require 'modules.brinevector'
 local moonshine = require 'modules.moonshine'
 
@@ -80,8 +80,9 @@ local colors = {
 
 -- radius is in pixel units
 local function lightSource(x, y, radius)
-  local scale = (radius * 2) / lightBlur:getPixelWidth()
-  love.graphics.draw(lightBlur, x - radius, y - radius, 0, scale, scale)
+  local lightBlur = AnimationFactory:newStaticSprite('light-blur')
+  local scale = (radius * 2) / lightBlur:getWidth()
+  lightBlur:draw(x, y, 0, scale, scale)
 end
 
 local addParamsMt = {
@@ -149,12 +150,11 @@ return Component.create({
       local Color = require 'modules.color'
 
       -- draw base lines
+      love.graphics.setLineStyle('rough')
+      love.graphics.setBlendMode('alpha')
       for i=1, #self.sources do
         local source = self.sources[i]
-        love.graphics.setLineStyle('rough')
-
         love.graphics.setLineWidth(source.thickness)
-        love.graphics.setBlendMode('alpha')
         love.graphics.setColor(Color.multiplyAlpha(source.color, 0.35 * source.opacity))
         love.graphics.line(source.vertices)
       end
@@ -194,7 +194,6 @@ return Component.create({
       end
 
       love.graphics.setStencilTest()
-
       love.graphics.setCanvas()
 
       love.graphics.setColor(1,1,1)
