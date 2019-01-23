@@ -1,47 +1,24 @@
 local dynamicRequire = require 'utils.dynamic-require'
-local drawBox = dynamicRequire 'components.gui.utils.draw-box'
+local drawBox = require 'components.gui.utils.draw-box'
 local Component = require 'modules.component'
-local AnimationFactory = dynamicRequire 'components.animation-factory'
+local AnimationFactory = require 'components.animation-factory'
 local msgBus = require 'components.msg-bus'
 local MenuManager = require 'modules.menu-manager'
-local PlayerPositionIndicator = dynamicRequire 'components.hud.player-position-indicator'
-local overworldMapDefinition = require 'built.maps.overworld-map'
+local PlayerPositionIndicator = require 'components.hud.player-position-indicator'
+local overworldMapDefinition = dynamicRequire 'built.maps.overworld-map'
 local F = require 'utils.functional'
 local Gui = require 'components.gui.gui'
-
-print(
-  string.format('%.0f', 124.254)
-)
 
 local function getTranslate(state)
   return state.translate.x + state.translate.dx,
     state.translate.y + state.translate.dy
 end
 
-local zonesLayer = F.find(overworldMapDefinition.layers, function(layer)
-  return layer.name == 'zones'
-end)
-
-local function getNextPlayerPosition(self)
-  local zoneData = F.find(zonesLayer.objects, function(zone)
-    return zone.name == 'zone_home'
-  end)
-  local x, y = self.x - 1 + zoneData.x,
-    self.y - 1 + zoneData.y
-  local tx, ty = getTranslate(self.state)
-  return x + tx, y + ty
+local function handleZoom(ev, state)
+  local dy = ev[2]
+  local clamp = require 'utils.math'.clamp
+  state.nextScale = clamp(state.nextScale + dy, 1, 5)
 end
-
-local mask_shader = love.graphics.newShader[[
-   vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
-      float a = Texel(texture, texture_coords).a;
-      if (a == 1.0 || a == 0.0) {
-         // a discarded pixel wont be applied as the stencil.
-         discard;
-      }
-      return vec4(1.0);
-   }
-]]
 
 local AntiClickUnderlay = function()
   local camera = require 'components.camera'
@@ -55,6 +32,60 @@ local AntiClickUnderlay = function()
   })
 end
 
+local function handlePanning(self, event)
+  self.antiClickUnderlay = self.antiClickUnderlay or AntiClickUnderlay():setParent(self)
+
+  -- panning
+  local tx = self.state.translate
+  local scale = self.state.scale
+  tx.startX = event.startX/scale
+  tx.startY = event.startY/scale
+  tx.dx = math.floor(event.dx/scale)
+  tx.dy = math.floor(event.dy/scale)
+end
+
+local function handlePanningEnd(self, event)
+  if self.antiClickUnderlay then
+    self.antiClickUnderlay:delete(true)
+    self.antiClickUnderlay = nil
+  end
+
+  local state = self.state
+  state.movingNode = nil
+
+  -- update tree translation
+  local tx = state.translate
+  tx.x, tx.y = tx.x + tx.dx, tx.y + tx.dy
+  tx.startX = 0
+  tx.startY = 0
+  tx.dx = 0
+  tx.dy = 0
+end
+
+local zonesLayer = F.find(overworldMapDefinition.layers, function(layer)
+  return layer.name == 'zones'
+end)
+
+local function getNextPlayerPosition(self)
+  local zoneData = F.find(zonesLayer.objects, function(zone)
+    return zone.name == 'zone_1_1'
+  end)
+  local x, y = self.x + zoneData.x,
+    self.y + zoneData.y
+  return x, y
+end
+
+local mask_shader = love.graphics.newShader[[
+   vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
+      float a = Texel(texture, texture_coords).a;
+      if (a == 1.0 || a == 0.0) {
+         // a discarded pixel wont be applied as the stencil.
+         discard;
+      }
+      return vec4(1.0);
+   }
+]]
+
 local OverworldMap = Component.createFactory({
   group = 'hud',
   x = 50,
@@ -64,15 +95,20 @@ local OverworldMap = Component.createFactory({
   init = function(self)
     local parent = self
 
+    local playerX, playerY = getNextPlayerPosition(self)
+    local camera = require 'components.camera'
+    local w,h = camera:getSize()
     self.state = {
       translate = {
         startX = 0,
         startY = 0,
         dx = 0,
         dy = 0,
-        x = 0,
-        y = 0
+        x = w/2 - playerX,
+        y = h/2 - playerY
       },
+      scale = 1,
+      nextScale = 2
     }
 
     msgBus.send(msgBus.TOGGLE_MAIN_MENU, false)
@@ -92,34 +128,16 @@ local OverworldMap = Component.createFactory({
 
     self.listeners = {
       msgBus.on(msgBus.MOUSE_DRAG, function(event)
-        self.antiClickUnderlay = self.antiClickUnderlay or AntiClickUnderlay():setParent(self)
-
-        local camera = require 'components.camera'
-        -- panning
-        local tx = self.state.translate
-        tx.startX = event.startX/camera.scale
-        tx.startY = event.startY/camera.scale
-        tx.dx = math.floor(event.dx/camera.scale)
-        tx.dy = math.floor(event.dy/camera.scale)
+        handlePanning(self, event)
       end),
 
       msgBus.on(msgBus.MOUSE_DRAG_END, function(event)
-        if self.antiClickUnderlay then
-          self.antiClickUnderlay:delete(true)
-          self.antiClickUnderlay = nil
-        end
-
-        local state = self.state
-        state.movingNode = nil
-
-        -- update tree translation
-        local tx = state.translate
-        tx.x, tx.y = tx.x + tx.dx, tx.y + tx.dy
-        tx.startX = 0
-        tx.startY = 0
-        tx.dx = 0
-        tx.dy = 0
+        handlePanningEnd(self, ev)
       end),
+
+      msgBus.on('MOUSE_WHEEL_MOVED', function(ev)
+        handleZoom(ev, self.state)
+      end)
     }
 
     self.stencil = function()
@@ -135,24 +153,49 @@ local OverworldMap = Component.createFactory({
     self.h = h - self.y*2
 
     self.clock = (self.clock or 0) + dt
+
+    if self.state.scale ~= self.state.nextScale then
+      local clamp = require 'utils.math'.clamp
+      local ds = clamp(self.state.scale - self.state.nextScale, -1, 1) * -1
+      self.state.scale = self.state.scale + (0.25 * ds)
+    end
   end,
   draw = function(self)
     drawBox(self, 'panelTranslucent')
 
+    local tx, ty = getTranslate(self.state)
+    local scale = self.state.scale
+    local scaleDiff = math.max(0, scale - 1)/scale
+
     love.graphics.stencil(self.stencil, 'replace', 1)
     love.graphics.setStencilTest('greater', 0)
 
-    local tx, ty = getTranslate(self.state)
-    local mapZone = AnimationFactory:newStaticSprite('gui-zone-1')
-    mapZone:draw(
-      self.x + 15 + tx,
-      self.y + 15 + ty
-    )
+    love.graphics.push()
+    love.graphics.origin()
 
-    local playerX, playerY = getNextPlayerPosition(self)
-    PlayerPositionIndicator(
-      playerX, playerY, self.clock
-    )
+      local camera = require 'components.camera'
+      local w,h = camera:getSize()
+      local centerX, centerY = w/2, h/2
+      -- translate to center of screen before zooming
+      love.graphics.translate(centerX, centerY)
+      love.graphics.scale(scale)
+      -- move translation back to origin before doing final translation
+      love.graphics.translate(-centerX * scaleDiff, -centerY * scaleDiff)
+      -- move to final translation
+      love.graphics.translate(tx, ty)
+
+      local mapZone = AnimationFactory:newStaticSprite('gui-zone-1')
+      mapZone:draw(
+        self.x,
+        self.y
+      )
+
+      local playerX, playerY = getNextPlayerPosition(self)
+      PlayerPositionIndicator(
+        playerX, playerY, self.clock
+      )
+
+    love.graphics.pop()
 
     love.graphics.setStencilTest()
   end,
