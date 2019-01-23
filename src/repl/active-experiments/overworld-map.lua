@@ -196,14 +196,10 @@ local OverworldMap = Component.createFactory({
         local camera = require 'components.camera'
         local cameraX, cameraY  = camera:getPosition()
         local tx, ty = centerX - cameraX/gridSize, centerY - cameraY/gridSize
+        love.graphics.setColor(1,1,1)
         love.graphics.draw(minimapRef.canvas, 0, 0)
+        love.graphics.draw(minimapRef.dynamicBlocksCanvas, 0, 0)
       end
-
-      -- local mapZone = AnimationFactory:newStaticSprite('gui-zone-1')
-      -- mapZone:draw(
-      --   self.x,
-      --   self.y
-      -- )
 
       local playerX, playerY = getNextPlayerPosition(self)
       PlayerPositionIndicator(
