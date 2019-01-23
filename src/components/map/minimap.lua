@@ -48,14 +48,28 @@ local function drawPlayerPosition(self, centerX, centerY)
 end
 
 local function drawDynamicBlocks(self)
+  love.graphics.setCanvas(self.dynamicBlocksCanvas)
+  love.graphics.clear()
+  local oBlendMode = love.graphics.getBlendMode()
+  love.graphics.setBlendMode('alpha', 'premultiplied')
+
   for coordIndex, renderFn in pairs(self.blocks) do
     local x, y = Grid.getCoordinateByIndex(self.grid, coordIndex)
     love.graphics.push()
+    love.graphics.origin()
     love.graphics.translate(x, y)
+    love.graphics.scale(1)
     renderFn()
     love.graphics.pop()
   end
   self.blocks = {}
+
+  love.graphics.setCanvas()
+  love.graphics.push()
+  love.graphics.setBlendMode(oBlendMode)
+  love.graphics.setColor(1,1,1)
+  love.graphics.draw(self.dynamicBlocksCanvas)
+  love.graphics.pop()
 end
 
 -- minimap
@@ -80,7 +94,8 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
     -- 1-d array of visited indices
     self.visitedIndices = self.visitedIndices or {}
 
-    self.canvas = love.graphics.newCanvas()
+    self.canvas = love.graphics.newCanvas(4096, 4096)
+    self.dynamicBlocksCanvas = love.graphics.newCanvas(4096, 4096)
 
     local x,y,w,h = self:getRectangle()
     self.stencil = function()
@@ -104,6 +119,15 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
   end,
 
   renderStart = function(self)
+    local x,y,w,h = self:getRectangle()
+    -- backround
+    love.graphics.setColor(0,0,0,0.2)
+    love.graphics.rectangle('fill', x, y, w, h)
+    -- border
+    love.graphics.setLineWidth(0.5)
+    love.graphics.setColor(1,1,1,0.5)
+    love.graphics.rectangle('line', x, y, w, h)
+
     love.graphics.push()
     love.graphics.origin()
     love.graphics.setCanvas(self.canvas)
@@ -147,15 +171,6 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
     drawDynamicBlocks(self, centerX, centerY)
     love.graphics.setStencilTest()
     love.graphics.pop()
-
-    local x,y,w,h = self:getRectangle()
-    -- backround
-    love.graphics.setColor(0,0,0,0.2)
-    love.graphics.rectangle('fill', x, y, w, h)
-    -- border
-    love.graphics.setLineWidth(0.5)
-    love.graphics.setColor(1,1,1,0.5)
-    love.graphics.rectangle('line', x, y, w, h)
 
     drawPlayerPosition(self, centerX, centerY)
   end

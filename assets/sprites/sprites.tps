@@ -216,6 +216,8 @@
                 <false/>
             </struct>
             <key type="filename">custom-art/abilities/bullet/bullet-1.png</key>
+            <key type="filename">custom-art/gui/gui-player-position-indicator-glow.png</key>
+            <key type="filename">custom-art/gui/gui-player-position-indicator.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -344,8 +346,12 @@
             <key type="filename">custom-art/characters/eyeball/eyeball.png</key>
             <key type="filename">custom-art/gui/gui-home-button--hover.png</key>
             <key type="filename">custom-art/gui/gui-home-button.png</key>
+            <key type="filename">custom-art/gui/gui-home-portal-button--hover.png</key>
+            <key type="filename">custom-art/gui/gui-home-portal-button.png</key>
             <key type="filename">custom-art/gui/gui-inventory-button--hover.png</key>
             <key type="filename">custom-art/gui/gui-inventory-button.png</key>
+            <key type="filename">custom-art/gui/gui-main-map-button--hover.png</key>
+            <key type="filename">custom-art/gui/gui-main-map-button.png</key>
             <key type="filename">custom-art/gui/gui-quest-log-button--hover.png</key>
             <key type="filename">custom-art/gui/gui-quest-log-button.png</key>
             <key type="filename">custom-art/gui/gui-skill-tree-button--hover.png</key>
@@ -788,13 +794,14 @@
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>23,20,46,39</rect>
+                <rect>17,11,33,21</rect>
                 <key>scale9Paddings</key>
-                <rect>23,20,46,39</rect>
+                <rect>17,11,33,21</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
             <key type="filename">custom-art/gui/gui-panel-menu-translucent.png</key>
+            <key type="filename">custom-art/gui/gui-panel-menu.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -804,19 +811,6 @@
                 <rect>16,13,32,27</rect>
                 <key>scale9Paddings</key>
                 <rect>16,13,32,27</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">custom-art/gui/gui-panel-menu.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0,0</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>24,20,48,40</rect>
-                <key>scale9Paddings</key>
-                <rect>24,20,48,40</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -861,32 +855,7 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/gui/gui-text-input.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>7,7,13,14</rect>
-                <key>scale9Paddings</key>
-                <rect>7,7,13,14</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">custom-art/gui/gui-zone-1.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0,0</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>88,48,176,96</rect>
-                <key>scale9Paddings</key>
-                <rect>88,48,176,96</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
+            <key type="filename">custom-art/gui/gui-square-border.png</key>
             <key type="filename">custom-art/items/augmentation-defender.png</key>
             <key type="filename">custom-art/items/augmentation-one.png</key>
             <key type="filename">custom-art/items/augmentation-rage.png</key>
@@ -903,10 +872,36 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/items/legendary-item-drop-effect-minimap.png</key>
+            <key type="filename">custom-art/gui/gui-text-input.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>7,7,13,14</rect>
+                <key>scale9Paddings</key>
+                <rect>7,7,13,14</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-zone-1.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>116,48,232,96</rect>
+                <key>scale9Paddings</key>
+                <rect>116,48,232,96</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/items/legendary-item-drop-effect-minimap.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.444444,0.444444</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
