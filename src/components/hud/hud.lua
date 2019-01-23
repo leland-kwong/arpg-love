@@ -84,17 +84,17 @@ local menuButtonsList = {
       msgBus.send('MAP_TOGGLE')
     end
   },
-  {
-    displayValue = 'Quests (u)',
-    normalAni = AnimationFactory:newStaticSprite('gui-quest-log-button'),
-    hoverAni = AnimationFactory:newStaticSprite('gui-quest-log-button--hover'),
-    badge = function()
-      return 0
-    end,
-    onClick = function()
-      msgBus.send('QUEST_LOG_TOGGLE')
-    end
-  },
+  -- {
+  --   displayValue = 'Quests (u)',
+  --   normalAni = AnimationFactory:newStaticSprite('gui-quest-log-button'),
+  --   hoverAni = AnimationFactory:newStaticSprite('gui-quest-log-button--hover'),
+  --   badge = function()
+  --     return 0
+  --   end,
+  --   onClick = function()
+  --     msgBus.send('QUEST_LOG_TOGGLE')
+  --   end
+  -- },
 }
 
 function Hud.init(self)
