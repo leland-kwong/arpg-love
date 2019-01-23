@@ -68,8 +68,8 @@ function DashAbility.update(_, state, dt)
 end
 
 local SlimeSlap =  {
-  range = 3,
-  actionSpeed = 0.7,
+  range = 2,
+  actionSpeed = 0.8,
   cooldown = 0.4
 }
 
@@ -140,7 +140,7 @@ return AiBlueprint({
     physicalResist = 1,
     armor = 700,
     experience = 2,
-    attackRange = 3,
+    attackRange = 2,
     onDestroyStart = onDestroyStart
   },
   create = function()
