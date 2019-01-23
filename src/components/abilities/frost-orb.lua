@@ -63,8 +63,8 @@ local Shard = Component.createFactory({
         )
         local hitParent = cItem.parent
         local sourceId = self.source
-        local hitCoolingDown = isHit and Component.groups.frostOrbTargets.getAll()[sourceId]
-        if isHit and (not hitCoolingDown) then
+        local recentlyHit = isHit and Component.groups.frostOrbTargets.getAll()[sourceId]
+        if isHit and (not recentlyHit) then
           local msgBus = require 'components.msg-bus'
           Component.addToGroup(sourceId, 'frostOrbTargets', {
             hitClock = 0,
