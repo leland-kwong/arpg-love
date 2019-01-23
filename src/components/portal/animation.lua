@@ -36,7 +36,7 @@ return Component.createFactory({
     self.drawRectangle = function()
       love.graphics.push()
       local w,h = rect:getWidth(), rect:getHeight()
-      love.graphics.translate(self.x, self.y)
+      love.graphics.translate(self.x, self.y - self.z)
       love.graphics.rotate(self.rotation)
       love.graphics.rectangle('fill', -w/2, -h/2, w, h)
       love.graphics.pop()
@@ -51,15 +51,17 @@ return Component.createFactory({
     self.rotation = self.rotation + dt
   end,
   draw = function(self)
+    local x, y = self.x, self.y - self.z
+
     local lightWorld = Component.get('lightWorld')
     if lightWorld then
-      lightWorld:addLight(self.x, self.y, 20, self.color)
+      lightWorld:addLight(x, y, 20, self.color)
     end
     love.graphics.setColor(0,0,0,0.7)
     self.drawRectangle()
 
     love.graphics.setColor(self.color)
-    rect:draw(self.x, self.y, self.rotation, self.w, self.h)
+    rect:draw(x, y, self.rotation, self.w, self.h)
 
     love.graphics.setColor(1,1,1)
     love.graphics.stencil(self.stencil, 'replace', 1)
@@ -67,9 +69,9 @@ return Component.createFactory({
 
     love.graphics.setColor(self.color)
     local r1, r2, r3 = self.rect1, self.rect2, self.rect3
-    rect:draw(self.x, self.y, -self.rotation*2, self.w * r1.scale, self.h * r1.scale)
-    rect:draw(self.x, self.y, self.rotation*2, self.w * r2.scale, self.h * r2.scale)
-    rect:draw(self.x, self.y, -self.rotation*2, self.w * r3.scale, self.h * r3.scale)
+    rect:draw(x, y, -self.rotation*2, self.w * r1.scale, self.h * r1.scale)
+    rect:draw(x, y, self.rotation*2, self.w * r2.scale, self.h * r2.scale)
+    rect:draw(x, y, -self.rotation*2, self.w * r3.scale, self.h * r3.scale)
 
     love.graphics.setStencilTest()
   end,

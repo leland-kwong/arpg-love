@@ -6,8 +6,11 @@ local GuiText = require 'components.gui.gui-text'
 local Font = require 'components.font'
 local msgBus = require 'components.msg-bus'
 local collisionWorlds = require 'components.collision-worlds'
+local loadImage = require 'modules.load-image'
 local Color = require 'modules.color'
 
+local spiralScale = 0.4
+local spiralSize = 62 * spiralScale
 local function portalCollisionFilter(item, other)
   if collisionGroups.matches(other.group, collisionGroups.player) then
     return 'touch'
@@ -43,13 +46,13 @@ local Portal = {
   locationName = '', -- name of location
   posOffset = {
     x = 2,
-    y = -18
+    z = 18
   },
   -- debug = true,
   init = function(self)
     local root = self
     self.x = self.x + self.posOffset.x
-    self.y = self.y + self.posOffset.y
+    self.z = self.z + self.posOffset.z
 
     portalOpenSound()
 
@@ -111,7 +114,7 @@ local Portal = {
     PortalAnimation.create({
       x = self.x,
       y = self.y,
-      z = 6
+      z = self.z
     }):setParent(self)
   end,
   update = function(self, dt)
