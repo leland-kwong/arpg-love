@@ -6,12 +6,8 @@ local GuiText = require 'components.gui.gui-text'
 local Font = require 'components.font'
 local msgBus = require 'components.msg-bus'
 local collisionWorlds = require 'components.collision-worlds'
-local loadImage = require 'modules.load-image'
 local Color = require 'modules.color'
 
-local spiralScale = 0.4
-local spiralSize = 62 * spiralScale
-local scaleX, scaleY = 0.8, 1
 local function portalCollisionFilter(item, other)
   if collisionGroups.matches(other.group, collisionGroups.player) then
     return 'touch'
@@ -54,10 +50,6 @@ local Portal = {
     local root = self
     self.x = self.x + self.posOffset.x
     self.y = self.y + self.posOffset.y
-
-    self.spiralStencil = function()
-      love.graphics.circle('fill', self.x, self.y, spiralSize)
-    end
 
     portalOpenSound()
 
