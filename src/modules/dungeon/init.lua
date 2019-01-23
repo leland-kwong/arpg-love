@@ -57,6 +57,9 @@ local objectParsersByType = {
         grid = grid,
         WALKABLE = Map.WALKABLE,
         rarity = function(ai)
+          local O = require 'utils.object-utils'
+          O.assign(ai, obj.properties)
+
           local Color = require 'modules.color'
           local itemConfig = require 'components.item-inventory.items.config'
           return ai:set('rarityColor', Color.RARITY_LEGENDARY)
@@ -100,6 +103,13 @@ local objectParsersByType = {
       SpawnerAi({
         grid = grid,
         WALKABLE = Map.WALKABLE,
+        rarity = function(ai)
+          local O = require 'utils.object-utils'
+          O.assign(ai, obj.properties)
+
+          local aiRarity = require 'components.ai.rarity'
+          return aiRarity(ai)
+        end,
         target = function()
           return Component.get('PLAYER')
         end,

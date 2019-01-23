@@ -9,7 +9,6 @@ local Math = require 'utils.math'
 local animationFactory = require 'components.animation-factory'
 local setProp = require 'utils.set-prop'
 local aiTypes = require 'components.ai.types'
-local aiRarity = require 'components.ai.rarity'
 local Map = require 'modules.map-generator.index'
 local f = require 'utils.functional'
 
@@ -70,7 +69,6 @@ local SpawnerAi = {
   x = 0,
   y = 0,
   moveSpeed = 0,
-  rarity = aiRarity, -- [FUNCTION]
   -- these need to be passed in
   grid = nil,
   WALKABLE = Map.WALKABLE,
@@ -87,6 +85,7 @@ local function AiFactory(props)
     type(self.target) == 'function',
     'target property must be a function'
   )
+  assert(type(self.rarity) == 'function', 'a rarity function must be provided')
 
   local function findNearestTarget(otherX, otherY, otherSightRadius)
     if not self.target then
