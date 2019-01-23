@@ -45,11 +45,11 @@ end
 
 local menuButtonsList = {
   {
-    displayValue = 'Main Menu (esc)',
-    normalAni = AnimationFactory:newStaticSprite('gui-home-button'),
-    hoverAni = AnimationFactory:newStaticSprite('gui-home-button--hover'),
+    displayValue = 'Portal Home (t)',
+    normalAni = AnimationFactory:newStaticSprite('gui-home-portal-button'),
+    hoverAni = AnimationFactory:newStaticSprite('gui-home-portal-button--hover'),
     onClick = function()
-      msgBus.send(msgBus.TOGGLE_MAIN_MENU)
+      msgBus.send(msgBus.PORTAL_OPEN)
     end
   },
   {
@@ -95,6 +95,14 @@ local menuButtonsList = {
   --     msgBus.send('QUEST_LOG_TOGGLE')
   --   end
   -- },
+  {
+    displayValue = 'Main Menu (esc)',
+    normalAni = AnimationFactory:newStaticSprite('gui-home-button'),
+    hoverAni = AnimationFactory:newStaticSprite('gui-home-button--hover'),
+    onClick = function()
+      msgBus.send(msgBus.TOGGLE_MAIN_MENU)
+    end
+  },
 }
 
 function Hud.init(self)
