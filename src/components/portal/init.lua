@@ -48,6 +48,7 @@ local Portal = {
     x = 2,
     z = 18
   },
+  location = {},
   -- debug = true,
   init = function(self)
     local root = self
@@ -66,10 +67,10 @@ local Portal = {
       h = 1,
       onClick = function()
         portalEnterSound()
-        msgBus.send(msgBus.PORTAL_ENTER)
+        msgBus.send(msgBus.PORTAL_ENTER, location)
       end,
       onUpdate = function(self)
-        local portalTooltipText = 'teleport to '..(root.locationName or 'no location')
+        local portalTooltipText = 'teleport to '..(root.location.name or 'no location')
         local textWidth, textHeight = GuiText.getTextSize(portalTooltipText, Font.primary.font)
         self.w = textWidth + padding
         self.h = textHeight + padding

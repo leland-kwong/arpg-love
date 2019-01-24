@@ -60,16 +60,17 @@ function MainScene.init(self)
     end),
 
     msgBus.on(msgBus.PORTAL_OPEN, function()
-      local Portal = require 'components.portal'
-      self.portal = self.portal or Portal.create({
-        id = 'playerPortal'
-      })
       local playerRef = Component.get('PLAYER')
       local x, y = playerRef:getPosition()
-      self.portal
-        :set('locationName', 'home')
-        :setPosition(x, y - 18)
-        :setParent(self)
+      local Portal = require 'components.portal'
+      Portal.create({
+        id = 'playerPortal',
+        x = x,
+        y = y - 18,
+        location = {
+          name = 'home'
+        }
+      }):setParent(self)
     end),
 
     msgBus.on(msgBus.PORTAL_ENTER, function()
