@@ -217,7 +217,6 @@ end)
 
 require 'scene.skill-tree-editor'
 require 'scene.light-test'
-require 'scene.tooltip-test'
 
 function Sandbox.init(self)
   self.activeSceneMenu = nil
