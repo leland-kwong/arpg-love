@@ -10,6 +10,7 @@ local Gui = require 'components.gui.gui'
 local Enum = require 'utils.enum'
 local universeView = dynamicRequire 'components.hud.universe-map.universe-view'
 local config = require 'config.config'
+local Vec2 = require 'modules.brinevector'
 
 local function getTranslate(state)
   return state.translate.x + state.translate.dx,
@@ -196,7 +197,9 @@ local OverworldMap = Component.createFactory({
         dx = 0,
         dy = 0,
         x = 0,
-        y = 0
+        y = 0,
+
+        zoomOffset = Vec2(0, 0),
       },
       scale = 1,
       nextScale = 2,
@@ -260,6 +263,15 @@ local OverworldMap = Component.createFactory({
       local ds = clamp(self.state.scale - self.state.nextScale, -1, 1) * -1
       self.state.scale = self.state.scale + (0.25 * ds)
     end
+
+    local camera = require 'components.camera'
+    local w,h = camera:getSize()
+    local centerX, centerY = w/2, h/2
+    local scale = self.state.scale
+    local scaleDiff = math.max(0, scale - 1)/scale
+    -- adjusts the translate so that when we zoom is zooms in from the center of the screen
+    self.state.translate.zoomOffset = Vec2(centerX/scale - (centerX * scaleDiff),
+      centerY/scale - (centerY * scaleDiff))
   end,
   draw = function(self)
     drawBox(self, 'panelTranslucent')
@@ -278,10 +290,11 @@ local OverworldMap = Component.createFactory({
       local w,h = camera:getSize()
       local centerX, centerY = w/2, h/2
       -- translate to center of screen before zooming
-      love.graphics.translate(centerX, centerY)
+      -- love.graphics.translate(centerX, centerY)
       love.graphics.scale(scale)
       -- move translation back to origin before doing final translation
-      love.graphics.translate(-centerX * scaleDiff, -centerY * scaleDiff)
+      -- love.graphics.translate(-centerX * scaleDiff, -centerY * scaleDiff)
+      love.graphics.translate(self.state.translate.zoomOffset.x, self.state.translate.zoomOffset.y)
       -- move to final translation
       love.graphics.translate(tx, ty)
 
@@ -302,7 +315,7 @@ local OverworldMap = Component.createFactory({
           playerX/gridSize, playerY/gridSize, self.clock
         )
       else
-        universeView()
+        universeView(self.state)
       end
 
     love.graphics.pop()
