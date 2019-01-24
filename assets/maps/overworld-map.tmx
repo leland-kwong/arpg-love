@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="left-down" width="60" height="34" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="79">
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="left-down" width="60" height="34" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="83">
  <tileset firstgid="1" source="overworld-map.tsx"/>
  <objectgroup color="#55ff7f" id="2" name="areas">
-  <object id="69" type="portalPoint" x="64" y="96">
+  <object id="69" type="portalPoint" x="64" y="80">
    <properties>
     <property name="area" value="1_1"/>
    </properties>
    <point/>
   </object>
-  <object id="70" type="portalPoint" x="144" y="96">
+  <object id="70" type="portalPoint" x="144" y="80">
    <properties>
     <property name="area" value="1_2"/>
    </properties>
    <point/>
   </object>
-  <object id="74" type="connectionLine" x="64" y="95" width="80" height="1"/>
+  <object id="81" type="connectionLine" x="76" y="80" width="56" height="1"/>
  </objectgroup>
  <objectgroup id="5" name="gui"/>
  <objectgroup id="4" name="text">

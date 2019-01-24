@@ -5,10 +5,11 @@ local AnimationFactory = dynamicRequire 'components.animation-factory'
 local msgBus = require 'components.msg-bus'
 local MenuManager = require 'modules.menu-manager'
 local PlayerPositionIndicator = require 'components.hud.player-position-indicator'
-local overworldMapDefinition = dynamicRequire 'built.maps.overworld-map'
 local F = require 'utils.functional'
 local Gui = require 'components.gui.gui'
 local Enum = require 'utils.enum'
+local universeView = dynamicRequire 'components.hud.universe-map.universe-view'
+local config = require 'config.config'
 
 local function getTranslate(state)
   return state.translate.x + state.translate.dx,
@@ -31,6 +32,11 @@ local AntiClickUnderlay = function()
     w = w,
     h = h
   })
+end
+
+local function panTo(self, x, y)
+  local tx = self.state.translate
+  tx.x, tx.y = x, y
 end
 
 local function handlePanning(self, event)
@@ -56,16 +62,12 @@ local function handlePanningEnd(self, event)
 
   -- update tree translation
   local tx = state.translate
-  tx.x, tx.y = tx.x + tx.dx, tx.y + tx.dy
+  panTo(self, tx.x + tx.dx, tx.y + tx.dy)
   tx.startX = 0
   tx.startY = 0
   tx.dx = 0
   tx.dy = 0
 end
-
-local zonesLayer = F.find(overworldMapDefinition.layers, function(layer)
-  return layer.name == 'zones'
-end)
 
 local function getNextPlayerPosition(self)
   local playerRef = Component.get('PLAYER')
@@ -74,12 +76,6 @@ local function getNextPlayerPosition(self)
   end
 
   return 0,0
-  -- local zoneData = F.find(zonesLayer.objects, function(zone)
-  --   return zone.name == 'zone_1_1'
-  -- end)
-  -- local x, y = self.x + zoneData.x,
-  --   self.y + zoneData.y
-  -- return x, y
 end
 
 local mask_shader = love.graphics.newShader[[
@@ -114,6 +110,18 @@ local function getLegendPosition()
   local camera = require 'components.camera'
   local w2 = camera:getSize()
   return w2 - legendGraphic:getWidth() - 50, oy
+end
+
+local function switchView(self, view)
+  if (mapViews.UNIVERSE == view) then
+    panTo(self, self.x, self.y)
+  elseif (mapViews.LOCAL == view) then
+    local playerX, playerY = getNextPlayerPosition(self)
+    local camera = require 'components.camera'
+    local w,h = camera:getSize()
+    panTo(self, w/2 - playerX/config.gridSize, h/2 - playerY/config.gridSize)
+  end
+  self.state.view = view
 end
 
 local GuiOverlay = Component.createFactory({
@@ -181,17 +189,14 @@ local OverworldMap = Component.createFactory({
   init = function(self)
     local parent = self
 
-    local playerX, playerY = getNextPlayerPosition(self)
-    local camera = require 'components.camera'
-    local w,h = camera:getSize()
     self.state = {
       translate = {
         startX = 0,
         startY = 0,
         dx = 0,
         dy = 0,
-        x = w/2 - playerX/16,
-        y = h/2 - playerY/16
+        x = 0,
+        y = 0
       },
       scale = 1,
       nextScale = 2,
@@ -199,6 +204,7 @@ local OverworldMap = Component.createFactory({
       view = self.mapView
     }
 
+    switchView(self, self.state.view)
     msgBus.send(msgBus.TOGGLE_MAIN_MENU, false)
     MenuManager.clearAll()
     MenuManager.push(self)
@@ -216,8 +222,8 @@ local OverworldMap = Component.createFactory({
 
     GuiOverlay.create({
       value = self.state.view,
-      onToggle = function(mode)
-        self.state.view = mode
+      onToggle = function(view)
+        switchView(parent, view)
       end
     }):setParent(parent)
 
@@ -296,6 +302,7 @@ local OverworldMap = Component.createFactory({
           playerX/gridSize, playerY/gridSize, self.clock
         )
       else
+        universeView()
       end
 
     love.graphics.pop()

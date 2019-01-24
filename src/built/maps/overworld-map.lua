@@ -8,8 +8,8 @@ return {
   height = 34,
   tilewidth = 16,
   tileheight = 16,
-  nextlayerid = 5,
-  nextobjectid = 79,
+  nextlayerid = 6,
+  nextobjectid = 83,
   properties = {},
   tilesets = {
     {
@@ -67,7 +67,7 @@ return {
           type = "portalPoint",
           shape = "point",
           x = 64,
-          y = 96,
+          y = 80,
           width = 0,
           height = 0,
           rotation = 0,
@@ -82,7 +82,7 @@ return {
           type = "portalPoint",
           shape = "point",
           x = 144,
-          y = 96,
+          y = 80,
           width = 0,
           height = 0,
           rotation = 0,
@@ -92,19 +92,31 @@ return {
           }
         },
         {
-          id = 74,
+          id = 81,
           name = "",
           type = "connectionLine",
           shape = "rectangle",
-          x = 64,
-          y = 95,
-          width = 80,
+          x = 76,
+          y = 80,
+          width = 56,
           height = 1,
           rotation = 0,
           visible = true,
           properties = {}
         }
       }
+    },
+    {
+      type = "objectgroup",
+      id = 5,
+      name = "gui",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      draworder = "topdown",
+      properties = {},
+      objects = {}
     },
     {
       type = "objectgroup",
