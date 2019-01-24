@@ -1,13 +1,14 @@
 local dynamicRequire = require 'utils.dynamic-require'
-local drawBox = require 'components.gui.utils.draw-box'
+local drawBox = dynamicRequire 'components.gui.utils.draw-box'
 local Component = require 'modules.component'
-local AnimationFactory = require 'components.animation-factory'
+local AnimationFactory = dynamicRequire 'components.animation-factory'
 local msgBus = require 'components.msg-bus'
 local MenuManager = require 'modules.menu-manager'
 local PlayerPositionIndicator = require 'components.hud.player-position-indicator'
 local overworldMapDefinition = dynamicRequire 'built.maps.overworld-map'
 local F = require 'utils.functional'
 local Gui = require 'components.gui.gui'
+local Enum = require 'utils.enum'
 
 local function getTranslate(state)
   return state.translate.x + state.translate.dx,
@@ -92,12 +93,91 @@ local mask_shader = love.graphics.newShader[[
    }
 ]]
 
+local mapViews = Enum(
+  'UNIVERSE',
+  'LOCAL'
+)
+
+local oy = 50
+local viewToggleGraphic = AnimationFactory:newStaticSprite('gui-map-gui-view-toggle')
+local function getViewTogglePosition()
+  local Position = require 'utils.position'
+  local w1, h1 = viewToggleGraphic:getWidth(), viewToggleGraphic:getHeight()
+  local camera = require 'components.camera'
+  local w2, h2 = camera:getSize()
+  local ox = Position.boxCenterOffset(w1, h1, w2, h2)
+  return ox, oy
+end
+
+local legendGraphic = AnimationFactory:newStaticSprite('gui-map-gui-legend')
+local function getLegendPosition()
+  local camera = require 'components.camera'
+  local w2 = camera:getSize()
+  return w2 - legendGraphic:getWidth() - 50, oy
+end
+
+local GuiOverlay = Component.createFactory({
+  value = '',
+  init = function(self)
+    local parent = self
+
+    Component.addToGroup(self, 'gui')
+
+    local GuiText = require 'components.gui.gui-text'
+    local textLayer = GuiText.create({
+      font = require 'components.font'.primary.font
+    }):setParent(parent)
+
+    local selectedMode = parent.value
+    local function ToggleButton(x, y, w, h, value)
+      return Gui.create({
+        -- debug = true,
+        x = x,
+        y = y,
+        w = w,
+        h = h,
+        onClick = function(self)
+          parent.onToggle(value)
+          selectedMode = value
+        end,
+        render = function(self)
+          local isSelected = (selectedMode == value)
+          local Color = require 'modules.color'
+          if self.hovered or isSelected then
+            if isSelected then
+              love.graphics.setColor(Color.rgba255(44, 232, 245))
+            else
+              love.graphics.setColor(Color.multiplyAlpha(Color.WHITE, 0.5))
+            end
+            local selectedIndicator = AnimationFactory:newStaticSprite('gui-triangle-small')
+            selectedIndicator:draw(self.x + self.w/2, self.y + 20)
+          end
+        end
+      }):setParent(parent)
+    end
+
+    local x = getViewTogglePosition()
+    local buttonWidth = 48
+    ToggleButton(x, 68, buttonWidth, 20, mapViews.UNIVERSE)
+    ToggleButton(x + buttonWidth, 68, buttonWidth, 20,  mapViews.LOCAL)
+  end,
+
+  draw = function()
+    love.graphics.setColor(1,1,1)
+    viewToggleGraphic:draw(getViewTogglePosition())
+    legendGraphic:draw(getLegendPosition())
+  end,
+})
+
 local OverworldMap = Component.createFactory({
   group = 'hud',
   x = 50,
   y = 50,
   w = 1,
   h = 1,
+
+  mapView = mapViews.UNIVERSE,
+
   init = function(self)
     local parent = self
 
@@ -114,7 +194,9 @@ local OverworldMap = Component.createFactory({
         y = h/2 - playerY/16
       },
       scale = 1,
-      nextScale = 2
+      nextScale = 2,
+
+      view = self.mapView
     }
 
     msgBus.send(msgBus.TOGGLE_MAIN_MENU, false)
@@ -131,6 +213,13 @@ local OverworldMap = Component.createFactory({
         self.h = parent.h
       end
     }):setParent(self)
+
+    GuiOverlay.create({
+      value = self.state.view,
+      onToggle = function(mode)
+        self.state.view = mode
+      end
+    }):setParent(parent)
 
     self.listeners = {
       msgBus.on(msgBus.MOUSE_DRAG, function(event)
@@ -190,25 +279,27 @@ local OverworldMap = Component.createFactory({
       -- move to final translation
       love.graphics.translate(tx, ty)
 
-      local minimapRef = Component.get('miniMap')
-      local gridSize = 16
-      if minimapRef then
-        local camera = require 'components.camera'
-        local cameraX, cameraY  = camera:getPosition()
-        local tx, ty = centerX - cameraX/gridSize, centerY - cameraY/gridSize
-        love.graphics.setColor(1,1,1)
-        love.graphics.draw(minimapRef.canvas, 0, 0)
-        love.graphics.draw(minimapRef.dynamicBlocksCanvas, 0, 0)
-      end
+      if mapViews.LOCAL == self.state.view then
+        local minimapRef = Component.get('miniMap')
+        local gridSize = 16
+        if minimapRef then
+          local camera = require 'components.camera'
+          local cameraX, cameraY  = camera:getPosition()
+          local tx, ty = centerX - cameraX/gridSize, centerY - cameraY/gridSize
+          love.graphics.setColor(1,1,1)
+          love.graphics.draw(minimapRef.canvas, 0, 0)
+          love.graphics.draw(minimapRef.dynamicBlocksCanvas, 0, 0)
+        end
 
-      local playerX, playerY = getNextPlayerPosition(self)
-      PlayerPositionIndicator(
-        playerX/gridSize, playerY/gridSize, self.clock
-      )
+        local playerX, playerY = getNextPlayerPosition(self)
+        PlayerPositionIndicator(
+          playerX/gridSize, playerY/gridSize, self.clock
+        )
+      else
+      end
 
     love.graphics.pop()
     love.graphics.setStencilTest()
-
   end,
   drawOrder = function()
     return 9

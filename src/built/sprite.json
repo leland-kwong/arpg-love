@@ -727,7 +727,7 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":65,"h":48},
 	"sourceSize": {"w":65,"h":48},
-	"pivot": {"x":0.5,"y":0.5}
+	"pivot": {"x":0,"y":0}
 },
 "gui-map-gui-view-toggle":
 {
@@ -736,7 +736,7 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":96,"h":40},
 	"sourceSize": {"w":96,"h":40},
-	"pivot": {"x":0.5,"y":0.5}
+	"pivot": {"x":0,"y":0}
 },
 "gui-map-pointer":
 {
@@ -2680,6 +2680,6 @@
 	"format": "RGBA8888",
 	"size": {"w":1783,"h":127},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:888bedb983e7e7b779663c17d5f65076:e27f06f01ea9f6a41d16e1fe6acd91e0:68d88b3cf7eafc9b5accfffdfb2fda91$"
+	"smartupdate": "$TexturePacker:SmartUpdate:f38938a0232dd71ecab1fa3ccaabca33:a55ec710587004fdf506a238225a9c62:68d88b3cf7eafc9b5accfffdfb2fda91$"
 }
 }
