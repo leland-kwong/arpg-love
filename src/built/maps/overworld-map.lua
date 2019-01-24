@@ -8,16 +8,16 @@ return {
   height = 34,
   tilewidth = 16,
   tileheight = 16,
-  nextlayerid = 4,
-  nextobjectid = 69,
+  nextlayerid = 5,
+  nextobjectid = 79,
   properties = {},
   tilesets = {
     {
       name = "overworld map",
       firstgid = 1,
       filename = "../../../assets/maps/overworld-map.tsx",
-      tilewidth = 496,
-      tileheight = 224,
+      tilewidth = 17,
+      tileheight = 17,
       spacing = 0,
       margin = 0,
       columns = 0,
@@ -32,73 +32,28 @@ return {
       },
       properties = {},
       terrains = {},
-      tilecount = 1,
+      tilecount = 2,
       tiles = {
         {
-          id = 1,
-          image = "../../../assets/sprites/custom-art/gui/gui-zone-1.png",
-          width = 464,
-          height = 192
+          id = 2,
+          image = "../../../assets/sprites/custom-art/gui/gui-map-portal-point.png",
+          width = 17,
+          height = 17
+        },
+        {
+          id = 3,
+          image = "../../../assets/sprites/custom-art/gui/gui-map-quest-point.png",
+          width = 13,
+          height = 13
         }
       }
     }
   },
   layers = {
     {
-      type = "tilelayer",
-      id = 1,
-      name = "graphics",
-      x = 0,
-      y = 0,
-      width = 60,
-      height = 34,
-      visible = true,
-      opacity = 1,
-      offsetx = 0,
-      offsety = 0,
-      properties = {},
-      encoding = "lua",
-      data = {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-      }
-    },
-    {
       type = "objectgroup",
       id = 2,
-      name = "zones",
+      name = "areas",
       visible = true,
       opacity = 1,
       offsetx = 0,
@@ -107,183 +62,44 @@ return {
       properties = {},
       objects = {
         {
-          id = 12,
-          name = "zone_1_1",
-          type = "zone",
+          id = 69,
+          name = "",
+          type = "portalPoint",
           shape = "point",
-          x = 192,
-          y = 80,
+          x = 64,
+          y = 96,
           width = 0,
           height = 0,
           rotation = 0,
           visible = true,
-          properties = {}
+          properties = {
+            ["area"] = "1_1"
+          }
         },
         {
-          id = 37,
-          name = "zone_1_2",
-          type = "zone",
+          id = 70,
+          name = "",
+          type = "portalPoint",
           shape = "point",
-          x = 192,
-          y = 128,
+          x = 144,
+          y = 96,
           width = 0,
           height = 0,
           rotation = 0,
           visible = true,
-          properties = {}
+          properties = {
+            ["area"] = "1_2"
+          }
         },
         {
-          id = 38,
-          name = "zone_1_4",
-          type = "zone",
-          shape = "point",
-          x = 240,
-          y = 80,
-          width = 0,
-          height = 0,
-          rotation = 0,
-          visible = true,
-          properties = {}
-        },
-        {
-          id = 39,
-          name = "zone_1_3",
-          type = "zone",
-          shape = "point",
-          x = 240,
-          y = 128,
-          width = 0,
-          height = 0,
-          rotation = 0,
-          visible = true,
-          properties = {}
-        },
-        {
-          id = 40,
-          name = "zone_1_5",
-          type = "zone",
-          shape = "point",
-          x = 288,
-          y = 80,
-          width = 0,
-          height = 0,
-          rotation = 0,
-          visible = true,
-          properties = {}
-        },
-        {
-          id = 41,
-          name = "zone_2_1",
-          type = "zone",
-          shape = "point",
-          x = 352,
-          y = 80,
-          width = 0,
-          height = 0,
-          rotation = 0,
-          visible = true,
-          properties = {}
-        },
-        {
-          id = 42,
-          name = "zone_2_2",
-          type = "zone",
-          shape = "point",
-          x = 352,
-          y = 128,
-          width = 0,
-          height = 0,
-          rotation = 0,
-          visible = true,
-          properties = {}
-        },
-        {
-          id = 43,
-          name = "zone_2_3",
-          type = "zone",
-          shape = "point",
-          x = 400,
-          y = 128,
-          width = 0,
-          height = 0,
-          rotation = 0,
-          visible = true,
-          properties = {}
-        },
-        {
-          id = 46,
-          name = "zone_2_8",
-          type = "zone",
-          shape = "point",
-          x = 496,
-          y = 176,
-          width = 0,
-          height = 0,
-          rotation = 0,
-          visible = true,
-          properties = {}
-        },
-        {
-          id = 47,
-          name = "zone_2_6",
-          type = "zone",
-          shape = "point",
-          x = 400,
-          y = 176,
-          width = 0,
-          height = 0,
-          rotation = 0,
-          visible = true,
-          properties = {}
-        },
-        {
-          id = 48,
-          name = "zone_2_5",
-          type = "zone",
-          shape = "point",
-          x = 352,
-          y = 176,
-          width = 0,
-          height = 0,
-          rotation = 0,
-          visible = true,
-          properties = {}
-        },
-        {
-          id = 55,
-          name = "zone_2_4",
-          type = "zone",
-          shape = "point",
-          x = 448,
-          y = 128,
-          width = 0,
-          height = 0,
-          rotation = 0,
-          visible = true,
-          properties = {}
-        },
-        {
-          id = 56,
-          name = "zone_2_7",
-          type = "zone",
-          shape = "point",
-          x = 448,
-          y = 176,
-          width = 0,
-          height = 0,
-          rotation = 0,
-          visible = true,
-          properties = {}
-        },
-        {
-          id = 68,
-          name = "zone_home",
-          type = "zone",
-          shape = "point",
-          x = 40,
-          y = 56,
-          width = 0,
-          height = 0,
+          id = 74,
+          name = "",
+          type = "connectionLine",
+          shape = "rectangle",
+          x = 64,
+          y = 95,
+          width = 80,
+          height = 1,
           rotation = 0,
           visible = true,
           properties = {}
@@ -292,8 +108,8 @@ return {
     },
     {
       type = "objectgroup",
-      id = 3,
-      name = "grid-definitions",
+      id = 4,
+      name = "text",
       visible = true,
       opacity = 1,
       offsetx = 0,
@@ -302,199 +118,60 @@ return {
       properties = {},
       objects = {
         {
-          id = 49,
-          name = "room-1",
-          type = "gridBlock",
-          shape = "rectangle",
-          x = 208,
-          y = 160,
-          width = 16,
-          height = 16,
+          id = 71,
+          name = "",
+          type = "",
+          shape = "text",
+          x = 32,
+          y = 48,
+          width = 64,
+          height = 19,
           rotation = 0,
           visible = true,
-          properties = {
-            ["zone"] = "zone_1_1"
-          }
+          text = "Floor 1",
+          fontfamily = "M41_LOVEBIT",
+          pixelsize = 8,
+          wrap = true,
+          color = { 255, 255, 255 },
+          halign = "center",
+          properties = {}
         },
         {
-          id = 51,
-          name = "room-2",
-          type = "gridBlock",
-          shape = "rectangle",
-          x = 208,
-          y = 176,
-          width = 16,
-          height = 16,
+          id = 73,
+          name = "",
+          type = "",
+          shape = "text",
+          x = 112,
+          y = 48,
+          width = 64,
+          height = 19,
           rotation = 0,
           visible = true,
-          properties = {
-            ["zone"] = "zone_1_2"
-          }
+          text = "Floor 2",
+          fontfamily = "M41_LOVEBIT",
+          pixelsize = 8,
+          wrap = true,
+          color = { 255, 255, 255 },
+          halign = "center",
+          properties = {}
         },
         {
-          id = 57,
-          name = "room-3",
-          type = "gridBlock",
-          shape = "rectangle",
-          x = 224,
-          y = 176,
-          width = 16,
-          height = 16,
+          id = 75,
+          name = "",
+          type = "",
+          shape = "text",
+          x = 48,
+          y = 16,
+          width = 112,
+          height = 19,
           rotation = 0,
           visible = true,
-          properties = {
-            ["zone"] = "zone_1_3"
-          }
-        },
-        {
-          id = 58,
-          name = "room-4",
-          type = "gridBlock",
-          shape = "rectangle",
-          x = 224,
-          y = 160,
-          width = 16,
-          height = 16,
-          rotation = 0,
-          visible = true,
-          properties = {
-            ["zone"] = "zone_1_4"
-          }
-        },
-        {
-          id = 59,
-          name = "room-3",
-          type = "gridBlock",
-          shape = "rectangle",
-          x = 240,
-          y = 160,
-          width = 16,
-          height = 16,
-          rotation = 0,
-          visible = true,
-          properties = {
-            ["zone"] = "zone_1_5"
-          }
-        },
-        {
-          id = 60,
-          name = "room-3",
-          type = "gridBlock",
-          shape = "rectangle",
-          x = 352,
-          y = 208,
-          width = 16,
-          height = 16,
-          rotation = 0,
-          visible = true,
-          properties = {
-            ["zone"] = "zone_2_1"
-          }
-        },
-        {
-          id = 61,
-          name = "room-3",
-          type = "gridBlock",
-          shape = "rectangle",
-          x = 352,
-          y = 224,
-          width = 16,
-          height = 16,
-          rotation = 0,
-          visible = true,
-          properties = {
-            ["zone"] = "zone_2_2"
-          }
-        },
-        {
-          id = 62,
-          name = "room-3",
-          type = "gridBlock",
-          shape = "rectangle",
-          x = 368,
-          y = 240,
-          width = 16,
-          height = 16,
-          rotation = 0,
-          visible = true,
-          properties = {
-            ["zone"] = "zone_2_6"
-          }
-        },
-        {
-          id = 63,
-          name = "room-2",
-          type = "gridBlock",
-          shape = "rectangle",
-          x = 368,
-          y = 224,
-          width = 16,
-          height = 16,
-          rotation = 0,
-          visible = true,
-          properties = {
-            ["zone"] = "zone_2_3"
-          }
-        },
-        {
-          id = 64,
-          name = "room-3",
-          type = "gridBlock",
-          shape = "rectangle",
-          x = 384,
-          y = 224,
-          width = 16,
-          height = 16,
-          rotation = 0,
-          visible = true,
-          properties = {
-            ["zone"] = "zone_2_4"
-          }
-        },
-        {
-          id = 65,
-          name = "room-3",
-          type = "gridBlock",
-          shape = "rectangle",
-          x = 384,
-          y = 240,
-          width = 16,
-          height = 16,
-          rotation = 0,
-          visible = true,
-          properties = {
-            ["zone"] = "zone_2_7"
-          }
-        },
-        {
-          id = 66,
-          name = "room-boss-1",
-          type = "gridBlock",
-          shape = "rectangle",
-          x = 400,
-          y = 240,
-          width = 16,
-          height = 16,
-          rotation = 0,
-          visible = true,
-          properties = {
-            ["zone"] = "zone_2_8"
-          }
-        },
-        {
-          id = 67,
-          name = "room-3",
-          type = "gridBlock",
-          shape = "rectangle",
-          x = 352,
-          y = 240,
-          width = 16,
-          height = 16,
-          rotation = 0,
-          visible = true,
-          properties = {
-            ["zone"] = "zone_2_5"
-          }
+          text = "Aureus",
+          fontfamily = "M41_LOVEBIT",
+          wrap = true,
+          color = { 255, 255, 255 },
+          halign = "center",
+          properties = {}
         }
       }
     }

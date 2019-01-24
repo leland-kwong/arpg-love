@@ -149,17 +149,17 @@ local GuiOverlay = Component.createFactory({
             else
               love.graphics.setColor(Color.multiplyAlpha(Color.WHITE, 0.5))
             end
-            local selectedIndicator = AnimationFactory:newStaticSprite('gui-triangle-small')
-            selectedIndicator:draw(self.x + self.w/2, self.y + 20)
+            local selectedIndicator = AnimationFactory:newStaticSprite('gui-selected-indicator')
+            selectedIndicator:draw(self.x + self.w/2, self.y + 1)
           end
         end
       }):setParent(parent)
     end
 
-    local x = getViewTogglePosition()
+    local x, y = getViewTogglePosition(), 72
     local buttonWidth = 48
-    ToggleButton(x, 68, buttonWidth, 20, mapViews.UNIVERSE)
-    ToggleButton(x + buttonWidth, 68, buttonWidth, 20,  mapViews.LOCAL)
+    ToggleButton(x, y, buttonWidth, 20, mapViews.UNIVERSE)
+    ToggleButton(x + buttonWidth, y, buttonWidth, 20,  mapViews.LOCAL)
   end,
 
   draw = function()
