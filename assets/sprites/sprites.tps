@@ -258,7 +258,6 @@
                 <false/>
             </struct>
             <key type="filename">custom-art/abilities/frost-orb/frost-orb-shard.png</key>
-            <key type="filename">custom-art/gui/gui-triangle-small.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -818,7 +817,7 @@
             <key type="filename">custom-art/gui/gui-map-portal-point.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
+                <point_f>0.529412,0.529412</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -880,6 +879,19 @@
                 <rect>4,4,7,7</rect>
                 <key>scale9Paddings</key>
                 <rect>4,4,7,7</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-selected-indicator.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>11,1,21,2</rect>
+                <key>scale9Paddings</key>
+                <rect>11,1,21,2</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
