@@ -5,8 +5,14 @@ local round = require 'utils.math'.round
 local mathUtils = require 'utils.math'
 local config = require 'config.config'
 
-local Camera = function()
-  local camera = {
+local defaults = {
+  screenPosition = function(self)
+    return self.w/2, self.h/2
+  end
+}
+
+local Camera = function(customOptions)
+  local camera = mergeProps({
     x = 0,
     y = 0,
     w = love.graphics.getWidth(),
@@ -16,7 +22,7 @@ local Camera = function()
       x = 0,
       y = 0
     }
-  }
+  }, defaults, customOptions)
 
   local targetPosition = {x = 0, y = 0}
   local lerpDuration = 0
@@ -145,7 +151,7 @@ local Camera = function()
   function camera:attach()
     love.graphics.push()
     love.graphics.origin()
-    love.graphics.translate(self.w/2, self.h/2)
+    love.graphics.translate(self:screenPosition())
     love.graphics.scale(self.scale)
     local tx, ty = -self.x, -self.y
     if self.shakeComponents then
@@ -162,14 +168,16 @@ local Camera = function()
   end
 
   function camera:toWorldCoords(x, y)
-    local wx = ((x) - self.w/2) / self.scale
-    local wy = ((y) - self.h/2) / self.scale
+    local ox, oy = self:screenPosition()
+    local wx = ((x) - ox) / self.scale
+    local wy = ((y) - oy) / self.scale
     return wx + self.x, wy + self.y
   end
 
   function camera:toScreenCoords(x, y)
     local width, height = self:getSize()
-    return x - self.x + width/2, y - self.y + height/2
+    local ox, oy = self:screenPosition()
+    return x - self.x + ox, y - self.y + oy
   end
 
   function camera:getMousePosition()
