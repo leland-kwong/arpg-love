@@ -21,7 +21,8 @@ end
 local function guiDrawOrder(self)
   return 1000
 end
-local guiText = GuiText.create({
+GuiText.create({
+  id = 'PortalTextLayer',
   font = Font.primary.font,
   group = groups.all,
   outline = false,
@@ -43,12 +44,15 @@ end
 local Portal = {
   group = groups.all,
   class = 'portal',
-  locationName = '', -- name of location
   posOffset = {
     x = 2,
     z = 18
   },
-  location = {},
+  style = 1,
+  color = {1,0.9,0},
+  location = {
+    tooltipText = 'no location'
+  },
   -- debug = true,
   init = function(self)
     local root = self
@@ -70,17 +74,11 @@ local Portal = {
         msgBus.send(msgBus.PORTAL_ENTER, location)
       end,
       onUpdate = function(self)
-        local portalTooltipText = 'teleport to '..(root.location.name or 'no location')
+        local portalTooltipText = 'teleport to '..(root.location.tooltipText)
         local textWidth, textHeight = GuiText.getTextSize(portalTooltipText, Font.primary.font)
         self.w = textWidth + padding
         self.h = textHeight + padding
         self.portalTooltipText = portalTooltipText
-
-        local hasChangedPosition = self.x ~= self.prevX or self.y ~= self.prevY
-        if hasChangedPosition then
-          portalOpenSound()
-        end
-        self.prevX, self.prevY = self.x, self.y
       end,
       getMousePosition = function()
         local camera = require 'components.camera'
@@ -90,7 +88,7 @@ local Portal = {
         love.graphics.setColor(Color.multiplyAlpha(Color.BLACK, 0.8))
         local paddingOffset = padding/2
         love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
-        guiText:add(self.portalTooltipText, Color.WHITE, self.x + paddingOffset, self.y + paddingOffset + Font.primary.lineHeight)
+        Component.get('PortalTextLayer'):add(self.portalTooltipText, Color.WHITE, self.x + paddingOffset, self.y + paddingOffset + Font.primary.lineHeight)
 
         if self.hovered then
           love.graphics.setColor(1,1,1)
@@ -113,10 +111,12 @@ local Portal = {
 
     local PortalAnimation = require 'components.portal.animation'
     PortalAnimation.create({
-      x = self.x,
-      y = self.y,
-      z = self.z
-    }):setParent(self)
+      x = root.x,
+      y = root.y,
+      z = root.z,
+      style = root.style,
+      color = root.color
+    }):setParent(root)
   end,
   update = function(self, dt)
     self.angle = self.angle + dt * 20

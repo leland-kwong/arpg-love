@@ -59,20 +59,6 @@ function MainScene.init(self)
       msgBus.send(msgBus.EXPERIENCE_GAIN, math.floor(msgValue.experience))
     end),
 
-    msgBus.on(msgBus.PORTAL_OPEN, function()
-      local playerRef = Component.get('PLAYER')
-      local x, y = playerRef:getPosition()
-      local Portal = require 'components.portal'
-      Portal.create({
-        id = 'playerPortal',
-        x = x,
-        y = y - 18,
-        location = {
-          name = 'home'
-        }
-      }):setParent(self)
-    end),
-
     msgBus.on(msgBus.PORTAL_ENTER, function()
       local HomeBase = require('scene.home-base')
       msgBus.send(

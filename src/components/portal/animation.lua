@@ -10,14 +10,72 @@ local function zoomObject(o, dt)
   end
 end
 
+local animationRenderers = {
+  [1] = function(self, x, y)
+    love.graphics.setColor(0,0,0,0.7)
+    self.drawShape()
+
+    love.graphics.setColor(self.color)
+    rect:draw(x, y, self.rotation)
+
+    love.graphics.setColor(1,1,1)
+    love.graphics.stencil(self.stencil, 'replace', 1)
+    love.graphics.setStencilTest('greater', 0)
+
+    love.graphics.setColor(self.color)
+    local r1, r2, r3 = self.rect1, self.rect2, self.rect3
+    rect:draw(x, y, -self.rotation*2, r1.scale, r1.scale)
+    rect:draw(x, y, self.rotation*2, r2.scale, r2.scale)
+    rect:draw(x, y, -self.rotation*2, r3.scale, r3.scale)
+  end,
+
+  [2] = function(self, x, y)
+    love.graphics.setColor(0,0,0,0.7)
+    self.drawShape()
+
+    love.graphics.setColor(self.color)
+    love.graphics.circle('line', x, y, self.w)
+    -- rect:draw(x, y, self.rotation, self.w, self.h)
+
+    love.graphics.setColor(1,1,1)
+    love.graphics.stencil(self.stencil, 'replace', 1)
+    love.graphics.setStencilTest('greater', 0)
+
+    love.graphics.setColor(self.color)
+    local r1, r2, r3 = self.rect1, self.rect2, self.rect3
+    love.graphics.circle('line', x, y, self.w * r1.scale)
+    love.graphics.circle('line', x, y, self.w * r2.scale)
+    love.graphics.circle('line', x, y, self.w * r3.scale)
+  end
+}
+
+local stencilTypes = {
+  [1] = function(self)
+    love.graphics.push()
+    local w,h = rect:getWidth(), rect:getHeight()
+    love.graphics.translate(self.x, self.y - self.z)
+    love.graphics.rotate(self.rotation)
+    love.graphics.rectangle('fill', -w/2, -h/2, w, h)
+    love.graphics.pop()
+  end,
+
+  [2] = function(self)
+    love.graphics.push()
+    love.graphics.translate(self.x, self.y - self.z)
+    love.graphics.rotate(self.rotation)
+    love.graphics.circle('fill', 0, 0, self.w)
+    love.graphics.pop()
+  end
+}
+
 return Component.createFactory({
-  id = 'PortalExample',
   x = 250,
   y = 100,
-  w = 1,
-  h = 1,
+  w = 22,
+  h = 22,
   group = 'all',
   color = {1,0.9,0},
+  style = 1,
   init = function(self)
     self.rect1 = {
       scale = 0,
@@ -33,15 +91,10 @@ return Component.createFactory({
 
     self.rotation = 0
 
-    self.drawRectangle = function()
-      love.graphics.push()
-      local w,h = rect:getWidth(), rect:getHeight()
-      love.graphics.translate(self.x, self.y - self.z)
-      love.graphics.rotate(self.rotation)
-      love.graphics.rectangle('fill', -w/2, -h/2, w, h)
-      love.graphics.pop()
+    self.drawShape = function()
+      return stencilTypes[self.style](self)
     end
-    self.stencil = self.drawRectangle
+    self.stencil = self.drawShape
   end,
   update = function(self, dt)
     zoomObject(self.rect1, dt*1.15)
@@ -57,22 +110,8 @@ return Component.createFactory({
     if lightWorld then
       lightWorld:addLight(x, y, 20, self.color)
     end
-    love.graphics.setColor(0,0,0,0.7)
-    self.drawRectangle()
 
-    love.graphics.setColor(self.color)
-    rect:draw(x, y, self.rotation, self.w, self.h)
-
-    love.graphics.setColor(1,1,1)
-    love.graphics.stencil(self.stencil, 'replace', 1)
-    love.graphics.setStencilTest('greater', 0)
-
-    love.graphics.setColor(self.color)
-    local r1, r2, r3 = self.rect1, self.rect2, self.rect3
-    rect:draw(x, y, -self.rotation*2, self.w * r1.scale, self.h * r1.scale)
-    rect:draw(x, y, self.rotation*2, self.w * r2.scale, self.h * r2.scale)
-    rect:draw(x, y, -self.rotation*2, self.w * r3.scale, self.h * r3.scale)
-
+    animationRenderers[self.style](self, x, y)
     love.graphics.setStencilTest()
   end,
   drawOrder = function(self)

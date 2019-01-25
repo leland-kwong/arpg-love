@@ -314,7 +314,16 @@ local Player = {
             msgBus.send(msgBus.PLAYER_ACTION_ERROR, 'we cannot portal during boss')
             return
           end
-          msgBus.send(msgBus.PORTAL_OPEN)
+          local x, y = self:getPosition()
+          local Portal = require 'components.portal'
+          Portal.create({
+            id = 'playerPortal',
+            x = x,
+            y = y - 18,
+            location = {
+              tooltipText = 'home'
+            }
+          }):setParent(Component.get('MAIN_SCENE'))
         end
 
         if (keyMap.PAUSE_GAME == key) and (not v.hasModifier) then
