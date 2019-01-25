@@ -48,7 +48,7 @@ end
 function ScreenFx.draw(self)
   if self.currentTween then
     local camera = require 'components.camera'
-    local cameraWidth = camera:getSize() * camera.scale
+    local cameraWidth = camera:getSize(true) * camera.scale
     local scale = cameraWidth / vignette:getPixelWidth()
 
     love.graphics.push()

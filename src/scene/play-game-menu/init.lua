@@ -59,7 +59,7 @@ function NewGameDialogBlueprint.init(self)
   end
 
   local camera = require 'components.camera'
-  local screenWidth, screenHeight = camera:getSize()
+  local screenWidth, screenHeight = camera:getSize(true)
   local width = 250
   local keyHandlers = {
     SUBMIT = 'return',

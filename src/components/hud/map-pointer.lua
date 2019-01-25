@@ -22,7 +22,7 @@ local screenSize = {
 }
 
 local function setScreenBoundsCollisions()
-  local screenWidth, screenHeight = camera:getSize()
+  local screenWidth, screenHeight = camera:getSize(true)
   local isDifferentScreenSize = screenWidth ~= screenSize.width or screenHeight ~= screenSize.height
   if (not isDifferentScreenSize) then
     return

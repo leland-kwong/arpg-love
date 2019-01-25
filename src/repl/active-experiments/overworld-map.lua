@@ -25,7 +25,7 @@ end
 
 local AntiClickUnderlay = function()
   local camera = require 'components.camera'
-  local w, h = camera:getSize()
+  local w, h = camera:getSize(true)
   return Gui.create({
     id = 'AntiClickUnderlay',
     x = 0,
@@ -101,7 +101,7 @@ local function getViewTogglePosition()
   local Position = require 'utils.position'
   local w1, h1 = viewToggleGraphic:getWidth(), viewToggleGraphic:getHeight()
   local camera = require 'components.camera'
-  local w2, h2 = camera:getSize()
+  local w2, h2 = camera:getSize(true)
   local ox = Position.boxCenterOffset(w1, h1, w2, h2)
   return ox, oy
 end
@@ -109,7 +109,7 @@ end
 local legendGraphic = AnimationFactory:newStaticSprite('gui-map-gui-legend')
 local function getLegendPosition()
   local camera = require 'components.camera'
-  local w2 = camera:getSize()
+  local w2 = camera:getSize(true)
   return w2 - legendGraphic:getWidth() - 50, oy
 end
 
@@ -119,7 +119,7 @@ local function switchView(self, view)
   elseif (mapViews.LOCAL == view) then
     local playerX, playerY = getNextPlayerPosition(self)
     local camera = require 'components.camera'
-    local w,h = camera:getSize()
+    local w,h = camera:getSize(true)
     panTo(self, w/2 - playerX/config.gridSize, h/2 - playerY/config.gridSize)
   end
   self.state.view = view
@@ -252,7 +252,7 @@ local OverworldMap = Component.createFactory({
   end,
   update = function(self, dt)
     local camera = require 'components.camera'
-    local w, h = camera:getSize()
+    local w, h = camera:getSize(true)
     self.w = w - self.x*2
     self.h = h - self.y*2
 
@@ -265,7 +265,7 @@ local OverworldMap = Component.createFactory({
     end
 
     local camera = require 'components.camera'
-    local w,h = camera:getSize()
+    local w,h = camera:getSize(true)
     local centerX, centerY = w/2, h/2
     local scale = self.state.scale
     local scaleDiff = math.max(0, scale - 1)/scale
@@ -287,7 +287,7 @@ local OverworldMap = Component.createFactory({
     love.graphics.origin()
 
       local camera = require 'components.camera'
-      local w,h = camera:getSize()
+      local w,h = camera:getSize(true)
       local centerX, centerY = w/2, h/2
       -- translate to center of screen before zooming
       -- love.graphics.translate(centerX, centerY)

@@ -65,8 +65,9 @@ local Camera = function()
     return self
   end
 
-  function camera:getPosition()
-    return self.x, self.y
+  function camera:getPosition(includeScale)
+    local divisor = includeScale and self.scale or 1
+    return self.x/divisor, self.y/divisor
   end
 
   function camera:setScreenPosition(x, y)
@@ -74,8 +75,9 @@ local Camera = function()
     return self
   end
 
-  function camera:getScreenPosition()
-    return self.screenX, self.screenY
+  function camera:getScreenPosition(includeScale)
+    local divisor = includeScale and self.scale or 1
+    return self.screenX/divisor, self.screenY/divisor
   end
 
   function camera:update(dt)
@@ -122,8 +124,9 @@ local Camera = function()
       south / divisor
   end
 
-  function camera:getSize()
-    return self.w/self.scale, self.h/self.scale
+  function camera:getSize(includeScale)
+    local divisor = includeScale and self.scale or 1
+    return self.w/divisor, self.h/divisor
   end
 
   -- userful for debugging

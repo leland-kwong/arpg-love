@@ -30,7 +30,7 @@ function LightTest.update(self)
   local tx, ty = self.playerRef:getPosition()
   self.lw:setPosition(-cameraTranslateX, -cameraTranslateY)
 
-  local cWidth, cHeight = camera:getSize()
+  local cWidth, cHeight = camera:getSize(true)
   self.lw:addLight(
     tx + cWidth/2, ty + cHeight/2,
     50,

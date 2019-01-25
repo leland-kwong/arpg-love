@@ -29,7 +29,7 @@ local healthManaWidth = 63 * 2
 
 local function setupExperienceIndicator(self)
   local w, h = healthManaWidth - 2, 2
-  local winWidth, winHeight = camera:getSize()
+  local winWidth, winHeight = camera:getSize(true)
   local offX, offY = Position.boxCenterOffset(w, h, winWidth, winHeight)
   ExperienceIndicator.create({
     rootStore = self.rootStore,
@@ -114,7 +114,7 @@ function Hud.init(self)
         :consumeSnapshot(mainSceneRef.mapId)
     local minimapW, minimapH = 100, 100
     local minimapMargin = 5
-    local cameraWidth = camera:getSize()
+    local cameraWidth = camera:getSize(true)
     Minimap.create({
       camera = camera,
       grid = mainSceneRef.mapGrid,
@@ -144,7 +144,7 @@ function Hud.init(self)
     end
   }):setParent(self)
 
-  local winWidth, winHeight = camera:getSize()
+  local winWidth, winHeight = camera:getSize(true)
   local barHeight = 18
   local offX, offY = Position.boxCenterOffset(healthManaWidth, barHeight, winWidth, winHeight)
 

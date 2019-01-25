@@ -35,7 +35,7 @@ end
 function PlayerLose.draw(self)
   local gfx = love.graphics
   local titleFont = Font.secondaryLarge.font
-  local camW, camH = camera:getSize()
+  local camW, camH = camera:getSize(true)
 
   gfx.setColor(0,0,0,0.2)
   gfx.rectangle('fill', 0, 0, camW, camH)

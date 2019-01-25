@@ -68,7 +68,7 @@ function M.init(self)
 
               local config = require 'config.config'
               local camera = require 'components.camera'
-              local width, height = camera:getSize()
+              local width, height = camera:getSize(true)
               -- cover full-screen to prevent click-through
               local spawnOverlay = Gui.create({
                 width = width,
@@ -124,7 +124,7 @@ function M.init(self)
             onClick = function()
               closeMenu()
               local camera = require 'components.camera'
-              local width, height = camera:getSize()
+              local width, height = camera:getSize(true)
 
               local EnvironmentInteractable = require 'components.map.environment-interactable'
               local mx, my = camera:getMousePosition()

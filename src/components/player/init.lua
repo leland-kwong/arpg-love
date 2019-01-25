@@ -260,7 +260,7 @@ local Player = {
           activeLog:delete(true)
         else
           local QuestLog = require 'components.hud.quest-log'
-          local cameraWidth = camera:getSize()
+          local cameraWidth = camera:getSize(true)
           local uiWidth = 160
           local offset = 0
           QuestLog.create({
@@ -659,7 +659,7 @@ end
 
 local function updateLightWorld(camera)
   local cameraTranslateX, cameraTranslateY = camera:getPosition()
-  local cWidth, cHeight = camera:getSize()
+  local cWidth, cHeight = camera:getSize(true)
   local lightWorld = Component.get('lightWorld')
   lightWorld:setPosition(-cameraTranslateX + cWidth/2, -cameraTranslateY + cHeight/2)
 end
