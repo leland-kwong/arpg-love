@@ -147,7 +147,6 @@ local Camera = function()
   end
 
   function camera:setScale(scale, _lerpDuration)
-    assert(scale % 1 == 0, 'scale must be integer values')
     lerpScaleDuration = _lerpDuration or 0
     if lerpScaleDuration > 0 then
       targetScale.scale = scale
