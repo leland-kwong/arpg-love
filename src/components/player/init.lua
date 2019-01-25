@@ -311,9 +311,10 @@ local Player = {
           x = x,
           y = y - 18,
           location = {
-            tooltipText = 'home'
+            tooltipText = 'portal home',
+            from = 'player'
           }
-        }):setParent(Component.get('MAIN_SCENE'))
+        })
       end),
 
       msgBus.on(msgBus.KEY_DOWN, function(v)

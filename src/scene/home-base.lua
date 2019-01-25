@@ -21,6 +21,7 @@ local HomeBase = {
   zoneTitle = 'Mothership',
   x = 0,
   y = 5,
+  previousLocation = nil,
   drawOrder = function()
     return 1
   end
@@ -50,10 +51,20 @@ function HomeBase.init(self)
     return obj.name == 'playerPortalPosition'
   end)
 
+  local initialPlayerPosition = f.find(objectsLayer.objects, function(obj)
+    return obj.name == 'initialPlayerPosition'
+  end)
+
   local previousScene = sceneManager:getLastItem()
 
   local Player = require 'components.player'
-  local playerStartPosition = previousScene and playerPortalPosition or universePortalPosition
+  local playerStartPosition = self.previousLocation and
+    (
+      self.previousLocation.from == 'player' and
+        playerPortalPosition or
+        universePortalPosition
+    ) or
+    initialPlayerPosition
   self.player = Player.create({
     x = playerStartPosition.x,
     y = playerStartPosition.y,
@@ -74,17 +85,19 @@ function HomeBase.init(self)
     x = universePortalPosition.x,
     y = universePortalPosition.y,
     location = {
-      tooltipText = defaultMapLayout
+      tooltipText = 'Universe Portal',
+      type = 'universe'
     }
   }):setParent(self)
 
-  if previousScene then
+  if self.previousLocation and self.previousLocation.from == 'player' then
     Portal.create({
       style = 1,
       x = playerPortalPosition.x,
       y = playerPortalPosition.y,
       location = {
-        tooltipText = Dungeon:getData(previousScene.props.mapId).options.layoutType
+        tooltipText = 'Portal back to '..Dungeon:getData(previousScene.props.mapId).options.layoutType,
+        from = 'player'
       }
     }):setParent(self)
   end
@@ -125,26 +138,36 @@ function HomeBase.init(self)
   }):setParent(self)
 
   self.listeners = {
-    msgBus.on(msgBus.PORTAL_ENTER, function()
-      local msgBus = require 'components.msg-bus'
-      local hasPreviousScene = sceneManager:canPop()
-      if (not hasPreviousScene) then
+    msgBus.on(msgBus.PORTAL_ENTER, function(location)
+      if location.type == 'universe' then
+        msgBus.send('MAP_TOGGLE')
+        return
+      end
+
+      local Sound = require 'components.sound'
+      Sound.playEffect('portal-enter.wav')
+
+      if location.from == 'player' then
+        msgBus.send(
+          msgBus.SCENE_STACK_POP
+        )
+        Component.get('PlayerPortal'):delete(true)
+        return
+      end
+
+      if (location.layoutType) then
         local Dungeon = require 'modules.dungeon'
         msgBus.send(msgBus.SCENE_STACK_REPLACE, {
           scene = require 'scene.scene-main',
           props = {
             mapId = Dungeon:new({
-              layoutType = defaultMapLayout,
+              layoutType = location.layoutType,
               nextLevel = 'aureus-floor-2'
             })
           }
         })
         return
       end
-
-      msgBus.send(
-        msgBus.SCENE_STACK_POP
-      )
     end)
   }
 end

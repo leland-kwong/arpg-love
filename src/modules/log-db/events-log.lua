@@ -20,7 +20,7 @@ local function getCompactedLog(gameId)
       itemsAcquired = {},
       quests = {},
       locationsVisited = {
-        ['1_1'] = true
+        ['aureus'] = true
       }
     }
     db:put(eventLogDbKey(gameId), defaultLog)

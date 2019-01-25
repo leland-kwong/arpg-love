@@ -70,15 +70,19 @@ local Portal = {
       w = 1,
       h = 1,
       onClick = function()
-        portalEnterSound()
-        msgBus.send(msgBus.PORTAL_ENTER, self.location)
+        if (not root.portalActionEnabled) then
+          return
+        end
+        msgBus.send(msgBus.PORTAL_ENTER, root.location)
       end,
       onUpdate = function(self)
-        local portalTooltipText = 'teleport to '..(root.location.tooltipText)
+        local portalTooltipText = root.location.tooltipText
         local textWidth, textHeight = GuiText.getTextSize(portalTooltipText, Font.primary.font)
         self.w = textWidth + padding
         self.h = textHeight + padding
         self.portalTooltipText = portalTooltipText
+
+        self:setDrawDisabled(not root.portalActionEnabled)
       end,
       getMousePosition = function()
         local camera = require 'components.camera'
@@ -126,8 +130,7 @@ local Portal = {
       self.collision.y,
       portalCollisionFilter
     )
-    local portalActionEnabled = len > 0
-    self.teleportButton:setDisabled(not portalActionEnabled)
+    self.portalActionEnabled = len > 0
     self.collision:update(self.x, self.y)
   end
 }

@@ -59,11 +59,35 @@ function MainScene.init(self)
       msgBus.send(msgBus.EXPERIENCE_GAIN, math.floor(msgValue.experience))
     end),
 
-    msgBus.on(msgBus.PORTAL_ENTER, function()
+    msgBus.on(msgBus.PORTAL_ENTER, function(location)
+      if location.type == 'universe' then
+        msgBus.send('MAP_TOGGLE')
+        return
+      end
+
+      if (location.layoutType) then
+        local Dungeon = require 'modules.dungeon'
+        msgBus.send(msgBus.SCENE_STACK_REPLACE, {
+          scene = require 'scene.scene-main',
+          props = {
+            mapId = Dungeon:new({
+              layoutType = location.layoutType,
+              nextLevel = 'aureus-floor-2'
+            })
+          }
+        })
+        return
+      end
+
+      local Sound = require 'components.sound'
+      Sound.playEffect('portal-enter.wav')
       local HomeBase = require('scene.home-base')
       msgBus.send(
         msgBus.SCENE_STACK_PUSH, {
-          scene = HomeBase
+          scene = HomeBase,
+          props = {
+            previousLocation = location
+          }
         }
       )
     end)

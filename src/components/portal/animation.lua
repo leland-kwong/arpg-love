@@ -35,7 +35,6 @@ local animationRenderers = {
 
     love.graphics.setColor(self.color)
     love.graphics.circle('line', x, y, self.w)
-    -- rect:draw(x, y, self.rotation, self.w, self.h)
 
     love.graphics.setColor(1,1,1)
     love.graphics.stencil(self.stencil, 'replace', 1)
@@ -69,8 +68,8 @@ local stencilTypes = {
 }
 
 return Component.createFactory({
-  x = 250,
-  y = 100,
+  x = 0,
+  y = 0,
   w = 22,
   h = 22,
   group = 'all',
