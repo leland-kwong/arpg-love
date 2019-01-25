@@ -307,7 +307,7 @@ local Player = {
         local x, y = self:getPosition()
         local Portal = require 'components.portal'
         Portal.create({
-          id = 'playerPortal',
+          id = 'PlayerPortal',
           x = x,
           y = y - 18,
           location = {

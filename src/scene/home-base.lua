@@ -10,7 +10,6 @@ local collisionWorlds = require 'components.collision-worlds'
 local Portal = require 'components.portal'
 local StarField = require 'components.star-field'
 local loadImage = require 'modules.load-image'
-local imageObj = loadImage('built/images/pixel-1x1-white.png')
 local sceneManager = require 'scene.manager'
 
 local inspect = require 'utils.inspect'
@@ -43,20 +42,26 @@ function HomeBase.init(self)
     return layer.name == 'objects'
   end)
 
-  local startPosition = f.find(objectsLayer.objects, function(obj)
-    return obj.name == 'startPosition'
+  local universePortalPosition = f.find(objectsLayer.objects, function(obj)
+    return obj.name == 'universePortalPosition'
   end)
 
+  local playerPortalPosition = f.find(objectsLayer.objects, function(obj)
+    return obj.name == 'playerPortalPosition'
+  end)
+
+  local previousScene = sceneManager:getLastItem()
+
   local Player = require 'components.player'
+  local playerStartPosition = previousScene and playerPortalPosition or universePortalPosition
   self.player = Player.create({
-    x = startPosition.x,
-    y = startPosition.y,
+    x = playerStartPosition.x,
+    y = playerStartPosition.y,
     drawOrder = function(self)
       return self.group:drawOrder(self) + 1
     end
   }):setParent(self)
 
-  local previousScene = sceneManager:getLastItem()
   local Dungeon = require 'modules.dungeon'
 
   local homeBaseMapId = Dungeon:new({
@@ -64,10 +69,25 @@ function HomeBase.init(self)
   })
 
   Portal.create({
-    x = startPosition.x,
-    y = startPosition.y,
-    locationName = previousScene and Dungeon:getData(previousScene.props.mapId).name or defaultMapLayout
+    style = 2,
+    color = {1,1,1},
+    x = universePortalPosition.x,
+    y = universePortalPosition.y,
+    location = {
+      tooltipText = defaultMapLayout
+    }
   }):setParent(self)
+
+  if previousScene then
+    Portal.create({
+      style = 1,
+      x = playerPortalPosition.x,
+      y = playerPortalPosition.y,
+      location = {
+        tooltipText = Dungeon:getData(previousScene.props.mapId).options.layoutType
+      }
+    }):setParent(self)
+  end
 
   Component.create({
     group = groups.all,

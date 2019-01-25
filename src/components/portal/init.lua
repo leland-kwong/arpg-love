@@ -45,7 +45,7 @@ local Portal = {
   group = groups.all,
   class = 'portal',
   posOffset = {
-    x = 2,
+    x = 0,
     z = 18
   },
   style = 1,
@@ -71,7 +71,7 @@ local Portal = {
       h = 1,
       onClick = function()
         portalEnterSound()
-        msgBus.send(msgBus.PORTAL_ENTER, location)
+        msgBus.send(msgBus.PORTAL_ENTER, self.location)
       end,
       onUpdate = function(self)
         local portalTooltipText = 'teleport to '..(root.location.tooltipText)
