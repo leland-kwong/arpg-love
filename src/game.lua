@@ -47,6 +47,7 @@ local function setViewport()
     love.window.setMode(vw, vh)
     camera
       :setSize(vw, vh)
+      :setScreenPosition(vw/2, vh/2)
       :setScale(config.scale)
     msgBus.send(msgBus.CURSOR_SET, {})
 

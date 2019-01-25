@@ -5,8 +5,10 @@ local overworldMapDefinition = dynamicRequire 'built.maps.overworld-map'
 local F = require 'utils.functional'
 local getFont = require 'components.font'
 local Gui = require 'components.gui.gui'
+local Color = require 'modules.color'
 
 local state = {
+  clock = 0,
   isViewShowing = false,
   mapState = {},
   hoveredPoint = nil
@@ -22,7 +24,7 @@ local function renderTextObjects(textObjects)
     local o = textObjects[i]
     local font = getFont(o.fontfamily, o.pixelsize)
     love.graphics.setFont(font.font)
-    love.graphics.setColor(1,1,1)
+    love.graphics.setColor(Color.WHITE)
     love.graphics.print(o.text, o.x, o.y)
   end
 end
@@ -51,6 +53,16 @@ local function renderPortalConnectionLines(connections)
     local rad = (l.rotation * math.pi) / 180
     pixel:draw(l.x, l.y, rad, l.width, l.height)
   end
+end
+
+local function renderDebugBox(self)
+  love.graphics.push()
+  love.graphics.origin()
+
+  love.graphics.setColor(1,1,0,0.5)
+  love.graphics.rectangle('line', self.x, self.y, self.w, self.h)
+
+  love.graphics.pop()
 end
 
 local function setupInteractionElements()
@@ -90,13 +102,7 @@ local function setupInteractionElements()
         state.hoveredPoint = nil
       end,
       render = function(self)
-        love.graphics.push()
-        love.graphics.origin()
-
-        love.graphics.setColor(1,1,0,0.5)
-        love.graphics.rectangle('line', self.x, self.y, self.w, self.h)
-
-        love.graphics.pop()
+        -- renderDebugBox(self)
       end,
       onClick = function()
         print(p.id)
@@ -116,7 +122,8 @@ Component.create({
   group = 'hud',
   init = function()
   end,
-  update = function(self)
+  update = function(self, dt)
+    state.clock = state.clock + dt
     local isViewStateChange = state.isViewShowing ~= self.previousViewState
     if isViewStateChange then
       if state.isViewShowing then
@@ -155,4 +162,8 @@ return function(mapState)
       return o.type == 'connectionLine'
     end)
   )
+
+  love.graphics.setColor(1,1,1,0.5)
+  local def = overworldMapDefinition
+  love.graphics.rectangle('line', 0, 0, def.width * def.tilewidth, def.height * def.tileheight)
 end

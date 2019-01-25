@@ -18,7 +18,10 @@ local function getCompactedLog(gameId)
     local defaultLog = {
       enemiesKilled = {},
       itemsAcquired = {},
-      quests = {}
+      quests = {},
+      locationsVisited = {
+        ['1_1'] = true
+      }
     }
     db:put(eventLogDbKey(gameId), defaultLog)
     inMemoryLog = defaultLog
@@ -208,6 +211,18 @@ function EventLog.start(gameId)
       self.listeners = setupListeners(self, gameId)
     end,
 
+    update = function()
+      local log = EventLog.read(gameId)
+
+      for locationName in pairs(log.locationsVisited) do
+        Component.addToGroup(
+          locationName,
+          'locationsVisited',
+          true
+        )
+      end
+    end,
+
     final = function(self)
       if self.cleanupTailLog then
         self.cleanupTailLog()
@@ -218,6 +233,7 @@ function EventLog.start(gameId)
 end
 
 function EventLog.read(gameId)
+  assert(gameId ~= nil, '[EventLog.read] invalid game id')
   return getCompactedLog(gameId)
 end
 

@@ -112,7 +112,7 @@ function M.init(self)
                 x = playerRef.x,
                 y = playerRef.y,
                 guaranteedItems = {
-                  itemSystem.create('base.action-module-hammer')
+                  itemSystem.create('legendary.augmentation-module-frenzy')
                 }
               })
             end,

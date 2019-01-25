@@ -66,14 +66,15 @@ return {
           name = "",
           type = "portalPoint",
           shape = "point",
-          x = 64,
-          y = 80,
+          x = 32,
+          y = 64,
           width = 0,
           height = 0,
           rotation = 0,
           visible = true,
           properties = {
-            ["area"] = "1_1"
+            ["area"] = "1_1",
+            ["regionId"] = "75"
           }
         },
         {
@@ -81,14 +82,15 @@ return {
           name = "",
           type = "portalPoint",
           shape = "point",
-          x = 144,
-          y = 80,
+          x = 112,
+          y = 64,
           width = 0,
           height = 0,
           rotation = 0,
           visible = true,
           properties = {
-            ["area"] = "1_2"
+            ["area"] = "1_2",
+            ["regionId"] = "75"
           }
         },
         {
@@ -96,8 +98,8 @@ return {
           name = "",
           type = "connectionLine",
           shape = "rectangle",
-          x = 76,
-          y = 80,
+          x = 44,
+          y = 64,
           width = 56,
           height = 1,
           rotation = 0,
@@ -134,8 +136,8 @@ return {
           name = "",
           type = "",
           shape = "text",
-          x = 32,
-          y = 48,
+          x = 0,
+          y = 32,
           width = 64,
           height = 19,
           rotation = 0,
@@ -153,8 +155,8 @@ return {
           name = "",
           type = "",
           shape = "text",
-          x = 112,
-          y = 48,
+          x = 80,
+          y = 32,
           width = 64,
           height = 19,
           rotation = 0,
@@ -172,8 +174,8 @@ return {
           name = "",
           type = "",
           shape = "text",
-          x = 48,
-          y = 16,
+          x = 16,
+          y = 0,
           width = 112,
           height = 19,
           rotation = 0,
