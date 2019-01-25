@@ -49,7 +49,7 @@ local menuButtonsList = {
     normalAni = AnimationFactory:newStaticSprite('gui-home-portal-button'),
     hoverAni = AnimationFactory:newStaticSprite('gui-home-portal-button--hover'),
     onClick = function()
-      msgBus.send(msgBus.PORTAL_OPEN)
+      msgBus.send(msgBus.PLAYER_PORTAL_OPEN)
     end
   },
   {

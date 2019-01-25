@@ -293,6 +293,24 @@ local Player = {
         PassiveTree.toggle()
       end),
 
+      msgBus.on('PLAYER_PORTAL_OPEN', function()
+        if Component.get('HomeBase') then
+          msgBus.send('PLAYER_ACTION_ERROR', 'Cannot do that here')
+          return
+        end
+
+        local x, y = self:getPosition()
+        local Portal = require 'components.portal'
+        Portal.create({
+          id = 'playerPortal',
+          x = x,
+          y = y - 18,
+          location = {
+            tooltipText = 'home'
+          }
+        }):setParent(Component.get('MAIN_SCENE'))
+      end),
+
       msgBus.on(msgBus.KEY_DOWN, function(v)
         local key = v.key
         local keyMap = userSettings.keyboard
@@ -309,21 +327,12 @@ local Player = {
           msgBus.send('MAP_TOGGLE')
         end
 
-        if (keyMap.PORTAL_OPEN == key) and (not v.hasModifier) then
+        if (keyMap.PLAYER_PORTAL_OPEN == key) and (not v.hasModifier) then
           if self.inBossBattle then
             msgBus.send(msgBus.PLAYER_ACTION_ERROR, 'we cannot portal during boss')
             return
           end
-          local x, y = self:getPosition()
-          local Portal = require 'components.portal'
-          Portal.create({
-            id = 'playerPortal',
-            x = x,
-            y = y - 18,
-            location = {
-              tooltipText = 'home'
-            }
-          }):setParent(Component.get('MAIN_SCENE'))
+          msgBus.send('PLAYER_PORTAL_OPEN')
         end
 
         if (keyMap.PAUSE_GAME == key) and (not v.hasModifier) then
