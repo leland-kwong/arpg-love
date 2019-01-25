@@ -5,12 +5,6 @@ local round = require 'utils.math'.round
 local mathUtils = require 'utils.math'
 local config = require 'config.config'
 
-local defaults = {
-  screenPosition = function(self)
-    return self.w/2, self.h/2
-  end
-}
-
 local Camera = function(customOptions)
   local camera = mergeProps({
     x = 0,
@@ -21,7 +15,11 @@ local Camera = function(customOptions)
     shakeOffset = {
       x = 0,
       y = 0
-    }
+    },
+
+    screenX = 0,
+    screenY = 0
+
   }, defaults, customOptions)
 
   local targetPosition = {x = 0, y = 0}
@@ -70,6 +68,15 @@ local Camera = function(customOptions)
 
   function camera:getPosition()
     return self.x, self.y
+  end
+
+  function camera:setScreenPosition(x, y)
+    self.screenX, self.screenY = x, y
+    return self
+  end
+
+  function camera:getScreenPosition()
+    return self.screenX, self.screenY
   end
 
   function camera:update(dt)
@@ -151,7 +158,7 @@ local Camera = function(customOptions)
   function camera:attach()
     love.graphics.push()
     love.graphics.origin()
-    love.graphics.translate(self:screenPosition())
+    love.graphics.translate(self:getScreenPosition())
     love.graphics.scale(self.scale)
     local tx, ty = -self.x, -self.y
     if self.shakeComponents then
@@ -168,7 +175,7 @@ local Camera = function(customOptions)
   end
 
   function camera:toWorldCoords(x, y)
-    local ox, oy = self:screenPosition()
+    local ox, oy = self:getScreenPosition()
     local wx = ((x) - ox) / self.scale
     local wy = ((y) - oy) / self.scale
     return wx + self.x, wy + self.y
@@ -176,7 +183,7 @@ local Camera = function(customOptions)
 
   function camera:toScreenCoords(x, y)
     local width, height = self:getSize()
-    local ox, oy = self:screenPosition()
+    local ox, oy = self:getScreenPosition()
     return x - self.x + ox, y - self.y + oy
   end
 
