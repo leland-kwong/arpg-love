@@ -18,12 +18,16 @@ return function()
   local function generateMapBlockDefinitions()
     local blocks = {
       'room-2',
+      'room-3',
+      'room-boss-1',
+      -- 'room-1',
+      'room-1',
     }
 
     local mapDefinitions = {
-      mapBlockGenerator,
-      mapBlockGenerator,
-      mapBlockGenerator
+      -- mapBlockGenerator,
+      -- mapBlockGenerator,
+      -- mapBlockGenerator
     }
 
     while #mapDefinitions > 0 do
