@@ -81,6 +81,10 @@ function M.init(self)
                     x = mx/config.gridSize,
                     y = my/config.gridSize,
                     grid = Component.get('MAIN_SCENE').mapGrid,
+                    rarity = function(ai)
+                      local aiRarity = require 'components.ai.rarity'
+                      return aiRarity(ai)
+                    end,
                     target = function()
                       return Component.get('PLAYER')
                     end,
