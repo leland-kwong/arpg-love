@@ -5,8 +5,8 @@ local round = require 'utils.math'.round
 local mathUtils = require 'utils.math'
 local config = require 'config.config'
 
-local Camera = function(customOptions)
-  local camera = mergeProps({
+local Camera = function()
+  local camera = {
     x = 0,
     y = 0,
     w = love.graphics.getWidth(),
@@ -19,8 +19,7 @@ local Camera = function(customOptions)
 
     screenX = 0,
     screenY = 0
-
-  }, defaults, customOptions)
+  }
 
   local targetPosition = {x = 0, y = 0}
   local lerpDuration = 0
