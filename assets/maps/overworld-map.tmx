@@ -2,31 +2,31 @@
 <map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="left-down" width="60" height="34" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="83">
  <tileset firstgid="1" source="overworld-map.tsx"/>
  <objectgroup color="#55ff7f" id="2" name="areas">
-  <object id="69" type="portalPoint" x="32" y="64">
+  <object id="69" type="portalPoint" x="80" y="96">
    <properties>
     <property name="area" value="1_1"/>
     <property name="regionId" value="75"/>
    </properties>
    <point/>
   </object>
-  <object id="70" type="portalPoint" x="112" y="64">
+  <object id="70" type="portalPoint" x="160" y="96">
    <properties>
     <property name="area" value="1_2"/>
     <property name="regionId" value="75"/>
    </properties>
    <point/>
   </object>
-  <object id="81" type="connectionLine" x="44" y="64" width="56" height="1"/>
+  <object id="81" type="connectionLine" x="92" y="96" width="56" height="1"/>
  </objectgroup>
  <objectgroup id="5" name="gui"/>
  <objectgroup id="4" name="text">
-  <object id="71" x="0" y="32" width="64" height="19">
+  <object id="71" x="48" y="64" width="64" height="19">
    <text fontfamily="M41_LOVEBIT" pixelsize="8" wrap="1" color="#ffffff" halign="center">Floor 1</text>
   </object>
-  <object id="73" x="80" y="32" width="64" height="19">
+  <object id="73" x="128" y="64" width="64" height="19">
    <text fontfamily="M41_LOVEBIT" pixelsize="8" wrap="1" color="#ffffff" halign="center">Floor 2</text>
   </object>
-  <object id="75" x="16" y="0" width="112" height="19">
+  <object id="75" x="64" y="32" width="112" height="19">
    <text fontfamily="M41_LOVEBIT" wrap="1" color="#ffffff" halign="center">Aureus</text>
   </object>
  </objectgroup>

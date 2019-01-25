@@ -294,6 +294,11 @@ local Player = {
       end),
 
       msgBus.on('PLAYER_PORTAL_OPEN', function()
+        if self.inBossBattle then
+          msgBus.send(msgBus.PLAYER_ACTION_ERROR, 'we cannot portal during boss')
+          return
+        end
+
         if Component.get('HomeBase') then
           msgBus.send('PLAYER_ACTION_ERROR', 'Cannot do that here')
           return
@@ -327,11 +332,7 @@ local Player = {
           msgBus.send('MAP_TOGGLE')
         end
 
-        if (keyMap.PLAYER_PORTAL_OPEN == key) and (not v.hasModifier) then
-          if self.inBossBattle then
-            msgBus.send(msgBus.PLAYER_ACTION_ERROR, 'we cannot portal during boss')
-            return
-          end
+        if (keyMap.PORTAL_OPEN == key) and (not v.hasModifier) then
           msgBus.send('PLAYER_PORTAL_OPEN')
         end
 
