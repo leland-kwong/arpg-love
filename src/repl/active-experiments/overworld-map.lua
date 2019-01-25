@@ -115,11 +115,13 @@ end
 
 local function switchView(self, view)
   if (mapViews.UNIVERSE == view) then
+    self.state.nextScale = 2
     panTo(self, self.x, self.y)
   elseif (mapViews.LOCAL == view) then
     local playerX, playerY = getNextPlayerPosition(self)
     local camera = require 'components.camera'
     local w,h = camera:getSize(true)
+    self.state.nextScale = 2
     panTo(self, w/2 - playerX/config.gridSize, h/2 - playerY/config.gridSize)
   end
   self.state.view = view

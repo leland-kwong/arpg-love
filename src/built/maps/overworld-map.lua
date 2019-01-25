@@ -66,15 +66,14 @@ return {
           name = "",
           type = "portalPoint",
           shape = "point",
-          x = 32,
-          y = 64,
+          x = 80,
+          y = 96,
           width = 0,
           height = 0,
           rotation = 0,
           visible = true,
           properties = {
-            ["area"] = "1_1",
-            ["regionId"] = "75"
+            ["layoutType"] = "aureus"
           }
         },
         {
@@ -82,15 +81,14 @@ return {
           name = "",
           type = "portalPoint",
           shape = "point",
-          x = 112,
-          y = 64,
+          x = 160,
+          y = 96,
           width = 0,
           height = 0,
           rotation = 0,
           visible = true,
           properties = {
-            ["area"] = "1_2",
-            ["regionId"] = "75"
+            ["layoutType"] = "aureus-floor-2"
           }
         },
         {
@@ -98,8 +96,8 @@ return {
           name = "",
           type = "connectionLine",
           shape = "rectangle",
-          x = 44,
-          y = 64,
+          x = 92,
+          y = 96,
           width = 56,
           height = 1,
           rotation = 0,
@@ -136,8 +134,8 @@ return {
           name = "",
           type = "",
           shape = "text",
-          x = 0,
-          y = 32,
+          x = 48,
+          y = 64,
           width = 64,
           height = 19,
           rotation = 0,
@@ -155,8 +153,8 @@ return {
           name = "",
           type = "",
           shape = "text",
-          x = 80,
-          y = 32,
+          x = 128,
+          y = 64,
           width = 64,
           height = 19,
           rotation = 0,
@@ -174,8 +172,8 @@ return {
           name = "",
           type = "",
           shape = "text",
-          x = 16,
-          y = 0,
+          x = 64,
+          y = 32,
           width = 112,
           height = 19,
           rotation = 0,

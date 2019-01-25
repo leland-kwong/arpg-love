@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="60" height="50" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="21">
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="60" height="50" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="25">
  <tileset firstgid="1" source="action rpg.tsx"/>
- <tileset firstgid="24" source="home-base.tsx"/>
+ <tileset firstgid="23" source="home-base.tsx"/>
  <layer id="1" name="tiles" width="60" height="50">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -53,7 +53,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-24,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+23,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
  <layer id="5" name="walls" width="60" height="50">
@@ -119,13 +119,19 @@
   <object id="17" x="550" y="454" width="11" height="3"/>
  </objectgroup>
  <objectgroup color="#ff00ff" id="3" name="objects">
-  <object id="19" name="startPosition" x="476" y="398" width="8" height="8">
-   <ellipse/>
-  </object>
   <object id="20" name="Lisa, the quest master" type="npc" x="416" y="336" width="16" height="16">
    <properties>
     <property name="id" value="questMaster"/>
    </properties>
+  </object>
+  <object id="22" name="universePortalPosition" x="480" y="403">
+   <point/>
+  </object>
+  <object id="23" name="playerPortalPosition" x="404" y="433">
+   <point/>
+  </object>
+  <object id="24" name="initialPlayerPosition" x="480" y="449">
+   <point/>
   </object>
  </objectgroup>
  <layer id="4" name="ground" width="60" height="50">

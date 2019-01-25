@@ -35,7 +35,7 @@ local function renderPortalPoints(portalPoints)
     local p = portalPoints[i]
     if state.hoveredPoint == p.id then
       love.graphics.setColor(1,1,0)
-    elseif hasLocationBeenVisited(p.properties.area) then
+    elseif hasLocationBeenVisited(p.properties.layoutType) then
       love.graphics.setColor(1,1,1)
     else
       local c = 0.5
@@ -94,7 +94,7 @@ local function setupInteractionElements()
         Component.addToGroup(self, 'guiPortalPoint')
       end,
       onPointerMove = function()
-        if (hasLocationBeenVisited(p.properties.area)) then
+        if (hasLocationBeenVisited(p.properties.layoutType)) then
           state.hoveredPoint = p.id
         end
       end,
@@ -105,7 +105,12 @@ local function setupInteractionElements()
         -- renderDebugBox(self)
       end,
       onClick = function()
-        print(p.id)
+        local msgBus = require 'components.msg-bus'
+        local location = {
+          layoutType = p.properties.layoutType
+        }
+        msgBus.send('PORTAL_ENTER', location)
+        msgBus.send('MAP_TOGGLE')
       end
     })
   end)
@@ -162,8 +167,4 @@ return function(mapState)
       return o.type == 'connectionLine'
     end)
   )
-
-  love.graphics.setColor(1,1,1,0.5)
-  local def = overworldMapDefinition
-  love.graphics.rectangle('line', 0, 0, def.width * def.tilewidth, def.height * def.tileheight)
 end

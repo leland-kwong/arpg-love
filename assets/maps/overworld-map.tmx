@@ -4,15 +4,13 @@
  <objectgroup color="#55ff7f" id="2" name="areas">
   <object id="69" type="portalPoint" x="80" y="96">
    <properties>
-    <property name="area" value="1_1"/>
-    <property name="regionId" value="75"/>
+    <property name="layoutType" value="aureus"/>
    </properties>
    <point/>
   </object>
   <object id="70" type="portalPoint" x="160" y="96">
    <properties>
-    <property name="area" value="1_2"/>
-    <property name="regionId" value="75"/>
+    <property name="layoutType" value="aureus-floor-2"/>
    </properties>
    <point/>
   </object>
