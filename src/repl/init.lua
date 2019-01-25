@@ -6,7 +6,8 @@ local state = {
 
 local function reloadFile(file)
   local info = love.filesystem.getInfo(file)
-  local shouldReload = info.modtime ~= state.lastModified[file]
+  local shouldReload = info.type == 'file' and
+    info.modtime ~= state.lastModified[file]
   state.lastModified[file] = info.modtime
 
   -- reload the file
@@ -28,7 +29,7 @@ Component.create({
     if self.clock >= self.updateFrequency then
       self.clock = 0
 
-      local rootDir = '/repl/active-experiments'
+      local rootDir = 'repl/active-experiments'
       local files = love.filesystem.getDirectoryItems(rootDir)
       for _,f in ipairs(files) do
         local ok, result = pcall(function()
