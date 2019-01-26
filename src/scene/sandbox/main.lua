@@ -216,7 +216,6 @@ msgBus.on(msgBus.MENU_ITEM_REMOVE, function(menuOption)
 end)
 
 require 'scene.skill-tree-editor'
-require 'scene.light-test'
 
 function Sandbox.init(self)
   self.activeSceneMenu = nil
