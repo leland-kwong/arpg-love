@@ -50,10 +50,9 @@ local defaultFilters = {
   obstacle = true,
 }
 
-local ColFilter = memoize(function(groupToMatch, targetsToIgnore)
-  targetsToIgnore = targetsToIgnore or EMPTY
+local ColFilter = memoize(function(groupToMatch)
   return function (item, other)
-    if collisionGroups.matches(other.group, groupToMatch) and (not targetsToIgnore[other.parent]) then
+    if collisionGroups.matches(other.group, groupToMatch) then
       return 'touch'
     end
     return false
@@ -130,7 +129,7 @@ local Bullet = {
     self.x = self.x + dx
     self.y = self.y + dy
     self.animation:update(dt)
-    local _, _, cols, len = self.colObj:move(self.x, self.y, ColFilter(self.targetGroup, self.targetsToIgnore))
+    local _, _, cols, len = self.colObj:move(self.x, self.y, ColFilter(self.targetGroup))
     local hasCollisions = len > 0
     local isExpired = self.lifeTime <= 0
 
@@ -200,8 +199,7 @@ local Bullet = {
     drawBullet(self, 1, 1)
     drawBullet(self, 1.4, 0.5)
     drawBullet(self, 1.8, 0.2)
-    drawBullet(self, 2.2, 0.1)
-    drawBullet(self, 3, 0.1)
+    drawBullet(self, 3, 0.2)
 
     if config.collisionDebug then
       local debug = require 'modules.debug'
