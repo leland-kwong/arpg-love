@@ -844,7 +844,7 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":2,"w":11,"h":11},
 	"sourceSize": {"w":11,"h":11},
-	"pivot": {"x":0.454546,"y":0.454546}
+	"pivot": {"x":0.454545,"y":0.454545}
 },
 "gui-selected-indicator":
 {
@@ -2680,6 +2680,6 @@
 	"format": "RGBA8888",
 	"size": {"w":1788,"h":127},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:b7c10f1771f35d9c58f55e0a7d471159:994a035f01703412372d928c3f242806:68d88b3cf7eafc9b5accfffdfb2fda91$"
+	"smartupdate": "$TexturePacker:SmartUpdate:a040f1e1a0d47bf6d45726b851743a09:afcfc3274b62321c2f291a477133b494:68d88b3cf7eafc9b5accfffdfb2fda91$"
 }
 }
