@@ -222,6 +222,10 @@ function SpawnMinions.update(_, state, dt)
       local minions = Spawn({
         grid = Component.get('MAIN_SCENE').mapGrid,
         WALKABLE = require 'modules.map-generator.index'.WALKABLE,
+        rarity = function(ai)
+          local aiRarity = require 'components.ai.rarity'
+          return aiRarity(ai)
+        end,
         target = function()
           return Component.get('PLAYER')
         end,
