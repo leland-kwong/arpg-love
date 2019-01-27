@@ -116,7 +116,7 @@ function M.init(self)
                 x = playerRef.x,
                 y = playerRef.y,
                 guaranteedItems = {
-                  itemSystem.create('legendary.cheat-boots')
+                  itemSystem.create('development.cheat-boots')
                 }
               })
             end,

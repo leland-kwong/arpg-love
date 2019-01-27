@@ -1,7 +1,7 @@
 local itemConfig = require("components.item-inventory.items.config")
 
 return {
-	type = "legendary.cheat-boots",
+	type = "development.cheat-boots",
 
 	blueprint =  {
 		extraModifiers = {},
