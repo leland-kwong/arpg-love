@@ -184,7 +184,7 @@ local Camera = function()
 
   function camera:toScreenCoords(x, y)
     local width, height = self:getSize()
-    local ox, oy = self:getScreenPosition()
+    local ox, oy = self:getScreenPosition(true)
     return x - self.x + ox, y - self.y + oy
   end
 
