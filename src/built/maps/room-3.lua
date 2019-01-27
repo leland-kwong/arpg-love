@@ -9,7 +9,7 @@ return {
   tilewidth = 16,
   tileheight = 16,
   nextlayerid = 6,
-  nextobjectid = 63,
+  nextobjectid = 64,
   properties = {},
   tilesets = {
     {
@@ -471,6 +471,19 @@ return {
           y = 1264,
           width = 96,
           height = 16,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 63,
+          name = "start point",
+          type = "startPoint",
+          shape = "point",
+          x = 96,
+          y = 112,
+          width = 0,
+          height = 0,
           rotation = 0,
           visible = true,
           properties = {}

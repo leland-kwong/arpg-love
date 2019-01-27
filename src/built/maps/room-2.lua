@@ -9,7 +9,7 @@ return {
   tilewidth = 16,
   tileheight = 16,
   nextlayerid = 6,
-  nextobjectid = 44,
+  nextobjectid = 45,
   properties = {},
   tilesets = {
     {
@@ -368,6 +368,19 @@ return {
           properties = {
             ["props"] = "../../modules/dungeon/treasure-chest-definitions/starting-items.lua"
           }
+        },
+        {
+          id = 44,
+          name = "start point",
+          type = "startPoint",
+          shape = "point",
+          x = 80,
+          y = 80,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          visible = true,
+          properties = {}
         }
       }
     },
