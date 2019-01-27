@@ -10,7 +10,7 @@ local Position = require 'utils.position'
 local itemSystem = require'components.item-inventory.items.item-system'
 local itemConfig = require 'components.item-inventory.items.config'
 local msgBus = require 'components.msg-bus'
-local uiState = require 'main.global-state'.uiState
+local globalState = require 'main.global-state'
 
 local function getItemCategory(slotX, slotY)
 	local Grid = require 'utils.grid'
@@ -112,7 +112,7 @@ function EquipmentPanel.init(self)
 		slotRenderer,
 		function(item, screenX, screenY, slotX, slotY)
 			local Color = require 'modules.color'
-			local pickedUpItem = uiState:get().pickedUpItem
+			local pickedUpItem = globalState.uiState:get().pickedUpItem
 			local isValidSlotForItem = pickedUpItem and
 				(getItemCategory(slotX, slotY) == itemSystem.getDefinition(pickedUpItem).category)
 			local alpha = math.max(math.sin(self.clock), 0.3)

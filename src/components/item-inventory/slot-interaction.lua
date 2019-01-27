@@ -35,13 +35,12 @@ local function getSprite(name)
   return sprite
 end
 
-local uiState = GlobalState.uiState
 local pickedUpitem = {
   set = function(newItem)
-    uiState:set('pickedUpItem', newItem)
+    GlobalState.uiState:set('pickedUpItem', newItem)
   end,
   get = function()
-    return uiState:get().pickedUpItem
+    return GlobalState.uiState:get().pickedUpItem
   end
 }
 
