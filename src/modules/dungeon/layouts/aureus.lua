@@ -19,9 +19,9 @@ return function()
     local blocks = {
       'room-2',
       'room-3',
-      'room-boss-1',
       -- 'room-1',
       'room-1',
+      'room-boss-1',
     }
 
     local mapDefinitions = {
@@ -42,13 +42,11 @@ return function()
   return {
     gridBlockNames = generateMapBlockDefinitions(),
     columns = 2,
-    startPosition = {
-      x = 4,
-      y = 6
-    },
+    startingBlock = 1,
     exitPosition = {
       x = 3,
       y = 1
-    }
+    },
+    nextLevel = 'aureus-floor-2'
   }
 end
