@@ -14,6 +14,7 @@ local StarField = require 'components.star-field'
 local Camera = require 'components.camera'
 
 local MainGameHomeScene = {
+  id = 'HomeScreen',
   group = groups.gui,
   x = 0,
   y = 0
