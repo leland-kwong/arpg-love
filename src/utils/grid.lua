@@ -58,14 +58,14 @@ function Grid.walkNeighbors(grid, x, y, callback, seed, cardinalOnly)
   return seed
 end
 
-function Grid.getIndexByCoordinate(grid, x, y)
-  local numCols = #grid[1]
+function Grid.getIndexByCoordinate(grid, x, y, numCols)
+  numCols = numCols or #grid[1]
   return ((y - 1) * numCols) + x
 end
 
 local ceil = math.ceil
-function Grid.getCoordinateByIndex(grid, index)
-  local numCols = #grid[1]
+function Grid.getCoordinateByIndex(grid, index, numCols)
+  numCols = numCols or #grid[1]
   local y = ceil(index / numCols)
   local x = index - ((y-1) * numCols)
   return x, y

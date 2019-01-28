@@ -1,41 +1,263 @@
+local dynamicRequire = require 'utils.dynamic-require'
 local Component = require 'modules.component'
 local Gui = require 'components.gui.gui'
 local Position = require 'utils.position'
 local Vec2 = require 'modules.brinevector'
-local Grid = require 'utils.grid'
+local Grid = dynamicRequire 'utils.grid'
 local bump = require 'modules.bump'
 local msgBus = require 'components.msg-bus'
+local room1 = require 'built.maps.room-1'
+local F = require 'utils.functional'
+local Color = require 'modules.color'
+local memoize = require 'utils.memoize'
 
 local gridSize = 32
 local colWorld = bump.newWorld(gridSize)
 
+local uiCollisions = {}
+local stateMt = {
+  _onChange = function()
+  end,
+  set = function(self, k, v)
+    local currentVal = self[k]
+    self[k] = v
+    self._onChange(self, k, v, currentVal)
+  end,
+  onChange = function(self, callback)
+    self._onChange = callback
+  end
+}
+stateMt.__index = stateMt
+local state = setmetatable({
+  loadDir = nil,
+  saveDir = nil,
+  fileStateContext = nil,
+  mousePosition = Vec2(0, 0),
+  mouseGridPosition = Vec2(0, 0),
+  objects = {},
+  layouts = {}
+}, stateMt)
+
+-- Lua implementation of PHP scandir function
+function loadLayouts(directory)
+  local layouts = {}
+  local lfs = require 'lua_modules.lfs_ffi'
+  for file in lfs.dir(directory) do
+    local fullPath = directory..'\\'..file
+    local mode = lfs.attributes(fullPath,"mode")
+    if mode == "file" then
+      -- print("found file, "..file)
+      local io = require 'io'
+      local fileDescriptor = io.open(fullPath)
+      table.insert(
+        layouts,
+        {
+          file = file,
+          data = load(
+            fileDescriptor:read('*a')
+          )()
+        }
+      )
+    end
+  end
+  return layouts
+end
+
+state:onChange(function(self, k, val, prevVal)
+  local isNewLoadDir = k == 'loadDir' and val ~= prevVal
+  if isNewLoadDir then
+    state:set('layouts', loadLayouts(val))
+  end
+end)
+
 local function renderMousePosition(self)
   love.graphics.setColor(0,0.5,1)
-  local mgp = self.state.mousePosition
+  local mgp = state.mousePosition
   love.graphics.rectangle('line', mgp.x, mgp.y, gridSize, gridSize)
 end
 
-local function renderObjects(self)
-  love.graphics.setColor(1,1,0)
+local function iterateListAsGrid(list, numCols, callback)
+  for i=1, #list do
+    local val = list[i]
+    local x, y = Grid.getCoordinateByIndex(list, i, numCols)
+    callback(val, x, y)
+  end
+end
 
-  local activeObjects = {}
-  local collisions = self.collisions
-  for i=1, #collisions do
-    local c = collisions[i]
-    activeObjects[c.other.id] = true
+local uiEvents = {
+  MOUSE_CLICKED = function(ev)
+    print(ev)
+  end
+}
+
+local tileRenderer = {
+  [1] = function(x, y, w, h)
+    love.graphics.setColor(1,1,1,0.2)
+    love.graphics.rectangle('fill', x, y, w, h)
+  end,
+  [12] = function(x, y, w, h)
+    love.graphics.setColor(1,1,1,1)
+    love.graphics.rectangle('fill', x, y, w, h)
+  end
+}
+
+local layoutsCanvas = love.graphics.newCanvas(4096, 4096)
+local renderLayouts = memoize(function (layouts, groupOrigin)
+  local oBlendMode = love.graphics.getBlendMode()
+  love.graphics.setBlendMode('alpha', 'premultiplied')
+  love.graphics.setCanvas(layoutsCanvas)
+  love.graphics.clear()
+  love.graphics.setColor(1,1,1)
+
+  local tileRenderSize = 1
+  local layouts = state.layouts
+  local offsetY = 0
+  for i=1, #layouts do
+    local origin = {
+      x = groupOrigin.x,
+      y = groupOrigin.y + offsetY
+    }
+    local l = layouts[i]
+
+    love.graphics.print(l.file, origin.x, origin.y - 20)
+
+    local groundLayer = F.find(l.data.layers, function(l)
+      return l.name == 'ground'
+    end)
+    if groundLayer then
+      iterateListAsGrid(groundLayer.data, 60, function(v, x, y)
+        if tileRenderer[v] then
+          tileRenderer[v](origin.x + x * tileRenderSize, origin.y + y * tileRenderSize, tileRenderSize, tileRenderSize)
+        end
+      end)
+    end
+
+    local wallLayer = F.find(l.data.layers, function(l)
+      return l.name == 'walls'
+    end)
+    if wallLayer then
+      iterateListAsGrid(wallLayer.data, 60, function(v, x, y)
+        if tileRenderer[v] then
+          tileRenderer[v](origin.x + x * tileRenderSize, origin.y + y * tileRenderSize, tileRenderSize, tileRenderSize)
+        end
+      end)
+    end
+
+    offsetY = offsetY + l.data.height + 20
   end
 
-  Grid.forEach(self.state.objects, function(v, x, y)
-    local screenX, screenY = x * gridSize, y * gridSize
-    love.graphics.setColor(0.4,0.4,0.4)
-    love.graphics.rectangle('fill', screenX, screenY, gridSize, gridSize)
-    if activeObjects[v.id] then
-      love.graphics.setLineWidth(2)
-      love.graphics.setColor(1,0,1)
-      love.graphics.rectangle('line', screenX, screenY, gridSize, gridSize)
-    end
-  end)
+  love.graphics.setCanvas()
+  love.graphics.setBlendMode(oBlendMode)
+end)
+
+local loadedDirectoryBox = {
+  id = 'loadedDirectory',
+  x = 10,
+  y = 100,
+  w = 500,
+  h = 30
+}
+
+colWorld:add(
+  loadedDirectoryBox,
+  loadedDirectoryBox.x,
+  loadedDirectoryBox.y,
+  loadedDirectoryBox.w,
+  loadedDirectoryBox.h
+)
+
+local saveDirectoryBox = {
+  id = 'saveDirectory',
+  x = 10,
+  y = 135,
+  w = 500,
+  h = 30
+}
+
+colWorld:add(
+  saveDirectoryBox,
+  saveDirectoryBox.x,
+  saveDirectoryBox.y,
+  saveDirectoryBox.w,
+  saveDirectoryBox.h
+)
+
+local function guiPrint(text, x, y)
+  local getFont = require 'components.font'
+  love.graphics.setFont(getFont.debug.font)
+  love.graphics.print(text, x, y)
 end
+
+local function renderLoadDirectoryBox()
+  local isHovered = F.find(uiCollisions, function(c)
+    return c.other.id == loadedDirectoryBox.id
+  end) ~= nil
+  if isHovered then
+    love.graphics.setColor(1,1,0)
+  else
+    love.graphics.setColor(1,1,1)
+  end
+  local box = loadedDirectoryBox
+  love.graphics.setLineWidth(1)
+  love.graphics.rectangle('line', box.x - 0.5, box.y - 0.5, box.w, box.h)
+  guiPrint(state.loadDir or 'drag folder to load tiled maps', box.x + 3, box.y + 5)
+end
+
+local function renderSaveDirectoryBox()
+  local isHovered = F.find(uiCollisions, function(c)
+    return c.other.id == saveDirectoryBox.id
+  end) ~= nil
+  if isHovered then
+    love.graphics.setColor(1,1,0)
+  else
+    love.graphics.setColor(1,1,1)
+  end
+  local box = saveDirectoryBox
+  love.graphics.setLineWidth(1)
+  love.graphics.rectangle('line', box.x - 0.5, box.y - 0.5, box.w, box.h)
+  guiPrint(state.saveDir or 'drag folder to save to', box.x + 3, box.y + 5)
+end
+
+local function renderGuiElements()
+  renderLoadDirectoryBox()
+  renderSaveDirectoryBox()
+end
+
+local function getFileStateContext(dir)
+  local context = F.find(uiCollisions, function(c)
+    local otherId = c.other.id
+    return otherId == loadedDirectoryBox.id or otherId == saveDirectoryBox.id
+  end)
+
+  local contexts = {
+    [loadedDirectoryBox.id] = 'loadDir',
+    [saveDirectoryBox.id] = 'saveDir'
+  }
+
+  return contexts[context.other.id]
+end
+
+function love.directorydropped(dir)
+  local fileStateContext = getFileStateContext()
+  if fileStateContext then
+    state:set(fileStateContext, dir)
+  end
+end
+
+local getNativeMousePos = dynamicRequire 'repl.shared.native-cursor-position'
+local function getCursorPos()
+  local pos = getNativeMousePos()
+  local windowX, windowY = love.window.getPosition()
+  return {
+    x = pos.x - windowX,
+    y = pos.y - windowY
+  }
+end
+
+local layoutGroupOrigin = {
+  x = 10,
+  y = 200
+}
 
 Component.create({
   id = 'LayoutEditor',
@@ -43,43 +265,31 @@ Component.create({
 
   init = function(self)
     local mouseCollision = {}
-    colWorld:add(mouseCollision, 0, 0, gridSize, gridSize)
+    colWorld:add(mouseCollision, 0, 0, 1, 1)
 
     Gui.create({
       x = 0,
       y = 0,
       inputContext = 'editorBase',
       scale = 1,
-      onCreate = function(self)
-        self.state = {
-          mousePosition = Vec2(0, 0),
-          mouseGridPosition = Vec2(0, 0),
-          objects = {},
-        }
-        self.collisions = {}
-      end,
       onPointerMove = function(self, ev)
-        local gridX, gridY = Position.pixelsToGridUnits(ev.x, ev.y, gridSize)
+        local pos = getCursorPos()
+        local gridX, gridY = Position.pixelsToGridUnits(pos.x, pos.y, gridSize)
         local posX, posY = gridX * gridSize, gridY * gridSize
-        self.state.mousePosition = Vec2(posX, posY)
-        self.state.mouseGridPosition = Vec2(gridX, gridY)
+        state:set('mousePosition', Vec2(posX, posY))
+        state:set('mouseGridPosition', Vec2(gridX, gridY))
 
-        local _, _, cols, len = colWorld:move(mouseCollision, posX, posY, function()
+        local _, _, cols, len = colWorld:move(mouseCollision, pos.x, pos.y, function()
           return 'cross'
         end)
-        self.collisions = cols
+        uiCollisions = cols
 
         msgBus.send('CURSOR_SET', { type = 'default' })
       end,
       onClick = function(self)
-        local obj = {
-          id = Component.newId(),
-          connections = {}
-        }
-        Grid.set(self.state.objects, self.state.mouseGridPosition.x, self.state.mouseGridPosition.y, obj)
-        colWorld:add(obj, self.state.mousePosition.x, self.state.mousePosition.y, gridSize, gridSize)
+        -- place a layout down
       end,
-      onUpdate = function(self)
+      onUpdate = function(self, dt)
         self.w, self.h = love.graphics.getWidth(),
           love.graphics.getHeight()
       end,
@@ -88,10 +298,26 @@ Component.create({
         love.graphics.origin()
 
         renderMousePosition(self)
-        renderObjects(self)
+        renderLayouts(state.layouts, layoutGroupOrigin)
+        love.graphics.setColor(1,1,1)
+        love.graphics.draw(layoutsCanvas)
+
+        renderGuiElements(self)
 
         love.graphics.pop()
       end
     }):setParent(self)
-  end
+
+    self.listeners = {
+      msgBus.on('*', function(ev, msgType)
+        local eventHandler = uiEvents[msgType]
+        if eventHandler then
+          for i=1, #uiCollisions do
+            local c = uiCollisions[i]
+            eventHandler(c)
+          end
+        end
+      end)
+    }
+  end,
 })
