@@ -466,17 +466,18 @@ local function renderSelectedObject()
   end
 end
 
+local indexOffset = 1
 local function placeObject()
   local objectState = O.clone(state.placedObjects)
   local mgp = state.mouseGridPosition
-  Grid.set(objectState, mgp.x, mgp.y, uiState.selectedObject)
+  Grid.set(objectState, mgp.x + indexOffset, mgp.y + indexOffset, uiState.selectedObject)
   state:set('placedObjects', objectState)
 end
 
 local function renderPlacedObjects()
   Grid.forEach(state.placedObjects, function(o, x, y)
     local tx, ty = uiState:getTranslate()
-    local actualX, actualY = x * gridSize.w + tx, y * gridSize.h + ty
+    local actualX, actualY = (x - indexOffset) * gridSize.w + tx, (y - indexOffset) * gridSize.h + ty
     if o.type == 'mapBlock' then
       love.graphics.setColor(1,1,1)
       local canvas = layoutsCanvases[o.id]
