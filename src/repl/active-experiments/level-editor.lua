@@ -11,6 +11,7 @@ local F = require 'utils.functional'
 local Color = require 'modules.color'
 local memoize = require 'utils.memoize'
 local O = require 'utils.object-utils'
+local Observable = require 'modules.observable'
 
 local gridSize = {
   w = 60,
@@ -18,35 +19,101 @@ local gridSize = {
 }
 local uiColWorld = bump.newWorld(10)
 
-local stateMt = {
-  _onChange = function()
-    return self
-  end,
-  set = function(self, k, v)
-    local currentVal = self[k]
-    self[k] = v
-    self._onChange(self, k, v, currentVal)
-    return self
-  end,
-  onChange = function(self, callback)
-    self._onChange = callback
-    return self
-  end
-}
-stateMt.__index = stateMt
-local state = setmetatable({
+local function CreateState(initialState, options)
+  options = options or {
+    trackHistory = false
+  }
+
+  local stateCopy = O.deepCopy(initialState)
+  local stateMt = {
+    _onChange = function()
+      return self
+    end,
+    set = function(self, k, v, ignoreHistory)
+      local currentVal = self[k]
+      local isNewVal = currentVal ~= v
+      local shouldTrackChange = options.trackHistory and
+        isNewVal and
+        (not ignoreHistory) and
+        (not self._logPending)
+      if shouldTrackChange then
+        self._logPending = true
+        Observable(function()
+          self._logPending = false
+          self._changeHistory:push()
+          return true
+        end)
+      end
+
+      self[k] = v
+      self._onChange(self, k, v, currentVal)
+
+      return self
+    end,
+    undo = function(self)
+      local prevState = self._changeHistory:back() or {}
+      for k,v in pairs(prevState) do
+        self:set(k, v, true)
+      end
+    end,
+    redo = function(self)
+      local nextState = self._changeHistory:forward() or {}
+      for k,v in pairs(nextState) do
+        self:set(k, v, true)
+      end
+    end,
+    onChange = function(self, callback)
+      self._onChange = callback
+      return self
+    end,
+
+    _logPending = false,
+    _changeHistory = {
+      history = {},
+      position = 0,
+      removeEntriesAfterPosition = function(self, position)
+        local i = #self.history
+        while i > position do
+          table.remove(self.history, i)
+          i = i - 1
+        end
+      end,
+      push = function(self)
+        self:removeEntriesAfterPosition(self.position)
+        table.insert(self.history, O.clone(stateCopy))
+        self.position = #self.history
+      end,
+      back = function(self)
+        local clamp = require 'utils.math'.clamp
+        self.position = clamp(self.position - 1, 0, #self.history)
+        return self.history[self.position]
+      end,
+      forward = function(self)
+        local clamp = require 'utils.math'.clamp
+        self.position = clamp(self.position + 1, 0, #self.history)
+        return self.history[self.position]
+      end
+    }
+  }
+  stateMt.__index = stateMt
+  return setmetatable(stateCopy, stateMt)
+end
+
+local state = CreateState({
   mapSize = Vec2(0, 0),
   loadDir = nil,
   saveDir = nil,
-  fileStateContext = nil,
+  objects = {},
+  placedObjects = {} -- 2d grid of objects
+}, {
+  trackHistory = true
+})
+
+local uiState = CreateState({
   mousePosition = Vec2(0, 0),
   mouseGridPosition = Vec2(0, 0),
-  objects = {},
+  fileStateContext = nil,
   loadedLayouts = {},
-  placedObjects = {} -- 2d grid of objects
-}, stateMt)
-
-local uiState = setmetatable({
   translate = {
     startX = 0,
     startY = 0,
@@ -58,7 +125,6 @@ local uiState = setmetatable({
     zoomOffset = Vec2(0, 0),
   },
   scale = 1,
-  nextScale = 2,
 
   hoveredObject = {},
   selectedObject = nil,
@@ -68,8 +134,12 @@ local uiState = setmetatable({
   getTranslate = function(self)
     local tx = self.translate
     return tx.x + tx.dx, tx.y + tx.dy
+  end,
+
+  setSelection = function(self, object)
+    self:set('selectedObject', object)
   end
-}, stateMt)
+})
 
 local layoutsCanvases = {}
 local gridCanvas = love.graphics.newCanvas(4096, 4096)
@@ -116,7 +186,7 @@ local function setupGridCanvas(colSpan, rowSpan)
   love.graphics.push()
   love.graphics.origin()
   love.graphics.clear()
-  local color = 0.15
+  local color = 0.25
   love.graphics.setColor(color, color, color)
 
   for y=0, (rowSpan - 1) do
@@ -182,9 +252,9 @@ local renderersByLayerType = {
   }
 }
 
-local loadedLayoutsPanelBox = ColObj({
-  x = 10,
-  y = 10,
+local loadedLayoutsContainerBox = ColObj({
+  x = 0,
+  y = 0,
   w = 100,
   h = love.graphics.getHeight(),
   padding = {15, 0},
@@ -209,11 +279,11 @@ local loadedLayoutsPanelBox = ColObj({
   end
 })
 uiColWorld:add(
-  loadedLayoutsPanelBox,
-  loadedLayoutsPanelBox.x,
-  loadedLayoutsPanelBox.y,
-  loadedLayoutsPanelBox.w,
-  loadedLayoutsPanelBox.h
+  loadedLayoutsContainerBox,
+  loadedLayoutsContainerBox.x,
+  loadedLayoutsContainerBox.y,
+  loadedLayoutsContainerBox.w,
+  loadedLayoutsContainerBox.h
 )
 
 local updateLayouts = memoize(function (layouts, groupOrigin)
@@ -225,7 +295,7 @@ local updateLayouts = memoize(function (layouts, groupOrigin)
   love.graphics.origin()
 
   local scale = 1/16
-  local layouts = state.loadedLayouts
+  local layouts = uiState.loadedLayouts
   local offsetY = 0
 
   local layoutObjects = uiState.loadedLayoutObjects
@@ -254,6 +324,7 @@ local updateLayouts = memoize(function (layouts, groupOrigin)
 
       MOUSE_CLICKED = function(self)
         print(self.id, self.h)
+        uiState:setSelection(self)
       end
     })
     layoutObjects[obj.id] = obj
@@ -313,7 +384,7 @@ state:onChange(function(self, k, val, prevVal)
   local isNewLoadDir = k == 'loadDir' and isNewVal
   if isNewLoadDir then
     local layouts = loadLayouts(val)
-    state:set('loadedLayouts', layouts)
+    uiState:set('loadedLayouts', layouts)
     updateLayouts(layouts,  {
       x = 10,
       y = 10
@@ -333,7 +404,7 @@ local function renderMousePosition()
   end
 
   love.graphics.setColor(0,0.6,1,1)
-  local mgp = state.mousePosition
+  local mgp = uiState.mousePosition
   love.graphics.rectangle('line', mgp.x + 0.5, mgp.y + 0.5, gridSize.w, gridSize.h)
 end
 
@@ -429,7 +500,7 @@ end
 function love.directorydropped(dir)
   local fileStateContext = getFileStateContext()
   if fileStateContext then
-    state:set(fileStateContext, dir)
+    uiState:set(fileStateContext, dir)
   end
 end
 
@@ -457,7 +528,7 @@ local function renderSelectedObject()
     return
   end
 
-  local mp = state.mousePosition
+  local mp = uiState.mousePosition
   local mx, my = mp.x, mp.y
   if o.type == 'mapBlock' then
     love.graphics.setColor(1,1,1,0.6)
@@ -468,9 +539,20 @@ end
 
 local indexOffset = 1
 local function placeObject()
-  local objectState = O.clone(state.placedObjects)
-  local mgp = state.mouseGridPosition
-  Grid.set(objectState, mgp.x + indexOffset, mgp.y + indexOffset, uiState.selectedObject)
+  local mgp = uiState.mouseGridPosition
+  local x, y = mgp.x + indexOffset, mgp.y + indexOffset
+  local currentObj = Grid.get(state.placedObjects, x, y)
+  local isNewObject = (currentObj and currentObj.referenceId) ~= uiState.selectedObject.id
+  if (not isNewObject) then
+    return
+  end
+
+  local objectState = O.deepCopy(state.placedObjects)
+  Grid.set(objectState, x, y, {
+    id = Component.newId(),
+    referenceId = uiState.selectedObject.id,
+    data = uiState.selectedObject
+  })
   state:set('placedObjects', objectState)
 end
 
@@ -478,9 +560,10 @@ local function renderPlacedObjects()
   Grid.forEach(state.placedObjects, function(o, x, y)
     local tx, ty = uiState:getTranslate()
     local actualX, actualY = (x - indexOffset) * gridSize.w + tx, (y - indexOffset) * gridSize.h + ty
-    if o.type == 'mapBlock' then
+    local data = o.data
+    if data.type == 'mapBlock' then
       love.graphics.setColor(1,1,1)
-      local canvas = layoutsCanvases[o.id]
+      local canvas = layoutsCanvases[data.id]
       love.graphics.draw(canvas, actualX, actualY)
     end
   end)
@@ -537,21 +620,32 @@ Component.create({
         )
         local posX, posY = (gridPos.x * gridSize.w), (gridPos.y * gridSize.h)
         local round = require 'utils.math'.round
-        state:set('mousePosition', Vec2(posX + translateX, posY + translateY))
-        state:set('mouseGridPosition', Vec2(gridPos.x, gridPos.y))
+        uiState:set('mousePosition', Vec2(posX + translateX, posY + translateY))
+        uiState:set('mouseGridPosition', Vec2(gridPos.x, gridPos.y))
 
         updateUiCollisions(pos.x, pos.y)
 
         msgBus.send('CURSOR_SET', { type = uiState.panning and 'move' or 'default' })
       end,
       onClick = function(self)
-        if (uiState.hoveredObject and uiState.hoveredObject.selectable) then
-          uiState:set('selectedObject', uiState.hoveredObject)
-        end
       end,
       onKeyPress = function(self, ev)
         if ev.key == 'escape' then
           uiState:set('selectedObject', nil)
+        end
+
+        local inputState = require 'main.inputs.keyboard-manager'.state
+        local keysPressed = inputState.keyboard.keysPressed
+        local hasCtrlModifier = keysPressed.lctrl or
+          keysPressed.rctrl
+        if hasCtrlModifier then
+          if 'z' == ev.key then
+            if keysPressed.lshift or keysPressed.rshift then
+              state:redo()
+            else
+              state:undo()
+            end
+          end
         end
       end,
       onPointerDown = function()
@@ -589,6 +683,8 @@ Component.create({
       msgBus.on('*', function(ev, msgType)
         local hoveredObject = nil
         local uiCollisions = uiState.collisions
+        local preventBubbleEvents = {}
+
         -- handle ui events
         for i=1, #uiCollisions do
 
@@ -596,14 +692,24 @@ Component.create({
 
           hoveredObject = hoveredObject or c.other
 
-          local eventHandler = c.other[msgType]
-          if eventHandler then
-            eventHandler(c.other, ev)
+          if (not preventBubbleEvents[msgType]) then
+            local eventHandler = c.other[msgType]
+            if eventHandler then
+              local returnVal = eventHandler(c.other, ev) or O.EMPTY
+              if returnVal.stopPropagation then
+                preventBubbleEvents[msgType] = true
+              end
+            end
           end
 
-          local mouseMoveHandler = c.other.MOUSE_MOVE
-          if mouseMoveHandler then
-            mouseMoveHandler(c.other, ev)
+          if (not preventBubbleEvents.MOUSE_MOVE) then
+            local mouseMoveHandler = c.other.MOUSE_MOVE
+            if mouseMoveHandler then
+              local returnVal = mouseMoveHandler(c.other, ev) or O.EMPTY
+              if returnVal.stopPropagation then
+                preventBubbleEvents.MOUSE_MOVE = true
+              end
+            end
           end
         end
 
