@@ -2,16 +2,20 @@ return function(msgBus)
   -- custom cursor
   local cursorBaseSize = 22
   local cursorImages = {
-    default = 'cursor-target',
+    target = 'cursor-target',
     move = 'cursor-move',
     speech = 'cursor-speech',
   }
   local cursorsCache = {
     cursors = {},
     get = function(self, _type)
+      if _type == 'default' then
+        return nil
+      end
+
       local config = require 'config.config'
       local size = config.scale
-      _type = _type or 'default'
+      _type = _type or 'target'
       local cursorTypes = self.cursors[_type]
       if (not cursorTypes) then
         cursorTypes = {}
