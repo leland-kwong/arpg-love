@@ -35,6 +35,7 @@ local stateMt = {
 }
 stateMt.__index = stateMt
 local state = setmetatable({
+  mapSize = Vec2(0, 0),
   loadDir = nil,
   saveDir = nil,
   fileStateContext = nil,
@@ -44,10 +45,57 @@ local state = setmetatable({
   layouts = {}
 }, stateMt)
 
+local uiState = setmetatable({
+  translate = {
+    startX = 0,
+    startY = 0,
+    dx = 0,
+    dy = 0,
+    x = 0,
+    y = 0,
+
+    zoomOffset = Vec2(0, 0),
+  },
+  scale = 1,
+  nextScale = 2,
+
+  getTranslate = function(self)
+    local tx = self.translate
+    return tx.x + tx.dx, tx.y + tx.dy
+  end
+}, stateMt)
+
 local layoutsCanvas = love.graphics.newCanvas(4096, 4096)
 local gridCanvas = love.graphics.newCanvas(4096, 4096)
 
-local function setupGridCanvas(numRows, numCols)
+local function panTo(x, y)
+  local tx = uiState.translate
+  tx.x, tx.y = x, y
+end
+
+local function handlePanning(event)
+  -- panning
+  local tx = uiState.translate
+  local scale = uiState.scale
+  tx.startX = event.startX/scale
+  tx.startY = event.startY/scale
+  tx.dx = math.floor(event.dx/scale)
+  tx.dy = math.floor(event.dy/scale)
+end
+
+local function handlePanningEnd(event)
+  local state = uiState
+
+  -- update tree translation
+  local tx = state.translate
+  panTo(tx.x + tx.dx, tx.y + tx.dy)
+  tx.startX = 0
+  tx.startY = 0
+  tx.dx = 0
+  tx.dy = 0
+end
+
+local function setupGridCanvas(colSpan, rowSpan)
   love.graphics.setCanvas(gridCanvas)
   love.graphics.push()
   love.graphics.origin()
@@ -55,9 +103,9 @@ local function setupGridCanvas(numRows, numCols)
   local color = 0.2
   love.graphics.setColor(color, color, color)
 
-  for y=0, (numRows - 1) do
-    for x=0, (numCols - 1) do
-      local renderX, renderY = x * gridSize.w - 0.5, y * gridSize.h - 0.5
+  for y=0, (rowSpan - 1) do
+    for x=0, (colSpan - 1) do
+      local renderX, renderY = x * gridSize.w + 0.5, y * gridSize.h + 0.5
       love.graphics.rectangle('line', renderX, renderY, gridSize.w, gridSize.h)
     end
   end
@@ -181,7 +229,9 @@ local updateLayouts = memoize(function (layouts, groupOrigin)
 end)
 
 state:onChange(function(self, k, val, prevVal)
-  local isNewLoadDir = k == 'loadDir' and val ~= prevVal
+  local isNewVal = val ~= prevVal
+
+  local isNewLoadDir = k == 'loadDir' and isNewVal
   if isNewLoadDir then
     local layouts = loadLayouts(val)
     state:set('layouts', layouts)
@@ -189,6 +239,11 @@ state:onChange(function(self, k, val, prevVal)
       x = 10,
       y = 10
     })
+  end
+
+  local isNewMapSize = k == 'mapSize' and isNewVal
+  if isNewMapSize then
+    setupGridCanvas(state.mapSize.x, state.mapSize.y)
   end
 end)
 state:set('loadDir', 'C:\\Users\\lelandkwong\\Projects\\arpg-love\\src\\built\\maps')
@@ -315,7 +370,7 @@ Component.create({
       homeScreenRef:delete()
     end
 
-    setupGridCanvas(40, 60)
+    state:set('mapSize', Vec2(20, 10))
 
     local mouseCollision = {}
     colWorld:add(mouseCollision, 0, 0, 1, 1)
@@ -327,17 +382,23 @@ Component.create({
       scale = 1,
       onPointerMove = function(self, ev)
         local pos = getCursorPos()
-        local gridX, gridY = math.floor(pos.x/gridSize.w), math.floor(pos.y/gridSize.h)
-        local posX, posY = gridX * gridSize.w, gridY * gridSize.h
-        state:set('mousePosition', Vec2(posX, posY))
-        state:set('mouseGridPosition', Vec2(gridX, gridY))
+        local translateX, translateY = uiState:getTranslate()
+        local clamp = require 'utils.math'.clamp
+        local gridPos = Vec2(
+          clamp(math.floor((pos.x - translateX)/gridSize.w), 0, state.mapSize.x - 1),
+          clamp(math.floor((pos.y - translateY)/gridSize.h), 0, state.mapSize.y - 1)
+        )
+        local posX, posY = (gridPos.x * gridSize.w), (gridPos.y * gridSize.h)
+        local round = require 'utils.math'.round
+        state:set('mousePosition', Vec2(posX + translateX, posY + translateY))
+        state:set('mouseGridPosition', Vec2(gridPos.x, gridPos.y))
 
         local _, _, cols, len = colWorld:move(mouseCollision, pos.x, pos.y, function()
           return 'cross'
         end)
         uiCollisions = cols
 
-        msgBus.send('CURSOR_SET', { type = 'default' })
+        msgBus.send('CURSOR_SET', { type = uiState.panning and 'move' or 'default' })
       end,
       onClick = function(self)
         -- place a layout down
@@ -350,8 +411,11 @@ Component.create({
         love.graphics.push()
         love.graphics.origin()
 
+        love.graphics.push()
+        love.graphics.translate(uiState:getTranslate())
         love.graphics.setColor(1,1,1)
         love.graphics.draw(gridCanvas)
+        love.graphics.pop()
 
         renderMousePosition(self)
         love.graphics.setColor(1,1,1)
@@ -377,7 +441,23 @@ Component.create({
             mouseMoveHandler(c.other)
           end
         end
+      end),
+
+      msgBus.on('MOUSE_DRAG', function(ev)
+        if love.keyboard.isDown('space') then
+          handlePanning(ev)
+        else
+          handlePanningEnd(ev)
+        end
+      end),
+
+      msgBus.on('MOUSE_DRAG_END', function(ev)
+        handlePanningEnd(ev)
       end)
     }
   end,
+
+  update = function(self, dt)
+    uiState:set('panning', love.keyboard.isDown('space'))
+  end
 })
