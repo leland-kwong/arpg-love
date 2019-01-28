@@ -11,20 +11,26 @@ local F = require 'utils.functional'
 local Color = require 'modules.color'
 local memoize = require 'utils.memoize'
 
-local gridSize = 32
-local colWorld = bump.newWorld(gridSize)
+local gridSize = {
+  w = 60,
+  h = 80
+}
+local colWorld = bump.newWorld(10)
 
 local uiCollisions = {}
 local stateMt = {
   _onChange = function()
+    return self
   end,
   set = function(self, k, v)
     local currentVal = self[k]
     self[k] = v
     self._onChange(self, k, v, currentVal)
+    return self
   end,
   onChange = function(self, callback)
     self._onChange = callback
+    return self
   end
 }
 stateMt.__index = stateMt
@@ -38,8 +44,30 @@ local state = setmetatable({
   layouts = {}
 }, stateMt)
 
+local layoutsCanvas = love.graphics.newCanvas(4096, 4096)
+local gridCanvas = love.graphics.newCanvas(4096, 4096)
+
+local function setupGridCanvas(numRows, numCols)
+  love.graphics.setCanvas(gridCanvas)
+  love.graphics.push()
+  love.graphics.origin()
+  love.graphics.clear()
+  local color = 0.2
+  love.graphics.setColor(color, color, color)
+
+  for y=0, (numRows - 1) do
+    for x=0, (numCols - 1) do
+      local renderX, renderY = x * gridSize.w - 0.5, y * gridSize.h - 0.5
+      love.graphics.rectangle('line', renderX, renderY, gridSize.w, gridSize.h)
+    end
+  end
+
+  love.graphics.setCanvas()
+  love.graphics.pop()
+end
+
 -- Lua implementation of PHP scandir function
-function loadLayouts(directory)
+local function loadLayouts(directory)
   local layouts = {}
   local lfs = require 'lua_modules.lfs_ffi'
   for file in lfs.dir(directory) do
@@ -63,19 +91,6 @@ function loadLayouts(directory)
   return layouts
 end
 
-state:onChange(function(self, k, val, prevVal)
-  local isNewLoadDir = k == 'loadDir' and val ~= prevVal
-  if isNewLoadDir then
-    state:set('layouts', loadLayouts(val))
-  end
-end)
-
-local function renderMousePosition(self)
-  love.graphics.setColor(0,0.5,1)
-  local mgp = state.mousePosition
-  love.graphics.rectangle('line', mgp.x, mgp.y, gridSize, gridSize)
-end
-
 local function iterateListAsGrid(list, numCols, callback)
   for i=1, #list do
     local val = list[i]
@@ -83,12 +98,6 @@ local function iterateListAsGrid(list, numCols, callback)
     callback(val, x, y)
   end
 end
-
-local uiEvents = {
-  MOUSE_CLICKED = function(ev)
-    print(ev)
-  end
-}
 
 local tileRenderer = {
   [1] = function(x, y, w, h)
@@ -101,33 +110,53 @@ local tileRenderer = {
   end
 }
 
-local layoutsCanvas = love.graphics.newCanvas(4096, 4096)
-local renderLayouts = memoize(function (layouts, groupOrigin)
+local layoutCollisions = {}
+local updateLayouts = memoize(function (layouts, groupOrigin)
   local oBlendMode = love.graphics.getBlendMode()
+
   love.graphics.setBlendMode('alpha', 'premultiplied')
   love.graphics.setCanvas(layoutsCanvas)
   love.graphics.clear()
   love.graphics.setColor(1,1,1)
+  love.graphics.push()
+  love.graphics.origin()
 
   local tileRenderSize = 1
   local layouts = state.layouts
   local offsetY = 0
-  for i=1, #layouts do
-    local origin = {
-      x = groupOrigin.x,
-      y = groupOrigin.y + offsetY
-    }
-    local l = layouts[i]
 
-    love.graphics.print(l.file, origin.x, origin.y - 20)
+  for i=1, #layoutCollisions do
+    colWorld:remove(layoutCollisions[i])
+  end
+  layoutCollisions = {}
+
+  for i=1, #layouts do
+    local l = layouts[i]
+    local textHeight = 20
+    local marginTop = 10
+
+    local obj = {
+      x = groupOrigin.x,
+      y = groupOrigin.y + offsetY + textHeight,
+      w = l.data.width,
+      h = l.data.height + textHeight,
+
+      MOUSE_CLICKED = function()
+        print(l.file)
+      end
+    }
+    table.insert(layoutCollisions, obj)
+    colWorld:add(obj, obj.x, obj.y, obj.w, obj.h)
+
+    love.graphics.print(l.file, obj.x, obj.y - textHeight)
 
     local groundLayer = F.find(l.data.layers, function(l)
       return l.name == 'ground'
     end)
     if groundLayer then
-      iterateListAsGrid(groundLayer.data, 60, function(v, x, y)
+      iterateListAsGrid(groundLayer.data, l.data.width, function(v, x, y)
         if tileRenderer[v] then
-          tileRenderer[v](origin.x + x * tileRenderSize, origin.y + y * tileRenderSize, tileRenderSize, tileRenderSize)
+          tileRenderer[v](obj.x + x * tileRenderSize, obj.y + y * tileRenderSize, tileRenderSize, tileRenderSize)
         end
       end)
     end
@@ -136,25 +165,47 @@ local renderLayouts = memoize(function (layouts, groupOrigin)
       return l.name == 'walls'
     end)
     if wallLayer then
-      iterateListAsGrid(wallLayer.data, 60, function(v, x, y)
+      iterateListAsGrid(wallLayer.data, l.data.width, function(v, x, y)
         if tileRenderer[v] then
-          tileRenderer[v](origin.x + x * tileRenderSize, origin.y + y * tileRenderSize, tileRenderSize, tileRenderSize)
+          tileRenderer[v](obj.x + x * tileRenderSize, obj.y + y * tileRenderSize, tileRenderSize, tileRenderSize)
         end
       end)
     end
 
-    offsetY = offsetY + l.data.height + 20
+    offsetY = offsetY + l.data.height + textHeight + marginTop
   end
 
+  love.graphics.pop()
   love.graphics.setCanvas()
   love.graphics.setBlendMode(oBlendMode)
 end)
 
+state:onChange(function(self, k, val, prevVal)
+  local isNewLoadDir = k == 'loadDir' and val ~= prevVal
+  if isNewLoadDir then
+    local layouts = loadLayouts(val)
+    state:set('layouts', layouts)
+    updateLayouts(layouts,  {
+      x = 10,
+      y = 10
+    })
+  end
+end)
+state:set('loadDir', 'C:\\Users\\lelandkwong\\Projects\\arpg-love\\src\\built\\maps')
+
+local function renderMousePosition(self)
+  love.graphics.setColor(0,0.5,1)
+  local mgp = state.mousePosition
+  love.graphics.rectangle('line', mgp.x, mgp.y, gridSize.w, gridSize.h)
+end
+
+local inputWidth = 500
+
 local loadedDirectoryBox = {
   id = 'loadedDirectory',
-  x = 10,
-  y = 100,
-  w = 500,
+  x = love.graphics.getWidth() - 10 - inputWidth,
+  y = 10,
+  w = inputWidth,
   h = 30
 }
 
@@ -168,9 +219,9 @@ colWorld:add(
 
 local saveDirectoryBox = {
   id = 'saveDirectory',
-  x = 10,
-  y = 135,
-  w = 500,
+  x = love.graphics.getWidth() - 10 - inputWidth,
+  y = loadedDirectoryBox.y + 35,
+  w = inputWidth,
   h = 30
 }
 
@@ -200,7 +251,7 @@ local function renderLoadDirectoryBox()
   local box = loadedDirectoryBox
   love.graphics.setLineWidth(1)
   love.graphics.rectangle('line', box.x - 0.5, box.y - 0.5, box.w, box.h)
-  guiPrint(state.loadDir or 'drag folder to load tiled maps', box.x + 3, box.y + 5)
+  guiPrint(state.loadDir or 'drag folder to load Tiled maps', box.x + 3, box.y + 5)
 end
 
 local function renderSaveDirectoryBox()
@@ -254,16 +305,18 @@ local function getCursorPos()
   }
 end
 
-local layoutGroupOrigin = {
-  x = 10,
-  y = 200
-}
-
 Component.create({
   id = 'LayoutEditor',
   group = 'gui',
 
   init = function(self)
+    local homeScreenRef = Component.get('HomeScreen')
+    if homeScreenRef then
+      homeScreenRef:delete()
+    end
+
+    setupGridCanvas(40, 60)
+
     local mouseCollision = {}
     colWorld:add(mouseCollision, 0, 0, 1, 1)
 
@@ -274,8 +327,8 @@ Component.create({
       scale = 1,
       onPointerMove = function(self, ev)
         local pos = getCursorPos()
-        local gridX, gridY = Position.pixelsToGridUnits(pos.x, pos.y, gridSize)
-        local posX, posY = gridX * gridSize, gridY * gridSize
+        local gridX, gridY = math.floor(pos.x/gridSize.w), math.floor(pos.y/gridSize.h)
+        local posX, posY = gridX * gridSize.w, gridY * gridSize.h
         state:set('mousePosition', Vec2(posX, posY))
         state:set('mouseGridPosition', Vec2(gridX, gridY))
 
@@ -297,8 +350,10 @@ Component.create({
         love.graphics.push()
         love.graphics.origin()
 
+        love.graphics.setColor(1,1,1)
+        love.graphics.draw(gridCanvas)
+
         renderMousePosition(self)
-        renderLayouts(state.layouts, layoutGroupOrigin)
         love.graphics.setColor(1,1,1)
         love.graphics.draw(layoutsCanvas)
 
@@ -310,11 +365,16 @@ Component.create({
 
     self.listeners = {
       msgBus.on('*', function(ev, msgType)
-        local eventHandler = uiEvents[msgType]
-        if eventHandler then
-          for i=1, #uiCollisions do
-            local c = uiCollisions[i]
-            eventHandler(c)
+        for i=1, #uiCollisions do
+          local c = uiCollisions[i]
+          local eventHandler = c.other[msgType]
+          if eventHandler then
+            eventHandler(c.other)
+          end
+
+          local mouseMoveHandler = c.other.MOUSE_MOVE
+          if mouseMoveHandler then
+            mouseMoveHandler(c.other)
           end
         end
       end)
