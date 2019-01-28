@@ -16,7 +16,7 @@ local gridSize = {
   w = 60,
   h = 80
 }
-local colWorld = bump.newWorld(10)
+local uiColWorld = bump.newWorld(10)
 
 local stateMt = {
   _onChange = function()
@@ -77,6 +77,16 @@ local gridCanvas = love.graphics.newCanvas(4096, 4096)
 local function panTo(x, y)
   local tx = uiState.translate
   tx.x, tx.y = x, y
+end
+
+local collisionObjectMt = {
+  offsetX = 0,
+  offsetY = 0,
+  selectable = false
+}
+collisionObjectMt.__index = collisionObjectMt
+local function ColObj(props)
+  return setmetatable(props, collisionObjectMt)
 end
 
 local function handlePanning(event)
@@ -172,6 +182,40 @@ local renderersByLayerType = {
   }
 }
 
+local loadedLayoutsPanelBox = ColObj({
+  x = 10,
+  y = 10,
+  w = 100,
+  h = love.graphics.getHeight(),
+  padding = {15, 0},
+  scrollY = 0,
+
+  MOUSE_WHEEL_MOVED = function(self, ev)
+    local dy = ev[2]
+    local scrollSpeed = 20
+    local clamp = require 'utils.math'.clamp
+
+    local maxY = 0
+    for _,obj in pairs(uiState.loadedLayoutObjects) do
+      maxY = math.max(maxY, obj.y + obj.h)
+    end
+    self.scrollY = clamp(self.scrollY + (dy * scrollSpeed), -(maxY - self.h + self.padding[1]), 0)
+
+    for _,obj in pairs(uiState.loadedLayoutObjects) do
+      obj.offsetY = self.scrollY
+      uiColWorld:update(obj, obj.x + obj.offsetX, obj.y + obj.offsetY)
+    end
+
+  end
+})
+uiColWorld:add(
+  loadedLayoutsPanelBox,
+  loadedLayoutsPanelBox.x,
+  loadedLayoutsPanelBox.y,
+  loadedLayoutsPanelBox.w,
+  loadedLayoutsPanelBox.h
+)
+
 local updateLayouts = memoize(function (layouts, groupOrigin)
   local oBlendMode = love.graphics.getBlendMode()
 
@@ -186,7 +230,7 @@ local updateLayouts = memoize(function (layouts, groupOrigin)
 
   local layoutObjects = uiState.loadedLayoutObjects
   for _,obj in pairs(layoutObjects) do
-    colWorld:remove(obj)
+    uiColWorld:remove(obj)
   end
   layoutObjects = {}
 
@@ -195,20 +239,25 @@ local updateLayouts = memoize(function (layouts, groupOrigin)
     local textHeight = 20
     local marginTop = 20
 
-    local obj = {
+    local obj = ColObj({
       id = l.file,
+      data = l.data,
       type = 'mapBlock',
       x = groupOrigin.x,
       y = groupOrigin.y + offsetY + textHeight,
+      offsetX = 0,
+      offsetY = 0,
       w = l.data.width,
       h = l.data.height,
+      selectable = true,
+      eventPriority = 2,
 
-      MOUSE_CLICKED = function()
-        print(l.file)
+      MOUSE_CLICKED = function(self)
+        print(self.id, self.h)
       end
-    }
+    })
     layoutObjects[obj.id] = obj
-    colWorld:add(obj, obj.x, obj.y, obj.w, obj.h)
+    uiColWorld:add(obj, obj.x, obj.y, obj.w, obj.h)
 
     local canvas = layoutsCanvases[obj.id]
     if (not canvas) then
@@ -249,12 +298,12 @@ local function renderLoadedLayoutObjects()
   love.graphics.setColor(1,1,1)
   for id,obj in pairs(uiState.loadedLayoutObjects) do
     local canvas = layoutsCanvases[id]
-    love.graphics.draw(canvas, obj.x, obj.y)
+    love.graphics.draw(canvas, obj.x, obj.y + obj.offsetY)
   end
 
   love.graphics.setColor(1,1,1)
   for _,obj in pairs(uiState.loadedLayoutObjects) do
-    love.graphics.print(obj.id, obj.x, obj.y - 20)
+    love.graphics.print(obj.id, obj.x, obj.y - 20 + obj.offsetY)
   end
 end
 
@@ -290,15 +339,15 @@ end
 
 local inputWidth = 500
 
-local loadedDirectoryBox = {
+local loadedDirectoryBox = ColObj({
   id = 'loadedDirectory',
   x = love.graphics.getWidth() - 10 - inputWidth,
   y = 10,
   w = inputWidth,
   h = 30
-}
+})
 
-colWorld:add(
+uiColWorld:add(
   loadedDirectoryBox,
   loadedDirectoryBox.x,
   loadedDirectoryBox.y,
@@ -306,15 +355,15 @@ colWorld:add(
   loadedDirectoryBox.h
 )
 
-local saveDirectoryBox = {
+local saveDirectoryBox = ColObj({
   id = 'saveDirectory',
   x = love.graphics.getWidth() - 10 - inputWidth,
   y = loadedDirectoryBox.y + 35,
   w = inputWidth,
   h = 30
-}
+})
 
-colWorld:add(
+uiColWorld:add(
   saveDirectoryBox,
   saveDirectoryBox.x,
   saveDirectoryBox.y,
@@ -398,7 +447,7 @@ local function renderHoveredObjectBox()
   local o = uiState.hoveredObject
   if o then
     love.graphics.setColor(1,1,0)
-    love.graphics.rectangle('line', o.x + 0.5, o.y + 0.5, o.w, o.h)
+    love.graphics.rectangle('line', o.x + o.offsetX + 0.5, o.y + o.offsetY + 0.5, o.w, o.h)
   end
 end
 
@@ -436,6 +485,21 @@ local function renderPlacedObjects()
   end)
 end
 
+local mouseCollision = {}
+uiColWorld:add(mouseCollision, 0, 0, 1, 1)
+
+local function updateUiCollisions(mouseX, mouseY)
+  local _, _, cols, len = uiColWorld:move(mouseCollision, mouseX, mouseY, function()
+    return 'cross'
+  end)
+  table.sort(cols, function(a, b)
+    local ep1 = a.other.eventPriority or 1
+    local ep2 = b.other.eventPriority or 1
+    return ep1 > ep2
+  end)
+  uiState:set('collisions', cols)
+end
+
 Component.create({
   id = 'LayoutEditor',
   group = 'gui',
@@ -453,9 +517,6 @@ Component.create({
     end
 
     state:set('mapSize', Vec2(20, 10))
-
-    local mouseCollision = {}
-    colWorld:add(mouseCollision, 0, 0, 1, 1)
 
     Gui.create({
       x = 0,
@@ -478,15 +539,12 @@ Component.create({
         state:set('mousePosition', Vec2(posX + translateX, posY + translateY))
         state:set('mouseGridPosition', Vec2(gridPos.x, gridPos.y))
 
-        local _, _, cols, len = colWorld:move(mouseCollision, pos.x, pos.y, function()
-          return 'cross'
-        end)
-        uiState:set('collisions', cols)
+        updateUiCollisions(pos.x, pos.y)
 
         msgBus.send('CURSOR_SET', { type = uiState.panning and 'move' or 'default' })
       end,
       onClick = function(self)
-        if (uiState.hoveredObject) then
+        if (uiState.hoveredObject and uiState.hoveredObject.selectable) then
           uiState:set('selectedObject', uiState.hoveredObject)
         end
       end,
@@ -535,16 +593,16 @@ Component.create({
 
           local c = uiCollisions[i]
 
-          hoveredObject = c.other
+          hoveredObject = hoveredObject or c.other
 
           local eventHandler = c.other[msgType]
           if eventHandler then
-            eventHandler(c.other)
+            eventHandler(c.other, ev)
           end
 
           local mouseMoveHandler = c.other.MOUSE_MOVE
           if mouseMoveHandler then
-            mouseMoveHandler(c.other)
+            mouseMoveHandler(c.other, ev)
           end
         end
 
