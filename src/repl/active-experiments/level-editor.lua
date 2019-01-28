@@ -153,15 +153,23 @@ local function iterateListAsGrid(list, numCols, callback)
   end
 end
 
-local tileRenderer = {
-  [1] = function(x, y, w, h)
-    love.graphics.setColor(1,1,1,0.2)
-    love.graphics.rectangle('fill', x, y, w, h)
-  end,
-  [12] = function(x, y, w, h)
-    love.graphics.setColor(1,1,1,1)
-    love.graphics.rectangle('fill', x, y, w, h)
-  end
+local renderersByLayerType = {
+  tilelayer = {
+    [1] = function(x, y, w, h)
+      love.graphics.setColor(1,1,1,0.1)
+      love.graphics.rectangle('fill', x, y, w, h)
+    end,
+    [12] = function(x, y, w, h)
+      love.graphics.setColor(1,1,1,0.7)
+      love.graphics.rectangle('fill', x, y, w, h)
+    end
+  },
+  objectgroup = {
+    point = function(scale, obj)
+      love.graphics.setColor(0,1,1)
+      love.graphics.circle('fill', obj.x * scale, obj.y * scale, 2)
+    end
+  }
 }
 
 local updateLayouts = memoize(function (layouts, groupOrigin)
@@ -172,7 +180,7 @@ local updateLayouts = memoize(function (layouts, groupOrigin)
   love.graphics.push()
   love.graphics.origin()
 
-  local tileRenderSize = 1
+  local scale = 1/16
   local layouts = state.loadedLayouts
   local offsetY = 0
 
@@ -209,27 +217,23 @@ local updateLayouts = memoize(function (layouts, groupOrigin)
     end
     love.graphics.setCanvas(canvas)
 
-    local groundLayer = F.find(l.data.layers, function(l)
-      return l.name == 'ground'
+    F.forEach(l.data.layers, function(layer)
+      if layer.type == 'tilelayer' then
+        local renderType = renderersByLayerType.tilelayer
+        iterateListAsGrid(layer.data, layer.width, function(v, x, y)
+          if renderType[v] then
+            renderType[v](x * l.data.tilewidth * scale, y * l.data.tileheight * scale, l.data.tilewidth * scale, l.data.tileheight * scale)
+          end
+        end)
+      elseif layer.type == 'objectgroup' then
+        local renderType = renderersByLayerType.objectgroup
+        F.forEach(layer.objects, function(v)
+          if renderType[v.shape] then
+            renderType[v.shape](scale, v)
+          end
+        end)
+      end
     end)
-    if groundLayer then
-      iterateListAsGrid(groundLayer.data, l.data.width, function(v, x, y)
-        if tileRenderer[v] then
-          tileRenderer[v](x * tileRenderSize, y * tileRenderSize, tileRenderSize, tileRenderSize)
-        end
-      end)
-    end
-
-    local wallLayer = F.find(l.data.layers, function(l)
-      return l.name == 'walls'
-    end)
-    if wallLayer then
-      iterateListAsGrid(wallLayer.data, l.data.width, function(v, x, y)
-        if tileRenderer[v] then
-          tileRenderer[v](x * tileRenderSize, y * tileRenderSize, tileRenderSize, tileRenderSize)
-        end
-      end)
-    end
 
     offsetY = offsetY + l.data.height + textHeight + marginTop
   end
@@ -414,10 +418,6 @@ local function renderSelectedObject()
 end
 
 local function placeObject()
-  if (not uiState.selectedObject) then
-    return
-  end
-
   local objectState = O.clone(state.placedObjects)
   local mgp = state.mouseGridPosition
   Grid.set(objectState, mgp.x, mgp.y, uiState.selectedObject)
@@ -441,9 +441,15 @@ Component.create({
   group = 'gui',
 
   init = function(self)
+    local mainMenuRef = Component.get('mainMenu')
+    if mainMenuRef then
+      msgBus.send('TOGGLE_MAIN_MENU', false)
+      mainMenuRef:delete(true)
+    end
+
     local homeScreenRef = Component.get('HomeScreen')
     if homeScreenRef then
-      homeScreenRef:delete()
+      homeScreenRef:delete(true)
     end
 
     state:set('mapSize', Vec2(20, 10))
@@ -456,6 +462,9 @@ Component.create({
       y = 0,
       inputContext = 'editorBase',
       scale = 1,
+      onCreate = function(self)
+        Gui.setFocus(self)
+      end,
       onPointerMove = function(self, ev)
         local pos = getCursorPos()
         local translateX, translateY = uiState:getTranslate()
@@ -479,6 +488,11 @@ Component.create({
       onClick = function(self)
         if (uiState.hoveredObject) then
           uiState:set('selectedObject', uiState.hoveredObject)
+        end
+      end,
+      onKeyPress = function(self, ev)
+        if ev.key == 'escape' then
+          uiState:set('selectedObject', nil)
         end
       end,
       onPointerDown = function()
@@ -553,5 +567,9 @@ Component.create({
 
   update = function(self, dt)
     uiState:set('panning', love.keyboard.isDown('space'))
+  end,
+
+  final = function(self)
+    msgBus.off(self.listeners)
   end
 })
