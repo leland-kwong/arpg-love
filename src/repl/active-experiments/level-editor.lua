@@ -29,6 +29,141 @@ local gridSize = {
 }
 local uiColWorld = bump.newWorld(32)
 
+local function getTextSize(text, font)
+  local GuiText = require 'components.gui.gui-text'
+  return GuiText.getTextSize(text, font)
+end
+
+local function resetTextBoxClock()
+  uiState:set('textBoxCursorClock', math.pi)
+end
+
+local function TextBox(props, colWorld)
+  local textBox = ColObj({
+    id = Component.newId(),
+    x = 0,
+    y = 0,
+    w = 150,
+    h = 30,
+    text = props.text,
+    padding = props.padding or 5,
+    charCollisions = {},
+    cursorPosition = 1,
+    selectionRange = Vec2(0,0),
+    updateCharCollisions = function(self)
+      local parent = self
+      local offsetX = 0
+      for _,c in ipairs(self.charCollisions) do
+        c:remove()
+      end
+      self.charCollisions = {}
+      local posX, posY = self:getPosition()
+
+      -- add an extra space at the end so we can handle range selection easier
+      local collisionText = self.text..' '
+
+      for i=1, #collisionText do
+        local char = string.sub(collisionText, i, i)
+        local charWidth, charHeight = getTextSize(char, getFont.debug.font)
+        local collision = ColObj({
+          id = 'char-'..i..'-'..self.id,
+          index = i,
+          type = 'textInputCharacter',
+          x = posX + offsetX,
+          y = posY,
+          w = charWidth,
+          h = charHeight + (parent.padding * 2),
+          MOUSE_CLICKED = function(self)
+            parent:setRange(i, i)
+          end,
+        }, colWorld)
+        table.insert(self.charCollisions, collision)
+        offsetX = offsetX + charWidth
+      end
+    end,
+    setRange = function(self, _start, _end)
+      local clamp = require 'utils.math'.clamp
+      local max = #self.text + 1
+      _start = clamp(_start, 1, max)
+      _end = clamp(_end, _start, max)
+      self.selectionRange = Vec2(_start, _end)
+    end,
+    MOUSE_MOVE = function(self)
+      self:updateCharCollisions()
+    end,
+    MOUSE_CLICKED = function(self)
+      msgBus.send('SET_TEXT_INPUT', true)
+      self:updateCharCollisions()
+      resetTextBoxClock()
+    end,
+    GUI_TEXT_INPUT = function(self, nextChar)
+      local rangeLength = math.abs(self.selectionRange.x - self.selectionRange.y)
+      if rangeLength > 0 then
+        self.text = (string.sub(self.text, 1, self.selectionRange.x - 1) or '') .. (string.sub(self.text, self.selectionRange.y) or '')
+        self.text = self.text .. nextChar
+      else
+        self.text = (string.sub(self.text, 1, self.selectionRange.x - 1) or '') .. nextChar .. (string.sub(self.text, self.selectionRange.y) or '')
+      end
+      self:setRange(self.selectionRange.x + 1, self.selectionRange.x + 1)
+      self:updateCharCollisions()
+      resetTextBoxClock()
+    end,
+    KEY_DOWN = function(self, ev)
+      local rangeLength = math.abs(self.selectionRange.x - self.selectionRange.y)
+      if 'backspace' == ev.key then
+        if rangeLength > 0 then
+          self.text = (string.sub(self.text, 1, self.selectionRange.x - 1) or '') .. (string.sub(self.text, self.selectionRange.y) or '')
+          self:setRange(self.selectionRange.x, self.selectionRange.x)
+        else
+          self.text = (string.sub(self.text, 1, self.selectionRange.x - 2) or '') .. (string.sub(self.text, self.selectionRange.y) or '')
+          self:setRange(self.selectionRange.x - 1, self.selectionRange.x - 1)
+        end
+        resetTextBoxClock()
+      end
+
+      if 'left' == ev.key then
+        if rangeLength > 0 then
+          self:setRange(self.selectionRange.x, self.selectionRange.x)
+        else
+          self:setRange(self.selectionRange.x - 1, self.selectionRange.y - 1)
+        end
+        resetTextBoxClock()
+      elseif 'right' == ev.key then
+        if rangeLength > 0 then
+          self:setRange(self.selectionRange.y, self.selectionRange.y)
+        else
+          self:setRange(self.selectionRange.x + 1, self.selectionRange.y + 1)
+        end
+        resetTextBoxClock()
+      end
+      print(self.selectionRange)
+    end,
+    MOUSE_DRAG = function(self, ev)
+      -- print('text input drag', Inspect(ev))
+      local x,y,w,h = ev.startX, ev.startY, math.abs(ev.dx), math.max(1, ev.dy)
+      if w <= 0 then
+        return
+      end
+      if ev.dx < 0 then
+        x = x + ev.dx
+      end
+      local items, len = colWorld:queryRect(x, y, w, h, function(item)
+        return item.type == 'textInputCharacter'
+      end)
+      if len > 0 then
+        table.sort(items, function(a, b)
+          return a.index < b.index
+        end)
+        self:setRange(
+          items[1].index,
+          items[#items].index
+        )
+      end
+    end
+  }, colWorld)
+  return textBox
+end
+
 local actions = ActionSystem()
 actions:addActions({
   LAYER_CREATE = function()
@@ -96,9 +231,42 @@ local function guiPrint(text, x, y)
   love.graphics.print(text, x, y)
 end
 
-local function getTextSize(text, font)
-  local GuiText = require 'components.gui.gui-text'
-  return GuiText.getTextSize(text, font)
+local activeTextBox = TextBox({
+  text = 'foobar'
+}, uiColWorld):setTranslate(300, 200)
+
+local function renderActiveTextBox()
+  local b = activeTextBox
+  local x,y = b:getPosition()
+  local padding = 6
+
+  love.graphics.setColor(0,0,0,0.9)
+  love.graphics.rectangle('fill', x + 0.5, y + 0.5, b.w, b.h)
+
+  love.graphics.setColor(1,1,1)
+  love.graphics.rectangle('line', x + 0.5, y + 0.5, b.w, b.h)
+
+  -- render selection range
+  local rangeStartBox, rangeEndBox = b.charCollisions[b.selectionRange.x],
+    b.charCollisions[b.selectionRange.y]
+  if rangeStartBox then
+    local isSingleCursor = rangeStartBox == rangeEndBox
+    local x,y,w,h = rangeStartBox.x,
+      rangeStartBox.y,
+      isSingleCursor and 1 or math.abs(rangeEndBox.x - rangeStartBox.x),
+      rangeStartBox.h
+
+    if isSingleCursor then
+      local opacity = math.floor(math.sin(uiState.textBoxCursorClock * 7)) * -1
+      love.graphics.setColor(1,1,1,opacity)
+    else
+      love.graphics.setColor(0,0.3,1)
+    end
+    love.graphics.rectangle('fill', x + padding, y, w, h)
+  end
+
+  love.graphics.setColor(1,1,1)
+  guiPrint(b.text, x + padding, y + padding)
 end
 
 local function handlePanning(event)
@@ -123,12 +291,12 @@ local function handlePanningEnd(event)
   tx.dy = 0
 end
 
-local function setupGridCanvas(colSpan, rowSpan)
+local function updateGridCanvas(colSpan, rowSpan)
   love.graphics.setCanvas(gridCanvas)
   love.graphics.push()
   love.graphics.origin()
   love.graphics.clear()
-  local color = 0.25
+  local color = 0.2
   love.graphics.setColor(color, color, color)
 
   for y=0, (rowSpan - 1) do
@@ -377,7 +545,7 @@ state:onChange(function(self, k, val, prevVal)
 
   local isNewMapSize = k == 'mapSize' and isNewVal
   if isNewMapSize then
-    setupGridCanvas(state.mapSize.x, state.mapSize.y)
+    updateGridCanvas(state.mapSize.x, state.mapSize.y)
   end
 end)
 state:set('loadDir', 'C:\\Users\\lelandkwong\\Projects\\arpg-love\\src\\built\\maps')
@@ -787,6 +955,7 @@ Component.create({
         renderSelection()
         renderGridSelectionState()
         renderHoveredObjectBox()
+        renderActiveTextBox()
         renderEditorModeState()
 
         love.graphics.pop()
@@ -846,6 +1015,7 @@ Component.create({
 
   update = function(self, dt)
     uiState:set('panning', love.keyboard.isDown('space'))
+    uiState:set('textBoxCursorClock', uiState.textBoxCursorClock + dt)
   end,
 
   final = function(self)

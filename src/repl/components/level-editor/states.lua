@@ -8,6 +8,7 @@ local state = CreateState({
   mapSize = Vec2(0, 0),
   loadDir = nil,
   saveDir = nil,
+  layersList = {},
   placedObjects = {} -- 2d grid of objects by layer
 }, {
   trackHistory = true
@@ -34,6 +35,7 @@ local uiState = CreateState({
     zoomOffset = Vec2(0, 0),
   },
   scale = 1,
+  textBoxCursorClock = 0,
 
   hoveredObject = {},
   selection = nil,
