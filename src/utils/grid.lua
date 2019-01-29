@@ -5,6 +5,10 @@ local Grid = {}
 Grid.clone = require 'utils.clone-grid'
 
 function Grid.get(grid, x, y)
+  if (not grid) then
+    return nil
+  end
+
   local row = grid[y]
   return row and row[x]
 end
@@ -20,6 +24,10 @@ function Grid.set(grid, x, y, value)
 end
 
 function Grid.forEach(grid, callback)
+  if (not grid) then
+    return
+  end
+
   for y,row in pairs(grid) do
     for x,colValue in pairs(row) do
       callback(colValue, x, y)
