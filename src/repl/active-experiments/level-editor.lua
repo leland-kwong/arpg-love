@@ -16,8 +16,8 @@ local Enum = require 'utils.enum'
 local getFont = require 'components.font'
 
 local gridSize = {
-  w = 60,
-  h = 80
+  w = 20,
+  h = 20
 }
 local uiColWorld = bump.newWorld(32)
 
@@ -120,7 +120,6 @@ local state = CreateState({
   mapSize = Vec2(0, 0),
   loadDir = nil,
   saveDir = nil,
-  objects = {},
   placedObjects = {} -- 2d grid of objects
 }, {
   trackHistory = true
@@ -141,6 +140,7 @@ local uiState = CreateState({
   editorMode = editorModes.SELECT,
   lastEditorMode = nil,
   lastPlacementGridPosition = nil,
+  activeLayer = nil,
   translate = {
     startX = 0,
     startY = 0,
@@ -746,7 +746,7 @@ Component.create({
       homeScreenRef:delete(true)
     end
 
-    state:set('mapSize', Vec2(20, 10))
+    state:set('mapSize', Vec2(150, 100))
 
     Gui.create({
       x = 0,
