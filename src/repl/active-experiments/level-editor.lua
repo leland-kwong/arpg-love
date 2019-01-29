@@ -19,7 +19,7 @@ local gridSize = {
   w = 60,
   h = 80
 }
-local uiColWorld = bump.newWorld(10)
+local uiColWorld = bump.newWorld(32)
 
 local stateDefaultOptions = {
   trackHistory = false,
@@ -831,10 +831,12 @@ Component.create({
         elseif 'e' == ev.key then
           actions:send('EDITOR_MODE_SET', editorModes.ERASE)
           actions:send('SELECTION_CLEAR')
-        elseif (keysPressed.lctrl or keysPressed.rctrl) then
-          local copyAction = 'c' == ev.key
-          local cutAction = 'x' == ev.key
-          if copyAction or cutAction then
+        else
+          local isCtrlKey = keysPressed.lctrl or keysPressed.rctrl
+          local copyAction = 'c' == ev.key and isCtrlKey
+          local cutAction = 'x' == ev.key and isCtrlKey
+          local deleteAction = 'delete' == ev.key
+          if copyAction or cutAction or deleteAction then
             local function convertGridSelection(gridSelection)
               local newSelection = {}
               local objectsGridToErase = {}
@@ -842,13 +844,13 @@ Component.create({
               Grid.forEach(gridSelection, function(v, x, y)
                 origin = origin or uiState.placementGridPosition
                 local gridVal = Grid.get(state.placedObjects, x, y)
-                if gridVal then
+                if gridVal and (cutAction or copyAction) then
                   local referenceId = gridVal.referenceId
                   local objectData = ColObj:get(referenceId)
                   local originOffsetX, originOffsetY = 1 - origin.x, 1 - origin.y
                   Grid.set(newSelection, x + originOffsetX, y + originOffsetY, objectData)
                 end
-                if cutAction then
+                if cutAction or deleteAction then
                   Grid.set(objectsGridToErase, x, y, true)
                 end
               end)
