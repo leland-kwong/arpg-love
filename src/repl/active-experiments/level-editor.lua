@@ -12,6 +12,7 @@ local Color = require 'modules.color'
 local memoize = require 'utils.memoize'
 local O = require 'utils.object-utils'
 local Observable = require 'modules.observable'
+local Enum = require 'utils.enum'
 
 local gridSize = {
   w = 60,
@@ -30,6 +31,11 @@ local function CreateState(initialState, options)
       return self
     end,
     set = function(self, k, v, ignoreHistory)
+      if self._setInProgress then
+        error('[CreateState] Error setting property `' .. k .. '`. Cannot set the state while a set is already in progress.')
+      end
+      self._setInProgress = true
+
       local currentVal = self[k]
       local isNewVal = currentVal ~= v
       local shouldTrackChange = options.trackHistory and
@@ -48,6 +54,7 @@ local function CreateState(initialState, options)
       self[k] = v
       self._onChange(self, k, v, currentVal)
 
+      self._setInProgress = false
       return self
     end,
     undo = function(self)
@@ -67,6 +74,7 @@ local function CreateState(initialState, options)
       return self
     end,
 
+    _setInProgress = false,
     _logPending = false,
     _changeHistory = {
       history = {},
@@ -109,11 +117,18 @@ local state = CreateState({
   trackHistory = true
 })
 
+local editorModes = Enum(
+  'SELECT',
+  'ERASE',
+  'PLACE'
+)
+
 local uiState = CreateState({
   mousePosition = Vec2(0, 0),
   mouseGridPosition = Vec2(0, 0),
   fileStateContext = nil,
   loadedLayouts = {},
+  editorMode = editorModes.SELECT,
   translate = {
     startX = 0,
     startY = 0,
@@ -140,6 +155,37 @@ local uiState = CreateState({
     self:set('selectedObject', object)
   end
 })
+
+local ActionSystemMt = {
+  createAction = function(self, actionType, handler)
+    self.actionHandlers[actionType] = function(...)
+      local result = handler(...)
+      if self.onAction then
+        local args = {...}
+        self.onAction(actionType, args, result)
+      end
+      return result
+    end
+    return self
+  end
+}
+ActionSystemMt.__index =ActionSystemMt
+local function ActionSystem(options)
+  options = options or {}
+
+  return setmetatable({
+    onAction = options.onAction,
+    actionHandlers = {}
+  }, ActionSystemMt)
+end
+
+local actions = ActionSystem()
+actions:createAction('EDITOR_MODE_SET', function(mode)
+  if not editorModes[mode] then
+    error('invalid mode', mode)
+  end
+  uiState:set('editorMode', mode)
+end)
 
 local layoutsCanvases = {}
 local gridCanvas = love.graphics.newCanvas(4096, 4096)
@@ -383,6 +429,8 @@ state:onChange(function(self, k, val, prevVal)
 
   local isNewLoadDir = k == 'loadDir' and isNewVal
   if isNewLoadDir then
+    state:set('foobar', 'blah')
+
     local layouts = loadLayouts(val)
     uiState:set('loadedLayouts', layouts)
     updateLayouts(layouts,  {
