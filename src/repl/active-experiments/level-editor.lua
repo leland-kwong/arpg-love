@@ -151,17 +151,13 @@ local uiState = CreateState({
   scale = 1,
 
   hoveredObject = {},
-  selectedObject = nil,
+  selection = nil,
   collisions = {},
   loadedLayoutObjects = {},
 
   getTranslate = function(self)
     local tx = self.translate
     return tx.x + tx.dx, tx.y + tx.dy
-  end,
-
-  setSelection = function(self, object)
-    self:set('selectedObject', object)
   end
 })
 
@@ -207,6 +203,22 @@ actions:addActions({
       error('invalid mode', mode)
     end
     uiState:set('editorMode', mode)
+  end,
+
+  -- selection must be a 2-d array
+  SELECTION_SET = function(selection)
+    uiState:set('selection', selection)
+  end,
+
+  SELECTION_CLEAR = function()
+    uiState:set('selection', nil)
+  end,
+
+  SELECTION_ADD = function(obj)
+    --[[
+      * find origin anchor object based on the object that is closest to the grid origin
+      * build new selection by setting each object's grid position relative to the origin anchor object
+    ]]
   end
 })
 
@@ -221,11 +233,22 @@ end
 local collisionObjectMt = {
   offsetX = 0,
   offsetY = 0,
-  selectable = false
+  selectable = false,
+  setTranslate = function(self, x, y)
+    self.offsetX, self.offsetY = x or self.offsetX, y or self.offsetY
+    local x, y = self:getPosition()
+    self.collisionWorld:update(self, x, y)
+  end,
+  getPosition = function(self)
+    return self.x + self.offsetX, self.y + self.offsetY
+  end
 }
 collisionObjectMt.__index = collisionObjectMt
-local function ColObj(props)
-  return setmetatable(props, collisionObjectMt)
+local function ColObj(props, collisionWorld)
+  local o = setmetatable(props, collisionObjectMt)
+  o.collisionWorld = collisionWorld
+  collisionWorld:add(o, o.x, o.y, o.w, o.h)
+  return o
 end
 
 local function guiPrint(text, x, y)
@@ -351,19 +374,10 @@ local loadedLayoutsContainerBox = ColObj({
     self.scrollY = clamp(self.scrollY + (dy * scrollSpeed), -(maxY - self.h + self.padding[1]), 0)
 
     for _,obj in pairs(uiState.loadedLayoutObjects) do
-      obj.offsetY = self.scrollY
-      uiColWorld:update(obj, obj.x + obj.offsetX, obj.y + obj.offsetY)
+      obj:setTranslate(nil, self.scrollY)
     end
-
   end
-})
-uiColWorld:add(
-  loadedLayoutsContainerBox,
-  loadedLayoutsContainerBox.x,
-  loadedLayoutsContainerBox.y,
-  loadedLayoutsContainerBox.w,
-  loadedLayoutsContainerBox.h
-)
+}, uiColWorld)
 
 local updateLayouts = memoize(function (layouts, groupOrigin)
   local oBlendMode = love.graphics.getBlendMode()
@@ -404,9 +418,8 @@ local updateLayouts = memoize(function (layouts, groupOrigin)
       MOUSE_MOVE = function(self)
         actions:send('EDITOR_MODE_SET', editorModes.SELECT)
       end
-    })
+    }, uiColWorld)
     layoutObjects[obj.id] = obj
-    uiColWorld:add(obj, obj.x, obj.y, obj.w, obj.h)
 
     local canvas = layoutsCanvases[obj.id]
     if (not canvas) then
@@ -477,7 +490,7 @@ end)
 state:set('loadDir', 'C:\\Users\\lelandkwong\\Projects\\arpg-love\\src\\built\\maps')
 
 local function renderGridPosition()
-  if uiState.selectedObject then
+  if uiState.selection then
     return
   end
 
@@ -500,15 +513,7 @@ local loadedDirectoryBox = ColObj({
   y = 10,
   w = inputWidth,
   h = 30
-})
-
-uiColWorld:add(
-  loadedDirectoryBox,
-  loadedDirectoryBox.x,
-  loadedDirectoryBox.y,
-  loadedDirectoryBox.w,
-  loadedDirectoryBox.h
-)
+}, uiColWorld)
 
 local saveDirectoryBox = ColObj({
   id = 'saveDirectory',
@@ -516,15 +521,7 @@ local saveDirectoryBox = ColObj({
   y = loadedDirectoryBox.y + 35,
   w = inputWidth,
   h = 30
-})
-
-uiColWorld:add(
-  saveDirectoryBox,
-  saveDirectoryBox.x,
-  saveDirectoryBox.y,
-  saveDirectoryBox.w,
-  saveDirectoryBox.h
-)
+}, uiColWorld)
 
 local function renderLoadDirectoryBox()
   local isHovered = F.find(uiState.collisions, function(c)
@@ -596,23 +593,27 @@ local function renderHoveredObjectBox()
   local o = uiState.hoveredObject
   if o then
     love.graphics.setColor(1,1,0)
-    love.graphics.rectangle('line', o.x + o.offsetX + 0.5, o.y + o.offsetY + 0.5, o.w, o.h)
+    local x,y = o:getPosition()
+    love.graphics.rectangle('line', x + 0.5, y + 0.5, o.w, o.h)
   end
 end
 
-local function renderSelectedObject()
-  local o = uiState.selectedObject
-  if (not o) then
+local function renderSelection()
+  local selection = uiState.selection
+  if (not selection) then
     return
   end
 
   local mp = uiState.mousePosition
   local mx, my = mp.x, mp.y
-  if o.type == 'mapBlock' then
-    love.graphics.setColor(1,1,1,0.6)
-    local canvas = layoutsCanvases[o.id]
-    love.graphics.draw(canvas, mx, my)
-  end
+  Grid.forEach(selection, function(o, x, y)
+    local offsetX, offsetY = (x - 1) * gridSize.w, (y - 1) * gridSize.h
+    if o.type == 'mapBlock' then
+      love.graphics.setColor(1,1,1,0.6)
+      local canvas = layoutsCanvases[o.id]
+      love.graphics.draw(canvas, mx + offsetX, my + offsetY)
+    end
+  end)
 end
 
 local function renderEditorModeState()
@@ -638,23 +639,27 @@ local function placeObject()
     return
   end
 
-  local selectedObject = uiState.selectedObject
-  if (not selectedObject) then
+  local selection = uiState.selection
+  if (not selection) then
     return
   end
 
-  local currentObj = Grid.get(state.placedObjects, x, y)
-  local isNewObject = (currentObj and currentObj.referenceId) ~= uiState.selectedObject.id
-  if (not isNewObject) then
+  local isNewPlacement = uiState.lastPlacementGridPosition ~= uiState.mouseGridPosition
+  if (not isNewPlacement) then
     return
   end
+  uiState:set('lastPlacementGridPosition', uiState.mouseGridPosition)
 
   local nextObjectState = O.deepCopy(state.placedObjects)
-  Grid.set(nextObjectState, x, y, {
-    id = Component.newId(),
-    referenceId = uiState.selectedObject.id,
-    data = uiState.selectedObject
-  })
+  Grid.forEach(selection, function(v, localX, localY)
+    local updateX, updateY = x + (localX - 1), y + (localY - 1)
+    local objectToAdd = {
+      id = Component.newId(),
+      referenceId = v.id,
+      data = v,
+    }
+    Grid.set(nextObjectState, updateX, updateY, objectToAdd)
+  end)
   state:set('placedObjects', nextObjectState)
 end
 
@@ -729,7 +734,7 @@ Component.create({
 
         msgBus.send('CURSOR_SET', { type = uiState.panning and 'move' or 'default' })
 
-        local isPlaceMode = (not uiState.hoveredObject) and (uiState.selectedObject)
+        local isPlaceMode = (not uiState.hoveredObject) and (uiState.selection)
         if (isPlaceMode) then
           actions:send('EDITOR_MODE_SET', editorModes.PLACE)
         end
@@ -741,16 +746,18 @@ Component.create({
           uiState.hoveredObject and
           uiState.hoveredObject.selectable
         if shouldSetSelection then
-          uiState:set('selectedObject', uiState.hoveredObject)
+          actions:send('SELECTION_SET', {
+            {uiState.hoveredObject}
+          })
         end
       end,
       onKeyPress = function(self, ev)
         if 'escape' == ev.key then
           actions:send('EDITOR_MODE_SET', editorModes.SELECT)
-          uiState:set('selectedObject', nil)
+          actions:send('SELECTION_CLEAR')
         elseif 'e' == ev.key then
           actions:send('EDITOR_MODE_SET', editorModes.ERASE)
-          uiState:set('selectedObject', nil)
+          actions:send('SELECTION_CLEAR')
         end
       end,
       onKeyDown = function(self, ev)
@@ -793,7 +800,7 @@ Component.create({
         renderLoadedLayoutObjects()
         renderPlacedObjects()
         renderGridPosition()
-        renderSelectedObject()
+        renderSelection()
         renderHoveredObjectBox()
         renderEditorModeState()
 
