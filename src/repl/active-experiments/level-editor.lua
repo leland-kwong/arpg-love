@@ -629,9 +629,17 @@ end
 
 local indexOffset = 1
 local function placeObject()
+  local isNewPlacement = uiState.lastPlacementGridPosition ~= uiState.mouseGridPosition
+  if (not isNewPlacement) then
+    return
+  end
+  uiState:set('lastPlacementGridPosition', uiState.mouseGridPosition)
+
   local mgp = uiState.mouseGridPosition
   local x, y = mgp.x + indexOffset, mgp.y + indexOffset
-  local shouldErase = editorModes.ERASE == uiState.editorMode
+  local hasSomethingToErase = Grid.get(state.placedObjects, x, y) ~= nil
+  local shouldErase = (editorModes.ERASE == uiState.editorMode) and hasSomethingToErase
+
   if shouldErase then
     local nextObjectState = O.deepCopy(state.placedObjects)
     Grid.set(nextObjectState, x, y, nil)
@@ -643,12 +651,6 @@ local function placeObject()
   if (not selection) then
     return
   end
-
-  local isNewPlacement = uiState.lastPlacementGridPosition ~= uiState.mouseGridPosition
-  if (not isNewPlacement) then
-    return
-  end
-  uiState:set('lastPlacementGridPosition', uiState.mouseGridPosition)
 
   local nextObjectState = O.deepCopy(state.placedObjects)
   Grid.forEach(selection, function(v, localX, localY)
