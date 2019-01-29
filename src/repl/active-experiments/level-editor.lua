@@ -135,6 +135,7 @@ local editorModes = Enum(
 local uiState = CreateState({
   mousePosition = Vec2(0, 0),
   mouseGridPosition = Vec2(0, 0),
+  placementGridPosition = Vec2(0, 0),
   fileStateContext = nil,
   loadedLayouts = {},
   editorMode = editorModes.SELECT,
@@ -629,18 +630,17 @@ local function renderEditorModeState()
   )
 end
 
-local indexOffset = 1
 local function placeObject()
-  local canPlace = (uiState.lastPlacementGridPosition ~= uiState.mouseGridPosition) or
+  local canPlace = (uiState.lastPlacementGridPosition ~= uiState.placementGridPosition) or
     (uiState.lastEditorMode ~= uiState.editorMode)
   if (not canPlace) then
     return
   end
-  uiState:set('lastPlacementGridPosition', uiState.mouseGridPosition)
+  uiState:set('lastPlacementGridPosition', uiState.placementGridPosition)
   uiState:set('lastEditorMode', uiState.editorMode)
 
-  local mgp = uiState.mouseGridPosition
-  local x, y = mgp.x + indexOffset, mgp.y + indexOffset
+  local pgp = uiState.placementGridPosition
+  local x, y = pgp.x, pgp.y
   local shouldErase = (editorModes.ERASE == uiState.editorMode)
 
   if shouldErase then
@@ -671,7 +671,7 @@ end
 local function renderPlacedObjects()
   Grid.forEach(state.placedObjects, function(o, x, y)
     local tx, ty = uiState:getTranslate()
-    local actualX, actualY = (x - indexOffset) * gridSize.w + tx, (y - indexOffset) * gridSize.h + ty
+    local actualX, actualY = (x - 1) * gridSize.w + tx, (y - 1) * gridSize.h + ty
     local data = o.data
     if data.type == 'mapBlock' then
       love.graphics.setColor(1,1,1)
@@ -734,6 +734,7 @@ Component.create({
         local round = require 'utils.math'.round
         uiState:set('mousePosition', Vec2(posX + translateX, posY + translateY))
         uiState:set('mouseGridPosition', Vec2(gridPos.x, gridPos.y))
+        uiState:set('placementGridPosition', uiState.mouseGridPosition + Vec2(1,1))
 
         updateUiCollisions(pos.x, pos.y)
 
@@ -747,13 +748,26 @@ Component.create({
       onClick = function(self)
         local mode = uiState.editorMode
 
-        local shouldSetSelection = editorModes.SELECT == mode and
+        local isSelectingUiObject = editorModes.SELECT == mode and
           uiState.hoveredObject and
           uiState.hoveredObject.selectable
-        if shouldSetSelection then
+        if isSelectingUiObject then
           actions:send('SELECTION_SET', {
             {uiState.hoveredObject}
           })
+        end
+
+        local isSelectingGridObject = editorModes.SELECT == mode and
+          not isSelectingUiObject and
+          (
+            Grid.get(
+              state.placedObjects,
+              uiState.placementGridPosition.x,
+              uiState.placementGridPosition.y
+            ) ~= nil
+          )
+        if isSelectingGridObject then
+          print(uiState.placementGridPosition)
         end
       end,
       onKeyPress = function(self, ev)
