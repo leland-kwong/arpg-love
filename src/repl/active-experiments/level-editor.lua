@@ -51,6 +51,10 @@ local function TextBox(props, colWorld)
     cursorPosition = 1,
     selectionRange = Vec2(0,0),
     updateCharCollisions = function(self)
+      if self.previousText == self.text then
+        return
+      end
+      print('update char collisions')
       local parent = self
       local offsetX = 0
       for _,c in ipairs(self.charCollisions) do
@@ -73,13 +77,24 @@ local function TextBox(props, colWorld)
           y = posY,
           w = charWidth,
           h = charHeight + (parent.padding * 2),
-          MOUSE_CLICKED = function(self)
+          MOUSE_PRESSED = function(self, ev)
+            local presses = ev[5]
+            local isDoubleClick = presses == 2
+            if isDoubleClick then
+              parent:setRange(1, #parent.text + 1)
+              return
+            end
+
+            msgBus.send('SET_TEXT_INPUT', true)
+            resetTextBoxClock()
             parent:setRange(i, i)
           end,
         }, colWorld)
         table.insert(self.charCollisions, collision)
         offsetX = offsetX + charWidth
       end
+
+      self.previousText = self.text
     end,
     setRange = function(self, _start, _end)
       local clamp = require 'utils.math'.clamp
@@ -90,11 +105,6 @@ local function TextBox(props, colWorld)
     end,
     MOUSE_MOVE = function(self)
       self:updateCharCollisions()
-    end,
-    MOUSE_CLICKED = function(self)
-      msgBus.send('SET_TEXT_INPUT', true)
-      self:updateCharCollisions()
-      resetTextBoxClock()
     end,
     GUI_TEXT_INPUT = function(self, nextChar)
       local rangeLength = math.abs(self.selectionRange.x - self.selectionRange.y)
@@ -136,10 +146,8 @@ local function TextBox(props, colWorld)
         end
         resetTextBoxClock()
       end
-      print(self.selectionRange)
     end,
     MOUSE_DRAG = function(self, ev)
-      -- print('text input drag', Inspect(ev))
       local x,y,w,h = ev.startX, ev.startY, math.abs(ev.dx), math.max(1, ev.dy)
       if w <= 0 then
         return
