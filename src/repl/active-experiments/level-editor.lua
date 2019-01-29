@@ -155,6 +155,7 @@ local uiState = CreateState({
 
   hoveredObject = {},
   selection = nil,
+  gridSelection = nil,
   collisions = {},
   loadedLayoutObjects = {},
 
@@ -215,13 +216,22 @@ actions:addActions({
 
   SELECTION_CLEAR = function()
     uiState:set('selection', nil)
+    uiState:set('gridSelection', nil)
   end,
 
-  SELECTION_ADD = function(obj)
-    --[[
-      * find origin anchor object based on the object that is closest to the grid origin
-      * build new selection by setting each object's grid position relative to the origin anchor object
-    ]]
+  GRID_SELECTION_SET = function(selection)
+    uiState:set('gridSelection', selection)
+  end,
+
+  PLACED_OBJECTS_ERASE = function(objectsGridToErase)
+    if (not objectsGridToErase) then
+      return
+    end
+    local nextObjectState = O.deepCopy(state.placedObjects)
+    Grid.forEach(objectsGridToErase, function(_, x, y)
+      Grid.set(nextObjectState, x, y, nil)
+    end)
+    state:set('placedObjects', nextObjectState)
   end
 })
 
@@ -241,18 +251,34 @@ local collisionObjectMt = {
     self.offsetX, self.offsetY = x or self.offsetX, y or self.offsetY
     local x, y = self:getPosition()
     self.collisionWorld:update(self, x, y)
+    return self
   end,
   getPosition = function(self)
     return self.x + self.offsetX, self.y + self.offsetY
+  end,
+  remove = function(self)
+    self.collisionWorld:remove(self)
+    return self
   end
 }
 collisionObjectMt.__index = collisionObjectMt
-local function ColObj(props, collisionWorld)
-  local o = setmetatable(props, collisionObjectMt)
-  o.collisionWorld = collisionWorld
-  collisionWorld:add(o, o.x, o.y, o.w, o.h)
-  return o
-end
+
+local ColObj = setmetatable({
+  _objectsList = {},
+  get = function(self, id)
+    return self._objectsList[id]
+  end,
+}, {
+  __call = function(self, props, collisionWorld)
+    local o = setmetatable(props, collisionObjectMt)
+    o.collisionWorld = collisionWorld
+    collisionWorld:add(o, o.x, o.y, o.w, o.h)
+
+    assert(props.id ~= nil, 'id must be provided for collision object')
+    self._objectsList[props.id] = o
+    return o
+  end
+})
 
 local function guiPrint(text, x, y)
   love.graphics.setFont(getFont.debug.font)
@@ -358,6 +384,7 @@ local renderersByLayerType = {
 }
 
 local loadedLayoutsContainerBox = ColObj({
+  id = 'loadedLayoutsContainerBox',
   x = 0,
   y = 0,
   w = 100,
@@ -636,17 +663,15 @@ local function placeObject()
   if (not canPlace) then
     return
   end
-  uiState:set('lastPlacementGridPosition', uiState.placementGridPosition)
-  uiState:set('lastEditorMode', uiState.editorMode)
 
   local pgp = uiState.placementGridPosition
   local x, y = pgp.x, pgp.y
   local shouldErase = (editorModes.ERASE == uiState.editorMode)
 
   if shouldErase then
-    local nextObjectState = O.deepCopy(state.placedObjects)
-    Grid.set(nextObjectState, x, y, nil)
-    state:set('placedObjects', nextObjectState)
+    local objectsGridToErase = {}
+    Grid.set(objectsGridToErase, x, y, true)
+    actions:send('PLACED_OBJECTS_ERASE', objectsGridToErase)
     return
   end
 
@@ -661,7 +686,6 @@ local function placeObject()
     local objectToAdd = {
       id = Component.newId(),
       referenceId = v.id,
-      data = v,
     }
     Grid.set(nextObjectState, updateX, updateY, objectToAdd)
   end)
@@ -672,12 +696,22 @@ local function renderPlacedObjects()
   Grid.forEach(state.placedObjects, function(o, x, y)
     local tx, ty = uiState:getTranslate()
     local actualX, actualY = (x - 1) * gridSize.w + tx, (y - 1) * gridSize.h + ty
-    local data = o.data
+    local referenceId = o.referenceId
+    local data = ColObj:get(referenceId)
     if data.type == 'mapBlock' then
       love.graphics.setColor(1,1,1)
       local canvas = layoutsCanvases[data.id]
       love.graphics.draw(canvas, actualX, actualY)
     end
+  end)
+end
+
+local function renderGridSelectionState()
+  love.graphics.setColor(1,1,0)
+  Grid.forEach(uiState.gridSelection, function(v, x, y)
+    local tx, ty = uiState:getTranslate()
+    local actualX, actualY = (x - 1) * gridSize.w + tx, (y - 1) * gridSize.h + ty
+    love.graphics.rectangle('line', actualX, actualY, gridSize.w, gridSize.h)
   end)
 end
 
@@ -757,26 +791,76 @@ Component.create({
           })
         end
 
-        local isSelectingGridObject = editorModes.SELECT == mode and
-          not isSelectingUiObject and
-          (
-            Grid.get(
-              state.placedObjects,
-              uiState.placementGridPosition.x,
-              uiState.placementGridPosition.y
-            ) ~= nil
-          )
+        local isSelectingGridObject = editorModes.SELECT == uiState.editorMode and
+          (not uiState.hoveredObject)
         if isSelectingGridObject then
-          print(uiState.placementGridPosition)
+          local inputState = require 'main.inputs.keyboard-manager'.state
+          local isSelectionAdd = inputState.keyboard.keysPressed.lctrl or
+            inputState.keyboard.keysPressed.rctrl
+          local curSelection = Grid.get(
+            uiState.gridSelection,
+            uiState.placementGridPosition.x,
+            uiState.placementGridPosition.y
+          )
+          local nextSelection
+          if isSelectionAdd then
+            nextSelection = O.clone(uiState.gridSelection)
+          else
+            nextSelection = {}
+          end
+          local nextVal = true
+          if curSelection then
+            nextVal = nil
+          end
+          Grid.set(
+            nextSelection,
+            uiState.placementGridPosition.x,
+            uiState.placementGridPosition.y,
+            nextVal
+          )
+          actions:send('GRID_SELECTION_SET', nextSelection)
         end
       end,
       onKeyPress = function(self, ev)
+        local inputState = require 'main.inputs.keyboard-manager'.state
+        local keysPressed = inputState.keyboard.keysPressed
+
         if 'escape' == ev.key then
           actions:send('EDITOR_MODE_SET', editorModes.SELECT)
           actions:send('SELECTION_CLEAR')
         elseif 'e' == ev.key then
           actions:send('EDITOR_MODE_SET', editorModes.ERASE)
           actions:send('SELECTION_CLEAR')
+        elseif (keysPressed.lctrl or keysPressed.rctrl) then
+          local copyAction = 'c' == ev.key
+          local cutAction = 'x' == ev.key
+          if copyAction or cutAction then
+            local function convertGridSelection(gridSelection)
+              local newSelection = {}
+              local objectsGridToErase = {}
+              local origin
+              Grid.forEach(gridSelection, function(v, x, y)
+                origin = origin or uiState.placementGridPosition
+                local gridVal = Grid.get(state.placedObjects, x, y)
+                if gridVal then
+                  local referenceId = gridVal.referenceId
+                  local objectData = ColObj:get(referenceId)
+                  local originOffsetX, originOffsetY = 1 - origin.x, 1 - origin.y
+                  Grid.set(newSelection, x + originOffsetX, y + originOffsetY, objectData)
+                end
+                if cutAction then
+                  Grid.set(objectsGridToErase, x, y, true)
+                end
+              end)
+              return
+                (not O.isEmpty(newSelection)) and newSelection or nil,
+                (not O.isEmpty(objectsGridToErase)) and objectsGridToErase or nil
+            end
+            local nextSelection, objectsGridToErase = convertGridSelection(uiState.gridSelection)
+            actions:send('PLACED_OBJECTS_ERASE', objectsGridToErase)
+            actions:send('SELECTION_CLEAR')
+            actions:send('SELECTION_SET', nextSelection)
+          end
         end
       end,
       onKeyDown = function(self, ev)
@@ -800,6 +884,9 @@ Component.create({
           return
         end
         placeObject()
+
+        uiState:set('lastPlacementGridPosition', uiState.placementGridPosition)
+        uiState:set('lastEditorMode', uiState.editorMode)
       end,
       onUpdate = function(self, dt)
         self.w, self.h = love.graphics.getWidth(),
@@ -820,6 +907,7 @@ Component.create({
         renderPlacedObjects()
         renderGridPosition()
         renderSelection()
+        renderGridSelectionState()
         renderHoveredObjectBox()
         renderEditorModeState()
 
