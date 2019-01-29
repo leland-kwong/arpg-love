@@ -166,18 +166,30 @@ local uiState = CreateState({
 
 local ActionSystemMt = {
   createAction = function(self, actionType, handler)
-    self.actionHandlers[actionType] = function(...)
-      local result = handler(...)
+    self.actionHandlers[actionType] = function(payload)
+      local result = handler(payload)
       if self.onAction then
-        local args = {...}
-        self.onAction(actionType, args, result)
+        self.onAction(actionType, payload, result)
       end
       return result
     end
     return self
+  end,
+  addActions = function(self, handlerDefinitions)
+    for actionType,handler in pairs(handlerDefinitions) do
+      self:createAction(actionType, handler)
+    end
+    return self
+  end,
+  send = function(self, actionType, payload)
+    local actionHandler = self.actionHandlers[actionType]
+    if (not actionHandler) then
+      error('invalid action type '..actionType)
+    end
+    return actionHandler(payload)
   end
 }
-ActionSystemMt.__index =ActionSystemMt
+ActionSystemMt.__index = ActionSystemMt
 local function ActionSystem(options)
   options = options or {}
 
@@ -188,12 +200,16 @@ local function ActionSystem(options)
 end
 
 local actions = ActionSystem()
-actions:createAction('EDITOR_MODE_SET', function(mode)
-  if not editorModes[mode] then
-    error('invalid mode', mode)
+actions:addActions({
+  EDITOR_MODE_SET = function(mode)
+    if not editorModes[mode] then
+      error('invalid mode', mode)
+    end
+    uiState:set('editorMode', mode)
+  end,
+  ERASE_OBJECT = function()
   end
-  uiState:set('editorMode', mode)
-end)
+})
 
 local layoutsCanvases = {}
 local gridCanvas = love.graphics.newCanvas(4096, 4096)
@@ -376,9 +392,8 @@ local updateLayouts = memoize(function (layouts, groupOrigin)
       selectable = true,
       eventPriority = 2,
 
-      MOUSE_CLICKED = function(self)
-        print(self.id, self.h)
-        uiState:setSelection(self)
+      MOUSE_MOVE = function(self)
+        actions:send('EDITOR_MODE_SET', editorModes.SELECT)
       end
     })
     layoutObjects[obj.id] = obj
@@ -593,6 +608,11 @@ end
 
 local indexOffset = 1
 local function placeObject()
+  local selectedObject = uiState.selectedObject
+  if not selectedObject then
+    return
+  end
+
   local mgp = uiState.mouseGridPosition
   local x, y = mgp.x + indexOffset, mgp.y + indexOffset
   local currentObj = Grid.get(state.placedObjects, x, y)
@@ -682,19 +702,34 @@ Component.create({
         msgBus.send('CURSOR_SET', { type = uiState.panning and 'move' or 'default' })
       end,
       onClick = function(self)
+        local mode = uiState.editorMode
+
+        local shouldSetSelection = editorModes.SELECT == mode and
+          uiState.hoveredObject and
+          uiState.hoveredObject.selectable
+        if shouldSetSelection then
+          uiState:set('selectedObject', uiState.hoveredObject)
+        end
+
+        local shouldErase = editorModes.ERASE == mode
+        if shouldErase then
+          actions:send('ERASE_OBJECT')
+        end
       end,
       onKeyPress = function(self, ev)
         if ev.key == 'escape' then
           uiState:set('selectedObject', nil)
         end
-
+      end,
+      onKeyDown = function(self, ev)
         local inputState = require 'main.inputs.keyboard-manager'.state
         local keysPressed = inputState.keyboard.keysPressed
         local hasCtrlModifier = keysPressed.lctrl or
           keysPressed.rctrl
         if hasCtrlModifier then
           if 'z' == ev.key then
-            if keysPressed.lshift or keysPressed.rshift then
+            local isRedo = keysPressed.lshift or keysPressed.rshift
+            if isRedo then
               state:redo()
             else
               state:undo()
