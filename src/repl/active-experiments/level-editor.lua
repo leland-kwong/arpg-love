@@ -138,6 +138,8 @@ local uiState = CreateState({
   fileStateContext = nil,
   loadedLayouts = {},
   editorMode = editorModes.SELECT,
+  lastEditorMode = nil,
+  lastPlacementGridPosition = nil,
   translate = {
     startX = 0,
     startY = 0,
@@ -629,16 +631,17 @@ end
 
 local indexOffset = 1
 local function placeObject()
-  local isNewPlacement = uiState.lastPlacementGridPosition ~= uiState.mouseGridPosition
-  if (not isNewPlacement) then
+  local canPlace = (uiState.lastPlacementGridPosition ~= uiState.mouseGridPosition) or
+    (uiState.lastEditorMode ~= uiState.editorMode)
+  if (not canPlace) then
     return
   end
   uiState:set('lastPlacementGridPosition', uiState.mouseGridPosition)
+  uiState:set('lastEditorMode', uiState.editorMode)
 
   local mgp = uiState.mouseGridPosition
   local x, y = mgp.x + indexOffset, mgp.y + indexOffset
-  local hasSomethingToErase = Grid.get(state.placedObjects, x, y) ~= nil
-  local shouldErase = (editorModes.ERASE == uiState.editorMode) and hasSomethingToErase
+  local shouldErase = (editorModes.ERASE == uiState.editorMode)
 
   if shouldErase then
     local nextObjectState = O.deepCopy(state.placedObjects)
