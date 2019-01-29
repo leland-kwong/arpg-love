@@ -13,6 +13,7 @@ local memoize = require 'utils.memoize'
 local O = require 'utils.object-utils'
 local Observable = require 'modules.observable'
 local Enum = require 'utils.enum'
+local getFont = require 'components.font'
 
 local gridSize = {
   w = 60,
@@ -206,8 +207,6 @@ actions:addActions({
       error('invalid mode', mode)
     end
     uiState:set('editorMode', mode)
-  end,
-  ERASE_OBJECT = function()
   end
 })
 
@@ -227,6 +226,16 @@ local collisionObjectMt = {
 collisionObjectMt.__index = collisionObjectMt
 local function ColObj(props)
   return setmetatable(props, collisionObjectMt)
+end
+
+local function guiPrint(text, x, y)
+  love.graphics.setFont(getFont.debug.font)
+  love.graphics.print(text, x, y)
+end
+
+local function getTextSize(text, font)
+  local GuiText = require 'components.gui.gui-text'
+  return GuiText.getTextSize(text, font)
 end
 
 local function handlePanning(event)
@@ -443,7 +452,7 @@ local function renderLoadedLayoutObjects()
 
   love.graphics.setColor(1,1,1)
   for _,obj in pairs(uiState.loadedLayoutObjects) do
-    love.graphics.print(obj.id, obj.x, obj.y - 20 + obj.offsetY)
+    guiPrint(obj.id, obj.x, obj.y - 20 + obj.offsetY)
   end
 end
 
@@ -467,14 +476,20 @@ state:onChange(function(self, k, val, prevVal)
 end)
 state:set('loadDir', 'C:\\Users\\lelandkwong\\Projects\\arpg-love\\src\\built\\maps')
 
-local function renderMousePosition()
+local function renderGridPosition()
   if uiState.selectedObject then
     return
   end
 
-  love.graphics.setColor(0,0.6,1,1)
+  local style = 'line'
+  if editorModes.ERASE == uiState.editorMode then
+    love.graphics.setColor(1,1,1,0.15)
+    style = 'fill'
+  else
+    love.graphics.setColor(0,0.6,1,1)
+  end
   local mgp = uiState.mousePosition
-  love.graphics.rectangle('line', mgp.x + 0.5, mgp.y + 0.5, gridSize.w, gridSize.h)
+  love.graphics.rectangle(style, mgp.x + 0.5, mgp.y + 0.5, gridSize.w, gridSize.h)
 end
 
 local inputWidth = 500
@@ -510,12 +525,6 @@ uiColWorld:add(
   saveDirectoryBox.w,
   saveDirectoryBox.h
 )
-
-local function guiPrint(text, x, y)
-  local getFont = require 'components.font'
-  love.graphics.setFont(getFont.debug.font)
-  love.graphics.print(text, x, y)
-end
 
 local function renderLoadDirectoryBox()
   local isHovered = F.find(uiState.collisions, function(c)
@@ -606,28 +615,47 @@ local function renderSelectedObject()
   end
 end
 
+local function renderEditorModeState()
+  local text = uiState.editorMode
+  local w,h = getTextSize(text, getFont.debug.font)
+  love.graphics.setColor(1,1,0)
+  guiPrint(
+    text,
+    love.graphics.getWidth() - w - 10,
+    love.graphics.getHeight() - h - 10
+  )
+end
+
 local indexOffset = 1
 local function placeObject()
-  local selectedObject = uiState.selectedObject
-  if not selectedObject then
+  local mgp = uiState.mouseGridPosition
+  local x, y = mgp.x + indexOffset, mgp.y + indexOffset
+  local shouldErase = editorModes.ERASE == uiState.editorMode
+  if shouldErase then
+    local nextObjectState = O.deepCopy(state.placedObjects)
+    Grid.set(nextObjectState, x, y, nil)
+    state:set('placedObjects', nextObjectState)
     return
   end
 
-  local mgp = uiState.mouseGridPosition
-  local x, y = mgp.x + indexOffset, mgp.y + indexOffset
+  local selectedObject = uiState.selectedObject
+  if (not selectedObject) then
+    return
+  end
+
   local currentObj = Grid.get(state.placedObjects, x, y)
   local isNewObject = (currentObj and currentObj.referenceId) ~= uiState.selectedObject.id
   if (not isNewObject) then
     return
   end
 
-  local objectState = O.deepCopy(state.placedObjects)
-  Grid.set(objectState, x, y, {
+  local nextObjectState = O.deepCopy(state.placedObjects)
+  Grid.set(nextObjectState, x, y, {
     id = Component.newId(),
     referenceId = uiState.selectedObject.id,
     data = uiState.selectedObject
   })
-  state:set('placedObjects', objectState)
+  state:set('placedObjects', nextObjectState)
 end
 
 local function renderPlacedObjects()
@@ -700,6 +728,11 @@ Component.create({
         updateUiCollisions(pos.x, pos.y)
 
         msgBus.send('CURSOR_SET', { type = uiState.panning and 'move' or 'default' })
+
+        local isPlaceMode = (not uiState.hoveredObject) and (uiState.selectedObject)
+        if (isPlaceMode) then
+          actions:send('EDITOR_MODE_SET', editorModes.PLACE)
+        end
       end,
       onClick = function(self)
         local mode = uiState.editorMode
@@ -710,14 +743,13 @@ Component.create({
         if shouldSetSelection then
           uiState:set('selectedObject', uiState.hoveredObject)
         end
-
-        local shouldErase = editorModes.ERASE == mode
-        if shouldErase then
-          actions:send('ERASE_OBJECT')
-        end
       end,
       onKeyPress = function(self, ev)
-        if ev.key == 'escape' then
+        if 'escape' == ev.key then
+          actions:send('EDITOR_MODE_SET', editorModes.SELECT)
+          uiState:set('selectedObject', nil)
+        elseif 'e' == ev.key then
+          actions:send('EDITOR_MODE_SET', editorModes.ERASE)
           uiState:set('selectedObject', nil)
         end
       end,
@@ -760,9 +792,10 @@ Component.create({
         renderGuiElements()
         renderLoadedLayoutObjects()
         renderPlacedObjects()
-        renderMousePosition()
+        renderGridPosition()
         renderSelectedObject()
         renderHoveredObjectBox()
+        renderEditorModeState()
 
         love.graphics.pop()
       end
