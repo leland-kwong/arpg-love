@@ -31,6 +31,24 @@ local uiColWorld = bump.newWorld(32)
 
 local actions = ActionSystem()
 actions:addActions({
+  LAYER_CREATE = function()
+    local nextState = O.clone(state.placedObjects)
+    local layerId = Component.newId()
+    nextState[layerId] = {}
+
+    -- state:set('placedObjects', nextState)
+    local layersListCopy = O.clone(state.layersList)
+    table.insert(layersListCopy, {
+      id = layerId,
+      label = 'layer-'..layerId
+    })
+    state:set('layersList', layersListCopy)
+  end,
+
+  LAYER_SELECT = function(layerId)
+    uiState:set('activeLayer', layerId)
+  end,
+
   EDITOR_MODE_SET = function(mode)
     if not editorModes[mode] then
       error('invalid mode', mode)
@@ -66,6 +84,7 @@ actions:addActions({
 
 local layoutsCanvases = {}
 local gridCanvas = love.graphics.newCanvas(4096, 4096)
+local layersListCanvas = love.graphics.newCanvas(400, 1000)
 
 local function panTo(x, y)
   local tx = uiState.translate
@@ -148,6 +167,53 @@ local function loadLayouts(directory)
   return layouts
 end
 
+local layersContainerWidth = 150
+local layersContainerY = 100
+local layersContainerBox = ColObj({
+  id = 'layersContainerBox',
+  x = love.graphics.getWidth() - layersContainerWidth - 1,
+  y = layersContainerY,
+  w = layersContainerWidth,
+  h = love.graphics.getHeight() - layersContainerY - 35
+}, uiColWorld)
+
+local function updateLayersListUi()
+  love.graphics.push()
+  love.graphics.origin()
+  love.graphics.setCanvas(layersListCanvas)
+  love.graphics.clear()
+
+  love.graphics.setColor(1,1,1)
+  local offsetY = 0
+  for i=1, #state.layersList do
+    local l = state.layersList[i]
+
+    local layerObj = ColObj({
+      id = l.id,
+      x = layersContainerBox.x,
+      y = layersContainerBox.y + offsetY,
+      w = layersContainerBox.w,
+      h = 20
+    }, uiColWorld)
+
+    guiPrint(
+      l.label,
+      0,
+      offsetY
+    )
+
+    offsetY = offsetY + layerObj.h
+  end
+
+  love.graphics.pop()
+  love.graphics.setCanvas()
+end
+
+local function renderLayersList()
+  love.graphics.setColor(1,1,1)
+  love.graphics.draw(layersListCanvas, layersContainerBox.x, layersContainerBox.y)
+end
+
 local function iterateListAsGrid(list, numCols, callback)
   for i=1, #list do
     local val = list[i]
@@ -156,7 +222,7 @@ local function iterateListAsGrid(list, numCols, callback)
   end
 end
 
-local renderersByLayerType = {
+local renderersByTiledLayerType = {
   tilelayer = {
     [1] = function(x, y, w, h)
       love.graphics.setColor(1,1,1,0.1)
@@ -252,14 +318,14 @@ local updateLayouts = memoize(function (layouts, groupOrigin)
 
     F.forEach(l.data.layers, function(layer)
       if layer.type == 'tilelayer' then
-        local renderType = renderersByLayerType.tilelayer
+        local renderType = renderersByTiledLayerType.tilelayer
         iterateListAsGrid(layer.data, layer.width, function(v, x, y)
           if renderType[v] then
             renderType[v](x * l.data.tilewidth * scale, y * l.data.tileheight * scale, l.data.tilewidth * scale, l.data.tileheight * scale)
           end
         end)
       elseif layer.type == 'objectgroup' then
-        local renderType = renderersByLayerType.objectgroup
+        local renderType = renderersByTiledLayerType.objectgroup
         F.forEach(layer.objects, function(v)
           if renderType[v.shape] then
             renderType[v.shape](scale, v)
@@ -304,6 +370,11 @@ state:onChange(function(self, k, val, prevVal)
     })
   end
 
+  local layersListChanged = k == 'layersList' and isNewVal
+  if layersListChanged then
+    updateLayersListUi(val)
+  end
+
   local isNewMapSize = k == 'mapSize' and isNewVal
   if isNewMapSize then
     setupGridCanvas(state.mapSize.x, state.mapSize.y)
@@ -346,33 +417,19 @@ local saveDirectoryBox = ColObj({
 }, uiColWorld)
 
 local function renderLoadDirectoryBox()
-  local isHovered = F.find(uiState.collisions, function(c)
-    return c.other.id == loadedDirectoryBox.id
-  end) ~= nil
-  if isHovered then
-    love.graphics.setColor(1,1,0)
-  else
-    love.graphics.setColor(1,1,1)
-  end
+  love.graphics.setColor(1,1,1)
   local box = loadedDirectoryBox
   love.graphics.setLineWidth(1)
-  love.graphics.rectangle('line', box.x - 0.5, box.y - 0.5, box.w, box.h)
-  guiPrint(state.loadDir or 'drag folder to load Tiled maps', box.x + 3, box.y + 5)
+  love.graphics.rectangle('line', box.x + 0.5, box.y + 0.5, box.w, box.h)
+  guiPrint(state.loadDir or 'drag folder to load Tiled maps', box.x + 5, box.y + 6)
 end
 
 local function renderSaveDirectoryBox()
-  local isHovered = F.find(uiState.collisions, function(c)
-    return c.other.id == saveDirectoryBox.id
-  end) ~= nil
-  if isHovered then
-    love.graphics.setColor(1,1,0)
-  else
-    love.graphics.setColor(1,1,1)
-  end
+  love.graphics.setColor(1,1,1)
   local box = saveDirectoryBox
   love.graphics.setLineWidth(1)
-  love.graphics.rectangle('line', box.x - 0.5, box.y - 0.5, box.w, box.h)
-  guiPrint(state.saveDir or 'drag folder to save to', box.x + 3, box.y + 5)
+  love.graphics.rectangle('line', box.x + 0.5, box.y + 0.5, box.w, box.h)
+  guiPrint(state.saveDir or 'drag folder to save to', box.x + 5, box.y + 6)
 end
 
 local function renderGuiElements()
@@ -572,10 +629,23 @@ local handleCopyCutDeleteKey = function(ev)
   end
 end
 
+local handleNewLayerKey = function(ev)
+  local inputState = require 'main.inputs.keyboard-manager'.state
+  local keysPressed = inputState.keyboard.keysPressed
+  local isShiftKey = keysPressed.lshift or keysPressed.rshift
+  local isKeyComboMatch = ('n' == ev.key) and isShiftKey
+  if (not isKeyComboMatch) then
+    return
+  end
+
+  actions:send('LAYER_CREATE')
+end
+
 local function handleKeyPress(self, ev)
   handleResetSelectionKey(ev)
   handleEraseModeKey(ev)
   handleCopyCutDeleteKey(ev)
+  handleNewLayerKey(ev)
 end
 
 Component.create({
@@ -710,8 +780,9 @@ Component.create({
         love.graphics.pop()
 
         renderGuiElements()
-        renderLoadedLayoutObjects()
         renderPlacedObjects()
+        renderLoadedLayoutObjects()
+        renderLayersList()
         renderGridPosition()
         renderSelection()
         renderGridSelectionState()
