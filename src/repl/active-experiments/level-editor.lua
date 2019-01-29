@@ -16,6 +16,7 @@ local ColObj = dynamicRequire 'repl.components.level-editor.libs.collision'
 local ActionSystem = dynamicRequire 'repl.components.level-editor.libs.action-system'
 local constants = dynamicRequire 'repl.components.level-editor.constants'
 local states = dynamicRequire 'repl.components.level-editor.states'
+local filterCall = require 'utils.filter-call'
 
 local state = states.state
 local uiState = states.uiState
@@ -521,6 +522,62 @@ local function updateUiCollisions(mouseX, mouseY)
   uiState:set('collisions', cols)
 end
 
+local handleResetSelectionKey = filterCall(function()
+  actions:send('EDITOR_MODE_SET', editorModes.SELECT)
+  actions:send('SELECTION_CLEAR')
+end, function(ev)
+  return 'escape' == ev.key
+end)
+
+local handleEraseModeKey = filterCall(function()
+  actions:send('EDITOR_MODE_SET', editorModes.ERASE)
+  actions:send('SELECTION_CLEAR')
+end, function(ev)
+  return 'e' == ev.key
+end)
+
+local handleCopyCutDeleteKey = function(ev)
+  local inputState = require 'main.inputs.keyboard-manager'.state
+  local keysPressed = inputState.keyboard.keysPressed
+  local isCtrlKey = keysPressed.lctrl or keysPressed.rctrl
+  local copyAction = 'c' == ev.key and isCtrlKey
+  local cutAction = 'x' == ev.key and isCtrlKey
+  local deleteAction = 'delete' == ev.key
+  if copyAction or cutAction or deleteAction then
+    local function convertGridSelection(gridSelection)
+      local newSelection = {}
+      local objectsGridToErase = {}
+      local origin
+      Grid.forEach(gridSelection, function(v, x, y)
+        origin = origin or uiState.placementGridPosition
+        local gridVal = Grid.get(state.placedObjects, x, y)
+        if gridVal and (cutAction or copyAction) then
+          local referenceId = gridVal.referenceId
+          local objectData = ColObj:get(referenceId)
+          local originOffsetX, originOffsetY = 1 - origin.x, 1 - origin.y
+          Grid.set(newSelection, x + originOffsetX, y + originOffsetY, objectData)
+        end
+        if cutAction or deleteAction then
+          Grid.set(objectsGridToErase, x, y, true)
+        end
+      end)
+      return
+        (not O.isEmpty(newSelection)) and newSelection or nil,
+        (not O.isEmpty(objectsGridToErase)) and objectsGridToErase or nil
+    end
+    local nextSelection, objectsGridToErase = convertGridSelection(uiState.gridSelection)
+    actions:send('PLACED_OBJECTS_ERASE', objectsGridToErase)
+    actions:send('SELECTION_CLEAR')
+    actions:send('SELECTION_SET', nextSelection)
+  end
+end
+
+local function handleKeyPress(self, ev)
+  handleResetSelectionKey(ev)
+  handleEraseModeKey(ev)
+  handleCopyCutDeleteKey(ev)
+end
+
 Component.create({
   id = 'LayoutEditor',
   group = 'gui',
@@ -612,50 +669,7 @@ Component.create({
           actions:send('GRID_SELECTION_SET', nextSelection)
         end
       end,
-      onKeyPress = function(self, ev)
-        local inputState = require 'main.inputs.keyboard-manager'.state
-        local keysPressed = inputState.keyboard.keysPressed
-
-        if 'escape' == ev.key then
-          actions:send('EDITOR_MODE_SET', editorModes.SELECT)
-          actions:send('SELECTION_CLEAR')
-        elseif 'e' == ev.key then
-          actions:send('EDITOR_MODE_SET', editorModes.ERASE)
-          actions:send('SELECTION_CLEAR')
-        else
-          local isCtrlKey = keysPressed.lctrl or keysPressed.rctrl
-          local copyAction = 'c' == ev.key and isCtrlKey
-          local cutAction = 'x' == ev.key and isCtrlKey
-          local deleteAction = 'delete' == ev.key
-          if copyAction or cutAction or deleteAction then
-            local function convertGridSelection(gridSelection)
-              local newSelection = {}
-              local objectsGridToErase = {}
-              local origin
-              Grid.forEach(gridSelection, function(v, x, y)
-                origin = origin or uiState.placementGridPosition
-                local gridVal = Grid.get(state.placedObjects, x, y)
-                if gridVal and (cutAction or copyAction) then
-                  local referenceId = gridVal.referenceId
-                  local objectData = ColObj:get(referenceId)
-                  local originOffsetX, originOffsetY = 1 - origin.x, 1 - origin.y
-                  Grid.set(newSelection, x + originOffsetX, y + originOffsetY, objectData)
-                end
-                if cutAction or deleteAction then
-                  Grid.set(objectsGridToErase, x, y, true)
-                end
-              end)
-              return
-                (not O.isEmpty(newSelection)) and newSelection or nil,
-                (not O.isEmpty(objectsGridToErase)) and objectsGridToErase or nil
-            end
-            local nextSelection, objectsGridToErase = convertGridSelection(uiState.gridSelection)
-            actions:send('PLACED_OBJECTS_ERASE', objectsGridToErase)
-            actions:send('SELECTION_CLEAR')
-            actions:send('SELECTION_SET', nextSelection)
-          end
-        end
-      end,
+      onKeyPress = handleKeyPress,
       onKeyDown = function(self, ev)
         local inputState = require 'main.inputs.keyboard-manager'.state
         local keysPressed = inputState.keyboard.keysPressed
