@@ -20,10 +20,12 @@ local gridSize = {
 }
 local uiColWorld = bump.newWorld(10)
 
+local stateDefaultOptions = {
+  trackHistory = false,
+  maxUndos = 100
+}
 local function CreateState(initialState, options)
-  options = options or {
-    trackHistory = false
-  }
+  options = O.assign({}, stateDefaultOptions, options)
 
   local stateCopy = O.deepCopy(initialState)
   local stateMt = {
@@ -88,6 +90,12 @@ local function CreateState(initialState, options)
       end,
       push = function(self)
         self:removeEntriesAfterPosition(self.position)
+
+        local maxUndosReached = #self.history > options.maxUndos
+        if maxUndosReached then
+          table.remove(self.history, 1)
+        end
+
         table.insert(self.history, O.clone(stateCopy))
         self.position = #self.history
       end,
@@ -429,8 +437,6 @@ state:onChange(function(self, k, val, prevVal)
 
   local isNewLoadDir = k == 'loadDir' and isNewVal
   if isNewLoadDir then
-    state:set('foobar', 'blah')
-
     local layouts = loadLayouts(val)
     uiState:set('loadedLayouts', layouts)
     updateLayouts(layouts,  {
