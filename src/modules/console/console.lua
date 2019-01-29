@@ -34,7 +34,9 @@ local keyActions = setmetatable({
 })
 
 msgBus.on(msgBus.KEY_DOWN, function(v)
-  if v.hasModifier and (not v.isRepeated) then
+  local inputState = require 'main.inputs.keyboard-manager'.state
+  local keysPressed = inputState.keyboard.keysPressed
+  if (not v.isRepeated) and keysPressed.lctrl and keysPressed.lshift then
     keyActions[v.key]()
   end
   return v

@@ -11,194 +11,22 @@ local F = require 'utils.functional'
 local Color = require 'modules.color'
 local memoize = require 'utils.memoize'
 local O = require 'utils.object-utils'
-local Observable = require 'modules.observable'
-local Enum = require 'utils.enum'
 local getFont = require 'components.font'
+local ColObj = dynamicRequire 'repl.components.level-editor.libs.collision'
+local ActionSystem = dynamicRequire 'repl.components.level-editor.libs.action-system'
+local constants = dynamicRequire 'repl.components.level-editor.constants'
+local states = dynamicRequire 'repl.components.level-editor.states'
+
+local state = states.state
+local uiState = states.uiState
+
+local editorModes = constants.editorModes
 
 local gridSize = {
   w = 20,
   h = 20
 }
 local uiColWorld = bump.newWorld(32)
-
-local stateDefaultOptions = {
-  trackHistory = false,
-  maxUndos = 100
-}
-local function CreateState(initialState, options)
-  options = O.assign({}, stateDefaultOptions, options)
-
-  local stateCopy = O.deepCopy(initialState)
-  local stateMt = {
-    _onChange = function()
-      return self
-    end,
-    set = function(self, k, v, ignoreHistory)
-      if self._setInProgress then
-        error('[CreateState] Error setting property `' .. k .. '`. Cannot set the state while a set is already in progress.')
-      end
-      self._setInProgress = true
-
-      local currentVal = self[k]
-      local isNewVal = currentVal ~= v
-      local shouldTrackChange = options.trackHistory and
-        isNewVal and
-        (not ignoreHistory) and
-        (not self._logPending)
-      if shouldTrackChange then
-        self._logPending = true
-        Observable(function()
-          self._logPending = false
-          self._changeHistory:push()
-          return true
-        end)
-      end
-
-      self[k] = v
-      self._onChange(self, k, v, currentVal)
-
-      self._setInProgress = false
-      return self
-    end,
-    undo = function(self)
-      local prevState = self._changeHistory:back() or {}
-      for k,v in pairs(prevState) do
-        self:set(k, v, true)
-      end
-    end,
-    redo = function(self)
-      local nextState = self._changeHistory:forward() or {}
-      for k,v in pairs(nextState) do
-        self:set(k, v, true)
-      end
-    end,
-    onChange = function(self, callback)
-      self._onChange = callback
-      return self
-    end,
-
-    _setInProgress = false,
-    _logPending = false,
-    _changeHistory = {
-      history = {},
-      position = 0,
-      removeEntriesAfterPosition = function(self, position)
-        local i = #self.history
-        while i > position do
-          table.remove(self.history, i)
-          i = i - 1
-        end
-      end,
-      push = function(self)
-        self:removeEntriesAfterPosition(self.position)
-
-        local maxUndosReached = #self.history > options.maxUndos
-        if maxUndosReached then
-          table.remove(self.history, 1)
-        end
-
-        table.insert(self.history, O.clone(stateCopy))
-        self.position = #self.history
-      end,
-      back = function(self)
-        local clamp = require 'utils.math'.clamp
-        self.position = clamp(self.position - 1, 0, #self.history)
-        return self.history[self.position]
-      end,
-      forward = function(self)
-        local clamp = require 'utils.math'.clamp
-        self.position = clamp(self.position + 1, 0, #self.history)
-        return self.history[self.position]
-      end
-    }
-  }
-  stateMt.__index = stateMt
-  return setmetatable(stateCopy, stateMt)
-end
-
-local state = CreateState({
-  mapSize = Vec2(0, 0),
-  loadDir = nil,
-  saveDir = nil,
-  placedObjects = {} -- 2d grid of objects
-}, {
-  trackHistory = true
-})
-
-local editorModes = Enum(
-  'SELECT',
-  'ERASE',
-  'PLACE'
-)
-
-local uiState = CreateState({
-  mousePosition = Vec2(0, 0),
-  mouseGridPosition = Vec2(0, 0),
-  placementGridPosition = Vec2(0, 0),
-  fileStateContext = nil,
-  loadedLayouts = {},
-  editorMode = editorModes.SELECT,
-  lastEditorMode = nil,
-  lastPlacementGridPosition = nil,
-  activeLayer = nil,
-  translate = {
-    startX = 0,
-    startY = 0,
-    dx = 0,
-    dy = 0,
-    x = 150,
-    y = 100,
-
-    zoomOffset = Vec2(0, 0),
-  },
-  scale = 1,
-
-  hoveredObject = {},
-  selection = nil,
-  gridSelection = nil,
-  collisions = {},
-  loadedLayoutObjects = {},
-
-  getTranslate = function(self)
-    local tx = self.translate
-    return tx.x + tx.dx, tx.y + tx.dy
-  end
-})
-
-local ActionSystemMt = {
-  createAction = function(self, actionType, handler)
-    self.actionHandlers[actionType] = function(payload)
-      local result = handler(payload)
-      if self.onAction then
-        self.onAction(actionType, payload, result)
-      end
-      return result
-    end
-    return self
-  end,
-  addActions = function(self, handlerDefinitions)
-    for actionType,handler in pairs(handlerDefinitions) do
-      self:createAction(actionType, handler)
-    end
-    return self
-  end,
-  send = function(self, actionType, payload)
-    local actionHandler = self.actionHandlers[actionType]
-    if (not actionHandler) then
-      error('invalid action type '..actionType)
-    end
-    return actionHandler(payload)
-  end
-}
-ActionSystemMt.__index = ActionSystemMt
-local function ActionSystem(options)
-  options = options or {}
-
-  return setmetatable({
-    onAction = options.onAction,
-    actionHandlers = {}
-  }, ActionSystemMt)
-end
 
 local actions = ActionSystem()
 actions:addActions({
@@ -242,43 +70,6 @@ local function panTo(x, y)
   local tx = uiState.translate
   tx.x, tx.y = x, y
 end
-
-local collisionObjectMt = {
-  offsetX = 0,
-  offsetY = 0,
-  selectable = false,
-  setTranslate = function(self, x, y)
-    self.offsetX, self.offsetY = x or self.offsetX, y or self.offsetY
-    local x, y = self:getPosition()
-    self.collisionWorld:update(self, x, y)
-    return self
-  end,
-  getPosition = function(self)
-    return self.x + self.offsetX, self.y + self.offsetY
-  end,
-  remove = function(self)
-    self.collisionWorld:remove(self)
-    return self
-  end
-}
-collisionObjectMt.__index = collisionObjectMt
-
-local ColObj = setmetatable({
-  _objectsList = {},
-  get = function(self, id)
-    return self._objectsList[id]
-  end,
-}, {
-  __call = function(self, props, collisionWorld)
-    local o = setmetatable(props, collisionObjectMt)
-    o.collisionWorld = collisionWorld
-    collisionWorld:add(o, o.x, o.y, o.w, o.h)
-
-    assert(props.id ~= nil, 'id must be provided for collision object')
-    self._objectsList[props.id] = o
-    return o
-  end
-})
 
 local function guiPrint(text, x, y)
   love.graphics.setFont(getFont.debug.font)
