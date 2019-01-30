@@ -69,9 +69,9 @@ return setmetatable(M, {
 
     assert(props.id ~= nil, 'id must be provided for collision object')
 
-    local duplicateObjectById = self:get(props.id)
+    local duplicateObjectById = M:get(props.id)
     if duplicateObjectById then
-      duplicateObjectById:remove()
+      M:remove(props.id)
     end
 
     objectsList[props.id] = o

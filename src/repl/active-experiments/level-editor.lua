@@ -90,10 +90,12 @@ local function TextBox(props, colWorld)
           h = charHeight + (parent.padding * 2),
           MOUSE_PRESSED = function(self, ev)
             local presses = ev[5]
-            local isDoubleClick = presses == 2
+            local isDoubleClick = presses % 2 == 0
             if isDoubleClick then
               parent:setRange(1, #parent.text + 1)
-              return
+              return {
+                stopPropagation = true
+              }
             end
 
             local mousePos = getCursorPos()
@@ -104,8 +106,11 @@ local function TextBox(props, colWorld)
             local indexAdjust = isLeftEdge and -1 or 0
 
             msgBus.send('SET_TEXT_INPUT', true)
-            resetTextBoxClock()
             parent:setRange(i + indexAdjust, i + indexAdjust)
+
+            return {
+              stopPropagation = true
+            }
           end,
         }, colWorld)
         table.insert(self.charCollisions, collision)
@@ -118,8 +123,23 @@ local function TextBox(props, colWorld)
       local clamp = require 'utils.math'.clamp
       local max = #self.text + 1
       _start = clamp(_start, 1, max)
-      _end = clamp(_end, _start, max)
+      _end = _end and clamp(_end, _start, max) or _start
       self.selectionRange = Vec2(_start, _end)
+      resetTextBoxClock()
+    end,
+    MOUSE_PRESSED = function(self)
+      local mousePos = getCursorPos()
+      local x = ColObj:getPosition(self.id)
+      local w = ColObj:getSize(self.id)
+      local isBeginning = (mousePos.x - x)/w < 0.2
+
+      if isBeginning then
+        self:setRange(1)
+        return
+      end
+
+      local endOfText = #self.text + 1
+      self:setRange(endOfText)
     end,
     MOUSE_MOVE = function(self)
       self:updateCharCollisions()
@@ -139,30 +159,46 @@ local function TextBox(props, colWorld)
     KEY_DOWN = function(self, ev)
       local rangeLength = math.abs(self.selectionRange.x - self.selectionRange.y)
       if 'backspace' == ev.key then
-        if rangeLength > 0 then
-          self.text = (string.sub(self.text, 1, self.selectionRange.x - 1) or '') .. (string.sub(self.text, self.selectionRange.y) or '')
-          self:setRange(self.selectionRange.x, self.selectionRange.x)
-        else
-          self.text = (string.sub(self.text, 1, self.selectionRange.x - 2) or '') .. (string.sub(self.text, self.selectionRange.y) or '')
-          self:setRange(self.selectionRange.x - 1, self.selectionRange.x - 1)
+        local endFrag = (string.sub(self.text, self.selectionRange.y) or '')
+        local isSelection = rangeLength > 0
+        if isSelection then
+          local startFrag = (string.sub(self.text, 1, self.selectionRange.x - 1) or '')
+          self.text = startFrag .. endFrag
+          self:setRange(self.selectionRange.x)
+        elseif self.selectionRange.x > 1 then
+          local startFrag = (string.sub(self.text, 1, self.selectionRange.x - 2) or '')
+          self.text = startFrag .. endFrag
+          self:setRange(self.selectionRange.x - 1)
         end
-        resetTextBoxClock()
-      end
-
-      if 'left' == ev.key then
-        if rangeLength > 0 then
-          self:setRange(self.selectionRange.x, self.selectionRange.x)
+      elseif 'delete' == ev.key then
+        local isSelection = rangeLength > 0
+        if isSelection then
+          local startFrag, endFrag = (string.sub(self.text, 1, self.selectionRange.x - 1) or ''),
+            (string.sub(self.text, self.selectionRange.y) or '')
+          self.text = startFrag .. endFrag
+          self:setRange(self.selectionRange.x)
         else
-          self:setRange(self.selectionRange.x - 1, self.selectionRange.y - 1)
+          local startFrag, endFrag = (string.sub(self.text, 1, self.selectionRange.x - 1) or ''),
+            (string.sub(self.text, self.selectionRange.y + 1) or '')
+          self.text = startFrag .. endFrag
+          self:setRange(self.selectionRange.x)
         end
-        resetTextBoxClock()
+      elseif 'left' == ev.key then
+        if rangeLength > 0 then
+          self:setRange(self.selectionRange.x)
+        else
+          self:setRange(self.selectionRange.x - 1)
+        end
       elseif 'right' == ev.key then
         if rangeLength > 0 then
-          self:setRange(self.selectionRange.y, self.selectionRange.y)
+          self:setRange(self.selectionRange.y)
         else
-          self:setRange(self.selectionRange.x + 1, self.selectionRange.y + 1)
+          self:setRange(self.selectionRange.x + 1)
         end
-        resetTextBoxClock()
+      elseif 'home' == ev.key then
+        self:setRange(1)
+      elseif 'end' == ev.key then
+        self:setRange(#self.text + 1)
       end
     end,
     MOUSE_DRAG = function(self, ev)
