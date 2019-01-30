@@ -18,6 +18,7 @@ local uiState = CreateState({
   mousePosition = Vec2(0, 0),
   mouseGridPosition = Vec2(0, 0),
   placementGridPosition = Vec2(0, 0),
+  placementPosition = Vec2(0, 0),
   fileStateContext = nil,
   loadedLayouts = {},
   editorMode = editorModes.SELECT,

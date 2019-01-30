@@ -2,7 +2,7 @@ local filterCall = require 'utils.filter-call'
 local Grid = require 'utils.grid'
 local O = require 'utils.object-utils'
 
-return function(actions, constants, states)
+return function(actions, constants, states, ColObj)
   local state = states.state
   local uiState = states.uiState
 
@@ -35,13 +35,13 @@ return function(actions, constants, states)
         local objectsGridToErase = {}
         local origin
         Grid.forEach(gridSelection, function(v, x, y)
-          origin = origin or uiState.placementGridPosition
+          origin = origin or uiState.placementPosition
           local gridVal = Grid.get(state.placedObjects, x, y)
           if gridVal and (cutAction or copyAction) then
             local referenceId = gridVal.referenceId
             local objectData = ColObj:get(referenceId)
-            local originOffsetX, originOffsetY = 1 - origin.x, 1 - origin.y
-            Grid.set(newSelection, x + originOffsetX, y + originOffsetY, objectData)
+            local originOffsetX, originOffsetY = origin.x, origin.y
+            Grid.set(newSelection, x - originOffsetX, y - originOffsetY, objectData)
           end
           if cutAction or deleteAction then
             Grid.set(objectsGridToErase, x, y, true)

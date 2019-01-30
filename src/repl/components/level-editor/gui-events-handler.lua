@@ -1,4 +1,4 @@
-return function(states, actions, ColObj, msgBus, O)
+return function(states, actions, editorModes, ColObj, msgBus, O)
   local state = states.state
   local uiState = states.uiState
 
@@ -97,5 +97,8 @@ return function(states, actions, ColObj, msgBus, O)
     end
 
     actions:send('HOVERED_OBJECT_SET', hoveredObject)
+    if hoveredObject and hoveredObject.selectable then
+      actions:send('EDITOR_MODE_SET', editorModes.SELECT)
+    end
   end)
 end

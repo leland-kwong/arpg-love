@@ -119,10 +119,6 @@ return function(states, ColObj, uiColWorld, layoutsCanvases, actions, editorMode
         h = l.data.height,
         selectable = true,
         eventPriority = 2,
-
-        MOUSE_MOVE = function(self)
-          actions:send('EDITOR_MODE_SET', editorModes.SELECT)
-        end
       }, uiColWorld)
       layoutObjects[obj.id] = obj
 

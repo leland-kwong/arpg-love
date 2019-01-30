@@ -14,6 +14,10 @@ local O = require 'utils.object-utils'
 local getFont = require 'components.font'
 
 local uiColWorld = bump.newWorld(32)
+local gridSize = {
+  w = 20,
+  h = 20
+}
 local layoutsCanvases = {}
 
 local function guiPrint(text, x, y)
@@ -29,7 +33,7 @@ local getTextSize = require 'repl.components.level-editor.libs.get-text-size'
 local getCursorPos = require 'repl.components.level-editor.libs.get-cursor-position'
 local TextBox = dynamicRequire 'repl.components.level-editor.text-box'(states, ColObj)
 local actions = dynamicRequire 'repl.components.level-editor.actions'(states, constants)
-local handleKeyPress = dynamicRequire 'repl.components.level-editor.hotkeys'(actions, constants, states)
+local handleKeyPress = dynamicRequire 'repl.components.level-editor.hotkeys'(actions, constants, states, ColObj)
 local guiEventsHandler = dynamicRequire 'repl.components.level-editor.gui-events-handler'
 local layersList = dynamicRequire 'repl.components.level-editor.layers-list'(states, ColObj, uiColWorld, TextBox)
 local fileManager = dynamicRequire 'repl.components.level-editor.file-manager'(states, guiPrint, ColObj, uiColWorld)
@@ -43,15 +47,127 @@ local layoutList = dynamicRequire 'repl.components.level-editor.selectable-layou
   guiPrint
 )
 
+local function ObjectEditor(origin, states, gridSize, ColObj, uiColWorld)
+  local memoizeOne = require 'utils.memoize-one'
+  local Grid = require 'utils.grid'
+
+  local uiState = states.uiState
+  local objectsSelectedCanvas = love.graphics.newCanvas(4096, 4096)
+  local objectsCanvas = love.graphics.newCanvas(4096, 4096)
+  local offsetY = 25
+  local padding = 10
+
+  local shapeTypeOptions = {
+    ColObj({
+      id = 'shapeTypePoint',
+      x = origin.x + padding,
+      y = origin.y + padding + offsetY,
+      w = 30,
+      h = 30,
+      type = 'gridObject',
+      selectable = true
+    }, uiColWorld)
+  }
+
+  local indexOffset = 1
+  local shapeRenderers = {
+    gridObject = function(x, y)
+      love.graphics.setColor(0,1,1)
+      local radius = 4
+      love.graphics.circle('fill', x, y, 4)
+    end
+  }
+
+  local updatePlacedObjectsMemoized = memoizeOne(function(placedObjects)
+    love.graphics.setCanvas(objectsCanvas)
+    love.graphics.push()
+    love.graphics.origin()
+    love.graphics.clear()
+    local oBlendMode = love.graphics.getBlendMode()
+    love.graphics.setBlendMode('alpha', 'premultiplied')
+
+    Grid.forEach(placedObjects, function(o, x, y)
+      local referenceId = o.referenceId
+      local data = ColObj:get(referenceId)
+      if data.type == 'gridObject' then
+        shapeRenderers[data.type](x, y)
+      end
+    end)
+
+    love.graphics.setCanvas()
+    love.graphics.pop()
+    love.graphics.setBlendMode(oBlendMode)
+  end)
+  local updateSelectionObjectsMemoized = memoizeOne(function(selection)
+    if (not selection) then
+      return
+    end
+
+    love.graphics.setCanvas(objectsSelectedCanvas)
+    love.graphics.push()
+    love.graphics.origin()
+    love.graphics.clear()
+    local oBlendMode = love.graphics.getBlendMode()
+    love.graphics.setBlendMode('alpha', 'premultiplied')
+
+    Grid.forEach(selection, function(o, x, y)
+      if o.type == 'gridObject' then
+        shapeRenderers[o.type](x, y)
+      end
+    end)
+
+    love.graphics.setCanvas()
+    love.graphics.pop()
+    love.graphics.setBlendMode(oBlendMode)
+  end)
+
+  local update = function()
+    updatePlacedObjectsMemoized(states.state.placedObjects)
+    updateSelectionObjectsMemoized(uiState.selection)
+  end
+
+  local function renderUiPanel()
+    local title = 'Objects'
+    love.graphics.print(title, origin.x + padding, origin.y + padding)
+
+    love.graphics.setColor(1,1,1,0.5)
+    love.graphics.rectangle('line', origin.x + 0.5, origin.y + 0.5, 200, 34 + offsetY + (padding * 2))
+    for i=1, #shapeTypeOptions do
+      local box = shapeTypeOptions[i]
+      love.graphics.setColor(0,1,1)
+      love.graphics.circle('line', box.x + 0.5 + box.w/2, box.y + 0.5 + box.h/2, box.w/2)
+    end
+  end
+
+  local function render(item)
+    local tx, ty = uiState:getTranslate()
+    love.graphics.draw(objectsCanvas, tx, ty)
+    if uiState.selection then
+      local mp = uiState.mousePosition
+      local mx, my = mp.x, mp.y
+      love.graphics.draw(objectsSelectedCanvas, mx, my)
+    end
+  end
+
+  return {
+    update = update,
+    renderUiPanel = renderUiPanel,
+    render = render
+  }
+end
+
+local objectEditor = ObjectEditor(
+  Vec2(150, 10),
+  states,
+  gridSize,
+  ColObj,
+  uiColWorld
+)
+
 local state = states.state
 local uiState = states.uiState
 
 local editorModes = constants.editorModes
-
-local gridSize = {
-  w = 20,
-  h = 20
-}
 
 local gridCanvas = love.graphics.newCanvas(4096, 4096)
 
@@ -158,7 +274,7 @@ local function renderSelection()
   local mp = uiState.mousePosition
   local mx, my = mp.x, mp.y
   Grid.forEach(selection, function(o, x, y)
-    local offsetX, offsetY = (x - 1) * gridSize.w, (y - 1) * gridSize.h
+    local offsetX, offsetY = (x), (y)
     if o.type == 'mapBlock' then
       love.graphics.setColor(1,1,1,0.6)
       local canvas = layoutsCanvases[o.id]
@@ -185,8 +301,8 @@ local function placeObject()
     return
   end
 
-  local pgp = uiState.placementGridPosition
-  local x, y = pgp.x, pgp.y
+  local pp = uiState.placementPosition
+  local x, y = pp.x, pp.y
   local shouldErase = (editorModes.ERASE == uiState.editorMode)
 
   if shouldErase then
@@ -206,7 +322,7 @@ end
 local function renderPlacedObjects()
   Grid.forEach(state.placedObjects, function(o, x, y)
     local tx, ty = uiState:getTranslate()
-    local actualX, actualY = (x - 1) * gridSize.w + tx, (y - 1) * gridSize.h + ty
+    local actualX, actualY = (x) + tx, (y) + ty
     local referenceId = o.referenceId
     local data = ColObj:get(referenceId)
     if data.type == 'mapBlock' then
@@ -221,7 +337,7 @@ local function renderGridSelectionState()
   love.graphics.setColor(1,1,0)
   Grid.forEach(uiState.gridSelection, function(v, x, y)
     local tx, ty = uiState:getTranslate()
-    local actualX, actualY = (x - 1) * gridSize.w + tx, (y - 1) * gridSize.h + ty
+    local actualX, actualY = (x) + tx, (y) + ty
     love.graphics.rectangle('line', actualX, actualY, gridSize.w, gridSize.h)
   end)
 end
@@ -280,6 +396,7 @@ Component.create({
         uiState:set('mousePosition', Vec2(posX + translateX, posY + translateY))
         uiState:set('mouseGridPosition', Vec2(gridPos.x, gridPos.y))
         uiState:set('placementGridPosition', uiState.mouseGridPosition + Vec2(1,1))
+        uiState:set('placementPosition', Vec2(uiState.mouseGridPosition.x * gridSize.w, uiState.mouseGridPosition.y * gridSize.h))
 
         msgBus.send('CURSOR_SET', { type = uiState.panning and 'move' or 'default' })
 
@@ -308,8 +425,8 @@ Component.create({
             inputState.keyboard.keysPressed.rctrl
           local curSelection = Grid.get(
             uiState.gridSelection,
-            uiState.placementGridPosition.x,
-            uiState.placementGridPosition.y
+            uiState.placementPosition.x,
+            uiState.placementPosition.y
           )
           local nextSelection
           if isSelectionAdd then
@@ -323,8 +440,8 @@ Component.create({
           end
           Grid.set(
             nextSelection,
-            uiState.placementGridPosition.x,
-            uiState.placementGridPosition.y,
+            uiState.placementPosition.x,
+            uiState.placementPosition.y,
             nextVal
           )
           actions:send('GRID_SELECTION_SET', nextSelection)
@@ -374,6 +491,8 @@ Component.create({
         renderPlacedObjects()
         layoutList.render()
         layersList.render()
+        objectEditor.renderUiPanel()
+        objectEditor.render()
         renderGridPosition()
         renderSelection()
         renderGridSelectionState()
@@ -386,7 +505,7 @@ Component.create({
     }):setParent(self)
 
     self.listeners = {
-      guiEventsHandler(states, actions, ColObj, msgBus, O),
+      guiEventsHandler(states, actions, editorModes, ColObj, msgBus, O),
       msgBus.on('MOUSE_DRAG', function(ev)
         if love.keyboard.isDown('space') then
           handlePanning(ev)
@@ -409,6 +528,7 @@ Component.create({
 
     local pos = getCursorPos()
     updateUiCollisions(pos.x, pos.y)
+    objectEditor.update()
   end,
 
   final = function(self)
