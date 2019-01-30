@@ -12,14 +12,16 @@ local Color = require 'modules.color'
 local memoize = require 'utils.memoize'
 local O = require 'utils.object-utils'
 local getFont = require 'components.font'
+local states = dynamicRequire 'repl.components.level-editor.states'
 local ColObj = dynamicRequire 'repl.components.level-editor.libs.collision'
 local constants = dynamicRequire 'repl.components.level-editor.constants'
-local states = dynamicRequire 'repl.components.level-editor.states'
 local filterCall = require 'utils.filter-call'
-local TextBox = dynamicRequire 'repl.components.level-editor.text-box'
 local getTextSize = require 'repl.components.level-editor.libs.get-text-size'
 local getCursorPos = require 'repl.components.level-editor.libs.get-cursor-position'
-local actions = require 'repl.components.level-editor.actions'
+local TextBox = dynamicRequire 'repl.components.level-editor.text-box'(states, ColObj)
+local actions = dynamicRequire 'repl.components.level-editor.actions'
+local handleKeyPress = dynamicRequire 'repl.components.level-editor.hotkeys'(actions, constants, states)
+local guiEventsHandler = dynamicRequire 'repl.components.level-editor.gui-events-handler'
 
 local state = states.state
 local uiState = states.uiState
@@ -503,75 +505,6 @@ local function updateUiCollisions(mouseX, mouseY)
   uiState:set('collisions', cols)
 end
 
-local handleResetSelectionKey = filterCall(function()
-  actions:send('EDITOR_MODE_SET', editorModes.SELECT)
-  actions:send('SELECTION_CLEAR')
-end, function(ev)
-  return 'escape' == ev.key
-end)
-
-local handleEraseModeKey = filterCall(function()
-  actions:send('EDITOR_MODE_SET', editorModes.ERASE)
-  actions:send('SELECTION_CLEAR')
-end, function(ev)
-  return 'e' == ev.key
-end)
-
-local handleCopyCutDeleteKey = function(ev)
-  local inputState = require 'main.inputs.keyboard-manager'.state
-  local keysPressed = inputState.keyboard.keysPressed
-  local isCtrlKey = keysPressed.lctrl or keysPressed.rctrl
-  local copyAction = 'c' == ev.key and isCtrlKey
-  local cutAction = 'x' == ev.key and isCtrlKey
-  local deleteAction = 'delete' == ev.key
-  if copyAction or cutAction or deleteAction then
-    local function convertGridSelection(gridSelection)
-      local newSelection = {}
-      local objectsGridToErase = {}
-      local origin
-      Grid.forEach(gridSelection, function(v, x, y)
-        origin = origin or uiState.placementGridPosition
-        local gridVal = Grid.get(state.placedObjects, x, y)
-        if gridVal and (cutAction or copyAction) then
-          local referenceId = gridVal.referenceId
-          local objectData = ColObj:get(referenceId)
-          local originOffsetX, originOffsetY = 1 - origin.x, 1 - origin.y
-          Grid.set(newSelection, x + originOffsetX, y + originOffsetY, objectData)
-        end
-        if cutAction or deleteAction then
-          Grid.set(objectsGridToErase, x, y, true)
-        end
-      end)
-      return
-        (not O.isEmpty(newSelection)) and newSelection or nil,
-        (not O.isEmpty(objectsGridToErase)) and objectsGridToErase or nil
-    end
-    local nextSelection, objectsGridToErase = convertGridSelection(uiState.gridSelection)
-    actions:send('PLACED_OBJECTS_ERASE', objectsGridToErase)
-    actions:send('SELECTION_CLEAR')
-    actions:send('SELECTION_SET', nextSelection)
-  end
-end
-
-local handleNewLayerKey = function(ev)
-  local inputState = require 'main.inputs.keyboard-manager'.state
-  local keysPressed = inputState.keyboard.keysPressed
-  local isShiftKey = keysPressed.lshift or keysPressed.rshift
-  local isKeyComboMatch = ('n' == ev.key) and isShiftKey
-  if (not isKeyComboMatch) then
-    return
-  end
-
-  actions:send('LAYER_CREATE')
-end
-
-local function handleKeyPress(self, ev)
-  handleResetSelectionKey(ev)
-  handleEraseModeKey(ev)
-  handleCopyCutDeleteKey(ev)
-  handleNewLayerKey(ev)
-end
-
 Component.create({
   id = 'LayoutEditor',
   group = 'gui',
@@ -719,103 +652,7 @@ Component.create({
     }):setParent(self)
 
     self.listeners = {
-      msgBus.on('*', function(ev, msgType)
-        local hoveredObject = nil
-        local uiCollisions = uiState.collisions
-        local preventBubbleEvents = {}
-        local recentlyFocusedItem
-
-        local numCollisions = #uiCollisions
-
-        local shouldBlurFocusedItemOnOutsideClick = 'MOUSE_PRESSED' == msgType and
-          numCollisions == 0
-        if shouldBlurFocusedItemOnOutsideClick then
-          local previouslyFocusedItem = ColObj:get(ColObj:setFocus())
-          if previouslyFocusedItem then
-            local blurHandler = previouslyFocusedItem.ON_BLUR
-            if blurHandler then
-              blurHandler(previouslyFocusedItem)
-            end
-          end
-        end
-
-        local function triggerUiEvents(msgType, obj)
-          if (not preventBubbleEvents[msgType]) then
-            local eventHandler = obj[msgType]
-            if eventHandler then
-              local returnVal = eventHandler(obj, ev, c) or O.EMPTY
-              if returnVal.stopPropagation then
-                preventBubbleEvents[msgType] = true
-              end
-            end
-          end
-
-          local shouldTriggerFocus = 'MOUSE_PRESSED' == msgType and
-            not recentlyFocusedItem and
-            not ColObj:isFocused(obj.id)
-
-          if (shouldTriggerFocus) then
-            recentlyFocusedItem = obj.focusable
-
-            local previouslyFocusedItemId = ColObj:getFocused()
-            local previouslyFocusedItem = ColObj:get(previouslyFocusedItemId)
-            local isCurrentlyHovered = ColObj:isHovered(previouslyFocusedItemId)
-
-            if (not isCurrentlyHovered) and previouslyFocusedItem then
-              local blurHandler = previouslyFocusedItem.ON_BLUR
-              if blurHandler then
-                blurHandler(previouslyFocusedItem)
-              end
-            end
-
-            if (numCollisions > 1 and obj.focusable) or (numCollisions == 1) then
-              ColObj:setFocus(obj.id)
-              local focusHandler = obj.ON_FOCUS
-              if focusHandler then
-                focusHandler(obj)
-              end
-            end
-          end
-
-          if (not preventBubbleEvents.MOUSE_MOVE) then
-            local mouseMoveHandler = obj.MOUSE_MOVE
-            if mouseMoveHandler then
-              local returnVal = mouseMoveHandler(obj, ev) or O.EMPTY
-              if returnVal.stopPropagation then
-                preventBubbleEvents.MOUSE_MOVE = true
-              end
-            end
-          end
-        end
-
-        -- clear previously hovered
-        ColObj:clearHovered()
-
-        for i=1, numCollisions do
-          local c = uiCollisions[i]
-          ColObj:setHover(c.other.id)
-        end
-
-        -- [[ handle ui events ]]
-        for i=1, numCollisions do
-          local c = uiCollisions[i]
-          local obj = c.other
-          hoveredObject = hoveredObject or obj
-          triggerUiEvents(msgType, obj)
-        end
-
-        local currentlyFocusedId = ColObj:getFocused()
-        local currentlyFocusedItem = ColObj:get(currentlyFocusedId)
-        if ((not ColObj:isHovered(currentlyFocusedId)) and currentlyFocusedItem) then
-          triggerUiEvents(
-            msgType,
-            currentlyFocusedItem
-          )
-        end
-
-        actions:send('HOVERED_OBJECT_SET', hoveredObject)
-      end),
-
+      guiEventsHandler(states, actions, ColObj, msgBus, O),
       msgBus.on('MOUSE_DRAG', function(ev)
         if love.keyboard.isDown('space') then
           handlePanning(ev)

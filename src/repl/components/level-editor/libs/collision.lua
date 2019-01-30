@@ -13,6 +13,12 @@ local M = {
     hoveredObjects[id] = self:get(id)
     return self
   end,
+  clearHovered = function()
+    hoveredObjects = {}
+  end,
+  getHovered = function(self)
+    return hoveredObjects
+  end,
   setFocus = function(self, id)
     local previouslyFocused = focusedObject
 
@@ -61,6 +67,8 @@ local M = {
 local collisionObjectMt = {
   x = 0,
   y = 0,
+  w = 1,
+  h = 1,
   offsetX = 0,
   offsetY = 0,
   selectable = false,
