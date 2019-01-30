@@ -35,6 +35,25 @@ function Grid.forEach(grid, callback)
   end
 end
 
+function Grid.map(grid, callback)
+  local copy = {}
+
+  if (not grid) then
+    return copy
+  end
+
+  Grid.forEach(grid, function(v, x, y)
+    Grid.set(copy, x, y, callback(v, x, y))
+  end)
+
+  return copy
+end
+
+local cloneCallback = function(v) return v end
+function Grid.clone(grid)
+  return Grid.map(grid, cloneCallback)
+end
+
 local neighborOffsets = {
   {-1, -1},
   {0, -1},
