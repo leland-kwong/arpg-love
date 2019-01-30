@@ -69,7 +69,7 @@ local function TextBox(props, colWorld)
       local parent = self
       local offsetX = 0
       for _,c in ipairs(self.charCollisions) do
-        c:remove()
+        ColObj:remove(c.id)
       end
       self.charCollisions = {}
       local posX, posY = ColObj:getPosition(self.id)
@@ -259,7 +259,8 @@ end
 
 local activeTextBox = TextBox({
   text = 'foobar'
-}, uiColWorld):setTranslate(300, 200)
+}, uiColWorld)
+ColObj:setTranslate(activeTextBox.id, 300, 200)
 
 local function renderActiveTextBox()
   local b = activeTextBox
@@ -456,7 +457,7 @@ local loadedLayoutsContainerBox = ColObj({
     self.scrollY = clamp(self.scrollY + (dy * scrollSpeed), -(maxY - self.h + self.padding[1]), 0)
 
     for _,obj in pairs(uiState.loadedLayoutObjects) do
-      obj:setTranslate(nil, self.scrollY)
+      ColObj:setTranslate(obj.id, nil, self.scrollY)
     end
   end
 }, uiColWorld)
@@ -475,7 +476,7 @@ local updateLayouts = memoize(function (layouts, groupOrigin)
 
   local layoutObjects = uiState.loadedLayoutObjects
   for _,obj in pairs(layoutObjects) do
-    uiColWorld:remove(obj)
+    ColObj:remove(obj.id)
   end
   layoutObjects = {}
 
