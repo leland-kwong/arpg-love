@@ -51,14 +51,17 @@ function Object.clone(t1)
 	return Object.assign({}, t1)
 end
 
-function Object.deepCopy(t1)
+function Object.deepCopy(t1, fromRecursion)
 	if (type(t1) ~= 'table') then
+		if (not fromRecursion) then
+			return t1 == nil and {} or t1
+		end
 		return t1
 	end
 
 	local copy = {}
 	for k,v in pairs(t1) do
-		copy[k] = Object.deepCopy(v)
+		copy[k] = Object.deepCopy(v, true)
 	end
 	return copy
 end
