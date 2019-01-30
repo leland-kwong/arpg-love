@@ -952,7 +952,7 @@ Component.create({
           )
           local nextSelection
           if isSelectionAdd then
-            nextSelection = O.clone(uiState.gridSelection)
+            nextSelection = O.deepCopy(uiState.gridSelection)
           else
             nextSelection = {}
           end
