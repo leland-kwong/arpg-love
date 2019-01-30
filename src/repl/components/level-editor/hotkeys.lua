@@ -1,5 +1,6 @@
 local filterCall = require 'utils.filter-call'
 local Grid = require 'utils.grid'
+local O = require 'utils.object-utils'
 
 return function(actions, constants, states)
   local state = states.state
