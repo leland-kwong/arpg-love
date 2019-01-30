@@ -46,6 +46,13 @@ msgBus.on(msgBus.KEY_PRESSED, function(msg)
   end
 end)
 
+msgBus.on('KEY_DOWN', function(msg)
+  local entity = getFocusedEntity()
+  if entity then
+    entity:onKeyDown(msg)
+  end
+end)
+
 local Gui = {
   group = groups.gui,
   isGui = true,
@@ -55,12 +62,14 @@ local Gui = {
   -- inputContext = 'gui', -- the input context to set when the entity is hovered
   onClick = noop,
   onKeyPress = noop,
+  onKeyDown = noop,
   onChange = noop,
   onCreate = noop,
   onFocus = noop,
   onBlur = noop,
   onScroll = noop,
   onPointerDown = noop,
+  onPointerUp = noop,
   onPointerEnter = noop,
   onPointerLeave = noop,
   onUpdate = noop,
@@ -172,9 +181,14 @@ local function triggerEvents(c, msgValue, msgType)
     handleFocusChange(self, self.hovered)
   end
 
-  if self.hovered and love.mouse.isDown(1) then
-    local mx, my = self:getMousePosition()
-    self.onPointerDown(self, O.assign({}, msgValue, {x = mx, y = my}))
+  if self.hovered then
+    if love.mouse.isDown(1) then
+      local mx, my = self:getMousePosition()
+      self.onPointerDown(self, O.assign({}, msgValue, {x = mx, y = my}))
+    end
+    if msgBus.MOUSE_RELEASED == msgType then
+      self.onPointerUp(self)
+    end
   end
 
   if self.focused and guiType.TEXT_INPUT == self.type then
@@ -185,9 +199,11 @@ local function triggerEvents(c, msgValue, msgType)
     end
 
     -- handle backspace for text input
-    if msgBus.KEY_DOWN == msgType and msgValue.key == 'backspace' then
-      self.text = string.sub(self.text, 1, #self.text - 1)
-      self.onChange(self)
+    if msgBus.KEY_DOWN == msgType then
+      if msgValue.key == 'backspace' then
+        self.text = string.sub(self.text, 1, #self.text - 1)
+        self.onChange(self)
+      end
     end
   end
 end
@@ -219,6 +235,7 @@ local eventTypesFilter = {
   [msgBus.MOUSE_WHEEL_MOVED] = true,
   [msgBus.MOUSE_CLICKED] = true,
   [msgBus.MOUSE_PRESSED] = true,
+  [msgBus.MOUSE_RELEASED] = true,
   [msgBus.GUI_TEXT_INPUT] = true,
   [msgBus.KEY_DOWN] = true,
   [msgBus.UPDATE] = true,
