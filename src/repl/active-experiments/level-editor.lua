@@ -5,7 +5,6 @@ local Position = require 'utils.position'
 local Vec2 = require 'modules.brinevector'
 local Grid = dynamicRequire 'utils.grid'
 local bump = require 'modules.bump'
-local uiColWorld = bump.newWorld(32)
 local msgBus = require 'components.msg-bus'
 local room1 = require 'built.maps.room-1'
 local F = require 'utils.functional'
@@ -13,6 +12,15 @@ local Color = require 'modules.color'
 local memoize = require 'utils.memoize'
 local O = require 'utils.object-utils'
 local getFont = require 'components.font'
+
+local uiColWorld = bump.newWorld(32)
+local layoutsCanvases = {}
+
+local function guiPrint(text, x, y)
+  love.graphics.setFont(getFont.debug.font)
+  love.graphics.print(text, x, y)
+end
+
 local states = dynamicRequire 'repl.components.level-editor.states'
 local ColObj = dynamicRequire 'repl.components.level-editor.libs.collision'
 local constants = dynamicRequire 'repl.components.level-editor.constants'
@@ -24,6 +32,16 @@ local actions = dynamicRequire 'repl.components.level-editor.actions'(states, co
 local handleKeyPress = dynamicRequire 'repl.components.level-editor.hotkeys'(actions, constants, states)
 local guiEventsHandler = dynamicRequire 'repl.components.level-editor.gui-events-handler'
 local layersList = dynamicRequire 'repl.components.level-editor.layers-list'(states, ColObj, uiColWorld, TextBox)
+local fileManager = dynamicRequire 'repl.components.level-editor.file-manager'(states, guiPrint, ColObj, uiColWorld)
+local layoutList = dynamicRequire 'repl.components.level-editor.selectable-layout-list'(
+  states,
+  ColObj,
+  uiColWorld,
+  layoutsCanvases,
+  actions,
+  constants.editorModes,
+  guiPrint
+)
 
 local state = states.state
 local uiState = states.uiState
@@ -35,17 +53,11 @@ local gridSize = {
   h = 20
 }
 
-local layoutsCanvases = {}
 local gridCanvas = love.graphics.newCanvas(4096, 4096)
 
 local function panTo(x, y)
   local tx = uiState.translate
   tx.x, tx.y = x, y
-end
-
-local function guiPrint(text, x, y)
-  love.graphics.setFont(getFont.debug.font)
-  love.graphics.print(text, x, y)
 end
 
 local function handlePanning(event)
@@ -89,180 +101,12 @@ local function updateGridCanvas(colSpan, rowSpan)
   love.graphics.pop()
 end
 
--- Lua implementation of PHP scandir function
-local function loadLayouts(directory)
-  local layouts = {}
-  local lfs = require 'lua_modules.lfs_ffi'
-  for file in lfs.dir(directory) do
-    local fullPath = directory..'\\'..file
-    local mode = lfs.attributes(fullPath,"mode")
-    if mode == "file" then
-      -- print("found file, "..file)
-      local io = require 'io'
-      local fileDescriptor = io.open(fullPath)
-      table.insert(
-        layouts,
-        {
-          file = file,
-          data = load(
-            fileDescriptor:read('*a')
-          )()
-        }
-      )
-    end
-  end
-  return layouts
-end
-
-local function iterateListAsGrid(list, numCols, callback)
-  for i=1, #list do
-    local val = list[i]
-    local x, y = Grid.getCoordinateByIndex(list, i, numCols)
-    callback(val, x, y)
-  end
-end
-
-local renderersByTiledLayerType = {
-  tilelayer = {
-    [1] = function(x, y, w, h)
-      love.graphics.setColor(1,1,1,0.1)
-      love.graphics.rectangle('fill', x, y, w, h)
-    end,
-    [12] = function(x, y, w, h)
-      love.graphics.setColor(1,1,1,0.7)
-      love.graphics.rectangle('fill', x, y, w, h)
-    end
-  },
-  objectgroup = {
-    point = function(scale, obj)
-      love.graphics.setColor(0,1,1)
-      love.graphics.circle('fill', obj.x * scale, obj.y * scale, 2)
-    end
-  }
-}
-
-local loadedLayoutsContainerBox = ColObj({
-  id = 'loadedLayoutsContainerBox',
-  x = 0,
-  y = 0,
-  w = 100,
-  h = love.graphics.getHeight(),
-  padding = {15, 0},
-  scrollY = 0,
-
-  MOUSE_WHEEL_MOVED = function(self, ev)
-    local dy = ev[2]
-    local scrollSpeed = 20
-    local clamp = require 'utils.math'.clamp
-
-    local maxY = 0
-    for _,obj in pairs(uiState.loadedLayoutObjects) do
-      maxY = math.max(maxY, obj.y + obj.h)
-    end
-    self.scrollY = clamp(self.scrollY + (dy * scrollSpeed), -(maxY - self.h + self.padding[1]), 0)
-
-    for _,obj in pairs(uiState.loadedLayoutObjects) do
-      ColObj:setTranslate(obj.id, nil, self.scrollY)
-    end
-  end
-}, uiColWorld)
-
-local updateLayouts = memoize(function (layouts, groupOrigin)
-  local oBlendMode = love.graphics.getBlendMode()
-
-  love.graphics.setBlendMode('alpha', 'premultiplied')
-  love.graphics.setColor(1,1,1)
-  love.graphics.push()
-  love.graphics.origin()
-
-  local scale = 1/16
-  local layouts = uiState.loadedLayouts
-  local offsetY = 0
-
-  local layoutObjects = uiState.loadedLayoutObjects
-  for _,obj in pairs(layoutObjects) do
-    ColObj:remove(obj.id)
-  end
-  layoutObjects = {}
-
-  for i=1, #layouts do
-    local l = layouts[i]
-    local textHeight = 20
-    local marginTop = 20
-
-    local obj = ColObj({
-      id = l.file,
-      data = l.data,
-      type = 'mapBlock',
-      x = groupOrigin.x,
-      y = groupOrigin.y + offsetY + textHeight,
-      w = l.data.width,
-      h = l.data.height,
-      selectable = true,
-      eventPriority = 2,
-
-      MOUSE_MOVE = function(self)
-        actions:send('EDITOR_MODE_SET', editorModes.SELECT)
-      end
-    }, uiColWorld)
-    layoutObjects[obj.id] = obj
-
-    local canvas = layoutsCanvases[obj.id]
-    if (not canvas) then
-      canvas = love.graphics.newCanvas(1000, 1000)
-      layoutsCanvases[obj.id] = canvas
-    end
-    love.graphics.setCanvas(canvas)
-
-    F.forEach(l.data.layers, function(layer)
-      if layer.type == 'tilelayer' then
-        local renderType = renderersByTiledLayerType.tilelayer
-        iterateListAsGrid(layer.data, layer.width, function(v, x, y)
-          if renderType[v] then
-            renderType[v](x * l.data.tilewidth * scale, y * l.data.tileheight * scale, l.data.tilewidth * scale, l.data.tileheight * scale)
-          end
-        end)
-      elseif layer.type == 'objectgroup' then
-        local renderType = renderersByTiledLayerType.objectgroup
-        F.forEach(layer.objects, function(v)
-          if renderType[v.shape] then
-            renderType[v.shape](scale, v)
-          end
-        end)
-      end
-    end)
-
-    offsetY = offsetY + l.data.height + textHeight + marginTop
-  end
-
-  love.graphics.pop()
-  love.graphics.setCanvas()
-  love.graphics.setBlendMode(oBlendMode)
-
-  uiState:set('loadedLayoutObjects', layoutObjects)
-end)
-
-local function renderLoadedLayoutObjects()
-  love.graphics.setColor(1,1,1)
-  for id,obj in pairs(uiState.loadedLayoutObjects) do
-    local canvas = layoutsCanvases[id]
-    love.graphics.draw(canvas, obj.x, obj.y + obj.offsetY)
-  end
-
-  love.graphics.setColor(1,1,1)
-  for _,obj in pairs(uiState.loadedLayoutObjects) do
-    guiPrint(obj.id, obj.x, obj.y - 20 + obj.offsetY)
-  end
-end
-
 state:onChange(function(self, k, val, prevVal)
   local isNewVal = val ~= prevVal
 
   local isNewLoadDir = k == 'loadDir' and isNewVal
   if isNewLoadDir then
-    local layouts = loadLayouts(val)
-    uiState:set('loadedLayouts', layouts)
-    updateLayouts(layouts,  {
+    layoutList.update(val,  {
       x = 10,
       y = 10
     })
@@ -294,66 +138,6 @@ local function renderGridPosition()
   end
   local mgp = uiState.mousePosition
   love.graphics.rectangle(style, mgp.x + 0.5, mgp.y + 0.5, gridSize.w, gridSize.h)
-end
-
-local inputWidth = 500
-
-local loadedDirectoryBox = ColObj({
-  id = 'loadedDirectory',
-  x = love.graphics.getWidth() - 10 - inputWidth,
-  y = 10,
-  w = inputWidth,
-  h = 30
-}, uiColWorld)
-
-local saveDirectoryBox = ColObj({
-  id = 'saveDirectory',
-  x = love.graphics.getWidth() - 10 - inputWidth,
-  y = loadedDirectoryBox.y + 35,
-  w = inputWidth,
-  h = 30
-}, uiColWorld)
-
-local function renderLoadDirectoryBox()
-  love.graphics.setColor(1,1,1)
-  local box = loadedDirectoryBox
-  love.graphics.setLineWidth(1)
-  love.graphics.rectangle('line', box.x + 0.5, box.y + 0.5, box.w, box.h)
-  guiPrint(state.loadDir or 'drag folder to load Tiled maps', box.x + 5, box.y + 6)
-end
-
-local function renderSaveDirectoryBox()
-  love.graphics.setColor(1,1,1)
-  local box = saveDirectoryBox
-  love.graphics.setLineWidth(1)
-  love.graphics.rectangle('line', box.x + 0.5, box.y + 0.5, box.w, box.h)
-  guiPrint(state.saveDir or 'drag folder to save to', box.x + 5, box.y + 6)
-end
-
-local function renderGuiElements()
-  renderLoadDirectoryBox()
-  renderSaveDirectoryBox()
-end
-
-local function getFileStateContext(dir)
-  local context = F.find(uiState.collisions, function(c)
-    local otherId = c.other.id
-    return otherId == loadedDirectoryBox.id or otherId == saveDirectoryBox.id
-  end)
-
-  local contexts = {
-    [loadedDirectoryBox.id] = 'loadDir',
-    [saveDirectoryBox.id] = 'saveDir'
-  }
-
-  return contexts[context.other.id]
-end
-
-function love.directorydropped(dir)
-  local fileStateContext = getFileStateContext()
-  if fileStateContext then
-    uiState:set(fileStateContext, dir)
-  end
 end
 
 local function renderHoveredObjectBox()
@@ -497,8 +281,6 @@ Component.create({
         uiState:set('mouseGridPosition', Vec2(gridPos.x, gridPos.y))
         uiState:set('placementGridPosition', uiState.mouseGridPosition + Vec2(1,1))
 
-        updateUiCollisions(pos.x, pos.y)
-
         msgBus.send('CURSOR_SET', { type = uiState.panning and 'move' or 'default' })
 
         local isPlaceMode = (not uiState.hoveredObject) and (uiState.selection)
@@ -588,9 +370,9 @@ Component.create({
         love.graphics.draw(gridCanvas)
         love.graphics.pop()
 
-        renderGuiElements()
+        fileManager.render()
         renderPlacedObjects()
-        renderLoadedLayoutObjects()
+        layoutList.render()
         layersList.render()
         renderGridPosition()
         renderSelection()
@@ -624,6 +406,9 @@ Component.create({
       uiState:set('panning', love.keyboard.isDown('space'))
     end
     uiState:set('textBoxCursorClock', uiState.textBoxCursorClock + dt)
+
+    local pos = getCursorPos()
+    updateUiCollisions(pos.x, pos.y)
   end,
 
   final = function(self)
