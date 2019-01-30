@@ -233,7 +233,6 @@ actions:addActions({
     local layerId = Component.newId()
     nextState[layerId] = {}
 
-    -- state:set('placedObjects', nextState)
     local layersListCopy = O.clone(state.layersList)
     table.insert(layersListCopy, {
       id = layerId,
@@ -267,6 +266,10 @@ actions:addActions({
     uiState:set('gridSelection', selection)
   end,
 
+  HOVERED_OBJECT_SET = function(obj)
+    uiState:set('hoveredObject', obj)
+  end,
+
   PLACED_OBJECTS_ERASE = function(objectsGridToErase)
     if (not objectsGridToErase) then
       return
@@ -274,6 +277,24 @@ actions:addActions({
     local nextObjectState = O.deepCopy(state.placedObjects)
     Grid.forEach(objectsGridToErase, function(_, x, y)
       Grid.set(nextObjectState, x, y, nil)
+    end)
+    state:set('placedObjects', nextObjectState)
+  end,
+
+  PLACED_OBJECTS_UPDATE = function(nextGridSelection)
+    if (not nextGridSelection) then
+      return
+    end
+
+    local ngs = nextGridSelection
+    local nextObjectState = O.deepCopy(state.placedObjects)
+    Grid.forEach(ngs.selection, function(v, localX, localY)
+      local updateX, updateY = ngs.x + (localX - 1), ngs.y + (localY - 1)
+      local objectToAdd = {
+        id = Component.newId(),
+        referenceId = v.id,
+      }
+      Grid.set(nextObjectState, updateX, updateY, objectToAdd)
     end)
     state:set('placedObjects', nextObjectState)
   end
@@ -743,21 +764,11 @@ local function placeObject()
     return
   end
 
-  local selection = uiState.selection
-  if (not selection) then
-    return
-  end
-
-  local nextObjectState = O.deepCopy(state.placedObjects)
-  Grid.forEach(selection, function(v, localX, localY)
-    local updateX, updateY = x + (localX - 1), y + (localY - 1)
-    local objectToAdd = {
-      id = Component.newId(),
-      referenceId = v.id,
-    }
-    Grid.set(nextObjectState, updateX, updateY, objectToAdd)
-  end)
-  state:set('placedObjects', nextObjectState)
+  actions:send('PLACED_OBJECTS_UPDATE', {
+    x = x,
+    y = y,
+    selection = uiState.selection
+  })
 end
 
 local function renderPlacedObjects()
@@ -1051,7 +1062,7 @@ Component.create({
           end
         end
 
-        uiState:set('hoveredObject', hoveredObject)
+        actions:send('HOVERED_OBJECT_SET', hoveredObject)
       end),
 
       msgBus.on('MOUSE_DRAG', function(ev)
