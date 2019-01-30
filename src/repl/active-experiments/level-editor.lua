@@ -62,6 +62,8 @@ local function TextBox(props, colWorld)
     charCollisions = {},
     cursorPosition = 1,
     selectionRange = Vec2(0,0),
+    focusable = true,
+    enabled = false,
     updateCharCollisions = function(self)
       if self.previousText == self.text then
         return
@@ -92,7 +94,7 @@ local function TextBox(props, colWorld)
             local presses = ev[5]
             local isDoubleClick = presses % 2 == 0
             if isDoubleClick then
-              parent:setRange(1, #parent.text + 1)
+              parent:enable()
               return {
                 stopPropagation = true
               }
@@ -105,7 +107,6 @@ local function TextBox(props, colWorld)
             local isLeftEdge = (mousePos.x - x)/w < 0.4
             local indexAdjust = isLeftEdge and -1 or 0
 
-            msgBus.send('SET_TEXT_INPUT', true)
             parent:setRange(i + indexAdjust, i + indexAdjust)
 
             return {
@@ -119,7 +120,14 @@ local function TextBox(props, colWorld)
 
       self.previousText = self.text
     end,
+    clearRange = function(self)
+      self.selectionRange = Vec2(0, 0)
+    end,
     setRange = function(self, _start, _end)
+      if (not self.enabled) then
+        return
+      end
+
       local clamp = require 'utils.math'.clamp
       local max = #self.text + 1
       _start = clamp(_start, 1, max)
@@ -127,7 +135,28 @@ local function TextBox(props, colWorld)
       self.selectionRange = Vec2(_start, _end)
       resetTextBoxClock()
     end,
-    MOUSE_PRESSED = function(self)
+    selectAll = function(self)
+      self:setRange(1, #self.text + 1)
+    end,
+    enable = function(self)
+      msgBus.send('SET_TEXT_INPUT', true)
+      self.enabled = true
+      self:selectAll()
+    end,
+    setText = function(self, text)
+      if (not self.enabled) then
+        return
+      end
+
+      self.text = text
+    end,
+    MOUSE_PRESSED = function(self, ev)
+      local isDoubleClick = ev[5]%2 == 0
+      if isDoubleClick then
+        self:enable()
+        return
+      end
+
       local mousePos = getCursorPos()
       local x = ColObj:getPosition(self.id)
       local w = ColObj:getSize(self.id)
@@ -147,27 +176,30 @@ local function TextBox(props, colWorld)
     GUI_TEXT_INPUT = function(self, nextChar)
       local rangeLength = math.abs(self.selectionRange.x - self.selectionRange.y)
       if rangeLength > 0 then
-        self.text = (string.sub(self.text, 1, self.selectionRange.x - 1) or '') .. (string.sub(self.text, self.selectionRange.y) or '')
-        self.text = self.text .. nextChar
+        self:setText((string.sub(self.text, 1, self.selectionRange.x - 1) or '') .. (string.sub(self.text, self.selectionRange.y) or ''))
+        self:setText(self.text .. nextChar)
       else
-        self.text = (string.sub(self.text, 1, self.selectionRange.x - 1) or '') .. nextChar .. (string.sub(self.text, self.selectionRange.y) or '')
+        self:setText((string.sub(self.text, 1, self.selectionRange.x - 1) or '') .. nextChar .. (string.sub(self.text, self.selectionRange.y) or ''))
       end
-      self:setRange(self.selectionRange.x + 1, self.selectionRange.x + 1)
+      self:setRange(self.selectionRange.x + 1)
       self:updateCharCollisions()
       resetTextBoxClock()
     end,
     KEY_DOWN = function(self, ev)
       local rangeLength = math.abs(self.selectionRange.x - self.selectionRange.y)
-      if 'backspace' == ev.key then
+      if 'escape' == ev.key then
+        ColObj:setFocus()
+        self:ON_BLUR()
+      elseif 'backspace' == ev.key then
         local endFrag = (string.sub(self.text, self.selectionRange.y) or '')
         local isSelection = rangeLength > 0
         if isSelection then
           local startFrag = (string.sub(self.text, 1, self.selectionRange.x - 1) or '')
-          self.text = startFrag .. endFrag
+          self:setText(startFrag .. endFrag)
           self:setRange(self.selectionRange.x)
         elseif self.selectionRange.x > 1 then
           local startFrag = (string.sub(self.text, 1, self.selectionRange.x - 2) or '')
-          self.text = startFrag .. endFrag
+          self:setText(startFrag .. endFrag)
           self:setRange(self.selectionRange.x - 1)
         end
       elseif 'delete' == ev.key then
@@ -175,12 +207,12 @@ local function TextBox(props, colWorld)
         if isSelection then
           local startFrag, endFrag = (string.sub(self.text, 1, self.selectionRange.x - 1) or ''),
             (string.sub(self.text, self.selectionRange.y) or '')
-          self.text = startFrag .. endFrag
+          self:setText(startFrag .. endFrag)
           self:setRange(self.selectionRange.x)
         else
           local startFrag, endFrag = (string.sub(self.text, 1, self.selectionRange.x - 1) or ''),
             (string.sub(self.text, self.selectionRange.y + 1) or '')
-          self.text = startFrag .. endFrag
+          self:setText(startFrag .. endFrag)
           self:setRange(self.selectionRange.x)
         end
       elseif 'left' == ev.key then
@@ -221,6 +253,12 @@ local function TextBox(props, colWorld)
           items[#items].index
         )
       end
+    end,
+    ON_BLUR = function(self)
+      print('blur', self.id)
+      self.enabled = false
+      self:clearRange()
+      msgBus.send('SET_TEXT_INPUT', false)
     end
   }, colWorld)
   return textBox
@@ -952,7 +990,7 @@ Component.create({
           )
           local nextSelection
           if isSelectionAdd then
-            nextSelection = O.deepCopy(uiState.gridSelection)
+            nextSelection = Grid.clone(uiState.gridSelection)
           else
             nextSelection = {}
           end
@@ -1029,37 +1067,92 @@ Component.create({
         local hoveredObject = nil
         local uiCollisions = uiState.collisions
         local preventBubbleEvents = {}
+        local hoveredItems = {}
+        local recentlyFocusedItem
 
-        -- handle ui events
-        for i=1, #uiCollisions do
+        local numCollisions = #uiCollisions
 
-          local c = uiCollisions[i]
+        local shouldBlurFocusedItemOnOutsideClick = 'MOUSE_PRESSED' == msgType and
+          numCollisions == 0
+        if shouldBlurFocusedItemOnOutsideClick then
+          local previouslyFocusedItem = ColObj:get(ColObj:setFocus())
+          if previouslyFocusedItem then
+            local blurHandler = previouslyFocusedItem.ON_BLUR
+            if blurHandler then
+              blurHandler(previouslyFocusedItem)
+            end
+          end
+        end
 
-          hoveredObject = hoveredObject or c.other
-
+        local function triggerUiEvents(msgType, obj)
           if (not preventBubbleEvents[msgType]) then
-            local eventHandler = c.other[msgType]
+            local eventHandler = obj[msgType]
             if eventHandler then
-              local returnVal = eventHandler(c.other, ev, c) or O.EMPTY
+              local returnVal = eventHandler(obj, ev, c) or O.EMPTY
               if returnVal.stopPropagation then
                 preventBubbleEvents[msgType] = true
               end
             end
           end
 
-          if ('MOUSE_CLICK' == msgType and not preventBubbleEvents.FOCUS) then
+          local shouldTriggerFocus = 'MOUSE_PRESSED' == msgType and
+            not recentlyFocusedItem and
+            not ColObj:isFocused(obj.id)
 
+          if (shouldTriggerFocus) then
+            recentlyFocusedItem = obj.focusable
+
+            local previouslyFocusedItemId = ColObj:getFocused()
+            local previouslyFocusedItem = ColObj:get(previouslyFocusedItemId)
+            local isCurrentlyHovered = ColObj:isHovered(previouslyFocusedItemId)
+
+            if (not isCurrentlyHovered) and previouslyFocusedItem then
+              local blurHandler = previouslyFocusedItem.ON_BLUR
+              if blurHandler then
+                blurHandler(previouslyFocusedItem)
+              end
+            end
+
+            if (numCollisions > 1 and obj.focusable) or (numCollisions == 1) then
+              ColObj:setFocus(obj.id)
+              local focusHandler = obj.ON_FOCUS
+              if focusHandler then
+                focusHandler(obj)
+              end
+            end
           end
 
           if (not preventBubbleEvents.MOUSE_MOVE) then
-            local mouseMoveHandler = c.other.MOUSE_MOVE
+            local mouseMoveHandler = obj.MOUSE_MOVE
             if mouseMoveHandler then
-              local returnVal = mouseMoveHandler(c.other, ev) or O.EMPTY
+              local returnVal = mouseMoveHandler(obj, ev) or O.EMPTY
               if returnVal.stopPropagation then
                 preventBubbleEvents.MOUSE_MOVE = true
               end
             end
           end
+        end
+
+        for i=1, numCollisions do
+          local c = uiCollisions[i]
+          ColObj:setHover(c.other.id)
+        end
+
+        -- [[ handle ui events ]]
+        for i=1, numCollisions do
+          local c = uiCollisions[i]
+          local obj = c.other
+          hoveredObject = hoveredObject or obj
+          triggerUiEvents(msgType, obj)
+        end
+
+        local currentlyFocusedId = ColObj:getFocused()
+        local currentlyFocusedItem = ColObj:get(currentlyFocusedId)
+        if (not hoveredItems[currentlyFocusedId] and currentlyFocusedItem) then
+          triggerUiEvents(
+            msgType,
+            currentlyFocusedItem
+          )
         end
 
         actions:send('HOVERED_OBJECT_SET', hoveredObject)
@@ -1080,7 +1173,9 @@ Component.create({
   end,
 
   update = function(self, dt)
-    uiState:set('panning', love.keyboard.isDown('space'))
+    if (not ColObj:getFocused()) then
+      uiState:set('panning', love.keyboard.isDown('space'))
+    end
     uiState:set('textBoxCursorClock', uiState.textBoxCursorClock + dt)
   end,
 

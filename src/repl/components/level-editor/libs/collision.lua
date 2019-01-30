@@ -1,31 +1,35 @@
 local objectsList = {}
-local focusedObjects = {}
-local hoveredobjects = {}
+local focusedObject = nil
+local hoveredObjects = {}
 
 local M = {
   get = function(self, id)
     return objectsList[id]
   end,
+  getFocused = function(self)
+    return focusedObject
+  end,
   setHover = function(self, id)
-    hoveredobjects[id] = self:get(id)
+    hoveredObjects[id] = self:get(id)
     return self
   end,
   setFocus = function(self, id)
-    focusedObjects[id] = self:get(id)
-    return self
+    local previouslyFocused = focusedObject
+
+    local item = self:get(id)
+    if item and (not item.focusable) then
+      focusedObject = nil
+    else
+      focusedObject = id
+    end
+
+    return previouslyFocused
   end,
   isFocused = function(self, id)
-    return focusedObjects[id] ~= nil
+    return focusedObject == id
   end,
   isHovered = function(self, id)
-    return hoveredobjects[id] ~= nil
-  end,
-  getAllFocused = function(self)
-    return coroutine.wrap(function()
-      for _,obj in pairs(focusedObjects) do
-        coroutine.yield(obj)
-      end
-    end)
+    return hoveredObjects[id] ~= nil
   end,
   setTranslate = function(self, id, x, y)
     local o = self:get(id)
@@ -46,8 +50,10 @@ local M = {
     local o = self:get(id)
     o.collisionWorld:remove(o)
     objectsList[id] = nil
-    focusedObjects[id] = nil
-    hoveredobjects[id] = nil
+    if (focusedObject == id) then
+      focusedObject = nil
+    end
+    hoveredObjects[id] = nil
     return self
   end,
 }
@@ -57,7 +63,8 @@ local collisionObjectMt = {
   y = 0,
   offsetX = 0,
   offsetY = 0,
-  selectable = false
+  selectable = false,
+  focusable = false
 }
 collisionObjectMt.__index = collisionObjectMt
 
