@@ -34,19 +34,31 @@ local function getTextSize(text, font)
   return GuiText.getTextSize(text, font)
 end
 
+local getNativeMousePos = dynamicRequire 'repl.shared.native-cursor-position'
+local function getCursorPos()
+  local pos = getNativeMousePos()
+  local windowX, windowY = love.window.getPosition()
+  return {
+    x = pos.x - windowX,
+    y = pos.y - windowY
+  }
+end
+
 local function resetTextBoxClock()
   uiState:set('textBoxCursorClock', math.pi)
 end
 
 local function TextBox(props, colWorld)
+  local fontStyle = getFont.debug.font
+  local padding = props.padding or 5
   local textBox = ColObj({
     id = Component.newId(),
     x = 0,
     y = 0,
     w = 150,
-    h = 30,
+    h = select(2, getTextSize('foo', fontStyle)) + (padding*2),
     text = props.text,
-    padding = props.padding or 5,
+    padding = padding,
     charCollisions = {},
     cursorPosition = 1,
     selectionRange = Vec2(0,0),
@@ -54,21 +66,20 @@ local function TextBox(props, colWorld)
       if self.previousText == self.text then
         return
       end
-      print('update char collisions')
       local parent = self
       local offsetX = 0
       for _,c in ipairs(self.charCollisions) do
         c:remove()
       end
       self.charCollisions = {}
-      local posX, posY = self:getPosition()
+      local posX, posY = ColObj:getPosition(self.id)
 
       -- add an extra space at the end so we can handle range selection easier
       local collisionText = self.text..' '
 
       for i=1, #collisionText do
         local char = string.sub(collisionText, i, i)
-        local charWidth, charHeight = getTextSize(char, getFont.debug.font)
+        local charWidth, charHeight = getTextSize(char, fontStyle)
         local collision = ColObj({
           id = 'char-'..i..'-'..self.id,
           index = i,
@@ -85,9 +96,16 @@ local function TextBox(props, colWorld)
               return
             end
 
+            local mousePos = getCursorPos()
+            local round = require 'utils.math'.round
+            local x = ColObj:getPosition(self.id)
+            local w = ColObj:getSize(self.id)
+            local isLeftEdge = (mousePos.x - x)/w < 0.4
+            local indexAdjust = isLeftEdge and -1 or 0
+
             msgBus.send('SET_TEXT_INPUT', true)
             resetTextBoxClock()
-            parent:setRange(i, i)
+            parent:setRange(i + indexAdjust, i + indexAdjust)
           end,
         }, colWorld)
         table.insert(self.charCollisions, collision)
@@ -245,13 +263,13 @@ local activeTextBox = TextBox({
 
 local function renderActiveTextBox()
   local b = activeTextBox
-  local x,y = b:getPosition()
+  local x,y = ColObj:getPosition(b.id)
   local padding = 6
 
   love.graphics.setColor(0,0,0,0.9)
   love.graphics.rectangle('fill', x + 0.5, y + 0.5, b.w, b.h)
 
-  love.graphics.setColor(1,1,1)
+  love.graphics.setColor(1,1,1,0.5)
   love.graphics.rectangle('line', x + 0.5, y + 0.5, b.w, b.h)
 
   -- render selection range
@@ -634,21 +652,11 @@ function love.directorydropped(dir)
   end
 end
 
-local getNativeMousePos = dynamicRequire 'repl.shared.native-cursor-position'
-local function getCursorPos()
-  local pos = getNativeMousePos()
-  local windowX, windowY = love.window.getPosition()
-  return {
-    x = pos.x - windowX,
-    y = pos.y - windowY
-  }
-end
-
 local function renderHoveredObjectBox()
   local o = uiState.hoveredObject
   if o then
     love.graphics.setColor(1,1,0)
-    local x,y = o:getPosition()
+    local x,y = ColObj:getPosition(o.id)
     love.graphics.rectangle('line', x + 0.5, y + 0.5, o.w, o.h)
   end
 end
@@ -986,11 +994,15 @@ Component.create({
           if (not preventBubbleEvents[msgType]) then
             local eventHandler = c.other[msgType]
             if eventHandler then
-              local returnVal = eventHandler(c.other, ev) or O.EMPTY
+              local returnVal = eventHandler(c.other, ev, c) or O.EMPTY
               if returnVal.stopPropagation then
                 preventBubbleEvents[msgType] = true
               end
             end
+          end
+
+          if ('MOUSE_CLICK' == msgType and not preventBubbleEvents.FOCUS) then
+
           end
 
           if (not preventBubbleEvents.MOUSE_MOVE) then
