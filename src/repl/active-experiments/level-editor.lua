@@ -5,6 +5,7 @@ local Position = require 'utils.position'
 local Vec2 = require 'modules.brinevector'
 local Grid = dynamicRequire 'utils.grid'
 local bump = require 'modules.bump'
+local uiColWorld = bump.newWorld(32)
 local msgBus = require 'components.msg-bus'
 local room1 = require 'built.maps.room-1'
 local F = require 'utils.functional'
@@ -19,9 +20,10 @@ local filterCall = require 'utils.filter-call'
 local getTextSize = require 'repl.components.level-editor.libs.get-text-size'
 local getCursorPos = require 'repl.components.level-editor.libs.get-cursor-position'
 local TextBox = dynamicRequire 'repl.components.level-editor.text-box'(states, ColObj)
-local actions = dynamicRequire 'repl.components.level-editor.actions'
+local actions = dynamicRequire 'repl.components.level-editor.actions'(states, constants)
 local handleKeyPress = dynamicRequire 'repl.components.level-editor.hotkeys'(actions, constants, states)
 local guiEventsHandler = dynamicRequire 'repl.components.level-editor.gui-events-handler'
+local layersList = dynamicRequire 'repl.components.level-editor.layers-list'(states, ColObj, uiColWorld, TextBox)
 
 local state = states.state
 local uiState = states.uiState
@@ -32,11 +34,9 @@ local gridSize = {
   w = 20,
   h = 20
 }
-local uiColWorld = bump.newWorld(32)
 
 local layoutsCanvases = {}
 local gridCanvas = love.graphics.newCanvas(4096, 4096)
-local layersListCanvas = love.graphics.newCanvas(400, 1000)
 
 local function panTo(x, y)
   local tx = uiState.translate
@@ -112,54 +112,6 @@ local function loadLayouts(directory)
     end
   end
   return layouts
-end
-
-local layersContainerWidth = 150
-local layersContainerY = 100
-local layersContainerBox = ColObj({
-  id = 'layersContainerBox',
-  x = love.graphics.getWidth() - layersContainerWidth - 1,
-  y = layersContainerY,
-  w = layersContainerWidth,
-  h = love.graphics.getHeight() - layersContainerY - 35
-}, uiColWorld)
-
-local function updateLayersListUi()
-  love.graphics.push()
-  love.graphics.origin()
-  love.graphics.setCanvas(layersListCanvas)
-  love.graphics.clear()
-
-  love.graphics.setColor(1,1,1)
-  local offsetY = 0
-  for i=1, #state.layersList do
-    local l = state.layersList[i]
-
-    local layerObj = TextBox({
-      id = l.id,
-      x = layersContainerBox.x,
-      y = layersContainerBox.y + offsetY,
-      w = layersContainerBox.w,
-      h = 20,
-      text = l.label
-    }, uiColWorld)
-
-    guiPrint(
-      l.label,
-      0,
-      offsetY
-    )
-
-    offsetY = offsetY + layerObj.h
-  end
-
-  love.graphics.pop()
-  love.graphics.setCanvas()
-end
-
-local function renderLayersList()
-  love.graphics.setColor(1,1,1)
-  love.graphics.draw(layersListCanvas, layersContainerBox.x, layersContainerBox.y)
 end
 
 local function iterateListAsGrid(list, numCols, callback)
@@ -318,7 +270,7 @@ state:onChange(function(self, k, val, prevVal)
 
   local layersListChanged = k == 'layersList' and isNewVal
   if layersListChanged then
-    updateLayersListUi(val)
+    layersList.update(val)
   end
 
   local isNewMapSize = k == 'mapSize' and isNewVal
@@ -639,7 +591,7 @@ Component.create({
         renderGuiElements()
         renderPlacedObjects()
         renderLoadedLayoutObjects()
-        renderLayersList()
+        layersList.render()
         renderGridPosition()
         renderSelection()
         renderGridSelectionState()
