@@ -231,7 +231,47 @@ local textBoxMt = {
   end
 }
 
-return setmetatable(TextBox, {
+local function renderActiveTextBox()
+  local b = TextBox:getActive()
+  if (not b) then
+    return
+  end
+  local x,y = ColObj:getPosition(b.id)
+  local padding = 6
+
+  love.graphics.setColor(0,0,0,0.9)
+  love.graphics.rectangle('fill', x + 0.5, y + 0.5, b.w, b.h)
+
+  love.graphics.setColor(1,1,1,0.5)
+  love.graphics.rectangle('line', x + 0.5, y + 0.5, b.w, b.h)
+
+  -- render selection range
+  local rangeStartBox, rangeEndBox = b.charCollisions[b.selectionRange.x],
+    b.charCollisions[b.selectionRange.y]
+  if rangeStartBox then
+    local isSingleCursor = rangeStartBox == rangeEndBox
+    local x,y,w,h = rangeStartBox.x,
+      rangeStartBox.y,
+      isSingleCursor and 1 or math.abs(rangeEndBox.x - rangeStartBox.x),
+      rangeStartBox.h
+
+    if isSingleCursor then
+      local opacity = math.floor(math.sin(uiState.textBoxCursorClock * 7)) * -1
+      love.graphics.setColor(1,1,1,opacity)
+    else
+      love.graphics.setColor(0,0.3,1)
+    end
+    love.graphics.rectangle('fill', x + padding, y, w, h)
+  end
+
+  love.graphics.setColor(1,1,1)
+  love.graphics.setFont(getFont.debug.font)
+  love.graphics.print(b.text, x, y)
+end
+
+local Mt = {
+  renderActiveTextBox = renderActiveTextBox,
+
   __call = function(_, props, colWorld)
     props.charCollisions = {}
     local textBox = ColObj(
@@ -244,4 +284,7 @@ return setmetatable(TextBox, {
       __index = textBoxMt
     })
   end
-})
+}
+Mt.__index = Mt
+
+return setmetatable(TextBox, Mt)

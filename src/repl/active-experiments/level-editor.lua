@@ -13,13 +13,13 @@ local memoize = require 'utils.memoize'
 local O = require 'utils.object-utils'
 local getFont = require 'components.font'
 local ColObj = dynamicRequire 'repl.components.level-editor.libs.collision'
-local ActionSystem = dynamicRequire 'repl.components.level-editor.libs.action-system'
 local constants = dynamicRequire 'repl.components.level-editor.constants'
 local states = dynamicRequire 'repl.components.level-editor.states'
 local filterCall = require 'utils.filter-call'
 local TextBox = dynamicRequire 'repl.components.level-editor.text-box'
 local getTextSize = require 'repl.components.level-editor.libs.get-text-size'
 local getCursorPos = require 'repl.components.level-editor.libs.get-cursor-position'
+local actions = require 'repl.components.level-editor.actions'
 
 local state = states.state
 local uiState = states.uiState
@@ -31,80 +31,6 @@ local gridSize = {
   h = 20
 }
 local uiColWorld = bump.newWorld(32)
-
-local actions = ActionSystem()
-actions:addActions({
-  LAYER_CREATE = function()
-    local nextState = O.clone(state.placedObjects)
-    local layerId = Component.newId()
-    nextState[layerId] = {}
-
-    local layersListCopy = O.clone(state.layersList)
-    table.insert(layersListCopy, {
-      id = layerId,
-      label = 'layer-'..layerId
-    })
-    state:set('layersList', layersListCopy)
-  end,
-
-  LAYER_SELECT = function(layerId)
-    uiState:set('activeLayer', layerId)
-  end,
-
-  EDITOR_MODE_SET = function(mode)
-    if not editorModes[mode] then
-      error('invalid mode', mode)
-    end
-    uiState:set('editorMode', mode)
-  end,
-
-  -- selection must be a 2-d array
-  SELECTION_SET = function(selection)
-    uiState:set('selection', selection)
-  end,
-
-  SELECTION_CLEAR = function()
-    uiState:set('selection', nil)
-    uiState:set('gridSelection', nil)
-  end,
-
-  GRID_SELECTION_SET = function(selection)
-    uiState:set('gridSelection', selection)
-  end,
-
-  HOVERED_OBJECT_SET = function(obj)
-    uiState:set('hoveredObject', obj)
-  end,
-
-  PLACED_OBJECTS_ERASE = function(objectsGridToErase)
-    if (not objectsGridToErase) then
-      return
-    end
-    local nextObjectState = O.deepCopy(state.placedObjects)
-    Grid.forEach(objectsGridToErase, function(_, x, y)
-      Grid.set(nextObjectState, x, y, nil)
-    end)
-    state:set('placedObjects', nextObjectState)
-  end,
-
-  PLACED_OBJECTS_UPDATE = function(nextGridSelection)
-    if (not nextGridSelection) then
-      return
-    end
-
-    local ngs = nextGridSelection
-    local nextObjectState = O.deepCopy(state.placedObjects)
-    Grid.forEach(ngs.selection, function(v, localX, localY)
-      local updateX, updateY = ngs.x + (localX - 1), ngs.y + (localY - 1)
-      local objectToAdd = {
-        id = Component.newId(),
-        referenceId = v.id,
-      }
-      Grid.set(nextObjectState, updateX, updateY, objectToAdd)
-    end)
-    state:set('placedObjects', nextObjectState)
-  end
-})
 
 local layoutsCanvases = {}
 local gridCanvas = love.graphics.newCanvas(4096, 4096)
@@ -118,43 +44,6 @@ end
 local function guiPrint(text, x, y)
   love.graphics.setFont(getFont.debug.font)
   love.graphics.print(text, x, y)
-end
-
-local function renderActiveTextBox()
-  local b = TextBox:getActive()
-  if (not b) then
-    return
-  end
-  local x,y = ColObj:getPosition(b.id)
-  local padding = 6
-
-  love.graphics.setColor(0,0,0,0.9)
-  love.graphics.rectangle('fill', x + 0.5, y + 0.5, b.w, b.h)
-
-  love.graphics.setColor(1,1,1,0.5)
-  love.graphics.rectangle('line', x + 0.5, y + 0.5, b.w, b.h)
-
-  -- render selection range
-  local rangeStartBox, rangeEndBox = b.charCollisions[b.selectionRange.x],
-    b.charCollisions[b.selectionRange.y]
-  if rangeStartBox then
-    local isSingleCursor = rangeStartBox == rangeEndBox
-    local x,y,w,h = rangeStartBox.x,
-      rangeStartBox.y,
-      isSingleCursor and 1 or math.abs(rangeEndBox.x - rangeStartBox.x),
-      rangeStartBox.h
-
-    if isSingleCursor then
-      local opacity = math.floor(math.sin(uiState.textBoxCursorClock * 7)) * -1
-      love.graphics.setColor(1,1,1,opacity)
-    else
-      love.graphics.setColor(0,0.3,1)
-    end
-    love.graphics.rectangle('fill', x + padding, y, w, h)
-  end
-
-  love.graphics.setColor(1,1,1)
-  guiPrint(b.text, x + padding, y + padding)
 end
 
 local function handlePanning(event)
@@ -822,7 +711,7 @@ Component.create({
         renderSelection()
         renderGridSelectionState()
         renderHoveredObjectBox()
-        renderActiveTextBox()
+        TextBox.renderActiveTextBox()
         renderEditorModeState()
 
         love.graphics.pop()

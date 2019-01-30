@@ -37,7 +37,7 @@ local uiState = CreateState({
   scale = 1,
   textBoxCursorClock = 0,
 
-  hoveredObject = {},
+  hoveredObject = nil,
   selection = nil,
   gridSelection = nil,
   collisions = {},
