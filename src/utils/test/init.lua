@@ -1,4 +1,3 @@
-print('test')
 local testFiles = love.filesystem.getDirectoryItems('utils/test')
 
 for _,file in ipairs(testFiles) do
