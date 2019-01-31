@@ -174,7 +174,7 @@ local createUniverse = function()
   local level1 = Node:create({
     position = Vec2(20, 20),
     region = 'aureus',
-    level = 'floor_1',
+    level = 'a-1',
     labelPosition = 'top'
   })
 
@@ -184,7 +184,7 @@ local createUniverse = function()
       Node:get(level1).position.y
     ),
     region = 'aureus',
-    level = 'floor_2',
+    level = 'a-2',
     labelPosition = 'top'
   })
   model:addLink(level2, level1)
