@@ -5,28 +5,37 @@ local Collision = require 'repl.libs.collision'
 local uid = dynamicRequire 'utils.uid'
 local Vec2 = require 'modules.brinevector'
 local ser = require 'utils.ser'
+local Grid = require 'utils.grid'
+local bump = require 'modules.bump'
 
-local defaultValue = {
-  connections = function()
-    return {}
-  end
-}
+bump.newWorld(32)
+
 local nodeMt = {
-  position = Vec2(),
-  __index = function(self, k)
-    local val = rawget(self, k)
+  position = Vec2()
+}
+local modelMt = {
+  addLink = function(self, node1, node2)
+    Grid.set(self.links, node1, node2, true)
+    return self
+  end,
 
-    if (val == nil) then
-      local getDefaultValue = defaultValue[k]
-      if getDefaultValue then
-        val = getDefaultValue()
-        rawset(self, k, val)
-      end
-    end
+  removeLink = function(self, link)
+    Grid.set(self.links, link[1], link[2], nil)
+    return self
+  end,
 
-    return val
+  forEach = function(self, callback)
+    Grid.forEach(self.links, callback)
+    return self
   end
 }
+modelMt.__index = modelMt
+local modelDefaultOptions = {
+  validator = function(self, node1, node2)
+    return true
+  end
+}
+
 local Node = {
   nodeList = {},
   -- returns an id for the node
@@ -37,6 +46,11 @@ local Node = {
     self.nodeList[id] = node
     return id
   end,
+  createModel = function(self, options)
+    return setmetatable({
+      links = {}
+    }, modelMt)
+  end,
   get = function(self, id)
     return self.nodeList[id]
   end,
@@ -44,53 +58,33 @@ local Node = {
     self.nodeList[id] = nil
     return self
   end,
-  connect = function(self, node1, node2)
-    local nodeRef1 = self:get(node1)
-    local nodeRef2 = self:get(node2)
-    nodeRef1.connections[node2] = true
-    nodeRef2.connections[node1] = true
-    return self
-  end,
-  traverse = function(self, node, callback, visited)
-    visited = visited or {}
-    local ref = self:get(node)
-    for nodeId in pairs(ref.connections) do
-      if (not visited[nodeId]) then
-        visited[nodeId] = true
-        local ref = self:get(nodeId)
-        callback(nodeId)
-        self:traverse(nodeId, callback, visited)
-      end
-    end
-  end
 }
 
-local renderGraph = function(node)
+local graphColors = {
+  default = {0,1,1},
+  secret = {1,1,1,0}
+}
+
+local function renderNode(nodeId, distScale)
   love.graphics.setColor(0,1,1)
+  local ref = Node:get(nodeId)
+  local p = ref.position * distScale
+  love.graphics.setColor(graphColors.default)
+  love.graphics.circle('fill', p.x, p.y, 2)
 
-  local connectionsToDraw = {}
-  local connectionsAdded = {}
-  Node:traverse(node, function(id)
-    local ref = Node:get(id)
-    love.graphics.circle('fill', ref.position.x, ref.position.y, 5)
-    for targetId in pairs(ref.connections) do
-      local pathString, pathStringReverse = id..targetId, targetId..id
-      local isDuplicatePath = connectionsAdded[pathString] or connectionsAdded[pathStringReverse]
-      if (not isDuplicatePath) then
-        connectionsAdded[pathString] = true
-        connectionsAdded[pathStringReverse] = true
-        table.insert(connectionsToDraw, {id, targetId})
-      end
-    end
-  end)
+  love.graphics.circle('line', p.x, p.y, 8)
+end
 
-  love.graphics.setLineStyle('rough')
-  for i=1, #connectionsToDraw do
-    local path = connectionsToDraw[i]
-    local id, targetId = path[1], path[2]
-    local p1, p2 = Node:get(id).position, Node:get(targetId).position
-    love.graphics.line(p1.x, p1.y, p2.x, p2.y)
-  end
+local function renderLink(node1, node2, distScale)
+  local ref1, ref2 = Node:get(node1),
+    Node:get(node2)
+  local p1, p2 = ref1.position * distScale, ref2.position * distScale
+  love.graphics.setColor(
+    (ref1.secret or ref2.secret) and
+      graphColors.secret or
+      graphColors.default
+  )
+  love.graphics.line(p1.x, p1.y, p2.x, p2.y)
 end
 
 Component.create({
@@ -108,17 +102,21 @@ Component.create({
       homeScreenRef:delete(true)
     end
 
+    local model = Node:createModel()
+
     local level1 = Node:create({
-      position = Vec2()
+      position = Vec2(),
+      world = 'aureus'
     })
 
     local level2 = Node:create({
       position = Vec2(
         Node:get(level1).position.x + 30,
         Node:get(level1).position.y
-      )
+      ),
+      world = 'aureus'
     })
-    Node:connect(level2, level1)
+    model:addLink(level2, level1)
 
     local level3 = Node:create({
       position = Vec2(
@@ -126,7 +124,7 @@ Component.create({
         Node:get(level2).position.y + 30
       )
     })
-    Node:connect(level3, level2)
+    model:addLink(level3, level2)
 
     local level4 = Node:create({
       position = Vec2(
@@ -134,7 +132,7 @@ Component.create({
         Node:get(level3).position.y
       )
     })
-    Node:connect(level4, level3)
+    model:addLink(level4, level3)
 
     local level5 = Node:create({
       position = Vec2(
@@ -142,7 +140,7 @@ Component.create({
         Node:get(level4).position.y + 25
       )
     })
-    Node:connect(level5, level4)
+    model:addLink(level5, level4)
 
     local level6 = Node:create({
       position = Vec2(
@@ -150,20 +148,63 @@ Component.create({
         Node:get(level4).position.y + 25
       )
     })
-    Node:connect(level6, level4)
+    model:addLink(level6, level4)
 
     local avgPos = (Node:get(level2).position + Node:get(level3).position) / 2
     local secretLevel1 = Node:create({
       position = Vec2(
-        avgPos.x,
-        avgPos.y + 20
-      )
+        avgPos.x - 15,
+        avgPos.y + 40
+      ),
+      secret = true
     })
-    Node:connect(secretLevel1, level2)
-    Node:connect(secretLevel1, level3)
+    model:addLink(secretLevel1, level2)
+    model:addLink(secretLevel1, level3)
 
+    local renderCanvas = love.graphics.newCanvas(4096, 4096)
+    local distScale = 2 -- the amount to scale the distance between the nodes
     self.renderGraph = function()
-      renderGraph(level1)
+      local nodesToRender = {}
+      love.graphics.push()
+      love.graphics.origin()
+      local oBlendMode = love.graphics.getBlendMode()
+      love.graphics.setBlendMode('alpha', 'premultiplied')
+      love.graphics.setCanvas(renderCanvas)
+      love.graphics.clear()
+      love.graphics.setLineStyle('rough')
+
+      model:forEach(function(_, node1, node2)
+        if (not nodesToRender[node1]) then
+          nodesToRender[node1] = node1
+        end
+        if (not nodesToRender[node2]) then
+          nodesToRender[node2] = node2
+        end
+        renderLink(node1, node2, distScale)
+      end)
+
+      love.graphics.setCanvas()
+      love.graphics.pop()
+      love.graphics.setColor(1,1,1)
+      love.graphics.setBlendMode(oBlendMode)
+
+      love.graphics.stencil(function()
+        love.graphics.setColor(1,1,1)
+        for nodeId in pairs(nodesToRender) do
+          local ref = Node:get(nodeId)
+          local p = ref.position * distScale
+          love.graphics.circle('fill', p.x, p.y, 12)
+        end
+      end, 'replace', 1)
+
+      love.graphics.setStencilTest('notequal', 1)
+      love.graphics.draw(renderCanvas)
+      love.graphics.setStencilTest()
+
+      love.graphics.setLineWidth(1)
+      for nodeId in pairs(nodesToRender) do
+        renderNode(nodeId, distScale)
+      end
     end
   end,
 
