@@ -2,7 +2,6 @@ local dynamicRequire = require 'utils.dynamic-require'
 local Component = require 'modules.component'
 local msgBus = require 'components.msg-bus'
 local Gui = require 'components.gui.gui'
-local uid = dynamicRequire 'utils.uid'
 local Vec2 = require 'modules.brinevector'
 local ser = require 'utils.ser'
 local Grid = require 'utils.grid'
@@ -41,11 +40,13 @@ local modelDefaultOptions = {
 }
 
 local Node = {
+  counter = 0,
   nodeList = {},
   -- returns an id for the node
   create = function(self, props)
     local node = setmetatable(props, nodeMt)
-    local id = node.id or uid()
+    self.counter = self.counter + 1
+    local id = node.id or self.counter
     node.id = id
     self.nodeList[id] = node
     return id
@@ -62,6 +63,14 @@ local Node = {
     self.nodeList[id] = nil
     return self
   end,
+  reduce = function(self, reducer, seed)
+    local i = 1
+    for id in pairs(self.nodeList) do
+      seed = reducer(seed, id, i)
+      i = i + 1
+    end
+    return seed
+  end
 }
 
 local graphColors = {
@@ -80,7 +89,9 @@ local function renderNode(nodeId, distScale)
   love.graphics.setColor(0,1,1)
   local ref = Node:get(nodeId)
   local p = ref.position * distScale
-  local c = graphColors.region[ref.region] or graphColors.region.default
+  local c = graphColors.region[ref.region] or
+    (ref.secret and graphColors.region.secret) or
+    graphColors.region.default
   love.graphics.setColor(c)
   love.graphics.circle('fill', p.x, p.y, 3)
 
@@ -88,27 +99,61 @@ local function renderNode(nodeId, distScale)
   love.graphics.circle('line', p.x, p.y, 9)
 end
 
+local T = love.graphics.newText(Font.primary.font, '')
+local function getTextSize(text, font, wrapLimit, align)
+  T:setFont(font)
+  if wrapLimit then
+    T:setf(text, wrapLimit, align or 'left')
+    return T:getWidth(), T:getHeight()
+  end
+  local oLineHeight = font:getLineHeight()
+  font:setLineHeight(0.9)
+  T:set(text)
+  font:setLineHeight(oLineHeight)
+  return T:getWidth(), T:getHeight()
+end
+
 local labelOffsets = {
   top = function(textW, textH)
+    return Vec2(-textW/2, -25)
+  end,
+  right = function(textW, textH)
+    return Vec2(15, -textH/2)
+  end,
+  bottom = function(textW, textH)
     return Vec2(-textW/2, -30)
+  end,
+  left = function(textW, textH)
+    return Vec2(-textW - 15, -textH/2)
   end
 }
 local function renderNodeLabel(nodeId, distScale, labelFont)
-  love.graphics.setColor(1,1,1)
+  local opacity = distScale - 1
+  local c = 0.9
+  love.graphics.setColor(c,c,c,opacity)
   local ref = Node:get(nodeId)
   local label = ref.level
   if label then
     local humanizedLabel = string.gsub(label, '_', ' ')
     local textW, textH = getTextSize(humanizedLabel, labelFont)
-    local p = (ref.position * distScale) + labelOffsets[ref.labelPosition](textW, textH)
+    local lOffset = labelOffsets[ref.labelPosition] or labelOffsets.top
+    local p = (ref.position * distScale) + lOffset(textW, textH)
     love.graphics.print(humanizedLabel, p.x, p.y)
   end
 end
 
 local function renderRegionLabel(position, distScale, label, labelFont)
+  love.graphics.setFont(labelFont)
+  local labelWidth, labelHeight = getTextSize(label, labelFont)
   love.graphics.setColor(1,1,1)
-  local p = position * distScale
-  love.graphics.print(label, p.x, p.y)
+  local offset = Vec2(-labelWidth/2, -labelHeight - 40)
+  local scaleDiff = (distScale < 2) and (2 - distScale) or 0
+  local p = (position * (distScale + scaleDiff)) + offset
+  love.graphics.push()
+  love.graphics.scale(math.min(1, distScale/2))
+  love.graphics.translate(p.x, p.y)
+  love.graphics.print(label)
+  love.graphics.pop()
 end
 
 local function renderLink(node1, node2, distScale)
@@ -149,6 +194,7 @@ local createUniverse = function()
       Node:get(level2).position.x + 50,
       Node:get(level2).position.y + 20
     ),
+    level = 's-1',
     region = 'saria'
   })
   model:addLink(level3, level2)
@@ -158,6 +204,7 @@ local createUniverse = function()
       Node:get(level3).position.x + 30,
       Node:get(level3).position.y
     ),
+    level = 's-2',
     region = 'saria'
   })
   model:addLink(level4, level3)
@@ -167,6 +214,8 @@ local createUniverse = function()
       Node:get(level4).position.x + 15,
       Node:get(level4).position.y + 25
     ),
+    level = 's-3',
+    labelPosition = 'right',
     region = 'saria'
   })
   model:addLink(level5, level4)
@@ -176,6 +225,8 @@ local createUniverse = function()
       Node:get(level4).position.x - 15,
       Node:get(level4).position.y + 25
     ),
+    level = 's-4',
+    labelPosition = 'left',
     region = 'saria'
   })
   model:addLink(level6, level4)
@@ -187,7 +238,7 @@ local createUniverse = function()
       avgPos.y + 20
     ),
     secret = true,
-    region = 'secret'
+    region = ''
   })
   model:addLink(secretLevel1, level2)
 
@@ -195,10 +246,10 @@ local createUniverse = function()
   local secretLevel2 = Node:create({
     position = Vec2(
       avgPos.x + 6,
-      avgPos.y - 15
+      avgPos.y - 25
     ),
     secret = true,
-    region = 'secret'
+    region = ''
   })
   model:addLink(secretLevel2, level4)
 
@@ -208,6 +259,13 @@ end
 local renderCanvas = love.graphics.newCanvas(4096, 4096)
 local renderGraph = function(graph, distScale)
   local nodesToRender = {}
+  local nodesByRegion = {
+    regions = {},
+    add = function(self, region, node)
+      self.regions[region] = self.regions[region] or {}
+      table.insert(self.regions[region], node)
+    end
+  }
   love.graphics.push()
   love.graphics.origin()
   local oBlendMode = love.graphics.getBlendMode()
@@ -218,11 +276,14 @@ local renderGraph = function(graph, distScale)
 
   graph:forEach(function(_, node1, node2)
     if (not nodesToRender[node1]) then
-      nodesToRender[node1] = node1
+      nodesByRegion:add(Node:get(node1).region, node1)
     end
+    nodesToRender[node1] = node1
+
     if (not nodesToRender[node2]) then
-      nodesToRender[node2] = node2
+      nodesByRegion:add(Node:get(node2).region, node2)
     end
+    nodesToRender[node2] = node2
     renderLink(node1, node2, distScale)
   end)
 
@@ -259,6 +320,20 @@ local renderGraph = function(graph, distScale)
     renderNodeLabel(nodeId, distScale, labelFont)
   end
   love.graphics.setFont(oFont)
+
+  for region in pairs(nodesByRegion.regions) do
+    local nodes = nodesByRegion.regions[region]
+    local x, xTotal, y = 0, 0, nil
+    for i=1, #nodes do
+      local ref = Node:get(nodes[i])
+      local p = ref.position
+      xTotal = xTotal + p.x
+      x = xTotal/i
+      y = y or p.y
+      y = math.min(y, p.y)
+    end
+    renderRegionLabel(Vec2(x, y), distScale, region, Font.secondaryLarge.font)
+  end
 end
 
 Component.create({
@@ -284,8 +359,9 @@ Component.create({
       onWheel = function(self, ev)
         local dy = ev[2]
         local clamp = require 'utils.math'.clamp
+        local round = require 'utils.math'.round
         Component.animate(state, {
-          distScale = clamp(state.distScale + dy, 1, 4)
+          distScale = clamp(round(state.distScale + dy), 1, 4)
         }, 0.25, 'outCubic')
       end
     })
