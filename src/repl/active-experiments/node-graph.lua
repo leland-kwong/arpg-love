@@ -14,7 +14,8 @@ local state = {
   distScale = 2,
   unlockedNodes = {
     [1] = true,
-    [2] = true
+    [2] = true,
+    -- [7] = true
   }
 }
 
@@ -87,7 +88,8 @@ local graphColors = {
   },
   default = {Color.rgba255(44, 232, 245)},
   secret = {1,1,1,0},
-  link = {1,1,1}
+  link = {1,1,1},
+  linkLocked = {1,1,1,0.3}
 }
 
 local function renderNode(nodeId, distScale)
@@ -171,11 +173,20 @@ local function renderLink(node1, node2, distScale)
   local ref1, ref2 = Node:get(node1),
     Node:get(node2)
   local p1, p2 = ref1.position * distScale, ref2.position * distScale
-  love.graphics.setColor(
-    (ref1.secret or ref2.secret) and
-      graphColors.secret or
-      graphColors.link
-  )
+  local c = graphColors.link
+  local isUnAccessible = (not state.unlockedNodes[node1]) and (not state.unlockedNodes[node2])
+  local hasLocked = (not state.unlockedNodes[node1]) or (not state.unlockedNodes[node2])
+  local isSecret = (ref1.secret or ref2.secret)
+  if isUnAccessible then
+    if isSecret then
+      c = graphColors.secret
+    else
+      c = graphColors.linkLocked
+    end
+  elseif hasLocked and isSecret then
+    c = graphColors.secret
+  end
+  love.graphics.setColor(c)
   love.graphics.line(p1.x, p1.y, p2.x, p2.y)
 end
 
@@ -183,7 +194,7 @@ local createUniverse = function()
   local model = Node:createModel()
 
   local level1 = Node:create({
-    position = Vec2(20, 20),
+    position = Vec2(20, 30),
     region = 'aureus',
     level = 'a-1',
     labelPosition = 'top'
@@ -256,13 +267,13 @@ local createUniverse = function()
   local avgPos = (Node:get(level2).position + Node:get(level4).position) / 2
   local secretLevel2 = Node:create({
     position = Vec2(
-      avgPos.x + 6,
-      avgPos.y - 25
+      avgPos.x + 5,
+      avgPos.y - 32
     ),
     secret = true,
     region = ''
   })
-  model:addLink(secretLevel2, level4)
+  model:addLink(secretLevel2, level3)
 
   return model
 end
@@ -372,7 +383,7 @@ Component.create({
         local clamp = require 'utils.math'.clamp
         local round = require 'utils.math'.round
         Component.animate(state, {
-          distScale = clamp(round(state.distScale + dy), 1, 3)
+          distScale = clamp(round(state.distScale + dy), 1, 2)
         }, 0.25, 'outCubic')
       end
     })
