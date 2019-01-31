@@ -13,6 +13,15 @@ local M = {
 }
 local EMPTY = objectUtils.EMPTY
 
+local function loadCoreModules()
+  local coreModules = love.filesystem.getDirectoryItems('modules/component/core')
+
+  for _,file in ipairs(coreModules) do
+    require('modules.component.core.'..string.sub(file, 1, -5))(M)
+  end
+end
+loadCoreModules()
+
 local function cleanupCollisionObjects(self)
   if self.collisionObjects then
     for i=1, #self.collisionObjects do

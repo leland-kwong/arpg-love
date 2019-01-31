@@ -18,6 +18,7 @@ local SceneMain = require 'scene.scene-main'
 local tick = require 'utils.tick'
 local globalState = require 'main.global-state'
 local systemsProfiler = require 'components.profiler.component-groups'
+local Component = require 'modules.component'
 require 'components.groups.dungeon-test'
 require 'components.groups.game-world'
 local MapPointerWorld = require 'components.hud.map-pointer'
@@ -87,6 +88,7 @@ function love.update(dt)
   systemsProfiler()
 
   msgBus.send(msgBus.UPDATE, dt)
+  Component.animateUpdate(dt)
   tick.update(dt)
 
   camera:update(dt)
