@@ -8,9 +8,14 @@ local Grid = require 'utils.grid'
 local Color = require 'modules.color'
 local Font = require 'components.font'
 local getTextSize = require 'repl.libs.get-text-size'
+local AnimationFactory = dynamicRequire 'components.animation-factory'
 
 local state = {
-  distScale = 2
+  distScale = 2,
+  unlockedNodes = {
+    [1] = true,
+    [2] = true
+  }
 }
 
 local nodeMt = {
@@ -89,14 +94,20 @@ local function renderNode(nodeId, distScale)
   love.graphics.setColor(0,1,1)
   local ref = Node:get(nodeId)
   local p = ref.position * distScale
-  local c = graphColors.region[ref.region] or
-    (ref.secret and graphColors.region.secret) or
-    graphColors.region.default
+  local unlocked = state.unlockedNodes[nodeId]
+  local c
+  if unlocked then
+    c = graphColors.region[ref.region] or
+      (ref.secret and graphColors.region.secret) or
+      graphColors.region.default
+  else
+    c = Color.LIME
+  end
   love.graphics.setColor(c)
-  love.graphics.circle('fill', p.x, p.y, 3)
-
-  love.graphics.setColor(Color.multiplyAlpha(c, 0.3))
-  love.graphics.circle('line', p.x, p.y, 9)
+  local graphic = unlocked and
+    AnimationFactory:newStaticSprite('gui-map-portal-point') or
+    AnimationFactory:newStaticSprite('gui-map-portal-point-locked')
+  graphic:draw(p.x + 0.5, p.y + 0.5)
 end
 
 local T = love.graphics.newText(Font.primary.font, '')
@@ -361,7 +372,7 @@ Component.create({
         local clamp = require 'utils.math'.clamp
         local round = require 'utils.math'.round
         Component.animate(state, {
-          distScale = clamp(round(state.distScale + dy), 1, 4)
+          distScale = clamp(round(state.distScale + dy), 1, 3)
         }, 0.25, 'outCubic')
       end
     })
@@ -376,7 +387,8 @@ Component.create({
     love.graphics.push()
     love.graphics.origin()
     love.graphics.translate(180, 100)
-    love.graphics.scale(2)
+    local camera = require 'components.camera'
+    love.graphics.scale(camera.scale)
 
     renderGraph(self.graph, state.distScale)
 
