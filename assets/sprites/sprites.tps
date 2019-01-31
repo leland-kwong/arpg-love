@@ -472,6 +472,7 @@
                 <false/>
             </struct>
             <key type="filename">custom-art/characters/companion/inner.png</key>
+            <key type="filename">custom-art/gui/gui-map-portal-point-locked.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -817,7 +818,7 @@
             <key type="filename">custom-art/gui/gui-map-portal-point.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.529412,0.529412</point_f>
+                <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -866,19 +867,6 @@
                 <rect>6,6,11,11</rect>
                 <key>scale9Paddings</key>
                 <rect>6,6,11,11</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">custom-art/gui/gui-quest-point.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.466667,0.466667</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,4,7,7</rect>
-                <key>scale9Paddings</key>
-                <rect>4,4,7,7</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
