@@ -15,7 +15,7 @@ local state = {
   unlockedNodes = {
     [1] = true,
     [2] = true,
-    -- [7] = true
+    [7] = true
   }
 }
 
@@ -89,7 +89,7 @@ local graphColors = {
   default = {Color.rgba255(44, 232, 245)},
   secret = {1,1,1,0},
   link = {1,1,1},
-  linkLocked = {1,1,1,0.3}
+  linkLocked = {1,1,1,0.25}
 }
 
 local function renderNode(nodeId, distScale)
@@ -386,7 +386,7 @@ Component.create({
           distScale = clamp(round(state.distScale + dy), 1, 2)
         }, 0.25, 'outCubic')
       end
-    })
+    }):setParent(self)
 
     self.graph = createUniverse()
   end,
