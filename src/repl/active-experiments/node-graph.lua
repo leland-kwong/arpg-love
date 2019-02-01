@@ -64,6 +64,18 @@ local actions = {
   end,
   nodeSelect = function(node)
     print('select', node)
+  end,
+  newGraph = function(model)
+    state.nodeStyles = {}
+    model:forEach(function(link)
+      local node1, node2 = unpack(link)
+      state.nodeStyles[node1] = {
+        scale = 1
+      }
+      state.nodeStyles[node2] = {
+        scale = 1
+      }
+    end)
   end
 }
 
@@ -350,16 +362,7 @@ local createUniverse = function()
   })
   model:addLink(secretLevel2, level3)
 
-  state.nodeStyles = {}
-  model:forEach(function(link)
-    local node1, node2 = unpack(link)
-    state.nodeStyles[node1] = {
-      scale = 1
-    }
-    state.nodeStyles[node2] = {
-      scale = 1
-    }
-  end)
+  actions.newGraph(model)
 
   return model
 end
