@@ -1,7 +1,6 @@
 local dynamicRequire = require 'utils.dynamic-require'
 local Component = require 'modules.component'
 local msgBus = require 'components.msg-bus'
-local Gui = require 'components.gui.gui'
 local Vec2 = require 'modules.brinevector'
 local ser = require 'utils.ser'
 local Grid = require 'utils.grid'
@@ -9,14 +8,63 @@ local Color = require 'modules.color'
 local Font = require 'components.font'
 local getTextSize = require 'repl.libs.get-text-size'
 local AnimationFactory = dynamicRequire 'components.animation-factory'
+local GuiContext = dynamicRequire 'repl.libs.gui'
+local camera = require 'components.camera'
+local memoize = require 'utils.memoize-one'
+
+local Gui = GuiContext()
 
 local state = {
-  distScale = 2,
+  distScale = 1,
+  translate = Vec2(0, 20),
   unlockedNodes = {
     [1] = true,
     [2] = true,
     [7] = true
-  }
+  },
+  hoveredNode = nil,
+  nodeStyles = {}
+}
+
+local getNodeHoveredScale = memoize(function (node)
+  local subject = {scale = 1}
+  Component.animate(subject, {
+    scale = 1.4
+  }, 0.25, 'outCubic')
+
+  return function()
+    return subject.scale
+  end
+end)
+
+local actions = {
+  pan = function(dx, dy)
+    state.initialTranslate = state.initialTranslate or state.translate
+    state.translate = state.initialTranslate + Vec2(dx, dy)
+  end,
+  panEnd = function()
+    state.initialTranslate = nil
+  end,
+  zoom = function(dz)
+    local clamp = require 'utils.math'.clamp
+    local round = require 'utils.math'.round
+    Component.animate(state, {
+      distScale = clamp(round(state.distScale + dz), 1, 2)
+    }, 0.25, 'outCubic')
+  end,
+  nodeHoverIn = function(node)
+    Component.animate(state.nodeStyles[node], {
+      scale = 1.3
+    }, 0.15, 'outQuint')
+  end,
+  nodeHoverOut = function(node)
+    Component.animate(state.nodeStyles[node], {
+      scale = 1
+    }, 0.15, 'outQuint')
+  end,
+  nodeSelect = function(node)
+    print('select', node)
+  end
 }
 
 local nodeMt = {
@@ -24,17 +72,29 @@ local nodeMt = {
 }
 local modelMt = {
   addLink = function(self, node1, node2)
-    Grid.set(self.links, node1, node2, true)
+    self.id = self.id + 1
+    local link = {node1, node2}
+    self.links[self.id] = link
+    return self.id
+  end,
+
+  removeLink = function(self, linkId)
+    self.links[linkId] = nil
     return self
   end,
 
-  removeLink = function(self, link)
-    Grid.set(self.links, link[1], link[2], nil)
-    return self
+  getLink = function(self, linkId)
+    return self.links[linkId]
+  end,
+
+  hasNode = function(self, node)
+    return self.nodes[node] ~= nil
   end,
 
   forEach = function(self, callback)
-    Grid.forEach(self.links, callback)
+    for _,link in pairs(self.links) do
+      callback(link)
+    end
     return self
   end
 }
@@ -59,6 +119,8 @@ local Node = {
   end,
   createModel = function(self, options)
     return setmetatable({
+      id = 0,
+      nodes = {},
       links = {}
     }, modelMt)
   end,
@@ -109,7 +171,8 @@ local function renderNode(nodeId, distScale)
   local graphic = unlocked and
     AnimationFactory:newStaticSprite('gui-map-portal-point') or
     AnimationFactory:newStaticSprite('gui-map-portal-point-locked')
-  graphic:draw(p.x + 0.5, p.y + 0.5)
+  local scale = state.nodeStyles[nodeId].scale
+  graphic:draw(p.x + 0.5, p.y + 0.5, 0, scale, scale)
 end
 
 local T = love.graphics.newText(Font.primary.font, '')
@@ -188,6 +251,18 @@ local function renderLink(node1, node2, distScale)
   end
   love.graphics.setColor(c)
   love.graphics.line(p1.x, p1.y, p2.x, p2.y)
+end
+
+local function nodeGraphTest()
+  local model = Node:createModel()
+  local n1 = Node:create()
+  local n2 = Node:create()
+  model:addLink(n1, n2)
+
+  assert(model:hasNode(n1) and model:hasNode(n2))
+
+  local n3 = Node:create()
+  model:addLink(n2, n3)
 end
 
 local createUniverse = function()
@@ -275,6 +350,17 @@ local createUniverse = function()
   })
   model:addLink(secretLevel2, level3)
 
+  state.nodeStyles = {}
+  model:forEach(function(link)
+    local node1, node2 = unpack(link)
+    state.nodeStyles[node1] = {
+      scale = 1
+    }
+    state.nodeStyles[node2] = {
+      scale = 1
+    }
+  end)
+
   return model
 end
 
@@ -296,7 +382,8 @@ local renderGraph = function(graph, distScale)
   love.graphics.clear()
   love.graphics.setLineStyle('rough')
 
-  graph:forEach(function(_, node1, node2)
+  graph:forEach(function(link)
+    local node1, node2 = link[1], link[2]
     if (not nodesToRender[node1]) then
       nodesByRegion:add(Node:get(node1).region, node1)
     end
@@ -359,7 +446,7 @@ local renderGraph = function(graph, distScale)
 end
 
 Component.create({
-  id = 'WorldEditor',
+  id = 'UniverseMap',
   group = 'hud',
   init = function(self)
     local mainMenuRef = Component.get('mainMenu')
@@ -369,40 +456,109 @@ Component.create({
     end
 
     local homeScreenRef = Component.get('HomeScreen')
-  if homeScreenRef then
+    if homeScreenRef then
       homeScreenRef:delete(true)
     end
 
-    Gui.create({
+    -- full-screen event handler
+    Gui({
       x = 0,
       y = 0,
       w = love.graphics.getWidth(),
       h = love.graphics.getHeight(),
-      onWheel = function(self, ev)
+      MOUSE_DRAG = function(self, ev)
+        actions.pan(ev.dx, ev.dy)
+      end,
+      MOUSE_DRAG_END = function(self)
+        actions.panEnd()
+      end,
+      MOUSE_WHEEL_MOVED = function(self, ev)
         local dy = ev[2]
-        local clamp = require 'utils.math'.clamp
-        local round = require 'utils.math'.round
-        Component.animate(state, {
-          distScale = clamp(round(state.distScale + dy), 1, 2)
-        }, 0.25, 'outCubic')
+        actions.zoom(dy)
       end
-    }):setParent(self)
+    })
 
     self.graph = createUniverse()
+
+    local guiNodes = {}
+    self.guiNodes = guiNodes
+    local function createGraphNodeGuiElement(node)
+      local nodeRef = Node:get(node)
+      local p = nodeRef.position * state.distScale
+      return Gui({
+        x = p.x,
+        y = p.y,
+        size = 24,
+        -- debug = true,
+        MOUSE_ENTER = function(self)
+          actions.nodeHoverIn(node)
+        end,
+        MOUSE_LEAVE = function(self)
+          actions.nodeHoverOut(node)
+        end,
+        MOUSE_PRESSED = function(self)
+          actions.nodeSelect(node)
+        end,
+        update = function(self)
+          local size = self.size
+          local p = (nodeRef.position * state.distScale - Vec2(size/2, size/2)) * camera.scale + state.translate
+          self:setPosition(p.x, p.y)
+          self:setSize(size * camera.scale)
+        end,
+        renderDebug = function(self)
+          if not self.debug then
+            return
+          end
+          local color = self.hovered and {1,1,0,0.1} or {1,1,1,0.1}
+          love.graphics.setColor(color)
+          love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
+        end,
+      })
+    end
+    self.updateGuiNodes = function(dt)
+      for nodeId,guiNode in pairs(self.guiNodes) do
+        guiNode:update(dt)
+      end
+    end
+
+    self.renderGuiDebug = function()
+      love.graphics.push()
+      love.graphics.origin()
+      for _,guiNode in pairs(self.guiNodes) do
+        guiNode:renderDebug()
+      end
+      love.graphics.pop()
+    end
+
+    self.graph:forEach(function(link)
+      local node1, node2 = link[1], link[2]
+      if (not guiNodes[node1]) then
+        guiNodes[node1] = createGraphNodeGuiElement(node1)
+      end
+      if (not guiNodes[node2]) then
+        guiNodes[node2] = createGraphNodeGuiElement(node2)
+      end
+    end)
   end,
 
   update = function(self, dt)
+    Gui:update(dt)
+    self.updateGuiNodes(dt)
   end,
 
   draw = function(self)
     love.graphics.push()
     love.graphics.origin()
-    love.graphics.translate(180, 100)
-    local camera = require 'components.camera'
+    love.graphics.translate(state.translate.x, state.translate.y)
     love.graphics.scale(camera.scale)
 
     renderGraph(self.graph, state.distScale)
+    self.renderGuiDebug()
 
     love.graphics.pop()
+  end,
+
+  final = function(self)
+    Gui:destroy()
   end
 })
