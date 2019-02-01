@@ -88,7 +88,9 @@ local M = {
       self.focusedObject = nil
     else
       self.focusedObject = item
-      previouslyFocused.focused = false
+      if previouslyFocused then
+        previouslyFocused.focused = false
+      end
       item.focused = true
     end
 
