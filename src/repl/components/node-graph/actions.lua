@@ -1,5 +1,7 @@
+local dynamicRequire = require 'utils.dynamic-require'
 local Vec2 = require 'modules.brinevector'
 local Component = require 'modules.component'
+local buildLevel = dynamicRequire 'repl.components.node-graph.build-level'
 
 return function(state)
   return {
@@ -41,6 +43,17 @@ return function(state)
           scale = 1
         }
       end)
+    end,
+    buildLevel = function(node, linkRefs)
+      local blocks = {
+        'b-1', 'b-2', '_nil', '_nil',
+
+        'b-1', 'b-1', 'b-1', 'b-1'
+      }
+      local seed = 1
+      state.levels = {
+        buildLevel(blocks, node, state.graph:getLinksByNodeId(node, true), seed)
+      }
     end
   }
 end

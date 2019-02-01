@@ -19,7 +19,7 @@ return function(actions, Node)
     level = 'a-2',
     labelPosition = 'top'
   })
-  model:addLink(level2, level1)
+  model:addLink(level1, level2)
 
   local level3 = Node:create({
     position = Vec2(
@@ -29,7 +29,7 @@ return function(actions, Node)
     level = 's-1',
     region = 'saria'
   })
-  model:addLink(level3, level2)
+  model:addLink(level2, level3)
 
   local level4 = Node:create({
     position = Vec2(
@@ -39,7 +39,7 @@ return function(actions, Node)
     level = 's-2',
     region = 'saria'
   })
-  model:addLink(level4, level3)
+  model:addLink(level3, level4)
 
   local level5 = Node:create({
     position = Vec2(
@@ -50,7 +50,7 @@ return function(actions, Node)
     labelPosition = 'right',
     region = 'saria'
   })
-  model:addLink(level5, level4)
+  model:addLink(level4, level5)
 
   local level6 = Node:create({
     position = Vec2(
@@ -61,7 +61,7 @@ return function(actions, Node)
     labelPosition = 'left',
     region = 'saria'
   })
-  model:addLink(level6, level4)
+  model:addLink(level4, level6)
 
   local avgPos = (Node:get(level2).position + Node:get(level3).position) / 2
   local secretLevel1 = Node:create({
@@ -72,7 +72,8 @@ return function(actions, Node)
     secret = true,
     region = ''
   })
-  model:addLink(secretLevel1, level2)
+  model:addLink(level2, secretLevel1)
+  model:addLink(level1, secretLevel1)
 
   local avgPos = (Node:get(level2).position + Node:get(level4).position) / 2
   local secretLevel2 = Node:create({
@@ -86,6 +87,8 @@ return function(actions, Node)
   model:addLink(secretLevel2, level3)
 
   actions.newGraph(model)
+
+  print(level1, level2, secretLevel1)
 
   return model
 end

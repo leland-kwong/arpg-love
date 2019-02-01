@@ -3,7 +3,7 @@ local Component = require 'modules.component'
 local msgBus = require 'components.msg-bus'
 local Vec2 = require 'modules.brinevector'
 local ser = require 'utils.ser'
-local Grid = require 'utils.grid'
+local Grid = dynamicRequire 'utils.grid'
 local Font = require 'components.font'
 local getTextSize = require 'repl.libs.get-text-size'
 local AnimationFactory = dynamicRequire 'components.animation-factory'
@@ -13,21 +13,63 @@ local Node = dynamicRequire 'utils.node-graph'
 local renderGraph = dynamicRequire 'repl.components.node-graph.render-graph'
 local buildUniverse = dynamicRequire 'repl.components.node-graph.build-universe'
 
+Node.setDevelopment(true)
+
 local Gui = GuiContext()
 
 local state = {
   distScale = 1,
   translate = Vec2(0, 20),
   unlockedNodes = {
-    [1] = true,
     [2] = true,
-    [7] = true
+    [3] = true,
+    [8] = true
   },
   hoveredNode = nil,
-  nodeStyles = {}
+  nodeStyles = {},
+  levels = {},
+  graph = nil
 }
 
-local actions = require 'repl.components.node-graph.actions'(state)
+local actions = dynamicRequire 'repl.components.node-graph.actions'(state)
+
+local function getLinkOrderByNodeId(link, nodeId)
+  if link[1] == nodeId then
+    return link[1], link[2]
+  end
+  return link[2], link[1]
+end
+
+local function renderLevel(level)
+  local gridSize = 40
+
+  love.graphics.setFont(Font.debug.font)
+  love.graphics.setColor(0,1,1)
+  love.graphics.print(level.nodeId, 0, 0)
+
+  love.graphics.translate(0, 25)
+
+  Grid.forEach(level.blocks, function(l, x, y)
+    love.graphics.setColor(1,1,1)
+    local p = Vec2(x - 1, y - 1) * gridSize
+    love.graphics.rectangle('line', p.x, p.y, gridSize, gridSize)
+
+    if l.exitLink then
+      local pos = p + Vec2(5, 20)
+      local size = 10
+      love.graphics.setColor(1,1,0)
+      local from, to = getLinkOrderByNodeId(l.exitLink, level.nodeId)
+      love.graphics.print(
+        from..'-'..to, pos.x, pos.y
+      )
+    end
+
+    love.graphics.setColor(1,1,1)
+
+    local textPos = p + Vec2(5, 5)
+    love.graphics.print(l.blockType, textPos.x, textPos.y)
+  end)
+end
 
 local function createGraphNodeGuiElement(node)
   local nodeRef = Node:get(node)
@@ -43,8 +85,8 @@ local function createGraphNodeGuiElement(node)
     MOUSE_LEAVE = function(self)
       actions.nodeHoverOut(node)
     end,
-    MOUSE_PRESSED = function(self)
-      actions.nodeSelect(node)
+    MOUSE_CLICKED = function(self)
+      actions.buildLevel(node)
     end,
     update = function(self)
       local size = self.size
@@ -96,7 +138,7 @@ Component.create({
       end
     })
 
-    self.graph = buildUniverse(actions, Node)
+    state.graph = buildUniverse(actions, Node)
 
     local guiNodes = {}
     self.guiNodes = guiNodes
@@ -115,7 +157,7 @@ Component.create({
       love.graphics.pop()
     end
 
-    self.graph:forEach(function(link)
+    state.graph:forEach(function(link)
       local node1, node2 = link[1], link[2]
       if (not guiNodes[node1]) then
         guiNodes[node1] = createGraphNodeGuiElement(node1)
@@ -124,11 +166,35 @@ Component.create({
         guiNodes[node2] = createGraphNodeGuiElement(node2)
       end
     end)
+
+    -- local ok, result = pcall(function()
+    --   local blocks = {
+    --     'b-1', 'b-2', '_nil', '_nil',
+
+    --     'b-1', 'b-1', 'b-1', 'b-1'
+    --   }
+    --   return {
+    --     actions.buildLevel(blocks, 1, self.graph:getLinksByNodeId(1, true), 1),
+    --     actions.buildLevel(blocks, 2, self.graph:getLinksByNodeId(2, true), 2),
+    --     actions.buildLevel(blocks, 7, self.graph:getLinksByNodeId(7, true), 3)
+    --   }
+    -- end)
+
+    -- print(Inspect(self.graph:getLinksByNodeId(7, true)))
+
+    -- self.levels = result
+    if not ok then
+      print(result)
+    end
   end,
 
   update = function(self, dt)
     Gui:update(dt)
     self.updateGuiNodes(dt)
+
+    self.clock = (self.clock or 0) + dt
+    if self.clock > 0.4 then
+    end
   end,
 
   draw = function(self)
@@ -137,8 +203,15 @@ Component.create({
     love.graphics.translate(state.translate.x, state.translate.y)
     love.graphics.scale(camera.scale)
 
-    renderGraph(self.graph, state.distScale, state)
+    renderGraph(state.graph, camera.scale, state.distScale, state, true)
     self.renderGuiDebug()
+
+    love.graphics.origin()
+    love.graphics.translate(800, 30)
+    for i=1, #state.levels do
+      renderLevel(state.levels[i])
+      love.graphics.translate(0, 100)
+    end
 
     love.graphics.pop()
   end,

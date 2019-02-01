@@ -5,6 +5,8 @@ local Font = require 'components.font'
 local Node = require 'utils.node-graph'
 local AnimationFactory = dynamicRequire 'components.animation-factory'
 
+local development = false
+
 local graphColors = {
   region = {
     aureus = {Color.rgba255(44, 232, 245)},
@@ -67,18 +69,33 @@ local labelOffsets = {
     return Vec2(-textW - 15, -textH/2)
   end
 }
-local function renderNodeLabel(nodeId, distScale, labelFont)
+local function renderNodeLabel(nodeId, distScale, cameraScale, labelFont)
   local opacity = distScale - 1
   local c = 0.9
   love.graphics.setColor(c,c,c,opacity)
   local ref = Node:get(nodeId)
   local label = ref.level
+  local position = (ref.position * distScale)
   if label then
+    love.graphics.setFont(labelFont)
     local humanizedLabel = string.gsub(label, '_', ' ')
     local textW, textH = getTextSize(humanizedLabel, labelFont)
     local lOffset = labelOffsets[ref.labelPosition] or labelOffsets.top
-    local p = (ref.position * distScale) + lOffset(textW, textH)
+    local p = position + lOffset(textW, textH)
     love.graphics.print(humanizedLabel, p.x, p.y)
+  end
+
+  if development then
+    love.graphics.push()
+    love.graphics.origin()
+
+    love.graphics.setColor(1,1,0)
+    love.graphics.setFont(Font.primaryLarge.font)
+
+    local p = position * cameraScale
+    love.graphics.print(nodeId, p.x, p.y + 42)
+
+    love.graphics.pop()
   end
 end
 
@@ -118,7 +135,9 @@ local function renderLink(node1, node2, distScale, state)
 end
 
 local renderCanvas = love.graphics.newCanvas(4096, 4096)
-return function(graph, distScale, state)
+return function(graph, cameraScale, distScale, state, isDevelopment)
+  development = isDevelopment
+
   local nodesToRender = {}
   local nodesByRegion = {
     regions = {},
@@ -179,7 +198,7 @@ return function(graph, distScale, state)
   local labelFont = Font.secondary.font
   love.graphics.setFont(labelFont)
   for nodeId in pairs(nodesToRender) do
-    renderNodeLabel(nodeId, distScale, labelFont)
+    renderNodeLabel(nodeId, distScale, cameraScale, labelFont)
   end
   love.graphics.setFont(oFont)
 
