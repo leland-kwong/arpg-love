@@ -2,7 +2,7 @@ local dynamicRequire = require 'utils.dynamic-require'
 local Vec2 = require 'modules.brinevector'
 local Color = require 'modules.color'
 local Font = require 'components.font'
-local Node = require 'graph'
+local Node = require 'utils.graph'.Node
 local AnimationFactory = dynamicRequire 'components.animation-factory'
 
 local development = false

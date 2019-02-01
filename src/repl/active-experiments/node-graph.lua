@@ -9,11 +9,9 @@ local getTextSize = require 'repl.libs.get-text-size'
 local AnimationFactory = dynamicRequire 'components.animation-factory'
 local GuiContext = dynamicRequire 'repl.libs.gui'
 local camera = require 'components.camera'
-local Node = dynamicRequire 'graph'
+local Node = dynamicRequire 'utils.graph'.Node
 local renderGraph = dynamicRequire 'repl.components.node-graph.render-graph'
 local buildUniverse = dynamicRequire 'repl.components.node-graph.build-universe'
-
-Node.setDevelopment(true)
 
 local Gui = GuiContext()
 
@@ -21,9 +19,9 @@ local state = {
   distScale = 1,
   translate = Vec2(0, 20),
   unlockedNodes = {
+    [1] = true,
     [2] = true,
-    [3] = true,
-    [8] = true
+    [7] = true
   },
   hoveredNode = nil,
   nodeStyles = {},
@@ -166,26 +164,6 @@ Component.create({
         guiNodes[node2] = createGraphNodeGuiElement(node2)
       end
     end)
-
-    -- local ok, result = pcall(function()
-    --   local blocks = {
-    --     'b-1', 'b-2', '_nil', '_nil',
-
-    --     'b-1', 'b-1', 'b-1', 'b-1'
-    --   }
-    --   return {
-    --     actions.buildLevel(blocks, 1, self.graph:getLinksByNodeId(1, true), 1),
-    --     actions.buildLevel(blocks, 2, self.graph:getLinksByNodeId(2, true), 2),
-    --     actions.buildLevel(blocks, 7, self.graph:getLinksByNodeId(7, true), 3)
-    --   }
-    -- end)
-
-    -- print(Inspect(self.graph:getLinksByNodeId(7, true)))
-
-    -- self.levels = result
-    if not ok then
-      print(result)
-    end
   end,
 
   update = function(self, dt)
