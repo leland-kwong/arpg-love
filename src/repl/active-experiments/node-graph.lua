@@ -9,7 +9,7 @@ local getTextSize = require 'repl.libs.get-text-size'
 local AnimationFactory = dynamicRequire 'components.animation-factory'
 local GuiContext = dynamicRequire 'repl.libs.gui'
 local camera = require 'components.camera'
-local Node = dynamicRequire 'utils.node-graph'
+local Node = dynamicRequire 'graph'
 local renderGraph = dynamicRequire 'repl.components.node-graph.render-graph'
 local buildUniverse = dynamicRequire 'repl.components.node-graph.build-universe'
 

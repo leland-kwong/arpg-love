@@ -2,7 +2,7 @@ local dynamicRequire = require 'utils.dynamic-require'
 local Vec2 = require 'modules.brinevector'
 local Color = require 'modules.color'
 local Font = require 'components.font'
-local Node = require 'utils.node-graph'
+local Node = require 'graph'
 local AnimationFactory = dynamicRequire 'components.animation-factory'
 
 local development = false
@@ -69,7 +69,7 @@ local labelOffsets = {
     return Vec2(-textW - 15, -textH/2)
   end
 }
-local function renderNodeLabel(nodeId, distScale, cameraScale, labelFont)
+local function renderNodeLabel(nodeId, distScale, cameraScale, labelFont, state)
   local opacity = distScale - 1
   local c = 0.9
   love.graphics.setColor(c,c,c,opacity)
@@ -89,11 +89,10 @@ local function renderNodeLabel(nodeId, distScale, cameraScale, labelFont)
     love.graphics.push()
     love.graphics.origin()
 
+    love.graphics.translate(state.translate.x, state.translate.y)
     love.graphics.setColor(1,1,0)
-    love.graphics.setFont(Font.primaryLarge.font)
-
     local p = position * cameraScale
-    love.graphics.print(nodeId, p.x, p.y + 42)
+    love.graphics.print(nodeId, p.x, p.y + 25)
 
     love.graphics.pop()
   end
@@ -198,7 +197,7 @@ return function(graph, cameraScale, distScale, state, isDevelopment)
   local labelFont = Font.secondary.font
   love.graphics.setFont(labelFont)
   for nodeId in pairs(nodesToRender) do
-    renderNodeLabel(nodeId, distScale, cameraScale, labelFont)
+    renderNodeLabel(nodeId, distScale, cameraScale, labelFont, state)
   end
   love.graphics.setFont(oFont)
 
