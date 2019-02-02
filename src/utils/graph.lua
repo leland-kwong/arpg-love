@@ -7,8 +7,8 @@ local Vec2 = require 'modules.brinevector'
 local development = false
 
 local createId = function(self)
-  self.idCounter = (self.idCounter or 0) + 1
-  return self.idCounter
+  self._idCounter = (self._idCounter or 0) + 1
+  return self._idCounter
 end
 
 local function addLinkReference(self, linkId, node1, node2)
@@ -96,8 +96,9 @@ local modelDefaultOptions = {
 local nodeMt = {
   position = Vec2()
 }
+nodeMt.__index = nodeMt
+
 local Node = {
-  counter = 0,
   nodeList = {},
   setDevelopment = function(isDev)
     development = isDev
@@ -105,9 +106,9 @@ local Node = {
   createId = createId,
   -- returns an id for the node
   create = function(self, props)
-    local node = setmetatable(props, nodeMt)
-    local id = node.id or self:createId()
-    node.id = id
+    local node = setmetatable(props or {}, nodeMt)
+    local id = node._id or self:createId()
+    node._id = id
     self.nodeList[id] = node
     return id
   end,
@@ -125,11 +126,11 @@ local Model = {
   modelList = {},
   create = function(self, options)
     local model = setmetatable({
-      id = self:createId(),
+      _id = self:createId(),
       linksByNode = {},
       links = {}
     }, modelMt)
-    self.modelList[model.id] = model
+    self.modelList[model._id] = model
     return model
   end,
 }
