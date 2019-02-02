@@ -1,7 +1,7 @@
 local dynamicRequire = require 'utils.dynamic-require'
 local Vec2 = require 'modules.brinevector'
 local Component = require 'modules.component'
-local buildLevel = dynamicRequire 'repl.components.node-graph.build-level'
+local buildLevel = dynamicRequire 'repl.components.universe-map.build-level'
 
 return function(state)
   return {

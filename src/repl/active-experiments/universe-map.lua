@@ -10,8 +10,8 @@ local AnimationFactory = dynamicRequire 'components.animation-factory'
 local GuiContext = dynamicRequire 'repl.libs.gui'
 local camera = require 'components.camera'
 local Node = dynamicRequire 'utils.graph'.Node
-local renderGraph = dynamicRequire 'repl.components.node-graph.render-graph'
-local buildUniverse = dynamicRequire 'repl.components.node-graph.build-universe'
+local renderGraph = dynamicRequire 'repl.components.universe-map.render-graph'
+local buildUniverse = dynamicRequire 'repl.components.universe-map.build-universe'
 
 local Gui = GuiContext()
 
@@ -29,7 +29,7 @@ local state = {
   graph = nil
 }
 
-local actions = dynamicRequire 'repl.components.node-graph.actions'(state)
+local actions = dynamicRequire 'repl.components.universe-map.actions'(state)
 
 local function getLinkOrderByNodeId(link, nodeId)
   if link[1] == nodeId then

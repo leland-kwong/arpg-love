@@ -1,7 +1,8 @@
 local Vec2 = require 'modules.brinevector'
+local Model = require 'utils.graph'.Model
 
 return function(actions, Node)
-  local model = Node:createModel()
+  local model = Model:create()
 
   local level1 = Node:create({
     position = Vec2(20, 30),
@@ -87,8 +88,6 @@ return function(actions, Node)
   model:addLink(secretLevel2, level3)
 
   actions.newGraph(model)
-
-  print(level1, level2, secretLevel1)
 
   return model
 end
