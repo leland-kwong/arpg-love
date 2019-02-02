@@ -9,7 +9,7 @@ return {
   tilewidth = 16,
   tileheight = 16,
   nextlayerid = 5,
-  nextobjectid = 44,
+  nextobjectid = 46,
   properties = {},
   tilesets = {
     {
@@ -452,19 +452,6 @@ return {
       properties = {},
       objects = {
         {
-          id = 31,
-          name = "entrance to level",
-          type = "levelExit",
-          shape = "rectangle",
-          x = 384,
-          y = 656,
-          width = 32,
-          height = 16,
-          rotation = 0,
-          visible = true,
-          properties = {}
-        },
-        {
           id = 33,
           name = "block opening",
           type = "blockOpening",
@@ -582,6 +569,19 @@ return {
           properties = {
             ["props"] = "../../modules/dungeon/treasure-chest-definitions/starting-items.lua"
           }
+        },
+        {
+          id = 45,
+          name = "start point",
+          type = "levelExit",
+          shape = "point",
+          x = 848,
+          y = 112,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          visible = true,
+          properties = {}
         }
       }
     }

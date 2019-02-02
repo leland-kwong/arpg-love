@@ -9,7 +9,7 @@ return {
   tilewidth = 16,
   tileheight = 16,
   nextlayerid = 6,
-  nextobjectid = 64,
+  nextobjectid = 65,
   properties = {},
   tilesets = {
     {
@@ -340,19 +340,6 @@ return {
       properties = {},
       objects = {
         {
-          id = 50,
-          name = "entrance to level",
-          type = "levelExit",
-          shape = "rectangle",
-          x = 48,
-          y = 464,
-          width = 32,
-          height = 16,
-          rotation = 0,
-          visible = true,
-          properties = {}
-        },
-        {
           id = 54,
           name = "ramp-1",
           type = "ramp",
@@ -476,12 +463,12 @@ return {
           properties = {}
         },
         {
-          id = 63,
+          id = 64,
           name = "start point",
-          type = "startPoint",
+          type = "levelExit",
           shape = "point",
-          x = 96,
-          y = 112,
+          x = 80,
+          y = 976,
           width = 0,
           height = 0,
           rotation = 0,

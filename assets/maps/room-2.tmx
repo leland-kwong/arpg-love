@@ -182,7 +182,7 @@
     <property name="props" type="file" value="../../src/modules/dungeon/treasure-chest-definitions/starting-items.lua"/>
    </properties>
   </object>
-  <object id="44" name="start point" type="startPoint" x="80" y="80">
+  <object id="44" name="start point" type="levelExit" x="80" y="80">
    <point/>
   </object>
  </objectgroup>

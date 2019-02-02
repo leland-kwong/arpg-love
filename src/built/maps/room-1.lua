@@ -9,7 +9,7 @@ return {
   tilewidth = 16,
   tileheight = 16,
   nextlayerid = 5,
-  nextobjectid = 47,
+  nextobjectid = 54,
   properties = {},
   tilesets = {
     {
@@ -342,19 +342,6 @@ return {
       properties = {},
       objects = {
         {
-          id = 22,
-          name = "entrance to level",
-          type = "levelExit",
-          shape = "rectangle",
-          x = 576,
-          y = 0,
-          width = 32,
-          height = 16,
-          rotation = 0,
-          visible = true,
-          properties = {}
-        },
-        {
           id = 25,
           name = "block opening",
           type = "blockOpening",
@@ -459,12 +446,12 @@ return {
           properties = {}
         },
         {
-          id = 46,
+          id = 53,
           name = "start point",
-          type = "startPoint",
+          type = "levelExit",
           shape = "point",
           x = 112,
-          y = 112,
+          y = 96,
           width = 0,
           height = 0,
           rotation = 0,

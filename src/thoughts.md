@@ -298,3 +298,11 @@ Nodes
 - 2nd wind: receive large speed buff after taking a critical hit
 - punching bag: you return %100(+1% per 1000 armor) of the damage taken to nearby enemies
 - puppet master: +1 extra summon
+
+### Level design
+
+Portal points should may have one of three possible direction values:
+
+- 1 (previous - leads to a previous level)
+- 2 (previous or next - leads a previous level or to the next level)
+- 3 (next - leads to the next level)

@@ -9,15 +9,15 @@ return {
   tilewidth = 16,
   tileheight = 16,
   nextlayerid = 5,
-  nextobjectid = 39,
+  nextobjectid = 40,
   properties = {},
   tilesets = {
     {
       name = "action rpg",
       firstgid = 1,
       filename = "../../../assets/maps/action rpg.tsx",
-      tilewidth = 36,
-      tileheight = 28,
+      tilewidth = 16,
+      tileheight = 16,
       spacing = 0,
       margin = 0,
       columns = 0,
@@ -32,7 +32,7 @@ return {
       },
       properties = {},
       terrains = {},
-      tilecount = 11,
+      tilecount = 10,
       tiles = {
         {
           id = 0,
@@ -93,10 +93,6 @@ return {
           image = "../../../assets/sprites/custom-art/tiles/floor-10.png",
           width = 16,
           height = 16
-        },
-        {
-          id = 22,
-          image = "../../../assets/sprites/custom-art/tiles/treasure-chest.png"
         }
       }
     }
@@ -471,19 +467,6 @@ return {
       properties = {},
       objects = {
         {
-          id = 28,
-          name = "entrance to level",
-          type = "levelExit",
-          shape = "rectangle",
-          x = 368,
-          y = 656,
-          width = 32,
-          height = 16,
-          rotation = 0,
-          visible = true,
-          properties = {}
-        },
-        {
           id = 30,
           name = "block opening",
           type = "blockOpening",
@@ -570,6 +553,19 @@ return {
           y = 1152,
           width = 16,
           height = 16,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 39,
+          name = "start point",
+          type = "levelExit",
+          shape = "point",
+          x = 80,
+          y = 80,
+          width = 0,
+          height = 0,
           rotation = 0,
           visible = true,
           properties = {}

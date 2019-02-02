@@ -372,7 +372,7 @@ return {
         {
           id = 44,
           name = "start point",
-          type = "startPoint",
+          type = "levelExit",
           shape = "point",
           x = 80,
           y = 80,

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="60" height="80" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="44">
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="60" height="80" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="46">
  <tileset firstgid="1" source="action rpg.tsx"/>
  <layer id="1" name="ground" width="60" height="80">
   <data encoding="csv">
@@ -226,7 +226,6 @@
   </object>
  </objectgroup>
  <objectgroup color="#06cddf" id="4" name="environment">
-  <object id="31" name="entrance to level" type="levelExit" x="384" y="656" width="32" height="16"/>
   <object id="33" name="block opening" type="blockOpening" x="64" y="0" width="96" height="16"/>
   <object id="34" name="block opening" type="blockOpening" x="0" y="64" width="16" height="96"/>
   <object id="35" name="block opening" type="blockOpening" x="800" y="0" width="96" height="16"/>
@@ -239,6 +238,9 @@
    <properties>
     <property name="props" type="file" value="../../src/modules/dungeon/treasure-chest-definitions/starting-items.lua"/>
    </properties>
+  </object>
+  <object id="45" name="start point" type="levelExit" x="848" y="112">
+   <point/>
   </object>
  </objectgroup>
 </map>
