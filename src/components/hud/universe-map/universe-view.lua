@@ -65,7 +65,53 @@ local function renderDebugBox(self)
   love.graphics.pop()
 end
 
+local function createHomePortalButton()
+  local mapRef = Component.get('OverworldMap')
+  local GuiText = require 'components.gui.gui-text'
+  local buttonText = 'Travel Home'
+  local buttonGap = 14
+  local font = getFont.secondary.font
+  local w,h = GuiText.getTextSize(buttonText, font)
+  Gui.create({
+    x = mapRef.x + mapRef.w/2 - w/2 - buttonGap/2,
+    y = mapRef.y + mapRef.h - h - 5,
+    w = w + 20 + buttonGap,
+    h = h,
+    -- debug = true,
+    onCreate = function(self)
+      Component.addToGroup(self, 'guiPortalPoint')
+    end,
+    onClick = function()
+      if Component.get('HomeBase') then
+        msgBus.send('PLAYER_ACTION_ERROR', 'We are already home')
+        return
+      end
+
+      local msgBus = require 'components.msg-bus'
+      msgBus.send('PORTAL_ENTER', {
+        from = 'universe'
+      })
+      msgBus.send('MAP_TOGGLE')
+    end,
+    render = function(self)
+      if self.hovered then
+        love.graphics.setColor(1,1,1)
+      else
+        love.graphics.setColor(Color.CYAN)
+      end
+      local ox, oy = portalPointGraphic:getWidth()/2, portalPointGraphic:getHeight()/2
+      portalPointGraphic:draw(self.x + ox, self.y + oy)
+      love.graphics.setFont(
+        getFont.secondary.font
+      )
+      love.graphics.print(buttonText, self.x + ox + buttonGap, self.y + oy/2)
+    end
+  })
+end
+
 local function setupInteractionElements()
+  createHomePortalButton()
+
   local areaObjects = F.find(overworldMapDefinition.layers, function(l)
     return l.name == 'areas'
   end).objects
@@ -101,9 +147,6 @@ local function setupInteractionElements()
       onPointerLeave = function()
         state.hoveredPoint = nil
       end,
-      render = function(self)
-        -- renderDebugBox(self)
-      end,
       onClick = function()
         local msgBus = require 'components.msg-bus'
         local location = {
@@ -132,11 +175,10 @@ Component.create({
     local isViewStateChange = state.isViewShowing ~= self.previousViewState
     if isViewStateChange then
       if state.isViewShowing then
-        print('showing')
         setupInteractionElements()
       else
-        print('hidden')
         cleanupGuiElements()
+        state.hoveredPoint = nil
       end
     end
     self.previousViewState = state.isViewShowing
