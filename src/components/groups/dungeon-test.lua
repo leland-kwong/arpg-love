@@ -22,7 +22,7 @@ end
 
 local function addTreasureCaches(scene)
   local mapGrid = scene.mapGrid
-  local treasureCacheCount = 100
+  local treasureCacheCount = 30
   local occupiedPositions = {}
   for i=1, treasureCacheCount do
     local x, y = randomTreasurePosition(mapGrid, occupiedPositions)
