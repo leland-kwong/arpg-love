@@ -15,10 +15,11 @@ Component.create({
   group = 'firstLayer',
   init = function(self)
     self.listeners = {
+      -- serialize the state when the scene is changed
       msgBus.on('SCENE_STACK_REPLACE', function()
         local mainSceneRef = Component.get('MAIN_SCENE')
         if mainSceneRef then
-          local mapId = globalState.mapLayoutsCache:get(mainSceneRef.location.layoutType)
+          local mapId = globalState.mapLayoutsCache:get(mainSceneRef.location)
           msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:serializeAll(mapId)
           msgBus.send('MAP_UNLOADED')
         end
@@ -63,7 +64,7 @@ function MainScene.init(self)
   self.rootStore = rootState
   local parent = self
 
-  local mapId = globalState.mapLayoutsCache:get(self.location.layoutType)
+  local mapId = globalState.mapLayoutsCache:get(self.location)
   local serializedState = globalState.stateSnapshot:consumeSnapshot(mapId)
   local Dungeon = require 'modules.dungeon'
   local dungeonRef = Dungeon:getData(mapId)
@@ -118,7 +119,6 @@ function MainScene.init(self)
       end
 
       -- travel to a specific location in the universe
-      local Dungeon = require 'modules.dungeon'
       msgBus.send(msgBus.SCENE_STACK_REPLACE, {
         scene = require 'scene.scene-main',
         props = {

@@ -79,7 +79,7 @@ local objectParsersByType = {
     end,
   },
   ['spawn-points'] = {
-    aiGroup = function(obj, grid, origin, blockData)
+    aiGroup = function(obj, grid, origin)
       local config = require 'config.config'
       local Map = require 'modules.map-generator.index'
       local SpawnerAi = require 'components.spawn.spawn-ai'
@@ -120,7 +120,7 @@ local objectParsersByType = {
     end,
   },
   ['environment'] = {
-    triggerZone = function(obj, grid, origin, blockData)
+    triggerZone = function(obj, grid, origin)
       local Component = require 'modules.component'
       local x, y = toWorldCoords(obj, origin)
       Component.create({
@@ -157,7 +157,7 @@ local objectParsersByType = {
       })
     end,
 
-    treasureChest = function(obj, grid, origin, blockData)
+    treasureChest = function(obj, grid, origin)
       local TreasureChest = require 'components.treasure-chest'
       local config = require 'config.config'
       local filePropLoader = require 'modules.dungeon.modules.file-property-loader'
@@ -170,7 +170,7 @@ local objectParsersByType = {
       })
 
     end,
-    environmentDoor = function(obj, grid, origin, blockData)
+    environmentDoor = function(obj, grid, origin)
       local config = require 'config.config'
       local Component = require 'modules.component'
       local AnimationFactory = require 'components.animation-factory'
@@ -242,33 +242,6 @@ local objectParsersByType = {
           })
         end
       end
-    end,
-    levelExit = function(obj, grid, origin, blockData)
-      local msgBus = require 'components.msg-bus'
-      local LevelExit = require 'components.map.level-exit'
-      local config = require 'config.config'
-      local Component = require 'modules.component'
-      local uid = require 'utils.uid'
-      local exitId = 'exit-'..uid()
-      local nextLevel = obj.properties.location or blockData.nextLevel
-      local x, y = toWorldCoords(obj, origin)
-      LevelExit.create({
-        id = exitId,
-        locationName = nextLevel,
-        x = x,
-        y = y,
-        onEnter = function(self)
-          msgBus.send(msgBus.SCENE_STACK_PUSH, {
-            scene = require 'scene.scene-main',
-            props = {
-              location = {
-                exitId = exitId,
-                layoutType = nextLevel
-              }
-            }
-          })
-        end
-      })
     end,
     ramp = function(obj, grid, origin, blockData)
       local Grid = require 'utils.grid'
@@ -345,19 +318,47 @@ local objectParsersByType = {
 
       Grid.forEach(subGrid, setupStairSprites)
     end,
-    blockOpening = function(obj, grid, origin, blockData)
+    blockOpening = function(obj, grid, origin)
       local blockOpeningParser = require 'modules.dungeon.layout-object-parsers.block-opening'
-      blockOpeningParser(obj, grid, origin, blockData, cellTranslationsByLayer)
+      blockOpeningParser(obj, grid, origin, cellTranslationsByLayer)
     end
   },
   ['objects'] = {
-    npc = function(obj, grid, origin, blockData)
+    npc = function(obj, grid, origin)
 
     end
+  },
+  ['transition-points'] = {
+    levelExit = function(obj, grid, origin, dungeonOptions)
+      local msgBus = require 'components.msg-bus'
+      local LevelExit = require 'components.map.level-exit'
+      local config = require 'config.config'
+      local Component = require 'modules.component'
+      local uid = require 'utils.uid'
+      local exitId = 'exit-'..uid()
+      local nextLevel = dungeonOptions.transitionPoints[obj.id]
+      local x, y = toWorldCoords(obj, origin)
+      LevelExit.create({
+        id = exitId,
+        locationName = nextLevel,
+        x = x,
+        y = y,
+        onEnter = function(self)
+          msgBus.send(msgBus.SCENE_STACK_REPLACE, {
+            scene = require 'scene.scene-main',
+            props = {
+              location = {
+                layoutType = nextLevel
+              }
+            }
+          })
+        end
+      })
+    end,
   }
 }
 
-local function parseObjectsLayer(layerName, objectsLayer, grid, gridBlockOrigin, blockData, gridBlock)
+local function parseObjectsLayer(layerName, objectsLayer, grid, gridBlockOrigin, options, gridBlock)
   if (not objectsLayer) then
     return
   end
@@ -371,7 +372,7 @@ local function parseObjectsLayer(layerName, objectsLayer, grid, gridBlockOrigin,
 
     local parser = objectParsersByType[layerName][obj.type]
     if parser then
-      parser(obj, grid, gridBlockOrigin, blockData)
+      parser(obj, grid, gridBlockOrigin, options)
     end
   end
 end
@@ -421,25 +422,23 @@ local function buildDungeon(options)
 
   local grid = convertTileListToGrid(gridBlock)
 
-  local layersToParse = {
-    'spawn-points',
-    'unique-enemies',
-    'environment',
-    'objects'
-  }
-
   local origin = {x = 0, y = 0}
   local blockData = {}
-  f.forEach(layersToParse, function(layerName)
-    parseObjectsLayer(
-      layerName,
-      findLayerByName(gridBlock.layers, layerName),
-      grid,
-      origin,
-      blockData,
-      gridBlock
-    )
-  end)
+  f.forEach(
+    f.filter(gridBlock.layers, function(l)
+      return l.type == 'objectgroup'
+    end),
+    function(layer)
+      parseObjectsLayer(
+        layer.name,
+        findLayerByName(gridBlock.layers, layer.name),
+        grid,
+        origin,
+        options,
+        gridBlock
+      )
+    end
+  )
 
   local connectsToAnotherMap = options.from.mapId
   -- create an exit that points back to the previous map
@@ -476,6 +475,7 @@ end
 
 local defaultOptions = {
   layoutType = '',
+  transitionPoints = {},
   -- previous map
   from = {
     mapId = nil,

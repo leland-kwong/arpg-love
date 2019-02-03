@@ -190,13 +190,13 @@
    </properties>
    <point/>
   </object>
-  <object id="54" name="transition point" type="levelExit" x="112" y="1200">
+  <object id="54" name="transition point" type="levelExit" x="80" y="176">
    <properties>
     <property name="direction" type="int" value="3"/>
    </properties>
    <point/>
   </object>
-  <object id="55" name="transition point" type="levelExit" x="832" y="112">
+  <object id="55" name="transition point" type="levelExit" x="160" y="160">
    <properties>
     <property name="direction" type="int" value="3"/>
    </properties>

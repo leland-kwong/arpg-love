@@ -1,4 +1,4 @@
-return function(obj, grid, origin, blockData, cellTranslationsByLayer)
+return function(obj, grid, origin, cellTranslationsByLayer)
   local Grid = require 'utils.grid'
   local config = require 'config.config'
   local F = require 'utils.functional'

@@ -1,5 +1,6 @@
 local Grid = require 'utils.grid'
 local F = require 'utils.functional'
+local Node = require 'utils.graph'.Node
 
 local function getExitFromBlock(levelDefinition)
   return F.filter(
@@ -46,20 +47,12 @@ return function(levelDefinition, node, links, seed, maxRetries)
         if exit.properties.direction == direction then
           done = true
           table.remove(exitsRemainingToPrepare, i)
-          exitDefinitions[exit.id] = {
-            x = exit.x,
-            y = exit.y,
-            link = {l1, l2}
-          }
+          local nodeRef = Node:get('universe', l2)
+          exitDefinitions[exit.id] = nodeRef.level
         end
       end
     end
   end
 
-  print(Inspect(exitDefinitions))
-
-  return {
-    nodeId = node,
-    exitPositions = exitPositions
-  }
+  return exitDefinitions
 end

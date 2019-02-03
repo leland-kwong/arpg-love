@@ -23,14 +23,13 @@ local function makeGlobalState()
     uiState = UiState(),
     mapLayoutsCache = {
       cache = {},
-      get = function(self, layoutType)
+      get = function(self, locationProps)
         local Dungeon = require 'modules.dungeon'
+        local layoutType = locationProps.layoutType
         local mapId = self.cache[layoutType]
         if (not mapId) then
-          mapId = Dungeon:new({
-            layoutType = layoutType,
-            nextLevel = 'aureus-floor-2'
-          })
+          print(locationProps)
+          mapId = Dungeon:new(locationProps)
           self.cache[layoutType] = mapId
         end
         return mapId

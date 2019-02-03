@@ -1,7 +1,7 @@
 local dynamicRequire = require 'utils.dynamic-require'
 local Vec2 = require 'modules.brinevector'
 local Component = require 'modules.component'
-local buildLevel = dynamicRequire 'components.hud.universe-map.build-level'
+local setupTransitionPoints = dynamicRequire 'components.hud.universe-map.setup-transition-points'
 local Node = require 'utils.graph'.Node
 local F = dynamicRequire 'utils.functional'
 local Grid = dynamicRequire 'utils.grid'
@@ -54,26 +54,23 @@ return function(state)
       end)
     end,
     buildLevel = function(node, linkRefs)
-      local nodeRef = Node:get('universe', node)
-      local location = {
-        layoutType = nodeRef.level
-      }
-      msgBus.send('PORTAL_ENTER', location)
-      msgBus.send('MAP_TOGGLE')
-
-      -- local ok, result = pcall(function()
-      --   local nodeRef = Node:get('universe', node)
-      --   local levelDefinition = getLevelDefinition(nodeRef.level)
-      --   local seed = 1
-      --   return {
-      --     buildLevel(levelDefinition, node, state.graph:getLinksByNodeId(node, true), 1, 20)
-      --   }
-      -- end)
-      -- if not ok then
-      --   print(result)
-      -- else
-      --   state.levels = result
-      -- end
+      local ok, result = pcall(function()
+        local nodeRef = Node:get('universe', node)
+        local levelDefinition = getLevelDefinition(nodeRef.level)
+        local seed = 1
+        return setupTransitionPoints(levelDefinition, node, state.graph:getLinksByNodeId(node, true), 1, 20)
+      end)
+      if not ok then
+        print('[build level error]', result)
+      else
+        local nodeRef = Node:get('universe', node)
+        local location = {
+          layoutType = nodeRef.level,
+          transitionPoints = result
+        }
+        msgBus.send('PORTAL_ENTER', location)
+        msgBus.send('MAP_TOGGLE')
+      end
     end
   }
 end
