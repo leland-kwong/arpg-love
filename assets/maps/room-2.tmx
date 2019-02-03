@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="60" height="80" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="45">
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="60" height="80" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="47">
  <tileset firstgid="1" source="action rpg.tsx"/>
  <layer id="1" name="ground" width="60" height="80">
   <data encoding="csv">
@@ -182,7 +182,24 @@
     <property name="props" type="file" value="../../src/modules/dungeon/treasure-chest-definitions/starting-items.lua"/>
    </properties>
   </object>
-  <object id="44" name="start point" type="levelExit" x="80" y="80">
+ </objectgroup>
+ <objectgroup color="#ff00ff" id="6" name="transition-points">
+  <object id="44" name="transition point" type="levelExit" x="80" y="80">
+   <properties>
+    <property name="direction" type="int" value="1"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="45" name="transition point" type="levelExit" x="832" y="112">
+   <properties>
+    <property name="direction" type="int" value="3"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="46" name="check point" type="checkPoint" x="864" y="608">
+   <properties>
+    <property name="direction" type="int" value="0"/>
+   </properties>
    <point/>
   </object>
  </objectgroup>

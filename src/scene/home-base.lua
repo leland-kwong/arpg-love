@@ -21,7 +21,7 @@ local HomeBase = {
   zoneTitle = 'Mothership',
   x = 0,
   y = 5,
-  previousLocation = nil,
+  location = nil,
   drawOrder = function()
     return 1
   end
@@ -32,7 +32,6 @@ function HomeBase.init(self)
   local questHandlers = dynamic 'components.quest-log.quest-handlers'
   questHandlers.start()
 
-  msgBus.send(msgBus.NEW_MAP)
   Component.get('lightWorld'):setAmbientColor({1,1,1,1})
 
   local collisionObjectsLayer = f.find(tileData.layers, function(layer)
@@ -55,14 +54,18 @@ function HomeBase.init(self)
     return obj.name == 'initialPlayerPosition'
   end)
 
-  local previousScene = sceneManager:getLastItem()
-
   local Player = require 'components.player'
-  local playerStartPosition = self.previousLocation and
+  local playerStartPosition = self.location and
     (
-      self.previousLocation.from == 'player' and
-        playerPortalPosition or
-        universePortalPosition
+      (
+        self.location.from == 'player' and
+          playerPortalPosition or
+          universePortalPosition
+      ) or
+      (
+        self.location.from == 'universe' and
+          universePortalPosition
+      )
     ) or
     initialPlayerPosition
   self.player = Player.create({
@@ -83,21 +86,25 @@ function HomeBase.init(self)
     style = 2,
     color = {1,1,1},
     x = universePortalPosition.x,
-    y = universePortalPosition.y,
+    y = universePortalPosition.y - 10,
     location = {
       tooltipText = 'Universe Portal',
       type = 'universe'
     }
   }):setParent(self)
 
-  if self.previousLocation and self.previousLocation.from == 'player' then
+  local shouldCreatePlayerPortal = Component.get('PlayerPortal') ~= nil
+  if shouldCreatePlayerPortal then
+    local globalState = require 'main.global-state'
+    local mapId = globalState.mapLayoutsCache:get(self.location.layoutType)
     Portal.create({
       style = 1,
       x = playerPortalPosition.x,
-      y = playerPortalPosition.y,
+      y = playerPortalPosition.y - 10,
       location = {
-        tooltipText = 'Portal back to '..Dungeon:getData(previousScene.props.mapId).options.layoutType,
-        from = 'player'
+        tooltipText = 'Portal back to '..Dungeon:getData(mapId).options.layoutType,
+        from = 'player',
+        layoutType = self.location.layoutType
       }
     }):setParent(self)
   end
@@ -147,23 +154,12 @@ function HomeBase.init(self)
       local Sound = require 'components.sound'
       Sound.playEffect('portal-enter.wav')
 
-      if location.from == 'player' then
-        msgBus.send(
-          msgBus.SCENE_STACK_POP
-        )
-        Component.get('PlayerPortal'):delete(true)
-        return
-      end
-
       if (location.layoutType) then
         local Dungeon = require 'modules.dungeon'
         msgBus.send(msgBus.SCENE_STACK_REPLACE, {
           scene = require 'scene.scene-main',
           props = {
-            mapId = Dungeon:new({
-              layoutType = location.layoutType,
-              nextLevel = 'aureus-floor-2'
-            })
+            location = location
           }
         })
         return

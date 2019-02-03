@@ -12,5 +12,5 @@ local function resetGameWorld()
   end
 end
 
-msgBus.on(msgBus.NEW_MAP, resetGameWorld)
+msgBus.on(msgBus.MAP_UNLOADED, resetGameWorld)
 msgBus.on(msgBus.GAME_UNLOADED, resetGameWorld)

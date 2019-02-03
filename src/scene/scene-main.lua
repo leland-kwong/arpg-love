@@ -7,14 +7,33 @@ local config = require 'config.config'
 local camera = require 'components.camera'
 local cloneGrid = require 'utils.clone-grid'
 local msgBus = require 'components.msg-bus'
+local globalState = require 'main.global-state'
+
+print('load main scene')
+
+Component.create({
+  group = 'firstLayer',
+  init = function(self)
+    self.listeners = {
+      msgBus.on('SCENE_STACK_REPLACE', function()
+        local mainSceneRef = Component.get('MAIN_SCENE')
+        if mainSceneRef then
+          local mapId = globalState.mapLayoutsCache:get(mainSceneRef.location.layoutType)
+          msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:serializeAll(mapId)
+          msgBus.send('MAP_UNLOADED')
+        end
+      end, 0)
+    }
+  end,
+  final = function(self)
+    msgBus.off(self.listeners)
+  end
+})
 
 local MainScene = {
   id = 'MAIN_SCENE',
   group = groups.firstLayer,
   zoneTitle = 'Aureus',
-
-  -- a map id to restore the state from
-  mapId = nil,
 
   -- options
   isNewGame = false
@@ -36,7 +55,6 @@ local function restoreComponentsFromState(self, serializedState)
 end
 
 function MainScene.init(self)
-  msgBus.send(msgBus.NEW_MAP)
   Component.get('lightWorld'):setAmbientColor({0.5,0.5,0.5,1})
 
   msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0,0,0,1})
@@ -45,16 +63,15 @@ function MainScene.init(self)
   self.rootStore = rootState
   local parent = self
 
-  local serializedState = msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:consumeSnapshot(self.mapId)
+  local mapId = globalState.mapLayoutsCache:get(self.location.layoutType)
+  local serializedState = globalState.stateSnapshot:consumeSnapshot(mapId)
   local Dungeon = require 'modules.dungeon'
-  local mapGrid = serializedState and (serializedState.mainMap and serializedState.mainMap[1].state) or Dungeon:getData(self.mapId).grid
+  local dungeonRef = Dungeon:getData(mapId)
+  local startPoint = dungeonRef.startPoint
+  local mapGrid = dungeonRef.grid
   self.mapGrid = mapGrid
 
   self.listeners = {
-    msgBus.on(msgBus.SCENE_STACK_PUSH, function(v)
-      msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:serializeAll(self.mapId)
-    end, 1),
-
     msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
       msgBus.send(msgBus.EXPERIENCE_GAIN, math.floor(msgValue.experience))
     end),
@@ -65,37 +82,55 @@ function MainScene.init(self)
         return
       end
 
-      if (location.layoutType) then
-        local Dungeon = require 'modules.dungeon'
-        msgBus.send(msgBus.SCENE_STACK_REPLACE, {
-          scene = require 'scene.scene-main',
-          props = {
-            mapId = Dungeon:new({
-              layoutType = location.layoutType,
-              nextLevel = 'aureus-floor-2'
-            })
+      local Sound = require 'components.sound'
+      Sound.playEffect('portal-enter.wav')
+
+      if location.from == 'player' then
+        local HomeBase = require('scene.home-base')
+        msgBus.send(
+          msgBus.SCENE_STACK_REPLACE, {
+            scene = HomeBase,
+            props = {
+              location = {
+                from = 'player',
+                layoutType = self.location.layoutType
+              }
+            }
           }
-        })
+        )
         return
       end
 
-      local Sound = require 'components.sound'
-      Sound.playEffect('portal-enter.wav')
-      local HomeBase = require('scene.home-base')
-      msgBus.send(
-        msgBus.SCENE_STACK_PUSH, {
-          scene = HomeBase,
-          props = {
-            previousLocation = location
+      if location.from == 'universe' then
+        local HomeBase = require('scene.home-base')
+        msgBus.send(
+          msgBus.SCENE_STACK_REPLACE, {
+            scene = HomeBase,
+            props = {
+              location = {
+                from = 'universe',
+                layoutType = self.location.layoutType
+              }
+            }
           }
+        )
+        return
+      end
+
+      -- travel to a specific location in the universe
+      local Dungeon = require 'modules.dungeon'
+      msgBus.send(msgBus.SCENE_STACK_REPLACE, {
+        scene = require 'scene.scene-main',
+        props = {
+          location = location
         }
-      )
+      })
     end)
   }
 
   MainMap.create({
     camera = camera,
-    mapId = self.mapId
+    mapId = mapId
   }):setParent(parent)
 
   if serializedState then
@@ -105,9 +140,9 @@ function MainScene.init(self)
   end
 
   local playerStartPos =
-    serializedState and
-    serializedState.portal[1] and
-    serializedState.portal[1].state.position
+    (self.location.from == 'player') and
+    Component.get('PlayerPortal')
+
   if (not playerStartPos) then
     if self.exitId then
       local x, y = Component.get(self.exitId):getPosition()
@@ -115,10 +150,22 @@ function MainScene.init(self)
       local entranceYOffset = 3 * config.gridSize
       playerStartPos = {x = x + entranceXOffset, y = y + entranceYOffset}
     else
-      local defaultStartPosition = {x = 4 * config.gridSize, y = 10 * config.gridSize}
-      playerStartPos = defaultStartPosition
+      playerStartPos = startPoint
     end
   end
+
+  local Portal = require 'components.portal'
+  Portal.create({
+    id = 'LayoutStartPosition',
+    x = startPoint.x,
+    y = startPoint.y - 10,
+    style = 2,
+    color = {1,1,1},
+    location = {
+      tooltipText = 'Universe Portal',
+      type = 'universe'
+    }
+  })
 
   local player = Player.create({
     x = playerStartPos.x,
@@ -126,7 +173,6 @@ function MainScene.init(self)
     mapGrid = mapGrid,
   }):setParent(parent)
 end
-
 
 local perf = require'utils.perf'
 MainScene.update = perf({

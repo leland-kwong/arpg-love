@@ -251,14 +251,6 @@ local objectParsersByType = {
       local uid = require 'utils.uid'
       local exitId = 'exit-'..uid()
       local nextLevel = obj.properties.location or blockData.nextLevel
-      local mapId = Dungeon:new({
-        layoutType = nextLevel,
-        from = {
-          mapId = Component.get('MAIN_SCENE').mapId,
-          exitId = exitId,
-        },
-        nextLevel = blockData.layoutType
-      })
       local x, y = toWorldCoords(obj, origin)
       LevelExit.create({
         id = exitId,
@@ -269,7 +261,10 @@ local objectParsersByType = {
           msgBus.send(msgBus.SCENE_STACK_PUSH, {
             scene = require 'scene.scene-main',
             props = {
-              mapId = mapId
+              location = {
+                exitId = exitId,
+                layoutType = nextLevel
+              }
             }
           })
         end
@@ -390,18 +385,29 @@ local function loadGridBlock(file)
   return dynamicModule('built/maps/'..file..'.lua')
 end
 
-local function addGridBlock(grid, gridBlockToAdd, startX, startY, transformFn, blockName)
-  local numCols = gridBlockToAdd.width
-  local area = gridBlockToAdd.width * gridBlockToAdd.height
+local function convertTileListToGrid(gridBlock)
+  local groundLayer = f.find(gridBlock.layers, 'name', 'ground')
+  local wallLayer = f.find(gridBlock.layers, 'name', 'walls')
+  local transformFn = function(index)
+    local groundValue = groundLayer.data[index]
+    local wallValue = wallLayer.data[index]
+    if wallValue ~= 0 then
+      return cellTranslationsByLayer.walls[wallValue]
+    end
+
+    return cellTranslationsByLayer.ground[groundValue] or 'NULL_CELL'
+  end
+
+  local grid = {}
+  local numCols = gridBlock.width
+  local area = gridBlock.width * gridBlock.height
   for i=0, (area - 1) do
     local y = math.floor(i/numCols) + 1
     local x = (i % numCols) + 1
-    -- local coordinates
-    local actualX = startX + x
-    local actualY = startY + y
-    grid[actualY] = grid[actualY] or {}
-    grid[actualY][actualX] = transformFn((i + 1), x, y)
+    grid[y] = grid[y] or {}
+    grid[y][x] = transformFn((i + 1))
   end
+
   return grid
 end
 
@@ -411,82 +417,29 @@ end
   Returns a 2-d grid.
 ]]
 local function buildDungeon(options)
-  local layoutGenerator = require('modules.dungeon.layouts.'..options.layoutType)
-  local layout = layoutGenerator()
-  local extractProps = require 'utils.object-utils.extract'
-  local gridBlockNames, columns, exitPosition = extractProps(layout, 'gridBlockNames', 'columns', 'exitPosition')
+  local gridBlock = require('built.maps.'..options.layoutType)
 
-  local grid = {}
-  local numBlocks = #gridBlockNames
-  local numCols = columns
-  local numRows = numBlocks/numCols
-  local layerProcessingQueue = {}
-  for blockIndex=0, (numBlocks - 1) do
-    local gridBlockName = gridBlockNames[blockIndex + 1]
-    local gridBlock = loadGridBlock(gridBlockName)
+  local grid = convertTileListToGrid(gridBlock)
 
-    -- block-level coordinates
-    local blockX = (blockIndex % numCols)
-    local blockY = math.floor(blockIndex/numCols)
-    local blockWidth, blockHeight = gridBlock.width, gridBlock.height
+  local layersToParse = {
+    'spawn-points',
+    'unique-enemies',
+    'environment',
+    'objects'
+  }
 
-    local overlapAdjustment = 0 --[[
-      the number of cells to overlap between blocks. This is mostly used as an option for making the layout share walls between blocks
-    ]]
-    local overlapAdjustmentX, overlapAdjustmentY = (overlapAdjustment * blockX), (overlapAdjustment * blockY)
-    -- grid units
-    local origin = {
-      x = (blockX * blockWidth),
-      y = (blockY * blockHeight)
-    }
-    if origin.x > 0 then
-      origin.x = origin.x + overlapAdjustmentX
-    end
-    if origin.y > 0 then
-      origin.y = origin.y + overlapAdjustmentY
-    end
-    local blockData = options
-    addGridBlock(
+  local origin = {x = 0, y = 0}
+  local blockData = {}
+  f.forEach(layersToParse, function(layerName)
+    parseObjectsLayer(
+      layerName,
+      findLayerByName(gridBlock.layers, layerName),
       grid,
-      gridBlock,
-      origin.x,
-      origin.y,
-      function(index, localX, localY)
-        local groundLayer = findLayerByName(gridBlock.layers, 'ground')
-        local groundValue = groundLayer.data[index]
-        local wallLayer = findLayerByName(gridBlock.layers, 'walls')
-        local wallValue = wallLayer.data[index]
-        if wallValue ~= 0 then
-          return cellTranslationsByLayer.walls[wallValue]
-        end
-
-        return cellTranslationsByLayer.ground[groundValue] or 'NULL_CELL'
-      end,
-      gridBlockName
+      origin,
+      blockData,
+      gridBlock
     )
-    local layersToParse = {
-      'spawn-points',
-      'unique-enemies',
-      'environment',
-      'objects'
-    }
-    table.insert(layerProcessingQueue, function()
-      f.forEach(layersToParse, function(layerName)
-        parseObjectsLayer(
-          layerName,
-          findLayerByName(gridBlock.layers, layerName),
-          grid,
-          origin,
-          blockData,
-          gridBlock
-        )
-      end)
-    end)
-  end
-
-  for _,fn in ipairs(layerProcessingQueue) do
-    fn()
-  end
+  end)
 
   local connectsToAnotherMap = options.from.mapId
   -- create an exit that points back to the previous map
@@ -502,15 +455,23 @@ local function buildDungeon(options)
         msgBus.send(msgBus.SCENE_STACK_PUSH, {
           scene = require 'scene.scene-main',
           props = {
-            mapId = options.from.mapId,
-            exitId = options.from.exitId
+            exitId = options.from.exitId,
+            location = {
+              layoutType = options.nextLevel
+            }
           }
         })
       end
     })
   end
 
-  return grid
+  local startPoint = f.find(
+    f.find(gridBlock.layers, 'name', 'transition-points').objects,
+    function(o)
+      return o.type == 'checkPoint'
+    end
+  )
+  return grid, startPoint
 end
 
 local defaultOptions = {
@@ -554,7 +515,16 @@ function Dungeon:getData(dungeonId)
   if (not dungeon) then
     return nil
   end
-  dungeon.grid = dungeon.grid or buildDungeon(dungeon.options)
+
+  if dungeon._built then
+    return dungeon
+  end
+
+  local grid, startPoint = buildDungeon(dungeon.options)
+  dungeon.grid = grid
+  dungeon.startPoint = startPoint
+  dungeon._built = true
+
   return dungeon
 end
 
