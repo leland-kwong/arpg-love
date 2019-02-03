@@ -19,12 +19,32 @@ function M.map(array, mapFn)
 	return list
 end
 
-function M.find(tbl, predicate)
+local String = require 'utils.string'
+
+local function getValueAtKeypath(obj, keypath)
+  local pathList = String.split(keypath, '%.')
+  local result = obj
+  for i=1, #pathList do
+    local key = pathList[i]
+    result = result[key]
+  end
+  return result
+end
+
+M.getValueAtKeypath = getValueAtKeypath
+
+function M.find(tbl, predicate, valueToMatch)
+	local isKeypath = type(predicate) == 'string'
 	local found = nil
 	local i = 1
 	local length = #tbl
 	while (i <= length) and (not found) do
-		found = predicate(tbl[i], i)
+		local v = tbl[i]
+		if isKeypath then
+			found = getValueAtKeypath(v, predicate) == valueToMatch
+		else
+			found = predicate(v, i)
+		end
 		if not found then
 			i = i + 1
 		else
