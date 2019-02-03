@@ -30,7 +30,7 @@ local state = {
 local actions = dynamicRequire 'components.hud.universe-map.actions'(state)
 
 local function createGraphNodeGuiElement(Gui, node)
-  local nodeRef = Node:get('universe', node)
+  local nodeRef = Node:getSystem('universe'):get( node)
   local p = nodeRef.position * state.distScale
   return Gui({
     x = p.x,
@@ -89,7 +89,7 @@ return Component.createFactory({
       end
     })
 
-    state.graph = buildUniverse(actions, Node)
+    state.graph = buildUniverse(actions)
 
     local guiNodes = {}
     self.guiNodes = guiNodes

@@ -1,21 +1,22 @@
 local Vec2 = require 'modules.brinevector'
 local Model = require 'utils.graph'.Model
+local Node = require 'utils.graph'.Node
 
-return function(actions, Node)
-  local model = Model:create()
-  Node:clearSystem('universe')
+return function(actions)
+  local model = Model:getSystem('universe'):reset()
+  local nodeSystem = Node:getSystem('universe'):reset()
 
-  local level1_1 = Node:create('universe', {
+  local level1_1 = nodeSystem:newNode({
     position = Vec2(20, 30),
     region = 'aureus',
     level = '1-1',
     labelPosition = 'top'
   })
 
-  local level1_2 = Node:create('universe', {
+  local level1_2 = nodeSystem:newNode({
     position = Vec2(
-      Node:get('universe', level1_1).position.x + 25,
-      Node:get('universe', level1_1).position.y
+      nodeSystem:get(level1_1).position.x + 25,
+      nodeSystem:get(level1_1).position.y
     ),
     region = 'aureus',
     level = '1-2',
@@ -23,10 +24,10 @@ return function(actions, Node)
   })
   model:addLink(level1_1, level1_2)
 
-  local level1_3 = Node:create('universe', {
+  local level1_3 = nodeSystem:newNode({
     position = Vec2(
-      Node:get('universe', level1_2).position.x + 25,
-      Node:get('universe', level1_2).position.y
+      nodeSystem:get(level1_2).position.x + 25,
+      nodeSystem:get(level1_2).position.y
     ),
     region = 'aureus',
     level = '1-3',
@@ -34,30 +35,30 @@ return function(actions, Node)
   })
   model:addLink(level1_2, level1_3)
 
-  local level2_1 = Node:create('universe', {
+  local level2_1 = nodeSystem:newNode({
     position = Vec2(
-      Node:get('universe', level1_3).position.x + 50,
-      Node:get('universe', level1_3).position.y + 20
+      nodeSystem:get(level1_3).position.x + 50,
+      nodeSystem:get(level1_3).position.y + 20
     ),
     level = 's-1',
     region = 'saria'
   })
   model:addLink(level1_3, level2_1)
 
-  local level4 = Node:create('universe', {
+  local level4 = nodeSystem:newNode({
     position = Vec2(
-      Node:get('universe', level2_1).position.x + 30,
-      Node:get('universe', level2_1).position.y
+      nodeSystem:get(level2_1).position.x + 30,
+      nodeSystem:get(level2_1).position.y
     ),
     level = 's-2',
     region = 'saria'
   })
   model:addLink(level2_1, level4)
 
-  local level5 = Node:create('universe', {
+  local level5 = nodeSystem:newNode({
     position = Vec2(
-      Node:get('universe', level4).position.x + 15,
-      Node:get('universe', level4).position.y + 25
+      nodeSystem:get(level4).position.x + 15,
+      nodeSystem:get(level4).position.y + 25
     ),
     level = 's-3',
     labelPosition = 'right',
@@ -65,10 +66,10 @@ return function(actions, Node)
   })
   model:addLink(level4, level5)
 
-  local level6 = Node:create('universe', {
+  local level6 = nodeSystem:newNode({
     position = Vec2(
-      Node:get('universe', level4).position.x - 15,
-      Node:get('universe', level4).position.y + 25
+      nodeSystem:get(level4).position.x - 15,
+      nodeSystem:get(level4).position.y + 25
     ),
     level = 's-4',
     labelPosition = 'left',
@@ -76,8 +77,8 @@ return function(actions, Node)
   })
   model:addLink(level4, level6)
 
-  local avgPos = (Node:get('universe', level1_2).position + Node:get('universe', level2_1).position) / 2
-  local secretLevel1 = Node:create('universe', {
+  local avgPos = (nodeSystem:get(level1_2).position + nodeSystem:get(level2_1).position) / 2
+  local secretLevel1 = nodeSystem:newNode({
     position = Vec2(
       avgPos.x - 15,
       avgPos.y + 20
@@ -88,8 +89,8 @@ return function(actions, Node)
   })
   model:addLink(level1_1, secretLevel1)
 
-  local avgPos = (Node:get('universe', level1_2).position + Node:get('universe', level4).position) / 2
-  local secretLevel1 = Node:create('universe', {
+  local avgPos = (nodeSystem:get(level1_2).position + nodeSystem:get(level4).position) / 2
+  local secretLevel1 = nodeSystem:newNode({
     position = Vec2(
       avgPos.x + 5,
       avgPos.y - 32
@@ -100,7 +101,7 @@ return function(actions, Node)
   })
   model:addLink(secretLevel1, level2_1)
 
-  actions.newGraph(model)
+  actions.newGraph(model.system)
 
   return model
 end

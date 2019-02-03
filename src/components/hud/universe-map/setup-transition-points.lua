@@ -47,7 +47,7 @@ return function(levelDefinition, node, links, seed, maxRetries)
         if exit.properties.direction == direction then
           done = true
           table.remove(exitsRemainingToPrepare, i)
-          local nodeRef = Node:get('universe', l2)
+          local nodeRef = Node:getSystem('universe'):get( l2)
           exitDefinitions[exit.id] = nodeRef.level
         end
       end
