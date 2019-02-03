@@ -1,11 +1,10 @@
 local dynamicRequire = require 'utils.dynamic-require'
 local Vec2 = require 'modules.brinevector'
 local Component = require 'modules.component'
-local buildLevel = dynamicRequire 'repl.components.universe-map.build-level'
+local buildLevel = dynamicRequire 'components.hud.universe-map.build-level'
 local Node = require 'utils.graph'.Node
 local F = dynamicRequire 'utils.functional'
 local Grid = dynamicRequire 'utils.grid'
-local msgBus = require 'components.msg-bus'
 local maps = require('modules.cargo').init('built/maps')
 
 local getLevelDefinition = function(levelId)
@@ -54,25 +53,19 @@ return function(state)
       end)
     end,
     buildLevel = function(node, linkRefs)
-      local location = {
-        layoutType = p.properties.layoutType
-      }
-      msgBus.send('PORTAL_ENTER', location)
-      msgBus.send('MAP_TOGGLE')
-
-      -- local ok, result = pcall(function()
-      --   local nodeRef = Node:get('universe', node)
-      --   local levelDefinition = getLevelDefinition(nodeRef.level)
-      --   local seed = 1
-      --   return {
-      --     buildLevel(levelDefinition, node, state.graph:getLinksByNodeId(node, true), 1, 20)
-      --   }
-      -- end)
-      -- if not ok then
-      --   print(result)
-      -- else
-      --   state.levels = result
-      -- end
+      local ok, result = pcall(function()
+        local nodeRef = Node:get('universe', node)
+        local levelDefinition = getLevelDefinition(nodeRef.level)
+        local seed = 1
+        return {
+          buildLevel(levelDefinition, node, state.graph:getLinksByNodeId(node, true), 1, 20)
+        }
+      end)
+      if not ok then
+        print(result)
+      else
+        state.levels = result
+      end
     end
   }
 end

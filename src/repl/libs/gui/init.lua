@@ -1,8 +1,8 @@
 local dynamicRequire = require 'utils.dynamic-require'
 local bump = require 'modules.bump'
 local EventsContext = dynamicRequire 'repl.libs.gui.events'
-
-local id = 0
+local InputContext = require 'modules.input-context'
+local uid = require 'utils.uid'
 
 local collisionObjectMt = {
   x = 0,
@@ -44,9 +44,10 @@ local M = {
     self.collisionWorld:add(o, o.x, o.y, o.w, o.h)
 
     if (not o.id) then
-      id = id + 1
+      id = uid()
       o.id = id
     end
+    o.inputContext = o.inputContext or o.id
 
     local duplicateObjectById = self.objectsList[o.id] ~= nil
     if duplicateObjectById then
@@ -68,14 +69,18 @@ local M = {
     return self.focusedObject
   end,
   setHover = function(self, item)
-    self.hoveredObjects[item.id] = item
-    item.hovered = true
+    if item then
+      InputContext.set(item.inputContext)
+      self.hoveredObjects[item.id] = item
+      item.hovered = true
+    end
     return self
   end,
   getAllHovered = function(self)
     return self.hoveredObjects
   end,
   clearHovered = function(self)
+    InputContext.set('any')
     for _,item in pairs(self.hoveredObjects) do
       item.hovered = false
     end

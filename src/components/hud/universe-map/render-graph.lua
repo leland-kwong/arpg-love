@@ -22,7 +22,7 @@ local graphColors = {
 
 local function renderNode(nodeId, distScale, state)
   love.graphics.setColor(0,1,1)
-  local ref = Node:get(nodeId)
+  local ref = Node:get('universe', nodeId)
   local p = ref.position * distScale
   local unlocked = state.unlockedNodes[nodeId]
   local c
@@ -73,7 +73,7 @@ local function renderNodeLabel(nodeId, distScale, cameraScale, labelFont, state)
   local opacity = distScale - 1
   local c = 0.9
   love.graphics.setColor(c,c,c,opacity)
-  local ref = Node:get(nodeId)
+  local ref = Node:get('universe', nodeId)
   local label = ref.level
   local position = (ref.position * distScale)
   if label then
@@ -113,8 +113,8 @@ local function renderRegionLabel(position, distScale, label, labelFont)
 end
 
 local function renderLink(node1, node2, distScale, state)
-  local ref1, ref2 = Node:get(node1),
-    Node:get(node2)
+  local ref1, ref2 = Node:get('universe', node1),
+    Node:get('universe', node2)
   local p1, p2 = ref1.position * distScale, ref2.position * distScale
   local c = graphColors.link
   local isUnAccessible = (not state.unlockedNodes[node1]) and (not state.unlockedNodes[node2])
@@ -156,12 +156,12 @@ return function(graph, cameraScale, distScale, state, isDevelopment)
   graph:forEach(function(link)
     local node1, node2 = link[1], link[2]
     if (not nodesToRender[node1]) then
-      nodesByRegion:add(Node:get(node1).region, node1)
+      nodesByRegion:add(Node:get('universe', node1).region, node1)
     end
     nodesToRender[node1] = node1
 
     if (not nodesToRender[node2]) then
-      nodesByRegion:add(Node:get(node2).region, node2)
+      nodesByRegion:add(Node:get('universe', node2).region, node2)
     end
     nodesToRender[node2] = node2
     renderLink(node1, node2, distScale, state)
@@ -175,9 +175,9 @@ return function(graph, cameraScale, distScale, state, isDevelopment)
   local lineGapStencil = function()
     love.graphics.setColor(1,1,1)
     local clamp = require 'utils.math'.clamp
-    local radius = clamp(14 * distScale/2, 12, 14)
+    local radius = clamp(14 * distScale/2, 11, 14)
     for nodeId in pairs(nodesToRender) do
-      local ref = Node:get(nodeId)
+      local ref = Node:get('universe', nodeId)
       local p = ref.position * distScale
       love.graphics.circle('fill', p.x, p.y, radius)
     end
@@ -205,7 +205,7 @@ return function(graph, cameraScale, distScale, state, isDevelopment)
     local nodes = nodesByRegion.regions[region]
     local x, xTotal, y = 0, 0, nil
     for i=1, #nodes do
-      local ref = Node:get(nodes[i])
+      local ref = Node:get('universe', nodes[i])
       local p = ref.position
       xTotal = xTotal + p.x
       x = xTotal/i

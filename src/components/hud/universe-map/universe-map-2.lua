@@ -10,10 +10,9 @@ local AnimationFactory = dynamicRequire 'components.animation-factory'
 local GuiContext = dynamicRequire 'repl.libs.gui'
 local camera = require 'components.camera'
 local Node = dynamicRequire 'utils.graph'.Node
-local renderGraph = dynamicRequire 'repl.components.universe-map.render-graph'
-local buildUniverse = dynamicRequire 'repl.components.universe-map.build-universe'
-
-local Gui = GuiContext()
+local renderGraph = dynamicRequire 'components.hud.universe-map.render-graph'
+local buildUniverse = dynamicRequire 'components.hud.universe-map.build-universe'
+local MenuManager = require 'modules.menu-manager'
 
 local state = {
   distScale = 1,
@@ -21,56 +20,17 @@ local state = {
   unlockedNodes = {
     [1] = true,
     [2] = true,
-    [7] = true
+    [3] = true
   },
   hoveredNode = nil,
   nodeStyles = {},
-  levels = {},
   graph = nil
 }
 
-local actions = dynamicRequire 'repl.components.universe-map.actions'(state)
+local actions = dynamicRequire 'components.hud.universe-map.actions'(state)
 
-local function getLinkOrderByNodeId(link, nodeId)
-  if link[1] == nodeId then
-    return link[1], link[2]
-  end
-  return link[2], link[1]
-end
-
-local function renderLevel(level)
-  local gridSize = 40
-
-  love.graphics.setFont(Font.debug.font)
-  love.graphics.setColor(0,1,1)
-  love.graphics.print(level.nodeId, 0, 0)
-
-  love.graphics.translate(0, 25)
-
-  Grid.forEach(level.blocks, function(l, x, y)
-    love.graphics.setColor(1,1,1)
-    local p = Vec2(x - 1, y - 1) * gridSize
-    love.graphics.rectangle('line', p.x, p.y, gridSize, gridSize)
-
-    if l.exitLink then
-      local pos = p + Vec2(5, 20)
-      local size = 10
-      love.graphics.setColor(1,1,0)
-      local from, to = getLinkOrderByNodeId(l.exitLink, level.nodeId)
-      love.graphics.print(
-        from..'-'..to, pos.x, pos.y
-      )
-    end
-
-    love.graphics.setColor(1,1,1)
-
-    local textPos = p + Vec2(5, 5)
-    love.graphics.print(l.blockType, textPos.x, textPos.y)
-  end)
-end
-
-local function createGraphNodeGuiElement(node)
-  local nodeRef = Node:get(node)
+local function createGraphNodeGuiElement(Gui, node)
+  local nodeRef = Node:get('universe', node)
   local p = nodeRef.position * state.distScale
   return Gui({
     x = p.x,
@@ -103,23 +63,16 @@ local function createGraphNodeGuiElement(node)
   })
 end
 
-Component.create({
-  id = 'UniverseMap',
+return Component.createFactory({
   group = 'hud',
   init = function(self)
-    local mainMenuRef = Component.get('mainMenu')
-    if mainMenuRef then
-      msgBus.send('TOGGLE_MAIN_MENU', false)
-      mainMenuRef:delete(true)
-    end
+    MenuManager.clearAll()
+    MenuManager.push(self)
 
-    local homeScreenRef = Component.get('HomeScreen')
-    if homeScreenRef then
-      homeScreenRef:delete(true)
-    end
+    self.Gui = GuiContext()
 
     -- full-screen event handler
-    Gui({
+    self.Gui({
       x = 0,
       y = 0,
       w = love.graphics.getWidth(),
@@ -158,16 +111,18 @@ Component.create({
     state.graph:forEach(function(link)
       local node1, node2 = link[1], link[2]
       if (not guiNodes[node1]) then
-        guiNodes[node1] = createGraphNodeGuiElement(node1)
+        guiNodes[node1] = createGraphNodeGuiElement(self.Gui, node1)
       end
       if (not guiNodes[node2]) then
-        guiNodes[node2] = createGraphNodeGuiElement(node2)
+        guiNodes[node2] = createGraphNodeGuiElement(self.Gui, node2)
       end
     end)
+
+    msgBus.send('CURSOR_SET', { type = 'default' })
   end,
 
   update = function(self, dt)
-    Gui:update(dt)
+    self.Gui:update(dt)
     self.updateGuiNodes(dt)
 
     self.clock = (self.clock or 0) + dt
@@ -176,25 +131,30 @@ Component.create({
   end,
 
   draw = function(self)
+
     love.graphics.push()
     love.graphics.origin()
+
+    -- draw background
+    love.graphics.setColor(0,0,0,0.8)
+    love.graphics.rectangle('fill', 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+
     love.graphics.translate(state.translate.x, state.translate.y)
     love.graphics.scale(camera.scale)
 
     renderGraph(state.graph, camera.scale, state.distScale, state, true)
     self.renderGuiDebug()
 
-    love.graphics.origin()
-    love.graphics.translate(800, 30)
-    for i=1, #state.levels do
-      renderLevel(state.levels[i])
-      love.graphics.translate(0, 100)
-    end
-
     love.graphics.pop()
   end,
 
   final = function(self)
-    Gui:destroy()
-  end
+    self.Gui:destroy()
+    msgBus.send('CURSOR_SET', { type = 'target' })
+    MenuManager.pop()
+  end,
+
+  drawOrder = function()
+    return 10
+  end,
 })
