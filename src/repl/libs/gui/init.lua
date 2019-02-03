@@ -91,7 +91,9 @@ local M = {
       if previouslyFocused then
         previouslyFocused.focused = false
       end
-      item.focused = true
+      if item then
+        item.focused = true
+      end
     end
 
     return previouslyFocused
