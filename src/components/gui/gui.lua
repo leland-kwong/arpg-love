@@ -372,7 +372,9 @@ function Gui.update(self, dt)
 
   if self.scrollNode then
     f.forEach(self.children, function(child)
+      local tetherPosition = require 'components.groups.tether-position'
       child:setParent(self.scrollNode)
+      tetherPosition(child, self.scrollNode)
     end)
   end
 

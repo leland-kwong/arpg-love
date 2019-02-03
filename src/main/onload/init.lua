@@ -28,6 +28,7 @@ require 'components.hud.player-position-indicator'
 require 'main.onload.news-dialog'
 require 'components.groups.dungeon-test'
 require 'components.groups.game-world'
+require 'components.groups.tether-position'
 
 
 local newLightWorld = LightWorld.create({

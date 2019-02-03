@@ -175,7 +175,7 @@ function M.newGroup(groupDefinition)
     else
       componentsById[id] = data
     end
-    if Group.onComponentEnter then
+    if isNewComponent and Group.onComponentEnter then
       Group:onComponentEnter(data)
     end
   end

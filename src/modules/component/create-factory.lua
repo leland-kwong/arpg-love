@@ -26,30 +26,6 @@ local baseProps = {
   _update = function(self, dt)
     self._ready = true
     self:update(dt)
-    local children = self._children
-    if children then
-      local hasChangedPosition = self.x ~= self._prevX
-        or self.y ~= self._prevY
-        or self.z ~= self._prevZ
-
-      if hasChangedPosition then
-        for _,child in pairs(children) do
-          -- update position relative to its parent
-          local dx, dy, dz =
-            (self.x - child.prevParentX),
-            (self.y - child.prevParentY),
-            (self.z - child.prevParentZ)
-          child:setPosition(child.x + dx, child.y + dy, child.z + dz)
-          child.prevParentX = self.x
-          child.prevParentY = self.y
-          child.prevParentZ = self.z
-        end
-
-        self._prevX = self.x
-        self._prevY = self.y
-        self._prevZ = self.z
-      end
-    end
   end,
   _drawDebug = function(self)
     self.draw(self)
@@ -192,21 +168,13 @@ return function(M)
         previousParent._children[id] = nil
       end
 
+      -- set new parent
+      self.parent = parent
+
       if (not parent) then
-        self.parent = nil
         return self
       end
 
-      --[[
-        The child's position will now be relative to its parent,
-        so we need to store the parent's initial position
-      ]]
-      self.prevParentX = parent.x
-      self.prevParentY = parent.y
-      self.prevParentZ = parent.z
-
-      -- set new parent
-      self.parent = parent
       parent._children = parent._children or {}
       -- add self as child to its parent
       parent._children[id] = self
