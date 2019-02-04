@@ -96,7 +96,7 @@ function HomeBase.init(self)
   local shouldCreatePlayerPortal = Component.get('PlayerPortal') ~= nil
   if shouldCreatePlayerPortal then
     local globalState = require 'main.global-state'
-    local mapId = globalState.mapLayoutsCache:get(self.location.layoutType)
+    local mapId = globalState.mapLayoutsCache:get(self.location)
     Portal.create({
       style = 1,
       x = playerPortalPosition.x,
