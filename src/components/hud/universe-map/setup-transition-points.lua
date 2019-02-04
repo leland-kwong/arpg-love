@@ -19,7 +19,7 @@ local function linkOrderByNode(node, link)
   return l2, l1
 end
 
-return function(levelDefinition, node, links, seed, maxRetries)
+return function(levelDefinition, universeNodeId, links, seed, maxRetries)
   math.randomseed(seed or os.clock())
   maxRetries = maxRetries or 100
 
@@ -37,8 +37,9 @@ return function(levelDefinition, node, links, seed, maxRetries)
   local exitDefinitions = {}
 
   for i=1, #linksAsList do
-    local link = Graph:getSystem('universe'):getLinkById(linksAsList[i])
-    local l1, l2 = linkOrderByNode(node, link.nodes)
+    local linkId = linksAsList[i]
+    local linkRef = Graph:getSystem('universe'):getLinkById(linkId)
+    local l1, l2 = linkOrderByNode(universeNodeId, linkRef.nodes)
     local direction = (l1 < l2) and 3 or 1
     local done = false
     for i=1, #exitsRemainingToPrepare do
@@ -48,7 +49,10 @@ return function(levelDefinition, node, links, seed, maxRetries)
           done = true
           table.remove(exitsRemainingToPrepare, i)
           local nodeRef = Graph:getSystem('universe'):getNode(l2)
-          exitDefinitions[exit.id] = nodeRef.level
+          exitDefinitions[exit.id] = {
+            transitionLinkId = linkId,
+            layoutType = nodeRef.level
+          }
         end
       end
     end

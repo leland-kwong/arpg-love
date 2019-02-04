@@ -40,7 +40,7 @@ local setNodeSystemDefaultProps = function(nodeSystem)
     nodeCounter = 0,
 
     linksByNodeId = {},
-    links = {},
+    linksById = {},
     linkCounter = 0
   })
 end
@@ -66,7 +66,7 @@ local nodeSystemMt = {
       data = data or {}
     }, linkMt)
     local linkId = self.linkCounter
-    self.links[linkId] = link
+    self.linksById[linkId] = link
 
     addLinkReference(self, linkId, node1, node2)
     addLinkReference(self, linkId, node2, node1)
@@ -90,14 +90,14 @@ local nodeSystemMt = {
       removeLinkReference(self, node1, node2)
       removeLinkReference(self, node2, node1)
 
-      self.links[linkId] = nil
+      self.linksById[linkId] = nil
     end
     return self
   end,
 
   -- returns the link reference
   getLinkById = function(self, linkId)
-    return self.links[linkId]
+    return self.linksById[linkId]
   end,
 
   -- returns a table of links for a given node {[nodeId] = [linkId], ...}
@@ -106,9 +106,27 @@ local nodeSystemMt = {
     return list.links or O.EMPTY
   end,
 
+  -- returns an iterator
+  getAllNodes = function(self)
+    return coroutine.wrap(function()
+      for nodeId,nodeRef in pairs(self.nodesById) do
+        coroutine.yield(nodeId, nodeRef)
+      end
+    end)
+  end,
+
+  -- returns an iterator
+  getAllLinks = function(self)
+    return coroutine.wrap(function()
+      for linkId,linkRef in pairs(self.linksById) do
+        coroutine.yield(linkId, linkRef)
+      end
+    end)
+  end,
+
   -- iterate over all links in the system
   forEachLink = function(self, callback)
-    for linkId,link in pairs(self.links) do
+    for linkId,link in pairs(self.linksById) do
       callback(linkId, link)
     end
     return self

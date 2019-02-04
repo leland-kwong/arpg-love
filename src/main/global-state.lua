@@ -28,7 +28,6 @@ local function makeGlobalState()
         local layoutType = locationProps.layoutType
         local mapId = self.cache[layoutType]
         if (not mapId) then
-          print(locationProps)
           mapId = Dungeon:new(locationProps)
           self.cache[layoutType] = mapId
         end
@@ -41,7 +40,6 @@ local function makeGlobalState()
     stateSnapshot = {
       serializedStateByMapId = newStateStorage(),
       serializeAll = function(self, mapId)
-        print('serialize', mapId)
         local statesByClass = {}
         local collisionGroups = require 'modules.collision-groups'
         local f = require 'utils.functional'

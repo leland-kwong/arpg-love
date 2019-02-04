@@ -9,7 +9,7 @@ return {
   tilewidth = 16,
   tileheight = 16,
   nextlayerid = 6,
-  nextobjectid = 56,
+  nextobjectid = 58,
   properties = {},
   tilesets = {
     {
@@ -474,14 +474,14 @@ return {
           }
         },
         {
-          id = 54,
+          id = 56,
           name = "transition point",
           type = "levelExit",
-          shape = "point",
-          x = 80,
-          y = 176,
-          width = 0,
-          height = 0,
+          shape = "rectangle",
+          x = 64,
+          y = 160,
+          width = 16,
+          height = 16,
           rotation = 0,
           visible = true,
           properties = {
@@ -489,14 +489,14 @@ return {
           }
         },
         {
-          id = 55,
+          id = 57,
           name = "transition point",
           type = "levelExit",
-          shape = "point",
+          shape = "rectangle",
           x = 160,
           y = 160,
-          width = 0,
-          height = 0,
+          width = 16,
+          height = 16,
           rotation = 0,
           visible = true,
           properties = {

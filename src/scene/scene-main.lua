@@ -12,6 +12,7 @@ local globalState = require 'main.global-state'
 print('load main scene')
 
 Component.create({
+  id = 'MainSceneInitializer',
   group = 'firstLayer',
   init = function(self)
     self.listeners = {
@@ -70,6 +71,7 @@ function MainScene.init(self)
   local dungeonRef = Dungeon:getData(mapId)
   local startPoint = dungeonRef.startPoint
   local mapGrid = dungeonRef.grid
+  self.mapId = mapId
   self.mapGrid = mapGrid
 
   self.listeners = {

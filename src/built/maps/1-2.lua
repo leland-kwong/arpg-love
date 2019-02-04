@@ -9,7 +9,7 @@ return {
   tilewidth = 16,
   tileheight = 16,
   nextlayerid = 7,
-  nextobjectid = 47,
+  nextobjectid = 50,
   properties = {},
   tilesets = {
     {
@@ -383,36 +383,6 @@ return {
       properties = {},
       objects = {
         {
-          id = 44,
-          name = "transition point",
-          type = "levelExit",
-          shape = "point",
-          x = 80,
-          y = 80,
-          width = 0,
-          height = 0,
-          rotation = 0,
-          visible = true,
-          properties = {
-            ["direction"] = 1
-          }
-        },
-        {
-          id = 45,
-          name = "transition point",
-          type = "levelExit",
-          shape = "point",
-          x = 832,
-          y = 112,
-          width = 0,
-          height = 0,
-          rotation = 0,
-          visible = true,
-          properties = {
-            ["direction"] = 3
-          }
-        },
-        {
           id = 46,
           name = "check point",
           type = "checkPoint",
@@ -425,6 +395,36 @@ return {
           visible = true,
           properties = {
             ["direction"] = 0
+          }
+        },
+        {
+          id = 48,
+          name = "transition point",
+          type = "levelExit",
+          shape = "rectangle",
+          x = 48,
+          y = 0,
+          width = 16,
+          height = 16,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["direction"] = 1
+          }
+        },
+        {
+          id = 49,
+          name = "transition point",
+          type = "levelExit",
+          shape = "rectangle",
+          x = 816,
+          y = 0,
+          width = 16,
+          height = 16,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["direction"] = 3
           }
         }
       }

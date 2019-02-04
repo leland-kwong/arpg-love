@@ -329,26 +329,48 @@ local objectParsersByType = {
     end
   },
   ['transition-points'] = {
-    levelExit = function(obj, grid, origin, dungeonOptions)
+    levelExit = function(obj, grid, origin, dungeonOptions, blockFileData)
+      print('generate exit')
+      local Graph = require 'utils.graph'
+      local universeSystem = Graph:getSystem('universe')
+      local setupTransitionPoints = require 'components.hud.universe-map.setup-transition-points'
+      local nodeIter = universeSystem:getAllNodes()
+      local universeNodeId = nil
+      for id,nodeRef in nodeIter do
+        if nodeRef.level == dungeonOptions.layoutType then
+          universeNodeId = id
+        end
+      end
+      local transitionPoints = setupTransitionPoints(
+        blockFileData,
+        universeNodeId,
+        universeSystem:getNodeLinks(universeNodeId),
+        1,
+        20
+      )
+
       local msgBus = require 'components.msg-bus'
       local LevelExit = require 'components.map.level-exit'
       local config = require 'config.config'
       local Component = require 'modules.component'
       local uid = require 'utils.uid'
-      local exitId = 'exit-'..uid()
-      local nextLevel = dungeonOptions.transitionPoints[obj.id]
+      local exitDefinition = transitionPoints[obj.id]
+      local exitId = exitDefinition.transitionLinkId
+      local toLevel = exitDefinition.layoutType
       local x, y = toWorldCoords(obj, origin)
       LevelExit.create({
         id = exitId,
-        locationName = nextLevel,
+        locationName = toLevel,
         x = x,
         y = y,
         onEnter = function(self)
           msgBus.send(msgBus.SCENE_STACK_REPLACE, {
             scene = require 'scene.scene-main',
             props = {
+              exitId = exitId,
               location = {
-                layoutType = nextLevel
+                layoutType = toLevel,
+                transitionPoints = transitionPoints
               }
             }
           })
@@ -358,7 +380,7 @@ local objectParsersByType = {
   }
 }
 
-local function parseObjectsLayer(layerName, objectsLayer, grid, gridBlockOrigin, options, gridBlock)
+local function parseObjectsLayer(layerName, objectsLayer, grid, gridBlockOrigin, options, blockFileData)
   if (not objectsLayer) then
     return
   end
@@ -367,12 +389,12 @@ local function parseObjectsLayer(layerName, objectsLayer, grid, gridBlockOrigin,
     local obj = objects[i]
 
     -- shift positions by 1 full tile since lua indexes start at 1
-    obj.x = obj.x + gridBlock.tilewidth
-    obj.y = obj.y + gridBlock.tileheight
+    obj.x = obj.x + blockFileData.tilewidth
+    obj.y = obj.y + blockFileData.tileheight
 
     local parser = objectParsersByType[layerName][obj.type]
     if parser then
-      parser(obj, grid, gridBlockOrigin, options)
+      parser(obj, grid, gridBlockOrigin, options, blockFileData)
     end
   end
 end
