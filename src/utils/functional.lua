@@ -1,4 +1,23 @@
+local String = require 'utils.string'
+
 local M = {}
+
+
+local function getValueAtKeypath(val, keypath)
+	if keypath == '' then
+		return val
+	end
+
+	local result = val
+  local pathList = String.split(keypath, '%.')
+  for i=1, #pathList do
+    local key = pathList[i]
+    result = result[key]
+  end
+  return result
+end
+
+M.getValueAtKeypath = getValueAtKeypath
 
 function M.forEach(array, callback, ctx)
 	local len = array and #array or 0
@@ -19,23 +38,9 @@ function M.map(array, mapFn)
 	return list
 end
 
-local String = require 'utils.string'
-
-local function getValueAtKeypath(obj, keypath)
-  local pathList = String.split(keypath, '%.')
-  local result = obj
-  for i=1, #pathList do
-    local key = pathList[i]
-    result = result[key]
-  end
-  return result
-end
-
-M.getValueAtKeypath = getValueAtKeypath
-
 function M.find(tbl, predicate, valueToMatch)
 	local isKeypath = type(predicate) == 'string'
-	local found = nil
+	local found = false
 	local i = 1
 	local length = #tbl
 	while (i <= length) and (not found) do
