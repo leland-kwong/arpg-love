@@ -43,7 +43,7 @@ return function(actions)
   })
   nodeSystem:newLink(level1_3, level2_1)
 
-  local level4 = nodeSystem:newNode({
+  local level2_2 = nodeSystem:newNode({
     position = Vec2(
       nodeSystem:getNode(level2_1).position.x + 30,
       nodeSystem:getNode(level2_1).position.y
@@ -51,29 +51,29 @@ return function(actions)
     level = 's-2',
     region = 'saria'
   })
-  nodeSystem:newLink(level2_1, level4)
+  nodeSystem:newLink(level2_1, level2_2)
 
-  local level5 = nodeSystem:newNode({
+  local level2_3 = nodeSystem:newNode({
     position = Vec2(
-      nodeSystem:getNode(level4).position.x + 15,
-      nodeSystem:getNode(level4).position.y + 25
+      nodeSystem:getNode(level2_2).position.x + 15,
+      nodeSystem:getNode(level2_2).position.y + 25
     ),
     level = 's-3',
     labelPosition = 'right',
     region = 'saria'
   })
-  nodeSystem:newLink(level4, level5)
+  nodeSystem:newLink(level2_2, level2_3)
 
-  local level6 = nodeSystem:newNode({
+  local level2_4 = nodeSystem:newNode({
     position = Vec2(
-      nodeSystem:getNode(level4).position.x - 15,
-      nodeSystem:getNode(level4).position.y + 25
+      nodeSystem:getNode(level2_2).position.x - 15,
+      nodeSystem:getNode(level2_2).position.y + 25
     ),
     level = 's-4',
     labelPosition = 'left',
     region = 'saria'
   })
-  nodeSystem:newLink(level4, level6)
+  nodeSystem:newLink(level2_2, level2_4)
 
   local avgPos = (nodeSystem:getNode(level1_2).position + nodeSystem:getNode(level2_1).position) / 2
   local secretLevel1 = nodeSystem:newNode({
@@ -85,9 +85,9 @@ return function(actions)
     -- secret = true,
     region = ''
   })
-  nodeSystem:newLink(level1_1, secretLevel1)
+  nodeSystem:newLink(level2_4, secretLevel1)
 
-  local avgPos = (nodeSystem:getNode(level1_2).position + nodeSystem:getNode(level4).position) / 2
+  local avgPos = (nodeSystem:getNode(level1_2).position + nodeSystem:getNode(level2_2).position) / 2
   local secretLevel1 = nodeSystem:newNode({
     position = Vec2(
       avgPos.x + 5,

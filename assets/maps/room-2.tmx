@@ -184,18 +184,13 @@
   </object>
  </objectgroup>
  <objectgroup color="#ff00ff" id="6" name="transition-points">
-  <object id="46" name="check point" type="checkPoint" x="864" y="608">
+  <object id="46" name="check point" type="checkPoint" x="80" y="80">
    <properties>
     <property name="direction" type="int" value="0"/>
    </properties>
    <point/>
   </object>
-  <object id="48" name="transition point" type="levelExit" x="48" y="0" width="16" height="16">
-   <properties>
-    <property name="direction" type="int" value="1"/>
-   </properties>
-  </object>
-  <object id="49" name="transition point" type="levelExit" x="816" y="0" width="16" height="16">
+  <object id="49" name="transition point" type="levelExit" x="176" y="0" width="16" height="16">
    <properties>
     <property name="direction" type="int" value="3"/>
    </properties>

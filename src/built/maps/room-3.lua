@@ -8,8 +8,8 @@ return {
   height = 80,
   tilewidth = 16,
   tileheight = 16,
-  nextlayerid = 6,
-  nextobjectid = 65,
+  nextlayerid = 7,
+  nextobjectid = 67,
   properties = {},
   tilesets = {
     {
@@ -461,19 +461,49 @@ return {
           rotation = 0,
           visible = true,
           properties = {}
-        },
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      id = 6,
+      name = "transition-points",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      draworder = "topdown",
+      properties = {},
+      objects = {
         {
-          id = 64,
-          name = "start point",
+          id = 65,
+          name = "transition point",
           type = "levelExit",
-          shape = "point",
-          x = 80,
-          y = 976,
-          width = 0,
-          height = 0,
+          shape = "rectangle",
+          x = 160,
+          y = 0,
+          width = 16,
+          height = 16,
           rotation = 0,
           visible = true,
-          properties = {}
+          properties = {
+            ["direction"] = 3
+          }
+        },
+        {
+          id = 66,
+          name = "transition point",
+          type = "levelExit",
+          shape = "rectangle",
+          x = 64,
+          y = 464,
+          width = 16,
+          height = 16,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["direction"] = 3
+          }
         }
       }
     },

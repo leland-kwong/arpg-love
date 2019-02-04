@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="60" height="80" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="65">
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="60" height="80" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="68">
  <tileset firstgid="1" source="action rpg.tsx"/>
  <tileset firstgid="23" source="home-base.tsx"/>
  <layer id="1" name="ground" width="60" height="80">
@@ -182,7 +182,22 @@
   <object id="60" name="block opening" type="blockOpening" x="0" y="1120" width="16" height="96"/>
   <object id="61" name="block opening" type="blockOpening" x="64" y="1264" width="96" height="16"/>
   <object id="62" name="block opening" type="blockOpening" x="800" y="1264" width="96" height="16"/>
-  <object id="64" name="start point" type="levelExit" x="80" y="976">
+ </objectgroup>
+ <objectgroup color="#ff00ff" id="6" name="transition-points">
+  <object id="65" name="transition point" type="levelExit" x="160" y="0" width="16" height="16">
+   <properties>
+    <property name="direction" type="int" value="1"/>
+   </properties>
+  </object>
+  <object id="66" name="transition point" type="levelExit" x="64" y="464" width="16" height="16">
+   <properties>
+    <property name="direction" type="int" value="3"/>
+   </properties>
+  </object>
+  <object id="67" name="check point" type="checkPoint" x="112" y="1168">
+   <properties>
+    <property name="direction" type="int" value="0"/>
+   </properties>
    <point/>
   </object>
  </objectgroup>
@@ -211,7 +226,7 @@
    </properties>
    <ellipse/>
   </object>
-  <object id="34" name="ai-group" type="aiGroup" x="320" y="1152" width="53" height="53">
+  <object id="34" name="ai-group" type="aiGroup" x="464" y="1152" width="53" height="53">
    <properties>
     <property name="groupSize" type="int" value="4"/>
    </properties>

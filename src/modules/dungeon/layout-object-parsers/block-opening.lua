@@ -1,4 +1,8 @@
 return function(obj, grid, origin, cellTranslationsByLayer)
+  if not cellTranslationsByLayer then
+    return
+  end
+
   local Grid = require 'utils.grid'
   local config = require 'config.config'
   local F = require 'utils.functional'
