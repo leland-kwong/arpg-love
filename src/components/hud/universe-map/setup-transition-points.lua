@@ -1,6 +1,6 @@
 local Grid = require 'utils.grid'
 local F = require 'utils.functional'
-local Node = require 'utils.graph'.Node
+local Graph = require 'utils.graph'
 
 local function getExitFromBlock(levelDefinition)
   return F.filter(
@@ -37,8 +37,8 @@ return function(levelDefinition, node, links, seed, maxRetries)
   local exitDefinitions = {}
 
   for i=1, #linksAsList do
-    local link = linksAsList[i]
-    local l1, l2 = linkOrderByNode(node, link)
+    local link = Graph:getSystem('universe'):getLinkById(linksAsList[i])
+    local l1, l2 = linkOrderByNode(node, link.nodes)
     local direction = (l1 < l2) and 3 or 1
     local done = false
     for i=1, #exitsRemainingToPrepare do
@@ -47,7 +47,7 @@ return function(levelDefinition, node, links, seed, maxRetries)
         if exit.properties.direction == direction then
           done = true
           table.remove(exitsRemainingToPrepare, i)
-          local nodeRef = Node:getSystem('universe'):get( l2)
+          local nodeRef = Graph:getSystem('universe'):getNode(l2)
           exitDefinitions[exit.id] = nodeRef.level
         end
       end

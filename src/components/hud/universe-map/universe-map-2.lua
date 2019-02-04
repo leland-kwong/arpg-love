@@ -9,7 +9,7 @@ local getTextSize = require 'repl.libs.get-text-size'
 local AnimationFactory = dynamicRequire 'components.animation-factory'
 local GuiContext = dynamicRequire 'repl.libs.gui'
 local camera = require 'components.camera'
-local Node = dynamicRequire 'utils.graph'.Node
+local Graph =dynamicRequire 'utils.graph'
 local renderGraph = dynamicRequire 'components.hud.universe-map.render-graph'
 local buildUniverse = dynamicRequire 'components.hud.universe-map.build-universe'
 local MenuManager = require 'modules.menu-manager'
@@ -18,9 +18,9 @@ local state = {
   distScale = 1,
   translate = Vec2(0, 20),
   unlockedNodes = {
-    [1] = true,
-    [2] = true,
-    [3] = true
+    ['universe-1'] = true,
+    ['universe-2'] = true,
+    ['universe-3'] = true
   },
   hoveredNode = nil,
   nodeStyles = {},
@@ -30,7 +30,7 @@ local state = {
 local actions = dynamicRequire 'components.hud.universe-map.actions'(state)
 
 local function createGraphNodeGuiElement(Gui, node)
-  local nodeRef = Node:getSystem('universe'):get( node)
+  local nodeRef = Graph:getSystem('universe'):getNode( node)
   local p = nodeRef.position * state.distScale
   return Gui({
     x = p.x,
@@ -108,8 +108,8 @@ return Component.createFactory({
       love.graphics.pop()
     end
 
-    state.graph:forEach(function(link)
-      local node1, node2 = link[1], link[2]
+    state.graph:forEachLink(function(_, link)
+      local node1, node2 = link.nodes[1], link.nodes[2]
       if (not guiNodes[node1]) then
         guiNodes[node1] = createGraphNodeGuiElement(self.Gui, node1)
       end

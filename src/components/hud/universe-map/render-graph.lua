@@ -2,7 +2,7 @@ local dynamicRequire = require 'utils.dynamic-require'
 local Vec2 = require 'modules.brinevector'
 local Color = require 'modules.color'
 local Font = require 'components.font'
-local Node = require 'utils.graph'.Node
+local Graph = require 'utils.graph'
 local AnimationFactory = dynamicRequire 'components.animation-factory'
 
 local development = false
@@ -22,7 +22,7 @@ local graphColors = {
 
 local function renderNode(nodeId, distScale, state)
   love.graphics.setColor(0,1,1)
-  local ref = Node:getSystem('universe'):get( nodeId)
+  local ref = Graph:getSystem('universe'):getNode(nodeId)
   local p = ref.position * distScale
   local unlocked = state.unlockedNodes[nodeId]
   local c
@@ -73,7 +73,7 @@ local function renderNodeLabel(nodeId, distScale, cameraScale, labelFont, state)
   local opacity = distScale - 1
   local c = 0.9
   love.graphics.setColor(c,c,c,opacity)
-  local ref = Node:getSystem('universe'):get( nodeId)
+  local ref = Graph:getSystem('universe'):getNode(nodeId)
   local label = ref.level
   local position = (ref.position * distScale)
   if label then
@@ -113,8 +113,8 @@ local function renderRegionLabel(position, distScale, label, labelFont)
 end
 
 local function renderLink(node1, node2, distScale, state)
-  local ref1, ref2 = Node:getSystem('universe'):get( node1),
-    Node:getSystem('universe'):get( node2)
+  local ref1, ref2 = Graph:getSystem('universe'):getNode(node1),
+    Graph:getSystem('universe'):getNode(node2)
   local p1, p2 = ref1.position * distScale, ref2.position * distScale
   local c = graphColors.link
   local isUnAccessible = (not state.unlockedNodes[node1]) and (not state.unlockedNodes[node2])
@@ -134,7 +134,7 @@ local function renderLink(node1, node2, distScale, state)
 end
 
 local renderCanvas = love.graphics.newCanvas(4096, 4096)
-return function(graph, cameraScale, distScale, state, isDevelopment)
+return function(universeGraph, cameraScale, distScale, state, isDevelopment)
   development = isDevelopment
 
   local nodesToRender = {}
@@ -153,15 +153,15 @@ return function(graph, cameraScale, distScale, state, isDevelopment)
   love.graphics.clear()
   love.graphics.setLineStyle('rough')
 
-  graph:forEach(function(link)
-    local node1, node2 = link[1], link[2]
+  universeGraph:forEachLink(function(_, link)
+    local node1, node2 = unpack(link.nodes)
     if (not nodesToRender[node1]) then
-      nodesByRegion:add(Node:getSystem('universe'):get( node1).region, node1)
+      nodesByRegion:add(Graph:getSystem('universe'):getNode(node1).region, node1)
     end
     nodesToRender[node1] = node1
 
     if (not nodesToRender[node2]) then
-      nodesByRegion:add(Node:getSystem('universe'):get( node2).region, node2)
+      nodesByRegion:add(Graph:getSystem('universe'):getNode(node2).region, node2)
     end
     nodesToRender[node2] = node2
     renderLink(node1, node2, distScale, state)
@@ -177,7 +177,7 @@ return function(graph, cameraScale, distScale, state, isDevelopment)
     local clamp = require 'utils.math'.clamp
     local radius = clamp(14 * distScale/2, 11, 14)
     for nodeId in pairs(nodesToRender) do
-      local ref = Node:getSystem('universe'):get( nodeId)
+      local ref = Graph:getSystem('universe'):getNode(nodeId)
       local p = ref.position * distScale
       love.graphics.circle('fill', p.x, p.y, radius)
     end
@@ -205,7 +205,7 @@ return function(graph, cameraScale, distScale, state, isDevelopment)
     local nodes = nodesByRegion.regions[region]
     local x, xTotal, y = 0, 0, nil
     for i=1, #nodes do
-      local ref = Node:getSystem('universe'):get( nodes[i])
+      local ref = Graph:getSystem('universe'):getNode(nodes[i])
       local p = ref.position
       xTotal = xTotal + p.x
       x = xTotal/i

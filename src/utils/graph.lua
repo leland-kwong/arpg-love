@@ -2,43 +2,130 @@
   Utility library for generating a graph datastructure via nodes and links.
 ]]
 
-local Vec2 = require 'modules.brinevector'
 local O = require 'utils.object-utils'
 
 local development = false
 
-local nodeMt = {
-  position = Vec2()
-}
-nodeMt.__index = nodeMt
+local function addLinkReference(self, linkId, node1, node2)
+  local list = self.linksByNodeId[node1]
+  if (not list) then
+    list = {
+      links = {},
+      numLinks = 0
+    }
+    self.linksByNodeId[node1] = list
+  end
+  list.links[node2] = linkId
+  list.numLinks = list.numLinks + 1
+end
+
+local function removeLinkReference(self, node1, node2)
+  local list = self.linksByNodeId[node1]
+  local link = list and list.links[node2]
+  if (not link) then
+    return
+  end
+  list.links[node2] = nil
+  list.numLinks = list.numLinks - 1
+
+  local shouldClearReferenceList = list.numLinks == 0
+  if shouldClearReferenceList then
+    self.linksByNodeId[node1] = nil
+  end
+end
 
 local setNodeSystemDefaultProps = function(nodeSystem)
   return O.assign(nodeSystem, {
-    nodes = {},
-    counter = 0
+    nodesById = {},
+    nodeCounter = 0,
+
+    linksByNodeId = {},
+    links = {},
+    linkCounter = 0
   })
 end
 
 local nodeSystemMt = {
   newNode = function(self, props)
-    local node = setmetatable(props or {}, nodeMt)
-    self.counter = self.counter + 1
-    local id = node._id or self.counter
-    node._id = id
-    self.nodes[id] = node
+    local node = props or {}
+    self.nodeCounter = self.nodeCounter + 1
+    local id = string.format(self.idFormat, self.nodeCounter)
+    self.nodesById[id] = node
     return id
   end,
-  get = function(self, id)
-    return self.nodes[id]
+
+  newLink = function(self, node1, node2, data)
+    assert(
+      self:getNode(node1) and self:getNode(node2),
+      '[graph:newLink] a node is missing in the system'
+    )
+
+    self.linkCounter = self.linkCounter + 1
+    local link = setmetatable({
+      nodes = {node1, node2},
+      data = data or {}
+    }, linkMt)
+    local linkId = self.linkCounter
+    self.links[linkId] = link
+
+    addLinkReference(self, linkId, node1, node2)
+    addLinkReference(self, linkId, node2, node1)
+
+    return linkId
   end,
-  reset = function(self)
+
+  removeNode = function(self, node)
+    local links = self:getNodeLinks(node)
+    for _,linkId in pairs(links) do
+      self:removeLink(linkId)
+    end
+    self.nodesById[node] = nil
+    return self
+  end,
+
+  removeLink = function(self, linkId)
+    local linkRef = self:getLinkById(linkId)
+    if (linkRef) then
+      local node1, node2 = unpack(linkRef)
+      removeLinkReference(self, node1, node2)
+      removeLinkReference(self, node2, node1)
+
+      self.links[linkId] = nil
+    end
+    return self
+  end,
+
+  -- returns the link reference
+  getLinkById = function(self, linkId)
+    return self.links[linkId]
+  end,
+
+  -- returns a table of links for a given node {[nodeId] = [linkId], ...}
+  getNodeLinks = function(self, node)
+    local list = self.linksByNodeId[node] or O.EMPTY
+    return list.links or O.EMPTY
+  end,
+
+  -- iterate over all links in the system
+  forEachLink = function(self, callback)
+    for linkId,link in pairs(self.links) do
+      callback(linkId, link)
+    end
+    return self
+  end,
+
+  getNode = function(self, id)
+    return self.nodesById[id]
+  end,
+
+  clear = function(self)
     setNodeSystemDefaultProps(self)
     return self
   end
 }
 nodeSystemMt.__index = nodeSystemMt
 
-local Node = {
+local Graph = {
   _systems = {},
   setDevelopment = function(isDev)
     development = isDev
@@ -47,9 +134,16 @@ local Node = {
   getSystem = function(self, system)
     assert(type(system) == 'string', 'a system name must be provided')
 
-    self._systems[system] = self._systems[system] or
-      setNodeSystemDefaultProps(setmetatable({}, nodeSystemMt))
     local nodeSystem = self._systems[system]
+    if (not nodeSystem) then
+      nodeSystem = setNodeSystemDefaultProps(
+        setmetatable({
+          systemName = system,
+          idFormat = system..'-%d'
+        }, nodeSystemMt)
+      )
+      self._systems[system] = nodeSystem
+    end
     return nodeSystem
   end,
 
@@ -58,126 +152,4 @@ local Node = {
   end
 }
 
-local function addLinkReference(self, linkId, node1, node2)
-  self.linksByNode[node1] = self.linksByNode[node1] or {
-    links = {},
-    numLinks = 0
-  }
-  local list = self.linksByNode[node1]
-  list.links[node2] = linkId
-  list.numLinks = list.numLinks + 1
-end
-
-local function removeLinkReference(self, node1, node2)
-  local list = self.linksByNode[node1]
-  list.links[node2] = nil
-  list.numLinks = list.numLinks - 1
-
-  local shouldClearReferenceList = list.numLinks == 0
-  if shouldClearReferenceList then
-    self.linksByNode[node1] = nil
-  end
-end
-
-local setModelDefaultProps = function(model)
-  return O.assign(model, {
-    counter = 0,
-    linksByNode = {},
-    links = {}
-  })
-end
-
-local modelMt = {
-  addLink = function(self, node1, node2)
-    local nodeSystem = Node:getSystem(self.system)
-    assert(
-      nodeSystem:get(node1) and nodeSystem:get(node2),
-      'one of the nodes in the link no longer exists in the node system'
-    )
-
-    self.counter = self.counter + 1
-    local link = {node1, node2}
-    local linkId = self.counter
-    self.links[linkId] = link
-
-    addLinkReference(self, linkId, node1, node2)
-    -- also add reverse for reverse-lookup
-    addLinkReference(self, linkId, node2, node1)
-
-    return linkId
-  end,
-
-  removeLink = function(self, linkId)
-    local node1, node2 = unpack(self:getLinkByLinkId(linkId))
-    removeLinkReference(self, node1, node2)
-    removeLinkReference(self, node2, node1)
-
-    self.links[linkId] = nil
-    return self
-  end,
-
-  -- returns the link reference
-  getLinkByLinkId = function(self, linkId)
-    return self.links[linkId]
-  end,
-
-  -- returns a table of links {[nodeId] = [linkId], ...}
-  getLinksByNodeId = function(self, node, byReference)
-    local list = self.linksByNode[node]
-    local links = list and list.links
-    if links and byReference then
-      local refList = {}
-      for _,id in pairs(links) do
-        refList[id] = self:getLinkByLinkId(id)
-      end
-      return refList
-    end
-    return links
-  end,
-
-  hasNode = function(self, node)
-    return self.linksByNode[node] ~= nil
-  end,
-
-  forEach = function(self, callback)
-    for _,link in pairs(self.links) do
-      callback(link)
-    end
-    return self
-  end,
-
-  reset = function(self)
-    setModelDefaultProps(self)
-    return self
-  end
-}
-modelMt.__index = modelMt
-local modelDefaultOptions = {
-  development = false,
-  validator = function(self, node1, node2)
-    return true
-  end
-}
-
-local Model = {
-  _systems = {},
-  getSystem = function(self, system)
-    local model = self._systems[system]
-    if (not model) then
-      model = setModelDefaultProps(setmetatable({
-        system = system
-      }, modelMt))
-      self._systems[system] = model
-    end
-    return model
-  end,
-
-  release = function(self, system)
-    self._systems[system] = nil
-  end
-}
-
-return {
-  Node = Node,
-  Model = Model
-}
+return Graph

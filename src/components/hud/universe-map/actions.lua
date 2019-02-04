@@ -2,8 +2,7 @@ local dynamicRequire = require 'utils.dynamic-require'
 local Vec2 = require 'modules.brinevector'
 local Component = require 'modules.component'
 local setupTransitionPoints = dynamicRequire 'components.hud.universe-map.setup-transition-points'
-local graph = require 'utils.graph'
-local Node, Model = graph.Node, graph.Model
+local Graph = require 'utils.graph'
 local F = dynamicRequire 'utils.functional'
 local Grid = dynamicRequire 'utils.grid'
 local msgBus = require 'components.msg-bus'
@@ -42,10 +41,10 @@ return function(state)
     nodeSelect = function(node)
       print('select', node)
     end,
-    newGraph = function(modelSystem)
+    newGraph = function(systemName)
       state.nodeStyles = {}
-      Model:getSystem(modelSystem):forEach(function(link)
-        local node1, node2 = unpack(link)
+      Graph:getSystem(systemName):forEachLink(function(_, link)
+        local node1, node2 = unpack(link.nodes)
         state.nodeStyles[node1] = {
           scale = 1
         }
@@ -56,15 +55,15 @@ return function(state)
     end,
     buildLevel = function(node, linkRefs)
       local ok, result = pcall(function()
-        local nodeRef = Node:getSystem('universe'):get( node)
+        local nodeRef = Graph:getSystem('universe'):getNode(node)
         local levelDefinition = getLevelDefinition(nodeRef.level)
         local seed = 1
-        return setupTransitionPoints(levelDefinition, node, state.graph:getLinksByNodeId(node, true), 1, 20)
+        return setupTransitionPoints(levelDefinition, node, state.graph:getNodeLinks(node), 1, 20)
       end)
       if not ok then
         print('[build level error]', result)
       else
-        local nodeRef = Node:getSystem('universe'):get( node)
+        local nodeRef = Graph:getSystem('universe'):getNode(node)
         local location = {
           layoutType = nodeRef.level,
           transitionPoints = result
