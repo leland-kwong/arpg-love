@@ -2,81 +2,63 @@ local Vec2 = require 'modules.brinevector'
 local Graph = require 'utils.graph'
 
 return function(actions)
-  local nodeSystem = Graph:getSystem('universe'):clear()
+  local uSystem = Graph:getSystem('universe'):clear()
 
-  local level1_1 = nodeSystem:newNode({
+  uSystem:setNode('1-1', {
     position = Vec2(20, 30),
     region = 'aureus',
     level = '1-1',
     labelPosition = 'top'
   })
 
-  local level1_2 = nodeSystem:newNode({
-    position = Vec2(
-      nodeSystem:getNode(level1_1).position.x + 25,
-      nodeSystem:getNode(level1_1).position.y
-    ),
+  uSystem:setNode('1-2', {
+    position = uSystem:getNode('1-1').position + Vec2(25, 0),
     region = 'aureus',
     level = '1-2',
     labelPosition = 'top'
   })
-  nodeSystem:newLink(level1_1, level1_2)
+  uSystem:newLink('1-1', '1-2')
 
-  local level1_3 = nodeSystem:newNode({
-    position = Vec2(
-      nodeSystem:getNode(level1_2).position.x + 25,
-      nodeSystem:getNode(level1_2).position.y
-    ),
+  uSystem:setNode('1-3', {
+    position = uSystem:getNode('1-2').position + Vec2(25, 0),
     region = 'aureus',
     level = '1-3',
     labelPosition = 'top'
   })
-  nodeSystem:newLink(level1_2, level1_3)
+  uSystem:newLink('1-2', '1-3')
 
-  local level2_1 = nodeSystem:newNode({
-    position = Vec2(
-      nodeSystem:getNode(level1_3).position.x + 50,
-      nodeSystem:getNode(level1_3).position.y + 20
-    ),
+  uSystem:setNode('2-1', {
+    position = uSystem:getNode('1-3').position + Vec2(50, 20),
     level = 's-1',
     region = 'saria'
   })
-  nodeSystem:newLink(level1_3, level2_1)
+  uSystem:newLink('1-3', '2-1')
 
-  local level2_2 = nodeSystem:newNode({
-    position = Vec2(
-      nodeSystem:getNode(level2_1).position.x + 30,
-      nodeSystem:getNode(level2_1).position.y
-    ),
+  uSystem:setNode('2-2', {
+    position = uSystem:getNode('2-1').position + Vec2(30, 0),
     level = 's-2',
     region = 'saria'
   })
-  nodeSystem:newLink(level2_1, level2_2)
+  uSystem:newLink('2-1', '2-2')
 
-  local level2_3 = nodeSystem:newNode({
-    position = Vec2(
-      nodeSystem:getNode(level2_2).position.x + 15,
-      nodeSystem:getNode(level2_2).position.y + 25
-    ),
+  uSystem:setNode('2-3', {
+    position = uSystem:getNode('2-2').position + Vec2(15, 25),
     level = 's-3',
     labelPosition = 'right',
     region = 'saria'
   })
-  nodeSystem:newLink(level2_2, level2_3)
+  uSystem:newLink('2-2', '2-3')
 
-  local level2_4 = nodeSystem:newNode({
-    position = Vec2(
-      nodeSystem:getNode(level2_2).position.x - 15,
-      nodeSystem:getNode(level2_2).position.y + 25
-    ),
+  uSystem:setNode('2-4', {
+    position = uSystem:getNode('2-2').position + Vec2(-15, 25),
     level = 's-4',
     labelPosition = 'left',
     region = 'saria'
   })
-  nodeSystem:newLink(level2_2, level2_4)
+  uSystem:newLink('2-2', '2-4')
 
-  local avgPos = (nodeSystem:getNode(level1_2).position + nodeSystem:getNode(level2_1).position) / 2
-  local secretLevel1 = nodeSystem:newNode({
+  local avgPos = (uSystem:getNode('1-2').position + uSystem:getNode('2-1').position) / 2
+  uSystem:setNode('secret-1', {
     position = Vec2(
       avgPos.x - 15,
       avgPos.y + 20
@@ -85,10 +67,10 @@ return function(actions)
     -- secret = true,
     region = ''
   })
-  nodeSystem:newLink(level2_4, secretLevel1)
+  uSystem:newLink('2-4', 'secret-1')
 
-  local avgPos = (nodeSystem:getNode(level1_2).position + nodeSystem:getNode(level2_2).position) / 2
-  local secretLevel1 = nodeSystem:newNode({
+  local avgPos = (uSystem:getNode('1-2').position + uSystem:getNode('2-2').position) / 2
+  uSystem:setNode('secret-2', {
     position = Vec2(
       avgPos.x + 5,
       avgPos.y - 32
@@ -97,9 +79,9 @@ return function(actions)
     -- secret = true,
     region = ''
   })
-  nodeSystem:newLink(secretLevel1, level2_1)
+  uSystem:newLink('secret-2', '2-1')
 
   actions.newGraph('universe')
 
-  return nodeSystem
+  return uSystem
 end
