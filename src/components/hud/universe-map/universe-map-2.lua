@@ -13,10 +13,17 @@ local Graph =dynamicRequire 'utils.graph'
 local renderGraph = dynamicRequire 'components.hud.universe-map.render-graph'
 local buildUniverse = dynamicRequire 'components.hud.universe-map.build-universe'
 local MenuManager = require 'modules.menu-manager'
+local Enum = require 'utils.enum'
+local config = require 'config.config'
+
+local mapViews = Enum(
+  'UNIVERSE',
+  'LOCAL'
+)
 
 local state = {
   distScale = 1,
-  translate = Vec2(0, 20),
+  translate = Vec2(),
   unlockedNodes = {
     ['universe-1'] = true,
     ['universe-2'] = true,
@@ -24,7 +31,8 @@ local state = {
   },
   hoveredNode = nil,
   nodeStyles = {},
-  graph = nil
+  graph = nil,
+  view = mapViews.UNIVERSE
 }
 
 local actions = dynamicRequire 'components.hud.universe-map.actions'(state)
@@ -63,12 +71,116 @@ local function createGraphNodeGuiElement(Gui, node)
   })
 end
 
-return Component.createFactory({
+local oy = 10
+local viewToggleGraphic = AnimationFactory:newStaticSprite('gui-map-gui-view-toggle')
+local function getViewTogglePosition()
+  local Position = require 'utils.position'
+  local w1, h1 = viewToggleGraphic:getWidth(), viewToggleGraphic:getHeight()
+  local camera = require 'components.camera'
+  local w2, h2 = camera:getSize(true)
+  local ox = Position.boxCenterOffset(w1, h1, w2, h2)
+  return ox, oy
+end
+
+local legendGraphic = AnimationFactory:newStaticSprite('gui-map-gui-legend')
+local function getLegendPosition()
+  local camera = require 'components.camera'
+  local w2 = camera:getSize(true)
+  return w2 - legendGraphic:getWidth() - 50, oy
+end
+
+local function getNextPlayerPosition(self)
+  local playerRef = Component.get('PLAYER')
+  if playerRef then
+    return playerRef.x, playerRef.y
+  end
+
+  return 0,0
+end
+
+local function switchView(self, view)
+  if (mapViews.UNIVERSE == view) then
+    state.distScale = 2
+    actions.panTo(200, 160)
+  elseif (mapViews.LOCAL == view) then
+    local playerX, playerY = getNextPlayerPosition(self)
+    local camera = require 'components.camera'
+    local w,h = camera:getSize(true)
+    state.distScale = 1
+    actions.panTo((w/2 - playerX/config.gridSize) * camera.scale, (h/2 - playerY/config.gridSize) * camera.scale)
+    print(Inspect(state.translate))
+  end
+  state.view = view
+end
+
+local function setupViewToggleButtons(parent)
+  local function ToggleButton(x, y, w, h, value)
+    local camera = require 'components.camera'
+    return parent.Gui({
+      -- debug = true,
+      x = x * camera.scale,
+      y = y * camera.scale,
+      w = w * camera.scale,
+      h = h * camera.scale,
+      eventPriority = 3,
+      MOUSE_CLICKED = function(self)
+        state.view = value
+        switchView(parent, state.view)
+      end,
+      render = function(self)
+        local isSelected = (state.view == value)
+        local Color = require 'modules.color'
+        if self.hovered or isSelected then
+          if isSelected then
+            love.graphics.setColor(Color.rgba255(44, 232, 245))
+          else
+            love.graphics.setColor(Color.multiplyAlpha(Color.WHITE, 0.5))
+          end
+          local selectedIndicator = AnimationFactory:newStaticSprite('gui-selected-indicator')
+          love.graphics.push()
+          love.graphics.translate(-self.x/camera.scale, -self.y/camera.scale)
+          selectedIndicator:draw((self.x) + 2, self.y)
+          love.graphics.pop()
+        end
+        if self.debug then
+          self:renderDebug()
+        end
+      end,
+      renderDebug = function(self)
+        love.graphics.push()
+        love.graphics.origin()
+
+        love.graphics.setColor(1,1,0,0.3)
+        love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
+
+        love.graphics.pop()
+      end
+    })
+  end
+
+  local x, y = getViewTogglePosition(), oy + 22
+  local buttonWidth = 48
+  local toggleButtons = {
+    ToggleButton(x, y, buttonWidth, 20, mapViews.UNIVERSE),
+    ToggleButton(x + buttonWidth, y, buttonWidth, 20,  mapViews.LOCAL)
+  }
+  parent.renderToggleViewButtons = function()
+    love.graphics.setColor(1,1,1)
+    viewToggleGraphic:draw(getViewTogglePosition())
+    legendGraphic:draw(getLegendPosition())
+    for i=1, #toggleButtons do
+      toggleButtons[i]:render()
+    end
+  end
+end
+
+local Factory = Component.createFactory({
   group = 'hud',
   init = function(self)
     MenuManager.clearAll()
     MenuManager.push(self)
 
+    switchView(self, state.view)
     self.Gui = GuiContext()
 
     -- full-screen event handler
@@ -88,6 +200,8 @@ return Component.createFactory({
         actions.zoom(dy)
       end
     })
+
+    setupViewToggleButtons(self)
 
     state.graph = buildUniverse(actions)
 
@@ -142,10 +256,30 @@ return Component.createFactory({
     love.graphics.translate(state.translate.x, state.translate.y)
     love.graphics.scale(camera.scale)
 
-    renderGraph(state.graph, camera.scale, state.distScale, state, true)
+    if state.view == mapViews.UNIVERSE then
+      renderGraph(state.graph, camera.scale, state.distScale, state)
+    elseif state.view == mapViews.LOCAL then
+      love.graphics.scale(state.distScale)
+      local PlayerPositionIndicator = require 'components.hud.player-position-indicator'
+      local minimapRef = Component.get('miniMap')
+      local gridSize = 16
+      if minimapRef then
+        love.graphics.setColor(1,1,1)
+        love.graphics.draw(minimapRef.canvas, 0, 0)
+        love.graphics.draw(minimapRef.dynamicBlocksCanvas, 0, 0)
+
+        love.graphics.setColor(1,1,1)
+        local playerX, playerY = getNextPlayerPosition(self)
+        PlayerPositionIndicator(
+          playerX/gridSize, playerY/gridSize, self.clock
+        )
+      end
+    end
     self.renderGuiDebug()
 
     love.graphics.pop()
+
+    self.renderToggleViewButtons()
   end,
 
   final = function(self)
@@ -157,4 +291,31 @@ return Component.createFactory({
   drawOrder = function()
     return 10
   end,
+})
+
+Component.create({
+  id = 'UniverseMapInit',
+  group = 'hud',
+  init = function(self)
+    local ref = Component.get('UniverseMap')
+    if ref then
+      Factory.create(ref.initialProps)
+    end
+
+    self.listeners = {
+      msgBus.on('MAP_TOGGLE', function(enabled)
+        local ref = Component.get('UniverseMap')
+        if ref then
+          ref:delete(true)
+        else
+          Factory.create({
+            id = 'UniverseMap',
+          })
+        end
+      end)
+    }
+  end,
+  final = function(self)
+    msgBus.off(self.listeners)
+  end
 })
