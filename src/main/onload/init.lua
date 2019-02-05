@@ -1,3 +1,4 @@
+local msgBus = require 'components.msg-bus'
 require 'modules.log-db.error-log'
 
 -- load up user settings on game start
@@ -10,17 +11,32 @@ if config.isDevelopment then
 
   local Console = require 'modules.console.console'
   local console = Console.create()
+
+  LiveReload:setOptions({
+    enabled = true
+  })
+  msgBus.on('UPDATE', function(dt)
+    LiveReload:update(dt)
+  end)
 end
+
+require 'scene.scene-main'
+
+local MapPointerWorld = require 'components.hud.map-pointer'
+MapPointerWorld.create({
+  id = 'hudPointerWorld'
+})
 
 local Component = require 'modules.component'
 local drawOrders = require 'modules.draw-orders'
 local LightWorld = require('components.light-world')
 local camera = require 'components.camera'
-local msgBus = require 'components.msg-bus'
 
 local RootScene = require 'scene.sandbox.main'
 RootScene.create()
 
+require 'components.groups.dungeon-test'
+require 'components.groups.game-world'
 require 'modules.auto-visibility'
 require 'components.map-text'
 require 'components.status-icons'

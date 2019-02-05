@@ -1,8 +1,10 @@
+local O = require 'utils.object-utils'
+
 local ok, err = pcall(function()
 
   local cargo = require 'modules.cargo'
   local utils = cargo.init('utils')
-  local Graph =utils.graph
+  local Graph = utils.graph
 
   local system = Graph:getSystem('test')
   local n1 = system:newNode()

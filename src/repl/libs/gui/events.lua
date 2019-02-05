@@ -46,11 +46,14 @@ local function setupListeners(getState, ColObj)
         end
       end
 
+      local defaultHandlerValue = {
+        stopPropagation = true
+      }
       local function triggerUiEvents(msgType, obj)
         if (not preventBubbleEvents[msgType]) then
           local eventHandler = obj[msgType]
           if eventHandler then
-            local returnVal = eventHandler(obj, ev, c) or O.EMPTY
+            local returnVal = eventHandler(obj, ev, c) or defaultHandlerValue
             if returnVal.stopPropagation then
               preventBubbleEvents[msgType] = true
             end

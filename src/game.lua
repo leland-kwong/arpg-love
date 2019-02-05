@@ -14,14 +14,10 @@ require 'main.listeners'
 local groups = require 'components.groups'
 local config = require 'config.config'
 local camera = require 'components.camera'
-local SceneMain = require 'scene.scene-main'
 local tick = require 'utils.tick'
 local globalState = require 'main.global-state'
 local systemsProfiler = require 'components.profiler.component-groups'
 local Component = require 'modules.component'
-require 'components.groups.dungeon-test'
-require 'components.groups.game-world'
-local MapPointerWorld = require 'components.hud.map-pointer'
 
 local scale = config.scaleFactor
 
@@ -61,11 +57,7 @@ function love.load()
   msgBus.send(msgBus.GAME_LOADED)
   love.keyboard.setKeyRepeat(true)
   setViewport()
-  require 'main.onload'
-
-  MapPointerWorld.create({
-    id = 'hudPointerWorld'
-  })
+  require 'main.onload'  
 
   --[[
     run tests after everything is loaded since some tests rely on the game loop

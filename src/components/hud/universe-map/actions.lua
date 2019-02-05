@@ -14,6 +14,9 @@ end
 
 return function(state)
   return {
+    panTo = function(x, y)
+      state.translate = Vec2(x, y)
+    end,
     pan = function(dx, dy)
       state.initialTranslate = state.initialTranslate or state.translate
       state.translate = state.initialTranslate + Vec2(dx, dy)

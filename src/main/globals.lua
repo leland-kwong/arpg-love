@@ -1,3 +1,4 @@
+LiveReload = require 'modules.live-reload'
 Time = require 'utils.time'
 Inspect = require 'utils.inspect'
 jprof = require 'modules.profile'
