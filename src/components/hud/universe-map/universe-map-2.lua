@@ -25,9 +25,9 @@ local state = {
   distScale = 1,
   translate = Vec2(),
   unlockedNodes = {
-    ['universe-1'] = true,
-    ['universe-2'] = true,
-    ['universe-3'] = true
+    ['1-1'] = true,
+    ['1-2'] = true,
+    ['1-3'] = true
   },
   hoveredNode = nil,
   nodeStyles = {},

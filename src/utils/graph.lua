@@ -21,8 +21,8 @@ end
 
 local function removeLinkReference(self, node1, node2)
   local list = self.linksByNodeId[node1]
-  local link = list and list.links[node2]
-  if (not link) then
+  local linkId = list and list.links[node2]
+  if (not linkId) then
     return
   end
   list.links[node2] = nil
@@ -32,6 +32,8 @@ local function removeLinkReference(self, node1, node2)
   if shouldClearReferenceList then
     self.linksByNodeId[node1] = nil
   end
+
+  return linkId
 end
 
 local setNodeSystemDefaultProps = function(nodeSystem)
@@ -46,12 +48,17 @@ local setNodeSystemDefaultProps = function(nodeSystem)
 end
 
 local nodeSystemMt = {
-  newNode = function(self, props)
-    local node = props or {}
+  setNode = function(self, id, props)
+    local idType = type(id)
+    assert(
+      (idType == 'string') or (idType == 'number'),
+      'id must be a string or number'
+    )
+
+    local node = props or ''
     self.nodeCounter = self.nodeCounter + 1
-    local id = string.format(self.idFormat, self.nodeCounter)
     self.nodesById[id] = node
-    return id
+    return self
   end,
 
   newLink = function(self, node1, node2, data)
@@ -63,7 +70,7 @@ local nodeSystemMt = {
     self.linkCounter = self.linkCounter + 1
     local link = setmetatable({
       nodes = {node1, node2},
-      data = data or {}
+      data = data or nil
     }, linkMt)
     local linkId = self.linkCounter
     self.linksById[linkId] = link
@@ -71,27 +78,28 @@ local nodeSystemMt = {
     addLinkReference(self, linkId, node1, node2)
     addLinkReference(self, linkId, node2, node1)
 
-    return linkId
+    return self
   end,
 
   removeNode = function(self, node)
     local links = self:getNodeLinks(node)
     for _,linkId in pairs(links) do
-      self:removeLink(linkId)
+      local linkRef = self:getLinkById(linkId)
+      local node1, node2 = linkRef.nodes[1], linkRef.nodes[2]
+      self:removeLink(node1, node2)
     end
     self.nodesById[node] = nil
     return self
   end,
 
-  removeLink = function(self, linkId)
-    local linkRef = self:getLinkById(linkId)
-    if (linkRef) then
-      local node1, node2 = unpack(linkRef)
-      removeLinkReference(self, node1, node2)
-      removeLinkReference(self, node2, node1)
-
-      self.linksById[linkId] = nil
+  removeLink = function(self, node1, node2)
+    local linkId = removeLinkReference(self, node1, node2)
+    if (not linkId) then
+      return self
     end
+
+    removeLinkReference(self, node2, node1)
+    self.linksById[linkId] = nil
     return self
   end,
 
@@ -100,7 +108,7 @@ local nodeSystemMt = {
     return self.linksById[linkId]
   end,
 
-  -- returns a table of links for a given node {[nodeId] = [linkId], ...}
+  -- returns a table of linkIds for a given node {[nodeId] = [linkId], ...}
   getNodeLinks = function(self, node)
     local list = self.linksByNodeId[node] or O.EMPTY
     return list.links or O.EMPTY
