@@ -3,7 +3,14 @@
 local msgBus = require 'components.msg-bus'
 local f = require 'utils.functional'
 local oUtils = require 'utils.object-utils'
+
 local M = {}
+
+msgBus.on(msgBus.SET_CONFIG, function(msgValue)
+  local configChanges = msgValue
+  local oUtils = require 'utils.object-utils'
+  oUtils.assign(M, configChanges)
+end)
 
 local xpDiff = 20
 M.levelExperienceRequirements = {}

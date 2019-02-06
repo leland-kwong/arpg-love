@@ -8,11 +8,15 @@ require 'main.globals'
 love.graphics.setDefaultFilter('nearest', 'nearest')
 
 local msgBus = require 'components.msg-bus'
+local config = require 'config.config'
+-- load up user settings on game start
+local userSettingsState = require 'config.user-settings.state'
+userSettingsState.load()
+
 require 'main.inputs'
 require 'main.listeners'
 
 local groups = require 'components.groups'
-local config = require 'config.config'
 local camera = require 'components.camera'
 local tick = require 'utils.tick'
 local globalState = require 'main.global-state'

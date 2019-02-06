@@ -50,13 +50,6 @@ msgBus.on(msgBus.SCENE_STACK_REPLACE, function(nextScene)
   return sceneStackPush(nextScene)
 end, SCENE_STACK_MESSAGE_LAST_PRIORITY)
 
-msgBus.on(msgBus.SET_CONFIG, function(msgValue)
-  local configChanges = msgValue
-  local oUtils = require 'utils.object-utils'
-  local config = require 'config.config'
-  oUtils.assign(config, configChanges)
-end)
-
 msgBus.on(msgBus.GAME_STATE_GET, function()
   return globalState.gameState
 end)

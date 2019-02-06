@@ -33,10 +33,6 @@ function ZoneInfo.update(self, dt)
   end
   local globalState = require 'main.global-state'
   self.zoneTitle = globalState.sceneTitle
-  if (not zoneTitle) then
-    print('[WARNING] - zone title not found')
-    self:delete(true)
-  end
 end
 
 function ZoneInfo.draw(self)
