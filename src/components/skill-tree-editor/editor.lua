@@ -211,7 +211,6 @@ local playMode = {
     -- traverse a sibling's branch and get a number of all the selected nodes that match the list of siblings
     local matchCount = getMatchCount(nodeIdToWalk, nodeToCheck.connections)
     local isOnlyChild = numSelectedSiblings == 1
-    print(numSelectedSiblings, matchCount)
     return isOnlyChild or numSelectedSiblings == matchCount
   end,
   isConnectionToSelectableNode = function(self, fromNode, toNode)
