@@ -33,7 +33,7 @@ msgBus.on(msgBus.SCENE_STACK_POP, function()
     state.activeScene:delete(true)
   end
   local poppedScene = state.sceneStack:pop()
-  local sceneRef = poppedScene.scene.create(poppedScene.props)
+  local sceneRef = poppedScene.scene.create(poppedScene.scene)
   state.activeScene = sceneRef
   gsa('setSceneTitle', state.activeScene.zoneTitle)
   msgBus.send(msgBus.MUSIC_PLAY, sceneRef)
