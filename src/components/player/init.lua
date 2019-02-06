@@ -25,7 +25,7 @@ local InputContext = require 'modules.input-context'
 local F = require 'utils.functional'
 local Object = require 'utils.object-utils'
 local EventLog = require 'modules.log-db.events-log'
-
+local UniverseMap = require 'components.hud.universe-map.universe-map-2'
 
 local colMap = collisionWorlds.map
 

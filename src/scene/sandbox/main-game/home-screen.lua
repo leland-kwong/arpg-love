@@ -12,6 +12,7 @@ local config = require 'config.config'
 local tick = require 'utils.tick'
 local StarField = require 'components.star-field'
 local Camera = require 'components.camera'
+local gsa = require 'main.global-state-actions'
 
 local MainGameHomeScene = {
   id = 'HomeScreen',
@@ -22,7 +23,7 @@ local MainGameHomeScene = {
 
 function MainGameHomeScene.init(self)
   Camera:setPosition(0, 0, 0)
-  msgBus.send(msgBus.SET_BACKGROUND_COLOR, Color.DARK_GRAY)
+  gsa.setBackgroundColor(Color.DARK_GRAY)
   msgBus.on(msgBus.KEY_PRESSED, function(ev)
     local isToggleDevMode = ev.hasModifier and ev.key == '.'
     if isToggleDevMode then

@@ -40,4 +40,8 @@ function math_utils.sign(v)
 	return v > 0 and 1 or -1
 end
 
+function math_utils.calcPulse(freq, time)
+  return 0.5 * math.sin(freq * time) + 0.5
+end
+
 return math_utils

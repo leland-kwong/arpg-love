@@ -109,9 +109,9 @@ function Hud.init(self)
   local root = self
   local mainSceneRef = Component.get('MAIN_SCENE')
   if mainSceneRef and self.minimapEnabled then
-    local stateSnapshot = msgBus.send(msgBus.GLOBAL_STATE_GET)
-      .stateSnapshot
-        :consumeSnapshot(mainSceneRef.mapId)
+    local globalState = require 'main.global-state'
+    local stateSnapshot = globalState.stateSnapshot
+      :consumeSnapshot(mainSceneRef.mapId)
     local minimapW, minimapH = 100, 100
     local minimapMargin = 5
     local cameraWidth = camera:getSize(true)

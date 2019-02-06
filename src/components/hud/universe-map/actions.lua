@@ -56,7 +56,7 @@ return function(state)
         }
       end)
     end,
-    buildLevel = function(node, linkRefs)
+    buildLevel = function(node)
       local ok, result = pcall(function()
         local nodeRef = Graph:getSystem('universe'):getNode(node)
         local levelDefinition = getLevelDefinition(nodeRef.level)

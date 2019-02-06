@@ -12,11 +12,11 @@ local function getExitFromBlock(levelDefinition)
 end
 
 local function linkOrderByNode(node, link)
-  local l1, l2 = unpack(link)
-  if l1 == node then
-    return l1, l2
+  local n1, n2 = unpack(link)
+  if n1 == node then
+    return n1, n2
   end
-  return l2, l1
+  return n2, n1
 end
 
 return function(levelDefinition, universeNodeId, links, seed, maxRetries)
@@ -39,8 +39,8 @@ return function(levelDefinition, universeNodeId, links, seed, maxRetries)
   for i=1, #linksAsList do
     local linkId = linksAsList[i]
     local linkRef = Graph:getSystem('universe'):getLinkById(linkId)
-    local l1, l2 = linkOrderByNode(universeNodeId, linkRef.nodes)
-    local direction = (l1 < l2) and 3 or 1
+    local n1, n2 = linkOrderByNode(universeNodeId, linkRef.nodes)
+    local direction = (n1 < n2) and 3 or 1
     local done = false
     for i=1, #exitsRemainingToPrepare do
       if (not done) then
@@ -48,7 +48,7 @@ return function(levelDefinition, universeNodeId, links, seed, maxRetries)
         if exit.properties.direction == direction then
           done = true
           table.remove(exitsRemainingToPrepare, i)
-          local nodeRef = Graph:getSystem('universe'):getNode(l2)
+          local nodeRef = Graph:getSystem('universe'):getNode(n2)
           exitDefinitions[exit.id] = {
             transitionLinkId = linkId,
             layoutType = nodeRef.level

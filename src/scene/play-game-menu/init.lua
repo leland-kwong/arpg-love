@@ -12,6 +12,7 @@ local HomeBase = require 'scene.home-base'
 local Color = require 'modules.color'
 local f = require 'utils.functional'
 local MenuManager = require 'modules.menu-manager'
+local gsa = require 'main.global-state-actions'
 
 local PlayGameMenu = {
   id = 'PlayGameMenu',
@@ -31,6 +32,13 @@ local NewGameDialogBlueprint = {
   y = 100
 }
 
+local function createNewGame(nextGameState)
+  gsa.setNewGamestate(nextGameState)
+  msgBus.send(msgBus.NEW_GAME, {
+    scene = HomeBase
+  })
+end
+
 function NewGameDialogBlueprint.init(self)
   local parent = self
   local state = {
@@ -48,12 +56,9 @@ function NewGameDialogBlueprint.init(self)
       return
     end
 
-    msgBus.send(msgBus.NEW_GAME, {
-      scene = HomeBase,
-      props = {
-        isNewGame = true,
-        characterName = state.characterName
-      }
+    createNewGame({
+      isNewGame = true,
+      characterName = state.characterName
     })
     self:delete(true)
   end
@@ -223,13 +228,7 @@ local function getMenuOptions(parent)
           else
             local CreateStore = require 'components.state.state'
             local loadedState = Db.load('saved-states'):get(file).data
-            msgBus.send(
-              msgBus.NEW_GAME,
-              {
-                scene = HomeBase,
-                props = loadedState
-              }
-            )
+            createNewGame(loadedState)
             msgBus.send(msgBus.TOGGLE_MAIN_MENU, false)
             parent:delete(true)
           end

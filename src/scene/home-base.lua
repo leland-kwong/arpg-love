@@ -11,6 +11,8 @@ local Portal = require 'components.portal'
 local StarField = require 'components.star-field'
 local loadImage = require 'modules.load-image'
 local sceneManager = require 'scene.manager'
+local mapLayoutGenerator = require 'modules.dungeon.map-layout-generator'
+local gsa = require 'main.global-state-actions'
 
 local inspect = require 'utils.inspect'
 local defaultMapLayout = 'aureus'
@@ -28,6 +30,7 @@ local HomeBase = {
 }
 
 function HomeBase.init(self)
+  gsa.setActiveLevel('')
   local dynamic = require 'utils.dynamic-require'
   local questHandlers = dynamic 'components.quest-log.quest-handlers'
   questHandlers.start()
@@ -95,8 +98,7 @@ function HomeBase.init(self)
 
   local shouldCreatePlayerPortal = Component.get('PlayerPortal') ~= nil
   if shouldCreatePlayerPortal then
-    local globalState = require 'main.global-state'
-    local mapId = globalState.mapLayoutsCache:get(self.location)
+    local mapId = mapLayoutGenerator.get(self.location)
     Portal.create({
       style = 1,
       x = playerPortalPosition.x,
@@ -136,7 +138,7 @@ function HomeBase.init(self)
     ):addToWorld(collisionWorlds.map)
   end)
 
-  msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0,0,0,0})
+  gsa.setBackgroundColor({0,0,0,0})
   self.starField = StarField.create({
     direction = math.pi/2,
     emissionRate = 500,

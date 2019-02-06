@@ -4,6 +4,8 @@ local Color = require 'modules.color'
 local Font = require 'components.font'
 local Graph = require 'utils.graph'
 local AnimationFactory = dynamicRequire 'components.animation-factory'
+local globalState = require 'main.global-state'
+local Math = require 'utils.math'
 
 local development = false
 
@@ -19,6 +21,19 @@ local graphColors = {
   link = {1,1,1},
   linkLocked = {1,1,1,0.25}
 }
+
+local function renderPlayerLocation(distScale)
+  local activeLevel = globalState.activeLevel
+  local nodeRef = Graph:getSystem('universe'):getNode(activeLevel)
+  if nodeRef then
+    local graphic = AnimationFactory:newStaticSprite('gui-player-position-indicator')
+    local p = nodeRef.position * distScale
+    love.graphics.setColor(1,1,1,0.5)
+    graphic:draw(p.x, p.y)
+    love.graphics.setColor(1,1,1,Math.calcPulse(4, globalState.gameClock))
+    graphic:draw(p.x, p.y)
+  end
+end
 
 local function renderNode(nodeId, distScale, state)
   love.graphics.setColor(0,1,1)
@@ -214,4 +229,6 @@ return function(universeGraph, cameraScale, distScale, state, isDevelopment)
     end
     renderRegionLabel(Vec2(x, y), distScale, region, Font.secondaryLarge.font)
   end
+
+  renderPlayerLocation(distScale)
 end

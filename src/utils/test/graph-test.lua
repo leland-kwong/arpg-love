@@ -45,7 +45,6 @@ local ok, err = pcall(function()
     O.isEmpty(system:getNodeLinks(2)),
     'all links connected to a removed node should be removed'
   )
-
 end)
 
 if (not ok) then

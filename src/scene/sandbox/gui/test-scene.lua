@@ -32,7 +32,8 @@ function GuiTestBlueprint.init(self)
     }
   }
 
-  msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0.5,0.5,0.5,})
+  local gsa = require 'main.global-state'
+  gsa.setBackgroundColor({0.5,0.5,0.5,})
 
   local guiText = GuiText.create({
     group = groups.gui

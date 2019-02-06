@@ -9,7 +9,7 @@ local getTextSize = require 'repl.libs.get-text-size'
 local AnimationFactory = dynamicRequire 'components.animation-factory'
 local GuiContext = dynamicRequire 'repl.libs.gui'
 local camera = require 'components.camera'
-local Graph =dynamicRequire 'utils.graph'
+local Graph = require 'utils.graph'
 local renderGraph = dynamicRequire 'components.hud.universe-map.render-graph'
 local buildUniverse = dynamicRequire 'components.hud.universe-map.build-universe'
 local MenuManager = require 'modules.menu-manager'
@@ -35,7 +35,7 @@ local state = {
   view = mapViews.UNIVERSE
 }
 
-local actions = dynamicRequire 'components.hud.universe-map.actions'(state)
+local actions = require 'components.hud.universe-map.actions'(state)
 
 local function createGraphNodeGuiElement(Gui, node)
   local nodeRef = Graph:getSystem('universe'):getNode( node)
@@ -108,7 +108,6 @@ local function switchView(self, view)
     local w,h = camera:getSize(true)
     state.distScale = 1
     actions.panTo((w/2 - playerX/config.gridSize) * camera.scale, (h/2 - playerY/config.gridSize) * camera.scale)
-    print(Inspect(state.translate))
   end
   state.view = view
 end
@@ -314,6 +313,10 @@ Component.create({
         end
       end)
     }
+  end,
+  update = function()
+    -- local globalState = require 'main.global-state'
+    -- print(globalState.activeLevel)
   end,
   final = function(self)
     msgBus.off(self.listeners)

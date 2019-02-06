@@ -8,8 +8,8 @@ local camera = require 'components.camera'
 local cloneGrid = require 'utils.clone-grid'
 local msgBus = require 'components.msg-bus'
 local globalState = require 'main.global-state'
-
-print('load main scene')
+local mapLayoutGenerator = require 'modules.dungeon.map-layout-generator'
+local gsa = require 'main.global-state-actions'
 
 Component.create({
   id = 'MainSceneInitializer',
@@ -20,8 +20,8 @@ Component.create({
       msgBus.on('SCENE_STACK_REPLACE', function()
         local mainSceneRef = Component.get('MAIN_SCENE')
         if mainSceneRef then
-          local mapId = globalState.mapLayoutsCache:get(mainSceneRef.location)
-          msgBus.send(msgBus.GLOBAL_STATE_GET).stateSnapshot:serializeAll(mapId)
+          local mapId = mapLayoutGenerator.get(mainSceneRef.location)
+          globalState.stateSnapshot:serializeAll(mapId)
           msgBus.send('MAP_UNLOADED')
         end
       end, 0)
@@ -59,16 +59,17 @@ end
 function MainScene.init(self)
   Component.get('lightWorld'):setAmbientColor({0.5,0.5,0.5,1})
 
-  msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0,0,0,1})
+  gsa.setBackgroundColor({0,0,0,1})
 
   local rootState = msgBus.send(msgBus.GAME_STATE_GET)
   self.rootStore = rootState
   local parent = self
 
-  local mapId = globalState.mapLayoutsCache:get(self.location)
+  local mapId = mapLayoutGenerator.get(self.location)
   local serializedState = globalState.stateSnapshot:consumeSnapshot(mapId)
   local Dungeon = require 'modules.dungeon'
   local dungeonRef = Dungeon:getData(mapId)
+  gsa.setActiveLevel(dungeonRef.options.layoutType)
   local startPoint = dungeonRef.startPoint
   local mapGrid = dungeonRef.grid
   self.mapId = mapId

@@ -604,21 +604,6 @@ return {
           properties = {
             ["direction"] = 1
           }
-        },
-        {
-          id = 44,
-          name = "transition point next",
-          type = "levelExit",
-          shape = "rectangle",
-          x = 816,
-          y = 1120,
-          width = 16,
-          height = 16,
-          rotation = 0,
-          visible = true,
-          properties = {
-            ["direction"] = 3
-          }
         }
       }
     }

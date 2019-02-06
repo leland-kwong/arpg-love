@@ -330,9 +330,9 @@ local objectParsersByType = {
   },
   ['transition-points'] = {
     levelExit = function(obj, grid, origin, dungeonOptions, blockFileData)
-      print('generate exit')
       local Graph = require 'utils.graph'
       local universeSystem = Graph:getSystem('universe')
+
       local setupTransitionPoints = require 'components.hud.universe-map.setup-transition-points'
       local nodeIter = universeSystem:getAllNodes()
       local universeNodeId = nil

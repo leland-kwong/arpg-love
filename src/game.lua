@@ -16,6 +16,7 @@ local config = require 'config.config'
 local camera = require 'components.camera'
 local tick = require 'utils.tick'
 local globalState = require 'main.global-state'
+local gsa = require 'main.global-state-actions'
 local systemsProfiler = require 'components.profiler.component-groups'
 local Component = require 'modules.component'
 
@@ -73,7 +74,7 @@ local characterSystem = msgBus.send(msgBus.PROFILE_FUNC, {
 })
 
 function love.update(dt)
-  globalState.gameClock = globalState.gameClock + dt
+  gsa.updateGameClock(dt)
   setViewport()
 
   jprof.push('frame')

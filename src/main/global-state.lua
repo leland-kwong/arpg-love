@@ -1,5 +1,4 @@
 local Component = require 'modules.component'
-local sceneManager = require 'scene.manager'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local CreateStore = require 'components.state.state'
@@ -16,27 +15,12 @@ Component.newGroup({
 
 local function makeGlobalState()
   return {
-    activeScene = nil,
+    sceneTitle = '',
+    activeLevel = '',
+    gameClock = 0,
     backgroundColor = {0.2,0.2,0.2},
-    sceneStack = sceneManager,
     gameState = CreateStore(),
     uiState = UiState(),
-    mapLayoutsCache = {
-      cache = {},
-      get = function(self, locationProps)
-        local Dungeon = require 'modules.dungeon'
-        local layoutType = locationProps.layoutType
-        local mapId = self.cache[layoutType]
-        if (not mapId) then
-          mapId = Dungeon:new(locationProps)
-          self.cache[layoutType] = mapId
-        end
-        return mapId
-      end,
-      clear = function(self)
-        self.cache = {}
-      end
-    },
     stateSnapshot = {
       serializedStateByMapId = newStateStorage(),
       serializeAll = function(self, mapId)
@@ -98,11 +82,22 @@ end
 
 local globalState = makeGlobalState()
 
-msgBus.on(msgBus.NEW_GAME, function()
-  globalState = makeGlobalState()
+msgBus.on(msgBus.NEW_GAME, function(msg)
+  assert(type(msg) == 'table')
+  assert(msg.scene ~= nil)
+
+  msgBus.send(
+    msgBus.SCENE_STACK_REPLACE,
+    {
+      scene = msg.scene
+    }
+  )
 end, 1)
 
 return setmetatable({}, {
+  __newindex = function(_, k, v)
+    globalState[k] = v
+  end,
   __index = function(_, k)
     return globalState[k]
   end

@@ -204,10 +204,5 @@
     <property name="direction" type="int" value="1"/>
    </properties>
   </object>
-  <object id="44" name="transition point next" type="levelExit" x="816" y="1120" width="16" height="16">
-   <properties>
-    <property name="direction" type="int" value="3"/>
-   </properties>
-  </object>
  </objectgroup>
 </map>

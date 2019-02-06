@@ -8,6 +8,7 @@ local config = require 'config.config'
 local ZoneInfo = {
   opacity = 1,
   duration = 2,
+  zoneTitle = ''
 }
 
 local endState = {
@@ -30,9 +31,8 @@ function ZoneInfo.update(self, dt)
     self:delete(true)
     return
   end
-  local globalState = msgBus.send(msgBus.GLOBAL_STATE_GET)
-  local zoneTitle = globalState.activeScene.zoneTitle
-  self.zoneTitle = zoneTitle
+  local globalState = require 'main.global-state'
+  self.zoneTitle = globalState.sceneTitle
   if (not zoneTitle) then
     print('[WARNING] - zone title not found')
     self:delete(true)
