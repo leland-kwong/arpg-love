@@ -6,7 +6,7 @@ local function newSnapshotStorage()
   return Lru.new(100)
 end
 
-return {
+local actions = {
   setBackgroundColor = function(color)
     globalState.backgroundColor = color
   end,
@@ -84,3 +84,19 @@ return {
     globalState.sceneTitle = title or ''
   end
 }
+
+local config = require 'config.config'
+if config.isDevelopment then
+  for k,func in pairs(actions) do
+    actions[k] = function(...)
+      globalState.__allowMutation = true
+      local result = func(...)
+      globalState.__allowMutation = false
+      return result
+    end
+  end
+else
+  globalState.__allowMutation = true
+end
+
+return actions
