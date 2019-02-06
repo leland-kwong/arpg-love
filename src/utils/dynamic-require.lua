@@ -1,6 +1,7 @@
 return function(pkg)
-  if package.loaded[pkg] then
-    package.loaded[pkg] = nil
-  end
-  return require(pkg)
+  local oPkg = package.loaded[pkg]
+  package.loaded[pkg] = nil
+  local newModule = require(pkg)
+  package.loaded[pkg] = oPkg
+  return newModule
 end

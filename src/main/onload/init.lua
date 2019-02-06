@@ -13,6 +13,7 @@ if config.isDevelopment then
   local console = Console.create()
 
   LiveReload:setOptions({
+    rootDir = love.filesystem.getWorkingDirectory(),
     enabled = true
   })
   msgBus.on('UPDATE', function(dt)
