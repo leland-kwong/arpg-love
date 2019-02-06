@@ -1,5 +1,6 @@
 local globalState = require 'main.global-state'
 local Lru = require 'utils.lru'
+local Component = require 'modules.component'
 local groups = require 'components.groups'
 
 local function newSnapshotStorage()

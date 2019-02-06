@@ -1,6 +1,5 @@
 -- can't use lua strict right now because 'jumper' library uses globals which throws errors
 -- require 'lua_modules.strict'
-
 require 'components.run'
 require 'main.globals'
 

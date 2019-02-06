@@ -1,9 +1,4 @@
-local Component = require 'modules.component'
 local msgBus = require 'components.msg-bus'
-
-Component.newGroup({
-  name = 'mapStateSerializers'
-})
 
 local function makeGlobalState()
   return {
