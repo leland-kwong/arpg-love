@@ -5,7 +5,7 @@ local O = dynamicRequire 'utils.object-utils'
 local Observable = require 'modules.observable'
 local msgBus = require 'components.msg-bus'
 
-local logSeparator = '_LOG_'
+local logDelimiter = '[[/LOG/]]'
 
 local Component = require 'modules.component'
 Component.create({
@@ -35,10 +35,13 @@ function Log.append(path, entry)
     'invalid path'
   )
 
+  local serialized = bitser.dumps(entry)
+  assert(string.find(serialized, logDelimiter) == nil, 'log entry data has a log separator string fragment. The separator is '..logDelimiter)
+
   threadSend(
     'APPEND',
     path,
-    bitser.dumps(entry)..logSeparator
+    serialized..logDelimiter
   )
 
   return Observable(function()
@@ -74,7 +77,7 @@ function Log.readStream(path, onData, onError, onComplete, seed)
       local message = readChannel:pop()
       if message then
         local String = require 'utils.string'
-        local entries = String.split(message, logSeparator)
+        local entries = String.split(message, logDelimiter)
         for i=1, (#entries) - 1 do
           local data = entries[i]
           seed = onData(seed, bitser.loads(data))
