@@ -4,7 +4,7 @@
         <key>fileFormatVersion</key>
         <int>4</int>
         <key>texturePackerVersion</key>
-        <string>4.11.0</string>
+        <string>4.12.0</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -216,8 +216,6 @@
                 <false/>
             </struct>
             <key type="filename">custom-art/abilities/bullet/bullet-1.png</key>
-            <key type="filename">custom-art/gui/gui-player-position-indicator-glow.png</key>
-            <key type="filename">custom-art/gui/gui-player-position-indicator.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -855,25 +853,24 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">custom-art/gui/gui-panel-simple.png</key>
-            <key type="filename">custom-art/mouse-cursors/cursor-speech.png</key>
-            <key type="filename">custom-art/mouse-cursors/cursor-target.png</key>
+            <key type="filename">custom-art/gui/gui-player-position-indicator-glow.png</key>
+            <key type="filename">custom-art/gui/gui-player-position-indicator.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
+                <point_f>0.454545,0.454545</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>6,6,11,11</rect>
+                <rect>3,3,6,6</rect>
                 <key>scale9Paddings</key>
-                <rect>6,6,11,11</rect>
+                <rect>3,3,6,6</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
             <key type="filename">custom-art/gui/gui-selected-indicator.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
+                <point_f>0,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -929,6 +926,10 @@
             <key type="filename">custom-art/items/augmentation-one.png</key>
             <key type="filename">custom-art/items/augmentation-rage.png</key>
             <key type="filename">custom-art/items/body-armor-basic.png</key>
+            <key type="filename">custom-art/tiles/tiled-exit-direction-next.png</key>
+            <key type="filename">custom-art/tiles/tiled-exit-direction-prev-next.png</key>
+            <key type="filename">custom-art/tiles/tiled-exit-direction-prev.png</key>
+            <key type="filename">custom-art/tiles/tiled-layout-block.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -1078,6 +1079,20 @@
                 <rect>17,17,33,33</rect>
                 <key>scale9Paddings</key>
                 <rect>17,17,33,33</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/mouse-cursors/cursor-speech.png</key>
+            <key type="filename">custom-art/mouse-cursors/cursor-target.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>6,6,11,11</rect>
+                <key>scale9Paddings</key>
+                <rect>6,6,11,11</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>

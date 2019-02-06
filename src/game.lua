@@ -57,7 +57,7 @@ function love.load()
   msgBus.send(msgBus.GAME_LOADED)
   love.keyboard.setKeyRepeat(true)
   setViewport()
-  require 'main.onload'  
+  require 'main.onload'
 
   --[[
     run tests after everything is loaded since some tests rely on the game loop
@@ -73,6 +73,7 @@ local characterSystem = msgBus.send(msgBus.PROFILE_FUNC, {
 })
 
 function love.update(dt)
+  globalState.gameClock = globalState.gameClock + dt
   setViewport()
 
   jprof.push('frame')
