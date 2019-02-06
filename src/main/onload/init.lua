@@ -2,7 +2,7 @@ local msgBus = require 'components.msg-bus'
 require 'modules.log-db.error-log'
 
 local gsa = require 'main.global-state-actions'
-gsa.setNewGameState()
+gsa('setNewGameState')
 
 local config = require 'config.config'
 if config.isDevelopment then

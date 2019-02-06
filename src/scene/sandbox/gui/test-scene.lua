@@ -33,7 +33,7 @@ function GuiTestBlueprint.init(self)
   }
 
   local gsa = require 'main.global-state'
-  gsa.setBackgroundColor({0.5,0.5,0.5,})
+  gsa('setBackgroundColor', {0.5,0.5,0.5,})
 
   local guiText = GuiText.create({
     group = groups.gui

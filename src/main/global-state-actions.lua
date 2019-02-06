@@ -85,18 +85,8 @@ local actions = {
   end
 }
 
-local config = require 'config.config'
-if config.isDevelopment then
-  for k,func in pairs(actions) do
-    actions[k] = function(...)
-      globalState.__allowMutation = true
-      local result = func(...)
-      globalState.__allowMutation = false
-      return result
-    end
-  end
-else
+return function(action, payload)
   globalState.__allowMutation = true
+  actions[action](payload)
+  globalState.__allowMutation = false
 end
-
-return actions

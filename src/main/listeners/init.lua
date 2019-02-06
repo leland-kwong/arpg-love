@@ -19,7 +19,7 @@ local function sceneStackPush(msgValue)
   end
   local sceneRef = nextScene.scene.create(nextScene.props)
   state.activeScene = sceneRef
-  gsa.setSceneTitle(state.activeScene.zoneTitle)
+  gsa('setSceneTitle', state.activeScene.zoneTitle)
   state.sceneStack:push(nextScene)
   msgBus.send(msgBus.MUSIC_PLAY, sceneRef)
   msgBus.send(msgBus.SCENE_CHANGE, sceneRef)
@@ -35,7 +35,7 @@ msgBus.on(msgBus.SCENE_STACK_POP, function()
   local poppedScene = state.sceneStack:pop()
   local sceneRef = poppedScene.scene.create(poppedScene.props)
   state.activeScene = sceneRef
-  gsa.setSceneTitle(state.activeScene.zoneTitle)
+  gsa('setSceneTitle', state.activeScene.zoneTitle)
   msgBus.send(msgBus.MUSIC_PLAY, sceneRef)
   msgBus.send(msgBus.SCENE_CHANGE, sceneRef)
   return sceneRef

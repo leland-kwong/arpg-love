@@ -30,7 +30,7 @@ local HomeBase = {
 }
 
 function HomeBase.init(self)
-  gsa.setActiveLevel('')
+  gsa('setActiveLevel', '')
   local dynamic = require 'utils.dynamic-require'
   local questHandlers = dynamic 'components.quest-log.quest-handlers'
   questHandlers.start()
@@ -138,7 +138,7 @@ function HomeBase.init(self)
     ):addToWorld(collisionWorlds.map)
   end)
 
-  gsa.setBackgroundColor({0,0,0,0})
+  gsa('setBackgroundColor', {0,0,0,0})
   self.starField = StarField.create({
     direction = math.pi/2,
     emissionRate = 500,

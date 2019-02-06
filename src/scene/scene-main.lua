@@ -59,7 +59,7 @@ end
 function MainScene.init(self)
   Component.get('lightWorld'):setAmbientColor({0.5,0.5,0.5,1})
 
-  gsa.setBackgroundColor({0,0,0,1})
+  gsa('setBackgroundColor', {0,0,0,1})
 
   local rootState = msgBus.send(msgBus.GAME_STATE_GET)
   self.rootStore = rootState
@@ -69,7 +69,7 @@ function MainScene.init(self)
   local serializedState = globalState.stateSnapshot:consumeSnapshot(mapId)
   local Dungeon = require 'modules.dungeon'
   local dungeonRef = Dungeon:getData(mapId)
-  gsa.setActiveLevel(dungeonRef.options.layoutType)
+  gsa('setActiveLevel', dungeonRef.options.layoutType)
   local startPoint = dungeonRef.startPoint
   local mapGrid = dungeonRef.grid
   self.mapId = mapId

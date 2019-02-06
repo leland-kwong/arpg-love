@@ -23,7 +23,7 @@ local MainGameHomeScene = {
 
 function MainGameHomeScene.init(self)
   Camera:setPosition(0, 0, 0)
-  gsa.setBackgroundColor(Color.DARK_GRAY)
+  gsa('setBackgroundColor', Color.DARK_GRAY)
   msgBus.on(msgBus.KEY_PRESSED, function(ev)
     local isToggleDevMode = ev.hasModifier and ev.key == '.'
     if isToggleDevMode then

@@ -33,7 +33,7 @@ local NewGameDialogBlueprint = {
 }
 
 local function createNewGame(nextGameState)
-  gsa.setNewGameState(nextGameState)
+  gsa('setNewGameState', nextGameState)
   msgBus.send(msgBus.NEW_GAME, {
     scene = HomeBase
   })

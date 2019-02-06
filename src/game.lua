@@ -9,12 +9,13 @@ love.graphics.setDefaultFilter('nearest', 'nearest')
 
 local msgBus = require 'components.msg-bus'
 local config = require 'config.config'
--- load up user settings on game start
-local userSettingsState = require 'config.user-settings.state'
-userSettingsState.load()
 
 require 'main.inputs'
 require 'main.listeners'
+
+-- load up user settings on game start
+local userSettingsState = require 'config.user-settings.state'
+userSettingsState.load()
 
 local groups = require 'components.groups'
 local camera = require 'components.camera'
@@ -78,7 +79,7 @@ local characterSystem = msgBus.send(msgBus.PROFILE_FUNC, {
 })
 
 function love.update(dt)
-  gsa.updateGameClock(dt)
+  gsa('updateGameClock', dt)
   setViewport()
 
   jprof.push('frame')
