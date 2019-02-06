@@ -52,6 +52,8 @@ function ForceField.getAbsorption(self)
 end
 
 function ForceField.init(self)
+  Component.addToGroup(self, 'gameWorld')
+
   self.bonusStacks = 0
   self.clock = 0
   self.totalAbsorption = 0
@@ -174,15 +176,17 @@ return itemSystem.registerModule({
       end
 
       if (not forceFieldsByItemId[id]) then
+        local tetherPosition = require 'components.groups.tether-position'
         local playerRef = Component.get('PLAYER')
         local x, y = playerRef:getPosition()
-        forceFieldsByItemId[id] = ForceField.create(props)
+        local ff = ForceField.create(props)
           :set('x', x)
           :set('y', y)
           :set('drawOrder', function()
             return playerRef:drawOrder() + 3
           end)
-          :setParent(playerRef)
+        tetherPosition(ff, playerRef)
+        forceFieldsByItemId[id] = ff
       end
     end, 100)
   end,
