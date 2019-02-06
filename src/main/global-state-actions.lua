@@ -7,7 +7,7 @@ return {
   updateGameClock = function(dt)
     globalState.gameClock = globalState.gameClock + dt
   end,
-  setNewGamestate = function(nextGameState)
+  setNewGameState = function(nextGameState)
     local CreateStore = require 'components.state.state'
     globalState.gameState = CreateStore(nextGameState)
   end,
