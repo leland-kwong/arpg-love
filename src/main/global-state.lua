@@ -8,7 +8,12 @@ local function makeGlobalState()
     backgroundColor = {0.2,0.2,0.2},
     gameState = {},
     uiState = {},
-    stateSnapshot = {}
+    stateSnapshot = {},
+    location = {},
+    playerPortal = {
+      position = nil,
+      mapId = nil
+    }
   }
 end
 

@@ -69,7 +69,10 @@ function MainScene.init(self)
   local serializedState = globalState.stateSnapshot:consumeSnapshot(mapId)
   local Dungeon = require 'modules.dungeon'
   local dungeonRef = Dungeon:getData(mapId)
-  gsa('setActiveLevel', dungeonRef.options.layoutType)
+  gsa('setActiveLevel', {
+    level = dungeonRef.options.layoutType,
+    mapId = mapId
+  })
   local startPoint = dungeonRef.startPoint
   local mapGrid = dungeonRef.grid
   self.mapId = mapId
@@ -142,9 +145,10 @@ function MainScene.init(self)
     Component.addToGroup(self:getId(), 'dungeonTest', self)
   end
 
-  local playerStartPos =
-    (self.location.from == 'player') and
-    Component.get('PlayerPortal')
+  local lastPortal = globalState.playerPortal
+  local playerStartPos = self.location.from == 'player' and
+    (lastPortal.mapId == mapId) and
+    lastPortal.position
 
   if (not playerStartPos) then
     if self.exitId then
@@ -175,6 +179,16 @@ function MainScene.init(self)
     y = playerStartPos.y,
     mapGrid = mapGrid,
   }):setParent(parent)
+
+  local enteredFromPlayerPortal = self.location.from == 'player'
+  local shouldRespawnPortal = (not enteredFromPlayerPortal) and
+    lastPortal and
+    (lastPortal.mapId == mapId)
+  if enteredFromPlayerPortal then
+    gsa('clearPlayerPortalInfo')
+  elseif shouldRespawnPortal then
+    msgBus.send('PLAYER_PORTAL_OPEN', lastPortal.position)
+  end
 end
 
 local perf = require'utils.perf'

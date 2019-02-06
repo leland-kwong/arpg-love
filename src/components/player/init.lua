@@ -27,6 +27,7 @@ local Object = require 'utils.object-utils'
 local EventLog = require 'modules.log-db.events-log'
 local UniverseMap = require 'components.hud.universe-map.universe-map-2'
 local globalState = require 'main.global-state'
+local gsa = require 'main.global-state-actions'
 
 local colMap = collisionWorlds.map
 
@@ -290,27 +291,35 @@ local Player = {
         PassiveTree.toggle()
       end),
 
-      msgBus.on('PLAYER_PORTAL_OPEN', function()
+      msgBus.on('PLAYER_PORTAL_OPEN', function(position)
         if self.inBossBattle then
           msgBus.send(msgBus.PLAYER_ACTION_ERROR, 'we cannot portal during boss')
           return
         end
+
+        position = position or
+          -- default to player position
+          {x = self.x, y = self.y}
 
         if Component.get('HomeBase') then
           msgBus.send('PLAYER_ACTION_ERROR', 'Cannot do that here')
           return
         end
 
-        local x, y = self:getPosition()
         local Portal = require 'components.portal'
         Portal.create({
           id = 'PlayerPortal',
-          x = x,
-          y = y - 18,
+          x = position.x,
+          y = position.y - 18,
           location = {
             tooltipText = 'portal home',
             from = 'player'
           }
+        })
+
+        gsa('setPlayerPortalInfo', {
+          position = position,
+          mapId = globalState.activeLevel.mapId
         })
       end),
 

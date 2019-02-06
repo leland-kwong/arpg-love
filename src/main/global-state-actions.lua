@@ -78,11 +78,26 @@ local actions = {
       end
     }
   end,
-  setActiveLevel = function(level)
-    globalState.activeLevel = level
+  setActiveLevel = function(levelInfo)
+    globalState.activeLevel = {
+      level = levelInfo.layoutType,
+      mapId = levelInfo.mapId
+    }
   end,
   setSceneTitle = function(title)
     globalState.sceneTitle = title or ''
+  end,
+  setPlayerPortalInfo = function(info)
+    assert(type(info) == 'table')
+    assert(type(info.position) == 'table')
+    assert(type(info.mapId) == 'string')
+    globalState.playerPortal = info
+  end,
+  clearPlayerPortalInfo = function()
+    globalState.playerPortal = {
+      position = nil,
+      mapId = nil
+    }
   end
 }
 

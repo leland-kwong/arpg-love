@@ -55,6 +55,8 @@ local Portal = {
   },
   -- debug = true,
   init = function(self)
+    Component.addToGroup(self, 'gameWorld')
+
     local root = self
     self.x = self.x + self.posOffset.x
     self.z = self.z + self.posOffset.z

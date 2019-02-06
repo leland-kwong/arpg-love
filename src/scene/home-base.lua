@@ -30,7 +30,9 @@ local HomeBase = {
 }
 
 function HomeBase.init(self)
-  gsa('setActiveLevel', '')
+  gsa('setActiveLevel', {
+    activeLevel = ''
+  })
   local dynamic = require 'utils.dynamic-require'
   local questHandlers = dynamic 'components.quest-log.quest-handlers'
   questHandlers.start()
@@ -96,7 +98,8 @@ function HomeBase.init(self)
     }
   }):setParent(self)
 
-  local shouldCreatePlayerPortal = Component.get('PlayerPortal') ~= nil
+  local globalState = require 'main.global-state'
+  local shouldCreatePlayerPortal = globalState.playerPortal.mapId
   if shouldCreatePlayerPortal then
     local mapId = mapLayoutGenerator.get(self.location)
     Portal.create({
