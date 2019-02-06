@@ -193,7 +193,8 @@ function WeaponCore.draw(self)
     )
   end
 
-  local rootStore = msgBus.send(msgBus.GAME_STATE_GET)
+  local globalstate = require 'main.global-state'
+  local rootStore = globalstate.gameState
   if rootStore then
     local gameState = rootStore:get()
     iterateGrid(gameState.equipment, function(item)

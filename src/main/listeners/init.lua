@@ -49,7 +49,3 @@ msgBus.on(msgBus.SCENE_STACK_REPLACE, function(nextScene)
   ]]
   return sceneStackPush(nextScene)
 end, SCENE_STACK_MESSAGE_LAST_PRIORITY)
-
-msgBus.on(msgBus.GAME_STATE_GET, function()
-  return globalState.gameState
-end)

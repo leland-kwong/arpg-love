@@ -4,9 +4,10 @@ local itemSystem = require 'components.item-inventory.items.item-system'
 local msgBus = require 'components.msg-bus'
 local filterCall = require 'utils.filter-call'
 local noop = require 'utils.noop'
+local globalState = require 'main.global-state'
 
 msgBus.on(msgBus.EQUIPMENT_CHANGE, function()
-	local rootStore = msgBus.send(msgBus.GAME_STATE_GET)
+	local rootStore = globalState.gameState
 	local curState, lastState = rootStore:get()
   --[[
     NOTE: we must unequip items before equipping new ones in order to make sure the newest modifiers

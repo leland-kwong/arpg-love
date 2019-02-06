@@ -276,7 +276,8 @@ function LootGenerator.init(self)
   local parent = self
   assert(self.item ~= nil, 'item must be provided')
 
-  local rootStore = msgBus.send(msgBus.GAME_STATE_GET)
+  local globalState = require 'main.global-state'
+  local rootStore = globalState.gameState
   local screenX, screenY = self.x, self.y
   local item = self.item
   local isLegendary = itemConfig.rarity.LEGENDARY == item.rarity

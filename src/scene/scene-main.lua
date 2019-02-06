@@ -61,7 +61,7 @@ function MainScene.init(self)
 
   gsa('setBackgroundColor', {0,0,0,1})
 
-  local rootState = msgBus.send(msgBus.GAME_STATE_GET)
+  local rootState = globalState.gameState
   self.rootStore = rootState
   local parent = self
 

@@ -26,6 +26,7 @@ local F = require 'utils.functional'
 local Object = require 'utils.object-utils'
 local EventLog = require 'modules.log-db.events-log'
 local UniverseMap = require 'components.hud.universe-map.universe-map-2'
+local globalState = require 'main.global-state'
 
 local colMap = collisionWorlds.map
 
@@ -68,7 +69,7 @@ local function setupDefaultInventory(items)
 end
 
 local function connectInventory()
-  local rootState = msgBus.send(msgBus.GAME_STATE_GET)
+  local rootState = globalState.gameState
   local inventoryController = InventoryController(rootState)
 
   -- add default weapons
@@ -236,10 +237,6 @@ local Player = {
         return canInteractWithItem(self, item)
       end),
 
-      msgBus.on(msgBus.MOUSE_PRESSED, function()
-        self.isAlreadyAttacking = InputContext.contains('any')
-      end),
-
       msgBus.on(msgBus.GENERATE_LOOT, function(msgValue)
         local LootGenerator = require'components.loot-generator.loot-generator'
         local x, y, item = unpack(msgValue)
@@ -276,7 +273,7 @@ local Player = {
       msgBus.on(msgBus.INVENTORY_TOGGLE, function()
         local activeInventory = Component.get('MENU_INVENTORY')
         if (not activeInventory) then
-          local rootState = msgBus.send(msgBus.GAME_STATE_GET)
+          local rootState = globalState.gameState
           Inventory.create({
             rootStore = rootState,
             slots = function()
@@ -413,7 +410,7 @@ local Player = {
     local Hud = require 'components.hud.hud'
     Hud.create({
       player = self,
-      rootStore = msgBus.send(msgBus.GAME_STATE_GET)
+      rootStore = globalState.gameState
     }):setParent(self.hudRoot)
     connectInventory()
     self.onDamageTaken = function(self, actualDamage, actualNonCritDamage, criticalMultiplier)
@@ -422,7 +419,7 @@ local Player = {
       end
     end
 
-    self.rootStore = msgBus.send(msgBus.GAME_STATE_GET)
+    self.rootStore = globalState.gameState
     self.dir = DIRECTION_RIGHT
 
     self.animations = {
@@ -472,7 +469,7 @@ local Player = {
 
     msgBus.send(msgBus.PLAYER_INITIALIZED)
 
-    self.gameId = msgBus.send('GAME_STATE_GET'):getId()
+    self.gameId = globalState.gameState:getId()
     EventLog.compact(self.gameId)
       :next(function()
         EventLog.start(self.gameId)
@@ -605,7 +602,8 @@ local function handleAbilities(self, dt)
     return
   end
 
-  local canUseAbility = self.isAlreadyAttacking or
+  local canUseAbility =
+    (love.mouse.isDown(1) and self.isAlreadyAttacking) or
     InputContext.contains('any') or
     (
       (InputContext.contains('loot treasureChest')) and
@@ -690,6 +688,7 @@ local function resetInteractStates(self)
 end
 
 function Player.update(self, dt)
+
   self:updatePlayerModifiers()
   if (not self.recentlyCreated) then
     self.recentlyCreated = true
