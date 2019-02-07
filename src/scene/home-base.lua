@@ -31,7 +31,7 @@ local HomeBase = {
 
 function HomeBase.init(self)
   gsa('setActiveLevel', {
-    activeLevel = ''
+    level = ''
   })
   local dynamic = require 'utils.dynamic-require'
   local questHandlers = dynamic 'components.quest-log.quest-handlers'
@@ -102,14 +102,15 @@ function HomeBase.init(self)
   local shouldCreatePlayerPortal = globalState.playerPortal.mapId
   if shouldCreatePlayerPortal then
     local mapId = mapLayoutGenerator.get(self.location)
+    local layoutType = Dungeon:getData(mapId).options.layoutType
     Portal.create({
       style = 1,
       x = playerPortalPosition.x,
       y = playerPortalPosition.y - 10,
       location = {
-        tooltipText = 'Portal back to '..Dungeon:getData(mapId).options.layoutType,
+        tooltipText = 'Portal back to '..layoutType,
         from = 'player',
-        layoutType = self.location.layoutType
+        layoutType = layoutType
       }
     }):setParent(self)
   end
