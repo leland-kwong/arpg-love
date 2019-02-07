@@ -52,7 +52,7 @@ return Component.createFactory({
             msgBus.send('CHECKPOINT_UNLOCKED', checkPointId)
             local bnTheme = BigNotifier.themes.checkPointUnlocked
             BigNotifier.create({
-              w = 260,
+              w = 360,
               h = 50,
               duration = 0.5,
               text = {

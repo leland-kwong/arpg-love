@@ -35,6 +35,29 @@ local function getExpInfo(currentLevel, totalExp)
   return progress
 end
 
+local function levelUpNotification(nextLevel)
+  local Sound = require 'components.sound'
+  Sound.playEffect('level-up.wav')
+
+  local BigNotifier = LiveReload 'components.hud.big-notifier'
+  local bnTheme = BigNotifier.themes.levelUp
+  BigNotifier.create({
+    w = 300,
+    h = 50,
+    duration = 0.3,
+    text = {
+      title = {
+        bnTheme.title, 'Level ',
+
+        {1,1,1}, nextLevel,
+
+        bnTheme.title, ' Reached!'
+      },
+      body = {bnTheme.body, 'You have gained a new level'}
+    }
+  })
+end
+
 function ExperienceIndicator.init(self)
   msgBus.on(msgBus.EXPERIENCE_GAIN, function(msgValue)
     if self:isDeleted() then
@@ -48,16 +71,8 @@ function ExperienceIndicator.init(self)
     local nextLevel = getCurrentLevel(self.rootStore:get().totalExperience)
     local isLevelUp = currentLevel < nextLevel
     if isLevelUp then
-      love.audio.stop(Sound.levelUp)
-      love.audio.play(Sound.levelUp)
       msgBus.send(msgBus.PLAYER_LEVEL_UP)
-      msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
-        title = 'level up!',
-        description = {
-          Color.WHITE, 'you are now level ',
-          Color.CYAN, nextLevel
-        }
-      })
+      levelUpNotification(nextLevel)
     end
   end)
 end

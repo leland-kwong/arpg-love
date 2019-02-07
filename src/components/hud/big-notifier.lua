@@ -28,6 +28,9 @@ local BigNotifier = {
     title = nil,
     body = ''
   },
+  init = function(self)
+    Component.addToGroup(self, 'gameWorld')
+  end,
   update = function(self, dt)
     self.clock = self.clock + dt
     if self.clock >= self.hideDelay then
@@ -40,7 +43,7 @@ local BigNotifier = {
     end
     local camera = require 'components.camera'
     local w,h = camera:getSize(true)
-    self.x, self.y = w/2, h/2 - self.h
+    self.x, self.y = w/2, h/2 - self.h - 30
   end,
   draw = function(self)
     xpcall(function()
@@ -54,7 +57,7 @@ local BigNotifier = {
       local background = AnimationFactory:newStaticSprite('gui-gradient-background')
       background:draw(self.x, self.y, 0, self.w/100, self.h)
 
-      local textOffsetY = -12
+      local textOffsetY = -10
       local titleW,titleH = 0,0
       if self.text.title then
         local font = Font.secondary.font
