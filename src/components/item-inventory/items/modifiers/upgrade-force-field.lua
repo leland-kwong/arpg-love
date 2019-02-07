@@ -24,9 +24,6 @@ local ForceField = {
   bonusAbsorption = 0,
   maxAbsorption = 50,
   stackIncreaseDelay = 0.5,
-  owner = function()
-    return Component.get('PLAYER')
-  end,
   state = state.SHIELD_DOWN
 }
 
@@ -79,14 +76,6 @@ function ForceField.update(self, dt)
     icon = 'status-shield'
   })
   self.totalAbsorption = self:getAbsorption()
-
-  local nextX, nextY = self.owner():getPosition()
-  local hasOwnerMoved = nextX ~= self.previousX or nextY ~= self.previousY
-  -- reset clock for bonus stacks
-  if hasOwnerMoved then
-    self.clock = 0
-  end
-  self.previousX, self.previousY = nextX, nextY
 
   local round = require 'utils.math'.round
   self.clock = self.clock + dt
