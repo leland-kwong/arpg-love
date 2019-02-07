@@ -226,9 +226,7 @@ function SpawnMinions.update(_, state, dt)
           local aiRarity = require 'components.ai.rarity'
           return aiRarity(ai)
         end,
-        target = function()
-          return Component.get('PLAYER')
-        end,
+        target = require 'components.ai.find-target'.player,
         x = playerRef.x / config.gridSize,
         y = playerRef.y / config.gridSize - 4,
         types = {

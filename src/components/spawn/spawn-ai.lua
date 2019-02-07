@@ -92,6 +92,10 @@ local function AiFactory(props)
       return nil
     end
     local target = self.target()
+    if (not target) then
+      return nil
+    end
+
     local tPosX, tPosY = target.x, target.y
     local dist = Math.dist(tPosX, tPosY, otherX, otherY)
     local withinVision = dist <= otherSightRadius

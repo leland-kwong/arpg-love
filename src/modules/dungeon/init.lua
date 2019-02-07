@@ -45,6 +45,8 @@ local function toWorldCoords(obj, origin)
     (origin.y * config.gridSize) + obj.y
 end
 
+local aiFindTarget = require 'components.ai.find-target'.player
+
 local objectParsersByType = {
   ['unique-enemies'] = {
     legendaryEnemy = function(obj, grid, origin)
@@ -67,9 +69,7 @@ local objectParsersByType = {
             :set('moveSpeed', ai.moveSpeed * 1.5)
             :set('experience', ai.experience * 3)
         end,
-        target = function()
-          return Component.get('PLAYER')
-        end,
+        target = aiFindTarget,
         x = origin.x + (obj.x / config.gridSize),
         y = origin.y + (obj.y / config.gridSize),
         types = {
@@ -110,9 +110,7 @@ local objectParsersByType = {
           local aiRarity = require 'components.ai.rarity'
           return aiRarity(ai)
         end,
-        target = function()
-          return Component.get('PLAYER')
-        end,
+        target = aiFindTarget,
         x = origin.x + (obj.x / config.gridSize),
         y = origin.y + (obj.y / config.gridSize),
         types = spawnTypes

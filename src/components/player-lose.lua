@@ -23,8 +23,14 @@ function PlayerLose.init(self)
   msgBus.on('*', function(_, msgType)
     if restartEvents[msgType] then
       local HomeBase = require 'scene.home-base'
-      msgBus.send(msgBus.SCENE_STACK_PUSH, {
-        scene = HomeBase
+      local globalState = require 'main.global-state'
+      msgBus.send(msgBus.SCENE_STACK_REPLACE, {
+        scene = HomeBase,
+        props = {
+          location = {
+            layoutType = globalState.activeLevel.level
+          }
+        }
       })
       self:delete(true)
       return msgBus.CLEANUP
