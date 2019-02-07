@@ -80,7 +80,7 @@ local actions = {
   end,
   setActiveLevel = function(levelInfo)
     globalState.activeLevel = {
-      level = levelInfo.layoutType,
+      level = levelInfo.level,
       mapId = levelInfo.mapId
     }
   end,
