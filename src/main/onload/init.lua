@@ -20,7 +20,7 @@ if config.isDevelopment then
   end)
 end
 
-require 'scene.scene-main'
+require 'scene.main-scene'
 
 local MapPointerWorld = require 'components.hud.map-pointer'
 MapPointerWorld.create({

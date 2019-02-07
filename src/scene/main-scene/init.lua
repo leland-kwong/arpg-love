@@ -126,7 +126,7 @@ function MainScene.init(self)
 
       -- travel to a specific location in the universe
       msgBus.send(msgBus.SCENE_STACK_REPLACE, {
-        scene = require 'scene.scene-main',
+        scene = require 'scene.main-scene',
         props = {
           location = location
         }

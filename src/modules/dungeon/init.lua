@@ -365,7 +365,7 @@ local objectParsersByType = {
         y = y,
         onEnter = function(self)
           msgBus.send(msgBus.SCENE_STACK_REPLACE, {
-            scene = require 'scene.scene-main',
+            scene = require 'scene.main-scene',
             props = {
               exitId = exitId,
               location = {
@@ -474,7 +474,7 @@ local function buildDungeon(options)
       onEnter = function()
         local msgBus = require 'components.msg-bus'
         msgBus.send(msgBus.SCENE_STACK_PUSH, {
-          scene = require 'scene.scene-main',
+          scene = require 'scene.main-scene',
           props = {
             exitId = options.from.exitId,
             location = {

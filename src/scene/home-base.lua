@@ -162,7 +162,7 @@ function HomeBase.init(self)
       if (location.layoutType) then
         local Dungeon = require 'modules.dungeon'
         msgBus.send(msgBus.SCENE_STACK_REPLACE, {
-          scene = require 'scene.scene-main',
+          scene = require 'scene.main-scene',
           props = {
             location = location
           }
