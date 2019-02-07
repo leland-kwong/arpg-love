@@ -105,11 +105,12 @@ local entryHandlers = {
     })
   end,
   EVENT_LOG_UPDATE = function(log, entry)
-    O.assign({}, log, entry.data)
+    O.assign(log, entry.data)
   end
 }
 
 local function updateInMemoryLog(gameId, entry)
+  print(Inspect(entry))
   local finalLog = getCompactedLog(gameId)
   entryHandlers[entry.event](finalLog, entry)
 end
