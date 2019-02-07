@@ -388,24 +388,18 @@ local function parseObjectsLayer(layerName, objectsLayer, grid, gridBlockOrigin,
   for i=1, #objects do
     local obj = objects[i]
 
-    -- shift positions by 1 full tile since lua indexes start at 1
-    obj.x = obj.x + blockFileData.tilewidth
-    obj.y = obj.y + blockFileData.tileheight
+    local O = require 'utils.object-utils'
+    local objCopy = O.assign({}, obj, {
+      -- shift positions by 1 full tile since lua indexes start at 1
+      x = obj.x + blockFileData.tilewidth,
+      y = obj.y + blockFileData.tileheight
+    })
 
     local parser = objectParsersByType[layerName][obj.type]
     if parser then
-      parser(obj, grid, gridBlockOrigin, options, blockFileData)
+      parser(objCopy, grid, gridBlockOrigin, options, blockFileData)
     end
   end
-end
-
-local function loadGridBlock(file)
-  local dynamicModule = require 'modules.dynamic-module'
-  --[[
-    Note: we use filesystem load instead of `require` so that we're not loading a cached instance.
-    This is important because we are mutating the dataset, so we need a fresh dataset each time.
-  ]]
-  return dynamicModule('built/maps/'..file..'.lua')
 end
 
 local function convertTileListToGrid(gridBlock)
