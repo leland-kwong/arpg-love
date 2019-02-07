@@ -2,6 +2,7 @@ local Log = require 'modules.log-db'
 local msgBus = require 'components.msg-bus'
 local Component = require 'modules.component'
 local Db = require 'modules.database'
+local O = require 'utils.object-utils'
 
 local EventLog = {}
 
@@ -19,8 +20,8 @@ local function getCompactedLog(gameId)
       enemiesKilled = {},
       itemsAcquired = {},
       quests = {},
-      locationsVisited = {
-        ['aureus'] = true
+      checkPointsUnlocked = {
+        ['1-1'] = true
       }
     }
     db:put(eventLogDbKey(gameId), defaultLog)
@@ -96,6 +97,15 @@ local entryHandlers = {
     if (not ok) then
       msgBus.send('LOG_ERROR', err)
     end
+  end,
+  CHECKPOINT_UNLOCKED = function(log, entry)
+    local checkPointId = entry.data
+    log.checkPointsUnlocked = O.assign({}, log.checkPointsUnlocked, {
+      [checkPointId] = true
+    })
+  end,
+  EVENT_LOG_UPDATE = function(log, entry)
+    O.assign({}, log, entry.data)
   end
 }
 
@@ -136,6 +146,7 @@ function EventLog.compact(gameId)
     done = true
     errMsg = err
   end
+  done = true
   Log.readStream(gameId, function(_, entry)
     updateInMemoryLog(gameId, entry)
   end, handleError, function()
@@ -160,6 +171,14 @@ local function setupListeners(self, gameId)
   end
 
   return {
+    -- [[NOTE: this should only be used for development purposes]]
+    msgBus.on('EVENT_LOG_UPDATE', function(nextState)
+      assert(_DEVELOPMENT_, '`EVENT_LOG_UPDATE` may only be used during development')
+      Log.append(gameId, {
+        event = 'EVENT_LOG_UPDATE',
+        data = nextState
+      })
+    end),
     msgBus.on('QUEST_ADD', function(msg)
       Log.append(gameId, {
         event = 'QUEST_ADD',
@@ -191,36 +210,31 @@ local function setupListeners(self, gameId)
           }
         }):next(nil, handleAppendError)
       end
+    end),
+    msgBus.on('CHECKPOINT_UNLOCKED', function(checkPointId)
+      Log.append(gameId, {
+        event = 'CHECKPOINT_UNLOCKED',
+        data = checkPointId
+      })
     end)
   }
 end
 
 function EventLog.start(gameId)
+  if (not gameId) then
+    print('[EVENT LOG] invalid gameId ', gameId)
+    return
+  end
+
   Component.create({
     id = 'EventLog',
     init = function(self)
       Component.addToGroup(self, 'firstLayer')
       self.cleanupTailLog = Log.tail(gameId, function(entry)
-        -- print(
-        --   'log entry - ',
-        --   Inspect(entry)
-        -- )
         updateInMemoryLog(gameId, entry)
       end)
 
       self.listeners = setupListeners(self, gameId)
-    end,
-
-    update = function()
-      local log = EventLog.read(gameId)
-
-      for locationName in pairs(log.locationsVisited) do
-        Component.addToGroup(
-          locationName,
-          'locationsVisited',
-          true
-        )
-      end
     end,
 
     final = function(self)

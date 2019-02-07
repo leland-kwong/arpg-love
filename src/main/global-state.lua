@@ -3,7 +3,7 @@ local msgBus = require 'components.msg-bus'
 local function makeGlobalState()
   return {
     sceneTitle = '',
-    activeLevel = '',
+    activeLevel = {},
     gameClock = 0,
     backgroundColor = {0.2,0.2,0.2},
     gameState = {},

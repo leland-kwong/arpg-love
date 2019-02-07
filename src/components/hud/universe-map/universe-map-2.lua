@@ -24,11 +24,7 @@ local mapViews = Enum(
 local state = {
   distScale = 1,
   translate = Vec2(),
-  unlockedNodes = {
-    ['1-1'] = true,
-    ['1-2'] = true,
-    ['1-3'] = true
-  },
+  unlockedNodes = {},
   hoveredNode = nil,
   nodeStyles = {},
   graph = nil,
@@ -241,6 +237,11 @@ local Factory = Component.createFactory({
     self.clock = (self.clock or 0) + dt
     if self.clock > 0.4 then
     end
+
+    local globalState = require 'main.global-state'
+    local EventLog = require 'modules.log-db.events-log'
+    local log = EventLog.read(globalState.gameState:getId())
+    state.unlockedNodes = log.checkPointsUnlocked or {}
   end,
 
   draw = function(self)

@@ -161,13 +161,14 @@ function MainScene.init(self)
     end
   end
 
-  local Portal = require 'components.portal'
-  Portal.create({
+  local checkPointId = globalState.activeLevel.level
+  local CheckPoint = require 'components.check-point'
+  CheckPoint.create({
     id = 'LayoutStartPosition',
     x = startPoint.x,
     y = startPoint.y - 10,
     style = 2,
-    color = {1,1,1},
+    checkPointId = checkPointId,
     location = {
       tooltipText = 'Universe Portal',
       type = 'universe'

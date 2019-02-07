@@ -8,6 +8,7 @@ local msgBus = require 'components.msg-bus'
 local collisionWorlds = require 'components.collision-worlds'
 local loadImage = require 'modules.load-image'
 local Color = require 'modules.color'
+local dynamicRequire = require 'utils.dynamic-require'
 
 local spiralScale = 0.4
 local spiralSize = 62 * spiralScale
@@ -49,6 +50,7 @@ local Portal = {
     z = 18
   },
   style = 1,
+  scale = 1,
   color = {1,0.9,0},
   location = {
     tooltipText = 'no location'
@@ -72,7 +74,7 @@ local Portal = {
       w = 1,
       h = 1,
       onClick = function()
-        if (not root.portalActionEnabled) then
+        if (not root.collidingWithPlayer) then
           return
         end
         msgBus.send(msgBus.PORTAL_ENTER, root.location)
@@ -84,7 +86,7 @@ local Portal = {
         self.h = textHeight + padding
         self.portalTooltipText = portalTooltipText
 
-        self:setDrawDisabled(not root.portalActionEnabled)
+        self:setDrawDisabled(not root.collidingWithPlayer)
       end,
       getMousePosition = function()
         local camera = require 'components.camera'
@@ -115,13 +117,13 @@ local Portal = {
       offset - offset * 0.6
     ):addToWorld(collisionWorlds.map)
 
-    local PortalAnimation = require 'components.portal.animation'
-    PortalAnimation.create({
+    local PortalAnimation = dynamicRequire 'components.portal.animation'
+    self.portalAnimation = PortalAnimation.create({
       x = root.x,
       y = root.y,
       z = root.z,
       style = root.style,
-      color = root.color
+      color = root.color,
     }):setParent(root)
   end,
   update = function(self, dt)
@@ -132,8 +134,10 @@ local Portal = {
       self.collision.y,
       portalCollisionFilter
     )
-    self.portalActionEnabled = len > 0
+    self.collidingWithPlayer = len > 0
     self.collision:update(self.x, self.y)
+
+    self.portalAnimation.scale = self.scale
   end
 }
 
