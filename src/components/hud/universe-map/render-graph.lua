@@ -23,7 +23,7 @@ local graphColors = {
 }
 
 local function renderPlayerLocation(distScale)
-  local activeLevel = globalState.activeLevel
+  local activeLevel = globalState.activeLevel.level
   local nodeRef = Graph:getSystem('universe'):getNode(activeLevel)
   if nodeRef then
     local graphic = AnimationFactory:newStaticSprite('gui-player-position-indicator')
