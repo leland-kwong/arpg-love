@@ -110,7 +110,6 @@ local entryHandlers = {
 }
 
 local function updateInMemoryLog(gameId, entry)
-  print(Inspect(entry))
   local finalLog = getCompactedLog(gameId)
   entryHandlers[entry.event](finalLog, entry)
 end
@@ -213,6 +212,7 @@ local function setupListeners(self, gameId)
       end
     end),
     msgBus.on('CHECKPOINT_UNLOCKED', function(checkPointId)
+      print(checkPointId)
       Log.append(gameId, {
         event = 'CHECKPOINT_UNLOCKED',
         data = checkPointId

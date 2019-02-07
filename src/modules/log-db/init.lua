@@ -6,19 +6,17 @@ local Observable = require 'modules.observable'
 local msgBus = require 'components.msg-bus'
 
 local logDelimiter = '[[/LOG/]]'
+local escapeSpecials = function(char)
+  return '%'..char
+end
+local logDelimiterSplitPattern = string.gsub(logDelimiter, '[^a-zA-Z0-9]', escapeSpecials)
 
-local Component = require 'modules.component'
-Component.create({
-  id = 'logger-init',
-  init = function(self)
-    if (not logAppendThread) then
-      -- start async write thread
-      local source = love.filesystem.read('modules/log-db/async-write.lua')
-      logAppendThread = love.thread.newThread(source)
-      logAppendThread:start()
-    end
-  end,
-})
+if (not logAppendThread) then
+  -- start async write thread
+  local source = love.filesystem.read('modules/log-db/async-write.lua')
+  logAppendThread = love.thread.newThread(source)
+  logAppendThread:start()
+end
 
 local Log = {}
 
@@ -76,19 +74,24 @@ function Log.readStream(path, onData, onError, onComplete, seed)
     local ok, result = pcall(function()
       local message = readChannel:pop()
       if message then
+        if message == 'done' then
+          onComplete(seed)
+          return msgBus.CLEANUP
+        end
+
         local String = require 'utils.string'
-        local entries = String.split(message, logDelimiter)
+        local entries = String.split(message, logDelimiterSplitPattern)
         for i=1, (#entries) - 1 do
           local data = entries[i]
-          seed = onData(seed, bitser.loads(data))
+          local deserialized = bitser.loads(data)
+          seed = onData(seed, deserialized)
         end
-        onComplete(seed)
-        return msgBus.CLEANUP
       end
     end)
 
     if (not ok) then
       onError(result)
+      return
     end
 
     return result

@@ -88,6 +88,7 @@ local function readLogFile(path)
     local logAsString = file:read('*a')
     local channel = love.thread.getChannel('logRead.'..path)
     channel:push(logAsString)
+    channel:push('done')
   end)
   if not ok then
     print(err)
