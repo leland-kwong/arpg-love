@@ -5,9 +5,11 @@ local msgBus = require 'components.msg-bus'
 local M = {}
 
 local function updateDevMode()
+  local isDevelopment = userSettings.isDevelopment
   msgBus.send(msgBus.SET_CONFIG, {
-    isDevelopment = userSettings.isDevelopment
+    isDevelopment = isDevelopment
   })
+  _DEVELOPMENT_ = isDevelopment
 end
 
 function M.set(setterFn)
