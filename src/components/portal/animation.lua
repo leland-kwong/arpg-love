@@ -75,6 +75,7 @@ return Component.createFactory({
   group = 'all',
   color = {1,0.9,0},
   style = 1,
+  scale = 1,
   init = function(self)
     self.rect1 = {
       scale = 0,
@@ -110,8 +111,13 @@ return Component.createFactory({
       lightWorld:addLight(x, y, 20, self.color)
     end
 
+    love.graphics.push()
+    love.graphics.scale(self.scale)
+    local scaleDiff = (1 - self.scale)/self.scale
+    love.graphics.translate(x * scaleDiff, y * scaleDiff)
     animationRenderers[self.style](self, x, y)
     love.graphics.setStencilTest()
+    love.graphics.pop()
   end,
   drawOrder = function(self)
     return Component.groups.all:drawOrder(self)
