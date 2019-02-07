@@ -4,7 +4,9 @@ return function(Component)
   local tweens = {}
 
   Component.animate = function (subject, target, duration, easing)
-    tweens[subject] = tween.new(duration, subject, target, easing)
+    local tween = tween.new(duration, subject, target, easing)
+    tweens[subject] = tween
+    return tween
   end
 
   Component.animateUpdate = function(dt)
