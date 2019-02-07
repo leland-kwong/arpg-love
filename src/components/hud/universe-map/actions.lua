@@ -7,6 +7,8 @@ local F = dynamicRequire 'utils.functional'
 local Grid = dynamicRequire 'utils.grid'
 local msgBus = require 'components.msg-bus'
 local maps = require('modules.cargo').init('built/maps')
+local globalState = require 'main.global-state'
+local EventLog = require 'modules.log-db.events-log'
 
 local getLevelDefinition = function(levelId)
   return maps[levelId]
@@ -57,8 +59,14 @@ return function(state)
       end)
     end,
     buildLevel = function(node)
+      local log = EventLog.read(globalState.gameState:getId())
+      local nodeRef = Graph:getSystem('universe'):getNode(node)
+      local isUnlocked = log.checkPointsUnlocked[nodeRef.level]
+      if (not isUnlocked) then
+        return
+      end
+
       local ok, result = pcall(function()
-        local nodeRef = Graph:getSystem('universe'):getNode(node)
         local levelDefinition = getLevelDefinition(nodeRef.level)
         local seed = 1
         return setupTransitionPoints(levelDefinition, node, state.graph:getNodeLinks(node), 1, 20)
