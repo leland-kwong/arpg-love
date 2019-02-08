@@ -78,7 +78,7 @@ function WeaponCore.init(self)
     drawOrder = function(self)
       return WeaponCore:drawOrder()
     end
-  })
+  }):setParent(self)
 end
 
 local max = math.max
