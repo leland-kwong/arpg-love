@@ -439,7 +439,7 @@ return {
           type = "blockOpening",
           shape = "rectangle",
           x = 800,
-          y = 32,
+          y = 0,
           width = 96,
           height = 16,
           rotation = 0,
