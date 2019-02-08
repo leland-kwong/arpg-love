@@ -60,6 +60,29 @@ local function testLevelUpNotification()
   })
 end
 
-testCheckpointNotification()
+-- local function readLog(gameId)
+--   local handleError = function(err)
+--     print('error', err)
+--   end
+--   local Log = LiveReload 'modules.log-db'
+--   Log.readStream(gameId, function(_, entry)
+--     print('entry', Inspect(entry))
+--   end, handleError, function()
+--     print('done')
+--   end)
+-- end
+
+-- local globalState = require 'main.global-state'
+-- local gameId = globalState.gameState:getId()
+-- readLog(gameId)
+-- print(gameId)
+
+-- testCheckpointNotification()
 -- testLevelUpNotification()
 -- resetCheckPointLogState()
+
+local Component = require 'modules.component'
+local playerRef = Component.get('PLAYER')
+if playerRef then
+
+end

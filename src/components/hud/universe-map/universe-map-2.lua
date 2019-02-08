@@ -250,7 +250,7 @@ local Factory = Component.createFactory({
     love.graphics.origin()
 
     -- draw background
-    love.graphics.setColor(0,0,0,0.8)
+    love.graphics.setColor(0,0,0,0.85)
     love.graphics.rectangle('fill', 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
 
     love.graphics.translate(state.translate.x, state.translate.y)
