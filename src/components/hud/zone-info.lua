@@ -32,7 +32,7 @@ function ZoneInfo.update(self, dt)
     return
   end
   local globalState = require 'main.global-state'
-  self.zoneTitle = globalState.sceneTitle
+  self.zoneTitle = globalState.activeLevel.level
 end
 
 function ZoneInfo.draw(self)
