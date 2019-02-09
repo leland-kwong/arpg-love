@@ -9,6 +9,7 @@ local config = require 'config.config'
 
 local Door = {
   dy = 0,
+  doorOpenComplete = false,
   init = function(self)
     local parent = self
     gfx = {
@@ -21,6 +22,9 @@ local Door = {
       frontFacingRightWall = AnimationFactory:newStaticSprite(
         'door-1-front-facing-right-wall'
       ),
+      frontFacingLip = AnimationFactory:newStaticSprite(
+        'door-1-front-facing-lip'
+      )
     }
 
     self.doorW, self.doorH = gfx.frontFacingCenter:getWidth(),
@@ -28,7 +32,7 @@ local Door = {
 
     local triggerCloseAnimation = function()
       local quad = gfx.frontFacingCenter.sprite
-      local heightToShow = 15
+      local heightToShow = 16
       local doorH = self.doorH
       local originalY = parent.y
       Component.animate(parent, {
@@ -38,6 +42,7 @@ local Door = {
         gfx.frontFacingCenter:setSize(nil, actualH)
       end, function()
         parent.doorCollision:delete()
+        parent.doorOpenComplete = true
       end)
     end
 
@@ -61,11 +66,9 @@ local Door = {
         return camera:getMousePosition()
       end,
       onClick = function(self)
-        if (self.opened) then
-          return
-        end
         self.opened = true
         triggerCloseAnimation()
+        self:delete(true)
       end,
       onUpdate = function(self, dt)
         self:setPosition(
@@ -104,31 +107,54 @@ local Door = {
       gfx.frontFacingLeftWall:getWidth(),
       config.gridSize
     ):addToWorld('map')
+
+    -- door lip
+    Component.create({
+      group = 'all',
+      draw = function(self)
+        love.graphics.setColor(1,1,1)
+        local x = parent.x + gfx.frontFacingLeftWall:getWidth() + gfx.frontFacingCenter:getWidth()/2
+        gfx.frontFacingLip:draw(x, parent.y)
+      end,
+      drawOrder = function()
+        return 2
+      end
+    }):setParent(parent)
+
+    -- door center
+    Component.create({
+      group = 'all',
+      draw = function()
+        local showOutline = self.clickArea.hovered and (not self.clickArea.opened)
+        if (showOutline) then
+          local atlasData = AnimationFactory.atlasData
+          love.graphics.setShader(shader)
+          shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
+          shader:send('outline_width', 1)
+          shader:send('outline_color', Color.WHITE)
+        end
+
+        love.graphics.setColor(1,1,1,1)
+        local adjustForSpriteSheetPadding = self.clickArea.opened and (gfx.frontFacingCenter.pad) or 0
+        gfx.frontFacingCenter:draw(parent.x + parent.leftWallOffset, parent.y + parent.dy - adjustForSpriteSheetPadding)
+
+        shader:send('outline_width', 0)
+      end,
+      drawOrder = function()
+        if parent.doorOpenComplete then
+          return 2
+        end
+        return parent:drawOrder() + 1
+      end
+    }):setParent(parent)
   end,
   draw = function(self)
     local parent = self
     parent.renderSideWalls()
     local lw = Component.get('lightWorld')
     lw:addLight(parent.x + parent.leftWallOffset + parent.doorW/2, parent.y, 20)
-
-    local showOutline = self.clickArea.hovered and (not self.clickArea.opened)
-    if (showOutline) then
-      local atlasData = AnimationFactory.atlasData
-      love.graphics.setShader(shader)
-      shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
-      shader:send('outline_width', 1)
-      shader:send('outline_color', Color.WHITE)
-    end
-
-    love.graphics.setColor(1,1,1,1)
-    gfx.frontFacingCenter:draw(parent.x + parent.leftWallOffset, parent.y + parent.dy)
-
-    shader:send('outline_width', 0)
   end,
   drawOrder = function(self)
-    if self.clickArea.opened then
-      return 1
-    end
     return Component.groups.all:drawOrder(self)
   end
 }
