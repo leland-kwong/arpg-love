@@ -121,7 +121,7 @@ optionsMt.__index = optionsMt
 setmetatable(LiveReload, {
   __call = function(self, rootFile, options)
     if (not self.options.enabled) then
-      return loadFn(require)
+      return require(rootFile)
     end
 
     options = setmetatable(options or {}, optionsMt)
