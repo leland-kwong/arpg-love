@@ -1,6 +1,7 @@
 local bump = require 'modules.bump'
 local typeCheck = require 'utils.type-check'
 local uid = require 'utils.uid'
+local CollisionWorlds = require 'components.collision-worlds'
 
 bump.TOUCH = 'touch'
 
@@ -40,15 +41,17 @@ function CollisionObject:getPositionWithOffset()
 end
 
 function CollisionObject:addToWorld(collisionWorld)
+  local cw = type(collisionWorld) == 'string' and CollisionWorlds[collisionWorld]
+    or collisionWorld
   local x, y = self:getPositionWithOffset()
-  collisionWorld:add(
+  cw:add(
     self,
     x,
     y,
     self.w,
     self.h
   )
-  self.world = collisionWorld
+  self.world = cw
   return self
 end
 
