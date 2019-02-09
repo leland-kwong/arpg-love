@@ -47,6 +47,8 @@ local statsMt = {
 }
 
 local Ai = {
+  -- debug = true,
+
   class = collisionGroups.enemyAi,
 
   state = states.IDLE,
@@ -87,8 +89,6 @@ local Ai = {
   onDestroyStart = noop,
   onUpdateStart = nil,
 
-  -- debug = true,
-
   drawOrder = function(self)
     return Component.groups.all:drawOrder(self) + 1
   end
@@ -112,7 +112,7 @@ function Ai:checkLineOfSight(grid, WALKABLE, targetX, targetY, debug)
   local gridX, gridY = self.pxToGridUnits(self.x, self.y, self.gridSize)
   local gridTargetX, gridTargetY = self.pxToGridUnits(targetX, targetY, self.gridSize)
   return LineOfSight(grid, WALKABLE, debug)(
-    gridX, gridY, gridTargetX, gridTargetY
+    self.x, self.y, targetX, targetY
   )
 end
 
@@ -419,7 +419,7 @@ function Ai.update(self, dt)
   end
 
   local canSeeTarget = targetX and
-    self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY, self.losDebug)
+    self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY)
   local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
   local isInAggroRange = gridDistFromPlayer <= (actualSightRadius / self.gridSize)
   local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or 99999
@@ -576,6 +576,8 @@ function Ai.draw(self)
   if self.debug and self.targetX then
     love.graphics.setColor(0,1,0.2)
     love.graphics.circle('line', self.targetX, self.targetY, 4)
+
+    self.losDebug()
   end
 
   createLight(self)
@@ -669,18 +671,16 @@ function Ai.init(self)
 
   if self.debug then
     self.losDebug = function(x, y, isBlocked)
-      local isNewFrame = self.lastFrameCount ~= self.frameCount
-      if isNewFrame then
-        self.losPoints = {}
-        self.lastFrameCount = self.frameCount
-      end
-      table.insert(
-        self.losPoints, {
-          x = x * self.gridSize,
-          y = y * self.gridSize,
-          isBlocked = isBlocked
-        }
+      local actualSightRadius = self.stats:get('sightRadius') * self.gridSize + 100
+      local targetX, targetY = self.findNearestTarget(
+        self.x,
+        self.y,
+        actualSightRadius
       )
+      if targetX then
+        love.graphics.setColor(0,1,0.5)
+        love.graphics.line(self.x, self.y, targetX, targetY)
+      end
     end
   end
 

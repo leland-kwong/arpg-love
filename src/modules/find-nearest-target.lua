@@ -31,7 +31,7 @@ local function findNearestTarget(
           if isValidTarget and los then
             local gx1, gy1 = Position.pixelsToGridUnits(startX, startY, gridSize)
             local gx2, gy2 = Position.pixelsToGridUnits(target.x, target.y, gridSize)
-            local canSeeTarget = los(gx1, gy1, gx2, gy2)
+            local canSeeTarget = los(startX, startY, target.x, target.y)
             if canSeeTarget then
               local dist = Math.dist(gx1, gy1, gx2, gy2)
               if dist < shortestEnemyDist then

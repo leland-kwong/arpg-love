@@ -1,4 +1,7 @@
 local bresenhamLine = require'utils.bresenham-line'
+local collisionGroups = require 'modules.collision-groups'
+local collisionWorlds = require 'components.collision-worlds'
+local config = require 'config.config'
 
 local function getDirection(x1, y1, x2, y2)
   local vx, vy = x2 - x1, y2 - y1
@@ -41,24 +44,15 @@ return function(grid, WALKABLE, debugFn, isDevelopment)
     return not isBlocked, isBlocked and DONE or nil
   end
 
+  local obstacleFilter = function(item)
+    return collisionGroups.matches(item.group, 'obstacle')
+  end
+
   -- return [BOOLEAN] - true if line of sight is valid
   local function checkLineOfSight(x1, y1, x2, y2)
-    -- if any values are not integers, we can assume that they're not grid positions
-    if (isDevelopment) then
-      local isGridCoordinates =
-        grid[y1]      ~= nil and
-        grid[y1][x1]  ~= nil and
-        grid[y2]      ~= nil and
-        grid[y2][x2]  ~= nil
-      if (not isGridCoordinates) then
-        error(
-          'coordinates must be grid positions '..require'utils.inspect'({x1, y1, x2, y2})
-        )
-      end
-    end
-
-    prevX, prevY = x1, y1
-    return bresenhamLine(x1, y1, x2, y2, callback)
+    local gs = config.gridSize
+    local items, len = collisionWorlds.map:querySegment(x1, y1, x2, y2, obstacleFilter)
+    return len == 0
   end
 
   return checkLineOfSight
