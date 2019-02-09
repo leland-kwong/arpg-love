@@ -80,7 +80,6 @@ local M = {
     return self.hoveredObjects
   end,
   clearHovered = function(self)
-    InputContext.set('any')
     for _,item in pairs(self.hoveredObjects) do
       item.hovered = false
     end
