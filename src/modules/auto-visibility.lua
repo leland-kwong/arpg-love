@@ -10,7 +10,11 @@ local autoVisibilityGroup = Component.newGroup({
 
 local function visibleItemFilter(item)
   local parent = item.parent
-  return autoVisibilityGroup.hasComponent(parent and parent:getId())
+  return autoVisibilityGroup.hasComponent(
+    parent and
+    parent.isComponent and
+    parent:getId()
+  )
 end
 
 local function toggleEntityVisibility(self)
