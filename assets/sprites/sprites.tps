@@ -1146,7 +1146,7 @@
             <key type="filename">custom-art/tiles/door-1-front-facing-lip.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.383333</point_f>
+                <point_f>0.5,0.366667</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
