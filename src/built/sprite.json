@@ -349,7 +349,7 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":28,"h":60},
 	"sourceSize": {"w":28,"h":60},
-	"pivot": {"x":0.5,"y":0.5}
+	"pivot": {"x":0.5,"y":0.383333}
 },
 "door-1-front-facing-right-wall":
 {
@@ -2707,6 +2707,6 @@
 	"format": "RGBA8888",
 	"size": {"w":1856,"h":128},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:5a82499f11201b99fe7f411f693a20ed:ac23f46a25d3bcd475ee1ee286b4e2f1:68d88b3cf7eafc9b5accfffdfb2fda91$"
+	"smartupdate": "$TexturePacker:SmartUpdate:59df0b95575654a5abf187367a692ae1:0c2fd421929e37aac3d52f95b20cac7a:68d88b3cf7eafc9b5accfffdfb2fda91$"
 }
 }
