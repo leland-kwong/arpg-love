@@ -1,4 +1,4 @@
-local Component = require 'modules.component'
+local msgBus = require 'components.msg-bus'
 local Promise = require 'utils.promise'
 
 --[[
@@ -30,13 +30,7 @@ local function flushPromises()
   end
 end
 
-Component.create({
-  id = 'observable-init',
-  init = function(self)
-    Component.addToGroup(self, 'firstLayer')
-  end,
-  update = flushPromises
-})
+msgBus.on('UPDATE', flushPromises)
 
 local Observable = {}
 local mt = {}
