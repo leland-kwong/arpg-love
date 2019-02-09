@@ -140,6 +140,17 @@ function meta:getFullHeight()
   return self:getHeight() + (self.pad * 2)
 end
 
+function meta:setSize(w, h)
+  local _x,_y,_w,_h = self.sprite:getViewport()
+  local padding = self.pad * 2
+  self.sprite:setViewport(
+    _x,
+    _y,
+    w and (w + padding) or _w,
+    h and (h + padding) or _h
+  )
+end
+
 function meta:isLastFrame()
   return self.index == self.numFrames
 end
