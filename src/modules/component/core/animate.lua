@@ -17,12 +17,11 @@ return function(Component)
   Component.animateUpdate = function(dt)
     for ref,t in pairs(tweens) do
       local complete = t.tween:update(dt)
-      if t.onUpdate then
-        t.onUpdate(dt)
-      end
       if complete then
         t.onComplete()
         tweens[ref] = nil
+      elseif t.onUpdate then
+        t.onUpdate(dt)
       end
     end
   end
