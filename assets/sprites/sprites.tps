@@ -362,8 +362,6 @@
             <key type="filename">custom-art/status-effect-icons/status-legendary-enemy.png</key>
             <key type="filename">custom-art/status-effect-icons/status-shield.png</key>
             <key type="filename">custom-art/tiles/floor-empty.png</key>
-            <key type="filename">custom-art/tiles/map-door-vert-1.png</key>
-            <key type="filename">custom-art/tiles/map-door-vert-2.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -761,6 +759,19 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/gui/gui-gradient-background.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>92,0,183,1</rect>
+                <key>scale9Paddings</key>
+                <rect>92,0,183,1</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/gui/gui-input-box-label.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -926,10 +937,6 @@
             <key type="filename">custom-art/items/augmentation-one.png</key>
             <key type="filename">custom-art/items/augmentation-rage.png</key>
             <key type="filename">custom-art/items/body-armor-basic.png</key>
-            <key type="filename">custom-art/tiles/tiled-exit-direction-next.png</key>
-            <key type="filename">custom-art/tiles/tiled-exit-direction-prev-next.png</key>
-            <key type="filename">custom-art/tiles/tiled-exit-direction-prev.png</key>
-            <key type="filename">custom-art/tiles/tiled-layout-block.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -1109,6 +1116,86 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/tiles/door-1-front-facing-center.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0.581395</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,11,32,21</rect>
+                <key>scale9Paddings</key>
+                <rect>16,11,32,21</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/door-1-front-facing-left-wall.png</key>
+            <key type="filename">custom-art/tiles/door-1-front-facing-right-wall.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0.581395</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,11,8,21</rect>
+                <key>scale9Paddings</key>
+                <rect>4,11,8,21</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/door-1-front-facing-lip.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>7,15,14,30</rect>
+                <key>scale9Paddings</key>
+                <rect>7,15,14,30</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/door-1-side-facing-bottom-wall.png</key>
+            <key type="filename">custom-art/tiles/door-1-side-facing-top-wall.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.595238</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,11,10,21</rect>
+                <key>scale9Paddings</key>
+                <rect>5,11,10,21</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/door-1-side-facing-center.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.284091</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,22,9,44</rect>
+                <key>scale9Paddings</key>
+                <rect>5,22,9,44</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/door-1-side-facing-lip.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>15,7,30,15</rect>
+                <key>scale9Paddings</key>
+                <rect>15,7,30,15</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">custom-art/tiles/environment-breakable-1.png</key>
             <key type="filename">custom-art/tiles/environment-breakable-2.png</key>
             <key type="filename">custom-art/tiles/environment-breakable-3.png</key>
@@ -1162,7 +1249,6 @@
             <key type="filename">custom-art/tiles/floor-7.png</key>
             <key type="filename">custom-art/tiles/floor-8.png</key>
             <key type="filename">custom-art/tiles/floor-9.png</key>
-            <key type="filename">custom-art/tiles/map-0.png</key>
             <key type="filename">custom-art/tiles/map-ramp-11.png</key>
             <key type="filename">custom-art/tiles/map-ramp-12.png</key>
             <key type="filename">custom-art/tiles/map-ramp-13.png</key>
@@ -1191,20 +1277,6 @@
                 <rect>4,7,8,15</rect>
                 <key>scale9Paddings</key>
                 <rect>4,7,8,15</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">custom-art/tiles/map-door-horiz-1.png</key>
-            <key type="filename">custom-art/tiles/map-door-horiz-2.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,9,8,18</rect>
-                <key>scale9Paddings</key>
-                <rect>4,9,8,18</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
