@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.2" orientation="orthogonal" renderorder="right-down" width="60" height="80" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="50">
+<map version="1.2" tiledversion="1.2.2" orientation="orthogonal" renderorder="right-down" width="60" height="80" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="51">
  <tileset firstgid="1" source="action rpg.tsx"/>
  <layer id="1" name="ground" width="60" height="80">
   <data encoding="csv">
@@ -182,6 +182,7 @@
     <property name="props" type="file" value="../../src/modules/dungeon/treasure-chest-definitions/starting-items.lua"/>
    </properties>
   </object>
+  <object id="50" name="door" type="door" x="480" y="224" width="96" height="16"/>
  </objectgroup>
  <objectgroup color="#ff00ff" id="6" name="transition-points">
   <object id="46" name="check point" type="checkPoint" x="96" y="96">

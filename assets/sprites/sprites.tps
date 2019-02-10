@@ -1160,7 +1160,7 @@
             <key type="filename">custom-art/tiles/door-1-side-facing-top-wall.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.595238</point_f>
+                <point_f>0.1,0.595238</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -1173,7 +1173,7 @@
             <key type="filename">custom-art/tiles/door-1-side-facing-center.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.284091</point_f>
+                <point_f>0.0555556,0.284091</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -1186,7 +1186,7 @@
             <key type="filename">custom-art/tiles/door-1-side-facing-lip.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
+                <point_f>0.366667,0.517241</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
