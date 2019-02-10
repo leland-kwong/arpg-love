@@ -186,12 +186,12 @@
   <object id="53" name="block opening" type="blockOpening" x="0" y="1120" width="16" height="96"/>
   <object id="54" name="block opening" type="blockOpening" x="64" y="1264" width="96" height="16"/>
   <object id="55" name="block opening" type="blockOpening" x="800" y="1264" width="96" height="16"/>
-  <object id="56" name="Treasure chest" type="treasureChest" x="288" y="1072" width="16" height="16"/>
-  <object id="57" name="Treasure chest" type="treasureChest" x="656" y="1072" width="16" height="16"/>
+  <object id="56" name="Treasure chest" type="treasureChest" x="304" y="1072" width="16" height="16"/>
+  <object id="57" name="Treasure chest" type="treasureChest" x="672" y="1072" width="16" height="16"/>
   <object id="58" name="boss-door" type="environmentDoor" x="624" y="1008" width="96" height="16"/>
   <object id="59" name="boss-door" type="environmentDoor" x="64" y="1120" width="96" height="16"/>
   <object id="60" name="boss-door" type="environmentDoor" x="800" y="1120" width="96" height="16"/>
-  <object id="61" name="Treasure chest" type="treasureChest" x="464" y="1200" width="16" height="16"/>
+  <object id="61" name="Treasure chest" type="treasureChest" x="480" y="1200" width="16" height="16"/>
  </objectgroup>
  <objectgroup color="#ffff00" id="3" name="spawn-points"/>
  <objectgroup color="#ff007f" id="4" name="unique-enemies">
