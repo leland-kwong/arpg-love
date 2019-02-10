@@ -193,6 +193,8 @@ local function drawLegendaryItemEffect(self, x, y, angle)
   -- light beams
   local animation = AnimationFactory:newStaticSprite('legendary-item-drop-effect')
   local ox, oy = animation:getOffset()
+  local oBlendMode = love.graphics.getBlendMode()
+  love.graphics.setBlendMode('add')
   love.graphics.draw(
     AnimationFactory.atlas,
     animation.sprite,
@@ -204,6 +206,7 @@ local function drawLegendaryItemEffect(self, x, y, angle)
     ox,
     oy
   )
+  love.graphics.setBlendMode(oBlendMode)
 end
 
 local function drawLegendaryItemEffectMinimap()
