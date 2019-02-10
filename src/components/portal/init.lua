@@ -73,6 +73,9 @@ local Portal = {
       y = self.y - spiralSize,
       w = 1,
       h = 1,
+      onCreate = function(self)
+        self.originalInputContext = self.inputContext
+      end,
       onClick = function()
         if (not root.collidingWithPlayer) then
           return
@@ -87,6 +90,10 @@ local Portal = {
         self.portalTooltipText = portalTooltipText
 
         self:setDrawDisabled(not root.collidingWithPlayer)
+
+        self.inputContext = root.collidingWithPlayer and
+          self.originalInputContext or
+          'any'
       end,
       getMousePosition = function()
         local camera = require 'components.camera'
@@ -106,15 +113,14 @@ local Portal = {
       drawOrder = guiDrawOrder
     }):setParent(self)
     local collisionSize = spiralSize
-    local offset = collisionSize/2
+    local offsetX = collisionSize
     self.collision = self:addCollisionObject(
       collisionGroups.hotSpot,
-      self.x,
-      self.y,
-      collisionSize,
-      collisionSize,
-      offset,
-      offset - offset * 0.6
+      self.x - offsetX,
+      self.y - collisionSize,
+      collisionSize * 2,
+      collisionSize * 2
+      -- ,offsetX
     ):addToWorld(collisionWorlds.map)
 
     local PortalAnimation = dynamicRequire 'components.portal.animation'
@@ -135,8 +141,6 @@ local Portal = {
       portalCollisionFilter
     )
     self.collidingWithPlayer = len > 0
-    self.collision:update(self.x, self.y)
-
     self.portalAnimation.scale = self.scale
   end
 }
