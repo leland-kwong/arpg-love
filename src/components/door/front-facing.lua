@@ -92,7 +92,7 @@ local Door = {
       end
     }):setParent(parent)
 
-    self.frustrumCullingCollision = self:addCollisionObject('environment', 0, 0, 1, 1)
+    self.frustrumCullingCollision = self:addCollisionObject('invisible', 0, 0, 1, 1)
       :addToWorld('map')
 
     self.doorCollision = Component.create({

@@ -9,5 +9,5 @@ return GroupMatcher({
   'environment',
   'floorItem',
   'hotSpot',
-  'mainMap'
+  'invisible'
 })
