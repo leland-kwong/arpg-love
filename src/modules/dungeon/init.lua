@@ -319,6 +319,25 @@ local objectParsersByType = {
     blockOpening = function(obj, grid, origin)
       local blockOpeningParser = require 'modules.dungeon.layout-object-parsers.block-opening'
       blockOpeningParser(obj, grid, origin, cellTranslationsByLayer)
+    end,
+    door = function(obj, grid, origin)
+      local Component = require 'modules.component'
+      local Door = require 'components.door'
+      local isSideView = obj.rotation == 90
+      local config = require 'config.config'
+      if isSideView then
+        local d = Door.SideFacing.create({
+          x = obj.x - config.gridSize,
+          y = obj.y
+        })
+        Component.addToGroup(d, 'gameWorld')
+      else
+        local d = Door.FrontFacing.create({
+          x = obj.x,
+          y = obj.y
+        })
+        Component.addToGroup(d, 'gameWorld')
+      end
     end
   },
   ['objects'] = {
