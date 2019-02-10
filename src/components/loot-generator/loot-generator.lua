@@ -171,7 +171,9 @@ local LootGenerator = {
 local dropHeight = 8
 
 local function drawLegendaryItemEffect(self, x, y, angle)
-  local opacity = math.max(0.3, math.sin(self.clock * 2))
+  local calcPulse = require 'utils.math'.calcPulse
+
+  local opacity = calcPulse(2, self.clock) + 0.1
   local Color = require 'modules.color'
   love.graphics.setColor(Color.multiplyAlpha(Color.RARITY_LEGENDARY, opacity))
 
