@@ -43,10 +43,12 @@ local Door = {
     self.doorW, self.doorH = gfx.sideFacingCenter:getWidth(),
       gfx.sideFacingCenter:getHeight()
 
-    local triggerCloseAnimation = function()
+    local triggerOpenAnimation = function()
       local quad = gfx.sideFacingCenter.sprite
       local doorH = self.doorH
       local originalY = parent.y
+      local Sound = require 'components.sound'
+      Sound.playEffect('door-open.wav')
       Component.animate(parent.state, {
         dy = 26,
         percentOpened = 1
@@ -78,7 +80,7 @@ local Door = {
           return
         end
         parent.state.opened = true
-        triggerCloseAnimation()
+        triggerOpenAnimation()
       end,
       onUpdate = function(self, dt)
         self:setPosition(
@@ -101,7 +103,7 @@ local Door = {
           :addToWorld('map')
       end,
       update = function(self, dt)
-        local x,y,w,h = parent.clickArea.x, parent.y, parent.clickArea.w, config.gridSize
+        local x,y,w,h = parent.x, parent.y, config.gridSize, parent.clickArea.h
         parent.frustrumCullingCollision:update(x,y,w,h)
 
         if parent.state.doorOpenComplete then
@@ -109,6 +111,9 @@ local Door = {
         else
           self.c:update(x,y,w,h)
         end
+      end,
+      drawOrder = function()
+        return math.pow(100, 100)
       end
     }):setParent(self)
     self.wallCollisionLeft = self:addCollisionObject(

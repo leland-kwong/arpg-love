@@ -40,11 +40,13 @@ local Door = {
     self.doorW, self.doorH = gfx.frontFacingCenter:getWidth(),
       gfx.frontFacingCenter:getHeight()
 
-    local triggerCloseAnimation = function()
+    local triggerOpenAnimation = function()
       local quad = gfx.frontFacingCenter.sprite
       local heightToShow = 16
       local doorH = self.doorH
       local originalY = parent.y
+      local Sound = require 'components.sound'
+      Sound.playEffect('door-open.wav')
       Component.animate(parent.state, {
         dy = doorH - heightToShow
       }, 0.25, 'outCubic', nil, function()
@@ -75,7 +77,7 @@ local Door = {
           return
         end
         parent.state.opened = true
-        triggerCloseAnimation()
+        triggerOpenAnimation()
       end,
       onUpdate = function(self, dt)
         self:setPosition(
