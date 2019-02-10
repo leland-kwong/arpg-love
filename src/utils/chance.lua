@@ -2,13 +2,14 @@ local callableObject = require 'utils.callable-object'
 
 local Chance = {}
 
-math.randomseed(os.time())
 local random = math.random
+
 function Chance.roll(percentChance)
   return random(1, 1 / percentChance) == 1
 end
 
-local function setupChanceFunctions(_, types)
+local function setupChanceFunctions(_, types, seed)
+  math.randomseed(seed or os.time())
   local list = {}
   for i=1, #types do
     local props = types[i]
