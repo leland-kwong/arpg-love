@@ -55,21 +55,28 @@ function CollisionObject:addToWorld(collisionWorld)
   return self
 end
 
-function CollisionObject:move(goalX, goalY, filter)
+function CollisionObject:check(goalX, goalY, filter, isMove)
   if not self.world then
     error('collision object must be added to a world')
     return
   end
 
-  local actualX, actualY, cols, len = self.world:move(
+  local method = isMove and 'move' or 'check'
+
+  local actualX, actualY, cols, len = self.world[method](
+    self.world,
     self,
     goalX - self.ox,
     goalY - self.oy,
     filter
   )
   local finalX, finalY = actualX + self.ox, actualY + self.oy
-  self.x = finalX
-  self.y = finalY
+
+  if isMove then
+    self.x = finalX
+    self.y = finalY
+  end
+
   return finalX,
     finalY,
     cols,
@@ -131,8 +138,8 @@ function CollisionObject:update(x, y, w, h, offsetX, offsetY)
   return self
 end
 
-function CollisionObject:check(goalX, goalY, filter)
-  return self.world:check(self, goalX, goalY, filter)
+function CollisionObject:move(goalX, goalY, filter)
+  return self:check(goalX, goalY, filter, true)
 end
 
 function CollisionObject.getStats()
