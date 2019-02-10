@@ -7,6 +7,7 @@ local Map = require 'modules.map-generator.index'
 local Grid = require 'utils.grid'
 
 local function randomTreasurePosition(mapGrid, occupiedPositions)
+  math.randomseed(os.clock())
   local rows, cols = #mapGrid, #mapGrid[1]
   local gridX, gridY = math.random(1, rows),
     math.random(1, cols)
