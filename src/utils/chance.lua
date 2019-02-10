@@ -8,8 +8,14 @@ function Chance.roll(percentChance)
   return random(1, 1 / percentChance) == 1
 end
 
+local defaultSeed = os.time()
+local getDefaultSeed = function()
+  defaultSeed = defaultSeed + 1
+  return defaultSeed
+end
+
 local function setupChanceFunctions(_, types, seed)
-  math.randomseed(seed or os.time())
+  math.randomseed(seed or getDefaultSeed())
   local list = {}
   for i=1, #types do
     local props = types[i]
