@@ -611,47 +611,50 @@ local function handleAbilities(self, dt)
     return
   end
 
+  local isSkill1Activate = love.keyboard.isDown(keyMap.SKILL_1) or
+    love.mouse.isDown(mouseInputMap.SKILL_1)
+  local isSkill2Activate = love.keyboard.isDown(keyMap.SKILL_2) or
+    love.mouse.isDown(mouseInputMap.SKILL_2)
+  local isSkill3Activate = love.keyboard.isDown(keyMap.SKILL_3) or
+    love.mouse.isDown(mouseInputMap.SKILL_3)
+  local isSkill4Activate = love.keyboard.isDown(keyMap.SKILL_4) or
+    love.mouse.isDown(mouseInputMap.SKILL_4)
+  local isMoveBoostActivate = love.keyboard.isDown(keyMap.MOVE_BOOST) or
+    (mouseInputMap.MOVE_BOOST and love.mouse.isDown(mouseInputMap.MOVE_BOOST))
   local canUseAbility =
-    (love.mouse.isDown(1) and self.isAlreadyAttacking) or
+    (self.isAlreadyAttacking and (
+      isSkill1Activate or isSkill2Activate or isSkill3Activate or isSkill4Activate
+    )) or
     InputContext.contains('any') or
     (
       (InputContext.contains('loot treasureChest')) and
       (not canInteractWithItem(self, self.state.itemHovered or self.state.environmentInteractHovered))
     )
+  self.isAlreadyAttacking = canUseAbility
   if canUseAbility then
     -- SKILL_1
-    local isSkill1Activate = love.keyboard.isDown(keyMap.SKILL_1) or
-      love.mouse.isDown(mouseInputMap.SKILL_1)
-    if not self.clickDisabled and isSkill1Activate then
+    if isSkill1Activate then
       msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_1')
     end
 
     -- SKILL_2
-    local isSkill2Activate = love.keyboard.isDown(keyMap.SKILL_2) or
-      love.mouse.isDown(mouseInputMap.SKILL_2)
-    if not self.clickDisabled and isSkill2Activate then
+    if isSkill2Activate then
       msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_2')
     end
 
     -- SKILL_3
-    local isSkill3Activate = love.keyboard.isDown(keyMap.SKILL_3) or
-      (mouseInputMap.SKILL_3 and love.mouse.isDown(mouseInputMap.SKILL_3))
-    if not self.clickDisabled and isSkill3Activate then
+    if isSkill3Activate then
       msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_3')
     end
 
     -- SKILL_4
-    local isSkill4Activate = love.keyboard.isDown(keyMap.SKILL_4) or
-      (mouseInputMap.SKILL_4 and love.mouse.isDown(mouseInputMap.SKILL_4))
-    if not self.clickDisabled and isSkill4Activate then
+    if isSkill4Activate then
       msgBus.send(msgBus.PLAYER_USE_SKILL, 'SKILL_4')
     end
   end
 
   -- MOVE_BOOST
-  local isMoveBoostActivate = love.keyboard.isDown(keyMap.MOVE_BOOST) or
-    (mouseInputMap.MOVE_BOOST and love.mouse.isDown(mouseInputMap.MOVE_BOOST))
-  if not self.clickDisabled and isMoveBoostActivate then
+  if isMoveBoostActivate then
     msgBus.send(msgBus.PLAYER_USE_SKILL, 'MOVE_BOOST')
   end
 end
