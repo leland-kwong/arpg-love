@@ -1,44 +1,45 @@
-local globalState = require 'main.global-state'
-
 local actions = {
-  setBackgroundColor = function(color)
-    globalState.backgroundColor = color
+  setBackgroundColor = function(state, color)
+    state.backgroundColor = color
   end,
-  updateGameClock = function(dt)
-    globalState.gameClock = globalState.gameClock + dt
+  updateGameClock = function(state, dt)
+    state.gameClock = state.gameClock + dt
   end,
-  setActiveLevel = function(levelInfo)
-    globalState.activeLevel = {
+  setActiveLevel = function(state, levelInfo)
+    state.activeLevel = {
       level = levelInfo.level,
       mapId = levelInfo.mapId
     }
   end,
-  setSceneTitle = function(title)
-    globalState.sceneTitle = title or ''
+  setSceneTitle = function(state, title)
+    state.sceneTitle = title or ''
   end,
-  setPlayerPortalInfo = function(info)
+  setPlayerPortalInfo = function(state, info)
     assert(type(info) == 'table')
     assert(type(info.position) == 'table')
     assert(type(info.mapId) == 'string')
-    globalState.playerPortal = info
+    state.playerPortal = info
   end,
-  clearPlayerPortalInfo = function()
-    globalState.playerPortal = {
+  clearPlayerPortalInfo = function(state)
+    state.playerPortal = {
       position = nil,
       mapId = nil
     }
   end,
 
-  clearInteractableList = function()
-    globalState.interactableList = {}
+  clearInteractableList = function(state)
+    state.interactableList = {}
   end,
-  setInteractable = function(item)
-    globalState.interactableList[item] = true
+  setInteractable = function(state, item)
+    state.interactableList[item] = true
   end
 }
 
+local globalState = require 'main.global-state'
 return function(action, payload)
-  globalState.__allowMutation = true
-  actions[action](payload)
-  globalState.__allowMutation = false
+  local reducer = actions[action]
+  local state = globalState.getState()
+  globalState.replaceState(
+    reducer(state, payload) or state
+  )
 end

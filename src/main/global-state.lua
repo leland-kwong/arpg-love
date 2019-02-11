@@ -99,13 +99,15 @@ msgBus.on(msgBus.NEW_GAME, function(msg)
 end, 1)
 
 return setmetatable({
-  __allowMutation = false
+  replaceState = function(newState)
+    globalState = newState
+  end,
+  getState = function()
+    return globalState
+  end
 }, {
   __newindex = function(self, k, v)
-    if (not self.__allowMutation) then
-      error('[NO MUTATION] Could not directly modify the property `'..k..'` of global state.')
-    end
-    globalState[k] = v
+    error('[NO MUTATION] Could not directly modify the property `'..k..'` of global state.')
   end,
   __index = function(_, k)
     return globalState[k]
