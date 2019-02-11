@@ -343,7 +343,7 @@ function Gui.init(self)
 
   local posX, posY = self:getPosition()
   self.colObj = self:addCollisionObject(
-    self.collisionGroup or self.type,
+    self.collisionGroup or 'interact',
     posX, posY,
     self.w, self.h
   ):addToWorld(collisionWorlds.gui)

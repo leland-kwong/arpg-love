@@ -123,6 +123,11 @@ return Component.createFactory({
       end,
       onClick = function(self)
         handleTreasureOpen(self, parent)
+      end,
+      onUpdate = function(self)
+        local globalState = require 'main.global-state'
+        parent.canOpen = (not parent.state.opened) and
+          globalState.interactableList[self]
       end
     }):setParent(self)
 
@@ -138,9 +143,6 @@ return Component.createFactory({
     if (not self.isInViewOfPlayer) then
       return
     end
-
-    self.canOpen = (not self.state.opened) and
-      msgBus.send('INTERACT_ENVIRONMENT_OBJECT', self)
 
     if self.tween then
       local complete = self.tween:update(dt)

@@ -220,6 +220,7 @@ local Player = {
   mapGrid = nil,
 
   init = function(self)
+    local parent = self
     local state = {
       itemHovered = nil,
       environmentInteractHovered = nil
@@ -470,6 +471,27 @@ local Player = {
       self.colObj.ox,
       self.colObj.oy
     ):addToWorld(collisionWorlds.player)
+
+    -- player interact collision
+    Component.create({
+      group = 'all',
+      init = function(self)
+        self.parent = parent
+      end,
+      update = function(self)
+        local p = self.parent
+        local size = p.stats:get('pickupRadius')
+        local CollisionGroups = require 'modules.collision-groups'
+        local collisionWorlds = require 'components.collision-worlds'
+        gsa('clearInteractableList')
+        collisionWorlds.gui:queryRect(p.x - size/2, p.y - size/2, size, size, function(item)
+          if (CollisionGroups.matches(item.group, 'interact')) then
+            gsa('setInteractable', item.parent)
+          end
+          return false
+        end)
+      end
+    }):setParent(self)
 
     WeaponCore.create({
       x = self.x,

@@ -13,6 +13,7 @@ local function makeGlobalState(initialGameState)
   return {
     sceneTitle = '',
     activeLevel = {},
+    interactableList = {},
     gameClock = 0,
     backgroundColor = {0.2,0.2,0.2},
     gameState = CreateStore(initialGameState),

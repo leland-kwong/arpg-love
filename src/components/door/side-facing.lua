@@ -7,6 +7,7 @@ local shader = Shaders('pixel-outline.fsh')
 local Color = require 'modules.color'
 local config = require 'config.config'
 local O = require 'utils.object-utils'
+local globalState = require 'main.global-state'
 
 local Door = {
   opacity = 1,
@@ -76,7 +77,7 @@ local Door = {
         return camera:getMousePosition()
       end,
       onClick = function(self)
-        if parent.state.opened then
+        if parent.state.opened or (not globalState.interactableList[self]) then
           return
         end
         parent.state.opened = true
@@ -111,9 +112,6 @@ local Door = {
         else
           self.c:update(x,y,w,h)
         end
-      end,
-      drawOrder = function()
-        return math.pow(100, 100)
       end
     }):setParent(self)
     self.wallCollisionLeft = self:addCollisionObject(
@@ -166,7 +164,7 @@ local Door = {
         shader:send('outline_width', 0)
       end,
       drawOrder = function()
-        if parent.doorOpenComplete then
+        if parent.state.doorOpenComplete then
           return 1
         end
         return parent:drawOrder() + 1

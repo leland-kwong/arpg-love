@@ -7,6 +7,7 @@ local shader = Shaders('pixel-outline.fsh')
 local Color = require 'modules.color'
 local config = require 'config.config'
 local O = require 'utils.object-utils'
+local globalState = require 'main.global-state'
 
 local Door = {
   group = 'all',
@@ -73,7 +74,7 @@ local Door = {
         return camera:getMousePosition()
       end,
       onClick = function(self)
-        if parent.state.opened then
+        if parent.state.opened or (not globalState.interactableList[self]) then
           return
         end
         parent.state.opened = true

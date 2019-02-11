@@ -27,6 +27,13 @@ local actions = {
       position = nil,
       mapId = nil
     }
+  end,
+
+  clearInteractableList = function()
+    globalState.interactableList = {}
+  end,
+  setInteractable = function(item)
+    globalState.interactableList[item] = true
   end
 }
 
