@@ -234,10 +234,10 @@ local function setDropPosition(parent, spriteWidth, spriteHeight)
   local Grid = require 'utils.grid'
   local config = require 'config.config'
   local gs = config.gridSize
-  local DroppablePositionSearch = require 'components.loot-generator.droppable-position-search'
+  local FindOpenPosition = require 'utils.find-open-position'
   local searchComplete = false
   local dropX, dropY = parent.x, parent.y
-  local getDroppablePosition = DroppablePositionSearch(
+  local getDroppablePosition = FindOpenPosition(
     function(grid, x, y, dist)
       local cellValue = Grid.get(grid, x, y)
       local isDroppablePosition = (not searchComplete) and (cellValue and cellValue.walkable)
