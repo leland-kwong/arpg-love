@@ -2,6 +2,17 @@
 
 ## 6.1.0-pre-alpha
 
+NEW
+
+Settings
+
+* Added display scale options
+
+GAMEPLAY
+
+* Added universe map so you can teleport between levels
+* Added doors
+
 BALANCE
 
 * Many abilities have been adjusted to make things feel a bit more balanced. As always, we'll continue to adjust things as needed.
@@ -10,6 +21,7 @@ BALANCE
 FIXES
 
 * Fixed an issue with memory leaks.
+* Fixed issue with enemies sometimes spawning outside of the map
 
 ## 6.0.0-pre-alpha
 

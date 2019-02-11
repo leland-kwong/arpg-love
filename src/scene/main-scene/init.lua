@@ -78,7 +78,20 @@ function MainScene.init(self)
   self.mapId = mapId
   self.mapGrid = mapGrid
 
+  local function setupMapComponent()
+    MainMap.create({
+      camera = camera,
+      mapId = mapId
+    }):setParent(parent)
+  end
+
   self.listeners = {
+    msgBus.on('SET_CONFIG', function(propsChanged)
+      if propsChanged.scale then
+        setupMapComponent()
+      end
+    end, 2),
+
     msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
       msgBus.send(msgBus.EXPERIENCE_GAIN, math.floor(msgValue.experience))
     end),
@@ -134,10 +147,7 @@ function MainScene.init(self)
     end)
   }
 
-  MainMap.create({
-    camera = camera,
-    mapId = mapId
-  }):setParent(parent)
+  setupMapComponent()
 
   if serializedState then
     restoreComponentsFromState(self, serializedState)

@@ -7,7 +7,8 @@ local M = {}
 local function updateDevMode()
   local isDevelopment = userSettings.isDevelopment
   msgBus.send(msgBus.SET_CONFIG, {
-    isDevelopment = isDevelopment
+    isDevelopment = isDevelopment,
+    scale = userSettings.display.scale
   })
   _DEVELOPMENT_ = isDevelopment
 end

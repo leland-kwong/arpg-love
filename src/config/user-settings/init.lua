@@ -48,6 +48,10 @@ M.camera = {
   speed = 0.4, -- lerp duration (larger value means slower movement)
 }
 
+M.display = {
+  scale = 3
+}
+
 M.sound = {
   masterVolume = 1,
   musicVolume = 0.5

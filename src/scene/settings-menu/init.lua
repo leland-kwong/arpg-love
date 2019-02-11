@@ -10,9 +10,7 @@ local userSettings = require 'config.user-settings'
 local userSettingsState = require 'config.user-settings.state'
 local MenuManager = require 'modules.menu-manager'
 
-local SettingsMenu = {
-  id = 'SettingsMenu'
-}
+local SettingsMenu = {}
 
 function SettingsMenu.init(self)
   Component.addToGroup(self, 'gui')
@@ -38,9 +36,118 @@ function SettingsMenu.init(self)
     drawOrder = guiTextTitle.drawOrder
   })
 
-  local soundSectionTitle = Component.create({
+  --[[
+    option {
+      label = STRING
+      value = ANY
+    }
+  ]]
+  local ToggleGroup = function(params)
+    local position, options, onSelect =
+      params.position, params.options, params.onSelect
+    return Component.create({
+      x = position.x,
+      y = position.y - 3,
+      h = 30,
+      init = function(self)
+        local parent = self
+        self.state = {
+          value = params.value
+        }
+
+        f.forEach(options, function(o, index)
+          local w = 15
+          local margin = (index - 1) * (params.margin or 2)
+          Gui.create({
+            w = w,
+            onUpdate = function(self)
+              self.x = parent.x + (w * (index - 1)) + margin
+              self.y = parent.y
+
+              guiTextBody:addf({Color.WHITE, o.label}, self.w, 'center', self.x, self.y + 3)
+              local w,h = guiTextBody:getSize()
+              self.h = h + 4
+            end,
+            onClick = function()
+              onSelect(o.value)
+              self.state.value = o.value
+            end,
+            render = function(self)
+              if self.hovered then
+                love.graphics.setColor(0,1,1,0.2)
+                love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
+              end
+              if parent.state.value == o.value then
+                love.graphics.setColor(0,1,1)
+                love.graphics.rectangle('line', self.x, self.y, self.w, self.h)
+              end
+            end
+          }):setParent(parent)
+        end)
+      end
+    })
+  end
+
+  local graphicsSectionTitle = Component.create({
     x = menuInnerX,
     y = menuInnerY,
+    init = function(self)
+      Component.addToGroup(self, 'gui')
+      guiTextTitle:add('GRAPHICS', Color.LIGHT_GRAY, self.x, self.y)
+      self.w, self.h = guiTextTitle:getSize()
+    end,
+    update = function(self)
+      guiTextTitle:add('GRAPHICS', Color.LIGHT_GRAY, self.x, self.y)
+    end
+  })
+
+  local displayScaleToggleGroupLabel = Component.create({
+    x = menuInnerX,
+    y = graphicsSectionTitle.y + graphicsSectionTitle.h + 10,
+    text = 'display scale',
+    init = function(self)
+      Component.addToGroup(self, 'gui')
+      guiTextBody:add('display scale', Color.LIGHT_GRAY, self.x, self.y)
+      self.w, self.h = guiTextBody:getSize()
+    end,
+    update = function(self)
+      guiTextBody:add('display scale', Color.LIGHT_GRAY, self.x, self.y)
+    end
+  })
+  local displayScaleToggleGroup = ToggleGroup({
+    position = {
+      x = displayScaleToggleGroupLabel.x + displayScaleToggleGroupLabel.w + 10,
+      y = displayScaleToggleGroupLabel.y
+    },
+    value = userSettings.display.scale,
+    options = {
+      {
+        label = 1,
+        value = 1
+      },
+      {
+        label = 2,
+        value = 2
+      },
+      {
+        label = 3,
+        value = 3
+      }
+    },
+    onSelect = function(displayScale)
+      local originallScale = userSettings.display.scale
+      userSettingsState.set(function(settings)
+        settings.display.scale = displayScale
+        return settings
+      end):next(function()
+        consoleLog(string.format('[settings] display scale changed from `%d` to `%d` !', originallScale, displayScale))
+      end)
+    end
+  })
+
+  local soundSectionTitle = Component.create({
+    x = menuInnerX,
+    y = displayScaleToggleGroup.y + 35,
     init = function(self)
       Component.addToGroup(self, 'gui')
     end,
@@ -54,7 +161,7 @@ function SettingsMenu.init(self)
     y = menuY,
     width = menuWidth,
     height = menuHeight,
-    contentHeight = 500,
+    contentHeight = 550,
     drawOrder = function()
       return 1100
     end
@@ -142,6 +249,9 @@ function SettingsMenu.init(self)
     end
   }):setCalculatedValue(userSettings.sound.masterVolume * 100)
   local childNodes = {
+    graphicsSectionTitle,
+    displayScaleToggleGroupLabel,
+    displayScaleToggleGroup,
     soundSectionTitle,
     musicSlider,
     soundSlider

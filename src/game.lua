@@ -36,8 +36,6 @@ local changeCount = 0
 local function setViewport()
   local isDevModeChange = config.isDevelopment ~= state.isDevelopment
   if isDevModeChange then
-    config.scale = config.isDevelopment and 2 or state.productionScale
-    config.scaleFactor = config.scale
     state.isDevelopment = config.isDevelopment
   end
 
