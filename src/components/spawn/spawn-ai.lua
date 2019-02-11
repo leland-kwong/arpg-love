@@ -2,6 +2,7 @@ local Component = require 'modules.component'
 local Ai = require 'components.ai.ai'
 local msgBus = require 'components.msg-bus'
 local collisionWorlds = require 'components.collision-worlds'
+local CollisionGroups = require 'modules.collision-groups'
 local groups = require 'components.groups'
 local config = require 'config.config'
 local typeCheck = require 'utils.type-check'
@@ -43,6 +44,13 @@ local function getItemPositions(items)
   return width, height, newItems
 end
 
+local spawnCollisionFilter = function(item, other)
+  if CollisionGroups.matches(other.group, CollisionGroups.create('obstacle', 'enemyAi')) then
+    return 'slide'
+  end
+  return false
+end
+
 local function repositionAiToPreventStacking(spawnedAi, x, y, collisionWorld)
   local width, height, positions = getItemPositions(spawnedAi)
   --[[
@@ -51,7 +59,7 @@ local function repositionAiToPreventStacking(spawnedAi, x, y, collisionWorld)
   ]]
   local boundingBox = {}
   collisionWorld:add(boundingBox, x, y, width, height)
-  local spawnX, spawnY = collisionWorld:move(boundingBox, x, y)
+  local spawnX, spawnY = collisionWorld:move(boundingBox, x, y, spawnCollisionFilter)
   collisionWorld:remove(boundingBox)
   for i=1, #positions do
     local ai = spawnedAi[i]
@@ -129,6 +137,7 @@ local function AiFactory(props)
     local ai = Ai.create(props):setParent(
       Component.get('MAIN_SCENE')
     )
+
     return ai
   end)
 
