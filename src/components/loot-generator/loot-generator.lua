@@ -14,6 +14,7 @@ local tween = require 'modules.tween'
 local bump = require 'modules.bump'
 local collisionGroups = require 'modules.collision-groups'
 local drawOrders = require 'modules.draw-orders'
+local globalState = require 'main.global-state'
 require 'components.groups.clock'
 
 local eventPriority = 1
@@ -391,7 +392,7 @@ function LootGenerator.init(self)
         end
       end
 
-      self.canInteract = msgBus.send('INTERACT_ENVIRONMENT_OBJECT', self)
+      self.canInteract = globalState.interactableList[self]
     end,
     draw = function(self)
       if (not parent.isInViewOfPlayer) then
