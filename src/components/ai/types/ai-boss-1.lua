@@ -210,7 +210,6 @@ function SpawnMinions.use(_, state)
 end
 
 function SpawnMinions.update(_, state, dt)
-  fadeInMinions()
   local minionCount = countMinions()
   local maxNumMinions = SpawnMinions.maxMinions
   if state.isNewSpawn and (minionCount < maxNumMinions) then
@@ -380,6 +379,10 @@ return AiBlueprint({
           keepBossActive()
         end
       }):setParent(self)
+    end
+
+    aiProps.onUpdateStart = function()
+      fadeInMinions()
     end
 
     aiProps.onFinal = function()
