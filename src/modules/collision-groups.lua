@@ -9,5 +9,6 @@ return GroupMatcher({
   'environment',
   'floorItem',
   'hotSpot',
-  'invisible'
+  'invisible',
+  'interact'
 })

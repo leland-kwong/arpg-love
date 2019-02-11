@@ -215,7 +215,7 @@ local function setupCollisionObjects(self, grid, gridSize)
       local gridSize = self.gridSize
       local tileX, tileY = x * gridSize, y * gridSize
       return self:addCollisionObject(
-        collisionGroups.obstacle,
+        'obstacle',
         tileX,
         tileY,
         gridSize,

@@ -10,7 +10,13 @@ local function GroupMatcher(groupNames)
 
   setmetatable(valueByName, {
     __index = function(t, k)
-      return 1
+      -- invalid group names trigger an error
+      if k then
+        local names = table.concat(groupNames, ', ')
+        error('invalid group name `'.. k.. '` must be one of ['..names..']')
+      else
+        return 1
+      end
     end
   })
   for i=1, #groupNames do

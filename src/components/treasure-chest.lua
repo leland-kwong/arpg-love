@@ -133,7 +133,9 @@ return Component.createFactory({
 
     local collisionWorlds = require 'components.collision-worlds'
     local collisionYAdjustment = 6
-    self:addCollisionObject('obstacle', self.interactNode.x, self.interactNode.y + collisionYAdjustment, self.interactNode.width, self.interactNode.height - collisionYAdjustment)
+    local CollisionGroups = require 'modules.collision-groups'
+    local cGroup = CollisionGroups.create('obstacle', 'interact')
+    self:addCollisionObject(cGroup, self.interactNode.x, self.interactNode.y + collisionYAdjustment, self.interactNode.width, self.interactNode.height - collisionYAdjustment)
       :addToWorld(collisionWorlds.map)
 
     self.particleClock = 0

@@ -8,6 +8,7 @@ local userSettings = require 'config.user-settings'
 local animationFactory = require 'components.animation-factory'
 local collisionWorlds = require 'components.collision-worlds'
 local collisionObject = require 'modules.collision'
+local CollisionGroups = require 'modules.collision-groups'
 local camera = require 'components.camera'
 local Position = require 'utils.position'
 local Map = require 'modules.map-generator.index'
@@ -40,13 +41,13 @@ local frameRate = 60
 local DIRECTION_RIGHT = 1
 local DIRECTION_LEFT = -1
 
-local collisionGroups = {
-  obstacle = true,
-  enemyAi = true
-}
+local movementCollisionGroup = CollisionGroups.create(
+  'obstacle',
+  'enemyAi'
+)
 
 local function collisionFilter(item, other)
-  if not collisionGroups[other.group] then
+  if not CollisionGroups.matches(other.group, movementCollisionGroup) then
     return false
   end
   return 'slide'
@@ -189,13 +190,13 @@ end
 local Player = {
   id = 'PLAYER',
   autoSave = config.autoSave,
-  class = collisionGroups.player,
+  class = 'player',
   group = groups.all,
   x = startPos.x,
   y = startPos.y,
   facingDirectionX = 1,
   facingDirectionY = 1,
-  pickupRadius = 5 * config.gridSize,
+  pickupRadius = 10 * config.gridSize,
 
   health = 1,
   energy = 1,
@@ -475,15 +476,25 @@ local Player = {
     -- player interact collision
     Component.create({
       group = 'all',
+      init = function(self)
+        local LOS = require 'modules.line-of-sight'
+        self.los = LOS()
+        self.losFilter = function(item)
+          return CollisionGroups.matches(item.group, 'obstacle') and
+            (not CollisionGroups.matches(item.group, 'interact'))
+        end
+      end,
       update = function(self)
         local p = parent
         local size = p.stats:get('pickupRadius')
-        local CollisionGroups = require 'modules.collision-groups'
         local collisionWorlds = require 'components.collision-worlds'
         gsa('clearInteractableList')
         collisionWorlds.gui:queryRect(p.x - size/2, p.y - size/2, size, size, function(item)
-          if (CollisionGroups.matches(item.group, 'interact')) then
-            gsa('setInteractable', item.parent)
+          local ip = item.parent
+          local isInteractable = CollisionGroups.matches(item.group, 'interact') and
+            self.los(p.x, p.y, ip.x, ip.y, self.losFilter)
+          if isInteractable then
+            gsa('setInteractable', ip)
           end
           return false
         end)
