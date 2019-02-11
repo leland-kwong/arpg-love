@@ -475,11 +475,8 @@ local Player = {
     -- player interact collision
     Component.create({
       group = 'all',
-      init = function(self)
-        self.parent = parent
-      end,
       update = function(self)
-        local p = self.parent
+        local p = parent
         local size = p.stats:get('pickupRadius')
         local CollisionGroups = require 'modules.collision-groups'
         local collisionWorlds = require 'components.collision-worlds'
