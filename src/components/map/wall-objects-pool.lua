@@ -13,7 +13,7 @@ local function generateWallObjects(gridSize, cacheSize)
         ox = 0,
         oy = 0,
         gridSize = gridSize
-      }):setParent(Component.get('MAIN_SCENE'))
+      }):setParent(Component.get('MainMap'))
     )
   end
 

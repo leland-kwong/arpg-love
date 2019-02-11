@@ -29,10 +29,7 @@ function NpcInfo.init(self)
   local nameTextWidth, nameTextHeight = GuiText.getTextSize('Foobar', textLayer.font)
   local w, h = 200, 15
   local y = self.y + nameTextHeight + 2
-  local windowW, windowH = windowSize()
-  local x = Position.boxCenterOffset(w, h, windowW, windowH)
   self.statusBar = StatusBar.create({
-    x = x,
     y = y,
     w = w,
     h = h,

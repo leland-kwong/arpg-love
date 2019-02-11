@@ -13,6 +13,16 @@ local HealthIndicator = {
   fillDirection = 1,
 }
 
+local function windowSize()
+  local config = require 'config.config'
+  return love.graphics.getWidth() / config.scale, love.graphics.getHeight() / config.scale
+end
+
+function HealthIndicator.update(self)
+  local windowW, windowH = windowSize()
+  self.x = Position.boxCenterOffset(self.w, self.h, windowW, windowH)
+end
+
 function HealthIndicator.draw(self)
   -- background
   love.graphics.setColor(0, 0, 0, 0.7)

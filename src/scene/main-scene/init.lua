@@ -80,6 +80,7 @@ function MainScene.init(self)
 
   local function setupMapComponent()
     MainMap.create({
+      id = 'MainMap',
       camera = camera,
       mapId = mapId
     }):setParent(parent)
@@ -89,6 +90,15 @@ function MainScene.init(self)
     msgBus.on('SET_CONFIG', function(propsChanged)
       if propsChanged.scale then
         setupMapComponent()
+
+        local playerRef = Component.get('PLAYER')
+        local x,y = playerRef.x, playerRef.y
+        playerRef:delete(true)
+        Player.create({
+          x = x,
+          y = y,
+          mapGrid = mapGrid
+        }):setParent(parent)
       end
     end, 2),
 
