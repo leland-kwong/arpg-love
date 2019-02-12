@@ -35,7 +35,8 @@ Component.create({
 local MainScene = {
   id = 'MAIN_SCENE',
   group = groups.firstLayer,
-  zoneTitle = 'Aureus',
+  location = {},
+  playerStartPosition = nil,
 
   -- options
   isNewGame = false
@@ -87,20 +88,26 @@ function MainScene.init(self)
   end
 
   self.listeners = {
-    msgBus.on('SET_CONFIG', function(propsChanged)
-      if propsChanged.scale then
-        setupMapComponent()
-
-        local playerRef = Component.get('PLAYER')
-        local x,y = playerRef.x, playerRef.y
-        playerRef:delete(true)
-        Player.create({
-          x = x,
-          y = y,
-          mapGrid = mapGrid
-        }):setParent(parent)
+    msgBus.on('SET_CONFIG', function(props)
+      -- reload the scene when scale has changed
+      if props.scale then
+        local tick = require 'utils.tick'
+        -- HACK: we need a timeout delay since it seems like config properties don't get set before we replace the scane
+        tick.delay(function()
+          local playerRef = Component.get('PLAYER')
+          msgBus.send(msgBus.SCENE_STACK_REPLACE, {
+            scene = require 'scene.main-scene',
+            props = {
+              location = self.location,
+              playerStartPosition = {
+                x = playerRef.x,
+                y = playerRef.y
+              }
+            }
+          })
+        end, 0.1)
       end
-    end, 2),
+    end, 10),
 
     msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
       msgBus.send(msgBus.EXPERIENCE_GAIN, math.floor(msgValue.experience))
@@ -166,9 +173,12 @@ function MainScene.init(self)
   end
 
   local lastPortal = globalState.playerPortal
-  local playerStartPos = self.location.from == 'player' and
-    (lastPortal.mapId == mapId) and
-    lastPortal.position
+  local playerStartPos = self.playerStartPosition or
+    (
+      self.location.from == 'player' and
+      (lastPortal.mapId == mapId) and
+      lastPortal.position
+    )
 
   if (not playerStartPos) then
     if self.exitId then
