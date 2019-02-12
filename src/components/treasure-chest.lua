@@ -111,7 +111,6 @@ return Component.createFactory({
 
     self.interactNode = Gui.create({
       group = 'all',
-      inputContext = 'treasureChest',
       x = parent.x - bodyWidth/2,
       y = parent.y - 15,
       width = bodyWidth,
@@ -128,6 +127,7 @@ return Component.createFactory({
         local globalState = require 'main.global-state'
         parent.canOpen = (not parent.state.opened) and
           globalState.interactableList[self]
+        self.inputContext = parent.canOpen and 'treasureChest' or 'any'
       end
     }):setParent(self)
 
