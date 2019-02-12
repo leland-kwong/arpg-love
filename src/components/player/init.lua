@@ -187,6 +187,36 @@ local function updateEnergyRegeneration(energyRegeneration)
   })
 end
 
+local function InteractCollisionController(parent)
+   -- player interact collision
+  Component.create({
+    group = 'all',
+    init = function(self)
+      local LOS = require 'modules.line-of-sight'
+      self.los = LOS()
+      self.losFilter = function(item)
+        return CollisionGroups.matches(item.group, 'obstacle') and
+          (not CollisionGroups.matches(item.group, 'interact'))
+      end
+    end,
+    update = function(self)
+      local p = parent
+      local size = p.stats:get('pickupRadius')
+      local collisionWorlds = require 'components.collision-worlds'
+      gsa('clearInteractableList')
+      collisionWorlds.gui:queryRect(p.x - size/2, p.y - size/2, size, size, function(item)
+        local ip = item.parent
+        local isInteractable = CollisionGroups.matches(item.group, 'interact') and
+          self.los(p.x, p.y, ip.x, ip.y, self.losFilter)
+        if isInteractable then
+          gsa('setInteractable', ip)
+        end
+        return false
+      end)
+    end
+  }):setParent(parent)
+end
+
 local Player = {
   id = 'PLAYER',
   autoSave = config.autoSave,
@@ -480,33 +510,7 @@ local Player = {
       self.colObj.oy
     ):addToWorld(collisionWorlds.player)
 
-    -- player interact collision
-    Component.create({
-      group = 'all',
-      init = function(self)
-        local LOS = require 'modules.line-of-sight'
-        self.los = LOS()
-        self.losFilter = function(item)
-          return CollisionGroups.matches(item.group, 'obstacle') and
-            (not CollisionGroups.matches(item.group, 'interact'))
-        end
-      end,
-      update = function(self)
-        local p = parent
-        local size = p.stats:get('pickupRadius')
-        local collisionWorlds = require 'components.collision-worlds'
-        gsa('clearInteractableList')
-        collisionWorlds.gui:queryRect(p.x - size/2, p.y - size/2, size, size, function(item)
-          local ip = item.parent
-          local isInteractable = CollisionGroups.matches(item.group, 'interact') and
-            self.los(p.x, p.y, ip.x, ip.y, self.losFilter)
-          if isInteractable then
-            gsa('setInteractable', ip)
-          end
-          return false
-        end)
-      end
-    }):setParent(self)
+    InteractCollisionController(self)
 
     WeaponCore.create({
       x = self.x,
