@@ -250,7 +250,9 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   init = function(self)
     self.grid = Dungeon:getData(self.mapId).grid
     self.tileDefs = generatedTileDefinitionsByMapId:get(self.mapId)
-    Background.create()
+    Background.create({
+      id = 'LevelBackground'
+    })
     self.collisionObjectsHash = setupCollisionObjects(self, self.grid, self.gridSize)
 
     local cacheSize = 1200
