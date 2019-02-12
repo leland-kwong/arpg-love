@@ -23,7 +23,7 @@ local speed = 50
 psystem:setSpeed(-speed, speed)
 local acceleration = 100
 psystem:setLinearAcceleration(-acceleration, -acceleration, acceleration, acceleration) -- move particles in all random directions
-psystem:setSizes(1, 1, 1, 2)
+psystem:setSizes(2, 3)
 psystem:setSizeVariation(1)
 psystem:setEmissionArea('ellipse', 5, 5, 0, true)
 
