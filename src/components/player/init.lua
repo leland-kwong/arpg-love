@@ -199,7 +199,7 @@ local Player = {
 
   showHealing = true,
   inherentStats = {
-    pickupRadius = 10 * config.gridSize,
+    pickupRadius = 5 * config.gridSize,
     health = 1,
     energy = 1,
   },
@@ -664,7 +664,7 @@ local function handleAbilities(self, dt)
     )) or
     InputContext.contains('any') or
     (
-      (InputContext.contains('loot treasureChest')) and
+      (InputContext.contains('loot')) and
       (not canInteractWithItem(self, self.state.itemHovered or self.state.environmentInteractHovered))
     )
   self.isAlreadyAttacking = canUseAbility
