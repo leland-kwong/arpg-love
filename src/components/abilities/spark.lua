@@ -18,14 +18,14 @@ local psystem = love.graphics.newParticleSystem(AnimationFactory.atlas, 500)
 psystem:setQuads(animation.sprite)
 psystem:setOffset(animation:getOffset())
 -- spread 360 degrees
-psystem:setSpread(-math.pi * 2, math.pi * 2)
-local speed = 50
-psystem:setSpeed(-speed, speed)
-local acceleration = 100
-psystem:setLinearAcceleration(-acceleration, -acceleration, acceleration, acceleration) -- move particles in all random directions
+-- psystem:setSpread(-math.pi * 2, math.pi * 2)
+local speed = 10
+psystem:setSpeed(0, speed)
+local acceleration = 60
+psystem:setLinearAcceleration(0, 0, 0, acceleration) -- move particles in all random directions
 psystem:setSizes(2, 3)
 psystem:setSizeVariation(1)
-psystem:setEmissionArea('ellipse', 5, 5, 0, true)
+psystem:setEmissionArea('ellipse', 10, 10, 0, true)
 
 -- particle system
 local ParticleSystem = {}
@@ -53,16 +53,15 @@ function Spark.init(self)
   Component.addToGroup(self, 'all')
   Component.addToGroup(self, 'gameWorld')
 
-  psystem:setParticleLifetime(0.25, self.maxLifeTime)
+  psystem:setParticleLifetime(0.30, self.maxLifeTime)
   local col = self.color
   psystem:setColors(
-    col[1], col[2], col[3], 0.1,
-    col[1], col[2], col[3], 1,
-    1, 1, 1, 0.75,
-    1, 1, 1, 0
+    1, 1, 1, 1,
+    col[1], col[2], col[3], 0.5,
+    col[1], col[2], col[3], 0
   )
   psystem:setPosition(self.x, self.y)
-  psystem:emit(30)
+  psystem:emit(20)
 
   self.clock = 0
 end
