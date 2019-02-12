@@ -525,13 +525,13 @@ function drawSprite(self, ox, oy)
   love.graphics.draw(
     atlas,
     self.animation.sprite,
-    round(self.x),
-    round(self.y - self.z),
+    (self.x),
+    (self.y - self.z),
     0,
     self.facingDirectionX,
     1,
-    round(ox),
-    round(oy)
+    (ox),
+    (oy)
   )
 end
 

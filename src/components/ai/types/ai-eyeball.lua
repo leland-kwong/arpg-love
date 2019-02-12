@@ -120,7 +120,7 @@ function FrostShot.update(self, state)
   end
 end
 
-local heightChange = 4
+local heightChange = 2
 local mt = {
   type = 'ai-eyeball',
   -- debug = true,
