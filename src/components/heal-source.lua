@@ -52,10 +52,10 @@ local function updateProperty(self, changeAmount, property, maxProperty)
 	if (changeAmount == 0) then
 		return
 	end
-  local curProp = self[property]
-  local maxProp = self.stats:get(maxProperty)
-	local newVal = max(0, min(maxProp, curProp + changeAmount))
-	self[property] = newVal
+  local curProp = self.stats:get(property)
+	local maxProp = self.stats:get(maxProperty)
+	local actualHealAmount = max(0, min(maxProp - curProp, changeAmount))
+	self.stats:add(property, actualHealAmount)
 end
 
 function HealSource.add(self, healSource)

@@ -122,7 +122,7 @@ local function ActiveEquipmentHandler()
       -- time an attack takes to finish (triggers a global cooldown)
       local playerRef = Component.get('PLAYER')
       local enoughEnergy = (energyCost == nil) or
-        (energyCost <= playerRef.energy)
+        (energyCost <= playerRef.stats:get('energy'))
       if (not enoughEnergy) then
         msgBus.send(msgBus.PLAYER_ACTION_ERROR, 'not enough energy')
         return skill
@@ -170,7 +170,7 @@ local function ActiveEquipmentHandler()
 
       local actualEnergyCost = energyCost -
         (energyCost * playerRef.stats:get('energyCostReduction'))
-      playerRef.energy = playerRef.energy - actualEnergyCost
+      playerRef.stats:add('energy', -actualEnergyCost)
       return skill
     end
   end

@@ -16,6 +16,7 @@ local AnimationFactory = require 'components.animation-factory'
 local scale = require 'config.config'.scaleFactor
 local Color = require 'modules.color'
 local config = require 'config.config'
+local Math = require 'utils.math'
 local max = math.max
 
 local Hud = {
@@ -150,12 +151,12 @@ function Hud.init(self)
 
   local function getHealthRemaining()
     local playerRef = Component.get('PLAYER')
-    return playerRef.stats:get('health') / playerRef.stats:get('maxHealth')
+    return Math.clamp(playerRef.stats:get('health') / playerRef.stats:get('maxHealth'), 0, 1)
   end
 
   local function getEnergyRemaining()
     local playerRef = Component.get('PLAYER')
-    return playerRef.stats:get('energy') / playerRef.stats:get('maxEnergy')
+    return Math.clamp(playerRef.stats:get('energy') / playerRef.stats:get('maxEnergy'), 0, 1)
   end
 
   -- health bar
@@ -282,8 +283,7 @@ function Hud.init(self)
   self.listeners = {
     msgBus.on(msgBus.PLAYER_HIT_RECEIVED, function(msgValue)
       local playerRef = Component.get('PLAYER')
-      playerRef.health = max(0, playerRef.health - msgValue)
-      return msgValue
+      playerRef.stats:add('health', -msgValue)
     end),
     msgBus.on(msgBus.SCENE_CHANGE, function(sceneRef)
       local ZoneInfo = require 'components.hud.zone-info'

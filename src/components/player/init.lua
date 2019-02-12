@@ -153,7 +153,7 @@ local function canInteractWithItem(self, item)
   end
   local calcDist = require'utils.math'.dist
   local dist = calcDist(self.x, self.y, item.x, item.y)
-  local outOfRange = dist > self.pickupRadius
+  local outOfRange = dist > self.stats:get('pickupRadius')
   if outOfRange then
     return false
   end
@@ -196,20 +196,27 @@ local Player = {
   y = startPos.y,
   facingDirectionX = 1,
   facingDirectionY = 1,
-  pickupRadius = 10 * config.gridSize,
 
-  health = 1,
-  energy = 1,
   showHealing = true,
+  inherentStats = {
+    pickupRadius = 10 * config.gridSize,
+    health = 1,
+    energy = 1,
+  },
   baseStats = function(self)
-    self.__index = self
+    local currentStats = self.stats and {
+      health = self.stats:get('health'),
+      energy = self.stats:get('energy'),
+    }
+    local inherentStats = Object.assign({}, self.inherentStats, currentStats)
+    inherentStats.__index = inherentStats
     return setmetatable({
       energyRegeneration = 1,
       maxHealth = 200,
       maxEnergy = 100,
       moveSpeed = 80,
       lightRadius = 50,
-    }, self)
+    }, inherentStats)
   end,
   attackRecoveryTime = 0,
 

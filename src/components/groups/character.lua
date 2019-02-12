@@ -45,8 +45,8 @@ end, 1)
 
 local function showHealing(c, prop, previousProp, accumulatedProp, color, isShowFrame)
   local Math = require 'utils.math'
-  local propertyChange = Math.round(c[prop] - (c[previousProp] or 0))
-  c[previousProp] = c[prop]
+  local propertyChange = Math.round(c.stats:get(prop) - (c[previousProp] or 0))
+  c[previousProp] = c.stats:get(prop)
   local isHealChange = propertyChange > 0
   if (isHealChange) then
     c[accumulatedProp] = (c[accumulatedProp] or 0) + propertyChange
