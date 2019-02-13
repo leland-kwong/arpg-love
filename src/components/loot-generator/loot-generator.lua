@@ -91,12 +91,11 @@ local itemNamesTooltipLayer = Gui.create({
         w = ttWidth,
         h = ttHeight,
         getMousePosition = itemMousePosition,
-        inputContext = 'loot',
-        onPointerMove = function()
-          msgBus.send(msgBus.ITEM_HOVERED, itemParent)
-        end,
+        onClick = function(_, ev) itemParent:onClick(ev) end,
         onUpdate = function(self)
-          tooltip.hovered = self.hovered
+          tooltip.hovered = self.hovered or itemParent.hovered
+          itemParent.hovered = tooltip.hovered
+          self.inputContext = itemParent.inputContext
         end
       })
     end
@@ -323,7 +322,6 @@ function LootGenerator.init(self)
     w = sw,
     h = sh,
     tweenClock = 0,
-    inputContext = 'loot',
     selected = false,
     animationComplete = false,
     eventPriority = eventPriority,
@@ -346,10 +344,11 @@ function LootGenerator.init(self)
       end
     end,
     getMousePosition = itemMousePosition,
-    onPointerMove = function(self)
-      msgBus.send(msgBus.ITEM_HOVERED, self)
-    end,
-    pickup = function()
+    onClick = function(self, ev)
+      local isInteractButton = ev[3] == 1
+      if (not self.canInteract) or (not isInteractButton) then
+        return
+      end
       local _, errorMsg = rootStore:addItemToInventory(item)
       if errorMsg then
         msgBus.send(msgBus.PLAYER_ACTION_ERROR, errorMsg)
@@ -393,6 +392,7 @@ function LootGenerator.init(self)
       end
 
       self.canInteract = globalState.interactableList[self]
+      self.inputContext = self.canInteract and 'loot' or 'any'
     end,
     draw = function(self)
       if (not parent.isInViewOfPlayer) then

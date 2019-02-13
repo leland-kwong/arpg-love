@@ -1,19 +1,19 @@
-local floor, sqrt, pow = math.floor, math.sqrt, math.pow
+local floor, sqrt, pow, min, max = math.floor, math.sqrt, math.pow, math.min, math.max
 
-local math_utils = {}
+local M = {}
 
-function math_utils.round(num, numDecimalPlaces)
+function M.round(num, numDecimalPlaces)
 	local mult = 10^(numDecimalPlaces or 0)
 	return floor(num * mult + 0.5) / mult
 end
 
-function math_utils.dist(x1, y1, x2, y2)
+function M.dist(x1, y1, x2, y2)
 	local a = x2 - x1
 	local b = y2 - y1
 	return sqrt(a*a + b*b)
 end
 
-function math_utils.normalizeVector(a, b)
+function M.normalizeVector(a, b)
 	local c = sqrt(a*a + b*b)
   -- dividing by zero returns a NAN value, so we should coerce to zero
   if c == 0 then
@@ -23,7 +23,7 @@ function math_utils.normalizeVector(a, b)
   end
 end
 
-function math_utils.clamp(v, min, max)
+function M.clamp(v, min, max)
 	if (v < min) then
 		return min
 	end
@@ -33,15 +33,21 @@ function math_utils.clamp(v, min, max)
 	return v
 end
 
-function math_utils.sign(v)
+function M.sign(v)
 	if v == 0 then
 		return 0
 	end
 	return v > 0 and 1 or -1
 end
 
-function math_utils.calcPulse(freq, time)
+function M.calcPulse(freq, time)
   return 0.5 * math.sin(freq * time) + 0.5
 end
 
-return math_utils
+function M.isRectangleWithinRadius(circleX, circleY, circleR, rectX, rectY, rectWidth, rectHeight)
+  local nearestX = max(rectX, min(circleX, rectX + rectWidth))
+  local nearestY = max(rectY, min(circleY, rectY + rectHeight))
+  return circleR >= M.dist(circleX, circleY, nearestX, nearestY)
+end
+
+return M

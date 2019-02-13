@@ -14,7 +14,6 @@ local Position = require 'utils.position'
 local Map = require 'modules.map-generator.index'
 local Color = require 'modules.color'
 local memoize = require 'utils.memoize'
-local LineOfSight = memoize(require'modules.line-of-sight')
 local Math = require 'utils.math'
 local WeaponCore = require 'components.player.weapon-core'
 local InventoryController = require 'components.item-inventory.controller'
@@ -147,24 +146,6 @@ msgBus.on(msgBus.PLAYER_FULL_HEAL, function()
   })
 end)
 
-local function canInteractWithItem(self, item)
-  if (not item) then
-    return false
-  end
-  local calcDist = require'utils.math'.dist
-  local dist = calcDist(self.x, self.y, item.x, item.y)
-  local outOfRange = dist > self.stats:get('pickupRadius')
-  if outOfRange then
-    return false
-  end
-  local gridX1, gridY1 = Position.pixelsToGridUnits(self.x, self.y, config.gridSize)
-  local gridX2, gridY2 = Position.pixelsToGridUnits(item.x, item.y, config.gridSize)
-  local canWalkToItem = self.mapGrid and
-    LineOfSight(self.mapGrid, Map.WALKABLE)(gridX1, gridY1, gridX2, gridY2) or
-    (not self.mapGrid and true)
-  return canWalkToItem
-end
-
 local function updateHealthRegeneration(healthRegeneration)
   local healthRegenerationDuration = math.pow(10, 10)
   msgBus.send(msgBus.PLAYER_HEAL_SOURCE_ADD, {
@@ -188,31 +169,49 @@ local function updateEnergyRegeneration(energyRegeneration)
 end
 
 local function InteractCollisionController(parent)
+  local LOS = require 'modules.line-of-sight'
+  local los = LOS()
+  local losFilter = function(item)
+    return CollisionGroups.matches(item.group, 'obstacle') and
+      (not CollisionGroups.matches(item.group, 'interact'))
+  end
+
+  local interactCollisionFilter = function(item, other)
+    local p = parent
+    local ip = other.parent
+    local isInteractable = CollisionGroups.matches(other.group, 'interact')
+    if isInteractable then
+      return 'cross'
+    end
+    return false
+  end
+
    -- player interact collision
   Component.create({
     group = 'all',
     init = function(self)
-      local LOS = require 'modules.line-of-sight'
-      self.los = LOS()
-      self.losFilter = function(item)
-        return CollisionGroups.matches(item.group, 'obstacle') and
-          (not CollisionGroups.matches(item.group, 'interact'))
-      end
+      local p = parent
+      local size = p.stats:get('pickupRadius') * 2
+      self.collision = self:addCollisionObject('invisible', p.x, p.y, size, size, size/2, size/2)
+        :addToWorld('gui')
     end,
     update = function(self)
-      local p = parent
-      local size = p.stats:get('pickupRadius')
       local collisionWorlds = require 'components.collision-worlds'
       gsa('clearInteractableList')
-      collisionWorlds.gui:queryRect(p.x - size/2, p.y - size/2, size, size, function(item)
-        local ip = item.parent
-        local isInteractable = CollisionGroups.matches(item.group, 'interact') and
-          self.los(p.x, p.y, ip.x, ip.y, self.losFilter)
-        if isInteractable then
+      self.collision:update(parent.x, parent.y)
+      local _,_,cols,len = self.collision:check(parent.x, parent.y, interactCollisionFilter)
+      local p = parent
+      local pickupRadius = parent.stats:get('pickupRadius')
+      for i=1, len do
+        local c = cols[i]
+        local o = c.other
+        local ip = c.other.parent
+        local canInteract = los(p.x, p.y, ip.x, ip.y, losFilter) and
+          Math.isRectangleWithinRadius(p.x, p.y, pickupRadius, o.x, o.y, o.w, o.h)
+        if canInteract then
           gsa('setInteractable', ip)
         end
-        return false
-      end)
+      end
     end
   }):setParent(parent)
 end
@@ -229,7 +228,7 @@ local Player = {
 
   showHealing = true,
   inherentStats = {
-    pickupRadius = 5 * config.gridSize,
+    pickupRadius = 3 * config.gridSize,
     health = 1,
     energy = 1,
   },
@@ -260,7 +259,6 @@ local Player = {
   init = function(self)
     local parent = self
     local state = {
-      itemHovered = nil,
       environmentInteractHovered = nil
     }
     self.state = state
@@ -272,11 +270,6 @@ local Player = {
       actsOn = 'PLAYER'
     })
     self.listeners = {
-      msgBus.on('INTERACT_ENVIRONMENT_OBJECT', function(item)
-        self.state.environmentInteractHovered = item
-        return canInteractWithItem(self, item)
-      end),
-
       msgBus.on(msgBus.GENERATE_LOOT, function(msgValue)
         local LootGenerator = require'components.loot-generator.loot-generator'
         local x, y, item = unpack(msgValue)
@@ -421,35 +414,6 @@ local Player = {
         )
       end),
 
-      msgBus.on(msgBus.ITEM_HOVERED, function(item)
-        state.itemHovered = item
-      end),
-
-      msgBus.on(msgBus.MOUSE_PRESSED, function(msg)
-        local isLeftClick = msg[3] == 1
-        if (isLeftClick and state.itemHovered) then
-          local pickupSuccess = msgBus.send(msgBus.ITEM_PICKUP, state.itemHovered)
-          if pickupSuccess then
-            state.itemHovered = nil
-          end
-        end
-      end),
-
-      msgBus.on(msgBus.ITEM_PICKUP, function(msg)
-        local item = msg
-        if canInteractWithItem(self, item) then
-          local pickupSuccess = item:pickup()
-          if pickupSuccess then
-            msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, true)
-            msgBus.on(msgBus.MOUSE_RELEASED, function()
-              msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
-              return msgBus.CLEANUP
-            end)
-          end
-          return pickupSuccess
-        end
-        return false
-      end)
     }
     connectAutoSave(self)
     self.hudRoot = Component.create({
@@ -662,15 +626,12 @@ local function handleAbilities(self, dt)
     love.mouse.isDown(mouseInputMap.SKILL_4)
   local isMoveBoostActivate = love.keyboard.isDown(keyMap.MOVE_BOOST) or
     (mouseInputMap.MOVE_BOOST and love.mouse.isDown(mouseInputMap.MOVE_BOOST))
+  local isRequestingToTriggerAction = isSkill1Activate or isSkill2Activate or isSkill3Activate or isSkill4Activate
+  local isInteractButton = love.mouse.isDown(1)
   local canUseAbility =
-    (self.isAlreadyAttacking and (
-      isSkill1Activate or isSkill2Activate or isSkill3Activate or isSkill4Activate
-    )) or
+    (self.isAlreadyAttacking and isRequestingToTriggerAction) or
     InputContext.contains('any') or
-    (
-      (InputContext.contains('loot')) and
-      (not canInteractWithItem(self, self.state.itemHovered or self.state.environmentInteractHovered))
-    )
+    (isRequestingToTriggerAction and (not isInteractButton))
   self.isAlreadyAttacking = canUseAbility
   if canUseAbility then
     -- SKILL_1
@@ -736,7 +697,6 @@ local function updateLightWorld(camera)
 end
 
 local function resetInteractStates(self)
-  self.state.itemHovered = nil
   self.state.environmentInteractHovered = nil
 end
 
