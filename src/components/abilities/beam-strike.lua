@@ -59,8 +59,9 @@ function createBeam(x1, y1, animationSpeed, frameRate)
 end
 
 local BeamStrike = {
+  debug = true,
   group = groups.all,
-  delay = 0.25, -- impact delay
+  delay = 1, -- impact delay
   radius = 20,
   opacity = 1,
   drawOrder = function()
@@ -157,10 +158,11 @@ function BeamStrike.draw(self)
   love.graphics.setBlendMode('alpha', 'premultiplied')
   love.graphics.push()
   love.graphics.origin()
-  love.graphics.scale(config.scale)
   love.graphics.setCanvas(self.canvas)
   love.graphics.clear()
+  love.graphics.scale(config.scale)
 
+  love.graphics.setColor(1,1,1)
   -- draw rotated sprites to canvas first
   local _, _, glyphWidth, glyphHeight = animationOuter.sprite:getViewport()
   local glyphOx, glyphOy = animationOuter:getSourceOffset()
@@ -193,7 +195,7 @@ function BeamStrike.draw(self)
   love.graphics.pop()
   love.graphics.setBlendMode('alpha')
 
-  local canvasX, canvasY = self.x - glyphX - glyphWidth/2, self.y - glyphY - glyphHeight/2
+  local canvasX, canvasY = self.x - glyphX * config.scale, self.y - glyphY * config.scale
   -- scale in y direction to get perspective
   local yOffset = (1 - self.scale.y) * glyphHeight
   love.graphics.draw(self.canvas, canvasX, canvasY + yOffset, 0, 1, self.scale.y)
@@ -206,6 +208,10 @@ end
 
 function BeamStrike.drawOrder()
   return 2
+end
+
+function BeamStrike.final(self)
+  self.canvas:release()
 end
 
 return Component.createFactory(BeamStrike)
