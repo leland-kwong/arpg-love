@@ -267,6 +267,12 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
     self.floorCanvas = love.graphics.newCanvas(width, height)
     self.wallsCanvas = love.graphics.newCanvas(width, height)
     self.shadowsCanvas = love.graphics.newCanvas(width, height)
+    self.canvases = {
+      self.crossSectionCanvas,
+      self.floorCanvas,
+      self.wallsCanvas,
+      self.shadowsCanvas
+    }
   end,
 
   onUpdateStart = function(self)
@@ -422,6 +428,13 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
 
   drawOrder = function()
     return 2
+  end,
+
+  final = function(self)
+    print('cleanup main map')
+    for _,c in ipairs(self.canvases) do
+      c:release()
+    end
   end
 })
 

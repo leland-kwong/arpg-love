@@ -82,4 +82,8 @@ function StarField.drawOrder()
   return 1
 end
 
+function StarField.final(self)
+  self.canvas:release()
+end
+
 return Component.createFactory(StarField)

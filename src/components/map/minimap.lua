@@ -113,6 +113,10 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
 
     self.canvas = love.graphics.newCanvas(4096, 4096)
     self.dynamicBlocksCanvas = love.graphics.newCanvas(4096, 4096)
+    self.cleanup = function()
+      self.canvas:release()
+      self.dynamicBlocksCanvas:release()
+    end
 
     local x,y,w,h = self:getRectangle()
     self.stencil = function()
@@ -215,6 +219,10 @@ function MiniMap.serialize(self)
   return objectUtils.immutableApply(self.initialProps, {
     visitedIndices = self.visitedIndices
   })
+end
+
+function MiniMap.final(self)
+  self:cleanup()
 end
 
 return Component.createFactory(MiniMap)

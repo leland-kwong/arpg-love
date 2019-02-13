@@ -78,4 +78,8 @@ function ZoneInfo.draw(self)
   love.graphics.draw(self.textCanvas, x - tx, finalY - ty)
 end
 
+function ZoneInfo.final(self)
+  self.textCanvas:release()
+end
+
 return Component.createFactory(ZoneInfo)
