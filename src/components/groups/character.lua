@@ -52,7 +52,7 @@ local function showHealing(c, prop, previousProp, accumulatedProp, color, isShow
     c[accumulatedProp] = (c[accumulatedProp] or 0) + propertyChange
   end
 
-  local roundedTotal = Math.round(c[accumulatedProp])
+  local roundedTotal = Math.round(c[accumulatedProp] or 0)
   if isShowFrame and (roundedTotal > 0) then
     local popupText = Component.get('popupText')
     popupText:new(roundedTotal, c.x, c.y - c.h, nil, color)
