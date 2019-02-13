@@ -172,45 +172,43 @@ local function InteractCollisionController(parent)
   local LOS = require 'modules.line-of-sight'
   local los = LOS()
   local losFilter = function(item)
-    return CollisionGroups.matches(item.group, 'obstacle') and
-      (not CollisionGroups.matches(item.group, 'interact'))
+    local matches = CollisionGroups.matches
+    return matches(item.group, 'obstacle')
   end
 
-  local interactCollisionFilter = function(item, other)
+  local isWithinLineOfSight = function(p, o)
+    local nearestX, nearestY = Math.nearestBoxPoint(p.x, p.y, o.x, o.y, o.w, o.h)
+    return los(p.x, p.y, nearestX, nearestY, losFilter)
+  end
+
+  local interactCollisionFilter = function(item)
     local p = parent
-    local ip = other.parent
-    local isInteractable = CollisionGroups.matches(other.group, 'interact')
+    local o = item
+    local pickupRadius = parent.stats:get('pickupRadius')
+    local isInteractable = CollisionGroups.matches(item.group, 'interact')
+      and Math.isRectangleWithinRadius(p.x, p.y, pickupRadius, o.x, o.y, o.w, o.h)
+      and isWithinLineOfSight(parent, item)
+
     if isInteractable then
-      return 'cross'
+      return true
     end
+
     return false
   end
 
    -- player interact collision
   Component.create({
     group = 'all',
-    init = function(self)
+    update = function(self)
       local p = parent
       local size = p.stats:get('pickupRadius') * 2
-      self.collision = self:addCollisionObject('invisible', p.x, p.y, size, size, size/2, size/2)
-        :addToWorld('gui')
-    end,
-    update = function(self)
+
       local collisionWorlds = require 'components.collision-worlds'
       gsa('clearInteractableList')
-      self.collision:update(parent.x, parent.y)
-      local _,_,cols,len = self.collision:check(parent.x, parent.y, interactCollisionFilter)
-      local p = parent
-      local pickupRadius = parent.stats:get('pickupRadius')
+      local items,len = collisionWorlds.gui:queryRect(parent.x - size/2, parent.y - size/2, size, size, interactCollisionFilter)
       for i=1, len do
-        local c = cols[i]
-        local o = c.other
-        local ip = c.other.parent
-        local canInteract = los(p.x, p.y, ip.x, ip.y, losFilter) and
-          Math.isRectangleWithinRadius(p.x, p.y, pickupRadius, o.x, o.y, o.w, o.h)
-        if canInteract then
-          gsa('setInteractable', ip)
-        end
+        local it = items[i]
+        gsa('setInteractable', it.parent)
       end
     end
   }):setParent(parent)

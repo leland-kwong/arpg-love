@@ -431,7 +431,6 @@ local blueprint = objectUtils.assign({}, mapBlueprint, {
   end,
 
   final = function(self)
-    print('cleanup main map')
     for _,c in ipairs(self.canvases) do
       c:release()
     end

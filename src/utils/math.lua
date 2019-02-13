@@ -45,9 +45,15 @@ function M.calcPulse(freq, time)
 end
 
 function M.isRectangleWithinRadius(circleX, circleY, circleR, rectX, rectY, rectWidth, rectHeight)
-  local nearestX = max(rectX, min(circleX, rectX + rectWidth))
-  local nearestY = max(rectY, min(circleY, rectY + rectHeight))
+  local nearestX, nearestY = M.nearestBoxPoint(circleX, circleY, rectX, rectY, rectWidth, rectHeight)
   return circleR >= M.dist(circleX, circleY, nearestX, nearestY)
+end
+
+-- returns the point on a rectangle closest to the provided point
+function M.nearestBoxPoint(x1, y1, rectX, rectY, rectWidth, rectHeight)
+	local nearestX = max(rectX, min(x1, rectX + rectWidth))
+	local nearestY = max(rectY, min(y1, rectY + rectHeight))
+	return nearestX, nearestY
 end
 
 return M
