@@ -36,8 +36,8 @@ local BigNotifier = {
     if self.clock >= self.hideDelay then
       self.tween = self.tween or Component.animate(self, {
         opacity = 0,
-        scale = 1.2
-      }, self.duration, 'outQuad', function()
+        scale = 0.9
+      }, self.duration, 'outQuad', nil, function()
         self:delete()
       end)
     end
