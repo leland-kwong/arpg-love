@@ -273,8 +273,6 @@ function ActiveSkillInfo.init(self)
       return value
     end)
   }
-
-  self.canvas = love.graphics.newCanvas()
 end
 
 function ActiveSkillInfo.update(self, dt)
