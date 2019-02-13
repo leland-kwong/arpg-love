@@ -160,7 +160,6 @@ function BeamStrike.draw(self)
   love.graphics.origin()
   love.graphics.setCanvas(self.canvas)
   love.graphics.clear()
-  love.graphics.scale(config.scale)
 
   love.graphics.setColor(1,1,1)
   -- draw rotated sprites to canvas first
@@ -185,7 +184,7 @@ function BeamStrike.draw(self)
     animationInner.sprite,
     glyphX,
     glyphY,
-    self.angle * -1 / 2,
+    self.angle * -2,
     1, 1,
     ox,
     oy
@@ -195,10 +194,13 @@ function BeamStrike.draw(self)
   love.graphics.pop()
   love.graphics.setBlendMode('alpha')
 
-  local canvasX, canvasY = self.x - glyphX * config.scale, self.y - glyphY * config.scale
+  local canvasX, canvasY = self.x - glyphX, self.y - glyphY
   -- scale in y direction to get perspective
-  local yOffset = (1 - self.scale.y) * glyphHeight
-  love.graphics.draw(self.canvas, canvasX, canvasY + yOffset, 0, 1, self.scale.y)
+  local yOffset = (1 - self.scale.y) * glyphHeight/2
+  love.graphics.push()
+  love.graphics.translate(0, yOffset)
+  love.graphics.draw(self.canvas, canvasX, canvasY, 0, 1, self.scale.y)
+  love.graphics.pop()
 
   if self.debug then
     love.graphics.setColor(1,0.5,1)
