@@ -14,26 +14,6 @@ local guiTextLayer = GuiText.create({
 local profileData = {}
 local totalAverageExecutionTime = 0
 
-msgBus.on(msgBus.PROFILE_FUNC, function(profileProps)
-  return require 'utils.perf'({
-    resetEvery = 1000,
-    done = function(_, totalTime, callCount)
-      if (not config.enableConsole) then
-        return
-      end
-
-      local averageTime = totalTime / callCount
-      totalAverageExecutionTime = totalAverageExecutionTime + averageTime
-      local passedThreshold = averageTime <= (profileProps.threshold or 0.1)
-      if passedThreshold then
-        return
-      end
-      table.insert(profileData, Color.WHITE)
-      table.insert(profileData, profileProps.name..' '..string.format('%0.2f', averageTime)..'\n')
-    end
-  })(profileProps.call)
-end)
-
 local function profileFn(groupName, callback)
   return require'utils.perf'({
     resetEvery = 1000,

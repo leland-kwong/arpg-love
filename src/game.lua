@@ -70,10 +70,7 @@ function love.load()
   end
 end
 
-local characterSystem = msgBus.send(msgBus.PROFILE_FUNC, {
-  name = 'character',
-  call = require 'components.groups.character'
-})
+local characterSystem = require 'components.groups.character'
 
 function love.update(dt)
   gsa('updateGameClock', dt)
