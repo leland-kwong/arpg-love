@@ -46,7 +46,7 @@ local floor = math.floor
 function GuiTextLayer.add(self, text, color, x, y)
   self.tablePool[1] = color
   self.tablePool[2] = text
-  self.textGraphic:add(self.tablePool, floor(x), floor(y))
+  self.textGraphic:add(self.tablePool, x, y)
 end
 
 function GuiTextLayer.addf(self, formattedText, wrapLimit, alignMode, x, y)
@@ -54,8 +54,8 @@ function GuiTextLayer.addf(self, formattedText, wrapLimit, alignMode, x, y)
     formattedText, -- [TABLE]
     wrapLimit,
     alignMode or 'left',
-    floor(x),
-    floor(y)
+    x,
+    y
   )
 end
 

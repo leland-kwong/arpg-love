@@ -15,6 +15,7 @@ local primaryFont = require'components.font'.primary
 
 function PlayerStatsPanel.init(self)
   local parent = self
+  Component.addToGroup(self, 'pixelRound')
   Gui.create({
     id = 'StatsPanelRegion',
     x = parent.x,
