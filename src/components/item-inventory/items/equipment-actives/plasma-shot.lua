@@ -23,11 +23,7 @@ return itemSystem.registerModule({
 				minDamage = props.minDamage,
 				maxDamage = props.maxDamage,
 				color = bulletColor,
-				targetGroup = collisionGroups.create(
-					collisionGroups.enemyAi,
-					collisionGroups.environment,
-					collisionGroups.obstacle
-				),
+				targetGroup = 'enemyAi environment obstacle',
 				startOffset = weaponLength,
 				speed = 400,
 			}

@@ -25,7 +25,7 @@ local function findNearestTarget(
       width,
       height,
       function(item)
-        if collisionGroups.matches(item.group, collisionGroups.create(collisionGroups.enemyAi, collisionGroups.environment)) then
+        if collisionGroups.matches(item.group, 'enemyAi environment') then
           local target = item.parent
           local isValidTarget = filter(target)
           if isValidTarget and los then

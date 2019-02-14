@@ -21,10 +21,7 @@ return itemSystem.registerModule({
         group = 'all',
         damage = props.damage,
         coldDamage = props.coldDamage,
-				target = collisionGroups.create(
-					collisionGroups.enemyAi,
-					collisionGroups.environment
-        ),
+				target = 'enemyAi environment',
         speed = 150,
         projectileSpeed = 250,
         projectileRate = 5,

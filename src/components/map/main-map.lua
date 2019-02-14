@@ -243,7 +243,7 @@ end
 
 local blueprint = objectUtils.assign({}, mapBlueprint, {
   group = groups.firstLayer,
-  class = collisionGroups.mainMap,
+  class = 'mainMap',
 
   isEmptyTile = Dungeon.isEmptyTile,
 

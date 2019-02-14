@@ -188,7 +188,7 @@ return itemSystem.registerType({
 							width * 2,
 							height * 2,
 							function(item)
-								if collisionGroups.matches(item.group, collisionGroups.create(collisionGroups.enemyAi, collisionGroups.environment)) then
+								if collisionGroups.matches(item.group, 'enemyAi environment') then
 									msgBus.send(msgBus.CHARACTER_HIT, {
 										parent = item.parent,
 										damage = math.random(

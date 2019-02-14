@@ -45,7 +45,7 @@ local function triggerHit(self)
   for i=1, #self.hitPositions do
     local point = self.hitPositions[i]
     local collisionGroups = require 'modules.collision-groups'
-    local cGroup = collisionGroups.create('enemyAi', 'environment')
+    local cGroup = 'enemyAi environment'
     local items, len = cWorld:querySegment(x, y, point.x, point.y, function(item)
       if (not item.parent) then
         return

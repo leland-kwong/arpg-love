@@ -653,17 +653,6 @@ function Ai.init(self)
   self.neighborFilter = function(item)
     return collisionGroups.matches(item.group, self.class)
   end
-  self.collisionFilter = function(item, other)
-    local collisionFilters = collisionGroups.create(
-      'player',
-      self.class,
-      'obstacle'
-    )
-    if collisionGroups.matches(other.group, collisionFilters) then
-      return 'slide'
-    end
-    return false
-  end
 
   -- [[ BASE PROPERTIES ]]
   self.health = self.health or self.stats:get('maxHealth')

@@ -22,11 +22,7 @@ return itemSystem.registerModule({
 			blueprint = require 'components.abilities.chain-lightning',
 			props = {
 				lightningDamage = props.lightningDamage,
-				targetGroup = collisionGroups.create(
-					collisionGroups.enemyAi,
-					collisionGroups.environment,
-					collisionGroups.obstacle
-				),
+				targetGroup = 'enemyAi environment obstacle',
 				range = 6,
 				maxBounces = 2
 			}

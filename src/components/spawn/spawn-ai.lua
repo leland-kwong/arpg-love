@@ -45,7 +45,7 @@ local function getItemPositions(items)
 end
 
 local spawnCollisionFilter = function(item, other)
-  if CollisionGroups.matches(other.group, CollisionGroups.create('obstacle', 'enemyAi')) then
+  if CollisionGroups.matches(other.group, 'obstacle enemyAi') then
     return 'slide'
   end
   return false

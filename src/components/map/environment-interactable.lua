@@ -73,11 +73,8 @@ function EnvironmentInteractable.init(self)
   self.w, self.h = w, h
   self.ox, self.oy = self.animation:getOffset()
   self.x, self.y = self.x + self.ox, self.y + self.oy
-  local cGroup = collisionGroups.create(
-    collisionGroups.environment
-  )
   self.collision = self:addCollisionObject(
-    cGroup,
+    'environment',
     self.x,
     self.y,
     w + 1,

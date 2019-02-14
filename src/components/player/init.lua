@@ -40,10 +40,7 @@ local frameRate = 60
 local DIRECTION_RIGHT = 1
 local DIRECTION_LEFT = -1
 
-local movementCollisionGroup = CollisionGroups.create(
-  'obstacle',
-  'enemyAi'
-)
+local movementCollisionGroup = 'obstacle enemyAi'
 
 local function collisionFilter(item, other)
   if not CollisionGroups.matches(other.group, movementCollisionGroup) then

@@ -4,6 +4,7 @@ local msgBus = require 'components.msg-bus'
 local Lru = require 'utils.lru'
 local Component = require 'modules.component'
 local groups = require 'components.groups'
+local groupMatch = require 'utils.group-match'
 
 local function newSnapshotStorage()
   return Lru.new(100)
@@ -24,18 +25,14 @@ local function makeGlobalState(initialGameState)
         local statesByClass = {}
         local collisionGroups = require 'modules.collision-groups'
         local f = require 'utils.functional'
-        local classesToMatch = collisionGroups.create(
-          collisionGroups.floorItem,
-          collisionGroups.mainMap,
-          collisionGroups.environment
-        )
+        local classesToMatch = 'floorItem mainMap environment'
         local components = f.reduce({
           groups.all.getAll(),
           groups.firstLayer.getAll(),
           Component.groups.disabled.getAll()
         }, function(components, groupComponents)
           for _,c in pairs(groupComponents) do
-            if collisionGroups.matches(c.class or '', classesToMatch) then
+            if groupMatch(c.class or '', classesToMatch) then
               components[c:getId()] = c
             end
           end

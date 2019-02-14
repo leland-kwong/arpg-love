@@ -155,7 +155,7 @@ local itemNamesTooltipLayer = Gui.create({
 
 local function dropItemCollisionFilter(item)
   local collisionGroups = require 'modules.collision-groups'
-  return collisionGroups.matches(item.group, collisionGroups.create('floorItem', 'obstacle'))
+  return collisionGroups.matches(item.group, 'floorItem obstacle')
 end
 
 local LootGenerator = {
