@@ -56,4 +56,8 @@ function M.nearestBoxPoint(x1, y1, rectX, rectY, rectWidth, rectHeight)
 	return nearestX, nearestY
 end
 
+function M.randomSign()
+	return math.random(0, 1) == 0 and 1 or -1
+end
+
 return M
