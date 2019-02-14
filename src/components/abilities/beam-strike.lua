@@ -59,7 +59,7 @@ function createBeam(x1, y1, animationSpeed, frameRate)
 end
 
 local BeamStrike = {
-  debug = true,
+  -- debug = true,
   group = groups.all,
   delay = 1, -- impact delay
   radius = 20,
