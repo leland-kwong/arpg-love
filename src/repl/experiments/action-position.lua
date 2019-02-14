@@ -38,6 +38,21 @@ local getActionPosition = function(startX, startY, targetX, targetY, filter)
   return actualX, actualY
 end
 
+local group = CollisionGroups.create('obstacle', 'interact')
+local groupMatch = LiveReload 'utils.group-match'
+local groupB = {'player enemyAi interact', 'obstacle'}
+for i=1, 10 do
+  local ts = Time()
+  for j=1, 100000 do
+    -- local matches = CollisionGroups.matches(group, CollisionGroups.create('player', 'enemyAi', 'interact'))
+    -- local matches = groupMatch('obstacle interact', 'player enemyAi interact')
+    -- local matches = groupMatch('obstacle interact', 'player enemyAi interact') or
+    --   groupMatch('obstacle interact', 'obstacle')
+    local matches = groupMatch('obstacle interact', {'player', 'enemyAi', 'obstacle'})
+  end
+  print(Time() - ts)
+end
+
 Component.create({
   id = 'actionPositionTesting',
   group = 'gui',
