@@ -39,4 +39,8 @@ function M.escape(s)
     return string.gsub(s, "([^A-Za-z0-9_])", _hex)
 end
 
+function M.trim(s)
+  return (s:gsub("^%s*(.-)%s*$", "%1"))
+end
+
 return M
