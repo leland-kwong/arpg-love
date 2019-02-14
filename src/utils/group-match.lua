@@ -2,11 +2,12 @@
   Checks if a list of words (space-delimited) contains at least one word from another list
 ]]
 
+local F = require 'utils.functional'
+local String = require 'utils.string'
+
 local parsedCache = {}
 
 local function buildGroup(groupString)
-  local F = require 'utils.functional'
-  local String = require 'utils.string'
   local trimmed = String.trim(groupString)
   local split = String.split(trimmed, ' ')
   return {
@@ -29,6 +30,19 @@ local parseGroup = function(groupString)
   return parsed
 end
 
+local function check(groupA, groupB)
+  local hashA = parseGroup(groupA).hash
+  local parsedB = parseGroup(groupB)
+  for i=1, parsedB.length do
+    local itemB = parsedB.list[i]
+    local hasMatch = hashA[itemB] ~= nil
+    if hasMatch then
+      return true
+    end
+  end
+  return false
+end
+
 local function groupMatch(groupA, groupB)
   assert(type(groupA) == 'string', 'group to check must be a string')
 
@@ -40,24 +54,15 @@ local function groupMatch(groupA, groupB)
 
   local isMultiGroup = type(groupB) == 'table'
   if isMultiGroup then
-    local multiGroup = groupB
-    local i=1
-    while (not hasMatch) and i <= #multiGroup do
-      hasMatch = groupMatch(groupA, multiGroup[i])
-      i = i + 1
+    for i=1, #groupB do
+      if check(groupA, groupB[i]) then
+        return true
+      end
     end
-    return hasMatch
+    return false
   end
 
-  local hashA = parseGroup(groupA).hash
-  local parsedB = parseGroup(groupB)
-  local i = 1
-  while (not hasMatch) and (i <= parsedB.length) do
-    local itemB = parsedB.list[i]
-    hasMatch = hashA[itemB] ~= nil
-    i = i + 1
-  end
-  return hasMatch
+  return check(groupA, groupB)
 end
 
 return groupMatch
