@@ -23,6 +23,7 @@ Component.create({
 })
 
 local Shard = Component.createFactory({
+  minTimeBetweenHits = 0.1,
   init = function(self)
     Component.addToGroup(self, 'gameWorld')
 
@@ -40,7 +41,9 @@ local Shard = Component.createFactory({
     local Position = require 'utils.position'
     self.dx, self.dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
     local sourceRef = Component.get(self.source)
-    self.dx, self.dy = self.dx + (sourceRef.dx * 0.5), self.dy + (sourceRef.dy * 0.5)
+    local directionMagnitude = 0.3
+    self.dx, self.dy = self.dx + (sourceRef.dx * directionMagnitude),
+      self.dy + (sourceRef.dy * directionMagnitude)
   end,
   update = function(self, dt)
     self.clock = self.clock + dt
@@ -68,22 +71,13 @@ local Shard = Component.createFactory({
           local msgBus = require 'components.msg-bus'
           Component.addToGroup(sourceId, 'frostOrbTargets', {
             hitClock = 0,
-            minTimeBetweenHits = 0.15
+            minTimeBetweenHits = self.minTimeBetweenHits
           })
           msgBus.send(msgBus.CHARACTER_HIT, {
             parent = hitParent,
             source = sourceId,
             coldDamage = math.random(self.coldDamage.x, self.coldDamage.y),
           })
-          msgBus.send(msgBus.CHARACTER_HIT, {
-            parent = hitParent,
-            source = Component.newId(),
-            modifiers = {
-              freeze = math.random(0, 3) == 1 and 1 or 0
-            },
-            duration = 0.5
-          })
-          -- self:delete(true)
         end
         if collisionGroups.matches(cItem.group, 'obstacle') then
           self:delete(true)
@@ -118,9 +112,10 @@ local FrostOrb = Component.createFactory({
   scale = 1,
   opacity = 1,
   angle = math.pi + math.pi/2,
-  speed = 50,
+  speed = 45,
   projectileRate = 5,
-  projectileLifeTime = 1,
+  projectileLifeTime = 0.8,
+  minTimeBetweenHits = 0.12,
   projectileSpeed = 120,
   init = function(self)
     Component.addToGroup(self, 'gameWorld')
@@ -172,6 +167,7 @@ local FrostOrb = Component.createFactory({
         target = self.target,
         group = self.group,
         lifeTime = self.projectileLifeTime,
+        minTimeBetweenHits = self.minTimeBetweenHits,
         speed = self.projectileSpeed,
         source = self:getId()
       }

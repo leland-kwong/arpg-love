@@ -2,6 +2,8 @@ local min, max, random = math.min, math.max, math.random
 local round = require 'utils.math'.round
 local Object = require 'utils.object-utils'
 local msgBus = require 'components.msg-bus'
+local rollFreezeChance = require 'modules.roll-freeze-chance'
+local uid = require 'utils.uid'
 
 local function rollCritChance(chance)
   if chance == 0 then
@@ -85,6 +87,19 @@ local function hitManager(_, self, dt, onDamageTaken)
         receiverId = self:getId(),
         totalDamage = actualDamage
       })
+
+      local coldHitPercentOfMaxLife = actualColdDamage/self.stats:get('maxHealth')
+      local shouldFreeze = rollFreezeChance(coldHitPercentOfMaxLife)
+      if shouldFreeze then
+        msgBus.send(msgBus.CHARACTER_HIT, {
+          parent = self,
+          source = uid(),
+          modifiers = {
+            freeze = 1
+          },
+          duration = 0.3
+        })
+      end
     end
     if onDamageTaken then
       onDamageTaken(
