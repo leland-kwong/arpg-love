@@ -90,7 +90,7 @@ function MainScene.init(self)
   self.listeners = {
     msgBus.on('SET_CONFIG', function(props)
       -- reload the scene when scale has changed
-      if props.scale then
+      if props.scale and (props.scale ~= config.scale) then
         local tick = require 'utils.tick'
         -- HACK: we need a timeout delay since it seems like config properties don't get set before we replace the scane
         tick.delay(function()
