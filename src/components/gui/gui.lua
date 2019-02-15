@@ -390,7 +390,6 @@ end
 
 function Gui.final(self)
   self.onFinal(self)
-  InputContext.set('any')
 end
 
 local drawOrderByType = {
