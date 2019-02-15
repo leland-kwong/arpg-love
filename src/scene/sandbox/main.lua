@@ -179,8 +179,8 @@ end)
 
 local sceneOptionsNormal = {
   menuOptionPlayGameMenu,
-  menuOptionHomeScreen,
   menuOptionSettingsMenu,
+  menuOptionHomeScreen,
   menuOptionNewsPanel
 }
 
