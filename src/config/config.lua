@@ -9,7 +9,12 @@ local M = {}
 msgBus.on(msgBus.SET_CONFIG, function(msgValue)
   local configChanges = msgValue
   local oUtils = require 'utils.object-utils'
-  oUtils.assign(M, configChanges)
+  local originalState = oUtils.clone(M)
+  local newState = oUtils.assign(M, configChanges)
+  msgBus.send('SET_CONFIG_SUCCESS', {
+    old = originalState,
+    new = newState,
+  })
 end)
 
 local xpDiff = 20

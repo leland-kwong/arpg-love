@@ -88,26 +88,23 @@ function MainScene.init(self)
   end
 
   self.listeners = {
-    msgBus.on('SET_CONFIG', function(props)
+    msgBus.on('SET_CONFIG_SUCCESS', function(msg)
       -- reload the scene when scale has changed
-      if props.scale and (props.scale ~= config.scale) then
+      if msg.new.scale and (msg.new.scale ~= msg.old.scale) then
         local tick = require 'utils.tick'
-        -- HACK: we need a timeout delay since it seems like config properties don't get set before we replace the scane
-        tick.delay(function()
-          local playerRef = Component.get('PLAYER')
-          msgBus.send(msgBus.SCENE_STACK_REPLACE, {
-            scene = require 'scene.main-scene',
-            props = {
-              location = self.location,
-              playerStartPosition = {
-                x = playerRef.x,
-                y = playerRef.y
-              }
+        local playerRef = Component.get('PLAYER')
+        msgBus.send(msgBus.SCENE_STACK_REPLACE, {
+          scene = require 'scene.main-scene',
+          props = {
+            location = self.location,
+            playerStartPosition = {
+              x = playerRef.x,
+              y = playerRef.y
             }
-          })
-        end, 0.1)
+          }
+        })
       end
-    end, 10),
+    end),
 
     msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
       msgBus.send(msgBus.EXPERIENCE_GAIN, math.floor(msgValue.experience))
