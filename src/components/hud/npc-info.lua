@@ -8,6 +8,7 @@ local config = require 'config.config'
 local Position = require 'utils.position'
 local Color = require 'modules.color'
 local collisionGroups = require 'modules.collision-groups'
+local msgBus = require 'components.msg-bus'
 
 local itemHovered = nil
 local aiHoverFilter = function(item)
@@ -27,13 +28,13 @@ end
 function NpcInfo.init(self)
   local textLayer = Component.get('HUD').hudTextLayer
   local nameTextWidth, nameTextHeight = GuiText.getTextSize('Foobar', textLayer.font)
-  local w, h = 200, 15
-  local y = self.y + nameTextHeight + 2
+  local w, h = 200, nameTextHeight + 3
+  local y = self.y
   self.statusBar = StatusBar.create({
     y = y,
     w = w,
     h = h,
-    color = Color.DEEP_RED,
+    color = {Color.multiplyAlpha(Color.DEEP_RED, 0.9)},
     fillPercentage = function()
       local percentage = self.target.stats:get('health') /
         self.target.stats:get('maxHealth')
@@ -81,8 +82,8 @@ function NpcInfo.update(self, dt)
     textLayer:add(
       dataSheet.name,
       itemHovered.rarityColor or Color.WHITE,
-      x,
-      self.y
+      math.floor(x),
+      self.statusBar.y + 4
     )
     local props = dataSheet.properties
     local propsText = ''
@@ -105,6 +106,9 @@ function NpcInfo.update(self, dt)
     )
     self.target = itemHovered
   end
+  msgBus.send('CURSOR_SET', {
+    type = itemHovered and 'target' or 'pointer'
+  })
   self.statusBar:setDisabled(not itemHovered)
 end
 
