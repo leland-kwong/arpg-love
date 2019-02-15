@@ -50,7 +50,7 @@ local Door = {
       Sound.playEffect('door-open.wav')
       Component.animate(parent.state, {
         dy = doorH - heightToShow
-      }, 0.25, 'outCubic', nil, function()
+      }, 0.25, 'linear', nil, function()
         parent.state.doorOpenComplete = true
       end)
     end

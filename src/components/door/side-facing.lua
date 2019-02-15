@@ -51,9 +51,9 @@ local Door = {
       local Sound = require 'components.sound'
       Sound.playEffect('door-open.wav')
       Component.animate(parent.state, {
-        dy = 26,
+        dy = 24,
         percentOpened = 1
-      }, 0.25, 'outCubic', nil, function()
+      }, 0.25, 'linear', nil, function()
         parent.state.doorOpenComplete = true
       end)
     end
