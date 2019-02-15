@@ -91,18 +91,23 @@ function MainScene.init(self)
     msgBus.on('SET_CONFIG_SUCCESS', function(msg)
       -- reload the scene when scale has changed
       if msg.new.scale and (msg.new.scale ~= msg.old.scale) then
+        --[[
+          HACK: a delay is needed for minimap to rerender properly for some reason
+        ]]
         local tick = require 'utils.tick'
-        local playerRef = Component.get('PLAYER')
-        msgBus.send(msgBus.SCENE_STACK_REPLACE, {
-          scene = require 'scene.main-scene',
-          props = {
-            location = self.location,
-            playerStartPosition = {
-              x = playerRef.x,
-              y = playerRef.y
+        tick.delay(function()
+          local playerRef = Component.get('PLAYER')
+          msgBus.send(msgBus.SCENE_STACK_REPLACE, {
+            scene = require 'scene.main-scene',
+            props = {
+              location = self.location,
+              playerStartPosition = {
+                x = playerRef.x,
+                y = playerRef.y
+              }
             }
-          }
-        })
+          })
+        end, 0.1)
       end
     end),
 
