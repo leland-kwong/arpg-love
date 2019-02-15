@@ -625,8 +625,7 @@ local function handleAbilities(self, dt)
   local isInteractButton = love.mouse.isDown(1)
   local canUseAbility =
     (self.isAlreadyAttacking and isRequestingToTriggerAction) or
-    InputContext.contains('any') or
-    (isRequestingToTriggerAction and (not isInteractButton))
+    InputContext.contains('any')
   self.isAlreadyAttacking = canUseAbility
   if canUseAbility then
     -- SKILL_1
