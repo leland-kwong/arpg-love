@@ -74,7 +74,7 @@ local Door = {
         return camera:getMousePosition()
       end,
       onClick = function(self)
-        if parent.state.opened or (not globalState.interactableList[self]) then
+        if parent.state.opened or (not self.canInteract) then
           return
         end
         parent.state.opened = true
@@ -88,6 +88,8 @@ local Door = {
         if parent.state.opened then
           self:delete(true)
         end
+        self.canInteract = globalState.interactableList[self]
+        self.inputContext = self.canInteract and 'environmentDoor' or 'any'
       end,
       render = function(self)
       end
