@@ -5,17 +5,18 @@ return function(msgBus)
     target = 'cursor-target',
     move = 'cursor-move',
     speech = 'cursor-speech',
+    pointer = 'cursor-pointer'
   }
   local cursorsCache = {
     cursors = {},
     get = function(self, _type)
       if _type == 'default' then
-        return nil
+        return self:get('pointer')
       end
 
       local config = require 'config.config'
       local size = config.scale
-      _type = _type or 'target'
+      _type = _type or 'pointer'
       local cursorTypes = self.cursors[_type]
       if (not cursorTypes) then
         cursorTypes = {}
