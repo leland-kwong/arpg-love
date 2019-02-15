@@ -9,6 +9,7 @@ local msgBus = require 'components.msg-bus'
 local config = require 'config.config'
 local objectUtils = require 'utils.object-utils'
 local bitser = require 'modules.bitser'
+local memoize = require 'utils.memoize'
 local F = require 'utils.functional'
 
 local function getMenuTabsPosition()
@@ -30,17 +31,6 @@ local Sandbox = {
   drawOrder = function()
     return drawOrder() - 1
   end
-}
-
-local scenes = {
-  guiTest = {
-    name = 'gui',
-    path = 'scene.sandbox.gui.test-scene'
-  },
-  particleTest = {
-    name = 'particle fx',
-    path = 'scene.sandbox.particle-fx.particle-test'
-  },
 }
 
 local state = {
@@ -101,7 +91,8 @@ msgBus.on(msgBus.SETTINGS_MENU_TOGGLE, function()
 end)
 
 local menuOptionHomeScreen = {
-  name = 'Home Screen',
+  name = 'Title Screen',
+  id = 'titleScreen',
   value = function()
     local HomeScreen = require 'scene.sandbox.main-game.home-screen'
     msgBus.send(msgBus.SCENE_STACK_REPLACE, {
@@ -188,14 +179,12 @@ end)
 
 local sceneOptionsNormal = {
   menuOptionPlayGameMenu,
-  menuOptionSettingsMenu,
   menuOptionHomeScreen,
+  menuOptionSettingsMenu,
   menuOptionNewsPanel
 }
 
 local sceneOptionsDebug = F.concat(sceneOptionsNormal, {
-  menuOptionSceneLoad(scenes.guiTest),
-  menuOptionSceneLoad(scenes.particleTest),
   menuOptionQuitGame
 })
 
@@ -265,6 +254,17 @@ function Sandbox.init(self)
   DebugMenu(true)
 end
 
+local getNextMenuOptions = memoize(function(isDev, isTitleScreen)
+  local options = isDev and
+    sceneOptionsDebug or
+    sceneOptionsNormal
+  return isTitleScreen and
+    F.filter(options, function(o)
+      return (o.id ~= 'titleScreen')
+    end) or
+    options
+end)
+
 function Sandbox.update(self)
   if state.menuOpened then
     Component.addToGroup(self.activeSceneMenu, 'guiDrawBox')
@@ -272,7 +272,8 @@ function Sandbox.update(self)
     Component.removeFromGroup(self.activeSceneMenu, 'guiDrawBox')
   end
   if self.activeSceneMenu then
-    self.activeSceneMenu.options = config.isDevelopment and sceneOptionsDebug or sceneOptionsNormal
+    local isTitleScreen = Component.get('HomeScreen') ~= nil
+    self.activeSceneMenu.options = getNextMenuOptions(config.isDevelopment, isTitleScreen)
   end
 end
 
