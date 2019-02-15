@@ -15,6 +15,7 @@ local buildUniverse = dynamicRequire 'components.hud.universe-map.build-universe
 local MenuManager = require 'modules.menu-manager'
 local Enum = require 'utils.enum'
 local config = require 'config.config'
+local Gui = require 'components.gui.gui'
 
 local mapViews = Enum(
   'UNIVERSE',
@@ -82,7 +83,7 @@ local legendGraphic = AnimationFactory:newStaticSprite('gui-map-gui-legend')
 local function getLegendPosition()
   local camera = require 'components.camera'
   local w2 = camera:getSize(true)
-  return w2 - legendGraphic:getWidth() - 50, oy
+  return w2 - legendGraphic:getWidth() - 10, oy
 end
 
 local function getNextPlayerPosition(self)
@@ -111,14 +112,13 @@ end
 local function setupViewToggleButtons(parent)
   local function ToggleButton(x, y, w, h, value)
     local camera = require 'components.camera'
-    return parent.Gui({
+    return Gui.create({
       -- debug = true,
-      x = x * camera.scale,
-      y = y * camera.scale,
-      w = w * camera.scale,
-      h = h * camera.scale,
-      eventPriority = 3,
-      MOUSE_CLICKED = function(self)
+      x = x,
+      y = y,
+      w = w,
+      h = h,
+      onClick = function(self)
         state.view = value
         switchView(parent, state.view)
       end,
@@ -132,10 +132,7 @@ local function setupViewToggleButtons(parent)
             love.graphics.setColor(Color.multiplyAlpha(Color.WHITE, 0.5))
           end
           local selectedIndicator = AnimationFactory:newStaticSprite('gui-selected-indicator')
-          love.graphics.push()
-          love.graphics.translate(-self.x/camera.scale, -self.y/camera.scale)
           selectedIndicator:draw((self.x) + 2, self.y)
-          love.graphics.pop()
         end
         if self.debug then
           self:renderDebug()
@@ -150,7 +147,7 @@ local function setupViewToggleButtons(parent)
 
         love.graphics.pop()
       end
-    })
+    }):setParent(parent)
   end
 
   local x, y = getViewTogglePosition(), oy + 22
@@ -172,6 +169,7 @@ end
 local Factory = Component.createFactory({
   group = 'hud',
   init = function(self)
+    msgBus.send(msgBus.TOGGLE_MAIN_MENU, false)
     MenuManager.clearAll()
     MenuManager.push(self)
 
@@ -179,22 +177,38 @@ local Factory = Component.createFactory({
     self.Gui = GuiContext()
 
     -- full-screen event handler
-    self.Gui({
+    Gui.create({
       x = 0,
       y = 0,
       w = love.graphics.getWidth(),
       h = love.graphics.getHeight(),
-      MOUSE_DRAG = function(self, ev)
-        actions.pan(ev.dx, ev.dy)
+      onCreate = function(self)
+        self.listeners = {
+          msgBus.on('MOUSE_DRAG', function(ev)
+            if (not self.hovered) then
+              return
+            end
+            actions.pan(ev.dx, ev.dy)
+          end),
+          msgBus.on('MOUSE_DRAG_END', function()
+            if (not self.hovered) then
+              return
+            end
+            actions.panEnd()
+          end),
+          msgBus.on('MOUSE_WHEEL_MOVED', function(ev)
+            if (not self.hovered) then
+              return
+            end
+            local dy = ev[2]
+            actions.zoom(dy)
+          end)
+        }
       end,
-      MOUSE_DRAG_END = function(self)
-        actions.panEnd()
-      end,
-      MOUSE_WHEEL_MOVED = function(self, ev)
-        local dy = ev[2]
-        actions.zoom(dy)
+      onFinal = function(self)
+        msgBus.off(self.listeners)
       end
-    })
+    }):setParent(self)
 
     setupViewToggleButtons(self)
 
@@ -284,7 +298,7 @@ local Factory = Component.createFactory({
 
   final = function(self)
     self.Gui:destroy()
-    msgBus.send('CURSOR_SET', { type = 'target' })
+    msgBus.send('CURSOR_SET', { type = 'pointer' })
     MenuManager.pop()
   end,
 
@@ -314,10 +328,6 @@ Component.create({
         end
       end)
     }
-  end,
-  update = function()
-    -- local globalState = require 'main.global-state'
-    -- print(globalState.activeLevel)
   end,
   final = function(self)
     msgBus.off(self.listeners)
