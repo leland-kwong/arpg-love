@@ -1,36 +1,22 @@
 -- https://www.geeksforgeeks.org/flood-fill-algorithm-implement-fill-paint/
 
-local TablePool = require 'utils.table-pool'
 local setProp = require 'utils.set-prop'
 
 local function FlowFieldFactory(canVisitCallback, getter)
-  local flowCellTablePool = TablePool.new()
-  local frontierTablePool = TablePool.new()
-  local cameFromRowTablePool = TablePool.new()
-
-  local function flowCellData(x, y, dist, id)
-    local obj = flowCellTablePool.get(id)
-    obj.x = x
-    obj.y = y
-    obj.dist = dist
-    return obj
+  local function flowCellData(x, y, dist)
+    return {
+      x = x,
+      y = y,
+      dist = dist
+    }
   end
 
-  local function toVisitData(x, y, dist, id)
-    local obj = frontierTablePool.get(id)
-    obj.x = x
-    obj.y = y
-    obj.dist = dist
-    return obj
-  end
-
-  local function cameFromRowPool(id)
-    local obj = cameFromRowTablePool.get(id)
-    -- clear out table
-    for k,v in pairs(obj) do
-      obj[k] = nil
-    end
-    return obj
+  local function toVisitData(x, y, dist)
+    return {
+      x = x,
+      y = y,
+      dist = dist
+    }
   end
 
   local function addCellData(grid, x, y, from, frontier, cameFromList, canVisit)
@@ -41,16 +27,15 @@ local function FlowFieldFactory(canVisitCallback, getter)
       return
     else
       -- insert cell to unvisited list
-      frontier[#frontier + 1] = toVisitData(x, y, dist + 1, cameFromList._cellCount)
+      frontier[#frontier + 1] = toVisitData(x, y, dist + 1)
     end
-    cameFromList._cellCount = cameFromList._cellCount + 1
-    cameFromList[y] = cameFromList[y] or cameFromRowPool(cameFromList._cellCount)
+    cameFromList[y] = cameFromList[y] or {}
 
     -- directions
     -- we multiply by -1 because we want the direction to where it came from
     local dirX = (x - from.x) * -1
     local dirY = (y - from.y) * -1
-    cameFromList[y][x] = flowCellData(dirX, dirY, dist, cameFromList._cellCount)
+    cameFromList[y][x] = flowCellData(dirX, dirY, dist)
   end
 
   --[[
@@ -128,17 +113,11 @@ local function FlowFieldFactory(canVisitCallback, getter)
     end
     table.insert(frontier, start)
 
-    local cameFromList = {
-      -- gets incremented each time a flow field cell is generated. Also used as the id for the table pool
-      _cellCount = 0,
-      start = start,
-      getValue = getter
-    }
-    cameFromList[startY] = cameFromRowPool(cameFromList._cellCount)
+    local cameFromList = {}
+    cameFromList[startY] = {}
     -- {directionX, directionY, distance}
     cameFromList[startY][startX] = flowCellData(0, 0, 0, cameFromList._cellCount)
 
-    local Console = require 'modules.console.console'
     return coroutine.wrap(function()
       local i = 1
       while i <= #frontier do
