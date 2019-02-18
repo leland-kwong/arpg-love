@@ -97,7 +97,7 @@ local function hitManager(_, self, dt, onDamageTaken)
           modifiers = {
             freeze = 1
           },
-          duration = 0.3
+          duration = 0.4
         })
       end
     end
