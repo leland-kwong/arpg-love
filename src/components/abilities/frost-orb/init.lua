@@ -4,6 +4,7 @@ local CollisionWorlds = require 'components.collision-worlds'
 local collisionGroups = require 'modules.collision-groups'
 local Sound = require 'components.sound'
 local Color = require 'modules.color'
+local CloudParticle = require 'components.abilities.frost-orb.particle-effect'
 
 local function obstacleFilter(item)
   return collisionGroups.matches(item.group, 'obstacle') and 'slide' or false
@@ -119,6 +120,7 @@ local FrostOrb = Component.createFactory({
   projectileSpeed = 120,
   init = function(self)
     Component.addToGroup(self, 'gameWorld')
+    self.cloudParticle = CloudParticle.create():setParent(self)
 
     local Position = require 'utils.position'
     self.dx, self.dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
@@ -139,6 +141,9 @@ local FrostOrb = Component.createFactory({
     self.rotation = self.rotation - dt * 20
     self.clock = self.clock + dt
     self.shardClock = self.shardClock + dt
+
+    self.cloudParticle.x = self.x
+    self.cloudParticle.y = self.y
 
     local isExpired = self.clock >= self.lifeTime
     if isExpired then
