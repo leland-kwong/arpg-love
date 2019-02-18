@@ -591,7 +591,7 @@ function Ai.draw(self)
   shader:send('sprite_size', shaderSpriteSize)
 
   if self.frozen then
-    shader:send('outline_color', {1,1,1,0.7})
+    shader:send('outline_color', {0.1,0.6,1,1})
     shader:send('outline_width', 2)
     shader:send('texture_scale', {5.5,1})
     shader:send('include_corners', true)
@@ -603,8 +603,13 @@ function Ai.draw(self)
     love.graphics.setColor(3,3,3)
   end
 
-  local r,g,b,a = self.fillColor[1], self.fillColor[2], self.fillColor[3], self.fillColor[4]
-  love.graphics.setColor(r, g, b, a * self.opacity)
+  if self.frozen then
+    love.graphics.setBlendMode('add')
+    love.graphics.setColor(0.7,0.7,1,0.7)
+  else
+    local r,g,b,a = self.fillColor[1], self.fillColor[2], self.fillColor[3], self.fillColor[4]
+    love.graphics.setColor(r, g, b, a * self.opacity)
+  end
   drawSprite(self, ox, oy)
 
   if (self.outlineColor) then
