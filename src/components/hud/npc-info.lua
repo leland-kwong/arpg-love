@@ -27,13 +27,9 @@ end
 
 function NpcInfo.init(self)
   local textLayer = Component.get('HUD').hudTextLayer
-  local nameTextWidth, nameTextHeight = GuiText.getTextSize('Foobar', textLayer.font)
-  local w, h = 200, nameTextHeight + 3
   local y = self.y
   self.statusBar = StatusBar.create({
     y = y,
-    w = w,
-    h = h,
     color = {Color.multiplyAlpha(Color.DEEP_RED, 0.9)},
     fillPercentage = function()
       local percentage = self.target.stats:get('health') /
@@ -73,15 +69,22 @@ function NpcInfo.update(self, dt)
     local name = itemHovered.name or ''
     local windowW, windowH = windowSize()
     local textWidth, textHeight = GuiText.getTextSize(dataSheet.name, textLayer.font)
+    local w, h = math.max(textWidth + 30, 200), textHeight + 3
     local x, y = Position.boxCenterOffset(
-      textWidth,
-      textHeight,
+      w,
+      h,
       windowW,
       windowH
     )
-    textLayer:add(
-      dataSheet.name,
-      itemHovered.rarityColor or Color.WHITE,
+    self.statusBar.w, self.statusBar.h = w,h
+
+    textLayer:addf(
+      {
+        itemHovered.rarityColor or Color.WHITE,
+        dataSheet.name,
+      },
+      w,
+      'center',
       math.floor(x),
       self.statusBar.y + 4
     )

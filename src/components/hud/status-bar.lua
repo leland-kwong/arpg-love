@@ -6,6 +6,8 @@ local Position = require 'utils.position'
 
 local HealthIndicator = {
   group = groups.hud,
+  w = 0,
+  h = 0,
   color = {1,1,1},
   fillPercentage = function()
     return 0
