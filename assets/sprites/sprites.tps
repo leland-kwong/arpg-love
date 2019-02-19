@@ -88,9 +88,9 @@
         <key>maxTextureSize</key>
         <QSize>
             <key>width</key>
-            <int>2048</int>
+            <int>16384</int>
             <key>height</key>
-            <int>2048</int>
+            <int>16384</int>
         </QSize>
         <key>fixedTextureSize</key>
         <QSize>
@@ -1061,8 +1061,8 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/mouse-cursors/cursor-pointer-2x.png</key>
             <key type="filename">custom-art/mouse-cursors/cursor-speech-2x.png</key>
-            <key type="filename">custom-art/mouse-cursors/cursor-target-2x.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -1075,8 +1075,8 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/mouse-cursors/cursor-pointer-3x.png</key>
             <key type="filename">custom-art/mouse-cursors/cursor-speech-3x.png</key>
-            <key type="filename">custom-art/mouse-cursors/cursor-target-3x.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -1089,8 +1089,8 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/mouse-cursors/cursor-pointer.png</key>
             <key type="filename">custom-art/mouse-cursors/cursor-speech.png</key>
-            <key type="filename">custom-art/mouse-cursors/cursor-target.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -1393,6 +1393,138 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">fx/charging/charging_0.png</key>
+            <key type="filename">fx/charging/charging_1.png</key>
+            <key type="filename">fx/charging/charging_10.png</key>
+            <key type="filename">fx/charging/charging_100.png</key>
+            <key type="filename">fx/charging/charging_101.png</key>
+            <key type="filename">fx/charging/charging_102.png</key>
+            <key type="filename">fx/charging/charging_103.png</key>
+            <key type="filename">fx/charging/charging_104.png</key>
+            <key type="filename">fx/charging/charging_105.png</key>
+            <key type="filename">fx/charging/charging_106.png</key>
+            <key type="filename">fx/charging/charging_107.png</key>
+            <key type="filename">fx/charging/charging_108.png</key>
+            <key type="filename">fx/charging/charging_109.png</key>
+            <key type="filename">fx/charging/charging_11.png</key>
+            <key type="filename">fx/charging/charging_110.png</key>
+            <key type="filename">fx/charging/charging_111.png</key>
+            <key type="filename">fx/charging/charging_112.png</key>
+            <key type="filename">fx/charging/charging_113.png</key>
+            <key type="filename">fx/charging/charging_114.png</key>
+            <key type="filename">fx/charging/charging_115.png</key>
+            <key type="filename">fx/charging/charging_116.png</key>
+            <key type="filename">fx/charging/charging_117.png</key>
+            <key type="filename">fx/charging/charging_118.png</key>
+            <key type="filename">fx/charging/charging_119.png</key>
+            <key type="filename">fx/charging/charging_12.png</key>
+            <key type="filename">fx/charging/charging_13.png</key>
+            <key type="filename">fx/charging/charging_14.png</key>
+            <key type="filename">fx/charging/charging_15.png</key>
+            <key type="filename">fx/charging/charging_16.png</key>
+            <key type="filename">fx/charging/charging_17.png</key>
+            <key type="filename">fx/charging/charging_18.png</key>
+            <key type="filename">fx/charging/charging_19.png</key>
+            <key type="filename">fx/charging/charging_2.png</key>
+            <key type="filename">fx/charging/charging_20.png</key>
+            <key type="filename">fx/charging/charging_21.png</key>
+            <key type="filename">fx/charging/charging_22.png</key>
+            <key type="filename">fx/charging/charging_23.png</key>
+            <key type="filename">fx/charging/charging_24.png</key>
+            <key type="filename">fx/charging/charging_25.png</key>
+            <key type="filename">fx/charging/charging_26.png</key>
+            <key type="filename">fx/charging/charging_27.png</key>
+            <key type="filename">fx/charging/charging_28.png</key>
+            <key type="filename">fx/charging/charging_29.png</key>
+            <key type="filename">fx/charging/charging_3.png</key>
+            <key type="filename">fx/charging/charging_30.png</key>
+            <key type="filename">fx/charging/charging_31.png</key>
+            <key type="filename">fx/charging/charging_32.png</key>
+            <key type="filename">fx/charging/charging_33.png</key>
+            <key type="filename">fx/charging/charging_34.png</key>
+            <key type="filename">fx/charging/charging_35.png</key>
+            <key type="filename">fx/charging/charging_36.png</key>
+            <key type="filename">fx/charging/charging_37.png</key>
+            <key type="filename">fx/charging/charging_38.png</key>
+            <key type="filename">fx/charging/charging_39.png</key>
+            <key type="filename">fx/charging/charging_4.png</key>
+            <key type="filename">fx/charging/charging_40.png</key>
+            <key type="filename">fx/charging/charging_41.png</key>
+            <key type="filename">fx/charging/charging_42.png</key>
+            <key type="filename">fx/charging/charging_43.png</key>
+            <key type="filename">fx/charging/charging_44.png</key>
+            <key type="filename">fx/charging/charging_45.png</key>
+            <key type="filename">fx/charging/charging_46.png</key>
+            <key type="filename">fx/charging/charging_47.png</key>
+            <key type="filename">fx/charging/charging_48.png</key>
+            <key type="filename">fx/charging/charging_49.png</key>
+            <key type="filename">fx/charging/charging_5.png</key>
+            <key type="filename">fx/charging/charging_50.png</key>
+            <key type="filename">fx/charging/charging_51.png</key>
+            <key type="filename">fx/charging/charging_52.png</key>
+            <key type="filename">fx/charging/charging_53.png</key>
+            <key type="filename">fx/charging/charging_54.png</key>
+            <key type="filename">fx/charging/charging_55.png</key>
+            <key type="filename">fx/charging/charging_56.png</key>
+            <key type="filename">fx/charging/charging_57.png</key>
+            <key type="filename">fx/charging/charging_58.png</key>
+            <key type="filename">fx/charging/charging_59.png</key>
+            <key type="filename">fx/charging/charging_6.png</key>
+            <key type="filename">fx/charging/charging_60.png</key>
+            <key type="filename">fx/charging/charging_61.png</key>
+            <key type="filename">fx/charging/charging_62.png</key>
+            <key type="filename">fx/charging/charging_63.png</key>
+            <key type="filename">fx/charging/charging_64.png</key>
+            <key type="filename">fx/charging/charging_65.png</key>
+            <key type="filename">fx/charging/charging_66.png</key>
+            <key type="filename">fx/charging/charging_67.png</key>
+            <key type="filename">fx/charging/charging_68.png</key>
+            <key type="filename">fx/charging/charging_69.png</key>
+            <key type="filename">fx/charging/charging_7.png</key>
+            <key type="filename">fx/charging/charging_70.png</key>
+            <key type="filename">fx/charging/charging_71.png</key>
+            <key type="filename">fx/charging/charging_72.png</key>
+            <key type="filename">fx/charging/charging_73.png</key>
+            <key type="filename">fx/charging/charging_74.png</key>
+            <key type="filename">fx/charging/charging_75.png</key>
+            <key type="filename">fx/charging/charging_76.png</key>
+            <key type="filename">fx/charging/charging_77.png</key>
+            <key type="filename">fx/charging/charging_78.png</key>
+            <key type="filename">fx/charging/charging_79.png</key>
+            <key type="filename">fx/charging/charging_8.png</key>
+            <key type="filename">fx/charging/charging_80.png</key>
+            <key type="filename">fx/charging/charging_81.png</key>
+            <key type="filename">fx/charging/charging_82.png</key>
+            <key type="filename">fx/charging/charging_83.png</key>
+            <key type="filename">fx/charging/charging_84.png</key>
+            <key type="filename">fx/charging/charging_85.png</key>
+            <key type="filename">fx/charging/charging_86.png</key>
+            <key type="filename">fx/charging/charging_87.png</key>
+            <key type="filename">fx/charging/charging_88.png</key>
+            <key type="filename">fx/charging/charging_89.png</key>
+            <key type="filename">fx/charging/charging_9.png</key>
+            <key type="filename">fx/charging/charging_90.png</key>
+            <key type="filename">fx/charging/charging_91.png</key>
+            <key type="filename">fx/charging/charging_92.png</key>
+            <key type="filename">fx/charging/charging_93.png</key>
+            <key type="filename">fx/charging/charging_94.png</key>
+            <key type="filename">fx/charging/charging_95.png</key>
+            <key type="filename">fx/charging/charging_96.png</key>
+            <key type="filename">fx/charging/charging_97.png</key>
+            <key type="filename">fx/charging/charging_98.png</key>
+            <key type="filename">fx/charging/charging_99.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.55</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>25,25,50,50</rect>
+                <key>scale9Paddings</key>
+                <rect>25,25,50,50</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
         </map>
         <key>fileList</key>
         <array>
@@ -1408,13 +1540,16 @@
             <filename>custom-art/items</filename>
             <filename>custom-art/light-blur.png</filename>
             <filename>custom-art/mouse-cursors</filename>
+            <filename>fx</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
         <key>replaceList</key>
         <array/>
         <key>ignoredWarnings</key>
-        <array/>
+        <array>
+            <string>large-max-texture-size</string>
+        </array>
         <key>commonDivisorX</key>
         <uint>1</uint>
         <key>commonDivisorY</key>
