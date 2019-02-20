@@ -42,7 +42,7 @@ local PunchAttack = Component.createFactory({
 
 local PunchAbility = {
   range = 1.5,
-  actionSpeed = 0.5,
+  actionSpeed = 1,
   cooldown = 0.3
 }
 
