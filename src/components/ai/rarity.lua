@@ -82,7 +82,10 @@ local mt = {
     typeDefsByName[typeName] = callableObject(rarityTypes[typeName])
     return typeDefsByName
   end, {}),
-  __call = function(_, ai)
+  __call = function(_, ai, rarity)
+    if rarity then
+      return rarityTypes[rarity]:__call(ai)
+    end
     return generateRandomRarity(ai)
   end
 }
