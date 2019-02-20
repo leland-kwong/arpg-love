@@ -261,11 +261,7 @@
   </object>
   <object id="71" name="door" type="door" x="1328" y="1088" width="96" height="16"/>
   <object id="74" name="door" type="door" x="1488" y="864" width="96" height="16" rotation="90"/>
-  <object id="88" name="Treasure chest" type="treasureChest" x="160" y="1696" width="16" height="16">
-   <properties>
-    <property name="props" type="file" value="../../src/modules/dungeon/treasure-chest-definitions/starting-items.lua"/>
-   </properties>
-  </object>
+  <object id="88" name="Treasure chest" type="treasureChest" x="160" y="1696" width="16" height="16"/>
  </objectgroup>
  <objectgroup color="#ff00ff" id="6" name="transition-points">
   <object id="65" name="transition point previous" type="levelExit" x="1520" y="304" width="16" height="16">

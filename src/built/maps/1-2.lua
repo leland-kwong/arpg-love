@@ -490,9 +490,7 @@ return {
           height = 16,
           rotation = 0,
           visible = true,
-          properties = {
-            ["props"] = "../../modules/dungeon/treasure-chest-definitions/starting-items.lua"
-          }
+          properties = {}
         }
       }
     },
