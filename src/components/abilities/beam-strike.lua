@@ -58,6 +58,43 @@ function createBeam(x1, y1, animationSpeed, frameRate)
   end)
 end
 
+local BeamAnimationFactory = Component.createFactory({
+  group = 'all',
+  animationSpeed = 1,
+  update = function(self, dt)
+    self.beamCo = self.beamCo or createBeam(self.x, self.y, self.animationSpeed, dt)
+    local isAlive, x, y, beamLength, isImpactFrame = coroutine.resume(self.beamCo)
+    if (isImpactFrame) then
+      self:delete(true)
+      return
+    end
+    self.beamX, self.beamY, self.beamLength = x, y, beamLength
+  end,
+  draw = function(self)
+    local ox, oy = beamHead:getOffset()
+    local beamLength = self.beamLength
+    local actualX, actualY = self.beamX - ox, self.beamY - oy
+    if (beamLength > 0) then
+      love.graphics.setColor(1,1,1)
+      -- tail
+      local _, tailHeight = beamTail:getOffset()
+      love.graphics.draw(AnimationFactory.atlas, beamTail.sprite, actualX, actualY - tailHeight + 1)
+      -- middle
+      love.graphics.draw(AnimationFactory.atlas, beamMiddle.sprite, actualX, actualY + 1, 0, 1, beamLength, 0, 2)
+      -- head
+      love.graphics.draw(AnimationFactory.atlas, beamHead.sprite, actualX, actualY)
+
+      if self.debug then
+        love.graphics.setColor(1,1,0,0.4)
+        love.graphics.circle('fill', self.x, self.y, 5)
+      end
+    end
+  end,
+  drawOrder = function(self)
+    return Component.groups.all:drawOrder(self)
+  end
+})
+
 local BeamStrike = {
   -- debug = true,
   group = groups.all,
@@ -92,24 +129,29 @@ function BeamStrike.update(self, dt)
   self.angle = self.angle + dt
   local shouldStartMoving = self.clock >= (self.delay - self.animationSpeed)
   if shouldStartMoving then
-    self.beamCo = self.beamCo or createBeam(self.x, self.y, self.animationSpeed, dt)
-    local isAlive, x, y, beamLength, isImpactFrame = coroutine.resume(self.beamCo)
+    self.beam = self.beam or BeamAnimationFactory.create({
+      x = self.x,
+      y = self.y,
+      animationSpeed = self.animationSpeed
+    }):setParent(self)
+
+    local isImpactFrame = self.beam:isDeleted()
     if isImpactFrame then
-      ImpactDispersion.create({
-        x = self.x,
-        y = self.y,
-        radius = self.radius,
-        scale = {
-          x = self.scale.x,
-          y = self.scale.y
-        }
-      })
-      self:onHit()
-    end
-    if (isAlive and beamLength) then
-      self.beamX, self.beamY, self.beamLength = x, y, beamLength
-    -- post hit effect
-    else
+      if (not self.hitTriggered) then
+        self.hitTriggered = true
+        ImpactDispersion.create({
+          x = self.x,
+          y = self.y,
+          radius = self.radius,
+          scale = {
+            x = self.scale.x,
+            y = self.scale.y
+          }
+        })
+        self:onHit()
+      end
+
+      -- post hit effect
       self.postHitClock = self.postHitClock + dt
       self.opacity = (self.postHitDuration - self.postHitClock) / self.postHitDuration
       local isComplete = self.postHitClock >= self.postHitDuration
@@ -134,25 +176,6 @@ end
 
 function BeamStrike.draw(self)
   love.graphics.setColor(1,1,1,1 * self.opacity)
-  if self.beamCo then
-    local ox, oy = beamHead:getOffset()
-    local beamLength = self.beamLength
-    local actualX, actualY = self.beamX - ox, self.beamY - oy
-    if (beamLength > 0) then
-      -- tail
-      local _, tailHeight = beamTail:getOffset()
-      love.graphics.draw(AnimationFactory.atlas, beamTail.sprite, actualX, actualY - tailHeight + 1)
-      -- middle
-      love.graphics.draw(AnimationFactory.atlas, beamMiddle.sprite, actualX, actualY + 1, 0, 1, beamLength, 0, 2)
-      -- head
-      love.graphics.draw(AnimationFactory.atlas, beamHead.sprite, actualX, actualY)
-
-      if self.debug then
-        love.graphics.setColor(1,1,0,0.4)
-        love.graphics.circle('fill', self.x, self.y, 5)
-      end
-    end
-  end
 
   -- draw glyph
   love.graphics.setBlendMode('alpha', 'premultiplied')
@@ -161,7 +184,7 @@ function BeamStrike.draw(self)
   love.graphics.setCanvas(self.canvas)
   love.graphics.clear()
 
-  love.graphics.setColor(1,1,1)
+  -- love.graphics.setColor(1,1,1)
   -- draw rotated sprites to canvas first
   local _, _, glyphWidth, glyphHeight = animationOuter.sprite:getViewport()
   local glyphOx, glyphOy = animationOuter:getSourceOffset()
