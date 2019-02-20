@@ -80,6 +80,7 @@ local SpawnerAi = {
   -- these need to be passed in
   grid = nil,
   WALKABLE = Map.WALKABLE,
+  preventStacking = true,
 
   colWorld = collisionWorlds.map,
   pxToGridUnits = require 'utils.position'.pixelsToGridUnits,
@@ -141,7 +142,9 @@ local function AiFactory(props)
     return ai
   end)
 
-  repositionAiToPreventStacking(spawnedAi, spawnX, spawnY, self.colWorld)
+  if self.preventStacking then
+    repositionAiToPreventStacking(spawnedAi, spawnX, spawnY, self.colWorld)
+  end
 
   return spawnedAi
 end
