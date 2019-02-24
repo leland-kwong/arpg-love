@@ -154,7 +154,7 @@ local item = {
     baseModifiers = {
       -- instance-level base modifiers
       armor =                         {0, 1}, -- min-max range to roll with
-      attackPower =                 {0, 1}, -- percent damage increase to all damage types
+      actionPower =                 {0, 1}, -- percent damage increase to all damage types
       weaponDamage =                  {0, 1},
       moveSpeed =                     {0, 0},
       healthRegen =                   {0, 1},
@@ -164,10 +164,10 @@ local item = {
       lightningResist =               {0, 1},
       fireResist =                    {0, 1},
       coldResist =                    {0, 1},
-      attackTime =                    {0, 0},
+      actionSpeed =                    {0, 0},
       energyCost =                    {0, 0},
       flatPhysicalDamageReduced =     {0, 1},
-      attackTimeReduced =             {0, 1},  -- percent attack time reduction
+      actionSpeedReduced =             {0, 1},  -- percent action speed
       cooldownReduced =               {0, 1},  -- percent cooldown reduction
       energyCostReduced =             {0, 1},  -- percent energy cost reduction
       extraExperience =               {0, 1}   -- percent extra experience
@@ -238,6 +238,14 @@ Ootsby - boids ai improvement
 Lumie1337 - item range calculation
 Gamernissem - passive tree skill ideas
 Funky Hippo - itch website suggestion
+The_Frontline - environment art tips
+ZeceDeKobold - ability ideas
+RobertJDole - play testing and bug reports
+Kwantuum - pem's algorithm and other algorithmic ideas
+
+## Play testers
+
+Klaxx
 
 ## Passive system
 
@@ -250,7 +258,7 @@ Ideas
 
 Nodes
 
-- +1% attack speed
+- +1% action speed
 - sharp: +1% damage
 - +2% movespeed
 - +2% health regeneration
@@ -290,3 +298,11 @@ Nodes
 - 2nd wind: receive large speed buff after taking a critical hit
 - punching bag: you return %100(+1% per 1000 armor) of the damage taken to nearby enemies
 - puppet master: +1 extra summon
+
+### Level design
+
+Portal points should may have one of three possible direction values:
+
+- 1 (previous - leads to a previous level)
+- 2 (previous or next - leads a previous level or to the next level)
+- 3 (next - leads to the next level)

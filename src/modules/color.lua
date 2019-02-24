@@ -46,7 +46,7 @@ local colors = {
   PALE_YELLOW = {Color.rgba255(254, 250, 192)},
   GOLDEN_PALE = {Color.rgba255(243, 156, 18)},
   RED = {1,0,0,1},
-  DEEP_RED = {Color.rgba255(209, 43, 43)},
+  DEEP_RED = {Color.rgba255(200, 43, 43)},
   TRANSPARENT = {0,0,0,0},
   PURPLE = {Color.rgba255(107, 171, 255)},
 

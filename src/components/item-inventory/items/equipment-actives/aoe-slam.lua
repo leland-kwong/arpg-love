@@ -16,9 +16,9 @@ local hammerWorld = bump.newWorld(4)
 local hitModifers = {
 	armor = -200
 }
-local attackTime = 0.3
+local actionSpeed = 0.3
 local attackCooldown = 0
-local hitModifierDuration = attackTime * 1.2
+local hitModifierDuration = actionSpeed * 1.2
 
 local function triggerAttack(self)
 	self.collisionX, self.collisionY = self.x - (self.w/2), self.y - (self.h/2)
@@ -30,7 +30,7 @@ local function triggerAttack(self)
 		self.collisionW,
 		self.collisionH,
 		function(item)
-			if (collisionGroups.matches(item.group, collisionGroups.create(collisionGroups.enemyAi, collisionGroups.environment))) then
+			if (collisionGroups.matches(item.group, 'enemyAi environment')) then
 				local aiCollision = item
 				local aiCollisionX, aiCollisionY = aiCollision:getPositionWithOffset()
 				hammerWorld:add(
@@ -81,8 +81,8 @@ local WeaponAnimation = Component.createFactory({
 
 		local tween = require 'modules.tween'
 		self.yPos = -20
-		self.attackAnimationDuration = self.attackTime * 0.6
-		self.attackRecoveryAnimationDuration = self.attackTime * 0.4
+		self.attackAnimationDuration = self.actionSpeed * 0.2
+		self.attackRecoveryAnimationDuration = self.actionSpeed * 0.8
 		self.tween = tween.new(self.attackAnimationDuration, self, {
 			yPos = 0,
 		})
@@ -121,12 +121,22 @@ local WeaponAnimation = Component.createFactory({
 	end,
 	drawSprite = function(color, x, y, angle, facingX, stretchY)
 		local AnimationFactory = require 'components.animation-factory'
-		local animation = AnimationFactory:newStaticSprite('companion/companion')
+		local animation = AnimationFactory:newStaticSprite('companion/inner')
 		local ox, oy = animation:getOffset()
 		love.graphics.setColor(color)
-		love.graphics.draw(
-			AnimationFactory.atlas,
-			animation.sprite,
+		animation:draw(
+			x,
+			y,
+			angle or 0,
+			1 * facingX,
+			-1, -- flip companion upside down
+			ox,oy
+		)
+
+		local animation = AnimationFactory:newStaticSprite('companion/outer')
+		local ox, oy = animation:getOffset()
+		love.graphics.setColor(color)
+		animation:draw(
 			x,
 			y,
 			angle or 0,
@@ -169,7 +179,7 @@ local Attack = Component.createFactory(
 			WeaponAnimation.create({
 				x = self.x,
 				y = self.y,
-				attackTime = self.attackTime,
+				actionSpeed = self.actionSpeed,
 				onImpactFrame = function()
 					triggerAttack(self)
 					self:delete()
@@ -190,8 +200,20 @@ return itemSystem.registerModule({
 	end,
 	tooltip = function(item, props)
 		return {
-			template = 'deals {minDamage} - {maxDamage} area of effect damage in front of the player',
-			data = props
+			template = 'deals {damageRange} area of effect damage in front of the player',
+			data = {
+				damageRange = {
+					type = 'range',
+					from = {
+						prop = 'minDamage',
+						val = props.minDamage
+					},
+					to = {
+						prop = 'maxDamage',
+						val = props.maxDamage
+					}
+				}
+			}
 		}
 	end
 })

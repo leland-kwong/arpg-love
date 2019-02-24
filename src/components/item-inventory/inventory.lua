@@ -29,21 +29,6 @@ local function calcInventorySize(slots, slotSize, margin)
   return width, height
 end
 
-local function InteractArea(self)
-  return Gui.create({
-		x = self.x,
-		y = self.y,
-		w = self.w,
-    h = self.h,
-    onPointerMove = function()
-			msgBus.send(msgBus.INVENTORY_DROP_MODE_INVENTORY)
-		end,
-		onPointerLeave = function()
-			msgBus.send(msgBus.INVENTORY_DROP_MODE_FLOOR)
-		end
-	})
-end
-
 msgBus.on(msgBus.ALL, function(msg, msgType)
   local rootStore = require 'main.global-state'.gameState
 
@@ -69,8 +54,8 @@ end)
 function InventoryBlueprint.init(self)
   Component.addToGroup(self:getId(), 'pixelRound', self)
 
-  local msgBusMainMenu = require 'components.msg-bus-main-menu'
-  msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
+  local msgBus = require 'components.msg-bus'
+  msgBus.send(msgBus.TOGGLE_MAIN_MENU, false)
   MenuManager.clearAll()
   MenuManager.push(self)
 
@@ -78,22 +63,32 @@ function InventoryBlueprint.init(self)
   self.slotMargin = 2
 
   local w, h = calcInventorySize(self.slots(), self.slotSize, self.slotMargin)
-  local panelMargin = 5
-  local statsWidth, statsHeight = 165, h
-  local equipmentWidth, equipmentHeight = 100, h
+  local panelMargin = 20
+  local statsWidth, statsHeight = 155, h
+  local equipmentWidth, equipmentHeight = 80, h
   self.w = w
   self.h = h
+
+  local parent = self
+  Gui.create({
+    id = 'InventoryPanelRegion',
+    x = parent.x,
+    y = parent.y,
+    inputContext = 'InventoryPanel',
+    onUpdate = function(self)
+      self.w = parent.w
+      self.h = parent.h
+    end,
+  }):setParent(self)
 
   -- center to screen
   local inventoryX = require'utils.position'.boxCenterOffset(
     w + (equipmentWidth + panelMargin) + (statsWidth + panelMargin), h,
     love.graphics.getWidth() / config.scaleFactor, love.graphics.getHeight() / config.scaleFactor
   )
-  inventoryX = inventoryX - 100
+  -- inventoryX = inventoryX - 100
   self.x = inventoryX + equipmentWidth + panelMargin + statsWidth + panelMargin
   self.y = 60
-
-  InteractArea(self):setParent(self)
 
   local function inventoryOnItemPickupFromSlot(x, y)
     msgBus.send(msgBus.INVENTORY_PICKUP)
@@ -113,7 +108,12 @@ function InventoryBlueprint.init(self)
   end
 
   setupSlotInteractions(
-    self,
+    {
+      x = self.x + 2,
+      y = self.y + 2,
+      slotSize = self.slotSize,
+      rootComponent = self
+    },
     self.slots,
     self.slotMargin,
     inventoryOnItemPickupFromSlot,
@@ -149,17 +149,13 @@ end
 function InventoryBlueprint.draw(self)
   local w, h = self.w, self.h
 
-  drawTitle(self, self.x, self.y - 15)
+  drawTitle(self, self.x, self.y - 25)
 
-  -- inventory background
-  love.graphics.setColor(0.2, 0.2, 0.2, 1)
-  love.graphics.rectangle('fill', self.x, self.y, w, h)
-  love.graphics.setColor(Color.multiplyAlpha(Color.SKY_BLUE, 0.5))
-  love.graphics.rectangle('line', self.x, self.y, w, h)
+  local drawBox = require 'components.gui.utils.draw-box'
+  drawBox(self)
 end
 
 function InventoryBlueprint.final(self)
-  msgBus.send(msgBus.INVENTORY_DROP_MODE_FLOOR)
   MenuManager.pop()
 end
 

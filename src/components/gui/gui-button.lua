@@ -19,7 +19,7 @@ local Button = extend(Gui, {
     hoverColor = Color.LIGHT_GRAY
   },
   opacity = 1,
-  padding = 0
+  padding = 10
 })
 
 Button.init = f.wrap(function(self)
@@ -32,11 +32,11 @@ end, Gui.init)
 
 Button.update = f.wrap(function(self)
   local buttonW = GuiText.getTextSize(self.text, self.textLayer.font)
-  local buttonH = self.textLayer.font:getHeight()
+  local buttonH = self.textLayer.font:getHeight() - 2
   if self.hidden then
     self.w, self.h = 1, 1
   else
-    self.w, self.h = buttonW + (self.padding * 2), buttonH + (self.padding * 2)
+    self.w, self.h = buttonW + self.padding*2, buttonH + self.padding*2
   end
 end, Gui.update)
 
@@ -46,7 +46,6 @@ function Button.draw(self)
   end
 
   local w, h = self.w, self.h
-  local buttonPadding = self.padding
   local styles = self.disabled and self.disabledStyle or self
   local btnColor, textColor = styles.color, styles.textColor
   local x, y = self.x, self.y
@@ -58,17 +57,19 @@ function Button.draw(self)
 
   love.graphics.setColor(btnColor)
 
-  love.graphics.rectangle(
-    'fill',
-    x, y,
-    w,
-    h
-  )
+  local drawBox = require 'components.gui.utils.draw-box'
+  local boxProps = {
+    padding = 0
+  }
+  boxProps.__index = self
+  setmetatable(boxProps, boxProps)
+  drawBox(boxProps, 'button')
+
   self.textLayer:add(
     self.text,
     textColor,
-    x + buttonPadding,
-    y + buttonPadding + ty
+    x + self.padding,
+    y + self.padding + ty
   )
 
   if self.hovered then

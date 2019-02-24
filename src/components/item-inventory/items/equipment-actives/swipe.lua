@@ -45,7 +45,7 @@ local function triggerHit(self)
   for i=1, #self.hitPositions do
     local point = self.hitPositions[i]
     local collisionGroups = require 'modules.collision-groups'
-    local cGroup = collisionGroups.create('enemyAi', 'environment')
+    local cGroup = 'enemyAi environment'
     local items, len = cWorld:querySegment(x, y, point.x, point.y, function(item)
       if (not item.parent) then
         return
@@ -83,13 +83,15 @@ function Swipe.init(self)
     Component.get('WEAPON_CORE'),
     'all'
   )
+  local Position = require 'utils.position'
+  self.dx, self.dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
 
   local frames = {}
-  local frameCount = 8
+  local frameCount = 9
   for i=1, frameCount do
-    table.insert(frames, 'ability-swipe-'..i)
+    table.insert(frames, 'swipe/'..i)
   end
-  self.animation = AnimationFactory:new(frames):setDuration(self.attackTime)
+  self.animation = AnimationFactory:new(frames):setDuration(self.actionSpeed)
 
   local playerRef = Component.get('PLAYER')
   self.angle = (math.atan2(self.dx, self.dy) * -1) + (math.pi/2)
@@ -153,8 +155,20 @@ return itemSystem.registerModule({
 	end,
 	tooltip = function(item, props)
 		return {
-			template = 'deals {minDamage} - {maxDamage} area of effect damage in front of the player',
-			data = props
+			template = 'deals {damageRange} area of effect damage in front of the player',
+			data = {
+        damageRange = {
+					type = 'range',
+					from = {
+						prop = 'minDamage',
+						val = props.minDamage
+					},
+					to = {
+						prop = 'maxDamage',
+						val = props.maxDamage
+					},
+				}
+      }
 		}
 	end
 })

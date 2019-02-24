@@ -16,14 +16,14 @@ return {
 		category = itemConfig.category.AUGMENTATION,
 
 		baseModifiers = {
-			attackPower = 30
+			actionPower = 30
 		},
 
 		extraModifiers = {
 			require 'components.item-inventory.items.modifiers.frenzy'({
 				maxStacks = 30,
 				resetStackDelay = 2,
-				attackTimeReduction = 0.01,
+				increasedActionSpeed = 0.01,
 				energyCostReduction = -0.1,
 				cooldownReduction = 0.005
 			}),

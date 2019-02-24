@@ -32,6 +32,12 @@ function Notifier.init(self)
           icon = icon
         }
       ]]
+      assert(
+        (
+          (msgValue.description == nil) or
+          (type(msgValue.description) == 'table')
+        ), 'description should be a love text object'
+      )
       msgValue.timestamp = os.date('%X')
       self.eventLog:add(msgValue)
       self.opacity = 1
@@ -82,7 +88,6 @@ function Notifier.draw(self)
 
     local content = {
       Color.YELLOW, e.title..'\n',
-      Color.MED_GRAY, e.timestamp..'\n'
     }
 
     for i=1, #(e.description or {}) do

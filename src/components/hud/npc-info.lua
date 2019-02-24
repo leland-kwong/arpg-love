@@ -8,6 +8,7 @@ local config = require 'config.config'
 local Position = require 'utils.position'
 local Color = require 'modules.color'
 local collisionGroups = require 'modules.collision-groups'
+local msgBus = require 'components.msg-bus'
 
 local itemHovered = nil
 local aiHoverFilter = function(item)
@@ -26,17 +27,10 @@ end
 
 function NpcInfo.init(self)
   local textLayer = Component.get('HUD').hudTextLayer
-  local nameTextWidth, nameTextHeight = GuiText.getTextSize('Foobar', textLayer.font)
-  local w, h = 200, 15
-  local y = self.y + nameTextHeight + 2
-  local windowW, windowH = windowSize()
-  local x = Position.boxCenterOffset(w, h, windowW, windowH)
+  local y = self.y
   self.statusBar = StatusBar.create({
-    x = x,
     y = y,
-    w = w,
-    h = h,
-    color = Color.DEEP_RED,
+    color = {Color.multiplyAlpha(Color.DEEP_RED, 0.9)},
     fillPercentage = function()
       local percentage = self.target.stats:get('health') /
         self.target.stats:get('maxHealth')
@@ -75,23 +69,31 @@ function NpcInfo.update(self, dt)
     local name = itemHovered.name or ''
     local windowW, windowH = windowSize()
     local textWidth, textHeight = GuiText.getTextSize(dataSheet.name, textLayer.font)
+    local w, h = math.max(textWidth + 30, 200), textHeight + 3
     local x, y = Position.boxCenterOffset(
-      textWidth,
-      textHeight,
+      w,
+      h,
       windowW,
       windowH
     )
-    textLayer:add(
-      dataSheet.name,
-      itemHovered.rarityColor or Color.WHITE,
-      x,
-      self.y
+    self.statusBar.w, self.statusBar.h = w,h
+
+    textLayer:addf(
+      {
+        itemHovered.rarityColor or Color.WHITE,
+        dataSheet.name,
+      },
+      w,
+      'center',
+      math.floor(x),
+      self.statusBar.y + 4
     )
     local props = dataSheet.properties
     local propsText = ''
     for i=1, #props do
       local p = props[i]
-      propsText = propsText..'  '..p
+      local separator = i > 1 and ', ' or ''
+      propsText = propsText..separator..p
     end
     local wrapLimit = 250
     local _, propsTextHeight = GuiText.getTextSize(propsText, textLayerSmall.font, wrapLimit)
@@ -107,6 +109,9 @@ function NpcInfo.update(self, dt)
     )
     self.target = itemHovered
   end
+  msgBus.send('CURSOR_SET', {
+    type = itemHovered and 'target' or 'pointer'
+  })
   self.statusBar:setDisabled(not itemHovered)
 end
 

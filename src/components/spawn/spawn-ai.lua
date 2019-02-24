@@ -2,6 +2,7 @@ local Component = require 'modules.component'
 local Ai = require 'components.ai.ai'
 local msgBus = require 'components.msg-bus'
 local collisionWorlds = require 'components.collision-worlds'
+local CollisionGroups = require 'modules.collision-groups'
 local groups = require 'components.groups'
 local config = require 'config.config'
 local typeCheck = require 'utils.type-check'
@@ -9,8 +10,66 @@ local Math = require 'utils.math'
 local animationFactory = require 'components.animation-factory'
 local setProp = require 'utils.set-prop'
 local aiTypes = require 'components.ai.types'
-local aiRarity = require 'components.ai.rarity'
+local Map = require 'modules.map-generator.index'
 local f = require 'utils.functional'
+
+local function getItemPositions(items)
+  local binPack = require 'utils..bin-pack'
+  local done = false
+  local sizeIncrement = 16
+  local width, height = 0, 0
+  local tryCount = 0
+  local newItems
+  while (not done) do
+    width, height = (tryCount + 1) * sizeIncrement,
+      (tryCount + 1) * sizeIncrement
+    newItems = {}
+    local bp = binPack(width, height)
+    local i = 1
+    local tooSmall = false
+    while (i <= #items) and (not tooSmall) do
+      local item = items[i]
+      local rect = bp:insert(item.w, item.h)
+      if (not rect) then
+        tooSmall = true
+      else
+        table.insert(newItems, rect)
+      end
+      i = i + 1
+    end
+    done = (not tooSmall)
+    tryCount = tryCount + 1
+  end
+
+  return width, height, newItems
+end
+
+local spawnCollisionFilter = function(item, other)
+  if CollisionGroups.matches(other.group, 'obstacle enemyAi') then
+    return 'slide'
+  end
+  return false
+end
+
+local function repositionAiToPreventStacking(spawnedAi, x, y, collisionWorld)
+  local width, height, positions = getItemPositions(spawnedAi)
+  --[[
+    check collisions using a bounding box around all ai to make sure
+    they fit within the area
+  ]]
+  local boundingBox = {}
+  collisionWorld:add(boundingBox, x, y, width, height)
+  local spawnX, spawnY = collisionWorld:move(boundingBox, x, y, spawnCollisionFilter)
+  collisionWorld:remove(boundingBox)
+  for i=1, #positions do
+    local ai = spawnedAi[i]
+    local p = positions[i]
+    ai:setPosition(
+      p.x + spawnX,
+      p.y + spawnY
+    )
+  end
+end
 
 local SpawnerAi = {
   -- debug = true,
@@ -18,31 +77,15 @@ local SpawnerAi = {
   x = 0,
   y = 0,
   moveSpeed = 0,
-  rarity = aiRarity, -- [FUNCTION]
   -- these need to be passed in
   grid = nil,
-  WALKABLE = nil,
+  WALKABLE = Map.WALKABLE,
 
   colWorld = collisionWorlds.map,
-  pxToGridUnits = function(screenX, screenY, gridSize)
-    typeCheck.validate(gridSize, typeCheck.NUMBER)
-
-    local gridPixelX, gridPixelY = screenX, screenY
-    local gridX, gridY =
-      Math.round(gridPixelX / gridSize),
-      Math.round(gridPixelY / gridSize)
-    return gridX, gridY
-  end,
+  pxToGridUnits = require 'utils.position'.pixelsToGridUnits,
   gridSize = config.gridSize,
 }
 SpawnerAi.__index = SpawnerAi
-
-local directions = {
-  1, -1
-}
-local function getRandomDirection()
-  return directions[math.random(1, 2)]
-end
 
 local function AiFactory(props)
   local self = setmetatable(props, SpawnerAi)
@@ -50,12 +93,17 @@ local function AiFactory(props)
     type(self.target) == 'function',
     'target property must be a function'
   )
+  assert(type(self.rarity) == 'function', 'a rarity function must be provided')
 
   local function findNearestTarget(otherX, otherY, otherSightRadius)
     if not self.target then
       return nil
     end
     local target = self.target()
+    if (not target) then
+      return nil
+    end
+
     local tPosX, tPosY = target.x, target.y
     local dist = Math.dist(tPosX, tPosY, otherX, otherY)
     local withinVision = dist <= otherSightRadius
@@ -67,18 +115,16 @@ local function AiFactory(props)
     return nil
   end
 
-  return f.map(self.types, function(aiType)
-    local aiPrototype
-    if (type(aiType) == 'function') then
-      aiPrototype = setProp(aiType())
-    else
-      aiPrototype = setProp(aiTypes.typeDefs[aiType]())
-    end
-    local spawnX, spawnY =
-      self.x * self.gridSize + math.random(0, self.gridSize) * getRandomDirection(),
-      self.y * self.gridSize + math.random(0, self.gridSize) * getRandomDirection()
+  local spawnX, spawnY =
+    self.x * self.gridSize,
+    self.y * self.gridSize
+  local spawnedAi = f.map(self.types, function(aiFactory)
+    local aiDefinition = (type(aiFactory) == 'table') and
+      aiFactory or
+      aiTypes.typeDefs[aiFactory]
+    local aiPrototype = aiDefinition.create()
+    aiPrototype = setProp(aiPrototype)
     local props = self.rarity(aiPrototype)
-      :set('debug',             self.debug)
       :set('x',                 spawnX)
       :set('y',                 spawnY)
       :set('collisionWorld',    self.colWorld)
@@ -91,8 +137,13 @@ local function AiFactory(props)
     local ai = Ai.create(props):setParent(
       Component.get('MAIN_SCENE')
     )
+
     return ai
   end)
+
+  repositionAiToPreventStacking(spawnedAi, spawnX, spawnY, self.colWorld)
+
+  return spawnedAi
 end
 
 return AiFactory

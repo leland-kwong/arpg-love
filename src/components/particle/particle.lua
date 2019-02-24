@@ -3,8 +3,7 @@ local groups = require 'components.groups'
 local Color = require 'modules.color'
 local Tween = require 'modules.tween'
 local scale = require 'config.config'.scaleFactor
-
-local image = love.graphics.newImage('built/images/pixel-1x1-white.png')
+local AnimationFactory = require 'components.animation-factory'
 
 local ParticleTest = {
   group = groups.all,
@@ -12,14 +11,21 @@ local ParticleTest = {
   y = 0,
   width = 8,
   duration = 0,
-  opacity = 1
+  opacity = 1,
+  sprite = 'pixel-white-1x1'
 }
 
 function ParticleTest.init(self)
   self.initialX = self.x
   self.initialY = self.y
 
-  local psystem = love.graphics.newParticleSystem(image, 100)
+  local animation = AnimationFactory:newStaticSprite(self.sprite)
+
+  local psystem = love.graphics.newParticleSystem(AnimationFactory.atlas, 500)
+  psystem:setQuads(animation.sprite)
+  psystem:setOffset(animation:getOffset())
+
+  -- local psystem = love.graphics.newParticleSystem(image, 100)
   self.psystem = psystem
   psystem:setParticleLifetime(0.25, 0.35) -- Particles live at least 2s and at most 5s.
   psystem:setEmissionRate(100)

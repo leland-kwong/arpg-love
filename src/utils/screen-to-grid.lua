@@ -8,12 +8,12 @@ local function gridPos(grid, x, y)
 	return x, newY
 end
 
--- returns grid coordinates relative to the screen. 
+-- returns grid coordinates relative to the screen.
 -- Also flips the grid y-axis value to go from bottom to top
-local screenToGrid = memoize(function(sx, sy)
+local screenToGrid = function(sx, sy)
 	local grid = Global.map
 	local gx, gy = pixelsToGrid(sx, sy)
 	return gridPos(grid, gx, gy)
-end)
+end
 
 return screenToGrid

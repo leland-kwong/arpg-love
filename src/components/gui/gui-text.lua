@@ -41,6 +41,8 @@ local GuiTextLayer = {
   end
 }
 
+local floor = math.floor
+
 function GuiTextLayer.add(self, text, color, x, y)
   self.tablePool[1] = color
   self.tablePool[2] = text
@@ -51,16 +53,10 @@ function GuiTextLayer.addf(self, formattedText, wrapLimit, alignMode, x, y)
   self.textGraphic:addf(
     formattedText, -- [TABLE]
     wrapLimit,
-    alignMode,
+    alignMode or 'left',
     x,
     y
   )
-end
-
--- adds a text group via [love's text string format](https://love2d.org/wiki/Text:add)
-function GuiTextLayer.addTextGroup(self, textGroup, x, y)
-  self.textGraphic:add(textGroup, x, y)
-  return self
 end
 
 function GuiTextLayer.init(self)
@@ -73,12 +69,19 @@ function GuiTextLayer.getSize(self)
 end
 
 function GuiTextLayer.draw(self)
+  local textWidth = self:getSize()
+  local isEmpty = textWidth == 0
+
+  if isEmpty then
+    return
+  end
+
   if self.outline then
     pixelOutlineShader.attach(nil, self.color[4])
   end
 
   love.graphics.setColor(self.color)
-  love.graphics.draw(self.textGraphic, x, y)
+  love.graphics.draw(self.textGraphic)
   self.textGraphic:clear()
 
   if self.outline then

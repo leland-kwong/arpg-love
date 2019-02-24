@@ -42,7 +42,7 @@ local PunchAttack = Component.createFactory({
 
 local PunchAbility = {
   range = 1.5,
-  attackTime = 0.5,
+  actionSpeed = 0.5,
   cooldown = 0.3
 }
 
@@ -92,63 +92,69 @@ function PunchAbility.update(self, state, dt)
   return false
 end
 
-return function()
-  local animations = {
-    moving = animationFactory:new({
-      'melee-bot/melee-bot-0',
-      'melee-bot/melee-bot-1',
-      'melee-bot/melee-bot-2',
-      'melee-bot/melee-bot-3',
-      'melee-bot/melee-bot-4',
-      'melee-bot/melee-bot-5',
-      'melee-bot/melee-bot-6',
-    }):setDuration(PunchAbility.attackTime),
-    idle = animationFactory:new({
-      'melee-bot/melee-bot-7',
-      'melee-bot/melee-bot-8',
-      'melee-bot/melee-bot-9',
-      'melee-bot/melee-bot-10',
-    }):setDuration(1),
-    attacking = animationFactory:new({
-      'melee-bot/melee-bot-11',
-      'melee-bot/melee-bot-12',
-      'melee-bot/melee-bot-13',
-      -- hit frame
-      'melee-bot/melee-bot-14',
-      'melee-bot/melee-bot-14',
-      -- recovery frames
-      'melee-bot/melee-bot-13',
-      'melee-bot/melee-bot-12',
-    }):setDuration(PunchAbility.attackTime)
-  }
-
-  local attackRange = 1.5
-  local spriteWidth, spriteHeight = animations.idle:getSourceSize()
-  local dataSheet = {
-    name = 'punch-bot',
-    properties = {
-      'melee'
+local AiBlueprint = require 'components.ai.create-blueprint'
+return AiBlueprint({
+  baseProps = {
+    type = 'ai-melee-bot',
+  },
+  create = function()
+    local animations = {
+      moving = animationFactory:new({
+        'melee-bot/melee-bot-0',
+        'melee-bot/melee-bot-1',
+        'melee-bot/melee-bot-2',
+        'melee-bot/melee-bot-3',
+        'melee-bot/melee-bot-4',
+        'melee-bot/melee-bot-5',
+        'melee-bot/melee-bot-6',
+      }):setDuration(PunchAbility.actionSpeed),
+      idle = animationFactory:new({
+        'melee-bot/melee-bot-7',
+        'melee-bot/melee-bot-8',
+        'melee-bot/melee-bot-9',
+        'melee-bot/melee-bot-10',
+      }):setDuration(1),
+      attacking = animationFactory:new({
+        'melee-bot/melee-bot-11',
+        'melee-bot/melee-bot-12',
+        'melee-bot/melee-bot-13',
+        -- hit frame
+        'melee-bot/melee-bot-14',
+        'melee-bot/melee-bot-14',
+        -- recovery frames
+        'melee-bot/melee-bot-13',
+        'melee-bot/melee-bot-12',
+      }):setDuration(PunchAbility.actionSpeed)
     }
-  }
 
-  return {
-    dataSheet = dataSheet,
-    armor = 250,
-    moveSpeed = 95,
-    maxHealth = 20,
-    itemData = {
-      level = 1,
-      dropRate = 10
-    },
-    experience = 1,
-    w = spriteWidth,
-    h = spriteHeight,
-    animations = animations,
-    abilities = {
-      PunchAbility
-    },
-    attackRange = attackRange,
-    fillColor = fillColor,
-    onDestroyStart = onDestroyStart
-  }
-end
+    local attackRange = 1.5
+    local spriteWidth, spriteHeight = animations.idle:getSourceSize()
+    local dataSheet = {
+      name = 'punch-bot',
+      properties = {
+        'melee'
+      }
+    }
+
+    return {
+      dataSheet = dataSheet,
+      armor = 250,
+      moveSpeed = 95,
+      maxHealth = 20,
+      itemData = {
+        level = 1,
+        dropRate = 10
+      },
+      experience = 1,
+      w = spriteWidth,
+      h = spriteHeight,
+      animations = animations,
+      abilities = {
+        PunchAbility
+      },
+      attackRange = attackRange,
+      fillColor = fillColor,
+      onDestroyStart = onDestroyStart
+    }
+  end
+})

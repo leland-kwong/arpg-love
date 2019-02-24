@@ -91,10 +91,14 @@ return function()
   }
 
   local function randomItemByRarity(rarity)
+    if (itemConfig.rarity.LEGENDARY == rarity) then
+      return randomLegendaryItem()()
+    end
+
+    local baseItem = randomBaseItem()()
     local isMagicalOrRare = rarity == itemConfig.rarity.MAGICAL or
       rarity == itemConfig.rarity.RARE
     if isMagicalOrRare then
-      local baseItem = randomBaseItem()()
       local numModifiers = extraModifiersByRarity[rarity]
       local modsToRoll = {}
       local numModsAdded = 0
@@ -113,10 +117,6 @@ return function()
       local title = itemSystem.getDefinition(baseItem).title
       itemSystem.item.setCustomTitle(baseItem, customTitles[rarity](title))
       return baseItem
-    end
-
-    if (itemConfig.rarity.LEGENDARY == rarity) then
-      return randomLegendaryItem()()
     end
 
     return baseItem
@@ -147,7 +147,7 @@ return function()
 
   --[[
     {itemLevel}
-    {dropRate} - out of 100%, where every 100% guarantees at least one item
+    {dropRate}
   ]]
   local function generateRandomItem(itemLevel, dropRate, minRarity, maxRarity)
     assert(type(itemLevel) == 'number')
@@ -155,8 +155,8 @@ return function()
     assert(type(minRarity) == 'number' and type(maxRarity) == 'number')
 
     local lootList = {}
-    local multiplier = 100
-    local randMax = 100 * multiplier
+    local multiplier = 90
+    local randMax = 100 * 100
 
     -- if this is over 0 then that means we should roll again for a chance at more items
     while getRate(dropRate) > 0 do

@@ -6,34 +6,34 @@ local Object = require 'utils.object-utils'
 
 local nodeValueOptions = {
   [1] = {
-    name = 'attack speed',
+    name = 'quick strikes',
     value = {
-      type = 'attackTimeReduction',
-      value = 0.01
+      type = 'increasedActionSpeed',
+      value = 0.04
     },
     image = 'gui-skill-tree_node_speed-up',
     backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
-      return '+'..(self.value.value * 100)..'% attack speed'
+      return '+'..(self.value.value * 100)..'% action speed'
     end
   },
   [2] = {
-    name = 'bonus damage',
+    name = 'bonus action power',
     value = {
-      type = 'attackPower',
-      value = 0.02
+      type = 'actionPower',
+      value = 0.1
     },
     image = 'gui-skill-tree_node_damage-up',
     backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
-      return '+'..(self.value.value * 100)..'% damage'
+      return '+'..(self.value.value * 100)..'% action power'
     end
   },
   [3] = {
     name = 'lightning rod',
     value = {
       type = 'lightningRod',
-      value = 0.1
+      value = 0.2
     },
     type = 'keystone',
     image = 'gui-skill-tree_node_lightning',
@@ -44,6 +44,7 @@ local nodeValueOptions = {
   },
   [4] = {
     name = 'battle suit',
+    image = 'gui-skill-tree_node_root',
     value = {
       value = 0,
       type = 'dummyNode',
@@ -75,44 +76,139 @@ local nodeValueOptions = {
     image = 'gui-skill-tree_node_blood-rage',
     backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
-      return 'gain '..(self.value.bonus * 100)..'% attack power for each 1% of missing health'
+      return '+'..(self.value.bonus * 100)..'% action power for each 1% of health missing'
     end
   },
   [7] = {
     name = 'extra health',
     value = {
       type = 'maxHealth',
-      value = 0.01
+      value = 0.05
     },
     image = 'gui-skill-tree_node_max-health',
     backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
-      return 'gain +'..(self.value.value * 100)..'% maximum health'
+      return '+'..(self.value.value * 100)..'% maximum health'
     end
   },
   [8] = {
     name = 'extra energy',
     value = {
       type = 'maxEnergy',
-      value = 0.01
+      value = 0.05
     },
     image = 'gui-skill-tree_node_max-energy',
     backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
-      return 'gain +'..(self.value.value * 100)..'% maximum energy'
+      return '+'..(self.value.value * 100)..'% maximum energy'
     end
   },
   [9] = {
     name = 'extra health and energy',
     value = {
       type = 'maxHealthEnergy',
-      bonusHealth = 0.01,
-      bonusEnergy = 0.01,
+      bonusHealth = 0.025,
+      bonusEnergy = 0.025,
     },
     image = 'gui-skill-tree_node_max-health-energy',
     backgroundImage = 'gui-skill-tree_node_background',
     description = function(self)
-      return 'gain +'..(self.value.bonusHealth * 100)..'% maximum health, and +'..(self.value.bonusEnergy * 100)..'% maximum energy'
+      return '+'..(self.value.bonusHealth * 100)..'% maximum health\n+'..(self.value.bonusEnergy * 100)..'% maximum energy'
+    end
+  },
+  [10] = {
+    name = 'extra energy regeneration',
+    value = {
+      type = 'percentEnergyRegen',
+      percentBonus = 0.1,
+    },
+    image = 'gui-skill-tree_node_energy-regeneration',
+    backgroundImage = 'gui-skill-tree_node_background',
+    description = function(self)
+      return '+'..(self.value.percentBonus * 100)..'% energy regeneration'
+    end
+  },
+  [11] = {
+    name = 'extra health regeneration',
+    value = {
+      type = 'percentHealthRegen',
+      percentBonus = 0.1,
+    },
+    image = 'gui-skill-tree_node_health-regeneration',
+    backgroundImage = 'gui-skill-tree_node_background',
+    description = function(self)
+      return '+'..(self.value.percentBonus * 100)..'% health regeneration'
+    end
+  },
+  [12] = {
+    name = 'supercharger',
+    value = {
+      type = 'percentHybridRegen',
+      percentEnergyRegen = 0.6,
+      percentEnergyRegenPerMissingEnergy = 0.01,
+      percentHealthRegen = 0.4,
+    },
+    image = 'gui-skill-tree_node_hybrid-regeneration',
+    backgroundImage = 'gui-skill-tree_node_background',
+    description = function(self)
+      return '+'..(self.value.percentEnergyRegen * 100)..'% energy regeneration'
+        ..'\n+'..(self.value.percentHealthRegen * 100)..'% health regeneration'
+        ..'\n\n+'..(self.value.percentEnergyRegenPerMissingEnergy * 100)..'% energy regeneration for each 1% maximum energy missing'
+    end
+  },
+  [13] = {
+    name = 'cooldown reduction',
+    value = {
+      type = 'cooldownReduction',
+      value = 0.04,
+    },
+    image = 'gui-skill-tree_node_cooldown-reduction',
+    backgroundImage = 'gui-skill-tree_node_background',
+    description = function(self)
+      return '+'..(self.value.value * 100)..'% cooldown reduction'
+    end
+  },
+  [14] = {
+    name = 'liquid nitrogen',
+    type = 'keystone',
+    value = {
+      type = 'cooldownReduction',
+      value = 0.1,
+    },
+    image = 'gui-skill-tree_node_cooldown-reduction-2',
+    backgroundImage = 'gui-skill-tree_node_background',
+    description = function(self)
+      return '+'..(self.value.value * 100)..'% cooldown reduction'
+    end
+  },
+  [15] = {
+    name = 'kinetic energy',
+    type = 'keystone',
+    value = {
+      type = 'energySteal',
+      value = 0.4,
+      duration = 0.4,
+    },
+    image = 'gui-skill-tree_node_energy-steal',
+    backgroundImage = 'gui-skill-tree_node_background',
+    description = function(self)
+      return (self.value.value * 100)..'% of damage you deal is restored as energy over '
+        ..(self.value.duration)..' seconds'
+    end
+  },
+  [16] = {
+    name = 'kinetic healing',
+    type = 'keystone',
+    value = {
+      type = 'lifeSteal',
+      value = 0.3,
+      duration = 0.4,
+    },
+    image = 'gui-skill-tree_node_life-steal',
+    backgroundImage = 'gui-skill-tree_node_background',
+    description = function(self)
+      return (self.value.value * 100)..'% of damage you deal is restored as health over '
+        ..(self.value.duration)..' seconds'
     end
   }
 }
@@ -123,10 +219,9 @@ local EditorWithDefaults = Object.assign(SkillTreeEditor, {
   defaultNodeDescription = 'not implemented yet',
   colors = {
     nodeConnection = {
-      inner = Color.SKY_BLUE,
-      innerNonSelectable = {Color.multiplyAlpha(Color.SKY_BLUE, 0.1)},
-      outerNonSelectable = {Color.multiplyAlpha(Color.SKY_BLUE, 0)},
-      outer = {Color.multiplyAlpha(Color.SKY_BLUE, 0.2)}
+      inner = {Color.rgba255(217,217,217)},
+      innerNonSelectable = {Color.multiplyAlpha(Color.MED_GRAY, 0.2)},
+      outerNonSelectable = {Color.multiplyAlpha(Color.MED_GRAY, 0)},
     }
   },
   parseTreeData = function(treeData)

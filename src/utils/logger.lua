@@ -8,6 +8,7 @@ function logger:new(size)
 	local o = {
 		entries = {},
 		size = size or 5,
+		entryCount = 0
 	}
 	setmetatable(o, self)
 	self.__index = self
@@ -15,6 +16,7 @@ function logger:new(size)
 end
 
 function logger:add(entry)
+	self.entryCount = self.entryCount + 1
 	-- insert to front of list
 	table.insert(self.entries, 1, entry)
 	-- remove oldest entry
@@ -25,6 +27,14 @@ end
 
 function logger:get()
 	return self.entries
+end
+
+function logger:getNewest()
+	return self.entries[1]
+end
+
+function logger:getLast()
+	return self.entries[#self.entries]
 end
 
 return logger

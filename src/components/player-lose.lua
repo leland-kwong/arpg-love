@@ -22,10 +22,15 @@ function PlayerLose.init(self)
   Component.addToGroup(self:getId(), 'hud', self)
   msgBus.on('*', function(_, msgType)
     if restartEvents[msgType] then
-      consoleLog('trigger')
       local HomeBase = require 'scene.home-base'
-      msgBus.send(msgBus.SCENE_STACK_PUSH, {
-        scene = HomeBase
+      local globalState = require 'main.global-state'
+      msgBus.send(msgBus.SCENE_STACK_REPLACE, {
+        scene = HomeBase,
+        props = {
+          location = {
+            layoutType = globalState.activeLevel.level
+          }
+        }
       })
       self:delete(true)
       return msgBus.CLEANUP
@@ -36,7 +41,7 @@ end
 function PlayerLose.draw(self)
   local gfx = love.graphics
   local titleFont = Font.secondaryLarge.font
-  local camW, camH = camera:getSize()
+  local camW, camH = camera:getSize(true)
 
   gfx.setColor(0,0,0,0.2)
   gfx.rectangle('fill', 0, 0, camW, camH)

@@ -1,5 +1,4 @@
 local Component = require 'modules.component'
-local fileSystem = require 'modules.file-system'
 local Color = require 'modules.color'
 local Gui = require 'components.gui.gui'
 local GuiTextInput = require 'components.gui.gui-text-input'
@@ -8,21 +7,23 @@ local GuiText = require 'components.gui.gui-text'
 local MenuList = require 'components.menu-list'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
-local msgBusMainMenu = require 'components.msg-bus-main-menu'
+local msgBus = require 'components.msg-bus'
 local config = require 'config.config'
 local tick = require 'utils.tick'
 local StarField = require 'components.star-field'
 local Camera = require 'components.camera'
+local gsa = require 'main.global-state-actions'
 
 local MainGameHomeScene = {
+  id = 'HomeScreen',
   group = groups.gui,
-  menuX = 300,
-  menuY = 40
+  x = 0,
+  y = 0
 }
 
 function MainGameHomeScene.init(self)
   Camera:setPosition(0, 0, 0)
-  msgBus.send(msgBus.SET_BACKGROUND_COLOR, Color.DARK_GRAY)
+  gsa('setBackgroundColor', Color.DARK_GRAY)
   msgBus.on(msgBus.KEY_PRESSED, function(ev)
     local isToggleDevMode = ev.hasModifier and ev.key == '.'
     if isToggleDevMode then
@@ -63,13 +64,22 @@ function MainGameHomeScene.update(self)
 end
 
 local function renderTitle(self)
+  local screenWidth, screenHeight = love.graphics.getDimensions()
+  local titleWidth, titleHeight = GuiText.getTextSize(config.gameTitle, self.guiTextTitleLayer.font)
+  local Position = require 'utils.position'
+  local titleX = Position.boxCenterOffset(
+    titleWidth,
+    titleHeight,
+    screenWidth / Camera.scale,
+    screenHeight / Camera.scale
+  )
   self.guiTextTitleLayer:add(
     config.gameTitle,
     Color.SKY_BLUE,
-    self.menuX,
-    self.menuY - 20
+    titleX,
+    self.y + 20
   )
-  local screenWidth, screenHeight = love.graphics.getDimensions()
+
   self.guiTextLayer:add(
     config.version,
     Color.WHITE,

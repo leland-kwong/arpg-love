@@ -24,7 +24,9 @@ M.keyboard = {
   MAIN_MENU = 'escape',
   PORTAL_OPEN = 't',
   PAUSE_GAME = 'p',
-  PASSIVE_SKILLS_TREE_TOGGLE = 'o'
+  PASSIVE_SKILLS_TREE_TOGGLE = 'o',
+  -- QUEST_LOG_TOGGLE = 'u',
+  MAP_TOGGLE = 'm'
 }
 
 -- these actions may not be remapped
@@ -46,11 +48,16 @@ M.camera = {
   speed = 0.4, -- lerp duration (larger value means slower movement)
 }
 
+M.display = {
+  scale = 3
+}
+
 M.sound = {
   masterVolume = 1,
   musicVolume = 0.5
 }
 
+M.fullScreen = false
 M.isDevelopment = false
 M.previousVersion = nil -- the last version the game was loaded as
 

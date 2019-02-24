@@ -12,9 +12,11 @@ local HudStatusIcons = require 'components.hud.status-icons'
 local camera = require 'components.camera'
 local msgBus = require 'components.msg-bus'
 local Position = require 'utils.position'
+local AnimationFactory = require 'components.animation-factory'
 local scale = require 'config.config'.scaleFactor
 local Color = require 'modules.color'
 local config = require 'config.config'
+local Math = require 'utils.math'
 local max = math.max
 
 local Hud = {
@@ -24,11 +26,11 @@ local Hud = {
   rootStore = {}
 }
 
-local healthManaWidth = 62 * 2
+local healthManaWidth = 63 * 2
 
 local function setupExperienceIndicator(self)
   local w, h = healthManaWidth - 2, 2
-  local winWidth, winHeight = love.graphics.getWidth() / scale, love.graphics.getHeight() / scale
+  local winWidth, winHeight = camera:getSize(true)
   local offX, offY = Position.boxCenterOffset(w, h, winWidth, winHeight)
   ExperienceIndicator.create({
     rootStore = self.rootStore,
@@ -42,20 +44,83 @@ local function setupExperienceIndicator(self)
   }):setParent(self)
 end
 
+local menuButtonsList = {
+  {
+    displayValue = 'Portal Home (t)',
+    normalAni = AnimationFactory:newStaticSprite('gui-home-portal-button'),
+    hoverAni = AnimationFactory:newStaticSprite('gui-home-portal-button--hover'),
+    onClick = function()
+      msgBus.send(msgBus.PLAYER_PORTAL_OPEN)
+    end
+  },
+  {
+    displayValue = 'Inventory (i)',
+    normalAni = AnimationFactory:newStaticSprite('gui-inventory-button'),
+    hoverAni = AnimationFactory:newStaticSprite('gui-inventory-button--hover'),
+    onClick = function()
+      msgBus.send(msgBus.INVENTORY_TOGGLE)
+    end
+  },
+  {
+    displayValue = 'Skill Tree (o)',
+    normalAni = AnimationFactory:newStaticSprite('gui-skill-tree-button'),
+    hoverAni = AnimationFactory:newStaticSprite('gui-skill-tree-button--hover'),
+    badge = function()
+      local PlayerPassiveTree = require 'components.player.passive-tree'
+      local unusedSkillPoints = PlayerPassiveTree.getUnusedSkillPoints()
+      return unusedSkillPoints
+    end,
+    onClick = function()
+      msgBus.send(msgBus.PASSIVE_SKILLS_TREE_TOGGLE)
+    end
+  },
+  {
+    displayValue = 'Map (m)',
+    normalAni = AnimationFactory:newStaticSprite('gui-main-map-button'),
+    hoverAni = AnimationFactory:newStaticSprite('gui-main-map-button--hover'),
+    badge = function()
+      return 0
+    end,
+    onClick = function()
+      msgBus.send('MAP_TOGGLE')
+    end
+  },
+  -- {
+  --   displayValue = 'Quests (u)',
+  --   normalAni = AnimationFactory:newStaticSprite('gui-quest-log-button'),
+  --   hoverAni = AnimationFactory:newStaticSprite('gui-quest-log-button--hover'),
+  --   badge = function()
+  --     return 0
+  --   end,
+  --   onClick = function()
+  --     msgBus.send('QUEST_LOG_TOGGLE')
+  --   end
+  -- },
+  {
+    displayValue = 'Main Menu (esc)',
+    normalAni = AnimationFactory:newStaticSprite('gui-home-button'),
+    hoverAni = AnimationFactory:newStaticSprite('gui-home-button--hover'),
+    onClick = function()
+      msgBus.send(msgBus.TOGGLE_MAIN_MENU)
+    end
+  },
+}
+
 function Hud.init(self)
   local root = self
   local mainSceneRef = Component.get('MAIN_SCENE')
   if mainSceneRef and self.minimapEnabled then
-    local stateSnapshot = msgBus.send(msgBus.GLOBAL_STATE_GET)
-      .stateSnapshot
-        :consumeSnapshot(mainSceneRef.mapId)
+    local globalState = require 'main.global-state'
+    local stateSnapshot = globalState.stateSnapshot
+      :consumeSnapshot(mainSceneRef.mapId)
     local minimapW, minimapH = 100, 100
     local minimapMargin = 5
+    local cameraWidth = camera:getSize(true)
     Minimap.create({
       camera = camera,
       grid = mainSceneRef.mapGrid,
-      x = love.graphics.getWidth()/config.scale - minimapW - minimapMargin,
-      y = minimapH + minimapMargin,
+      x = cameraWidth - minimapW - minimapMargin,
+      y = minimapMargin,
       w = minimapW,
       h = minimapH,
       scale = config.scale,
@@ -80,25 +145,25 @@ function Hud.init(self)
     end
   }):setParent(self)
 
-  local winWidth, winHeight = love.graphics.getWidth() / scale, love.graphics.getHeight() / scale
+  local winWidth, winHeight = camera:getSize(true)
   local barHeight = 18
   local offX, offY = Position.boxCenterOffset(healthManaWidth, barHeight, winWidth, winHeight)
 
   local function getHealthRemaining()
     local playerRef = Component.get('PLAYER')
-    return playerRef.stats:get('health') / playerRef.stats:get('maxHealth')
+    return Math.clamp(playerRef.stats:get('health') / playerRef.stats:get('maxHealth'), 0, 1)
   end
 
   local function getEnergyRemaining()
     local playerRef = Component.get('PLAYER')
-    return playerRef.stats:get('energy') / playerRef.stats:get('maxEnergy')
+    return Math.clamp(playerRef.stats:get('energy') / playerRef.stats:get('maxEnergy'), 0, 1)
   end
 
   -- health bar
   local StatusBarFancy = require 'components.hud.status-bar-fancy'
   local healthStatusBar = StatusBarFancy.create({
     id = 'healthStatusBar',
-    x = offX - 1,
+    x = offX - 2,
     y = winHeight - barHeight - 17,
     w = healthManaWidth / 2,
     h = barHeight,
@@ -153,32 +218,50 @@ function Hud.init(self)
     )
   end
 
-  local function drawMenuButtonsUnderlay()
+  local function drawMenuButtonsUnderlay(buttonDefinitions)
     local AnimationFactory = require 'components.animation-factory'
     local aniLeft = AnimationFactory:newStaticSprite('gui-dashboard-menu-left')
     local aniMiddle = AnimationFactory:newStaticSprite('gui-dashboard-menu-middle')
     local aniRight = AnimationFactory:newStaticSprite('gui-dashboard-menu-right')
-    local y = healthStatusBar.y
-    local x = offX - 4 + aniStatusBar:getWidth() + aniVialUnderlay:getWidth()
+    local y = healthStatusBar.y - 1
+    local x = offX - 2 + aniStatusBar:getWidth() + aniVialUnderlay:getWidth()
+
+    local ox = aniLeft:getOffset()
     love.graphics.setColor(1,1,1)
     love.graphics.draw(
       AnimationFactory.atlas,
       aniLeft.sprite,
       x,
-      y + 2
+      y + 2,
+      0,
+      1, 1,
+      ox
     )
-    local middleWidth = 1
+
+    local numButtons = #buttonDefinitions
+    local buttonMargin = 2
+    local middleWidth = (numButtons * 14) + (numButtons * buttonMargin) + 7 - (aniLeft:getWidth() + aniRight:getWidth())
+    local ox = aniMiddle:getOffset()
     love.graphics.draw(
       AnimationFactory.atlas,
       aniMiddle.sprite,
       x + aniLeft:getWidth(),
-      y + 2
+      y + 2,
+      0,
+      middleWidth,
+      1,
+      ox
     )
+
+    local ox = aniRight:getOffset()
     love.graphics.draw(
       AnimationFactory.atlas,
       aniRight.sprite,
       x + aniLeft:getWidth() + middleWidth,
-      y
+      y,
+      0,
+      1, 1,
+      ox
     )
   end
 
@@ -190,7 +273,7 @@ function Hud.init(self)
       drawStatusBarUnderlay()
       drawVialUnderlay()
       drawAbilityUnderlay()
-      drawMenuButtonsUnderlay()
+      drawMenuButtonsUnderlay(menuButtonsList)
     end,
     drawOrder = function(self)
       return 1
@@ -200,12 +283,13 @@ function Hud.init(self)
   self.listeners = {
     msgBus.on(msgBus.PLAYER_HIT_RECEIVED, function(msgValue)
       local playerRef = Component.get('PLAYER')
-      playerRef.health = max(0, playerRef.health - msgValue)
-      return msgValue
+      playerRef.stats:add('health', -msgValue)
     end),
     msgBus.on(msgBus.SCENE_CHANGE, function(sceneRef)
       local ZoneInfo = require 'components.hud.zone-info'
-      ZoneInfo.create()
+      ZoneInfo.create({
+        id = 'ZoneInfo'
+      })
     end)
   }
 
@@ -224,7 +308,7 @@ function Hud.init(self)
   }):setParent(self)
 
   local spacing = 27
-  local endXPos = healthStatusBar.x - spacing - 9
+  local endXPos = healthStatusBar.x - spacing - 7
 
   local skillSetup = {
     {
@@ -261,7 +345,7 @@ function Hud.init(self)
       player = self.player,
       rootStore = self.rootStore,
       x = endXPos - (spacing * (i - 1)),
-      y = winHeight - 32 - 2,
+      y = winHeight - 32 - 1,
       slotX = skill.slotX,
       slotY = skill.slotY,
       hudTextLayer = self.hudTextSmallLayer,
@@ -287,8 +371,8 @@ function Hud.init(self)
       skillId = skill.skillId,
       player = self.player,
       rootStore = self.rootStore,
-      x = energyStatusBar.x + energyStatusBar.w + 10 + (spacing * (i - 1)),
-      y = winHeight - 32 - 2,
+      x = energyStatusBar.x + energyStatusBar.w + 9 + (spacing * (i - 1)),
+      y = winHeight - 32 - 1,
       slotX = skill.slotX,
       slotY = skill.slotY,
       hudTextLayer = self.hudTextSmallLayer,
@@ -297,8 +381,9 @@ function Hud.init(self)
 
   local MenuButtons = require 'components.hud.menu-buttons'
   MenuButtons.create({
-    x = energyStatusBar.x + 134,
-    y = healthStatusBar.y + 5
+    x = energyStatusBar.x + 135,
+    y = healthStatusBar.y + 7,
+    buttonDefinitions = menuButtonsList
   }):setParent(self)
 end
 

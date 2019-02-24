@@ -5,8 +5,6 @@ local userSettings = require 'config.user-settings'
 local abs = math.abs
 require 'main.inputs.keyboard-manager'
 
-msgBus.MOUSE_CLICKED = 'MOUSE_CLICKED'
-
 local state = {
   keyboard = require 'main.inputs.keyboard-manager'.state.keyboard,
   mouse = {
@@ -31,9 +29,6 @@ local state = {
   }
 }
 
-msgBus.MOUSE_DRAG = 'MOUSE_DRAG'
-msgBus.MOUSE_DRAG_START = 'MOUSE_DRAG_START'
-msgBus.MOUSE_DRAG_END = 'MOUSE_DRAG_END'
 local function handleDragEvent()
   local isMouseDown = state.mouse.isDown
   local dragState = state.mouse.drag
@@ -85,8 +80,6 @@ local function handleDragEvent()
 end
 
 msgBus.on(msgBus.UPDATE, function()
-  local isMouseDown = love.mouse.isDown(1)
-  state.mouse.isDown = isMouseDown
   handleDragEvent()
 end)
 
@@ -100,6 +93,7 @@ function love.mousepressed( x, y, button, istouch, presses )
     lastPressed.timeStamp = socket.gettime()
     lastPressed.x, lastPressed.y = x, y
   end
+  state.mouse.isDown = true
 end
 
 function love.mousereleased( x, y, button, istouch, presses )
@@ -113,6 +107,8 @@ function love.mousereleased( x, y, button, istouch, presses )
   if timeBetweenRelease <= userSettings.mouseClickDelay then
     msgBus.send(msgBus.MOUSE_CLICKED, message)
   end
+
+  state.mouse.isDown = false
 end
 
 function love.wheelmoved(x, y)

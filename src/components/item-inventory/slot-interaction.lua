@@ -13,12 +13,15 @@ local groups = require 'components.groups'
 local boxCenterOffset = Position.boxCenterOffset
 local drawItem = require 'components.item-inventory.draw-item'
 local Lru = require 'utils.lru'
+local GlobalState = require 'main.global-state'
+local InputContext = require 'modules.input-context'
 
 local drawOrders = {
   GUI_SLOT = 3,
   GUI_SLOT_ITEM = 4,
   GUI_ITEM_PICKED_UP = 5,
-  GUI_SLOT_TOOLTIP = 6
+  GUI_SLOT_TOOLTIP = 6,
+  GUI_SLOT_TOOLTIP_CONTENT = 7
 }
 
 local spriteCache = Lru.new(100)
@@ -32,21 +35,21 @@ local function getSprite(name)
   return sprite
 end
 
--- currently picked up item. We can only have one item picked up at a time
-local itemPickedUp = nil
-local isDropModeFloor = false
+local pickedUpitem = {
+  set = function(newItem)
+    GlobalState.uiState:set('pickedUpItem', newItem)
+  end,
+  get = function()
+    return GlobalState.uiState:get().pickedUpItem
+  end
+}
 
-msgBus.on(msgBus.INVENTORY_DROP_MODE_INVENTORY, function()
-  isDropModeFloor = false
-end)
-msgBus.on(msgBus.INVENTORY_DROP_MODE_FLOOR, function()
-  isDropModeFloor = true
-end)
 -- handles dropping items on the floor when its in the floor drop mode
 local function handleItemDrop()
-  if (isDropModeFloor and itemPickedUp) then
-    msgBus.send(msgBus.DROP_ITEM_ON_FLOOR, itemPickedUp)
-    itemPickedUp = nil
+  local isDropModeFloor = InputContext.contains('any')
+  if (isDropModeFloor and pickedUpitem.get()) then
+    msgBus.send(msgBus.DROP_ITEM_ON_FLOOR, pickedUpitem.get())
+    pickedUpitem.set(nil)
     msgBus.on(msgBus.MOUSE_CLICKED, function()
       msgBus.send(msgBus.PLAYER_DISABLE_ABILITIES, false)
       return msgBus.CLEANUP
@@ -57,8 +60,8 @@ end
 msgBus.on(msgBus.MOUSE_PRESSED, handleItemDrop)
 
 local function getSlotPosition(gridX, gridY, offsetX, offsetY, slotSize, margin)
-  local posX, posY = ((gridX - 1) * slotSize) + (gridX * margin) + offsetX,
-    ((gridY - 1) * slotSize) + (gridY * margin) + offsetY
+  local posX, posY = ((gridX - 1) * slotSize) + ((gridX - 1) * margin) + offsetX,
+    ((gridY - 1) * slotSize) + ((gridY - 1) * margin) + offsetY
   return posX, posY
 end
 
@@ -67,12 +70,12 @@ Gui.create({
   type = Gui.types.INTERACT,
   inputContext = 'InventoryMenu',
   draw = function()
-    if itemPickedUp then
+    if pickedUpitem.get() then
       local gameScale = config.scaleFactor
       local mx, my = love.mouse.getX() / gameScale, love.mouse.getY() / gameScale
-      local sprite = itemSystem.getDefinition(itemPickedUp).sprite
+      local sprite = itemSystem.getDefinition(pickedUpitem.get()).sprite
       local sw, sh = animationFactory:getSpriteSize(sprite, true)
-      drawItem(itemPickedUp, mx - sw/2, my - sh/2)
+      drawItem(pickedUpitem.get(), mx - sw/2, my - sh/2)
     end
   end,
   drawOrder = function()
@@ -81,14 +84,20 @@ Gui.create({
 })
 
 -- sets up interactable gui nodes and renders the contents in each slot
+local hoveredBgColor = {1,1,1,0.5}
 local defaultSlotBackground = {0.1,0.1,0.1,1}
+local defaultGetCustomProps = function()
+  local O = require 'utils.object-utils'
+  return O.EMPTY
+end
+
 local function setupSlotInteractions(
   self, getSlots, margin,
   onItemPickupFromSlot, onItemDropToSlot, onItemActivate,
-  slotRenderer
+  slotRenderer, getCustomProps
 )
-  local rootStore = self.rootStore
   local initialSlots = getSlots()
+  getCustomProps = getCustomProps or defaultGetCustomProps
   -- setup the grid interaction
   require'utils.iterate-grid'(initialSlots, function(_, gridX, gridY)
     local posX, posY = getSlotPosition(gridX, gridY, self.x, self.y, self.slotSize, margin)
@@ -97,18 +106,18 @@ local function setupSlotInteractions(
       return getSlots()[gridY][gridX]
     end
 
+    local tooltipRef
     local slotSize = self.slotSize
     local guiSlot = Gui.create({
       x = posX,
       y = posY,
       w = slotSize,
       h = slotSize,
-      inputContext = self.inputContext,
       type = Gui.types.INTERACT,
       onUpdate = function(self)
         -- create a tooltip
         local item = getItem()
-        if self.hovered and item and (not self.tooltip) then
+        if self.hovered and item and (not tooltipRef) then
           local itemState = itemSystem.getState(item)
           local Block = require 'components.gui.block'
           local itemConfig = require'components.item-inventory.items.config'
@@ -117,7 +126,7 @@ local function setupSlotInteractions(
           local itemDef = itemSystem.getDefinition(item)
           local rarityColor = itemConfig.rarityColor[item.rarity]
           local tooltipWidth = 250
-          local modifierBackgroundColor = {0.17,0.17,0.17}
+          local modifierBackgroundColor = {0.12,0.12,0.12}
           local titleBlock = {
             content = {
               rarityColor,
@@ -168,18 +177,19 @@ local function setupSlotInteractions(
                   fontSize = font.primary.fontSize,
                 }
               }, {
-                marginBottom = blockPadding
+                marginTop = blockPadding
               })
             end
           end
 
           local rightClickModule = itemSystem.loadModule(definition.onActivate)
+          local Constants = require 'components.state.constants'
           local rightClickActionBlock = (not itemState.equipped) and
             Block.Row({
               {
                 content = {
                   Color.PALE_YELLOW,
-                  'right-click to '..rightClickModule.tooltip(item)
+                  Constants.glyphs.rightMouseBtn..' to '..rightClickModule.tooltip(item)
                 },
                 width = tooltipWidth,
                 align = 'right',
@@ -209,19 +219,18 @@ local function setupSlotInteractions(
               titleBlock,
               levelBlock
             }, {
-              marginBottom = 6
+              marginBottom = 3
             }),
             Block.Row({
               itemTypeBlock
             }, {
-              marginBottom = 12
+              marginBottom = 6
             }),
             Block.Row({
               infoBlock
             }, {
               marginBottom = blockPadding
             }),
-            activeAbilityBlock,
           }
 
           local functional = require 'utils.functional'
@@ -240,57 +249,52 @@ local function setupSlotInteractions(
                   width = tooltipWidth,
                   font = font.primary.font,
                   fontSize = font.primary.fontSize,
-                  background = modifierBackgroundColor,
-                  padding = blockPadding,
+                  -- background = modifierBackgroundColor,
+                  -- padding = blockPadding,
                 }
               }, extraModifiersRowProps))
-              -- experience required help text
-              local experienceRequired = modifier.props and modifier.props.experienceRequired or 0
-              if (experienceRequired - item.experience) > 0 then
-                table.insert(rows, Block.Row({
-                  {
-                    content = {
-                      Color.LIME,
-                      item.experience..'/'..experienceRequired..' experience required'
-                    },
-                    align = 'right',
-                    width = tooltipWidth,
-                    font = font.primary.font,
-                    fontSize = font.primary.fontSize,
-                    background = modifierBackgroundColor,
-                    padding = blockPadding
-                  },
-                }, {
-                  marginTop = -blockPadding
-                }))
-              end
             end
           end
           functional.forEach(itemSystem.getDefinition(item).extraModifiers or {}, showExtraModifiers)
           functional.forEach(item.extraModifiers, showExtraModifiers)
 
+          table.insert(rows, activeAbilityBlock)
           table.insert(rows, rightClickActionBlock)
 
-          self.tooltip = Block.create({
+          tooltipRef = Block.create({
             x = posX + self.w,
             y = posY,
-            background = {0,0,0,0.9},
+            padding = 15,
             rows = rows,
-            padding = blockPadding,
+            drawOrder = function()
+              return drawOrders.GUI_SLOT_TOOLTIP_CONTENT
+            end
+          }):setParent(self)
+
+          -- tooltip box background
+          Component.create({
+            group = 'gui',
+            draw = function()
+              local drawBox = require 'components.gui.utils.draw-box'
+              drawBox(tooltipRef, 'tooltip')
+            end,
             drawOrder = function()
               return drawOrders.GUI_SLOT_TOOLTIP
             end
-          }):setParent(self)
+          }):setParent(tooltipRef)
         end
 
         -- cleanup tooltip
-        if (not self.hovered) and self.tooltip then
-          self.tooltip:delete()
-          self.tooltip = nil
+        if ((not self.hovered or not item) and tooltipRef) then
+          tooltipRef:delete(true)
+          tooltipRef = nil
         end
+
+        self.customProps = getCustomProps(getItem(), self.x, self.y, gridX, gridY, self.w, self.h)
       end,
-      onClick = function(self, rightClick)
-        if rightClick then
+      onClick = function(self, event)
+        local isRightClick = event[3] == 2
+        if isRightClick then
           local item = getItem()
           local d = itemSystem.getDefinition(item)
           if d and onItemActivate then
@@ -299,26 +303,30 @@ local function setupSlotInteractions(
           return
         end
         local x, y = gridX, gridY
-        local curPickedUpItem = itemPickedUp
+        local curPickedUpItem = pickedUpitem.get()
         -- if an item hasn't already been picked up, then we're in pickup mode
-        local isPickingUp = (not itemPickedUp)
+        local isPickingUp = (not pickedUpitem.get())
         if isPickingUp then
-          itemPickedUp = onItemPickupFromSlot(x, y)
+          pickedUpitem.set(onItemPickupFromSlot(x, y))
         -- drop picked up item to slot
         elseif curPickedUpItem then
           local itemSwap = onItemDropToSlot(curPickedUpItem, x, y)
-          itemPickedUp = itemSwap
+          pickedUpitem.set(itemSwap)
         end
       end,
       drawOrder = function(self)
         return drawOrders.GUI_SLOT
       end,
       render = function(self)
-        if self.hovered then
-          love.graphics.setColor(1,1,1,0.5)
-        else
-          love.graphics.setColor(defaultSlotBackground)
-        end
+        love.graphics.setColor(
+          self.hovered and
+            hoveredBgColor or
+            (
+              self.customProps.backgroundColor or
+              defaultSlotBackground
+            )
+        )
+
         -- slot background
         love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
 
@@ -343,7 +351,7 @@ local function setupSlotInteractions(
           slotRenderer(item, self.x, self.y, gridX, gridY, self.w, self.h)
         end
       end
-    }):setParent(self)
+    }):setParent(self.rootComponent)
 
     Component.create({
       init = function(self)
@@ -356,7 +364,7 @@ local function setupSlotInteractions(
       drawOrder = function()
         return drawOrders.GUI_SLOT_ITEM
       end
-    }):setParent(self)
+    }):setParent(self.rootComponent)
   end)
 end
 

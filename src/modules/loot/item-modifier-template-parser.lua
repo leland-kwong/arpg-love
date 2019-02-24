@@ -3,7 +3,7 @@ local Color = require 'modules.color'
 local String = require 'utils.string'
 
 local colors = {
-  statBodyText = {0.8,0.8,0.8},
+  statBodyText = {Color.rgba255(81, 162, 255)},
   upgradeTitle = Color.WHITE
 }
 
@@ -36,11 +36,30 @@ local signHumanized = function(v)
   return v >= 0 and '+' or '' -- minus sign is part of negative value
 end
 
+local modifierPropTypeDisplayMapper = require 'components.state.base-stat-modifiers'.propTypesDisplayValue
+local statsListParsers = {
+  default = function(prop, val)
+    local mapperFn = modifierPropTypeDisplayMapper[prop]
+    local sign = signHumanized(val)
+    return sign..mapperFn(val)
+  end
+}
+
+local tooltipParsers = {
+  range = function(val)
+    local mappers = modifierPropTypeDisplayMapper
+    local _from, _to = val.from, val.to
+    return mappers[_from.prop](_from.val)..'-'..mappers[_to.prop](_to.val)
+  end,
+  default = function(val)
+    return val
+  end
+}
+
 local modifierParsers = {
   baseStatsList = function(data)
     local coloredText = {}
     local i = 0
-    local modifierPropTypeDisplayMapper = require 'components.state.base-stat-modifiers'.propTypesDisplayValue
     for k,v in pairs(data) do
       table.insert(coloredText, colors.statBodyText)
       if i > 0 then
@@ -66,23 +85,23 @@ local modifierParsers = {
     local coloredText = {}
     local i = 0
     local modifierPropTypeDisplayMapper = require 'components.state.base-stat-modifiers'.propTypesDisplayValue
-    for k,v in pairs(data) do
-      table.insert(coloredText, colors.statBodyText)
-      local sign = signHumanized(v)
-      if i == 0 then
-        table.insert(coloredText, sign)
-      else
-        table.insert(coloredText, '\n'..sign)
-      end
+    local propTypesDisplayKey = require 'components.state.base-stat-modifiers'.propTypesDisplayKey
+    for prop,val in pairs(data) do
+      local valType = type(val) == 'table' and val.type or 'default'
+      local parsedVal = statsListParsers[valType](prop, val)
+      local constants = require 'components.state.constants'
+      table.insert(coloredText, Color.MED_GRAY)
+      local bulletChar = i == 0 and constants.glyphs.diamondBullet or '\n'..constants.glyphs.diamondBullet
+      table.insert(coloredText, bulletChar..' ')
 
       table.insert(coloredText, Color.WHITE)
-      local mapperFn = modifierPropTypeDisplayMapper[k]
-      table.insert(coloredText, mapperFn(v))
+      table.insert(coloredText, parsedVal)
 
-      table.insert(coloredText, colors.statBodyText)
-      local camelCaseHumanized = require 'utils.camel-case-humanized'
-      local displayKey = ' '..camelCaseHumanized(k)
-      table.insert(coloredText, displayKey)
+      if valType == 'default' then
+        table.insert(coloredText, colors.statBodyText)
+        local displayKey = ' '..propTypesDisplayKey[prop]
+        table.insert(coloredText, displayKey)
+      end
       i = i + 1
     end
     return coloredText
@@ -90,14 +109,15 @@ local modifierParsers = {
   activeAbility = function(data)
     local coloredText = {}
 
-    table.insert(coloredText, Color.DEEP_BLUE)
+    table.insert(coloredText, Color.LIME)
     table.insert(coloredText, 'active skill: ')
 
     local parsed = parser(data.template, data.data)
     for fragment, value in parsed do
       local isVariable = not not value
+      local valueType = type(value) == 'table' and value.type or 'default'
       local color = isVariable and Color.WHITE or colors.statBodyText
-      local displayValue = isVariable and value or fragment
+      local displayValue = isVariable and tooltipParsers[valueType](value) or fragment
       table.insert(coloredText, color)
       table.insert(coloredText, displayValue)
     end

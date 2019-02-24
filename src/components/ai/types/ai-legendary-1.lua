@@ -73,7 +73,7 @@ local DissipateEffect = Component.createFactory(DissipateEffectBlueprint)
 
 local MultiShot = {
   range = 14,
-  attackTime = 0.4,
+  actionSpeed = 0.4,
   cooldown = 1
 }
 
@@ -104,7 +104,7 @@ end
 function MultiShot.update(_, state, dt)
   if state.isNewAttack then
     state.clock = state.clock + dt
-    local isAbilityComplete = state.clock >= MultiShot.attackTime
+    local isAbilityComplete = state.clock >= MultiShot.actionSpeed
     if isAbilityComplete then
       state.isNewAttack = false
     end
@@ -113,49 +113,56 @@ function MultiShot.update(_, state, dt)
   return false
 end
 
-return function(props)
-  local aiProps = AiEyeball()
+local AiBlueprint = require 'components.ai.create-blueprint'
+return AiBlueprint({
+  baseProps = {
+    type = 'legendary-eyeball',
+  },
+  legendary = true,
+  create = function(props)
+    local aiProps = AiEyeball.create()
 
-  local animations = {
-    attacking = animationFactory:new({
-      'ai-legendaries/legendary-1/legendary-ai-1',
-      'ai-legendaries/legendary-1/legendary-ai-1'
-    }):setDuration(MultiShot.attackTime),
-    idle = animationFactory:new({
-      'ai-legendaries/legendary-1/legendary-ai-1'
-    }),
-    moving = animationFactory:new({
-      'ai-legendaries/legendary-1/legendary-ai-1'
-    })
-  }
-  local spriteWidth, spriteHeight = animations.idle:getSourceSize()
-  aiProps.itemData.minRarity = itemConfig.rarity.NORMAL
-  aiProps.itemData.maxRarity = itemConfig.rarity.RARE
-  aiProps.itemData.dropRate = aiProps.itemData.dropRate * 30
-  aiProps.maxHealth = aiProps.maxHealth * 8
-
-  aiProps.animations = animations
-  aiProps.w = spriteWidth
-  aiProps.h = spriteHeight
-  aiProps.dataSheet = {
-    name = 'r-19 the mad',
-    properties = {
-      'ranged',
-      'slow-on-hit',
-      'multi-shot'
+    local animations = {
+      attacking = animationFactory:new({
+        'ai-legendaries/legendary-1/legendary-ai-1',
+        'ai-legendaries/legendary-1/legendary-ai-1'
+      }):setDuration(MultiShot.actionSpeed),
+      idle = animationFactory:new({
+        'ai-legendaries/legendary-1/legendary-ai-1'
+      }),
+      moving = animationFactory:new({
+        'ai-legendaries/legendary-1/legendary-ai-1'
+      })
     }
-  }
-  aiProps.lightRadius = 20
-  aiProps.onUpdateStart = function(self)
-    local iconX, iconY = self.x - spriteWidth / 2,
-      self.y - self.z - 40
-    Component.get('statusIcons'):addIcon(
-      'status-legendary-enemy',
-      iconX,
-      iconY
-    )
+    local spriteWidth, spriteHeight = animations.idle:getSourceSize()
+    aiProps.itemData.minRarity = itemConfig.rarity.NORMAL
+    aiProps.itemData.maxRarity = itemConfig.rarity.RARE
+    aiProps.itemData.dropRate = aiProps.itemData.dropRate * 30
+    aiProps.maxHealth = aiProps.maxHealth * 8
+
+    aiProps.animations = animations
+    aiProps.w = spriteWidth
+    aiProps.h = spriteHeight
+    aiProps.dataSheet = {
+      name = 'r-19 the mad',
+      properties = {
+        'ranged',
+        'slow-on-hit',
+        'multi-shot'
+      }
+    }
+    aiProps.lightRadius = 20
+    aiProps.onUpdateStart = function(self)
+      local iconX, iconY = self.x - spriteWidth / 2,
+        self.y - self.z - 40
+      Component.get('statusIcons'):addIcon(
+        'status-legendary-enemy',
+        iconX,
+        iconY
+      )
+    end
+    aiProps.outlineColor = itemConfig.rarityColor[itemConfig.rarity.LEGENDARY]
+    table.insert(aiProps.abilities, MultiShot)
+    return aiProps
   end
-  aiProps.outlineColor = itemConfig.rarityColor[itemConfig.rarity.LEGENDARY]
-  table.insert(aiProps.abilities, MultiShot)
-  return aiProps
-end
+})

@@ -56,21 +56,6 @@ msgBus.on(msgBus.CHARACTER_HIT, function(msgValue)
   local component = msgValue.parent
   if Component.getBlueprint(msgValue.parent) == EnvironmentInteractable then
     component.hitAnimation = coroutine.wrap(hitAnimation)
-
-    local source = love.audio.newSource('built/sounds/attack-impact-1.wav', 'static')
-    source:setVolume(0.4)
-    love.audio.play(source)
-  end
-end)
-
-msgBus.on(msgBus.ENEMY_DESTROYED, function(msgValue)
-  local component = msgValue.parent
-  if Component.getBlueprint(msgValue.parent) == EnvironmentInteractable then
-    local source = love.audio.newSource(
-      'built/sounds/treasure-cache-demolish.wav',
-      'static'
-    )
-    love.audio.play(source)
   end
 end)
 
@@ -85,18 +70,17 @@ function EnvironmentInteractable.init(self)
   )
   local offsetY = 5
   local w, h = self.animation:getWidth(), self.animation:getHeight()
-  self.h = h
-  local cGroup = collisionGroups.create(
-    collisionGroups.environment
-  )
+  self.w, self.h = w, h
+  self.ox, self.oy = self.animation:getOffset()
+  self.x, self.y = self.x + self.ox, self.y + self.oy
   self.collision = self:addCollisionObject(
-    cGroup,
+    'environment',
     self.x,
     self.y,
     w + 1,
-    h - offsetY,
-    0,
-    -offsetY
+    h,
+    self.ox,
+    self.oy
   ):addToWorld(collisionWorlds.map)
 end
 
@@ -124,7 +108,9 @@ local function draw(self, x, y, scaleX, scaleY)
     y,
     0,
     scaleX or 1,
-    scaleY or 1
+    scaleY or 1,
+    self.ox,
+    self.oy
   )
 end
 
@@ -132,7 +118,8 @@ function EnvironmentInteractable.draw(self)
   local w, h = self.animation:getWidth(), self.animation:getHeight()
   -- shadow
   love.graphics.setColor(0,0,0,0.25 * self.opacity)
-  draw(self, self.x + w * (0.2/2), self.y + h + h/4, 0.8, -0.5)
+  local shadowScale = 0.5
+  draw(self, self.x, self.y + (self.h * shadowScale), 1, -0.5)
 
   local oBlendMode
   if self.state == states.HIT then

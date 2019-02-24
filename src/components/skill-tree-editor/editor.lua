@@ -1,7 +1,7 @@
 local Component = require 'modules.component'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
-local msgBusMainMenu = require 'components.msg-bus-main-menu'
+local msgBus = require 'components.msg-bus'
 local Gui = require 'components.gui.gui'
 local GuiText = require 'components.gui.gui-text'
 local config = require 'config.config'
@@ -14,6 +14,8 @@ local Object = require 'utils.object-utils'
 local noop = require 'utils.noop'
 local rebuildTableBySortingKeys = require 'components.skill-tree-editor.rebuild-table-by-sorting-keys'
 local Sound = require 'components.sound'
+local InputContext = require 'modules.input-context'
+
 
 local sounds = {
   NODE_SELECT = 'gui/UI_Animate_Clean_Beeps_Appear_stereo.wav',
@@ -33,19 +35,12 @@ local sounds = {
 local mouseCollisionWorld = bump.newWorld(32)
 local mouseCollisionObject = {}
 local mouseCollisionSize = 50
-local cellSize = 50
 mouseCollisionWorld:add(mouseCollisionObject, 0, 0, mouseCollisionSize, mouseCollisionSize)
-
-local debugTextLayer = GuiText.create({
-  font = require 'components.font'.primary.font,
-  drawOrder = function()
-    return 10
-  end
-})
 
 local TreeEditor = {
   debug = {
     -- connectionCount = true,
+    -- selectionTraversal = true,
   },
   nodes = nil,
   nodeValueOptions = {},
@@ -53,11 +48,7 @@ local TreeEditor = {
   onSerialize = noop,
   serialize = function(self)
     local ser = require 'utils.ser'
-    local serializedTree = {}
-    for nodeId in pairs(rebuildTableBySortingKeys(self.nodes)) do
-      local node = Component.get(nodeId)
-      serializedTree[nodeId] = node:serialize()
-    end
+    local serializedTree = rebuildTableBySortingKeys(self.nodes)
 
     --[[
       Love's `love.filesystem.write` doesn't support writing to files in the source directory,
@@ -73,14 +64,8 @@ local TreeEditor = {
   end
 }
 
-local function snapToGrid(x, y)
-  local Position = require 'utils.position'
-  local gridX, gridY = Position.pixelsToGridUnits(x, y, cellSize)
-  return Position.gridToPixels(gridX, gridY, cellSize)
-end
-
-local initialDx, initialDy = snapToGrid(1920/2, 1080/2)
 local Enum = require 'utils.enum'
+local baseCellSize = 25
 local editorModes = Enum({
   'EDIT',
 
@@ -100,23 +85,33 @@ local state = {
     startY = 0,
     dx = 0,
     dy = 0,
-    dxTotal = initialDx,
-    dyTotal = initialDy
+    dxTotal = 0,
+    dyTotal = 0
   },
   mx = 0,
   my = 0,
-  scale = config.scale,
+  scale = 2,
   editorMode = editorModes.EDIT,
 }
 
+local debugTextLayer = GuiText.create({
+  font = require 'components.font'.primary.font,
+  drawOrder = function()
+    return 10
+  end
+})
+
+local cellSize = baseCellSize * state.scale
+
+local function snapToGrid(x, y)
+  local Position = require 'utils.position'
+  local gridX, gridY = Position.pixelsToGridUnits(x, y, cellSize)
+  return Position.gridToPixels(gridX, gridY, cellSize)
+end
+
 function TreeEditor.getMode(self)
-  local InputContext = require 'modules.input-context'
   if 'gui' == InputContext.get() then
     return
-  end
-
-  if (inputState.keyboard.keysPressed.space) then
-    return 'TREE_PANNING'
   end
 
   if editorModes.EDIT == self.editorMode then
@@ -149,8 +144,8 @@ function TreeEditor.getMode(self)
 end
 
 local function getTranslate()
-  return state.translate.dxTotal + state.translate.dx / state.scale,
-    state.translate.dyTotal + state.translate.dy / state.scale
+  return state.translate.dxTotal + state.translate.dx,
+    state.translate.dyTotal + state.translate.dy
 end
 
 local function clearSelections()
@@ -158,8 +153,17 @@ local function clearSelections()
   state.selectedConnection = nil
 end
 
+local debugState = {
+  checkedNodes = {},
+  firstCheckedNode = nil,
+}
+
 local playMode = {
-  isNodeSelectable = function(nodeToCheck, nodeList, nodeValueOptions)
+  --[[
+    Conditions
+    1. One of its neighbors must already be selected or a root node
+  ]]
+  isNodeSelectable = function(self, nodeToCheck, nodeList, nodeValueOptions)
     local nodeValue = nodeToCheck.nodeValue
     local nodeData = nodeValueOptions[nodeValue]
 
@@ -171,19 +175,45 @@ local playMode = {
     end
     return false
   end,
-  isNodeUnselectable = function(nodeToCheck, nodeList)
-    local numSelectedSiblingNodes = 0
-    for id in pairs(nodeToCheck.connections) do
-      if nodeList[id].selected then
-        numSelectedSiblingNodes = numSelectedSiblingNodes + 1
-      end
-      if numSelectedSiblingNodes > 1 then
-        return false
-      end
+  --[[
+    Conditions
+    1. All sibling nodes must be connected to at least a single branch
+  ]]
+  isNodeUnselectable = function(self, nodeToCheck, nodeList, nodeToCheckId)
+    local F = require 'utils.functional'
+
+    local function getMatchCount(fromNodeId, connectionsToMatch, visitedList)
+      visitedList = visitedList or {}
+      debugState.checkedNodes = visitedList
+      local connections = nodeList[fromNodeId].connections
+      return F.reduce(F.keys(connections), function(totalMatchCount, nodeId)
+        local isAlreadyMatched = (nodeId == nodeToCheckId) or visitedList[nodeId]
+        if isAlreadyMatched then
+          return totalMatchCount
+        end
+
+        local isMatch = connectionsToMatch[nodeId] ~= nil
+        local isSelectedNode = nodeList[nodeId].selected
+        local matches = (isMatch and isSelectedNode) and 1 or 0
+        visitedList[nodeId] = true
+        local siblingMatches = isSelectedNode and getMatchCount(nodeId, connectionsToMatch, visitedList) or 0
+        return totalMatchCount + (matches + siblingMatches)
+      end, 0)
     end
-    return true
+
+    local siblings = F.keys(nodeToCheck.connections)
+    local selectedSiblings = F.filter(siblings, function(siblingId)
+      return nodeList[siblingId].selected
+    end)
+    local numSelectedSiblings = #selectedSiblings
+    local nodeIdToWalk = selectedSiblings[1]
+    debugState.firstCheckedNode = nodeIdToWalk
+    -- traverse a sibling's branch and get a number of all the selected nodes that match the list of siblings
+    local matchCount = getMatchCount(nodeIdToWalk, nodeToCheck.connections)
+    local isOnlyChild = numSelectedSiblings == 1
+    return isOnlyChild or numSelectedSiblings == matchCount
   end,
-  isConnectionToSelectableNode = function(fromNode, toNode)
+  isConnectionToSelectableNode = function(self, fromNode, toNode)
     if editorModes.PLAY == state.editorMode then
       return fromNode.selected or toNode.selected
     end
@@ -196,35 +226,99 @@ local playMode = {
 }
 
 -- creates a new node and adds it to the node tree
-local function placeNode(root, nodeId, screenX, screenY, connections, nodeValue, selected, size)
+local function placeNode(root, nodeId, gridX, gridY, connections, nodeValue, selected, size)
   size = size or 1
 
+  local oScale = state.scale
   local node = Gui.create({
     id = nodeId,
     inputContext = 'treeNode',
-    x = screenX,
-    y = screenY,
-    width = size,
-    height = size,
     scale = 1,
+
+    onClick = function(self, event)
+      local mode = root:getMode()
+      local _, _, button = unpack(event)
+      local nodeId = self:getId()
+
+      if ('CONNECTION_CREATE' == mode) then
+        local selection = state.selectedNode
+        clearSelections()
+
+        -- make connection between nodes
+        local shouldAddConnection = not not selection
+        if shouldAddConnection then
+          local selectedNodeData = root.nodes[selection]
+          local hoveredNodeData = root.nodes[state.hoveredNode]
+
+          local lineData = {} -- if more points are added, we define a bezier curve
+          root:setNode(state.hoveredNode, {
+            connections = Object.immutableApply(
+              hoveredNodeData.connections, {
+                [selection] = lineData
+              }
+            )
+          })
+          root:setNode(selection, {
+            connections = Object.immutableApply(
+              selectedNodeData.connections, {
+                [state.hoveredNode] = lineData
+              }
+            )
+          })
+          return
+        end
+      end
+
+      if ('NODE_SELECTION' == mode) and (button == 1) then
+        local node = root.nodes[nodeId]
+
+        if (editorModes.PLAY_UNSELECT_ONLY == state.editorMode and node.selected) then
+          if (playMode:isNodeUnselectable(node, root.nodes, nodeId)) then
+            Sound.playEffect(sounds.NODE_UNSELECT)
+            root:setNode(nodeId, {
+              selected = false
+            })
+          else
+            msgBus.send(msgBus.PLAYER_ACTION_ERROR, 'tree must fully connected')
+          end
+        elseif (editorModes.PLAY == state.editorMode) then
+          local isNotSelectable = (
+              (not node.selected)
+              and (not playMode:isNodeSelectable(node, root.nodes, root.nodeValueOptions))
+            ) or
+            (
+              node.selected
+              and (not playMode:isNodeUnselectable(node, root.nodes, nodeId))
+            )
+          if (isNotSelectable) then
+            msgBus.send(msgBus.PLAYER_ACTION_ERROR, 'tree must fully connected')
+            return
+          end
+          local isSelected = not node.selected
+          if isSelected then
+            Sound.playEffect(sounds.NODE_SELECT)
+          else
+            Sound.playEffect(sounds.NODE_UNSELECT)
+          end
+          root:setNode(nodeId, {
+            selected = isSelected
+          })
+          return
+        end
+
+        local alreadySelected = state.selectedNode == nodeId
+        if alreadySelected then
+          state.selectedNode = nil
+        else
+          state.selectedNode = nodeId
+        end
+      end
+    end,
 
     getMousePosition = function(self)
       local tx, ty = getTranslate()
       return love.mouse.getX() - tx,
         love.mouse.getY() - ty
-    end,
-
-    serialize = function(self)
-      local dataRef = root.nodes[self:getId()]
-      return {
-        -- store coordinates as grid units
-        x = dataRef.x / cellSize,
-        y = dataRef.y / cellSize,
-        size = nodeSize,
-        connections = dataRef.connections,
-        nodeValue = dataRef.nodeValue,
-        selected = dataRef.selected
-      }
     end,
 
     onPointerMove = function(self)
@@ -251,19 +345,24 @@ local function placeNode(root, nodeId, screenX, screenY, connections, nodeValue,
         state.selectedNode = nil
         return
       end
-      local optionValue = root.nodeValueOptions[self.nodeValue]
-      local size = optionValue and (optionValue.type == 'keystone') and (2 * cellSize) or (cellSize)
-      self.width, self.height = size, size
-      dataRef.size = size
-      self.x, self.y = dataRef.x, dataRef.y
+      local optionValue = root.nodeValueOptions[nodeValue]
+      local AnimationFactory = require 'components.animation-factory'
+      local animation = AnimationFactory:newStaticSprite(
+        optionValue and optionValue.image or root.defaultNodeImage
+      )
+      local width, height = animation:getWidth(), animation:getHeight()
+      self.width, self.height = width * state.scale, height * state.scale
+      local ox, oy = (cellSize - self.width)/2,
+        (cellSize - self.height)/2
+      dataRef.size = cellSize
+      self.x, self.y = dataRef.x * cellSize + ox, dataRef.y * cellSize + oy
     end
   }):setParent(root)
 
   local nodeId = node:getId()
   root:setNode(nodeId, {
-    x = screenX,
-    y = screenY,
-    size = size,
+    x = gridX,
+    y = gridY,
     connections = connections or {},
     nodeValue = nodeValue, -- stores the value by the option's key
     selected = selected or false, -- whether the node has been "bought"
@@ -309,8 +408,8 @@ function TreeEditor.loadFromSerializedState(self)
       self,
       id,
       -- restore coordinates as pixel units
-      props.x * cellSize,
-      props.y * cellSize,
+      props.x,
+      props.y,
       props.connections,
       props.nodeValue,
       props.selected
@@ -323,111 +422,64 @@ end
 function TreeEditor.handleInputs(self)
   local root = self
 
-  self.listeners = {
-    msgBus.on(msgBus.MOUSE_CLICKED, function(event)
-      local mode = self:getMode()
-      local _, _, button = unpack(event)
+  local function handleZoom(ev)
+    local dy = ev[2]
+
+    local function changeScale(ds)
+      local clamp = require 'utils.math'.clamp
+      state.scale = clamp(state.scale + ds, 1, 5)
+    end
+
+    changeScale(dy)
+  end
+
+  local Gui = require 'components.gui.gui'
+  Gui.create({
+    id = 'skill-tree',
+    width = love.graphics.getWidth(),
+    height = love.graphics.getHeight(),
+    onClick = function(_, event)
+      local mode = root:getMode()
+      local button = select(3, unpack(event))
+      if ('NODE_CREATE' == mode) and (button == 1) then
+        local snapX, snapY = snapToGrid(state.mx - cellSize/2, state.my - cellSize/2)
+        placeNode(root, nil, snapX/cellSize, snapY/cellSize, nil, nil, nil, cellSize)
+      end
 
       if ('CLEAR_SELECTIONS' == mode) then
         return clearSelections()
-      end
-
-      if ('CONNECTION_CREATE' == mode) then
-        local selection = state.selectedNode
-        clearSelections()
-
-        -- make connection between nodes
-        local shouldAddConnection = not not selection
-        if shouldAddConnection then
-          local selectedNodeData = root.nodes[selection]
-          local hoveredNodeData = root.nodes[state.hoveredNode]
-
-          local lineData = {} -- if more points are added, we define a bezier curve
-          self:setNode(state.hoveredNode, {
-            connections = Object.immutableApply(
-              hoveredNodeData.connections, {
-                [selection] = lineData
-              }
-            )
-          })
-          self:setNode(selection, {
-            connections = Object.immutableApply(
-              selectedNodeData.connections, {
-                [state.hoveredNode] = lineData
-              }
-            )
-          })
-          return
-        end
-      end
-
-      if ('NODE_CREATE' == mode) and (button == 1) then
-        local snapX, snapY = snapToGrid(state.mx - cellSize/2, state.my - cellSize/2)
-        placeNode(root, nil, snapX, snapY, nil, nil, nil, cellSize)
-      end
-
-      if ('NODE_SELECTION' == mode) and (button == 1) then
-        local nodeId = state.hoveredNode
-        local node = root.nodes[nodeId]
-
-        if (editorModes.PLAY_UNSELECT_ONLY == state.editorMode) then
-          if (node.selected) then
-            Sound.playEffect(sounds.NODE_UNSELECT)
-            self:setNode(nodeId, {
-              selected = false
-            })
-          end
-        elseif (editorModes.PLAY == state.editorMode) then
-          if ((not node.selected) and (not playMode.isNodeSelectable(node, self.nodes, self.nodeValueOptions))) or
-            (node.selected and (not playMode.isNodeUnselectable(node, self.nodes)))
-          then
-            return
-          end
-          local isSelected = not node.selected
-          if isSelected then
-            Sound.playEffect(sounds.NODE_SELECT)
-          else
-            Sound.playEffect(sounds.NODE_UNSELECT)
-          end
-          self:setNode(nodeId, {
-            selected = isSelected
-          })
-          return
-        end
-
-        local alreadySelected = state.selectedNode == nodeId
-        if alreadySelected then
-          state.selectedNode = nil
-        else
-          state.selectedNode = nodeId
-        end
       end
 
       if ('CONNECTION_SELECTION' == mode) and (button == 1) then
         clearSelections()
         state.selectedConnection = state.hoveredConnection
       end
-    end),
+    end
+  }):setParent(self)
 
+  self.listeners = {
+    msgBus.on(msgBus.MOUSE_WHEEL_MOVED, function(ev)
+      if InputContext.contains('skill-tree treeNode') then
+        handleZoom(ev)
+      end
+    end),
     msgBus.on(msgBus.MOUSE_DRAG, function(event)
       if 'NODE_MOVE' == self:getMode() then
         state.movingNode = state.movingNode or state.hoveredNode
         local nodeData = self.nodes[state.movingNode]
-        local x, y = snapToGrid(state.mx - nodeData.size/2, state.my - nodeData.size/2)
+        local x, y = snapToGrid(state.mx - cellSize/2, state.my - cellSize/2)
         self:setNode(state.movingNode, {
-          x = x,
-          y = y
+          x = x/cellSize,
+          y = y/cellSize
         })
         clearSelections()
-      end
-
-      if 'TREE_PANNING' == self:getMode() then
+      else
+        -- panning
         local tx = state.translate
         tx.startX = event.startX
         tx.startY = event.startY
-        local snapX, snapY = snapToGrid(event.dx, event.dy)
-        tx.dx = snapX
-        tx.dy = snapY
+        tx.dx = math.floor(event.dx)
+        tx.dy = math.floor(event.dy)
       end
     end),
 
@@ -436,8 +488,10 @@ function TreeEditor.handleInputs(self)
 
       -- update tree translation
       local tx = state.translate
-      tx.dxTotal = tx.dxTotal + tx.dx
-      tx.dyTotal = tx.dyTotal + tx.dy
+      tx.dxTotal, tx.dyTotal = tx.dxTotal + tx.dx, tx.dyTotal + tx.dy
+      if (editorModes.EDIT == state.editorMode) then
+        tx.dxTotal, tx.dyTotal = snapToGrid(tx.dxTotal, tx.dyTotal)
+      end
       tx.startX = 0
       tx.startY = 0
       tx.dx = 0
@@ -478,7 +532,20 @@ function TreeEditor.handleInputs(self)
   }
 end
 
+function TreeEditor.panTo(self, x, y)
+  local shouldCenter = not x
+  if shouldCenter then
+    local halfCell = math.floor(cellSize/2)
+    local offset = -halfCell -- offset the panning of the center to be centered to the grid
+    x, y = love.graphics.getWidth() / 2 + offset, love.graphics.getHeight() / 2 + offset
+  end
+  state.translate.dxTotal, state.translate.dyTotal = x, y
+end
+
 function TreeEditor.init(self)
+  self:handleInputs()
+  self:panTo()
+
   -- load default state
   if (not self.nodes) then
     local defaultLayout = 'components.skill-tree-editor.layout'
@@ -501,8 +568,6 @@ function TreeEditor.init(self)
   love.mouse.setCursor()
 
   Component.addToGroup(self, 'gui')
-
-  self:handleInputs()
 end
 
 function TreeEditor.handleConnectionInteractions(self)
@@ -512,7 +577,7 @@ function TreeEditor.handleConnectionInteractions(self)
     for nodeId,node in pairs(self.nodes) do
       for connectionNodeId in pairs(node.connections or {}) do
         local connectionNode = self.nodes[connectionNodeId]
-        local _, len = mouseCollisionWorld:querySegment(node.x, node.y, connectionNode.x, connectionNode.y)
+        local _, len = mouseCollisionWorld:querySegment(node.x * cellSize, node.y * cellSize, connectionNode.x * cellSize, connectionNode.y * cellSize)
         if len > 0 then
           state.hoveredConnection = {
             [nodeId] = true,
@@ -562,6 +627,18 @@ local backgroundColorByEditorMode = {
 }
 
 function TreeEditor.update(self, dt)
+  cellSize = baseCellSize * state.scale
+  debugTextLayer.scale = state.scale
+
+  if (InputContext.get() == 'any') then
+    InputContext.set('SkillTreeBackground')
+  end
+
+  local cursorType = ((not state.hoveredNode) and (not state.selectedNode) and (not state.hoveredConnection))
+    and 'move'
+    or 'default'
+  msgBus.send(msgBus.CURSOR_SET, {type = cursorType})
+
   local tx, ty = getTranslate()
   local mOffset = mouseCollisionSize
   state.mx, state.my = love.mouse.getX() - tx, love.mouse.getY() - ty
@@ -573,6 +650,19 @@ function TreeEditor.update(self, dt)
   end
   self.mode = self:getMode()
   state.editorMode = self.editorMode or editorModes.EDIT
+
+  if (editorModes.PLAY ~= state.editorMode) then
+    self.clock = 0
+    self.direction = 1
+  else
+    self.direction = self.direction or 1
+    self.clock = (self.clock or 0) + (dt * self.direction) * 4
+    if self.clock > math.pi/2 then
+      self.direction = -1
+    elseif self.clock <= 0 then
+      self.direction = 1
+    end
+  end
 end
 
 function TreeEditor.drawTreeCenter(self)
@@ -584,48 +674,189 @@ function TreeEditor.drawTreeCenter(self)
   love.graphics.circle('fill', tx, ty, 10)
 end
 
+local tooltipOptionsMt = {
+  beforeRender = require('utils.noop'),
+  position = function(tt)
+    return 0, 0
+  end,
+  padding = 4,
+  minWidth = 100,
+  maxWidth = 100
+}
+tooltipOptionsMt.__index = tooltipOptionsMt
+local function renderTooltip(blocks, font, options)
+  options = setmetatable(options or {}, tooltipOptionsMt)
+  local tt = {
+    width = 0,
+    height = 0,
+    blocks = {}
+  }
+  local Grid = require 'utils.grid'
+  local rowWidth = 0
+  local rowHeight = 0
+  local currentRow = nil
+  local function setupTooltip(block, col, row)
+    local isNewRow = row ~= currentRow
+    if isNewRow then
+      -- update tooltip dimensions
+      tt.width = math.max(tt.width, rowWidth)
+      tt.height = tt.height + rowHeight
+
+      currentRow = row
+      rowWidth = 0
+      rowHeight = 0
+    end
+
+    table.insert(tt.blocks, {
+      x = rowWidth,
+      y = tt.height,
+      content = block.content,
+      align = block.align or 'left'
+    })
+
+    local tWidth, tHeight = GuiText.getTextSize(block.content, font, options.maxWidth)
+    rowWidth = rowWidth + tWidth
+    rowHeight = math.max(rowHeight, tHeight)
+  end
+  Grid.forEach(blocks, setupTooltip)
+  -- update tooltip final dimensions
+  local clamp = require 'utils.math'.clamp
+  tt.width = clamp(math.max(tt.width, rowWidth), options.minWidth, options.maxWidth) + (options.padding * 2)
+  tt.height = tt.height + rowHeight + (options.padding * 2)
+
+  local x,y = options.position(tt)
+  options.beforeRender(tt, x, y)
+  love.graphics.setFont(font)
+  local padding = {
+    left = options.padding,
+    center = 0,
+    right = -options.padding
+  }
+  for _,block in ipairs(tt.blocks) do
+    love.graphics.printf(
+      block.content,
+      math.floor(x + padding[block.align] + block.x),
+      math.floor(y + options.padding + block.y),
+      tt.width,
+      block.align
+    )
+  end
+end
+
 function TreeEditor.drawTooltip(self)
   if (not state.hoveredNode) then
     return
   end
 
-  local tx, ty = getTranslate()
   local node = self.nodes[state.hoveredNode]
   local dataKey = node.nodeValue
   local optionValue = self.nodeValueOptions[dataKey]
-  local tooltipContent = optionValue and optionValue:description() or self.defaultNodeDescription
-  local x, y = (node.x + tx)/config.scale, (node.y + ty - 20)/config.scale
-  local width, height = GuiText.getTextSize(tooltipContent, debugTextLayer.font)
-  local padding = 5
-  love.graphics.push()
-  love.graphics.scale(config.scale)
-    local rectX, rectY, rectW, rectH = x - padding, y - padding, width + padding*2, height + padding
-    love.graphics.setColor(0,0,0)
-    love.graphics.rectangle('fill', rectX, rectY, rectW, rectH)
-    love.graphics.setColor(1,1,1)
-    love.graphics.rectangle('line', rectX, rectY, rectW, rectH)
-  love.graphics.pop()
-  debugTextLayer:add(
-    tooltipContent,
-    Color.WHITE,
-    x,
-    y
-  )
-end
-
-function TreeEditor.draw(self)
+  local String = require 'utils.string'
+  local tooltipTitle = String.capitalize(optionValue and optionValue.name or '')
+  local tooltipBody = optionValue and optionValue:description() or self.defaultNodeDescription
+  local tooltipScale = config.scale
   local tx, ty = getTranslate()
+
+  local font = require 'components.font'.primary.font
   love.graphics.push()
   love.graphics.origin()
-  -- love.graphics.scale(config.scale)
-  local _editorMode = state.editorMode
+  love.graphics.scale(tooltipScale)
+    local constants = require 'components.state.constants'
+    renderTooltip(
+      {
+        {
+          {
+            content = {
+              Color.WHITE, tooltipTitle,
+              Color.WHITE, '\n\n'..tooltipBody,
+            },
+            align = 'left'
+          }
+        },
+        {
+          {
+            content = {
+              Color.PALE_YELLOW, '\n'..constants.glyphs.leftMouseBtn..' to '..(node.selected and 'unselect' or 'select')
+            },
+            align = 'right'
+          }
+        },
+        {
+          {
+            content = {
+              Color.MED_GRAY, '(bonuses are multiplied on top of items)'
+            },
+            align = 'right'
+          }
+        },
+      },
+      font,
+      {
+        minWidth = 0,
+        maxWidth = 200,
+        padding = 4,
+        position = function(tt)
+          return (node.x * cellSize + cellSize/2 + tx)/tooltipScale - tt.width/2,
+          (node.y * cellSize + ty)/tooltipScale - tt.height
+        end,
+        beforeRender = function(tt, x, y)
+          -- background
+          love.graphics.setColor(0,0,0)
+          love.graphics.rectangle('fill', x, y, tt.width, tt.height)
+          -- border
+          love.graphics.setColor(1,1,1)
+          love.graphics.rectangle('line', x, y, tt.width, tt.height)
+        end
+      }
+    )
+  love.graphics.pop()
+end
 
+local function drawBackground()
   -- create background
-  love.graphics.setColor(backgroundColorByEditorMode[_editorMode])
+  love.graphics.setColor(backgroundColorByEditorMode[state.editorMode])
   love.graphics.rectangle(
     'fill',
     0, 0, love.graphics.getWidth(), love.graphics.getHeight()
   )
+end
+
+local function drawHelpText()
+  local font = require 'components.font'.primary.font
+  local constants = require 'components.state.constants'
+  love.graphics.setColor(1,1,1)
+  love.graphics.setFont(font)
+  local text = {
+    Color.WHITE,
+    constants.glyphs.leftMouseBtn,
+    Color.WHITE,
+    ' drag to move tree\n',
+
+    Color.WHITE,
+    constants.glyphs.middleMouseBtn,
+    Color.WHITE,
+    ' zoom tree'
+  }
+  love.graphics.printf(text, 10, 10, 200, 'left')
+end
+
+local mask_shader = love.graphics.newShader[[
+   vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
+      if (Texel(texture, texture_coords).a == 0.0) {
+         // a discarded pixel wont be applied as the stencil.
+         discard;
+      }
+      return vec4(1.0);
+   }
+]]
+
+function TreeEditor.draw(self)
+  drawBackground(self)
+
+  local _editorMode = state.editorMode
+  local tx, ty = getTranslate()
+  love.graphics.push()
+  love.graphics.origin()
 
   self:drawTreeCenter()
 
@@ -642,28 +873,59 @@ function TreeEditor.draw(self)
   local function drawConnection(node, connectionNode)
     love.graphics.setLineStyle('rough')
     love.graphics.line(
-      node.x + node.size/2 + tx,
-      node.y + node.size/2 + ty,
-      connectionNode.x + connectionNode.size/2 + tx,
-      connectionNode.y + connectionNode.size/2 + ty
+      (node.x * cellSize) + cellSize/2 + tx,
+      (node.y * cellSize) + cellSize/2 + ty,
+      (connectionNode.x * cellSize) + connectionNode.size/2 + tx,
+      (connectionNode.y * cellSize) + connectionNode.size/2 + ty
     )
   end
 
+  local nodeBackgroundStencil = function()
+    love.graphics.setShader(mask_shader)
+    for _,node in pairs(self.nodes) do
+      local x, y = (node.x * cellSize) + node.size/2 + tx, (node.y * cellSize) + node.size/2 + ty
+      local dataKey = node.nodeValue
+      local optionValue = self.nodeValueOptions[dataKey]
+      -- cut-out the areas that overlap the connections
+      love.graphics.setColor(0,0,0)
+      local nodeBackground = self.defaultNodeImage
+      local AnimationFactory = require 'components.animation-factory'
+      local animation = AnimationFactory
+        :newStaticSprite(optionValue and optionValue.image or self.defaultNodeImage)
+      local ox, oy = animation:getOffset()
+      animation:draw(
+        math.floor(x), math.floor(y),
+        0,
+        state.scale, state.scale,
+        math.floor(ox), math.floor(oy)
+      )
+    end
+    love.graphics.setShader()
+  end
+
+  love.graphics.stencil(nodeBackgroundStencil, 'replace', 1)
+  love.graphics.setStencilTest('notequal', 1)
   -- draw connections
   for nodeId,node in pairs(self.nodes) do
-
     for connectionNodeId in pairs(node.connections or {}) do
       local oLineWidth = love.graphics.getLineWidth()
       local connectionNode = self.nodes[connectionNodeId]
+      local color = isHovered and Color.LIME or
+        (
+          playMode:isConnectionToSelectableNode(node, connectionNode) and
+            self.colors.nodeConnection.inner or
+            self.colors.nodeConnection.innerNonSelectable
+        )
 
       local isSelectedConnection = state.selectedConnection and
         (state.selectedConnection[connectionNodeId] and state.selectedConnection[nodeId])
+      local baseWidth = 1 * state.scale
       -- line outline
-      love.graphics.setLineWidth(8)
+      love.graphics.setLineWidth(baseWidth + 4)
       if isSelectedConnection then
-        love.graphics.setColor(1,0.2,1)
-      elseif playMode.isConnectionToSelectableNode(node, connectionNode) then
-        love.graphics.setColor(self.colors.nodeConnection.outer)
+        love.graphics.setColor(1,1,0)
+      elseif playMode:isConnectionToSelectableNode(node, connectionNode) then
+        love.graphics.setColor(Color.multiplyAlpha(color, 0.1))
       else
         love.graphics.setColor(self.colors.nodeConnection.outerNonSelectable)
       end
@@ -673,42 +935,33 @@ function TreeEditor.draw(self)
         state.hoveredConnection and
         state.hoveredConnection[nodeId] and
         state.hoveredConnection[connectionNodeId]
-      local color = isHovered and Color.LIME or
-        (
-          playMode.isConnectionToSelectableNode(node, connectionNode) and
-            self.colors.nodeConnection.inner or
-            self.colors.nodeConnection.innerNonSelectable
-        )
-      love.graphics.setLineWidth(4)
-      love.graphics.setColor(color)
+      love.graphics.setLineWidth(baseWidth)
+      if isHovered then
+        love.graphics.setColor(Color.LIME)
+      else
+        love.graphics.setColor(color)
+      end
       drawConnection(node, connectionNode)
       love.graphics.setLineWidth(oLineWidth)
     end
   end
+  love.graphics.setStencilTest()
 
-  love.graphics.setBlendMode('replace')
-  for _,node in pairs(self.nodes) do
-    local radius = node.size/2
-    local x, y = node.x + node.size/2 + tx, node.y + node.size/2 + ty
-    -- cut-out the areas that overlap the connections
-    love.graphics.setColor(0,0,0)
-    love.graphics.circle('fill', x, y, radius)
-  end
-  love.graphics.setBlendMode('alpha')
-
-  -- draw nodes
+  -- -- draw nodes
   for nodeId,node in pairs(self.nodes) do
     local dataKey = node.nodeValue
     local optionValue = self.nodeValueOptions[dataKey]
     local radius = node.size/2
-    local x, y = node.x + node.size/2 + tx, node.y + node.size/2 + ty
+    local x, y = node.x * cellSize + node.size/2 + tx,
+      node.y * cellSize + node.size/2 + ty
 
-    if (editorModes.PLAY == _editorMode) or
-      (editorModes.PLAY_READ_ONLY == _editorMode) or
-      (editorModes.PLAY_UNSELECT_ONLY == _editorMode)
-    then
+    if true then
       if node.selected then
         love.graphics.setColor(1,1,1)
+      -- highlight selectable nodes
+      elseif editorModes.PLAY == _editorMode and
+          playMode:isNodeSelectable(node, self.nodes, self.nodeValueOptions) then
+        love.graphics.setColor(1,1,1,math.max(math.cos(self.clock), 0.3))
       else
         love.graphics.setColor(1,1,1,0.3)
       end
@@ -716,34 +969,30 @@ function TreeEditor.draw(self)
       local sprite = optionValue and optionValue.image or self.defaultNodeImage
       local animation = AnimationFactory:newStaticSprite(sprite)
       local ox, oy = animation:getOffset()
-      love.graphics.draw(
-        AnimationFactory.atlas, animation.sprite,
-        x, y,
+      animation:draw(
+        math.floor(x), math.floor(y),
         0,
         state.scale, state.scale,
-        ox, oy
+        math.floor(ox), math.floor(oy)
       )
+
+      if self.debug.selectionTraversal then
+        if debugState.checkedNodes[nodeId] then
+          love.graphics.setColor(1,1,0)
+          love.graphics.circle('fill', x, y, 10)
+        end
+
+        if (debugState.firstCheckedNode == nodeId) then
+          love.graphics.setColor(1,0,1)
+          love.graphics.circle('fill', x, y, 10)
+        end
+      end
     end
 
     if (editorModes.EDIT == _editorMode) then
-      if node.hovered then
-        love.graphics.setColor(0,1,0)
-      else
-        love.graphics.setColor(1,0.5,0)
-      end
-      love.graphics.circle('fill', x, y, radius)
-
-      if optionValue then
-        debugTextLayer:add(
-          optionValue.name,
-          Color.WHITE,
-          x/config.scale, y/config.scale
-        )
-      end
-
       if state.selectedNode == nodeId then
         local oLineWidth = love.graphics.getLineWidth()
-        love.graphics.setLineWidth(2)
+        love.graphics.setLineWidth(3)
         love.graphics.setColor(1,1,1)
         love.graphics.circle('line', x, y, radius + 4)
         love.graphics.setLineWidth(oLineWidth)
@@ -754,19 +1003,22 @@ function TreeEditor.draw(self)
       debugTextLayer:add(
         #F.keys(node.connections),
         Color.WHITE,
-        x/config.scale, y/config.scale
+        x/state.scale, y/state.scale
       )
     end
   end
 
-  self:drawTooltip()
-
   love.graphics.pop()
+
+  self:drawTooltip()
+  drawHelpText(self)
 end
 
 function TreeEditor.final(self)
   self.autoSave:stop()
   msgBus.off(self.listeners)
+  msgBus.send(msgBus.CURSOR_SET, {})
+  InputContext.reset('any')
 end
 
 return Component.createFactory(TreeEditor)

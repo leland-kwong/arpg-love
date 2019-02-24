@@ -6,12 +6,24 @@ local Position = require 'utils.position'
 
 local HealthIndicator = {
   group = groups.hud,
+  w = 0,
+  h = 0,
   color = {1,1,1},
   fillPercentage = function()
     return 0
   end,
   fillDirection = 1,
 }
+
+local function windowSize()
+  local config = require 'config.config'
+  return love.graphics.getWidth() / config.scale, love.graphics.getHeight() / config.scale
+end
+
+function HealthIndicator.update(self)
+  local windowW, windowH = windowSize()
+  self.x = Position.boxCenterOffset(self.w, self.h, windowW, windowH)
+end
 
 function HealthIndicator.draw(self)
   -- background

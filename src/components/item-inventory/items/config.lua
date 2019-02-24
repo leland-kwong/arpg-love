@@ -52,7 +52,7 @@ config.consumableCategory = consumableCategory
 
 local equipmentCategory = {
 	BODY_ARMOR = 'BODY_ARMOR',
-	POD_MODULE = 'POD_MODULE',
+	ACTION_MODULE = 'ACTION_MODULE',
 	SHOES = 'SHOES',
 	HELMET = 'HELMET',
 	AUGMENTATION = 'AUGMENTATION',
@@ -65,7 +65,7 @@ config.category = objectUtils.assign(
 )
 
 config.categoryTitle = {
-	[equipmentCategory.POD_MODULE] = 'pod module',
+	[equipmentCategory.ACTION_MODULE] = 'action module',
 	[consumableCategory.CONSUMABLE] = 'consumable',
 	[equipmentCategory.HELMET] = 'helmet',
 	[equipmentCategory.BODY_ARMOR] = 'chest armor',
@@ -74,10 +74,10 @@ config.categoryTitle = {
 }
 
 config.equipmentCategorySilhouette = {
-	[equipmentCategory.POD_MODULE] = 'weapon-module-empty',
+	[equipmentCategory.ACTION_MODULE] = 'weapon-module-empty',
 	[consumableCategory.CONSUMABLE] = 'vial-health',
 	[equipmentCategory.HELMET] = 'helmet_106',
-	[equipmentCategory.BODY_ARMOR] = 'armor_121',
+	[equipmentCategory.BODY_ARMOR] = 'body-armor-basic',
 	[equipmentCategory.SHOES] = 'shoe_1',
 	[equipmentCategory.AUGMENTATION] = 'augmentation-one'
 }
@@ -85,12 +85,12 @@ config.equipmentCategorySilhouette = {
 -- defines what gui node that equipment may be dropped into
 config.equipmentGuiSlotMap = {
 	{
-		equipmentCategory.POD_MODULE,
-		equipmentCategory.POD_MODULE
+		equipmentCategory.ACTION_MODULE,
+		equipmentCategory.ACTION_MODULE
 	},
 	{
-		equipmentCategory.POD_MODULE,
-		equipmentCategory.POD_MODULE
+		equipmentCategory.ACTION_MODULE,
+		equipmentCategory.ACTION_MODULE
 	},
 	{
 		equipmentCategory.AUGMENTATION,

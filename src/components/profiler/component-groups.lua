@@ -3,42 +3,22 @@ local GuiText = require 'components.gui.gui-text'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local Color = require 'modules.color'
+local config = require 'config.config'
 
 local guiTextLayer = GuiText.create({
   group = Component.groups.system,
-  font = require'components.font'.primaryLarge.font,
+  font = require'components.font'.debug.font,
   outline = false
 })
 
 local profileData = {}
 local totalAverageExecutionTime = 0
 
-msgBus.PROFILE_FUNC = 'PROFILE_FUNC'
-msgBus.on(msgBus.PROFILE_FUNC, function(profileProps)
-  return require 'utils.perf'({
-    resetEvery = 1000,
-    done = function(_, totalTime, callCount)
-      if (not msgBus.send(msgBus.IS_CONSOLE_ENABLED)) then
-        return
-      end
-
-      local averageTime = totalTime / callCount
-      totalAverageExecutionTime = totalAverageExecutionTime + averageTime
-      local passedThreshold = averageTime <= (profileProps.threshold or 0.1)
-      if passedThreshold then
-        return
-      end
-      table.insert(profileData, Color.WHITE)
-      table.insert(profileData, '\n'..profileProps.name..' '..string.format('%0.2f', averageTime))
-    end
-  })(profileProps.call)
-end)
-
 local function profileFn(groupName, callback)
   return require'utils.perf'({
     resetEvery = 1000,
     done = function(_, totalTime, callCount)
-      if (not msgBus.send(msgBus.IS_CONSOLE_ENABLED)) then
+      if (not config.enableConsole) then
         return
       end
 
@@ -46,7 +26,7 @@ local function profileFn(groupName, callback)
       totalAverageExecutionTime = totalAverageExecutionTime + averageTime
       if averageTime >= 0.1 then
         table.insert(profileData, Color.WHITE)
-        table.insert(profileData, '\n'..groupName..': '..string.format('%0.2f', averageTime))
+        table.insert(profileData, groupName..': '..string.format('%0.2f', averageTime)..'\n')
       end
     end
   })(callback)
@@ -59,7 +39,8 @@ for k,group in pairs(groups) do
 end
 
 return function()
-  if (not msgBus.send(msgBus.IS_CONSOLE_ENABLED)) then
+  if (not config.enableConsole) then
+    profileData = {}
     return
   end
   -- add total average execution time
@@ -68,7 +49,8 @@ return function()
   -- reset
   totalAverageExecutionTime = 0
 
-  guiTextLayer:addf(profileData, 400, 'left', 10, 380)
+  local wrapLimit = 400
+  guiTextLayer:addf(profileData, wrapLimit, 'right', love.graphics.getWidth() - wrapLimit - 5, 5)
   -- reset
   profileData = {}
 end

@@ -11,9 +11,6 @@ Worlds.map = bump.newWorld(config.gridSize)
 ]]
 Worlds.player = bump.newWorld(config.gridSize)
 
--- uses grid coordinates
-Worlds.zones = bump.newWorld(1)
-
 function Worlds.reset(world)
   local items, len = world:getItems()
   for i=1, len do

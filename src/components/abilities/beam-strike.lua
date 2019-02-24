@@ -35,33 +35,33 @@ local beamMiddle = AnimationFactory:newStaticSprite(
 )
 
 -- returns beamX, beamY, beamLength, isImpactFrame
-function createBeam(x1, y1, animationSpeed)
+function createBeam(x1, y1, animationSpeed, frameRate)
   local max = math.max
   return coroutine.create(function()
     local distToTravel = 400
     local initialLength = 200
     local length = initialLength -- beam length
-    local frameRate = 1/60
     local animationSpeed = math.floor(distToTravel / animationSpeed * frameRate)
     local x2, y2 = x1, y1
     -- tween beam position
     while (distToTravel > 0) do
       distToTravel = max(0, distToTravel - animationSpeed)
-      x2, y2 = x1, y1 - distToTravel
+      x2, y2 = x1, y1 - distToTravel - length
       coroutine.yield(x2, y2, length)
     end
     -- tween beam length
     while length > 0 do
       local isImpactFrame = length == initialLength
       length = length - animationSpeed
-      coroutine.yield(x2, y2, max(0, length), isImpactFrame)
+      coroutine.yield(x2, y2 + (initialLength - length), max(0, length), isImpactFrame)
     end
   end)
 end
 
 local BeamStrike = {
+  -- debug = true,
   group = groups.all,
-  delay = 0.25, -- impact delay
+  delay = 1, -- impact delay
   radius = 20,
   opacity = 1,
   drawOrder = function()
@@ -92,7 +92,7 @@ function BeamStrike.update(self, dt)
   self.angle = self.angle + dt
   local shouldStartMoving = self.clock >= (self.delay - self.animationSpeed)
   if shouldStartMoving then
-    self.beamCo = self.beamCo or createBeam(self.x, self.y, self.animationSpeed)
+    self.beamCo = self.beamCo or createBeam(self.x, self.y, self.animationSpeed, dt)
     local isAlive, x, y, beamLength, isImpactFrame = coroutine.resume(self.beamCo)
     if isImpactFrame then
       ImpactDispersion.create({
@@ -141,7 +141,7 @@ function BeamStrike.draw(self)
     if (beamLength > 0) then
       -- tail
       local _, tailHeight = beamTail:getOffset()
-      love.graphics.draw(AnimationFactory.atlas, beamTail.sprite, actualX, actualY - beamLength - tailHeight + 1)
+      love.graphics.draw(AnimationFactory.atlas, beamTail.sprite, actualX, actualY - tailHeight + 1)
       -- middle
       love.graphics.draw(AnimationFactory.atlas, beamMiddle.sprite, actualX, actualY + 1, 0, 1, beamLength, 0, 2)
       -- head
@@ -158,10 +158,10 @@ function BeamStrike.draw(self)
   love.graphics.setBlendMode('alpha', 'premultiplied')
   love.graphics.push()
   love.graphics.origin()
-  love.graphics.scale(config.scale)
   love.graphics.setCanvas(self.canvas)
   love.graphics.clear()
 
+  love.graphics.setColor(1,1,1)
   -- draw rotated sprites to canvas first
   local _, _, glyphWidth, glyphHeight = animationOuter.sprite:getViewport()
   local glyphOx, glyphOy = animationOuter:getSourceOffset()
@@ -184,7 +184,7 @@ function BeamStrike.draw(self)
     animationInner.sprite,
     glyphX,
     glyphY,
-    self.angle * -1 / 2,
+    self.angle * -2,
     1, 1,
     ox,
     oy
@@ -194,10 +194,13 @@ function BeamStrike.draw(self)
   love.graphics.pop()
   love.graphics.setBlendMode('alpha')
 
-  local canvasX, canvasY = self.x - glyphX - glyphWidth/2, self.y - glyphY - glyphHeight/2
+  local canvasX, canvasY = self.x - glyphX, self.y - glyphY
   -- scale in y direction to get perspective
-  local yOffset = (1 - self.scale.y) * glyphHeight
-  love.graphics.draw(self.canvas, canvasX, canvasY + yOffset, 0, 1, self.scale.y)
+  local yOffset = (1 - self.scale.y) * glyphHeight/2
+  love.graphics.push()
+  love.graphics.translate(0, yOffset)
+  love.graphics.draw(self.canvas, canvasX, canvasY, 0, 1, self.scale.y)
+  love.graphics.pop()
 
   if self.debug then
     love.graphics.setColor(1,0.5,1)
@@ -207,6 +210,10 @@ end
 
 function BeamStrike.drawOrder()
   return 2
+end
+
+function BeamStrike.final(self)
+  self.canvas:release()
 end
 
 return Component.createFactory(BeamStrike)

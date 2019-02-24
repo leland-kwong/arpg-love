@@ -6,7 +6,6 @@ local abs = math.abs
 local Lru = require 'utils.lru'
 
 local meta = {}
-local spriteCache = Lru.new(1000)
 
 local function createAnimationFactory(
   frameJson,
@@ -39,6 +38,7 @@ function meta:new(aniFrames)
     frame = nil,
     time = 0, -- animation time
     index = 1, -- frame index
+    quads = {}
   }
   setmetatable(animation, self)
   self.__index = self
@@ -72,7 +72,7 @@ function meta:setFrame(index)
   end
 
   local pad = self.pad
-  local sprite = spriteCache:get(frameKey)
+  local sprite = self.quads[frameKey]
   if (not sprite) then
     sprite = love.graphics.newQuad(
       self.frame.frame.x - pad,
@@ -81,7 +81,7 @@ function meta:setFrame(index)
       self.frame.spriteSourceSize.h + (pad * 2),
       self.atlas:getDimensions()
     )
-    spriteCache:set(frameKey, sprite)
+    self.quads[frameKey] = sprite
   end
   self.sprite = sprite
   self.lastIndex = self.index
@@ -136,8 +136,34 @@ function meta:getFullWidth()
   return self:getWidth() + (self.pad * 2)
 end
 
+function meta:getFullHeight()
+  return self:getHeight() + (self.pad * 2)
+end
+
+function meta:setSize(w, h)
+  local _x,_y,_w,_h = self.sprite:getViewport()
+  local padding = self.pad * 2
+  self.sprite:setViewport(
+    _x,
+    _y,
+    w and (w + padding) or _w,
+    h and (h + padding) or _h
+  )
+end
+
 function meta:isLastFrame()
   return self.index == self.numFrames
+end
+
+function meta:draw(x, y, angle, sx, sy, ox, oy, kx, ky)
+  local _ox, _oy = self:getOffset()
+  ox, oy = ox or _ox, oy or _oy
+  love.graphics.draw(
+    self.atlas,
+    self.sprite,
+    x, y, angle, sx, sy, ox, oy
+  )
+  return self
 end
 
 -- increments the animation by the time amount
@@ -167,6 +193,11 @@ function meta:update(dt, data)
   end
 
   self:setFrame(self.index)
+  return self
+end
+
+function meta:reset()
+  self:setFrame(1)
   return self
 end
 

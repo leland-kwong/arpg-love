@@ -9,14 +9,7 @@ setmetatable(M, {
     exist. The main use case is when trying to access message type constants, ie `msgBus.PLAYER_HEAL_SOURCE_ADD` should not be a `nil` value.
   ]]
   __index = function(_, name)
-    if not proxy[name] then
-      error('[msgBus] property `'..name..'` not defined')
-    end
-    return proxy[name]
-  end,
-  __newindex = function(_, eventName, eventType)
-    assert(not proxy[eventName], eventName..' is already registered')
-    proxy[eventName] = eventType
+    return name
   end
 })
 
@@ -24,7 +17,6 @@ M.GAME_LOADED = 'GAME_LOADED'
 M.GAME_UNLOADED = 'GAME_UNLOADED'
 M.NEW_GAME = 'NEW_GAME' -- this will be used whenever we exit the currently loaded game. Currently its being unused
 M.SET_CONFIG = 'SET_CONFIG' -- makes updates to the game config
-M.SET_BACKGROUND_COLOR = 'SET_BACKGROUND_COLOR'
 
 M.KEY_DOWN = 'KEY_DOWN'
 M.KEY_RELEASED = 'KEY_RELEASED'
@@ -61,14 +53,11 @@ M.PLAYER_WEAPON_MUZZLE_FLASH = 'PLAYER_WEAPON_MUZZLE_FLASH'
 M.PLAYER_WEAPON_ATTACK = 'PLAYER_WEAPON_ATTACK'
 M.PLAYER_LEVEL_UP = 'PLAYER_LEVEL_UP'
 M.PLAYER_STATS_NEW_MODIFIERS = 'PLAYER_STATS_NEW_MODIFIERS'
-M.PORTAL_OPEN = 'PORTAL_OPEN'
+M.PLAYER_PORTAL_OPEN = 'PLAYER_PORTAL_OPEN'
 M.PORTAL_ENTER = 'PORTAL_ENTER'
 M.SET_TEXT_INPUT = 'SET_TEXT_INPUT'
 M.GUI_TEXT_INPUT = 'GUI_TEXT_INPUT'
 
-M.GAME_STATE_GET = 'GAME_STATE_GET'
-M.GAME_STATE_SET = 'GAME_STATE_SET'
-M.GLOBAL_STATE_GET = 'GLOBAL_STATE_GET'
 M.SCENE_STACK_PUSH = 'SCENE_STACK_PUSH'
 M.SCENE_STACK_POP = 'SCENE_STACK_POP'
 M.SCENE_STACK_REPLACE = 'SCENE_STACK_REPLACE'
@@ -87,15 +76,11 @@ M.ENEMY_DESTROYED = 'ENEMY_DESTROYED'
 
 M.ITEM_EQUIPPED = 'ITEM_EQUIPPED'
 M.ITEM_UPGRADE_UNLOCKED = 'ITEM_UPGRADE_UNLOCKED'
-M.ITEM_HOVERED = 'ITEM_HOVERED'
 M.ITEM_PICKUP = 'ITEM_PICKUP' --[[ itemInstance ]]
 M.ITEM_PICKUP_CANCEL = 'ITEM_PICKUP_CANCEL'
 M.DROP_ITEM_ON_FLOOR = 'DROP_ITEM_ON_FLOOR'
 M.INVENTORY_PICKUP = 'INVENTORY_PICKUP'
 M.INVENTORY_DROP = 'INVENTORY_DROP'
--- when clicked outside of the screen, we drop the item on the floor
-M.INVENTORY_DROP_MODE_FLOOR = 'INVENTORY_DROP_MODE_FLOOR'
-M.INVENTORY_DROP_MODE_INVENTORY = 'INVENTORY_DROP_MODE_INVENTORY'
 M.INVENTORY_TOGGLE = 'INVENTORY_TOGGLE'
 M.PASSIVE_SKILLS_TREE_TOGGLE = 'PASSIVE_SKILLS_TREE_TOGGLE'
 

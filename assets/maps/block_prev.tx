@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object name="block_prev" type="block" width="1" height="1">
+  <properties>
+   <property name="block" type="file" value="../../src/built/maps/room-4.lua"/>
+   <property name="exitDirection" type="int" value="1"/>
+  </properties>
+ </object>
+</template>

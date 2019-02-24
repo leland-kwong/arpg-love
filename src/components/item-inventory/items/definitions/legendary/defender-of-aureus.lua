@@ -16,7 +16,7 @@ return {
 		category = itemConfig.category.AUGMENTATION,
 
 		info = {
-			attackPower = 30
+			actionPower = 30
 		},
 
 		extraModifiers = {

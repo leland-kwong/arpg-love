@@ -13,7 +13,7 @@ local msgBus = require 'components.msg-bus'
 local bossId = 'Erion'
 
 local AbilityBeamStrike = {
-  attackTime = 0.8,
+  actionSpeed = 0.8,
   range = 20,
   cooldown = 3,
   beamDelay = 1
@@ -92,7 +92,7 @@ function AbilityBeamStrike.update(self, state, dt)
   end
 
   state.clock = (state.clock or 0) + dt
-  if (state.clock > AbilityBeamStrike.attackTime) then
+  if (state.clock > AbilityBeamStrike.actionSpeed) then
     return false
   end
   return true
@@ -126,7 +126,7 @@ end
 
 local MultiShot = {
   range = 14,
-  attackTime = 0.4,
+  actionSpeed = 0.4,
   cooldown = 1
 }
 
@@ -157,7 +157,7 @@ end
 function MultiShot.update(_, state, dt)
   if state.isNewAttack then
     state.clock = state.clock + dt
-    local isAbilityComplete = state.clock >= MultiShot.attackTime
+    local isAbilityComplete = state.clock >= MultiShot.actionSpeed
     if isAbilityComplete then
       state.isNewAttack = false
     end
@@ -168,7 +168,7 @@ end
 
 local SpawnMinions = {
   range = 40,
-  attackTime = 0.3,
+  actionSpeed = 0.3,
   cooldown = 2,
   maxMinions = 8
 }
@@ -210,21 +210,22 @@ function SpawnMinions.use(_, state)
 end
 
 function SpawnMinions.update(_, state, dt)
-  fadeInMinions()
   local minionCount = countMinions()
   local maxNumMinions = SpawnMinions.maxMinions
   if state.isNewSpawn and (minionCount < maxNumMinions) then
     if (state.clock == 0) then
       local Spawn = require 'components.spawn.spawn-ai'
-      local minionType = require 'components.ai.types'.types.MELEE_BOT
+      local minionType = require 'components.ai.types.ai-melee-bot'
       local playerRef = Component.get('PLAYER')
       local config = require 'config.config'
       local minions = Spawn({
         grid = Component.get('MAIN_SCENE').mapGrid,
         WALKABLE = require 'modules.map-generator.index'.WALKABLE,
-        target = function()
-          return Component.get('PLAYER')
+        rarity = function(ai)
+          local aiRarity = require 'components.ai.rarity'
+          return aiRarity(ai)
         end,
+        target = require 'components.ai.find-target'.player,
         x = playerRef.x / config.gridSize,
         y = playerRef.y / config.gridSize - 4,
         types = {
@@ -258,18 +259,10 @@ function SpawnMinions.update(_, state, dt)
       end
     end
     state.clock = state.clock + dt
-    local isReady = state.clock > SpawnMinions.attackTime
+    local isReady = state.clock > SpawnMinions.actionSpeed
     return (not isReady)
   end
   return false
-end
-
-local function isPlayerInRoom()
-  local playerRef = Component.get('PLAYER')
-  local F = require 'utils.functional'
-  return F.find(playerRef.zones, function(z)
-    return z.name == 'room-boss-1'
-  end)
 end
 
 local function forEachDoor(callback)
@@ -286,7 +279,7 @@ local function lockDoors()
 end
 
 local function cameraActionOnBossEncounter(bossRef, playerRef)
-  playerRef:setUpdateDisabled(true)
+  playerRef:set('cutSceneMode', true)
   bossRef.silenced = true
   local bossOriginalMoveSpeed = bossRef.moveSpeed
   bossRef.moveSpeed = 0
@@ -298,7 +291,7 @@ local function cameraActionOnBossEncounter(bossRef, playerRef)
   tick.delay(function()
     camera:setPosition(playerRef.x, playerRef.y, cameraOutDuration)
     tick.delay(function()
-      playerRef:setUpdateDisabled(false)
+      playerRef:set('cutSceneMode', false)
       bossRef.silenced = false
       bossRef.moveSpeed = bossOriginalMoveSpeed
       lockDoors()
@@ -312,8 +305,6 @@ local function keepBossActive()
   local bossRef = Component.get(bossId)
   local isBossDestroyed = not bossRef
 
-  playerRef.inBossBattle = (not isBossDestroyed) and bossRef.encountered
-
   local bossDistFromPlayer = calcDist(playerRef.x, playerRef.y, bossRef.x, bossRef.y)
 
   local showBossPointer = (bossDistFromPlayer < 200 * config.gridSize) and ((not bossRef.isInViewOfPlayer) or (not bossRef.canSeeTarget))
@@ -325,8 +316,7 @@ local function keepBossActive()
     )
   end
 
-  local encounterSightRange = 40
-  local battleSightRange = 80
+  local battleSightRange = 150
   if (not bossRef.encountered) then
     bossRef.health = bossRef.maxHealth
     bossRef.sightRadius = encounterSightRange
@@ -335,95 +325,113 @@ local function keepBossActive()
   end
 
   -- keep boss active even when it is outside of the viewport
-  local isNearPlayer = bossDistFromPlayer < (encounterSightRange * config.gridSize)
-  if isPlayerInRoom() and isNearPlayer and bossRef.canSeeTarget then
+  local isBossTriggered = false
+  local triggeredZones = Component.groups.triggeredZones.getAll()
+
+  for _,entity in pairs(triggeredZones) do
+    if entity.name == 'bossEncounteredZone' then
+      isBossTriggered = true
+    end
+  end
+
+
+  if isBossTriggered then
     if (not bossRef.encountered) then
+      playerRef.inBossBattle = true
       bossRef.encountered = true
       cameraActionOnBossEncounter(bossRef, playerRef)
     end
-
-    msgBus.send(msgBus.CHARACTER_HIT, {
-      parent = bossRef,
-      damage = 0,
-      source = 'BOSS_NEAR_PLAYER_AGGRO'
-    })
   end
 end
 
-return function(props)
-  local aiProps = AiEyeball()
+local AiBlueprint = require 'components.ai.create-blueprint'
+return AiBlueprint({
+  baseProps = {
+    type = 'boss-1',
+  },
+  legendary = true,
+  create = function(props)
+    local aiProps = AiEyeball.create()
 
-  aiProps.onInit = function(self)
-    local function handleBossDeath(msg)
-      local isBoss = msg.parent == Component.get(bossId)
-      if isBoss then
-        local camera = require 'components.camera'
-        camera:shake(4, 60, 5)
+    aiProps.onInit = function(self)
+      local function handleBossDeath(msg)
+        local isBoss = msg.parent == Component.get(bossId)
+        if isBoss then
+          local camera = require 'components.camera'
+          camera:shake(4, 60, 5)
 
-        for _,minion in pairs(Component.groups.boss1Minions.getAll()) do
-          Component.remove(minion:getId(), true)
+          for _,minion in pairs(Component.groups.boss1Minions.getAll()) do
+            Component.remove(minion:getId(), true)
+          end
+
+          local playerRef = Component.get('PLAYER')
+          playerRef.inBossBattle = false
         end
       end
-    end
-    local msgBus = require 'components.msg-bus'
-    msgBus.on(msgBus.ENEMY_DESTROYED, handleBossDeath)
+      local msgBus = require 'components.msg-bus'
+      msgBus.on(msgBus.ENEMY_DESTROYED, handleBossDeath)
 
-    Component.create({
-      init = function(self)
-        Component.addToGroup(self, 'all')
-      end,
-      update = function()
-        keepBossActive()
+      Component.create({
+        init = function(self)
+          Component.addToGroup(self, 'all')
+        end,
+        update = function()
+          keepBossActive()
+        end
+      }):setParent(self)
+    end
+
+    aiProps.onUpdateStart = function()
+      fadeInMinions()
+    end
+
+    aiProps.onFinal = function()
+      local function openDoor(door)
+        door:disable()
       end
-    }):setParent(self)
-  end
-
-  aiProps.onFinal = function()
-    local function openDoor(door)
-      door:disable()
+      forEachDoor(openDoor)
     end
-    forEachDoor(openDoor)
-  end
 
-  aiProps.id = bossId
-  aiProps.lightRadius = 40
-  local Color = require 'modules.color'
-  aiProps.lightColor = Color.SKY_BLUE
-  aiProps.attackRange = 12
-  aiProps.maxHealth = 400
+    aiProps.id = bossId
+    aiProps.lightRadius = 40
+    local Color = require 'modules.color'
+    aiProps.lightColor = Color.SKY_BLUE
+    aiProps.attackRange = 12
+    aiProps.maxHealth = 400
 
-  local animations = {
-    attacking = animationFactory:new({
-      'boss-1/boss-1',
-      'boss-1/boss-1'
-    }),
-    idle = animationFactory:new({
-      'boss-1/boss-1'
-    }),
-    moving = animationFactory:new({
-      'boss-1/boss-1'
-    })
-  }
-  local spriteWidth, spriteHeight = animations.idle:getSourceSize()
-  aiProps.itemData.minRarity = itemConfig.rarity.MAGICAL
-  aiProps.itemData.maxRarity = itemConfig.rarity.RARE
-  aiProps.itemData.dropRate = aiProps.itemData.dropRate * 30
-
-  aiProps.animations = animations
-  aiProps.w = spriteWidth
-  aiProps.h = spriteHeight
-  aiProps.dataSheet = {
-    name = 'Erion, Guardian of Aureus',
-    properties = {
-      'ranged',
-      'beam-strike',
-      'minion-spawn',
-      'slow-on-hit',
-      'multi-shot'
+    local animations = {
+      attacking = animationFactory:new({
+        'boss-1/boss-1',
+        'boss-1/boss-1'
+      }),
+      idle = animationFactory:new({
+        'boss-1/boss-1'
+      }),
+      moving = animationFactory:new({
+        'boss-1/boss-1'
+      })
     }
-  }
-  table.insert(aiProps.abilities, AbilityBeamStrike)
-  table.insert(aiProps.abilities, SpawnMinions)
-  table.insert(aiProps.abilities, MultiShot)
-  return aiProps
-end
+    local spriteWidth, spriteHeight = animations.idle:getSourceSize()
+    aiProps.itemData.minRarity = itemConfig.rarity.MAGICAL
+    aiProps.itemData.maxRarity = itemConfig.rarity.RARE
+    aiProps.itemData.dropRate = aiProps.itemData.dropRate * 30
+
+    aiProps.animations = animations
+    aiProps.w = spriteWidth
+    aiProps.h = spriteHeight
+    aiProps.dataSheet = {
+      name = 'Erion, Guardian of Aureus',
+      properties = {
+        'ranged',
+        'beam-strike',
+        'minion-spawn',
+        'slow-on-hit',
+        'multi-shot'
+      }
+    }
+    table.insert(aiProps.abilities, AbilityBeamStrike)
+    table.insert(aiProps.abilities, SpawnMinions)
+    table.insert(aiProps.abilities, MultiShot)
+    return aiProps
+  end
+})

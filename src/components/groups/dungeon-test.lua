@@ -7,13 +7,14 @@ local Map = require 'modules.map-generator.index'
 local Grid = require 'utils.grid'
 
 local function randomTreasurePosition(mapGrid, occupiedPositions)
+  math.randomseed(os.clock())
   local rows, cols = #mapGrid, #mapGrid[1]
   local gridX, gridY = math.random(1, rows),
     math.random(1, cols)
   local x, y = gridX * config.gridSize, gridY * config.gridSize
   if (
     (not Grid.get(occupiedPositions, x, y)) and
-    Grid.get(mapGrid, gridX, gridY) == Map.WALKABLE
+    Map.WALKABLE(Grid.get(mapGrid, gridX, gridY))
   ) then
     return x, y
   end
@@ -22,7 +23,7 @@ end
 
 local function addTreasureCaches(scene)
   local mapGrid = scene.mapGrid
-  local treasureCacheCount = 100
+  local treasureCacheCount = 30
   local occupiedPositions = {}
   for i=1, treasureCacheCount do
     local x, y = randomTreasurePosition(mapGrid, occupiedPositions)
@@ -39,6 +40,10 @@ local function addTreasureCaches(scene)
       },
       serialize = function(self)
         return self.initialProps
+      end,
+      onDestroyStart = function()
+        local Sound = require 'components.sound'
+        Sound.playEffect('treasure-cache-demolish.wav')
       end
     }
     EnvironmentInteractable.create(props):setParent(scene)

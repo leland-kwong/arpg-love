@@ -1,6 +1,7 @@
 local bump = require 'modules.bump'
 local typeCheck = require 'utils.type-check'
 local uid = require 'utils.uid'
+local CollisionWorlds = require 'components.collision-worlds'
 
 bump.TOUCH = 'touch'
 
@@ -40,33 +41,42 @@ function CollisionObject:getPositionWithOffset()
 end
 
 function CollisionObject:addToWorld(collisionWorld)
+  local cw = type(collisionWorld) == 'string' and CollisionWorlds[collisionWorld]
+    or collisionWorld
   local x, y = self:getPositionWithOffset()
-  collisionWorld:add(
+  cw:add(
     self,
     x,
     y,
     self.w,
     self.h
   )
-  self.world = collisionWorld
+  self.world = cw
   return self
 end
 
-function CollisionObject:move(goalX, goalY, filter)
+function CollisionObject:check(goalX, goalY, filter, isMove)
   if not self.world then
     error('collision object must be added to a world')
     return
   end
 
-  local actualX, actualY, cols, len = self.world:move(
+  local method = isMove and 'move' or 'check'
+
+  local actualX, actualY, cols, len = self.world[method](
+    self.world,
     self,
     goalX - self.ox,
     goalY - self.oy,
     filter
   )
   local finalX, finalY = actualX + self.ox, actualY + self.oy
-  self.x = finalX
-  self.y = finalY
+
+  if isMove then
+    self.x = finalX
+    self.y = finalY
+  end
+
   return finalX,
     finalY,
     cols,
@@ -83,6 +93,10 @@ function CollisionObject:setParent(parent)
 end
 
 function CollisionObject:delete()
+  if self._deleted then
+    return
+  end
+  self._deleted = true
   self:removeFromWorld(self.world)
   objectCount = objectCount - 1
   return self
@@ -124,8 +138,8 @@ function CollisionObject:update(x, y, w, h, offsetX, offsetY)
   return self
 end
 
-function CollisionObject:check(goalX, goalY, filter)
-  return self.world:check(self, goalX, goalY, filter)
+function CollisionObject:move(goalX, goalY, filter)
+  return self:check(goalX, goalY, filter, true)
 end
 
 function CollisionObject.getStats()

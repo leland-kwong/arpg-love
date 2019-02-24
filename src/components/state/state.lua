@@ -28,16 +28,15 @@ local function defaultState()
 	return {
 		__stateId = stateId,
 		characterName = characterName,
+		createdAt = os.time(),
+		playTime = 0,
 		isNewGame = true,
 
 		level = 1,
 		totalExperience = 0,
 		enemyKillCount = 0,
 
-		--[[ static modifiers ]]
-		statModifiers = baseStatModifiers(),
-
-		inventory = require'utils.make-grid'(11, 9, EMPTY_SLOT),
+		inventory = require'utils.make-grid'(10, 8, EMPTY_SLOT),
 
 		--[[ equipped items ]]
 		equipment = require'utils.make-grid'(2, 5, EMPTY_SLOT),

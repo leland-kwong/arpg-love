@@ -10,6 +10,7 @@ local noop = require 'utils.noop'
 local f = require 'utils.functional'
 local InputContext = require 'modules.input-context'
 local min, max = math.min, math.max
+local O = require 'utils.object-utils'
 
 local COLLISION_CROSS = 'cross'
 local mouseCollisionFilter = function()
@@ -45,24 +46,35 @@ msgBus.on(msgBus.KEY_PRESSED, function(msg)
   end
 end)
 
+msgBus.on('KEY_DOWN', function(msg)
+  local entity = getFocusedEntity()
+  if entity then
+    entity:onKeyDown(msg)
+  end
+end)
+
 local Gui = {
   group = groups.gui,
+  isGui = true,
   -- props
   x = 1,
   y = 1,
-  inputContext = 'gui', -- the input context to set when the entity is hovered
+  -- inputContext = 'gui', -- the input context to set when the entity is hovered
   onClick = noop,
   onKeyPress = noop,
+  onKeyDown = noop,
   onChange = noop,
   onCreate = noop,
   onFocus = noop,
   onBlur = noop,
   onScroll = noop,
   onPointerDown = noop,
+  onPointerUp = noop,
   onPointerEnter = noop,
   onPointerLeave = noop,
   onUpdate = noop,
   onPointerMove = noop,
+  onWheel = noop,
   onFinal = noop,
   collision = true,
   collisionGroup = nil,
@@ -91,6 +103,8 @@ local Gui = {
   focused = false,
   scrollTop = 0,
   scrollLeft = 0,
+  eventsDisabled = false,
+  prevHovered = false,
 
   -- statics
   types = guiType
@@ -114,10 +128,9 @@ end
 
 function Gui.setFocus(entity)
   local focusedEntity = getFocusedEntity()
-  if focusedEntity then
-    handleFocusChange(focusedEntity, false)
+  if (focusedEntity ~= entity) then
+    handleFocusChange(entity, true)
   end
-  handleFocusChange(entity, true)
 end
 
 local function handleScroll(self, dx, dy)
@@ -142,9 +155,174 @@ local function handleScroll(self, dx, dy)
   self.onScroll(self)
 end
 
+local function triggerEvents(c, msgValue, msgType)
+  local self = c
+
+  if msgBus.MOUSE_WHEEL_MOVED == msgType and self.hovered then
+    self.onWheel(self, msgValue)
+    if guiType.LIST == self.type then
+      handleScroll(self, msgValue[1], msgValue[2])
+    end
+  end
+
+  if msgBus.MOUSE_CLICKED == msgType then
+    if self.hovered then
+      local mx, my = self:getMousePosition()
+      self.onClick(self, O.assign({}, msgValue, {x = mx, y = my}))
+
+      if guiType.TOGGLE == self.type then
+        self.checked = not self.checked
+        self.onChange(self, self.checked)
+      end
+    end
+  end
+
+  if msgBus.MOUSE_PRESSED == msgType then
+    handleFocusChange(self, self.hovered)
+  end
+
+  if self.hovered then
+    if love.mouse.isDown(1) then
+      local mx, my = self:getMousePosition()
+      self.onPointerDown(self, O.assign({}, msgValue, {x = mx, y = my}))
+    end
+    if msgBus.MOUSE_RELEASED == msgType then
+      self.onPointerUp(self)
+    end
+  end
+
+  if self.focused and guiType.TEXT_INPUT == self.type then
+    if msgBus.GUI_TEXT_INPUT == msgType then
+      local txt = msgValue
+      self.text = self.text..txt
+      self.onChange(self)
+    end
+
+    -- handle backspace for text input
+    if msgBus.KEY_DOWN == msgType then
+      if msgValue.key == 'backspace' then
+        self.text = string.sub(self.text, 1, #self.text - 1)
+        self.onChange(self)
+      end
+    end
+  end
+end
+
+local function handleHoverEvents(self)
+  if self.eventsDisabled then
+    return false
+  end
+
+  local mx, my = self:getMousePosition()
+  local mouseCollisions = collisionWorlds.gui:queryPoint(mx, my, mouseCollisionFilter)
+
+  -- if the collided item is `self`, then we're hovered
+  for i=1, #mouseCollisions do
+    if mouseCollisions[i] == self.colObj then
+      self.hovered = true
+    end
+  end
+
+  if self.hovered then
+    InputContext.set(self.inputContext)
+    self.onPointerMove(self, {x = mx, y = my})
+  end
+
+  return self.hovered
+end
+
+local eventTypesFilter = {
+  [msgBus.MOUSE_WHEEL_MOVED] = true,
+  [msgBus.MOUSE_CLICKED] = true,
+  [msgBus.MOUSE_PRESSED] = true,
+  [msgBus.MOUSE_RELEASED] = true,
+  [msgBus.GUI_TEXT_INPUT] = true,
+  [msgBus.KEY_DOWN] = true,
+  [msgBus.UPDATE] = true,
+}
+
+Component.create({
+  id = 'gui-system-init',
+  init = function(self)
+    local function latestEventPriority(a, b)
+      return a.eventPriority > b.eventPriority
+    end
+
+    self.listeners = {
+      msgBus.on('*', function(msgValue, msgType)
+        local isInputEvent = eventTypesFilter[msgType]
+        if (not isInputEvent) then
+          return msgValue
+        end
+
+        local components = Component.groups.guiEventNode.getAll()
+        local sortedComponents = {}
+        for _,c in pairs(components) do
+          if c.isGui then
+            table.insert(sortedComponents, c)
+          end
+        end
+
+        table.sort(sortedComponents, latestEventPriority)
+
+        for i=1, #sortedComponents do
+          local c = sortedComponents[i]
+          c.hovered = false
+          if (not c.inputContext) then
+            error('gui component '..c:getId()..' has no input context')
+          end
+          if (
+              InputContext.contains(c.inputContext) or
+              InputContext.contains('any')
+            ) and
+            (not c.eventsDisabled)
+          then
+            local hovered = handleHoverEvents(c)
+            if hovered or c.focused then
+              triggerEvents(c, msgValue, msgType)
+            end
+          end
+          local hoverStateChanged = c.hovered ~= c.prevHovered
+          if hoverStateChanged then
+            if c.hovered then
+              c.onPointerEnter(c)
+            else
+              c.onPointerLeave(c)
+            end
+          end
+          c.prevHovered = c.hovered
+        end
+
+        return msgValue
+      end, 1),
+      msgBus.on(msgBus.UPDATE_END, function()
+        InputContext.set('any')
+      end, 100)
+    }
+  end,
+  final = function(self)
+    msgBus.off(self.listeners)
+  end
+})
+
+-- event priorities are sorted by highest to lowest
+local eventPriority = 0
+local function getDefaultEventPriority()
+  eventPriority = eventPriority + 1
+  return eventPriority
+end
+
 function Gui.init(self)
+  Component.addToGroup(self, 'guiEventNode')
+
   assert(guiType[self.type] ~= nil, 'invalid gui type'..tostring(self.type))
 
+  if self.initialProps.update then
+    error('may not override `update` method, use `onUpdate` instead')
+  end
+
+  self.inputContext = self.inputContext or self:getId()
+  self.eventPriority = self.eventPriority or getDefaultEventPriority()
   self.w, self.h = self.w or self.width or 1, self.h or self.height or 1
 
   if guiType.LIST == self.type then
@@ -163,60 +341,9 @@ function Gui.init(self)
     assert(type(self.checked) == 'boolean')
   end
 
-  msgBus.on('*', function(msgValue, msgType)
-    -- cleanup
-    local shouldCleanup = self:isDeleted()
-    if shouldCleanup then
-      return msgBus.CLEANUP
-    end
-
-    if guiType.LIST == self.type and
-      msgBus.MOUSE_WHEEL_MOVED == msgType and
-      self.hovered
-    then
-      handleScroll(self, msgValue[1], msgValue[2])
-    end
-
-    if msgBus.MOUSE_CLICKED == msgType then
-      if self.hovered then
-        local isRightClick = msgValue[3] == 2
-        self.onClick(self, isRightClick)
-
-        if guiType.TOGGLE == self.type then
-          self.checked = not self.checked
-          self.onChange(self, self.checked)
-        end
-      end
-    end
-
-    if msgBus.MOUSE_PRESSED == msgType then
-      handleFocusChange(self, self.hovered)
-    end
-
-    if self.hovered and love.mouse.isDown(1) then
-      self.onPointerDown(self)
-    end
-
-    if self.focused and guiType.TEXT_INPUT == self.type then
-      if msgBus.GUI_TEXT_INPUT == msgType then
-        local txt = msgValue
-        self.text = self.text..txt
-        self.onChange(self)
-      end
-
-      -- handle backspace for text input
-      if msgBus.KEY_DOWN == msgType and msgValue.key == 'backspace' then
-        self.text = string.sub(self.text, 1, #self.text - 1)
-        self.onChange(self)
-      end
-    end
-
-    return msgValue
-  end, 1)
-
   local posX, posY = self:getPosition()
   self.colObj = self:addCollisionObject(
-    self.collisionGroup or self.type,
+    self.collisionGroup or 'interact',
     posX, posY,
     self.w, self.h
   ):addToWorld(collisionWorlds.gui)
@@ -224,45 +351,9 @@ function Gui.init(self)
   self.onCreate(self)
 end
 
-local Lru = require 'utils.lru'
-local mouseCollisionsCache = Lru.new(20)
-local function indexByMouseCoord(x, y)
-  local maxCols = love.graphics.getWidth()
-  return (y * maxCols) + x
-end
-
-local function isDifferent(a, b)
-  return a ~= b
-end
-
-local function handleEvents(self)
-  local mx, my = self:getMousePosition()
-  local cacheKey = indexByMouseCoord(mx, my)
-  local mouseCollisions = collisionWorlds.gui:queryPoint(mx, my, mouseCollisionFilter)
-
-  -- if the collided item is `self`, then we're hovered
-  for i=1, #mouseCollisions do
-    if mouseCollisions[i] == self.colObj then
-      self.hovered = true
-    end
-  end
-
-  local isPointerMove = self.hovered
-  local hasPointerPositionChanged = posX ~= self.prevColPosX or posY ~= self.prevColPosY
-  if isPointerMove then
-    self.onPointerMove(self, posX, posY)
-    InputContext.set(self.inputContext)
-  end
-
-  local hoverStateChanged = self.hovered ~= self.prevHovered
-  if hoverStateChanged then
-    if self.hovered then
-      self.onPointerEnter(self)
-    else
-      self.onPointerLeave(self)
-      InputContext.set('any')
-    end
-  end
+function Gui.setEventsDisabled(self, disabled)
+  self.eventsDisabled = disabled
+  return self
 end
 
 function Gui.update(self, dt)
@@ -273,21 +364,20 @@ function Gui.update(self, dt)
   end
 
   local posX, posY = self:getPosition()
-  self.w, self.h = self.width or self.w, self.height or self.h
+  -- minimum width is needed for `bump` library to not fail for zero sized collision objects
+  self.w, self.h = math.max(1, self.width or self.w), math.max(1, self.height or self.h)
   self.colObj:update(posX, posY, self.w, self.h)
-
-  self.hovered = false
-  handleEvents(self)
 
   self.onUpdate(self, dt)
 
   if self.scrollNode then
     f.forEach(self.children, function(child)
+      local tetherPosition = require 'components.groups.tether-position'
       child:setParent(self.scrollNode)
+      tetherPosition(child, self.scrollNode)
     end)
   end
 
-  self.prevHovered = self.hovered
   self.prevColPosX = posX
   self.prevColPosY = posY
   self.prevX = self.x
@@ -300,7 +390,6 @@ end
 
 function Gui.final(self)
   self.onFinal(self)
-  InputContext.set('any')
 end
 
 local drawOrderByType = {

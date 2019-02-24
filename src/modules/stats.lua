@@ -49,6 +49,12 @@ local function eachCo(ctx)
   for k in pairs(ctx._stats) do
     coroutine.yield(k, ctx:get(k))
   end
+  -- also iterate over initial stats to show any missing stats
+  for k in pairs(ctx._initialStats) do
+    if (nil == ctx._stats[k]) then
+      coroutine.yield(k, ctx:get(k))
+    end
+  end
 end
 
 function statsMt.forEach(self)
@@ -58,13 +64,13 @@ function statsMt.forEach(self)
 end
 
 statsMt.__index = function(self, k)
-  return statsMt[k] or self._stats[k] or self._baseStats[k] or 0
+  return statsMt[k] or self._stats[k] or self._initialStats[k] or 0
 end
 
-function Stats.new(self, baseStats)
+function Stats.new(self, initialStats)
   return setmetatable({
     _stats = {},
-    _baseStats = baseStats or EMPTY,
+    _initialStats = initialStats or EMPTY,
     _functionalStats = {},
     hasChanges = false
   }, statsMt)

@@ -83,14 +83,20 @@ local function ActiveEquipmentHandler()
 
   local round = require 'utils.math'.round
   local function modifyAbility(instance, playerRef)
-    local v = instance
-    local dmgMultiplier = 1 + (playerRef.stats:get('attackPower') / 100)
-    local min = round(v.minDamage * dmgMultiplier)
-    local max = round(v.maxDamage * dmgMultiplier)
+    local v = setProp(instance)
+    local dmgMultiplier = 1 + (playerRef.stats:get('actionPower') / 100)
+    local min = (v.minDamage or 0) * dmgMultiplier
+    local max = (v.maxDamage or 0) * dmgMultiplier
 
     -- update instance properties
     v:set('minDamage', min)
       :set('maxDamage', max)
+    if v.lightningDamage then
+      v:set('lightningDamage', v.lightningDamage * dmgMultiplier)
+    end
+    if v.coldDamage then
+      v:set('coldDamage', v.coldDamage * dmgMultiplier)
+    end
 
     return v
   end
@@ -116,7 +122,7 @@ local function ActiveEquipmentHandler()
       -- time an attack takes to finish (triggers a global cooldown)
       local playerRef = Component.get('PLAYER')
       local enoughEnergy = (energyCost == nil) or
-        (energyCost <= playerRef.energy)
+        (energyCost <= playerRef.stats:get('energy'))
       if (not enoughEnergy) then
         msgBus.send(msgBus.PLAYER_ACTION_ERROR, 'not enough energy')
         return skill
@@ -126,30 +132,25 @@ local function ActiveEquipmentHandler()
         return skill
       end
 
-      local attackTime = itemSystem.getDefinition(activeItem).info.attackTime or 0
-      local actualAttackTime = propTypesCalculator.attackTimeReduction(attackTime, Component.get('PLAYER').stats:get('attackTimeReduction'))
+      local actionSpeed = itemSystem.getDefinition(activeItem).info.actionSpeed or 0
+      local actualAttackTime = propTypesCalculator.increasedActionSpeed(actionSpeed, Component.get('PLAYER').stats:get('increasedActionSpeed'))
 
       local mx, my = camera:getMousePosition()
       local playerX, playerY = self.player:getPosition()
       local abilityData = activateFn(activeItem)
-      local Position = require 'utils.position'
-      local dx, dy = Position.getDirection(playerX, playerY, mx, my)
       local abilityEntity = abilityData.blueprint.create(
-        extend(
-          abilityData.props, {
-            attackTime = actualAttackTime
-          , x = playerX
-          , y = playerY
-          , x2 = mx
-          , y2 = my
-          , dx = dx
-          , dy = dy
-          , source = activeItem.__id
-        })
-      )
-      local instance = modifyAbility(
-        abilityEntity,
-        playerRef
+        modifyAbility(
+          extend(
+            abilityData.props, {
+              actionSpeed = actualAttackTime
+            , x = playerX
+            , y = playerY
+            , x2 = mx
+            , y2 = my
+            , source = activeItem.__id
+          }),
+          playerRef
+        )
       )
       local baseCooldown = itemSystem.getDefinition(activeItem).info.cooldown or 0
       local actualCooldown = propTypesCalculator.cooldownReduction(baseCooldown, Component.get('PLAYER').stats:get('cooldownReduction'))
@@ -160,7 +161,7 @@ local function ActiveEquipmentHandler()
       msgBus.send(
         msgBus.PLAYER_WEAPON_ATTACK,
         {
-          attackTime = actualAttackTime,
+          actionSpeed = actualAttackTime,
           source = activeItem.__id,
           fromPos = Vec2(playerX, playerY),
           targetPos = Vec2(mx, my)
@@ -169,7 +170,7 @@ local function ActiveEquipmentHandler()
 
       local actualEnergyCost = energyCost -
         (energyCost * playerRef.stats:get('energyCostReduction'))
-      playerRef.energy = playerRef.energy - actualEnergyCost
+      playerRef.stats:add('energy', -actualEnergyCost)
       return skill
     end
   end
@@ -224,25 +225,16 @@ end
 local SkillBarPreDraw = Component.create({
   setSkill = function(self, skillId, drawFn)
     self.drawBySkillId[skillId] = drawFn
-
-    local oBlendMode = love.graphics.getBlendMode()
-    love.graphics.setBlendMode('alpha', 'premultiplied')
-    love.graphics.setCanvas(self.canvas)
-    love.graphics.clear()
-    for _,drawFn in pairs(self.drawBySkillId) do
-      drawFn()
-    end
-    love.graphics.setCanvas()
-    love.graphics.setBlendMode(oBlendMode)
   end,
   init = function(self)
     Component.addToGroup(self, 'hud')
     self.drawBySkillId = {}
-    self.canvas = love.graphics.newCanvas()
   end,
   draw = function(self)
     love.graphics.setColor(1,1,1)
-    love.graphics.draw(self.canvas)
+    for _,drawFn in pairs(self.drawBySkillId) do
+      drawFn()
+    end
   end,
   drawOrder = function()
     return 2
@@ -281,18 +273,6 @@ function ActiveSkillInfo.init(self)
       return value
     end)
   }
-
-  local itemRenderRef = ItemRender.create({
-    draw = function()
-      love.graphics.setColor(1,1,1)
-      skillHandlers[parent.skillId].draw(parent)
-    end,
-    drawOrder = function(self)
-      return self.group:drawOrder(self) + 3
-    end
-  })
-  Component.addToGroup(itemRenderRef:getId(), 'gameWorld', itemRenderRef)
-  self.canvas = love.graphics.newCanvas()
 end
 
 function ActiveSkillInfo.update(self, dt)
@@ -315,9 +295,10 @@ function ActiveSkillInfo.update(self, dt)
   self.activeItem = nextActiveItem
 end
 
+local Constants = require 'components.state.constants'
 local mouseBtnToString = {
-  [1] = 'lm',
-  [2] = 'rm'
+  [1] = Constants.glyphs.leftMouseBtn,
+  [2] = Constants.glyphs.rightMouseBtn
 }
 
 local keyboardBtnToString = {
@@ -343,12 +324,16 @@ function ActiveSkillInfo.draw(self)
   if self.activeItem then
     local boxSize = self.size
     local cooldown, skillCooldown = skillHandlers[self.skillId].getStats()
-    local progress = (skillCooldown - cooldown) / skillCooldown
-    local offsetY = progress * boxSize
-    love.graphics.setColor(1,1,1,0.2)
-    love.graphics.rectangle('fill', self.x, self.y + offsetY, boxSize, boxSize - offsetY)
 
+    local AnimationFactory = require 'components.animation-factory'
+    local pixel = AnimationFactory:newStaticSprite('pixel-white-1x1')
     if cooldown > 0 then
+      local progress = (skillCooldown - cooldown) / skillCooldown
+      local offsetY = progress * boxSize
+      love.graphics.setColor(1,1,1,0.2)
+      -- white box showing cooldown
+      pixel:draw(self.x, self.y + offsetY, 0, boxSize, boxSize - offsetY)
+
       local p = 5 -- padding
       self.hudTextLayer:add(
         string.format('%.1f', cooldown),
@@ -363,14 +348,15 @@ function ActiveSkillInfo.draw(self)
     if (attackRecoveryTime > 0) and (skill.type == 'EQUIPMENT') then
       love.graphics.setBlendMode('add')
       love.graphics.setColor(1,0,0,0.4)
-      love.graphics.rectangle('fill', self.x, self.y, boxSize, boxSize)
+      -- box overlay showing skill unable to be used
+      pixel:draw(self.x, self.y, 0, boxSize, boxSize)
       love.graphics.setBlendMode('alpha')
     end
   end
 end
 
 function ActiveSkillInfo.drawOrder()
-  return SkillBarPreDraw:drawOrder() + 1
+  return SkillBarPreDraw:drawOrder() + 0.1
 end
 
 function ActiveSkillInfo.final(self)

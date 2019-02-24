@@ -1,10 +1,29 @@
+local String = require 'utils.string'
+
 local M = {}
 
-function M.forEach(array, callback)
+
+local function getValueAtKeypath(val, keypath)
+	if keypath == '' then
+		return val
+	end
+
+	local result = val
+  local pathList = String.split(keypath, '%.')
+  for i=1, #pathList do
+    local key = pathList[i]
+    result = result[key]
+  end
+  return result
+end
+
+M.getValueAtKeypath = getValueAtKeypath
+
+function M.forEach(array, callback, ctx)
 	local len = array and #array or 0
 	for i=1, len do
 		local value = array[i]
-		callback(value, i)
+		callback(value, i, ctx)
 	end
 end
 
@@ -19,12 +38,18 @@ function M.map(array, mapFn)
 	return list
 end
 
-function M.find(tbl, predicate)
-	local found = nil
+function M.find(tbl, predicate, valueToMatch)
+	local isKeypath = type(predicate) == 'string'
+	local found = false
 	local i = 1
 	local length = #tbl
 	while (i <= length) and (not found) do
-		found = predicate(tbl[i], i)
+		local v = tbl[i]
+		if isKeypath then
+			found = getValueAtKeypath(v, predicate) == valueToMatch
+		else
+			found = predicate(v, i)
+		end
 		if not found then
 			i = i + 1
 		else
@@ -32,6 +57,17 @@ function M.find(tbl, predicate)
 		end
 	end
 	return nil
+end
+
+local function concatInsert(item, index, newList)
+	table.insert(newList, item)
+end
+
+function M.concat(table1, table2)
+	local newList = {}
+	M.forEach(table1, concatInsert, newList)
+	M.forEach(table2, concatInsert, newList)
+	return newList
 end
 
 function M.filter(t, filterFn)
@@ -57,10 +93,19 @@ function M.reduce(t, reducer, seed)
 	return result
 end
 
-function M.keys(_table)
+function M.keys(iterable)
 	local keys = {}
 	local i = 1
-	for k,_ in pairs(_table) do
+
+	if (type(iterable) == 'table') then
+		for k,_ in pairs(iterable) do
+			keys[i] = k
+			i = i + 1
+		end
+		return keys
+	end
+
+	for k,_ in iterable do
 		keys[i] = k
 		i = i + 1
 	end

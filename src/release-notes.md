@@ -1,73 +1,153 @@
-# Release notes
+# RELEASE NOTES
 
-## 3.0.1-alpha-hotfix
+## 6.2.0-pre-alpha
+
+We will be switching to a new game engine which means this is the last release running on the Love2d game engine. We are currently evaluating unity and maybe gamemaker or godot. We're not sure how long the switch will take, but expect at least a month before the next release. We'll still address any major game-breaking bugs that show up, but other than that, our focus now is on porting to a new engine. Thank you!
+
+SETTINGS/OPTIONS
+
+* Added display scale options
+
+GAMEPLAY
+
+* Redesigned maps to have more interesting layouts.
+* Added universe map so you can teleport between levels.
+* Added doors.
+* Tweaked ability graphics and added some particle effects for some.
+
+BALANCE
+
+* Many abilities have been adjusted to make things feel a bit more balanced. As always, we'll continue to adjust things as needed.
+* Many item modifier values have been reduced to make them less overpowered.
+* Frost orb now can only hit a maximum number of times per second. This prevents it from being too powerful on larger targets. To compensate for this change, the shards now pierce through targets.
+
+FIXES
+
+* Fixed issue with boss spawning ai outside of map.
+* Fixed issue with items dropping in unwalkable areas.
+* Fixed an issue with memory leaks.
+* Fixed issue with enemies sometimes spawning outside of the map.
+
+## 6.0.0-pre-alpha
+
+BALANCE
+
+* Reduce movement speed of mock shoes from **40** to **10**.
+
+## 5.2.0-pre-alpha
+
+NEW
+
+* Treasure Chest
+
+REWORK
+
+* **Attack time** has been changed to **action speed**. Action speed now represents number of actions per second, and bonus action speed now multiplies the number of actions per second.
+
+BALANCE
+
+* Reduced **cooldown reduction** and **action speed** item modifier ranges.
+
+FIXES
+
+* Map no longer has issues with random areas not rendering properly
+
+## 5.1.0-pre-alpha
+
+NEW
+
+* Energy leech passive ability
+* Life leech passive ability
+
+BALANCE
+
+* Increased values for action speed and bonus damage nodes
+
+FIXES
+
+* Items no longer drop in areas that prevent the player from picking them up
+* High action speed no longer causes the game to crash
+* Fixed issue with certain nodes in passive tree being unselectable when they shouldn't be
+
+## 5.0.0-pre-alpha
+
+NEW
+
+* Added several passive abilities
+* Added Chain Lightning ability
+* Redesigned move speed boost ability to now do a dash
+
+UPDATES
+
+* Added stairs/ramps for 2-d elevation changes
+* Redesigned skill tree to be more user-friendly and feel more sci-fi like
+
+FIXES
+
+* All Gui elements now properly stay within the screen's viewport
+* Improved enemy spawning to prevent them from spawning outside of the map
+
+## 4.0.0-pre-alpha
+
+NEW
+
+* Frost-orb ability
+* Cold damage type
+* Added support for **freeze** effect on enemies
+
+UPDATES
+
+* Changed resolution to be more zoomed in to give a more immersive feel to the game
+* Passive skill tree is now zoomable and has a more tree-like structure.
+
+## 3.0.1-pre-alpha-hotfix
 
 * Fixed issue with tree layout file not found.
 
----
+## 3.0.0-pre-alpha
 
-## 3.0.0-alpha
-
-New
+NEW
 
 * Passive skill tree. You can access this by pressing the **o** key or pressing the button in the HUD.
-* `Percent damage` property has been renamed to `Attack power`. This stat still works the same as before by increasing damage dealt by 1% per attack power.
+* `Percent damage` property has been renamed to `Attack power`. This stat still works the same as before by increasing damage dealt by 1% per action power.
 
-Updates
+UPDATES
 
 * Redesigned HUD to be more sci-fi style while also making it more readable regardless of the background colors
 * Redesigned stats system to be more reliable and flexible
 
----
+## 2.1.0-pre-alpha
 
-## 3.0.0-alpha
-
-New
-
-* Passive skill tree. You can access this by pressing the **o** key or pressing the button in the HUD.
-* `Percent damage` property has been renamed to `Attack power`. This stat still works the same as before by increasing damage dealt by 1% per attack power.
-
-Updates
-
-* Redesigned HUD to be more sci-fi style while also making it more readable regardless of the background colors
-* Redesigned stats system to be more reliable and flexible
-
-## 2.1.0-alpha
-
-New
+NEW
 
 * Added Swipe ability for fast close-range combat
 
-Updates
+UPDATES
 
 * Redesigned hammer animation
 * Redesigned player's drone character
 
----
-
-## 2.0.0-alpha
+## 2.0.0-pre-alpha
 
 **NOTE:** In order to support the latest changes, we've had to delete your existing saved games. We will continue to do this as necessary until the game has reached a more stable state.
 
 This release adds new major features and fixes a number of high priority bugs around player and ai movement.
 
-New
+NEW
 
-* New legendary items (drop rates are increased to 10% for testing purposes)
+* NEW legendary items (drop rates are increased to 10% for testing purposes)
 * Boss added (follow the yellow arrow on level 2)
 * Dungeons now have levels
 * Various HUD updates
 * Right-click to equip now automatically equips to the next available slot if available. Otherwise it equips to the first slot that matches that item type.
 
-### Bug Fixes
+FIXES
 
 * Player should no longer randomly teleport
 * Hugging the wall no longer prevents ai from engaging player
 * Ai no longer pushes the player through the wall
 
----
-
-## 1.2.0-alpha
+## 1.2.0-pre-alpha
 
 * Redesigned UI to be more user friendly and simpler
 * Fixed an issue where some windows 10 users were unable to run the game

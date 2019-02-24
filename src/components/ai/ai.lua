@@ -2,7 +2,6 @@ local Component = require 'modules.component'
 local groups = require 'components.groups'
 local animationFactory = require 'components.animation-factory'
 local msgBus = require 'components.msg-bus'
-local getAdjacentWalkablePosition = require 'modules.get-adjacent-open-position'
 local collisionObject = require 'modules.collision'
 local tween = require 'modules.tween'
 local socket = require 'socket'
@@ -24,10 +23,13 @@ local collisionGroups = require 'modules.collision-groups'
 local Console = require 'modules.console.console'
 local Object = require 'utils.object-utils'
 
+local Textures = require 'modules.textures'
+local iceTexture, defaultTexture = Textures.ice, Textures.default
+
 local max, random, abs, min = math.max, math.random, math.abs, math.min
 
-local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
-local shader = love.graphics.newShader(pixelOutlineShader)
+local Shaders = require 'modules.shaders'
+local shader = Shaders('pixel-outline.fsh')
 local atlasData = animationFactory.atlasData
 local shaderSpriteSize = {atlasData.meta.size.w, atlasData.meta.size.h}
 
@@ -38,18 +40,15 @@ local states = Enum({
   'FREE_MOVING'
 })
 
-local statDefaults = {
-  moveSpeed = 100,
-  sightRadius = 14,
-  freelyMove = 0
-}
 local statsMt = {
   __index = function(self, k)
-    return self.baseStats[k] or self.defaults[k]
+    return self.baseStats[k]
   end
 }
 
 local Ai = {
+  -- debug = true,
+
   class = collisionGroups.enemyAi,
 
   state = states.IDLE,
@@ -63,12 +62,9 @@ local Ai = {
 
   baseStats = function(self)
     return setmetatable({
-      baseStats = self,
-      defaults = statDefaults
+      baseStats = self
     }, statsMt)
   end,
-
-  experience = 1, -- amount of experience the ai grants when destroyed
 
   frameCount = 0,
   clock = 0, -- amount of time the ai has been alive
@@ -113,14 +109,10 @@ end
 local aiPathWithAstar = require'modules.flow-field.pathing-with-astar'
 
 function Ai:checkLineOfSight(grid, WALKABLE, targetX, targetY, debug)
-  if not targetX then
-    return false
-  end
-
   local gridX, gridY = self.pxToGridUnits(self.x, self.y, self.gridSize)
   local gridTargetX, gridTargetY = self.pxToGridUnits(targetX, targetY, self.gridSize)
   return LineOfSight(grid, WALKABLE, debug)(
-    gridX, gridY, gridTargetX, gridTargetY
+    self.x, self.y, targetX, targetY
   )
 end
 
@@ -143,7 +135,7 @@ local function handleAggro(self)
   if hasHits then
     self.isAggravated = true
     if (not previouslyAggravated) then
-      self.neighbors = getNeighbors(self, 10)
+      self.neighbors = getNeighbors(self, 16)
       spreadAggroToAllies(self:getId(), self.neighbors)
       -- put a short delay before setting `isAggravated` to false to prevent aggro spreading to cascade infinitely
       local tick = require 'utils.tick'
@@ -214,17 +206,17 @@ local function computeObstacleInfluence(self)
   local obstacles, len = self.collision.world:queryRect(
     self.x - self.w,
     self.y - self.h,
-    self.w * 3,
-    self.h * 3,
+    self.w * 2,
+    self.h * 2,
     obstacleFilter
   )
   local dist = 99999
   local no = nil
   for i=1, len do
     local o = obstacles[i]
-    local curDist = Math.dist(self.x, self.y, o.x + o.w/2, o.y + o.h/2) - (o.w * 0.5)
+    local curDist = Math.dist(self.x, self.y, o.x + o.w/2, o.y + o.h/2) - (o.w * 1)
     if curDist < dist then
-      no = o
+      nearestObstacle = o
       dist = curDist
     end
   end
@@ -234,7 +226,7 @@ local function computeObstacleInfluence(self)
 	-- We'll just use the single nearest obstacle.
 	-- A lot of the time this is enough but more complex environments might need influences from all nearby obstacles
   dist = max(0.01, dist - self.w*0.5)
-	local sepX, sepY = Math.normalizeVector(self.x - no.x, self.y - no.y)
+	local sepX, sepY = Math.normalizeVector(self.x - nearestObstacle.x, self.y - nearestObstacle.y)
 
 	return sepX/dist, sepY/dist
 end
@@ -302,15 +294,15 @@ local function setNextPosition(self, speed, radius)
   local nextY = self.y + self.vy * speed * targetDistDamping
 
   if not collidesWithPlayer(self, nextX, nextY) then
-    self.collision:update(nextX, nextY)
     self.x = nextX
     self.y = nextY
   end
 
   local Vec2 = require 'modules.brinevector'
   self.prevX, self.prevY = self.prevX or 0, self.prevY or 0
-  self.dv = self.dv or Vec2(0, 0)
-  self.dv.x, self.dv.y = self.x - self.prevX, self.y - self.prevY
+  self.dv = self.dv or 0
+  local dist = require 'utils.math'.dist
+  self.dv = self.dv + dist(self.x, self.y, self.prevX, self.prevY)
   self.prevX, self.prevY = self.x, self.y
 end
 
@@ -357,10 +349,22 @@ function Ai.update(self, dt)
   self.neighbors = nil
   handleAggro(self)
 
-  local isIdle = (self:getFiniteState() ~= states.MOVING) and (not self.isInViewOfPlayer) and (not self.isAggravated)
+  local isIdle = (self:getFiniteState() ~= states.MOVING) and
+    (not self.isInViewOfPlayer) and
+    (not self.isAggravated)
   self:setDrawDisabled(isIdle)
+  self.clock = self.clock + dt
+  self.frameCount = self.frameCount + 1
+
   if isIdle then
     return
+  end
+
+  local silenced = self.silenced or self.frozen
+  local moveSpeed = self.frozen and 0 or self:getActualSpeed(dt)
+
+  if self.onUpdateStart then
+    self.onUpdateStart(self, dt)
   end
 
   local shouldCheckStuckStatus = self:getFiniteState() == states.MOVING and self.dv and (not self.canSeeTarget)
@@ -371,12 +375,14 @@ function Ai.update(self, dt)
 
     self.checkCount = (self.checkCount or 0) + 1
     if self.checkCount >= 60 then
-      local isStuck = abs(self.dv.x) <= 6 and abs(self.dv.y) <= 6
+      local frameRate = 60
+      local expectedMoveRate = self.moveSpeed / frameRate
+      local isStuck = (self.dv / self.checkCount) < expectedMoveRate
       if isStuck then
         self.targetX = nil
       end
       self.checkCount = 0
-      self.dv = self.dv * 0
+      self.dv = 0
     end
   end
 
@@ -384,22 +390,12 @@ function Ai.update(self, dt)
   local playerX, playerY = playerRef:getPosition()
 
   local grid = self.grid
-  self.clock = self.clock + dt
-  self.frameCount = self.frameCount + 1
-
-  if self.onUpdateStart then
-    self.onUpdateStart(self, dt)
-  end
 
   local targetX, targetY
   local extraSightRadiusFromAggro = (self.isAggravated and 20 or 0) * self.gridSize
   local actualSightRadius = self.stats:get('sightRadius') * self.gridSize + extraSightRadiusFromAggro
 
-  if (self.isInViewOfPlayer or self.isAggravated) then
-    -- update ai facing direction
-    self.facingDirectionX = self.vx > 0 and 1 or -1
-    self.facingDirectionY = self.vy > 0 and 1 or -1
-
+  if ((self.isInViewOfPlayer or self.isAggravated)) then
     -- handle hit animation
     if self.hitAnimation then
       local done = self.hitAnimation()
@@ -414,10 +410,16 @@ function Ai.update(self, dt)
       actualSightRadius
     )
 
-    self.animation:update(dt)
+    if (not self.frozen) then
+      -- update ai facing direction
+      self.facingDirectionX = self.vx > 0 and 1 or -1
+      self.facingDirectionY = self.vy > 0 and 1 or -1
+      self.animation:update(dt)
+    end
   end
 
-  local canSeeTarget = self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY, self.losDebug)
+  local canSeeTarget = targetX and
+    self:checkLineOfSight(grid, self.WALKABLE, targetX, targetY)
   local gridDistFromPlayer = Math.dist(self.x, self.y, playerX, playerY) / self.gridSize
   local isInAggroRange = gridDistFromPlayer <= (actualSightRadius / self.gridSize)
   local distFromTarget = canSeeTarget and distOfLine(self.x, self.y, targetX, targetY) or 99999
@@ -426,7 +428,7 @@ function Ai.update(self, dt)
 
   self.canSeeTarget = canSeeTarget
 
-  if canSeeTarget and (isInAggroRange or self.isAggravated) then
+  if canSeeTarget and (isInAggroRange or self.isAggravated) and targetX then
     self.targetX, self.targetY = targetX, targetY
   end
 
@@ -435,7 +437,7 @@ function Ai.update(self, dt)
   local abilities = self.abilities
   for i=1, #abilities do
     local ability = abilities[i]
-    if (not self.silenced) then
+    if (not silenced) then
       local canUseAbility = (not self.isAbilityRecovering)
         and (self:getFiniteState() == states.MOVING)
       ability:update(self, dt)
@@ -460,15 +462,18 @@ function Ai.update(self, dt)
 
   local hasTarget = not not self.targetX
   if hasTarget and (self:getFiniteState() ~= states.ATTACKING) then
-    setNextPosition(self, self:getActualSpeed(dt), 40)
+    setNextPosition(self, moveSpeed, 40)
   end
 
   local nextX, nextY = self.x, self.y
 
+  -- update animation state
   if (self:getFiniteState() ~= states.ATTACKING) then
     local isMoving = originalX ~= nextX or originalY ~= nextY
     self.animation = isMoving and self.animations.moving or self.animations.idle
   end
+
+  self.collision:update(self.x, self.y)
 end
 
 local perf = require'utils.perf'
@@ -489,10 +494,10 @@ local function drawShadow(self, h, w, ox, oy)
     animationFactory.atlas,
     self.animation.sprite,
     self.x,
-    self.y + (h * self.scale / 1.5),
+    self.y + (h / 1.5),
     0,
-    self.scale*0.8 * self.facingDirectionX - heightScaleDiff,
-    -self.scale/2 + heightScaleDiff,
+    0.8 * self.facingDirectionX - heightScaleDiff,
+    -0.5 + heightScaleDiff,
     ox,
     oy
   )
@@ -520,13 +525,13 @@ function drawSprite(self, ox, oy)
   love.graphics.draw(
     atlas,
     self.animation.sprite,
-    round(self.x),
-    round(self.y - self.z),
+    (self.x),
+    (self.y - self.z),
     0,
-    self.scale * self.facingDirectionX,
-    self.scale,
-    round(ox),
-    round(oy)
+    self.facingDirectionX,
+    1,
+    (ox),
+    (oy)
   )
 end
 
@@ -568,6 +573,13 @@ end
 function Ai.draw(self)
   debugLineOfSight(self)
 
+  if self.debug and self.targetX then
+    love.graphics.setColor(0,1,0.2)
+    love.graphics.circle('line', self.targetX, self.targetY, 4)
+
+    self.losDebug()
+  end
+
   createLight(self)
 
   local oBlendMode = love.graphics.getBlendMode()
@@ -575,13 +587,15 @@ function Ai.draw(self)
   local w, h = self.animation:getSourceSize()
   drawShadow(self, h, w, ox, oy)
 
-  if (self.outlineColor) then
-    love.graphics.setShader(shader)
-    shader:send('sprite_size', shaderSpriteSize)
-    shader:send('outline_width', 1)
-    shader:send('outline_color', self.outlineColor)
-    shader:send('fill_color', self.fillColor)
-    shader:send('alpha', self.opacity)
+  love.graphics.setShader(shader)
+  shader:send('sprite_size', shaderSpriteSize)
+
+  if self.frozen then
+    shader:send('outline_color', {0.1,0.6,1,1})
+    shader:send('outline_width', 2)
+    shader:send('texture_scale', {5.5,1})
+    shader:send('include_corners', true)
+    shader:send('texture_image', iceTexture)
   end
 
   if self.hitAnimation and (not self.destroyedAnimation) then
@@ -589,28 +603,33 @@ function Ai.draw(self)
     love.graphics.setColor(3,3,3)
   end
 
-  local texture = animationFactory.atlas
-  local r,g,b,a = self.fillColor[1], self.fillColor[2], self.fillColor[3], self.fillColor[4]
-  love.graphics.setColor(r, g, b, a * self.opacity)
+  if self.frozen then
+    love.graphics.setBlendMode('add')
+    love.graphics.setColor(0.7,0.7,1,0.7)
+  else
+    local r,g,b,a = self.fillColor[1], self.fillColor[2], self.fillColor[3], self.fillColor[4]
+    love.graphics.setColor(r, g, b, a * self.opacity)
+  end
   drawSprite(self, ox, oy)
+
+  if (self.outlineColor) then
+    shader:send('outline_width', 1)
+    shader:send('outline_color', self.outlineColor)
+    drawSprite(self, ox, oy)
+  end
 
   local isShocked = self.stats:get('shocked') > 0
   if (isShocked) then
     drawShockEffect(self, ox, oy)
+    love.graphics.setShader(shader)
   end
 
   love.graphics.setBlendMode(oBlendMode)
-  love.graphics.setShader()
 
-  love.graphics.setColor(1,1,1, self.opacity)
+  shader:send('outline_width', 0)
+  shader:send('texture_image', defaultTexture)
+
   drawStatusEffects(self, statusIcons)
-end
-
-local function adjustInitialPositionIfNeeded(self)
-  -- check initial position and move if necessary
-  local actualX, actualY = self.collision:move(self.collision.x, self.collision.y, self.collisionFilter)
-  self.x = actualX
-  self.y = actualY
 end
 
 local function setupAbilities(self)
@@ -639,17 +658,6 @@ function Ai.init(self)
   self.neighborFilter = function(item)
     return collisionGroups.matches(item.group, self.class)
   end
-  self.collisionFilter = function(item, other)
-    local collisionFilters = collisionGroups.create(
-      'player',
-      self.class,
-      'obstacle'
-    )
-    if collisionGroups.matches(other.group, collisionFilters) then
-      return 'slide'
-    end
-    return false
-  end
 
   -- [[ BASE PROPERTIES ]]
   self.health = self.health or self.stats:get('maxHealth')
@@ -657,18 +665,16 @@ function Ai.init(self)
 
   if self.debug then
     self.losDebug = function(x, y, isBlocked)
-      local isNewFrame = self.lastFrameCount ~= self.frameCount
-      if isNewFrame then
-        self.losPoints = {}
-        self.lastFrameCount = self.frameCount
-      end
-      table.insert(
-        self.losPoints, {
-          x = x * self.gridSize,
-          y = y * self.gridSize,
-          isBlocked = isBlocked
-        }
+      local actualSightRadius = self.stats:get('sightRadius') * self.gridSize + 100
+      local targetX, targetY = self.findNearestTarget(
+        self.x,
+        self.y,
+        actualSightRadius
       )
+      if targetX then
+        love.graphics.setColor(0,1,0.5)
+        love.graphics.line(self.x, self.y, targetX, targetY)
+      end
     end
   end
 
@@ -686,13 +692,12 @@ function Ai.init(self)
       self.class,
       self.x,
       self.y,
-      self.w * self.scale,
-      self.h * self.scale,
-      ox * self.scale,
-      oy + self.z * self.scale
+      self.w,
+      self.h,
+      ox,
+      oy + self.z
     )
     :addToWorld(self.collisionWorld)
-  adjustInitialPositionIfNeeded(self)
 
   self.attackRange = self.attackRange * self.gridSize
   self.getPathWithAstar = Perf({

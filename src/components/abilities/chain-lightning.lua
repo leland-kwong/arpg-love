@@ -1,249 +1,161 @@
 local Component = require 'modules.component'
-local memoize = require 'utils.memoize'
 local config = require 'config.config'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
 local animationFactory = require 'components.animation-factory'
 local collisionWorlds = require 'components.collision-worlds'
 local collisionObject = require 'modules.collision'
-local LOS = memoize(require 'modules.line-of-sight')
+local CollisionGroups = require 'modules.collision-groups'
 local gameWorld = require 'components.game-world'
 local Position = require 'utils.position'
 local Color = require 'modules.color'
-local typeCheck = require 'utils.type-check'
-local random = math.random
-local tween = require 'modules.tween'
 local camera = require 'components.camera'
-local findNearestTarget = require 'modules.find-nearest-target'
+local Vec2 = require 'modules.brinevector'
+local memoize = require 'utils.memoize'
+local LOS = memoize(require 'modules.line-of-sight')
 
-local colMap = collisionWorlds.map
-
-local defaultFilters = {
-  obstacle = true,
+local targetsHitCache = {
+  new = function(self)
+    self.__index = self
+    return setmetatable({}, self)
+  end,
+  add = function(self, target)
+    self[target] = true
+  end,
+  has = function(self, target)
+    return self[target]
+  end
 }
 
-local ColFilter = memoize(function(groupToMatch)
-  return function (item, other)
-    if (other.group ~= groupToMatch) and not defaultFilters[other.group] then
-      return false
-    end
-    return 'touch'
-  end
-end)
+local function findNearestTarget(targetsHit, targetX, targetY)
+  local mainSceneRef = Component.get('MAIN_SCENE')
+  local mapGrid = mainSceneRef.mapGrid
+  local gridSize = config.gridSize
+  local Map = require 'modules.map-generator.index'
+  local losFn = LOS(mapGrid, Map.WALKABLE)
+  local getNearestTarget = require 'modules.find-nearest-target'
+  return getNearestTarget(collisionWorlds.map, targetX, targetY, 6 * gridSize, losFn, gridSize, function(target)
+    return not targetsHit:has(target)
+  end)
+end
 
 local ChainLightning = {
   group = groups.all,
-
-  -- [DEFAULTS]
-
-  -- start position
-  x = 0,
-  y = 0,
-  w = 16,
-  h = 16,
-
-  -- target position
-  x2 = 0,
-  y2 = 0,
-  minDamage = 1,
-  maxDamage = 2,
-  startOffset = 0,
-  scale = 1,
-  lifeTime = 5,
-  speed = 200,
-  cooldown = 0.3,
-  maxTargets = 3,
-  targetGroup = nil,
-  attackRange = 6 * config.gridSize,
-  color = {Color.rgba255(0, 246, 255, 1)}
+  range = 10,
+  maxBounces = 0,
+  _numBounces = 0,
+  hitBoxSize = config.gridSize,
 }
 
-local function checkMousePositionLineOfSight(self, mx, my, los)
-  local gx1, gy1 = Position.pixelsToGridUnits(self.x, self.y, config.gridSize)
-  local gx2, gy2 = Position.pixelsToGridUnits(mx, my, config.gridSize)
-  return los(gx1, gy1, gx2, gy2)
+function ChainLightning.init(self)
+  local Position = require 'utils.position'
+  local dx, dy = Position.getDirection(self.x, self.y, self.x2, self.y2)
+  local trueRange = self.range * config.gridSize
+  self.x2 = self.x + dx * trueRange
+  self.y2 = self.y + dy * trueRange
+
+  local hbSize = self.hitBoxSize
+  self.collision = self:addCollisionObject(
+    'projectile',
+    self.x, self.y,
+    hbSize, hbSize,
+    hbSize/2, hbSize/2
+  ):addToWorld(collisionWorlds.map)
+
+  self.targetsHit = self.targetsHit or targetsHitCache:new()
 end
 
-
--- check if mouse position is blocked by a wall or out of attack range
-local function checkMousePosition(self)
-  local mx, my = camera:getMousePosition()
-  local dx, dy = Position.getDirection(self.x, self.y, mx, my)
-  local actualMx, actualMy = self.x + dx * self.attackRange, self.y + dy * self.attackRange
-  mx, my = actualMx, actualMy
-  local items, wallCollisionCount = colMap:querySegment(self.x, self.y, mx, my, function(item)
-    -- obstacle filters
-    return defaultFilters[item.group]
-  end)
-  local isBlockedByWall = wallCollisionCount > 0
-  if isBlockedByWall then
-    local wallCollision = items[1]
-    mx = wallCollision.x
-    my = wallCollision.y
-  end
-  local isValidPosition = not isBlockedByWall
-  return mx, my, isValidPosition
+local function createEffect(start, target, hasHit)
+  local LightningEffect = require 'components.effects.lightning'
+  LightningEffect:add({
+    start = start,
+    target = target,
+    thickness = 1.4,
+    duration = 0.3,
+    targetPointRadius = hasHit and 12 or 4
+  })
 end
 
-local function getAllTargets(pointerX, pointerY, maxTargets, initialSeekRadius)
-  local targets = {}
-  local mainSceneRef = Component.get('MAIN_SCENE')
-  if not mainSceneRef then
-    return targets
-  end
-  local mapGrid = mainSceneRef.mapGrid
-  for i=1, maxTargets do
-    local maxSeekRadius = 6 * config.gridSize
-    local startX, startY
-    if i == 1 then
-      startX = pointerX
-      startY = pointerY
-      maxSeekRadius = initialSeekRadius or maxSeekRadius
-    else
-      local lastTarget = targets[#targets]
-      if (not lastTarget) then
-        return targets
+function ChainLightning.update(self, dt)
+  local actualX, actualY, cols, len = self.collision:move(
+    self.x2,
+    self.y2,
+    function(item, other)
+      if self.targetsHit:has(other.parent) then
+        return false
       end
-      startX = lastTarget.x
-      startY = lastTarget.y
+      if (CollisionGroups.matches(other.group, 'obstacle')) then
+        return 'slide'
+      end
+      if (CollisionGroups.matches(other.group, self.targetGroup)) then
+        return 'touch'
+      end
+      return false
     end
-    local Map = require 'modules.map-generator.index'
-    local losFn = LOS(mapGrid, Map.WALKABLE)
-    local target = findNearestTarget(colMap, targets, startX, startY, maxSeekRadius, losFn, config.gridSize)
-    table.insert(targets, target)
-  end
-  return targets
-end
-
-ChainLightning.init = function(self)
-  assert(
-    type(self.targetGroup) == 'string' and self.targetGroup ~= nil,
-    '[ChainLightning] `targetGroup` is required'
   )
+  local hitTriggered = len > 0
+  if hitTriggered then
+    local alreadyHit = false
+    local i=1
+    while (i <= len) and (not alreadyHit) do
+      local item = cols[i]
+      local parent = item.other.parent
+      alreadyHit = true
+      if parent then
+        local targetX, targetY = parent.x, parent.y
 
-  local pointerX, pointerY, isValidPosition = checkMousePosition(self)
-  local dx, dy = Position.getDirection(self.x, self.y, pointerX, pointerY)
-  self.x = self.x + self.startOffset * dx
-  self.y = self.y + self.startOffset * dy
+        local start = Vec2(self.x, self.y)
 
-  -- find 3 targets to hit ahead of time
-  self.targets = nil
-  if (isValidPosition) then
-    self.targets = getAllTargets(pointerX, pointerY, self.maxTargets, 0.5 * config.gridSize)
-  end
+        local isHittable = not CollisionGroups.matches(item.other.group, 'obstacle')
+        if isHittable then
+          local targetPos = Vec2(targetX, targetY)
+          createEffect(start, targetPos, true)
 
-  local foundTargets = self.targets and (#self.targets > 0)
-  -- set target to mouse position so we at least have an animation when no targets are found
-  if (not foundTargets) then
-    self.targets = getAllTargets(pointerX, pointerY, self.maxTargets)
-    local foundTargets = #self.targets > 0
-    if (not foundTargets) then
-      table.insert(self.targets, {x = pointerX, y = pointerY})
-    end
-  end
-
-  self.polyLine = {}
-  local targetIndex = 1
-  local animationDone = true
-  local tw = nil
-  local previousTarget = self
-  local endState = nil
-  local subject = nil
-  local currentTarget = nil
-  -- animate and deal damage once the animation ends for a given target
-  self.tween = function(dt)
-    local isFullAnimationComplete = targetIndex > #self.targets
-    if (not isFullAnimationComplete) then
-      if animationDone then
-        currentTarget = self.targets[targetIndex]
-        subject = {x = previousTarget.x, y = previousTarget.y}
-        endState = {x = currentTarget.x, y = currentTarget.y}
-        tw = tween.new(0.03, subject, endState)
-      end
-      animationDone = tw:update(dt)
-
-      local polyLineIndex = (targetIndex - 1) * 2
-      self.polyLine[polyLineIndex + 1] = previousTarget.x
-      self.polyLine[polyLineIndex + 2] = previousTarget.y
-      self.polyLine[polyLineIndex + 3] = subject.x
-      self.polyLine[polyLineIndex + 4] = subject.y
-
-      if animationDone then
-        if currentTarget.isComponent then
           msgBus.send(msgBus.CHARACTER_HIT, {
-            parent = currentTarget,
-            damage = math.random(self.minDamage, self.maxDamage),
+            parent = parent,
+            lightningDamage = math.random(self.lightningDamage.x, self.lightningDamage.y),
             source = self:getId()
           })
+          msgBus.send(msgBus.CHARACTER_HIT, {
+            parent = parent,
+            modifiers = {
+              shocked = 1
+            },
+            duration = 0.2,
+            source = 'chain-lightning'
+          })
+          self.targetsHit:add(parent)
+
+          local canBounce = self._numBounces < self.maxBounces
+          local t = canBounce and findNearestTarget(self.targetsHit, targetX, targetY)
+          if t then
+            self.initialProps.__index = self.initialProps
+            local props = setmetatable({
+              id = self:getId(),
+              x = targetX,
+              y = targetY,
+              x2 = t.x,
+              y2 = t.y,
+              _numBounces = self._numBounces + 1,
+              targetsHit = self.targetsHit,
+            }, self.initialProps)
+            ChainLightning.create(props)
+          end
+        elseif (self._numBounces == 0) then
+          local start, target = Vec2(self.x, self.y),
+            Vec2(actualX, actualY)
+          createEffect(start, target)
         end
-        previousTarget = currentTarget
-        targetIndex = targetIndex + 1
       end
-    else
-      self.done = true
+      i = i + 1
     end
+  -- show wiff if nothing hits
+  elseif (self._numBounces == 0) then
+    local start, target = Vec2(self.x, self.y),
+      Vec2(self.x2, self.y2)
+    createEffect(start, target)
   end
-end
-
-ChainLightning.update = function(self, dt)
-  self.lifeTime = self.lifeTime - dt
-
-  local isExpired = self.lifeTime <= 0
-  if isExpired or self.done then
-    self:delete()
-  end
-
-  self.tween(dt)
-end
-
-local function drawPoint(x, y, radius)
-  -- point outer
-  love.graphics.setColor(0.6,0.6,1,0.8)
-  love.graphics.circle(
-    'fill',
-    x,
-    y,
-    radius
-  )
-
-  -- point inner
-  love.graphics.setColor(1,1,1,1)
-  love.graphics.circle(
-    'fill',
-    x,
-    y,
-    radius * 0.65
-  )
-end
-
-local function drawTargets(self)
-  drawPoint(self.x, self.y, 8)
-  for i=1, #self.targets do
-    local t = self.targets[i]
-    drawPoint(t.x, t.y, 5)
-  end
-end
-
-ChainLightning.draw = function(self)
-  local originalLineWidth = love.graphics.getLineWidth()
-
-  -- chain outer
-  love.graphics.setColor(0.6,0.6,1,0.8)
-  love.graphics.setLineWidth(4)
-  love.graphics.line(self.polyLine)
-
-  -- chain inner
-  love.graphics.setColor(Color.WHITE)
-  love.graphics.setLineWidth(2)
-  love.graphics.line(self.polyLine)
-
-  drawTargets(self)
-  love.graphics.setLineWidth(originalLineWidth)
-end
-
-ChainLightning.drawOrder = function(self)
-  local order = self.group:drawOrder(self) + 100
-  return order
+  self:delete()
 end
 
 return Component.createFactory(ChainLightning)

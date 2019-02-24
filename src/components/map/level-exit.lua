@@ -17,6 +17,7 @@ local function collisionFilter(_, other)
 end
 
 return Component.createFactory({
+  locationName = '',
   class = 'environment',
   onEnter = function()
     print('exit entered')
@@ -45,13 +46,15 @@ return Component.createFactory({
   end,
   update = function(self)
     local minimapRef = Component.get('miniMap')
-    self.minimapRenderer = self.minimapRenderer or function()
-      love.graphics.setColor(minimapColor)
-      love.graphics.rectangle('fill', 0, 0, 2, 1)
-      -- entrance direction
-      love.graphics.circle('fill', 1, 3, 2)
+    if minimapRef then
+      self.minimapRenderer = self.minimapRenderer or function()
+        love.graphics.setColor(minimapColor)
+        love.graphics.rectangle('fill', 0, 0, 2, 1)
+        -- entrance direction
+        love.graphics.circle('fill', 1, 3, 2)
+      end
+      minimapRef:renderBlock(self.gridX, self.gridY, self.minimapRenderer)
     end
-    minimapRef:renderBlock(self.gridX, self.gridY, self.minimapRenderer)
 
     local calcDist = require 'utils.math'.dist
     local distFromPlayer = calcDist(
@@ -103,9 +106,22 @@ return Component.createFactory({
         self.collision.h
       )
     end
+
+    local GuiText = require 'components.gui.gui-text'
+    local text = self.locationName
+    Component.addToGroup(
+      Component.newId(),
+      'mapText',
+      {
+        text = text,
+        x = self.x + width/2,
+        y = self.y - oy - 9,
+        align = 'center'
+      }
+    )
   end,
   drawOrder = function(self)
-    return Component.groups.all:drawOrder(self) + 10
+    return Component.groups.all:drawOrder(self) + 5
   end,
   serialize = function(self)
     return self.initialProps

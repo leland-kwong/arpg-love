@@ -34,7 +34,7 @@ function ImpactDispersion.update(self)
 end
 
 function ImpactDispersion.draw(self)
-  local opacity = math.pow(math.max(0, (self.maxFrames - self.frameCount) / self.maxFrames), 0.75)
+  local opacity = math.min((self.maxFrames - self.frameCount) / self.maxFrames, 1)
   love.graphics.setColor(Color.multiplyAlpha(self.color, opacity))
   local imageWidth = impactAnimation:getSourceSize()
   local renderSize = self.displayRadius / imageWidth

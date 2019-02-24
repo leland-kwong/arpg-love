@@ -1,8 +1,9 @@
-local PopupTextController = require 'components.popup-text'
-local popupText = PopupTextController.create()
 local min, max, random = math.min, math.max, math.random
 local round = require 'utils.math'.round
 local Object = require 'utils.object-utils'
+local msgBus = require 'components.msg-bus'
+local rollFreezeChance = require 'modules.roll-freeze-chance'
+local uid = require 'utils.uid'
 
 local function rollCritChance(chance)
   if chance == 0 then
@@ -11,17 +12,45 @@ local function rollCritChance(chance)
   return random(1, 1/chance) == 1
 end
 
-local function adjustedDamageTaken(self, damage, lightningDamage, criticalChance, criticalMultiplier)
+local F = require 'utils.functional'
+local elementalCalculators = F.reduce({'lightning', 'cold', 'fire'}, function(calcFns, element)
+  local damageProp = element..'Damage'
+  local resistProp = element..'Resist'
+  calcFns[element] = function(stats, hit)
+    local damage = hit[damageProp]
+    local resistance = hit[resistProp]
+    return max(
+      0,
+      damage * (1 - stats:get(resistProp))
+    )
+  end
+  return calcFns
+end, {})
+
+local function adjustedDamageTaken(stats, hit)
+  local damage = hit.damage
+  local lightningDamage = hit.lightningDamage
+  local coldDamage = hit.coldDamage
+  local criticalChance = min(1, hit.criticalChance or 0)
+  local criticalMultiplier = hit.criticalMultiplier or 0
+
   local damageReductionPerArmor = 0.0001
-  local damageAfterFlatReduction = damage - self:get('physicalReduction')
-  local reducedDamageFromArmorResistance = (damageAfterFlatReduction * self:get('armor') * damageReductionPerArmor)
-  local lightningDamageAfterResistance = lightningDamage - (lightningDamage * self:get('lightningResist'))
+  local damageAfterFlatReduction = max(0, damage - stats:get('physicalResist'))
+  local reducedDamageFromArmorResistance = (damageAfterFlatReduction * stats:get('armor') * damageReductionPerArmor)
+  local actualLightningDamage, actualColdDamage =
+    elementalCalculators['lightning'](stats, hit),
+    elementalCalculators['cold'](stats, hit)
   local totalDamage = damageAfterFlatReduction
     - reducedDamageFromArmorResistance
-    + lightningDamageAfterResistance
+    + actualLightningDamage
+    + actualColdDamage
   local criticalMultiplier = rollCritChance(criticalChance) and criticalMultiplier or 0
   local totalDamageWithCrit = totalDamage + (totalDamage * criticalMultiplier)
-  return round(max(0, totalDamageWithCrit)), totalDamage, criticalMultiplier, lightningDamageAfterResistance
+  return round(max(0, totalDamageWithCrit)),
+    totalDamage,
+    criticalMultiplier,
+    actualLightningDamage,
+    actualColdDamage
 end
 
 -- modifiers modify properties such as `maxHealth`, `moveSpeed`, etc...
@@ -36,15 +65,6 @@ local function applyModifiers(self, newModifiers, multiplier)
   end
 end
 
-local function getDamageParams(self, hit)
-  return
-    self,
-    hit.damage or 0,
-    hit.lightningDamage or 0,
-    min(1, hit.criticalChance or 0), -- maximum value of 1
-    hit.criticalMultiplier or 0
-end
-
 --[[
   handles hits taken for a character, managing damage and property modifiers
 
@@ -56,16 +76,39 @@ local function hitManager(_, self, dt, onDamageTaken)
   for hitId,hit in pairs(self.hitData) do
     hitCount = hitCount + 1
 
+    local actualDamage,
+      actualNonCritDamage,
+      actualCritMultiplier,
+      actualLightningDamage,
+      actualColdDamage = adjustedDamageTaken(self.stats, hit)
+    -- send DAMAGE_RECEIVED event
+    if (actualDamage > 0) then
+      msgBus.send(msgBus.DAMAGE_RECEIVED, {
+        receiverId = self:getId(),
+        totalDamage = actualDamage
+      })
+
+      local coldHitPercentOfMaxLife = actualColdDamage/self.stats:get('maxHealth')
+      local shouldFreeze = rollFreezeChance(coldHitPercentOfMaxLife)
+      if shouldFreeze then
+        msgBus.send(msgBus.CHARACTER_HIT, {
+          parent = self,
+          source = uid(),
+          modifiers = {
+            freeze = 1
+          },
+          duration = 0.4
+        })
+      end
+    end
     if onDamageTaken then
-      local actualDamage, actualNonCritDamage, actualCritMultiplier, actualLightningDamage = adjustedDamageTaken(
-        getDamageParams(self.stats, hit)
-      )
       onDamageTaken(
         self,
         actualDamage,
         actualNonCritDamage,
         actualCritMultiplier,
-        actualLightningDamage
+        actualLightningDamage,
+        actualColdDamage
       )
     end
 

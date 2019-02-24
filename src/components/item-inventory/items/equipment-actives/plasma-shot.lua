@@ -15,8 +15,7 @@ return itemSystem.registerModule({
   name = 'plasma-shot',
   type = itemSystem.moduleTypes.EQUIPMENT_ACTIVE,
   active = function(item, props)
-    local source = love.audio.newSource('built/sounds/plasma-shot.wav', 'static')
-    love.audio.play(source)
+		Sound.playEffect('plasma-shot.wav')
     msgBus.send(msgBus.PLAYER_WEAPON_MUZZLE_FLASH, muzzleFlashMessage)
     return {
 			blueprint = require 'components.abilities.bullet',
@@ -24,11 +23,7 @@ return itemSystem.registerModule({
 				minDamage = props.minDamage,
 				maxDamage = props.maxDamage,
 				color = bulletColor,
-				targetGroup = collisionGroups.create(
-					collisionGroups.enemyAi,
-					collisionGroups.environment,
-					collisionGroups.obstacle
-				),
+				targetGroup = 'enemyAi environment obstacle',
 				startOffset = weaponLength,
 				speed = 400,
 			}
@@ -36,8 +31,20 @@ return itemSystem.registerModule({
 	end,
 	tooltip = function(item, props)
 		return {
-			template = 'Shoots a plasma shot dealing {minDamage} - {maxDamage} damage.',
-			data = props
+			template = 'Shoots a plasma shot dealing {damageRange} damage.',
+			data = {
+				damageRange = {
+					type = 'range',
+					from = {
+						prop = 'minDamage',
+						val = props.minDamage
+					},
+					to = {
+						prop = 'maxDamage',
+						val = props.maxDamage
+					},
+				}
+			}
 		}
 	end
 })

@@ -25,7 +25,7 @@ end
 -- deals damage with a chance to slow
 local FrostShot = {
   range = 10,
-  attackTime = 0.3,
+  actionSpeed = 0.3,
   cooldown = 1
 }
 
@@ -120,67 +120,74 @@ function FrostShot.update(self, state)
   end
 end
 
-return function()
-  local animations = {
-    attacking = animationFactory:new({
-      'eyeball/eyeball',
-      'eyeball/eyeball',
-    }):setDuration(FrostShot.attackTime),
-    idle = animationFactory:new({
-      'eyeball/eyeball'
-    }),
-    moving = animationFactory:new({
-      'eyeball/eyeball'
-    })
-  }
+local heightChange = 2
+local mt = {
+  type = 'ai-eyeball',
+  -- debug = true,
+  scale = 1,
+  z = 10,
+  heightOffset = math.random(0, heightChange),
+  heightChange = heightChange,
+  moveSpeed = 85,
+  maxHealth = 17,
+  experience = 1,
+  armor = 250,
+  attackRange = 10,
+  onUpdateStart = function(self, dt)
+    self.heightOffset = self.heightOffset + (dt * self.heightChange)
+    if self.heightOffset >= 4 then
+      self.heightChange = abs(self.heightChange) * -1
+    end
+    if self.heightOffset <= 0 then
+      self.heightChange = abs(self.heightChange)
+    end
+    -- update z position for levitation effect
+    self:setPosition(
+      self.x,
+      self.y,
+      self.z + dt * self.heightChange
+    )
+  end,
+  onDestroyStart = onDestroyStart
+}
 
-  local spriteWidth, spriteHeight = animations.idle:getSourceSize()
-
-  local heightChange = 4
-  local dataSheet = {
-    name = 'i-229',
-    properties = {
-      'ranged',
-      'slow on hit'
+local AiBlueprint = require 'components.ai.create-blueprint'
+return AiBlueprint({
+  baseProps = mt,
+  create = function()
+    local animations = {
+      attacking = animationFactory:new({
+        'eyeball/eyeball',
+        'eyeball/eyeball',
+      }):setDuration(FrostShot.actionSpeed),
+      idle = animationFactory:new({
+        'eyeball/eyeball'
+      }),
+      moving = animationFactory:new({
+        'eyeball/eyeball'
+      })
     }
-  }
-  return {
-    dataSheet = dataSheet,
-    -- debug = true,
-    scale = 1,
-    z = 10,
-    itemData = {
-      level = 1,
-      dropRate = 20
-    },
-    heightOffset = math.random(0, heightChange),
-    heightChange = heightChange,
-    moveSpeed = 85,
-    maxHealth = 17,
-    experience = 1,
-    w = spriteWidth,
-    h = spriteHeight,
-    animations = animations,
-    armor = 250,
-    abilities = {
-      FrostShot
-    },
-    attackRange = 10,
-    onUpdateStart = function(self, dt)
-      self.heightOffset = self.heightOffset + (dt * self.heightChange)
-      if self.heightOffset >= 4 then
-        self.heightChange = abs(self.heightChange) * -1
-      end
-      if self.heightOffset <= 0 then
-        self.heightChange = abs(self.heightChange)
-      end
-      -- update z position for levitation effect
-      self:setPosition(
-        self.x,
-        self.y,
-        self.z + dt * self.heightChange
-      )
-    end,
-    onDestroyStart = onDestroyStart
-  }
-end
+
+    local spriteWidth, spriteHeight = animations.idle:getSourceSize()
+
+    return {
+      itemData = {
+        level = 1,
+        dropRate = 20
+      },
+      dataSheet = {
+        name = 'i-229',
+        properties = {
+          'ranged',
+          'slow on hit'
+        }
+      },
+      w = spriteWidth,
+      h = spriteHeight,
+      animations = animations,
+      abilities = {
+        FrostShot
+      },
+    }
+  end
+})

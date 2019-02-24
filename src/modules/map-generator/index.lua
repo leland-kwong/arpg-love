@@ -7,7 +7,9 @@ local adjacentRoomsAlgorithm = require("modules.map-generator.adjacent-rooms.ind
 local fi = 1 -- first index of array
 
 local Map = {
-	WALKABLE = 1
+	WALKABLE = function(v)
+		return v and v.walkable
+	end
 }
 
 -- widens the map by increasing everything by a factor of the tunnel width

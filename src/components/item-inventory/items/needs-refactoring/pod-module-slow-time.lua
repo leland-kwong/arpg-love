@@ -40,7 +40,7 @@ local function aoeOnHit(self)
 end
 
 return itemSystem.registerType({
-	type = 'pod-module-slow-time',
+	type = 'action-module-slow-time',
 
 	create = function()
 		return {
@@ -57,7 +57,7 @@ return itemSystem.registerType({
 		title = 'x-1 time-bender',
 		rarity = config.rarity.EPIC,
 		baseDropChance = 1,
-		category = config.category.POD_MODULE,
+		category = config.category.ACTION_MODULE,
 
 		levelRequirement = 4,
 		energyCost = function(self)

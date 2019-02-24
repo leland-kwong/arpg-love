@@ -19,10 +19,6 @@ local ActionError = {
 function ActionError.init(self)
   self.listeners = {
     msgBus.on(msgBus.PLAYER_ACTION_ERROR, function(msgValue)
-      if self:isDeleted() then
-        return msgBus.CLEANUP
-      end
-
       local Sound = require 'components.sound'
       love.audio.play(Sound.ACTION_ERROR)
       local textColor = {1,1,0,1}

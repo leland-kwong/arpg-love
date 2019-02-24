@@ -15,20 +15,34 @@ local Camera = function()
     shakeOffset = {
       x = 0,
       y = 0
-    }
+    },
+
+    screenX = 0,
+    screenY = 0
   }
 
   local targetPosition = {x = 0, y = 0}
   local lerpDuration = 0
   local lerpTween = nil
 
+  local targetScale = {scale = 1}
+  local lerpScaleDuration = 0
+  local lerpScaleTween = nil
+
   local function lerp(dt, reset)
-    local dist = mathUtils.dist(camera.x, camera.y, targetPosition.x, targetPosition.y)
     local actualDuration = lerpDuration
     if reset then
       lerpTween = tween.new(actualDuration, camera, targetPosition, tween.easing.outExpo)
     end
     lerpTween:update(dt)
+  end
+
+  local function lerpScale(dt, reset)
+    local actualDuration = lerpScaleDuration
+    if reset then
+      lerpScaleTween = tween.new(actualDuration, camera, targetScale, tween.easing.outExpo)
+    end
+    lerpScaleTween:update(dt)
   end
 
   function camera:setSize(w, h)
@@ -51,8 +65,19 @@ local Camera = function()
     return self
   end
 
-  function camera:getPosition()
-    return self.x, self.y
+  function camera:getPosition(includeScale)
+    local divisor = includeScale and self.scale or 1
+    return self.x/divisor, self.y/divisor
+  end
+
+  function camera:setScreenPosition(x, y)
+    self.screenX, self.screenY = x, y
+    return self
+  end
+
+  function camera:getScreenPosition(includeScale)
+    local divisor = includeScale and self.scale or 1
+    return self.screenX/divisor, self.screenY/divisor
   end
 
   function camera:update(dt)
@@ -60,10 +85,16 @@ local Camera = function()
       local lastTargetPositionX = self.lastTargetPositionX
       local lastTargetPositionY = self.lastTargetPositionY
       local hasChangedPosition = (lastTargetPositionX ~= targetPosition.x) or
-        (lastTargetPositionY ~= targetPosition.y)
+      (lastTargetPositionY ~= targetPosition.y)
       self.lastTargetPositionX = targetPosition.x
       self.lastTargetPositionY = targetPosition.y
       lerp(dt, hasChangedPosition)
+    end
+
+    if (lerpScaleDuration > 0) then
+      local hasChangedScale = self.lastTargetScale ~= targetScale.scale
+      self.lastTargetScale = targetScale.scale
+      lerpScale(dt, hasChangedScale)
     end
 
     if self.shakeComponents then
@@ -93,8 +124,9 @@ local Camera = function()
       south / divisor
   end
 
-  function camera:getSize()
-    return self.w/self.scale, self.h/self.scale
+  function camera:getSize(includeScale)
+    local divisor = includeScale and self.scale or 1
+    return self.w/divisor, self.h/divisor
   end
 
   -- userful for debugging
@@ -102,8 +134,8 @@ local Camera = function()
     local w,e,n,s = self:getBounds()
     local width, height = self:getSize()
     local oLineWidth = love.graphics.getLineWidth()
-    love.graphics.setColor(1,1,1)
-    love.graphics.setLineWidth(2)
+    love.graphics.setColor(1,0,1,0.8)
+    love.graphics.setLineWidth(10)
     love.graphics.rectangle(
       'line',
       w,
@@ -114,14 +146,20 @@ local Camera = function()
     love.graphics.setLineWidth(oLineWidth)
   end
 
-  function camera:setScale(scale)
-    self.scale = scale
+  function camera:setScale(scale, _lerpDuration)
+    lerpScaleDuration = _lerpDuration or 0
+    if lerpScaleDuration > 0 then
+      targetScale.scale = scale
+    else
+      self.scale = scale
+    end
     return self
   end
 
   function camera:attach()
     love.graphics.push()
-    love.graphics.translate(self.w/2, self.h/2)
+    love.graphics.origin()
+    love.graphics.translate(self:getScreenPosition())
     love.graphics.scale(self.scale)
     local tx, ty = -self.x, -self.y
     if self.shakeComponents then
@@ -138,14 +176,16 @@ local Camera = function()
   end
 
   function camera:toWorldCoords(x, y)
-    local wx = ((x) - self.w/2) / self.scale
-    local wy = ((y) - self.h/2) / self.scale
+    local ox, oy = self:getScreenPosition()
+    local wx = ((x) - ox) / self.scale
+    local wy = ((y) - oy) / self.scale
     return wx + self.x, wy + self.y
   end
 
   function camera:toScreenCoords(x, y)
     local width, height = self:getSize()
-    return x - self.x + width/2, y - self.y + height/2
+    local ox, oy = self:getScreenPosition(true)
+    return x - self.x + ox, y - self.y + oy
   end
 
   function camera:getMousePosition()

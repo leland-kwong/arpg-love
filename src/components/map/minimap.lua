@@ -5,30 +5,29 @@ local mapBlueprint = require 'components.map.map-blueprint'
 local config = require 'config.config'
 local memoize = require 'utils.memoize'
 local Grid = require 'utils.grid'
+local Dungeon = require 'modules.dungeon'
 
 local COLOR_TILE_OUT_OF_VIEW = {1,1,1,0.3}
 local COLOR_TILE_IN_VIEW = {1,1,1,1}
-local COLOR_WALL = {1,1,1,0.7}
-local COLOR_GROUND = {0,0,0,0.2}
+local COLOR_WALL = {1,1,1,0.8}
+local COLOR_GROUND = {1,1,1,0.4}
 local floor = math.floor
 local minimapTileRenderers = {
-  -- obstacle
-  [0] = function(self, x, y)
+  unwalkable = function(self, x, y)
     love.graphics.setColor(COLOR_WALL)
     local rectSize = 1
-    local x = (self.x * rectSize) + x
-    local y = (self.y * rectSize) + y
+    local x = x
+    local y = y
     love.graphics.rectangle(
       'fill',
       x, y, rectSize, rectSize
     )
   end,
-  -- walkable
-  [1] = function(self, x, y)
+  walkable = function(self, x, y)
     love.graphics.setColor(COLOR_GROUND)
     local rectSize = 1
-    local x = (self.x * rectSize) + x
-    local y = (self.y * rectSize) + y
+    local x = x
+    local y = y
     love.graphics.rectangle(
       'fill',
       x, y, rectSize, rectSize
@@ -49,14 +48,45 @@ local function drawPlayerPosition(self, centerX, centerY)
 end
 
 local function drawDynamicBlocks(self)
-  for coordIndex, renderFn in pairs(self.blocks) do
-    local x, y = Grid.getCoordinateByIndex(self.grid, coordIndex)
-    love.graphics.push()
-    love.graphics.translate(self.x + x, self.y + y)
-    renderFn()
-    love.graphics.pop()
-  end
+  love.graphics.setCanvas(self.dynamicBlocksCanvas)
+  love.graphics.clear()
+  local oBlendMode = love.graphics.getBlendMode()
+  love.graphics.setBlendMode('alpha', 'premultiplied')
+
+  love.graphics.push()
+
+    for coordIndex, renderFn in pairs(self.blocks) do
+      local x, y = Grid.getCoordinateByIndex(self.grid, coordIndex)
+      love.graphics.origin()
+      love.graphics.translate(x, y)
+      love.graphics.scale(1)
+      renderFn()
+    end
+
+    for _,c in pairs(Component.groups.questObjects.getAll()) do
+      local x,y = c.x/config.gridSize,
+        c.y/config.gridSize
+      love.graphics.origin()
+      love.graphics.translate(x, y)
+      love.graphics.scale(1)
+
+      local AnimationFactory = require 'components.animation-factory'
+      local Color = require 'modules.color'
+      local questGraphic = AnimationFactory:newStaticSprite('gui-quest-point')
+      love.graphics.setColor(Color.PALE_YELLOW)
+      questGraphic:draw(0, 0)
+    end
+
+  love.graphics.pop()
+
   self.blocks = {}
+
+  love.graphics.setCanvas()
+  love.graphics.push()
+  love.graphics.setBlendMode(oBlendMode)
+  love.graphics.setColor(1,1,1)
+  love.graphics.draw(self.dynamicBlocksCanvas)
+  love.graphics.pop()
 end
 
 -- minimap
@@ -69,21 +99,29 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
   w = 100,
   h = 100,
 
+  isEmptyTile = Dungeon.isEmptyTile,
+
+  getRectangle = function(self)
+    return self.x, self.y, self.w, self.h
+  end,
+
   init = function(self)
     Component.addToGroup(self, 'mapStateSerializers')
 
     -- 1-d array of visited indices
     self.visitedIndices = self.visitedIndices or {}
-    self.playerVisitedIndices = {}
 
-    self.canvas = love.graphics.newCanvas()
+    self.canvas = love.graphics.newCanvas(4096, 4096)
+    self.dynamicBlocksCanvas = love.graphics.newCanvas(4096, 4096)
+    self.cleanup = function()
+      self.canvas:release()
+      self.dynamicBlocksCanvas:release()
+    end
+
+    local x,y,w,h = self:getRectangle()
     self.stencil = function()
       love.graphics.rectangle(
-        'fill',
-        self.x,
-        self.y,
-        self.w,
-        self.h
+        'fill', x, y, w, h
       )
     end
     self.blocks = {}
@@ -93,7 +131,7 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
     for index in pairs(self.visitedIndices) do
       local x, y = Grid.getCoordinateByIndex(self.grid, index)
       local value = Grid.get(self.grid, x, y)
-      local tileRenderer = minimapTileRenderers[value]
+      local tileRenderer = value and minimapTileRenderers[value.walkable and 'walkable' or 'unwalkable']
       if tileRenderer then
         tileRenderer(self, x, y)
       end
@@ -102,14 +140,28 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
   end,
 
   renderStart = function(self)
+    local x,y,w,h = self:getRectangle()
+    -- backround
+    love.graphics.setColor(0,0,0,0.2)
+    love.graphics.rectangle('fill', x, y, w, h)
+    -- border
+    love.graphics.setLineWidth(0.5)
+    love.graphics.setColor(1,1,1,0.5)
+    love.graphics.rectangle('line', x, y, w, h)
+
     love.graphics.push()
     love.graphics.origin()
     love.graphics.setCanvas(self.canvas)
-    self:setRenderDisabled(self.isVisitedGridPosition)
+
+    --[[
+      NOTE: disabled for now since there is an issue upon start of game
+      where the minimap at the player's start position does not render immediately
+    ]]
+    -- self:setRenderDisabled(self.isVisitedGridPosition)
   end,
 
   render = function(self, value, gridX, gridY)
-    local tileRenderer = minimapTileRenderers[value]
+    local tileRenderer = value and minimapTileRenderers[value.walkable and 'walkable' or 'unwalkable']
     if tileRenderer then
       local index = Grid.getIndexByCoordinate(self.grid, gridX, gridY)
       if self.visitedIndices[index] then
@@ -133,7 +185,7 @@ local MiniMap = objectUtils.assign({}, mapBlueprint, {
     local cameraX, cameraY  = self.camera:getPosition()
     local Position = require 'utils.position'
     local tx, ty = centerX - cameraX/self.gridSize, centerY - cameraY/self.gridSize
-    love.graphics.translate(tx, ty)
+    love.graphics.translate(self.x + tx, self.y + ty)
     love.graphics.setColor(1,1,1,1)
     love.graphics.setBlendMode('alpha')
     love.graphics.draw(self.canvas)
@@ -167,6 +219,10 @@ function MiniMap.serialize(self)
   return objectUtils.immutableApply(self.initialProps, {
     visitedIndices = self.visitedIndices
   })
+end
+
+function MiniMap.final(self)
+  self:cleanup()
 end
 
 return Component.createFactory(MiniMap)

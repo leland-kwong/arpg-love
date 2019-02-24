@@ -11,18 +11,6 @@ local state = {
   showConsole = true
 }
 
-local font = love.graphics.newFont(
-  'built/fonts/StarPerv.ttf',
-  16
-)
-font:setLineHeight(1)
-
-local guiText = GuiText.create({
-  font = font,
-  group = groups.system,
-  outline = false
-})
-
 local function toggleCollisionDebug()
   msgBus.send(msgBus.SET_CONFIG, {
     collisionDebug = (not config.collisionDebug)
@@ -37,7 +25,7 @@ end
 
 local keyActions = setmetatable({
   o = toggleCollisionDebug,
-  c = toggleConsole,
+  c = toggleConsole
 }, {
   __index = function()
     local noop = require 'utils.noop'
@@ -46,15 +34,12 @@ local keyActions = setmetatable({
 })
 
 msgBus.on(msgBus.KEY_DOWN, function(v)
-  if v.hasModifier and (not v.isRepeated) then
+  local inputState = require 'main.inputs.keyboard-manager'.state
+  local keysPressed = inputState.keyboard.keysPressed
+  if (not v.isRepeated) and keysPressed.lctrl and keysPressed.lshift then
     keyActions[v.key]()
   end
   return v
-end)
-
-msgBus.IS_CONSOLE_ENABLED = 'IS_CONSOLE_ENABLED'
-msgBus.on(msgBus.IS_CONSOLE_ENABLED, function()
-  return config.enableConsole
 end)
 
 local Console = {
@@ -133,6 +118,8 @@ function Console.update(self)
   s.currentMemoryUsed = collectgarbage('count')
   s.frameCount = s.frameCount + 1
   s.accumulatedMemoryUsed = s.accumulatedMemoryUsed + s.currentMemoryUsed
+
+  self.previousInputContext = InputContext.get()
 end
 
 local function calcMessageBusHandlers()
@@ -147,14 +134,12 @@ end
 local maxGraphicStats = {}
 
 function Console.draw(self)
+  local Font = require 'components.font'
+  local font = Font.debug.font
   love.graphics.setFont(font)
   local charHeight = font:getLineHeight() * font:getHeight()
   local gfx = love.graphics
   local s = self.stats
-
-  gfx.push()
-  gfx.setCanvas(canvas)
-  gfx.clear(0,0,0,0)
 
   gfx.setColor(Color.MED_GRAY)
   gfx.print('COMPONENTS', edgeOffset, edgeOffset)
@@ -182,7 +167,12 @@ function Console.draw(self)
   local nextStats = {}
   local gfxStats = gfx.getStats()
   for k,v in pairs(gfxStats) do
-    nextStats[k] = v .. ' '.. (maxGraphicStats[k] or 0)
+    local units = ''
+    if k == 'texturememory' then
+      units = 'M'
+      v = tonumber(string.format('%0.1f', v/1024/1024))
+    end
+    nextStats[k] = v .. units..' '.. (maxGraphicStats[k] or 0)..units
     maxGraphicStats[k] = math.max(maxGraphicStats[k] or 0, v)
   end
   printTable(
@@ -193,18 +183,18 @@ function Console.draw(self)
   )
 
   gfx.setColor(Color.MED_GRAY)
-  gfx.print('SYSTEM', edgeOffset, startY + 11 * charHeight)
+  gfx.print('SYSTEM', edgeOffset, startY + 10 * charHeight)
   gfx.setColor(Color.WHITE)
   printTable({
-      memory = string.format('%0.2f', s.currentMemoryUsed / 1024),
-      memoryAvg = string.format('%0.2f', s.accumulatedMemoryUsed / s.frameCount / 1024),
-      delta = love.timer.getAverageDelta(),
+      memory = string.format('%0.2fM', s.currentMemoryUsed / 1024),
+      memoryAvg = string.format('%0.2fM', s.accumulatedMemoryUsed / s.frameCount / 1024),
+      delta = string.format('%0.4f', love.timer.getAverageDelta()),
       fps = love.timer.getFPS(),
       eventHandlers = calcMessageBusHandlers()
     },
     charHeight,
     edgeOffset,
-    startY + 12 * charHeight
+    startY + 11 * charHeight
   )
 
   gfx.printf(
@@ -216,10 +206,10 @@ function Console.draw(self)
       Color.WHITE,
       '\ninput context: ',
       Color.YELLOW,
-      InputContext.get()
+      self.previousInputContext
     },
     edgeOffset,
-    700,
+    355,
     400,
     'left'
   )
@@ -227,7 +217,7 @@ function Console.draw(self)
 
   local logEntries = logger:get()
   gfx.setColor(Color.MED_GRAY)
-  local loggerYPosition = 750
+  local loggerYPosition = 420
   local logSectionTitle = 'LOG'
   gfx.print(logSectionTitle, edgeOffset, loggerYPosition)
   gfx.setColor(Color.WHITE)
@@ -237,14 +227,7 @@ function Console.draw(self)
     table.insert(output, Color.WHITE)
     table.insert(output, entry..'\n')
   end
-  guiText:addf(output, 400, 'left', edgeOffset, loggerYPosition + guiText.getTextSize(logSectionTitle, guiText.font))
-
-  gfx.setCanvas()
-  gfx.setBlendMode('alpha', 'premultiplied')
-  gfx.scale(config.scale / 2)
-  gfx.draw(canvas)
-  gfx.pop()
-  gfx.setBlendMode('alpha')
+  gfx.printf(output, 0, loggerYPosition + GuiText.getTextSize(logSectionTitle, font), 400, 'left')
 end
 
 function Console.drawOrder(self)

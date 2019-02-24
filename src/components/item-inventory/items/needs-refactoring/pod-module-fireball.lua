@@ -45,7 +45,7 @@ local muzzleFlashMessage = {
 }
 
 return itemSystem.registerType({
-	type = 'pod-module-fireball',
+	type = 'action-module-fireball',
 
 	create = function()
 		return {
@@ -69,10 +69,10 @@ return itemSystem.registerType({
 		title = 'tz-819 mortar',
 		rarity = itemConfig.rarity.LEGENDARY,
 		baseDropChance = 1,
-		category = itemConfig.category.POD_MODULE,
+		category = itemConfig.category.ACTION_MODULE,
 
 		levelRequirement = 3,
-		attackTime = 0.4,
+		actionSpeed = 0.4,
 		energyCost = function(self)
 			return 2
 		end,
@@ -188,7 +188,7 @@ return itemSystem.registerType({
 							width * 2,
 							height * 2,
 							function(item)
-								if collisionGroups.matches(item.group, collisionGroups.create(collisionGroups.enemyAi, collisionGroups.environment)) then
+								if collisionGroups.matches(item.group, 'enemyAi environment') then
 									msgBus.send(msgBus.CHARACTER_HIT, {
 										parent = item.parent,
 										damage = math.random(

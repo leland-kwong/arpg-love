@@ -6,7 +6,29 @@ local f = require 'utils.functional'
 local collisionWorlds = require 'components.collision-worlds'
 
 local Dungeon = {
-  generated = {}
+  generated = {},
+  isEmptyTile = require 'modules.dungeon.modules.is-empty-tile'
+}
+
+local function readTiledFileProperty(path)
+  local absolutePath = string.gsub()
+end
+
+local WALL_TILE = {
+  crossSection = 'floor-cross-section-0',
+  walkable = false
+}
+
+local cellTranslationsByLayer = {
+  walls = {
+    [12] = WALL_TILE
+  },
+  ground = {
+    [1] = {
+      crossSection = 'floor-cross-section-0',
+      walkable = true
+    }
+  }
 }
 
 local function findLayerByName(layers, name)
@@ -16,6 +38,14 @@ local function findLayerByName(layers, name)
     end
   end
 end
+
+local function toWorldCoords(obj, origin)
+  local config = require 'config.config'
+  return (origin.x * config.gridSize) + obj.x,
+    (origin.y * config.gridSize) + obj.y
+end
+
+local aiFindTarget = require 'components.ai.find-target'.player
 
 local objectParsersByType = {
   ['unique-enemies'] = {
@@ -29,16 +59,17 @@ local objectParsersByType = {
         grid = grid,
         WALKABLE = Map.WALKABLE,
         rarity = function(ai)
+          local O = require 'utils.object-utils'
+          O.assign(ai, obj.properties)
+
           local Color = require 'modules.color'
           local itemConfig = require 'components.item-inventory.items.config'
           return ai:set('rarityColor', Color.RARITY_LEGENDARY)
             :set('armor', ai.armor * 1.2)
             :set('moveSpeed', ai.moveSpeed * 1.5)
-            :set('experience', 10)
+            :set('experience', ai.experience * 3)
         end,
-        target = function()
-          return Component.get('PLAYER')
-        end,
+        target = aiFindTarget,
         x = origin.x + (obj.x / config.gridSize),
         y = origin.y + (obj.y / config.gridSize),
         types = {
@@ -48,7 +79,7 @@ local objectParsersByType = {
     end,
   },
   ['spawn-points'] = {
-    aiGroup = function(obj, grid, origin, blockData)
+    aiGroup = function(obj, grid, origin)
       local config = require 'config.config'
       local Map = require 'modules.map-generator.index'
       local SpawnerAi = require 'components.spawn.spawn-ai'
@@ -72,9 +103,14 @@ local objectParsersByType = {
       SpawnerAi({
         grid = grid,
         WALKABLE = Map.WALKABLE,
-        target = function()
-          return Component.get('PLAYER')
+        rarity = function(ai)
+          local O = require 'utils.object-utils'
+          O.assign(ai, obj.properties)
+
+          local aiRarity = require 'components.ai.rarity'
+          return aiRarity(ai)
         end,
+        target = aiFindTarget,
         x = origin.x + (obj.x / config.gridSize),
         y = origin.y + (obj.y / config.gridSize),
         types = spawnTypes
@@ -82,11 +118,64 @@ local objectParsersByType = {
     end,
   },
   ['environment'] = {
-    environmentDoor = function(obj, grid, origin, blockData)
+    triggerZone = function(obj, grid, origin)
+      local Component = require 'modules.component'
+      local x, y = toWorldCoords(obj, origin)
+      Component.create({
+        class = 'environment',
+        x = x,
+        y = y,
+        w = obj.width,
+        h = obj.height,
+        name = obj.name,
+        init = function(self)
+          Component.addToGroup(self, 'all')
+          Component.addToGroup(self, 'autoVisibility')
+          Component.addToGroup(self, 'gameWorld')
+          self.colObj = self:addCollisionObject('hotSpot', self.x, self.y, self.w, self.h)
+            :addToWorld(collisionWorlds.map)
+        end,
+        update = function(self)
+          if (not self.isInViewOfPlayer) then
+            return
+          end
+          local len = select(4, self.colObj:check(self.x, self.y, function(item, other)
+            local collisionGroups = require 'modules.collision-groups'
+            return collisionGroups.matches(other.group, 'player') and 'slide' or false
+          end))
+          if len > 0 then
+            Component.addToGroup(self, 'triggeredZones')
+          else
+            Component.removeFromGroup(self, 'triggeredZones')
+          end
+        end,
+        serialize = function(self)
+          return self.initialProps
+        end
+      })
+    end,
+
+    treasureChest = function(obj, grid, origin)
+      local TreasureChest = require 'components.treasure-chest'
+      local config = require 'config.config'
+      local filePropLoader = require 'modules.dungeon.modules.file-property-loader'
+      local defaultTreasure = require 'modules.dungeon.treasure-chest-definitions.default'
+      local x, y = toWorldCoords(obj, origin)
+      TreasureChest.create({
+        lootData = filePropLoader(obj.properties.props) or defaultTreasure,
+        x = x,
+        y = y
+      })
+
+    end,
+    environmentDoor = function(obj, grid, origin)
       local config = require 'config.config'
       local Component = require 'modules.component'
       local AnimationFactory = require 'components.animation-factory'
       local doorGridWidth, doorGridHeight = obj.width / config.gridSize, obj.height / config.gridSize
+
+      local blockOpeningParser = require 'modules.dungeon.layout-object-parsers.block-opening'
+      blockOpeningParser(obj, grid, origin, blockData, cellTranslationsByLayer)
 
       for x=1, doorGridWidth do
         for y=1, doorGridHeight do
@@ -121,7 +210,9 @@ local objectParsersByType = {
               local Map = require 'modules.map-generator.index'
               local mapGrid = Component.get('MAIN_SCENE').mapGrid
               local Grid = require 'utils.grid'
-              local isTraversable = Grid.get(mapGrid, self.x / config.gridSize, self.y / config.gridSize) == Map.WALKABLE
+              local isTraversable = Map.WALKABLE(
+                Grid.get(mapGrid, self.x / config.gridSize, self.y / config.gridSize)
+              )
               self:setDrawDisabled(not isTraversable)
             end,
             draw = function(self)
@@ -150,38 +241,163 @@ local objectParsersByType = {
         end
       end
     end,
-    levelExit = function(obj, grid, origin, blockData)
+    ramp = function(obj, grid, origin, blockData)
+      local Grid = require 'utils.grid'
+      local Math = require 'utils.math'
+      local config = require 'config.config'
+      local Position = require 'utils.position'
+      local gridX, gridY = Position.pixelsToGridUnits(obj.x, obj.y, config.gridSize)
+      local bLine = require 'utils.bresenham-line'
+      local coords = obj.polygon
+      local x1, y1 = Position.pixelsToGridUnits(coords[1].x, coords[1].y, config.gridSize)
+      local x2, y2 = Position.pixelsToGridUnits(coords[2].x, coords[2].y, config.gridSize)
+      local gridHeight, gridWidth = math.abs(coords[1].y - coords[4].y) / config.gridSize
+      local slope = coords[2].y/coords[2].x
+      local slope2 = (coords[3].y - coords[4].y) / (coords[3].x - coords[4].x)
+
+      -- make sure shape is parallelogram
+      assert(slope == slope2, 'ramp shape must be a parallelogram')
+      assert(coords[1].x == 0 and coords[1].x == 0, 'origin point coordinates must be [0,0]')
+
+      -- setup subGrid for bitmask tiling
+      local subGrid = {}
+
+      for row=1, gridHeight do
+        bLine(
+          x1, y1,
+          x2, y2,
+          function(_, x, y, length)
+            local rowOffset = row - 1
+
+            local offsetY = Math.round(-slope * (length - 1) * config.gridSize)
+            local cellData = {
+              type = 'RAMP',
+              slope = slope,
+              x = obj.x + ((origin.x + x) * config.gridSize),
+              y = obj.y + ((origin.y + rowOffset) * config.gridSize) - offsetY,
+              walkable = true
+            }
+
+            local actualX, actualY = (origin.x + x) * config.gridSize + obj.x,
+              (origin.y + y + rowOffset) * config.gridSize + obj.y
+            local gridX, gridY = actualX/config.gridSize, actualY/config.gridSize
+            Grid.set(grid, gridX, gridY, cellData)
+            Grid.set(subGrid, gridX, row, cellData)
+          end
+        )
+      end
+
+      local function isRampTile(v)
+        return v and v.type == 'RAMP'
+      end
+
+      local function setupStairSprites(cellData, x, y)
+        local bitmaskTileValue = require 'utils.tilemap-bitmask'
+        local tileValue = bitmaskTileValue(subGrid, x, y, isRampTile)
+        cellData.animations = {
+          'map-ramp-'..tileValue
+        }
+
+        local shouldShowShadow = slope ~= 0
+        if shouldShowShadow then
+          local shadowWidth = 2
+          local shadowOffsetX = config.gridSize - ((slope < 0) and (shadowWidth + config.gridSize) or 0)
+          local shadowOffsetY = (slope > 0) and 3 or Math.round(-slope * config.gridSize)
+          cellData.shadow = {
+            sprite = 'pixel-white-1x1',
+            x = cellData.x + shadowOffsetX,
+            y = cellData.y + shadowOffsetY,
+            sx = shadowWidth,
+            sy = 16,
+            color = {0,0,0,0.25}
+          }
+        end
+      end
+
+      Grid.forEach(subGrid, setupStairSprites)
+    end,
+    blockOpening = function(obj, grid, origin)
+      local blockOpeningParser = require 'modules.dungeon.layout-object-parsers.block-opening'
+      blockOpeningParser(obj, grid, origin, cellTranslationsByLayer)
+    end,
+    door = function(obj, grid, origin)
+      local Component = require 'modules.component'
+      local Door = require 'components.door'
+      local isSideView = obj.rotation == 90
+      local config = require 'config.config'
+      if isSideView then
+        local d = Door.SideFacing.create({
+          x = obj.x - config.gridSize,
+          y = obj.y
+        })
+        Component.addToGroup(d, 'gameWorld')
+      else
+        local d = Door.FrontFacing.create({
+          x = obj.x,
+          y = obj.y
+        })
+        Component.addToGroup(d, 'gameWorld')
+      end
+    end
+  },
+  ['objects'] = {
+    npc = function(obj, grid, origin)
+
+    end
+  },
+  ['transition-points'] = {
+    levelExit = function(obj, grid, origin, dungeonOptions, blockFileData)
+      local Graph = require 'utils.graph'
+      local universeSystem = Graph:getSystem('universe')
+
+      local setupTransitionPoints = require 'components.hud.universe-map.setup-transition-points'
+      local nodeIter = universeSystem:getAllNodes()
+      local universeNodeId = nil
+      for id,nodeRef in nodeIter do
+        if nodeRef.level == dungeonOptions.layoutType then
+          universeNodeId = id
+        end
+      end
+      local transitionPoints = setupTransitionPoints(
+        blockFileData,
+        universeNodeId,
+        universeSystem:getNodeLinks(universeNodeId),
+        1,
+        20
+      )
+
       local msgBus = require 'components.msg-bus'
       local LevelExit = require 'components.map.level-exit'
       local config = require 'config.config'
       local Component = require 'modules.component'
       local uid = require 'utils.uid'
-      local exitId = 'exit-'..uid()
-      local mapId = Dungeon:new(blockData.nextLevel, {
-        from = {
-          mapId = Component.get('MAIN_SCENE').mapId,
-          exitId = exitId
-        },
-        nextLevel = blockData.nextLevel
-      })
+      local exitDefinition = transitionPoints[obj.id]
+      local exitId = exitDefinition.transitionLinkId
+      local toLevel = exitDefinition.layoutType
+      local x, y = toWorldCoords(obj, origin)
       LevelExit.create({
         id = exitId,
-        x = origin.x * config.gridSize + obj.x,
-        y = origin.y * config.gridSize + obj.y,
+        locationName = toLevel,
+        x = x,
+        y = y,
         onEnter = function(self)
-          msgBus.send(msgBus.SCENE_STACK_PUSH, {
-            scene = require 'scene.scene-main',
+          msgBus.send(msgBus.SCENE_STACK_REPLACE, {
+            scene = require 'scene.main-scene',
             props = {
-              mapId = mapId
+              exitId = exitId,
+              location = {
+                layoutType = toLevel,
+                transitionPoints = transitionPoints
+              }
             }
           })
         end
       })
-    end
+    end,
   }
 }
 
-local function parseObjectsLayer(layerName, objectsLayer, grid, gridBlockOrigin, blockData, gridBlock)
+local function parseObjectsLayer(layerName, objectsLayer, grid, gridBlockOrigin, options, blockFileData)
   if (not objectsLayer) then
     return
   end
@@ -189,59 +405,110 @@ local function parseObjectsLayer(layerName, objectsLayer, grid, gridBlockOrigin,
   for i=1, #objects do
     local obj = objects[i]
 
-    -- shift positions by 1 full tile since lua indexes start at 1
-    obj.x = obj.x + gridBlock.tilewidth
-    obj.y = obj.y + gridBlock.tileheight
+    local O = require 'utils.object-utils'
+    local objCopy = O.assign({}, obj, {
+      -- shift positions by 1 full tile since lua indexes start at 1
+      x = obj.x + blockFileData.tilewidth,
+      y = obj.y + blockFileData.tileheight
+    })
 
     local parser = objectParsersByType[layerName][obj.type]
     if parser then
-      parser(obj, grid, gridBlockOrigin, blockData)
+      parser(objCopy, grid, gridBlockOrigin, options, blockFileData)
     end
   end
 end
 
-local function loadGridBlock(file)
-  local dynamicModule = require 'modules.dynamic-module'
-  --[[
-    Note: we use filesystem load instead of `require` so that we're not loading a cached instance.
-    This is important because we are mutating the dataset, so we need a fresh dataset each time.
-  ]]
-  return dynamicModule('built/maps/'..file..'.lua')
-end
+local function convertTileListToGrid(gridBlock)
+  local groundLayer = f.find(gridBlock.layers, 'name', 'ground')
+  local wallLayer = f.find(gridBlock.layers, 'name', 'walls')
+  local transformFn = function(index)
+    local groundValue = groundLayer.data[index]
+    local wallValue = wallLayer.data[index]
+    if wallValue ~= 0 then
+      return cellTranslationsByLayer.walls[wallValue]
+    end
 
-local function addGridBlock(grid, gridBlockToAdd, startX, startY, transformFn, blockName)
-  collisionWorlds.zones:add(
-    {name = blockName},
-    startX,
-    startY,
-    gridBlockToAdd.width,
-    gridBlockToAdd.height
-  )
-  local numCols = gridBlockToAdd.width
-  local area = gridBlockToAdd.width * gridBlockToAdd.height
+    return cellTranslationsByLayer.ground[groundValue] or 'NULL_CELL'
+  end
+
+  local grid = {}
+  local numCols = gridBlock.width
+  local area = gridBlock.width * gridBlock.height
   for i=0, (area - 1) do
     local y = math.floor(i/numCols) + 1
     local x = (i % numCols) + 1
-    -- local coordinates
-    local actualX = startX + x
-    local actualY = startY + y
-    grid[actualY] = grid[actualY] or {}
-    grid[actualY][actualX] = transformFn((i + 1), x, y)
+    grid[y] = grid[y] or {}
+    grid[y][x] = transformFn((i + 1))
   end
+
   return grid
 end
 
-local WALL_TILE = 0
-local cellTranslationsByLayer = {
-  walls = {
-    [12] = WALL_TILE
-  },
-  ground = {
-    [1] = 1
-  }
-}
+--[[
+  Initializes and generates a dungeon.
+
+  Returns a 2-d grid.
+]]
+local function buildDungeon(options)
+  local gridBlock = require('built.maps.'..options.layoutType)
+
+  local grid = convertTileListToGrid(gridBlock)
+
+  local origin = {x = 0, y = 0}
+  local blockData = {}
+  f.forEach(
+    f.filter(gridBlock.layers, function(l)
+      return l.type == 'objectgroup'
+    end),
+    function(layer)
+      parseObjectsLayer(
+        layer.name,
+        findLayerByName(gridBlock.layers, layer.name),
+        grid,
+        origin,
+        options,
+        gridBlock
+      )
+    end
+  )
+
+  local connectsToAnotherMap = options.from.mapId
+  -- create an exit that points back to the previous map
+  if connectsToAnotherMap then
+    local LevelExit = require 'components.map.level-exit'
+    local config = require 'config.config'
+    LevelExit.create({
+      x = exitPosition.x * config.gridSize,
+      y = exitPosition.y * config.gridSize,
+      locationName = options.nextLevel,
+      onEnter = function()
+        local msgBus = require 'components.msg-bus'
+        msgBus.send(msgBus.SCENE_STACK_PUSH, {
+          scene = require 'scene.main-scene',
+          props = {
+            exitId = options.from.exitId,
+            location = {
+              layoutType = options.nextLevel
+            }
+          }
+        })
+      end
+    })
+  end
+
+  local startPoint = f.find(
+    f.find(gridBlock.layers, 'name', 'transition-points').objects,
+    function(o)
+      return o.type == 'checkPoint'
+    end
+  )
+  return grid, startPoint
+end
 
 local defaultOptions = {
+  layoutType = '',
+  transitionPoints = {},
   -- previous map
   from = {
     mapId = nil,
@@ -258,121 +525,10 @@ local function validateOptions(options)
   end
 end
 
---[[
-  Initializes and generates a dungeon.
-
-  Returns a 2-d grid.
-]]
-local function buildDungeon(layoutType, options)
-  local layoutGenerator = require('modules.dungeon.layouts.'..layoutType)
-  local layout = layoutGenerator()
-  local extractProps = require 'utils.object-utils.extract'
-  local gridBlockNames, columns, exitPosition = extractProps(layout, 'gridBlockNames', 'columns', 'exitPosition')
-
-  collisionWorlds.reset(collisionWorlds.zones)
-
-  assert(#gridBlockNames%2 == 0, 'number of grid blocks must be an even number')
-
-  local grid = {}
-  local numBlocks = #gridBlockNames
-  local numCols = columns
-  local numRows = numBlocks/numCols
-  for blockIndex=0, (numBlocks - 1) do
-    local gridBlockName = gridBlockNames[blockIndex + 1]
-    local gridBlock = loadGridBlock(gridBlockName)
-
-    -- block-level coordinates
-    local blockX = (blockIndex % numCols)
-    local blockY = math.floor(blockIndex/numCols)
-    local blockWidth, blockHeight = gridBlock.width, gridBlock.height
-
-    local overlapAdjustment = -1 -- this is to prevent walls from doubling up between blocks
-    local overlapAdjustmentX, overlapAdjustmentY = (overlapAdjustment * blockX), (overlapAdjustment * blockY)
-    local origin = {
-      x = (blockX * blockWidth),
-      y = (blockY * blockHeight)
-    }
-    if origin.x > 0 then
-      origin.x = origin.x + overlapAdjustmentX
-    end
-    if origin.y > 0 then
-      origin.y = origin.y + overlapAdjustmentY
-    end
-    local blockData = options
-    addGridBlock(
-      grid,
-      gridBlock,
-      origin.x,
-      origin.y,
-      function(index, localX, localY)
-        local isEdge =
-          (blockX == 0 and localX == 1) -- west side
-          or ((blockX == numCols - 1) and localX == blockWidth) -- east side
-          or (blockY == 0 and localY == 1) -- north side
-          or ((blockY == numRows - 1) and localY == blockHeight) -- south side
-
-        -- close up exits on the perimeter
-        if isEdge then
-          return WALL_TILE
-        end
-
-        local wallLayer = findLayerByName(gridBlock.layers, 'walls')
-        local wallValue = wallLayer.data[index]
-        if wallValue ~= 0 then
-          return cellTranslationsByLayer.walls[wallValue]
-        end
-
-        local groundLayer = findLayerByName(gridBlock.layers, 'ground')
-        local groundValue = groundLayer.data[index]
-        return cellTranslationsByLayer.ground[groundValue]
-      end,
-      gridBlockName
-    )
-    local layersToParse = {
-      'spawn-points',
-      'unique-enemies',
-      'environment'
-    }
-    f.forEach(layersToParse, function(layerName)
-      parseObjectsLayer(
-        layerName,
-        findLayerByName(gridBlock.layers, layerName),
-        grid,
-        origin,
-        blockData,
-        gridBlock
-      )
-    end)
-  end
-
-  -- create an exit that points back to the previous map
-  if options.from.mapId then
-    local LevelExit = require 'components.map.level-exit'
-    local config = require 'config.config'
-    LevelExit.create({
-      x = exitPosition.x * config.gridSize,
-      y = exitPosition.y * config.gridSize,
-      onEnter = function()
-        local msgBus = require 'components.msg-bus'
-        msgBus.send(msgBus.SCENE_STACK_PUSH, {
-          scene = require 'scene.scene-main',
-          props = {
-            mapId = options.from.mapId,
-            exitId = options.from.exitId
-          }
-        })
-      end
-    })
-  end
-
-  return {
-    grid = grid,
-    name = layoutType
-  }
-end
-
 -- generates a dungeon and returns the dungeon id
-function Dungeon:new(layoutType, options)
+function Dungeon:new(options)
+  assert(type(options) == 'table')
+  assert(type(options.layoutType) == 'string', 'layout type should be the name of the layout file')
   validateOptions(options)
   -- assign defaults after validating first
   local assign = require 'utils.object-utils'.assign
@@ -381,7 +537,6 @@ function Dungeon:new(layoutType, options)
   local uid = require 'utils.uid'
   local dungeonId = uid()
   self.generated[dungeonId] = {
-    layoutType = layoutType,
     options = options
   }
   return dungeonId
@@ -393,8 +548,17 @@ function Dungeon:getData(dungeonId)
   if (not dungeon) then
     return nil
   end
-  dungeon.built = dungeon.built or buildDungeon(dungeon.layoutType, dungeon.options)
-  return dungeon.built
+
+  if dungeon._built then
+    return dungeon
+  end
+
+  local grid, startPoint = buildDungeon(dungeon.options)
+  dungeon.grid = grid
+  dungeon.startPoint = startPoint
+  dungeon._built = true
+
+  return dungeon
 end
 
 function Dungeon:remove(dungeonId)

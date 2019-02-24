@@ -24,9 +24,6 @@ local ForceField = {
   bonusAbsorption = 0,
   maxAbsorption = 50,
   stackIncreaseDelay = 0.5,
-  owner = function()
-    return Component.get('PLAYER')
-  end,
   state = state.SHIELD_DOWN
 }
 
@@ -52,6 +49,8 @@ function ForceField.getAbsorption(self)
 end
 
 function ForceField.init(self)
+  Component.addToGroup(self, 'gameWorld')
+
   self.bonusStacks = 0
   self.clock = 0
   self.totalAbsorption = 0
@@ -77,14 +76,6 @@ function ForceField.update(self, dt)
     icon = 'status-shield'
   })
   self.totalAbsorption = self:getAbsorption()
-
-  local nextX, nextY = self.owner():getPosition()
-  local hasOwnerMoved = nextX ~= self.previousX or nextY ~= self.previousY
-  -- reset clock for bonus stacks
-  if hasOwnerMoved then
-    self.clock = 0
-  end
-  self.previousX, self.previousY = nextX, nextY
 
   local round = require 'utils.math'.round
   self.clock = self.clock + dt
@@ -174,15 +165,17 @@ return itemSystem.registerModule({
       end
 
       if (not forceFieldsByItemId[id]) then
+        local tetherPosition = require 'components.groups.tether-position'
         local playerRef = Component.get('PLAYER')
         local x, y = playerRef:getPosition()
-        forceFieldsByItemId[id] = ForceField.create(props)
+        local ff = ForceField.create(props)
           :set('x', x)
           :set('y', y)
           :set('drawOrder', function()
             return playerRef:drawOrder() + 3
           end)
-          :setParent(playerRef)
+        tetherPosition(ff, playerRef)
+        forceFieldsByItemId[id] = ff
       end
     end, 100)
   end,
@@ -192,11 +185,14 @@ return itemSystem.registerModule({
       data = {
         title = 'force-field',
         description = {
-          template = 'Gain a forcefield that blocks {baseAbsorption}% damage. '
+          template = 'Gain a forcefield that blocks {baseAbsorption} damage. '
 
-            ..'\n\nFor each nearby enemy gain an extra {bonusAbsorption}% damage reduction.'
+            ..'\n\nFor each nearby enemy gain an extra {bonusAbsorption} damage reduction.'
             ..'\n\nMaximum absorption is capped to 50%.',
-          data = props
+          data = {
+            baseAbsorption = props.baseAbsorption .. '%',
+            bonusAbsorption = props.bonusAbsorption .. '%'
+          }
         }
       }
     }

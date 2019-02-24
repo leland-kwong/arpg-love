@@ -13,8 +13,7 @@ local LightWorld = {
 }
 
 function LightWorld.init(self)
-  local width, height = self.width, self.height
-  self.canvas = love.graphics.newCanvas(width * 2, height)
+  self.canvas = love.graphics.newCanvas(4096, 4096)
   self.lights = {}
 end
 
@@ -31,9 +30,6 @@ end
 
 function drawLights(self)
   local oBlendMode = love.graphics.getBlendMode()
-  love.graphics.push()
-  love.graphics.origin()
-  love.graphics.translate(self.x, self.y)
   love.graphics.setCanvas(self.canvas)
   love.graphics.clear(self.ambientColor)
   love.graphics.setBlendMode('add', 'alphamultiply')
@@ -51,23 +47,21 @@ function drawLights(self)
 
   love.graphics.setCanvas()
   love.graphics.setBlendMode(oBlendMode)
-  love.graphics.pop()
 end
 
 function LightWorld.draw(self)
-  love.graphics.push()
-  love.graphics.origin()
-  love.graphics.scale(config.scale)
-
   drawLights(self)
 
   local oBlendMode = love.graphics.getBlendMode()
   love.graphics.setColor(1,1,1)
   love.graphics.setBlendMode('multiply', 'premultiplied')
+
+  love.graphics.push()
+  love.graphics.origin()
   love.graphics.draw(self.canvas)
+  love.graphics.pop()
 
   love.graphics.setBlendMode(oBlendMode)
-  love.graphics.pop()
 end
 
 return Component.createFactory(LightWorld)

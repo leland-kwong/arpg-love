@@ -10,24 +10,33 @@ local collisionWorlds = require 'components.collision-worlds'
 local Portal = require 'components.portal'
 local StarField = require 'components.star-field'
 local loadImage = require 'modules.load-image'
-local imageObj = loadImage('built/images/pixel-1x1-white.png')
 local sceneManager = require 'scene.manager'
+local mapLayoutGenerator = require 'modules.dungeon.map-layout-generator'
+local gsa = require 'main.global-state-actions'
 
 local inspect = require 'utils.inspect'
 local defaultMapLayout = 'aureus'
 
 local HomeBase = {
+  id = 'HomeBase',
   group = groups.firstLayer,
   zoneTitle = 'Mothership',
   x = 0,
   y = 5,
+  location = nil,
   drawOrder = function()
     return 1
   end
 }
 
 function HomeBase.init(self)
-  msgBus.send(msgBus.NEW_MAP)
+  gsa('setActiveLevel', {
+    level = 'mothership'
+  })
+  local dynamic = require 'utils.dynamic-require'
+  local questHandlers = dynamic 'components.quest-log.quest-handlers'
+  questHandlers.start()
+
   Component.get('lightWorld'):setAmbientColor({1,1,1,1})
 
   local collisionObjectsLayer = f.find(tileData.layers, function(layer)
@@ -38,27 +47,73 @@ function HomeBase.init(self)
     return layer.name == 'objects'
   end)
 
-  local startPosition = f.find(objectsLayer.objects, function(obj)
-    return obj.name == 'startPosition'
+  local universePortalPosition = f.find(objectsLayer.objects, function(obj)
+    return obj.name == 'universePortalPosition'
+  end)
+
+  local playerPortalPosition = f.find(objectsLayer.objects, function(obj)
+    return obj.name == 'playerPortalPosition'
+  end)
+
+  local initialPlayerPosition = f.find(objectsLayer.objects, function(obj)
+    return obj.name == 'initialPlayerPosition'
   end)
 
   local Player = require 'components.player'
+  local playerStartPosition = self.location and
+    (
+      (
+        self.location.from == 'player' and
+          playerPortalPosition or
+          universePortalPosition
+      ) or
+      (
+        self.location.from == 'universe' and
+          universePortalPosition
+      )
+    ) or
+    initialPlayerPosition
   self.player = Player.create({
-    x = startPosition.x,
-    y = startPosition.y,
+    x = playerStartPosition.x,
+    y = playerStartPosition.y,
     drawOrder = function(self)
       return self.group:drawOrder(self) + 1
     end
   }):setParent(self)
 
-  local previousScene = sceneManager:getLastItem()
   local Dungeon = require 'modules.dungeon'
 
+  local homeBaseMapId = Dungeon:new({
+    layoutType = 'home-base'
+  })
+
   Portal.create({
-    x = startPosition.x,
-    y = startPosition.y,
-    locationName = previousScene and Dungeon:getData(previousScene.props.mapId).name or defaultMapLayout
+    style = 2,
+    color = {1,1,1},
+    x = universePortalPosition.x,
+    y = universePortalPosition.y - 10,
+    location = {
+      tooltipText = 'Universe Portal',
+      type = 'universe'
+    }
   }):setParent(self)
+
+  local globalState = require 'main.global-state'
+  local shouldCreatePlayerPortal = globalState.playerPortal.mapId
+  if shouldCreatePlayerPortal then
+    local mapId = mapLayoutGenerator.get(self.location)
+    local layoutType = Dungeon:getData(mapId).options.layoutType
+    Portal.create({
+      style = 1,
+      x = playerPortalPosition.x,
+      y = playerPortalPosition.y - 10,
+      location = {
+        tooltipText = 'Portal back to '..layoutType,
+        from = 'player',
+        layoutType = layoutType
+      }
+    }):setParent(self)
+  end
 
   Component.create({
     group = groups.all,
@@ -87,7 +142,7 @@ function HomeBase.init(self)
     ):addToWorld(collisionWorlds.map)
   end)
 
-  msgBus.send(msgBus.SET_BACKGROUND_COLOR, {0,0,0,0})
+  gsa('setBackgroundColor', {0,0,0,0})
   self.starField = StarField.create({
     direction = math.pi/2,
     emissionRate = 500,
@@ -96,25 +151,25 @@ function HomeBase.init(self)
   }):setParent(self)
 
   self.listeners = {
-    msgBus.on(msgBus.PORTAL_ENTER, function()
-      local msgBusMainMenu = require 'components.msg-bus-main-menu'
-      local hasPreviousScene = sceneManager:canPop()
-      if (not hasPreviousScene) then
+    msgBus.on(msgBus.PORTAL_ENTER, function(location)
+      if location.type == 'universe' then
+        msgBus.send('MAP_TOGGLE')
+        return
+      end
+
+      local Sound = require 'components.sound'
+      Sound.playEffect('portal-enter.wav')
+
+      if (location.layoutType) then
         local Dungeon = require 'modules.dungeon'
         msgBus.send(msgBus.SCENE_STACK_REPLACE, {
-          scene = require 'scene.scene-main',
+          scene = require 'scene.main-scene',
           props = {
-            mapId = Dungeon:new(defaultMapLayout, {
-              nextLevel = 'aureus-floor-2'
-            })
+            location = location
           }
         })
         return
       end
-
-      msgBus.send(
-        msgBus.SCENE_STACK_POP
-      )
     end)
   }
 end

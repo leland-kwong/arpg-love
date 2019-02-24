@@ -51,16 +51,38 @@ function Object.clone(t1)
 	return Object.assign({}, t1)
 end
 
-function Object.deepCopy(t1)
+function Object.deepCopy(t1, fromRecursion)
 	if (type(t1) ~= 'table') then
+		if (not fromRecursion) then
+			return t1 == nil and {} or t1
+		end
 		return t1
 	end
 
 	local copy = {}
 	for k,v in pairs(t1) do
-		copy[k] = Object.deepCopy(v)
+		copy[k] = Object.deepCopy(v, true)
 	end
 	return copy
+end
+
+function Object.deepEqual(t1, t2)
+	if (not t1) or (not t2) then
+		return false
+	end
+
+	for k,v in pairs(t1) do
+		if (type(v) == 'table') then
+			if not Object.deepEqual(v, t2[k]) then
+				return false
+			end
+		else
+			if (t2[k] ~= v) then
+				return false
+			end
+		end
+  end
+  return true
 end
 
 -- Does a shallow comparison of properties.
@@ -81,6 +103,8 @@ end
 Object.extend = Object.immutableApply
 
 local readOnlyMetatable = {
+	__readOnly = true,
+	__emptyObject = true,
 	__newindex = function()
 		error('table is read only')
 	end
@@ -94,6 +118,13 @@ function Object.setReadOnly(o)
 	end
 	setmetatable(o, metatable)
 	return o
+end
+
+function Object.isEmpty(t)
+	for _ in pairs(t) do
+    return false
+  end
+  return true
 end
 
 Object.EMPTY = Object.setReadOnly({})

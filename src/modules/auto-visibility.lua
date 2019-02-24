@@ -10,18 +10,23 @@ local autoVisibilityGroup = Component.newGroup({
 
 local function visibleItemFilter(item)
   local parent = item.parent
-  return autoVisibilityGroup.hasComponent(parent and parent:getId())
+  return autoVisibilityGroup.hasComponent(
+    parent and
+    parent.isComponent and
+    parent:getId()
+  )
 end
 
 local function toggleEntityVisibility(self)
   local collisionWorlds = require 'components.collision-worlds'
   local camera = require 'components.camera'
-  local threshold = config.gridSize * 1
+  local threshold = config.gridSize * 3
   local west, _, north = camera:getBounds()
-  local width, height = camera:getSize()
+  local width, height = camera:getSize(true)
   local items, len = collisionWorlds.map:queryRect(
     west - threshold,
-    north - threshold, width + (threshold * 2),
+    north - threshold,
+    width + (threshold * 2),
     height + (threshold * 2),
     visibleItemFilter
   )
@@ -40,6 +45,4 @@ local function toggleEntityVisibility(self)
   end
 end
 
-msgBus.on(msgBus.UPDATE, function()
-  toggleEntityVisibility(self)
-end)
+msgBus.on(msgBus.UPDATE, toggleEntityVisibility)

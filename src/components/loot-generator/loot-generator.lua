@@ -13,24 +13,25 @@ local tick = require 'utils.tick'
 local tween = require 'modules.tween'
 local bump = require 'modules.bump'
 local collisionGroups = require 'modules.collision-groups'
+local drawOrders = require 'modules.draw-orders'
+local globalState = require 'main.global-state'
 require 'components.groups.clock'
 
+local eventPriority = 1
 local itemGroup = groups.all
 local tooltipCollisionWorld = bump.newWorld(16)
+local droppedItemsCollisionWorld = bump.newWorld(16)
 local function itemMousePosition()
   return camera:getMousePosition()
 end
 
-local pixelOutlineShader = love.filesystem.read('modules/shaders/pixel-outline.fsh')
 local outlineColor = {1,1,1,1}
-local shader = love.graphics.newShader(pixelOutlineShader)
+local Shaders = require 'modules.shaders'
+local shader = Shaders('pixel-outline.fsh')
 local atlasData = AnimationFactory.atlasData
-shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
-shader:send('outline_width', 1)
-shader:send('outline_color', outlineColor)
 
-local DRAW_ORDER_BACKGROUND = 3
-local DRAW_ORDER_TEXT = DRAW_ORDER_BACKGROUND + 1
+local DRAW_ORDER_BACKGROUND = drawOrders.FloorItemTooltip
+local DRAW_ORDER_TEXT = drawOrders.FloorItemTooltip + 1
 local itemNameTextLayer = GuiText.create({
   group = itemGroup,
   font = require 'components.font'.primary.font,
@@ -84,20 +85,17 @@ local itemNamesTooltipLayer = Gui.create({
 
       tooltip.gui = Gui.create({
         group = itemGroup,
+        eventPriority = eventPriority,
         x = tooltip.x,
         y = tooltip.y,
         w = ttWidth,
         h = ttHeight,
         getMousePosition = itemMousePosition,
-        inputContext = 'loot',
-        onPointerEnter = function()
-          msgBus.send(msgBus.ITEM_HOVERED, itemParent)
-        end,
-        onPointerLeave = function()
-          msgBus.send(msgBus.ITEM_HOVERED)
-        end,
+        onClick = function(_, ev) itemParent:onClick(ev) end,
         onUpdate = function(self)
-          tooltip.hovered = self.hovered
+          tooltip.hovered = self.hovered or itemParent.hovered
+          itemParent.hovered = tooltip.hovered
+          self.inputContext = itemParent.inputContext
         end
       })
     end
@@ -157,46 +155,7 @@ local itemNamesTooltipLayer = Gui.create({
 
 local function dropItemCollisionFilter(item)
   local collisionGroups = require 'modules.collision-groups'
-  return collisionGroups.matches(item.group, 'floorItem')
-end
-
-local memoize = require 'utils.memoize'
-local LineOfSight = memoize(require'modules.line-of-sight')
-local function findNearestDroppablePosition(startX, startY)
-  local config = require 'config.config'
-  local Position = require 'utils.position'
-  local Map = require 'modules.map-generator.index'
-
-  local mainSceneRef = Component.get('MAIN_SCENE')
-  if (not mainSceneRef) then
-    return startX, startY
-  end
-  local dropX, dropY
-  local checkDroppablePosition = function(x, y, isBlocked)
-    local screenX, screenY = Position.gridToPixels(x, y, config.gridSize)
-    if (not isBlocked) and (not dropX) then
-      local _, len = collisionWorlds.map:queryRect(screenX, screenY, config.gridSize, config.gridSize, dropItemCollisionFilter)
-      if (len == 0) then
-        dropX, dropY = x, y
-      end
-    end
-  end
-  local radius = 20
-  local slices = 50
-  local increment = (math.pi * 2) / slices
-  local x1, y1 = Position.pixelsToGridUnits(startX, startY, config.gridSize)
-  local i = 1
-  local startAngle = (math.pi * 2) / math.random(1, 4) * (math.random(0, 1) == 0 and 1 or -1)
-  -- rotate clockwise and raycast till we find a droppable position
-  while (not dropX) and (i < slices) do
-    local angle = startAngle + (i * increment)
-    local x2 = x1 + radius * math.cos(angle)
-    local y2 = y1 + radius * math.sin(angle)
-    LineOfSight(mainSceneRef.mapGrid, Map.WALKABLE, checkDroppablePosition)(x1, y1, x2, y2)
-    i = i + 1
-  end
-
-  return dropX * config.gridSize, dropY * config.gridSize
+  return collisionGroups.matches(item.group, 'floorItem obstacle')
 end
 
 local LootGenerator = {
@@ -208,22 +167,13 @@ local LootGenerator = {
   item = nil,
 }
 
-local COLLISION_FLOOR_ITEM_TYPE = 'floorItem'
-local function collisionFilter(item, other)
-  if other.group == COLLISION_FLOOR_ITEM_TYPE or collisionGroups.matches(other.group, collisionGroups.obstacle) then
-    return 'slide'
-  end
-  return false
-end
-
 -- parabola that goes up and back down
-local curve = love.math.newBezierCurve(0, 0, 10, -10, 0, 0)
-local function flyoutEasing(t, b, c, d)
-  return c * curve:evaluate(t/d) + b
-end
+local dropHeight = 8
 
 local function drawLegendaryItemEffect(self, x, y, angle)
-  local opacity = math.max(0.3, math.sin(self.clock * 2))
+  local calcPulse = require 'utils.math'.calcPulse
+
+  local opacity = calcPulse(2, self.clock) + 0.1
   local Color = require 'modules.color'
   love.graphics.setColor(Color.multiplyAlpha(Color.RARITY_LEGENDARY, opacity))
 
@@ -245,6 +195,8 @@ local function drawLegendaryItemEffect(self, x, y, angle)
   -- light beams
   local animation = AnimationFactory:newStaticSprite('legendary-item-drop-effect')
   local ox, oy = animation:getOffset()
+  local oBlendMode = love.graphics.getBlendMode()
+  love.graphics.setBlendMode('add')
   love.graphics.draw(
     AnimationFactory.atlas,
     animation.sprite,
@@ -256,6 +208,7 @@ local function drawLegendaryItemEffect(self, x, y, angle)
     ox,
     oy
   )
+  love.graphics.setBlendMode(oBlendMode)
 end
 
 local function drawLegendaryItemEffectMinimap()
@@ -269,19 +222,67 @@ local function drawLegendaryItemEffectMinimap()
     0,
     0,
     0,
-    0.5,
-    0.5,
+    1,
+    1,
     ox,
     oy
   )
 end
 
+local function setDropPosition(parent, spriteWidth, spriteHeight)
+  local Grid = require 'utils.grid'
+  local config = require 'config.config'
+  local gs = config.gridSize
+  local FindOpenPosition = require 'utils.find-open-position'
+  local searchComplete = false
+  local dropX, dropY = parent.x, parent.y
+  local getDroppablePosition = FindOpenPosition(
+    function(grid, x, y, dist)
+      local cellValue = Grid.get(grid, x, y)
+      local isDroppablePosition = (not searchComplete) and (cellValue and cellValue.walkable)
+      if isDroppablePosition then
+        local _, len = collisionWorlds.map:queryRect(x * gs, y * gs, spriteWidth, spriteHeight, dropItemCollisionFilter)
+        searchComplete = len == 0
+        if searchComplete then
+          dropX = x * gs
+          dropY = y * gs
+        end
+      end
+      return isDroppablePosition
+    end
+  )
+  local mapGrid = Component.get('MAIN_SCENE').mapGrid
+  local iterCount = 0
+  local Position = require 'utils.position'
+  local Math = require 'utils.math'
+  local gridX, gridY = Position.pixelsToGridUnits(parent.x, parent.y, gs)
+  local prevC = Grid.get(mapGrid, gridX, gridY)
+  local lootPositionsIterator = getDroppablePosition(
+    mapGrid,
+    gridX, gridY,
+    true, 10
+  )
+  local iterating = true
+  local positions
+  while iterating do
+    local nextPositions = lootPositionsIterator()
+    positions = nextPositions or positions
+    iterating = not not nextPositions
+  end
+
+  return dropX, dropY
+end
+
 function LootGenerator.init(self)
+  self.state = self.state or {
+    dropComplete = false
+  }
+
   local parent = self
   assert(self.item ~= nil, 'item must be provided')
 
-  local parent = self
-  local rootStore = msgBus.send(msgBus.GAME_STATE_GET)
+  local globalState = require 'main.global-state'
+  local rootStore = globalState.gameState
   local screenX, screenY = self.x, self.y
   local item = self.item
   local isLegendary = itemConfig.rarity.LEGENDARY == item.rarity
@@ -300,56 +301,54 @@ function LootGenerator.init(self)
   })
 
   local sx, sy, sw, sh = animation.sprite:getViewport()
-  self.colObj = self:addCollisionObject(COLLISION_FLOOR_ITEM_TYPE, self.x, self.y, sw, sh)
+  self.colObj = self:addCollisionObject(collisionGroups.floorItem, self.x, self.y, sw, sh)
     :addToWorld(collisionWorlds.map)
+
+  local originalX, originalY = self.x, self.y
+  local actualX, actualY = originalX, originalY
+  if (not self.state.dropComplete) then
+    self.state.dropComplete = true
+    actualX, actualY = setDropPosition(self, sw, sh)
+    self.x, self.y = actualX, actualY
+    self.colObj:update(self.x, self.y)
+  end
 
   Gui.create({
     isNew = true,
     group = itemGroup,
     -- debug = true,
-    x = self.x,
-    y = self.y,
+    x = originalX,
+    y = originalY,
     w = sw,
     h = sh,
-    inputContext = 'loot',
+    tweenClock = 0,
     selected = false,
     animationComplete = false,
+    eventPriority = eventPriority,
     onCreate = function(self)
+      self.clock = 0
       Component.addToGroup(self:getId(), 'clock', self)
 
-      local direction = math.random(0, 1) == 1 and 1 or -1
-      local xOffset = math.random(10, 20)
-      local yOffset = -10 -- cause item to fly upwards
-      local endStateX = {
-        x = self.x
-      }
-      local endStateY = {
-        y = self.y
-      }
-      local actualX, actualY = findNearestDroppablePosition(endStateX.x, endStateY.y)
-      parent.x = actualX
-      parent.y = actualY
-      endStateX.x = actualX
-      -- update initial position to new initial position
-      self.y = actualY - yOffset
-      endStateY.y = actualY
-
       if parent.isNew then
+        local tweenTarget = {
+          tweenClock = 1
+        }
+        local dx = actualX - originalX
+        self.initialX = self.x
+        self.flyOutCurve = love.math.newBezierCurve(0, -5, dx/2, -10, dx, 0)
         parent.isNew = false
-        -- y-axis animation
-        self.tween = tween.new(0.5, self, endStateY, flyoutEasing)
-        -- x-axis animation
-        self.tween2 = tween.new(0.5, self, endStateX)
+        local Math = require 'utils.math'
+        local dist = Math.dist(self.x, self.y, actualX, actualY)
+        local duration = math.max(0.001, dist * 0.01)
+        self.tween = tween.new(duration, self, tweenTarget, tween.easing.backIn)
       end
     end,
     getMousePosition = itemMousePosition,
-    onPointerEnter = function(self)
-      msgBus.send(msgBus.ITEM_HOVERED, self)
-    end,
-    onPointerLeave = function()
-      msgBus.send(msgBus.ITEM_HOVERED)
-    end,
-    pickup = function()
+    onClick = function(self, ev)
+      local isInteractButton = ev[3] == 1
+      if (not self.canInteract) or (not isInteractButton) then
+        return
+      end
       local _, errorMsg = rootStore:addItemToInventory(item)
       if errorMsg then
         msgBus.send(msgBus.PLAYER_ACTION_ERROR, errorMsg)
@@ -359,6 +358,9 @@ function LootGenerator.init(self)
       return true
     end,
     onUpdate = function(self, dt)
+      self.clock = self.clock + dt
+      self.x = parent.x
+      self.y = parent.y
       self.angle = self.angle + dt
 
       local minimap = Component.get('miniMap')
@@ -376,15 +378,21 @@ function LootGenerator.init(self)
 
       -- IMPORTANT: run any update logic before the pickup messages trigger, since those can
       -- cause the item to be deleted part-way through the update method, which will cause race conditions.
-      itemNamesTooltipLayer:add(item, self.x, self.y, self)
+      itemNamesTooltipLayer:add(item, self.x, self.y + self.z, self)
 
       if self.tween then
         local complete = self.tween:update(dt)
-        self.tween2:update(dt)
+
+        local dx, dz = self.flyOutCurve:evaluate(self.tweenClock)
+        self.x, self.z = self.initialX + dx, dz
+
         if complete then
           self.tween = nil
         end
       end
+
+      self.canInteract = globalState.interactableList[self]
+      self.inputContext = self.canInteract and 'loot' or 'any'
     end,
     draw = function(self)
       if (not parent.isInViewOfPlayer) then
@@ -396,7 +404,7 @@ function LootGenerator.init(self)
       love.graphics.draw(
         AnimationFactory.atlas,
         animation.sprite,
-        self.x, self.y + (self.h * 1.25),
+        self.x, self.y + (self.h * 1.25) + self.z,
         0,
         1, -0.5
       )
@@ -408,27 +416,43 @@ function LootGenerator.init(self)
         drawLegendaryItemEffect(self, centerX, centerY, self.angle)
       end
 
-      if self.hovered then
-        love.graphics.setShader(shader)
-      end
-
       -- draw item
       love.graphics.setColor(1,1,1)
+
+      if (self.canInteract) then
+        require 'components.interactable-indicators'
+        local uid = require 'utils.uid'
+        Component.addToGroup(uid(), 'interactableIndicators', {
+          x = self.x + self.w,
+          y = self.y + (self.h / 2),
+          rotation = -math.pi/2
+        })
+      end
+
+      if self.hovered then
+        love.graphics.setShader(shader)
+        shader:send('sprite_size', {atlasData.meta.size.w, atlasData.meta.size.h})
+        shader:send('outline_width', 1)
+        shader:send('outline_color', outlineColor)
+      end
+
       love.graphics.draw(
         AnimationFactory.atlas,
         animation.sprite,
-        self.x, self.y
+        self.x, self.y + self.z
       )
 
       Component.get('lightWorld'):addLight(centerX, centerY, 17, nil, 0.4)
 
-      if self.hovered then
-        love.graphics.setShader()
-      end
+      shader:send('outline_width', 0)
     end,
 
     onFinal = function(self)
       itemNamesTooltipLayer:delete(item)
+    end,
+
+    drawOrder = function(self)
+      return 4
     end
   }):setParent(self)
 end
@@ -442,7 +466,8 @@ function LootGenerator.serialize(self)
   return Object.immutableApply(self.initialProps, {
     x = self.x,
     y = self.y,
-    isNew = self.isNew
+    isNew = self.isNew,
+    state = self.state
   })
 end
 

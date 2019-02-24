@@ -15,17 +15,47 @@ local ExperienceIndicator = {
 
 local hudTextLayer = GuiText.create()
 
-local function getExpInfo(self)
-  local curState = self.rootStore:get()
-  local currentLevel = curState.level
+local memoize = require 'utils.memoize'
+local getCurrentLevel = memoize(function (totalExp)
+  for level=1, #config.levelExperienceRequirements do
+    local expRequired = config.levelExperienceRequirements[level]
+    if expRequired > totalExp then
+      return level - 1
+    end
+  end
+end)
+
+local function getExpInfo(currentLevel, totalExp)
   local currentLevelRequirement = config.levelExperienceRequirements[currentLevel]
   local nextLevelRequirement = config.levelExperienceRequirements[currentLevel + 1]
-  local totalExp = curState.totalExperience
   local currentLevelExp = totalExp - currentLevelRequirement
   local expRequiredForLevelUp = nextLevelRequirement - currentLevelRequirement
   local progress = currentLevelExp / expRequiredForLevelUp
 
-  return totalExp, progress
+  return progress
+end
+
+local function levelUpNotification(nextLevel)
+  local Sound = require 'components.sound'
+  Sound.playEffect('level-up.wav')
+
+  local BigNotifier = LiveReload 'components.hud.big-notifier'
+  local bnTheme = BigNotifier.themes.levelUp
+  BigNotifier.create({
+    w = 300,
+    h = 50,
+    duration = 0.3,
+    text = {
+      title = {
+        bnTheme.title, 'Level ',
+
+        {1,1,1}, nextLevel,
+
+        bnTheme.title, ' Reached!'
+      },
+      body = {bnTheme.body, 'You have gained a new level'}
+    }
+  })
 end
 
 function ExperienceIndicator.init(self)
@@ -34,33 +64,27 @@ function ExperienceIndicator.init(self)
       return msgBus.CLEANUP
     end
 
+    local currentLevel = self.rootStore:get().level
     self.rootStore:set('totalExperience', function(state)
-      return state.totalExperience + msgValue
+      return math.max(0, state.totalExperience + msgValue)
     end)
-    local totalExp, progress = getExpInfo(self)
-    local isLevelUp = progress >= 1
+    local nextLevel = getCurrentLevel(self.rootStore:get().totalExperience)
+    local isLevelUp = currentLevel < nextLevel
     if isLevelUp then
-      self.rootStore:set('level', function(state)
-        return state.level + 1
-      end)
-      love.audio.stop(Sound.levelUp)
-      love.audio.play(Sound.levelUp)
       msgBus.send(msgBus.PLAYER_LEVEL_UP)
-      msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
-        title = 'level up!',
-        description = {
-          Color.WHITE, 'you are now level ',
-          Color.CYAN, self.rootStore:get().level
-        }
-      })
+      levelUpNotification(nextLevel)
     end
   end)
 end
 
 function ExperienceIndicator.update(self)
-  local totalExp, progress = getExpInfo(self)
+  local totalExp = self.rootStore:get().totalExperience
+  local progress = getExpInfo(self.rootStore:get().level, totalExp)
   self.experience = totalExp
   self.progress = progress
+
+  local currentLevel = getCurrentLevel(totalExp)
+  self.rootStore:set('level', currentLevel)
 end
 
 local function drawSegments(self, i, segmentCount, startX, totalWidth)

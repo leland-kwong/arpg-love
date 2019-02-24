@@ -14,18 +14,18 @@ return {
 		category = itemConfig.category.SHOES,
 
 		info = {
-			cooldown = 2,
+			cooldown = 0.7,
 		},
 
 		baseModifiers = {
-			moveSpeed = 40,
+			moveSpeed = 10,
 			armor = 50
 		},
 
 		onActivate = require 'components.item-inventory.items.inventory-actives.equip-on-click'(),
 		onActivateWhenEquipped = require(require('alias').path.items..'.equipment-actives.movespeed-boost')({
-			speedBoost = 40,
-			speedBoostDuration = 1,
+			distance = 5,
+			duration = 6/60,
 		})
 	}
 }

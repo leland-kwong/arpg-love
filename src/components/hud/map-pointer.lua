@@ -22,7 +22,7 @@ local screenSize = {
 }
 
 local function setScreenBoundsCollisions()
-  local screenWidth, screenHeight = camera:getSize()
+  local screenWidth, screenHeight = camera:getSize(true)
   local isDifferentScreenSize = screenWidth ~= screenSize.width or screenHeight ~= screenSize.height
   if (not isDifferentScreenSize) then
     return
@@ -89,7 +89,9 @@ function MapPointerWorld.draw(self)
     local animation = AnimationFactory:newStaticSprite('gui-map-pointer')
     local Position = require 'utils.position'
     local vx, vy = Position.getDirection(pointer.fromTarget.x, pointer.fromTarget.y, pointer.target.x, pointer.target.y)
-    love.graphics.setColor(pointer.color)
+    love.graphics.setColor(
+      Color.multiplyAlpha(pointer.color, 0.6)
+    )
     local ox, oy = animation:getSourceOffset()
     local x, y = handleCollisions(self, pointer.target)
     love.graphics.draw(

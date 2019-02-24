@@ -1,7 +1,7 @@
 local Component = require 'modules.component'
 local SkillTreeEditor = require 'components.skill-tree-editor'
 local msgBus = require 'components.msg-bus'
-local msgBusMainMenu = require 'components.msg-bus-main-menu'
+local msgBus = require 'components.msg-bus'
 
 local skillTreeId = 'passiveSkillsTree'
 
@@ -46,14 +46,14 @@ local function editorModesToggleButtons()
   end)
 end
 
-msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
+msgBus.send(msgBus.MENU_ITEM_ADD, {
   name = 'passive tree',
   value = function()
-    msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
+    msgBus.send(msgBus.TOGGLE_MAIN_MENU, false)
     Component.get('mainMenu'):delete(true)
 
-    local fs = require 'modules.file-system'
-    local savedState, ok = fs.loadSaveFile('', 'skill-tree-test')
+    local Db = require 'modules.database'
+    local savedState, err = Db.load('test/skill-tree-test'):get('data')
 
     msgBus.send(msgBus.SCENE_STACK_PUSH, {
       scene = SkillTreeEditor,
@@ -68,7 +68,7 @@ msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
           local success, message = f:write(serializedTreeAsString)
           f:close()
           if success then
-            fs.saveFile('', 'skill-tree-test')
+            Db.load('test/skill-tree-test'):put('data', '')
             msgBus.send(msgBus.NOTIFIER_NEW_EVENT, {
               title = '[SKILL TREE] state saved',
             })
@@ -80,6 +80,6 @@ msgBusMainMenu.send(msgBusMainMenu.MENU_ITEM_ADD, {
     })
 
     editorModesToggleButtons()
-    msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
+    msgBus.send(msgBus.TOGGLE_MAIN_MENU, false)
   end
 })

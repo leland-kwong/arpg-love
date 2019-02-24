@@ -19,19 +19,19 @@ end
 
 return {
   cooldownReduction = {
-    range = RangeCalculator(1, 10, 0.01),
+    range = RangeCalculator(1, 5, 0.01),
   },
-  attackTimeReduction = {
-    range = RangeCalculator(1, 10, 0.01)
+  increasedActionSpeed = {
+    range = RangeCalculator(1, 5, 0.01)
   },
-  attackPower = {
+  actionPower = {
     range = RangeCalculator(5, 15, 1)
   },
   armor = {
     range = RangeCalculator(10, 100, 1)
   },
   maxHealth = {
-    range = RangeCalculator(50, 100, 1)
+    range = RangeCalculator(20, 50, 1)
   },
   healthRegeneration = {
     range = RangeCalculator(1, 2, 1)
@@ -43,6 +43,6 @@ return {
     range = RangeCalculator(1, 2, 1)
   },
   moveSpeed = {
-    range = RangeCalculator(10, 15, 1)
+    range = RangeCalculator(2, 5, 1)
   },
 }

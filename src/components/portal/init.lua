@@ -8,10 +8,10 @@ local msgBus = require 'components.msg-bus'
 local collisionWorlds = require 'components.collision-worlds'
 local loadImage = require 'modules.load-image'
 local Color = require 'modules.color'
+local dynamicRequire = require 'utils.dynamic-require'
 
 local spiralScale = 0.4
 local spiralSize = 62 * spiralScale
-local scaleX, scaleY = 0.8, 1
 local function portalCollisionFilter(item, other)
   if collisionGroups.matches(other.group, collisionGroups.player) then
     return 'touch'
@@ -22,7 +22,8 @@ end
 local function guiDrawOrder(self)
   return 1000
 end
-local guiText = GuiText.create({
+GuiText.create({
+  id = 'PortalTextLayer',
   font = Font.primary.font,
   group = groups.all,
   outline = false,
@@ -44,20 +45,23 @@ end
 local Portal = {
   group = groups.all,
   class = 'portal',
-  locationName = '', -- name of location
   posOffset = {
-    x = 2,
-    y = -18
+    x = 0,
+    z = 18
+  },
+  style = 1,
+  scale = 1,
+  color = {1,0.9,0},
+  location = {
+    tooltipText = 'no location'
   },
   -- debug = true,
   init = function(self)
+    Component.addToGroup(self, 'gameWorld')
+
     local root = self
     self.x = self.x + self.posOffset.x
-    self.y = self.y + self.posOffset.y
-
-    self.spiralStencil = function()
-      love.graphics.circle('fill', self.x, self.y, spiralSize)
-    end
+    self.z = self.z + self.posOffset.z
 
     portalOpenSound()
 
@@ -69,50 +73,64 @@ local Portal = {
       y = self.y - spiralSize,
       w = 1,
       h = 1,
+      onCreate = function(self)
+        self.originalInputContext = self.inputContext
+      end,
       onClick = function()
-        portalEnterSound()
-        msgBus.send(msgBus.PORTAL_ENTER)
+        if (not root.collidingWithPlayer) then
+          return
+        end
+        msgBus.send(msgBus.PORTAL_ENTER, root.location)
       end,
       onUpdate = function(self)
-        local portalTooltipText = 'teleport to '..(root.locationName or 'no location')
+        local portalTooltipText = root.location.tooltipText
         local textWidth, textHeight = GuiText.getTextSize(portalTooltipText, Font.primary.font)
         self.w = textWidth + padding
         self.h = textHeight + padding
         self.portalTooltipText = portalTooltipText
 
-        local hasChangedPosition = self.x ~= self.prevX or self.y ~= self.prevY
-        if hasChangedPosition then
-          portalOpenSound()
-        end
-        self.prevX, self.prevY = self.x, self.y
+        self:setDrawDisabled(not root.collidingWithPlayer)
+
+        self.inputContext = root.collidingWithPlayer and
+          self.originalInputContext or
+          'any'
       end,
       getMousePosition = function()
         local camera = require 'components.camera'
         return camera:getMousePosition()
       end,
       draw = function(self)
-        love.graphics.setColor(
-          self.hovered and Color.YELLOW or Color.PRIMARY
-        )
+        love.graphics.setColor(Color.multiplyAlpha(Color.BLACK, 0.8))
         local paddingOffset = padding/2
         love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
-        love.graphics.setColor(Color.BLACK)
-        love.graphics.rectangle('line', self.x, self.y, self.w, self.h)
-        guiText:add(self.portalTooltipText, Color.BLACK, self.x + paddingOffset, self.y + paddingOffset + Font.primary.lineHeight)
+        Component.get('PortalTextLayer'):add(self.portalTooltipText, Color.WHITE, self.x + paddingOffset, self.y + paddingOffset + Font.primary.lineHeight)
+
+        if self.hovered then
+          love.graphics.setColor(1,1,1)
+          love.graphics.rectangle('line', self.x, self.y, self.w, self.h)
+        end
       end,
       drawOrder = guiDrawOrder
     }):setParent(self)
     local collisionSize = spiralSize
-    local offset = collisionSize/2
+    local offsetX = collisionSize
     self.collision = self:addCollisionObject(
       collisionGroups.hotSpot,
-      self.x,
-      self.y,
-      collisionSize,
-      collisionSize,
-      offset,
-      offset - offset * 0.6
+      self.x - offsetX,
+      self.y - collisionSize,
+      collisionSize * 2,
+      collisionSize * 2
+      -- ,offsetX
     ):addToWorld(collisionWorlds.map)
+
+    local PortalAnimation = dynamicRequire 'components.portal.animation'
+    self.portalAnimation = PortalAnimation.create({
+      x = root.x,
+      y = root.y,
+      z = root.z,
+      style = root.style,
+      color = root.color,
+    }):setParent(root)
   end,
   update = function(self, dt)
     self.angle = self.angle + dt * 20
@@ -122,37 +140,8 @@ local Portal = {
       self.collision.y,
       portalCollisionFilter
     )
-    local portalActionEnabled = len > 0
-    self.teleportButton:setDisabled(not portalActionEnabled)
-    self.collision:update(self.x, self.y)
-  end,
-  draw = function(self)
-    local scaleXDiff = 1 - scaleX
-    local x, y = self.x, self.y
-    local offset = {x = 50, y = 30}
-    love.graphics.setColor(0,0.7,1,0.3)
-    love.graphics.circle('fill', x, y, spiralSize)
-    love.graphics.circle('fill', x, y, spiralSize * 0.8)
-    love.graphics.circle('fill', x, y, spiralSize * 0.5)
-    love.graphics.setColor(0,0.3,0.5,0.3)
-    love.graphics.circle('fill', x, y, spiralSize * 0.2)
-
-    love.graphics.stencil(self.spiralStencil, 'replace', 1)
-    love.graphics.setStencilTest("greater", 0)
-    love.graphics.setColor(1,1,1,0.3)
-    local teleportSpiral = loadImage('built/images/fibonnaci-spiral.png')
-    love.graphics.draw(
-      teleportSpiral,
-      x, y,
-      self.angle,
-      1, 1,
-      offset.x,
-      offset.y
-    )
-    love.graphics.setStencilTest()
-  end,
-  drawOrder = function(self)
-    return self.group:drawOrder(self) + 1
+    self.collidingWithPlayer = len > 0
+    self.portalAnimation.scale = self.scale
   end
 }
 

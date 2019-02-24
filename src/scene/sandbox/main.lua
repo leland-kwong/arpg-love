@@ -6,13 +6,14 @@ local MenuList = require 'components.menu-list'
 local Component = require 'modules.component'
 local groups = require 'components.groups'
 local msgBus = require 'components.msg-bus'
-local msgBusMainMenu = require 'components.msg-bus-main-menu'
 local config = require 'config.config'
 local objectUtils = require 'utils.object-utils'
 local bitser = require 'modules.bitser'
+local memoize = require 'utils.memoize'
+local F = require 'utils.functional'
 
 local function getMenuTabsPosition()
-  return 200, 60
+  return 15, 60
 end
 
 local drawOrder = function()
@@ -30,25 +31,6 @@ local Sandbox = {
   drawOrder = function()
     return drawOrder() - 1
   end
-}
-
-local scenes = {
-  aiTest = {
-    name = 'ai',
-    path = 'scene.sandbox.ai.test-scene'
-  },
-  guiTest = {
-    name = 'gui',
-    path = 'scene.sandbox.gui.test-scene'
-  },
-  particleTest = {
-    name = 'particle fx',
-    path = 'scene.sandbox.particle-fx.particle-test'
-  },
-  groundFlameTest = {
-    name = 'ground flame fx',
-    path = 'scene.sandbox.particle-fx.ground-flame-test'
-  }
 }
 
 local state = {
@@ -87,19 +69,21 @@ local menuOptionQuitGame = {
   onSelectSoundEnabled = false
 }
 
-msgBus.SETTINGS_MENU_TOGGLE = 'SETTINGS_MENU_TOGGLE'
 msgBus.on(msgBus.SETTINGS_MENU_TOGGLE, function()
   local activeMenu = Component.get('SettingsMenu')
   if activeMenu then
     activeMenu:delete(true)
   else
+    local camera = require 'components.camera'
     -- create settings menu
     local SettingsMenu = require 'scene.settings-menu'
-    local width, height = 240, 400
     local menuTabs = Component.get('MainMenuTabs')
+    local x, y = menuTabs.x + menuTabs.width + 24,
+      menuTabs.y
+    local width, height = 240, love.graphics.getHeight() / camera.scale - y - 20
     local menu = SettingsMenu.create({
-      x = menuTabs.x + menuTabs.width + 2,
-      y = menuTabs.y,
+      x = x,
+      y = y,
       width = width,
       height = height
     })
@@ -107,15 +91,16 @@ msgBus.on(msgBus.SETTINGS_MENU_TOGGLE, function()
 end)
 
 local menuOptionHomeScreen = {
-  name = 'Home Screen',
+  name = 'Title Screen',
+  id = 'titleScreen',
   value = function()
     local HomeScreen = require 'scene.sandbox.main-game.home-screen'
     msgBus.send(msgBus.SCENE_STACK_REPLACE, {
       scene = HomeScreen
     })
     msgBus.send(msgBus.GAME_UNLOADED)
-    msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, false)
-    msgBusMainMenu.send(msgBusMainMenu.TOGGLE_MAIN_MENU, true)
+    msgBus.send(msgBus.TOGGLE_MAIN_MENU, false)
+    msgBus.send(msgBus.TOGGLE_MAIN_MENU, true)
   end
 }
 
@@ -142,13 +127,38 @@ local menuOptionPlayGameMenu = {
 }
 
 local menuOptionNewsPanel = {
-  name = 'Latest news',
+  name = 'Patch notes',
   value = function()
-    Component.get('newsDialog'):setDisabled(false)
+    -- dont close it if it's already open
+    if Component.get('newsDialog') then
+      return
+    end
+    msgBus.send(msgBus.LATEST_NEWS_TOGGLE)
   end
 }
 
-msgBus.PLAY_GAME_MENU_TOGGLE = 'PLAY_GAME_MENU_TOGGLE'
+msgBus.on(msgBus.LATEST_NEWS_TOGGLE, function()
+  local ref = Component.get('newsDialog')
+  if ref then
+    ref:delete(true)
+  else
+    local camera = require 'components.camera'
+    local LatestNews = require 'scene.latest-news'
+    local menuTabs = Component.get('MainMenuTabs')
+    local x, y = menuTabs.x + menuTabs.width + 24,
+      menuTabs.y
+    local width, height = 240, love.graphics.getHeight() / camera.scale - y - 20
+    LatestNews.create({
+      x = x,
+      y = y,
+      width = width,
+      height = height
+    })
+    -- set selected tab
+    Component.get('MainMenuTabs').value = menuOptionNewsPanel.value
+  end
+end)
+
 msgBus.on(msgBus.PLAY_GAME_MENU_TOGGLE, function()
   local activeMenu = Component.get('PlayGameMenu')
   if activeMenu then
@@ -161,7 +171,7 @@ msgBus.on(msgBus.PLAY_GAME_MENU_TOGGLE, function()
     local PlayGameMenu = require 'scene.play-game-menu'
     local menuTabs = Component.get('MainMenuTabs')
     local menu = PlayGameMenu.create({
-      x = menuTabs.x + menuTabs.width + 2,
+      x = menuTabs.x + menuTabs.width + 24,
       y = menuTabs.y,
     })
   end
@@ -171,40 +181,20 @@ local sceneOptionsNormal = {
   menuOptionPlayGameMenu,
   menuOptionSettingsMenu,
   menuOptionHomeScreen,
-  menuOptionNewsPanel,
+  menuOptionNewsPanel
+}
+
+local sceneOptionsDebug = F.concat(sceneOptionsNormal, {
   menuOptionQuitGame
-}
+})
 
-local sceneOptionsDebug = {
-  menuOptionPlayGameMenu,
-  menuOptionSettingsMenu,
-  {
-    name = 'main game sandbox',
-    value = function()
-      local msgBus = require 'components.msg-bus'
-      local Scene = require 'scene.sandbox.main-game.main-game-test'
-      msgBus.send(msgBus.NEW_GAME, {
-        scene = Scene,
-        props = {
-          __stateId = 'test-state',
-          characterName = 'test character'
-        }
-      })
-    end
-  },
-  menuOptionHomeScreen,
-  menuOptionSceneLoad(scenes.aiTest),
-  menuOptionSceneLoad(scenes.guiTest),
-  menuOptionSceneLoad(scenes.particleTest),
-  menuOptionSceneLoad(scenes.groundFlameTest),
-  menuOptionQuitGame,
-}
+table.insert(sceneOptionsNormal, menuOptionQuitGame)
 
-msgBusMainMenu.on(msgBusMainMenu.MENU_ITEM_ADD, function(menuOption)
+msgBus.on(msgBus.MENU_ITEM_ADD, function(menuOption)
   table.insert(sceneOptionsDebug, #sceneOptionsDebug - 1, menuOption)
 end)
 
-msgBusMainMenu.on(msgBusMainMenu.MENU_ITEM_REMOVE, function(menuOption)
+msgBus.on(msgBus.MENU_ITEM_REMOVE, function(menuOption)
   local options = sceneOptionsDebug
   for i=1, #options do
     local option= options[i]
@@ -215,10 +205,6 @@ msgBusMainMenu.on(msgBusMainMenu.MENU_ITEM_REMOVE, function(menuOption)
 end)
 
 require 'scene.skill-tree-editor'
-require 'scene.light-test'
-require 'scene.font-test'
-require 'scene.tooltip-test'
-require 'scene.skew-rotate-test'
 
 function Sandbox.init(self)
   self.activeSceneMenu = nil
@@ -232,7 +218,7 @@ function Sandbox.init(self)
         id = 'MainMenuTabs',
         x = x,
         y = y,
-        width = 150,
+        width = 120,
         options = {},
         onSelect = function(name, value)
           value()
@@ -252,7 +238,7 @@ function Sandbox.init(self)
   menuOptionHomeScreen.value()
 
   self.listeners = {
-    msgBusMainMenu.on(msgBusMainMenu.TOGGLE_MAIN_MENU, function(enabled)
+    msgBus.on(msgBus.TOGGLE_MAIN_MENU, function(enabled)
       local MenuManager = require 'modules.menu-manager'
       if (enabled ~= nil) then
         MenuManager.clearAll()
@@ -268,6 +254,17 @@ function Sandbox.init(self)
   DebugMenu(true)
 end
 
+local getNextMenuOptions = memoize(function(isDev, isTitleScreen)
+  local options = isDev and
+    sceneOptionsDebug or
+    sceneOptionsNormal
+  return isTitleScreen and
+    F.filter(options, function(o)
+      return (o.id ~= 'titleScreen')
+    end) or
+    options
+end)
+
 function Sandbox.update(self)
   if state.menuOpened then
     Component.addToGroup(self.activeSceneMenu, 'guiDrawBox')
@@ -275,12 +272,13 @@ function Sandbox.update(self)
     Component.removeFromGroup(self.activeSceneMenu, 'guiDrawBox')
   end
   if self.activeSceneMenu then
-    self.activeSceneMenu.options = config.isDevelopment and sceneOptionsDebug or sceneOptionsNormal
+    local isTitleScreen = Component.get('HomeScreen') ~= nil
+    self.activeSceneMenu.options = getNextMenuOptions(config.isDevelopment, isTitleScreen)
   end
 end
 
 function Sandbox.final(self)
-  msgBusMainMenu.off(self.listeners)
+  msgBus.off(self.listeners)
 end
 
 return Component.createFactory(Sandbox)

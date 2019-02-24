@@ -87,8 +87,6 @@ end
 Stateful.INITIAL_VALUE = 'INITIAL_VALUE'
 
 function Stateful:set(key, value, updateCompleteCallback)
-	typeCheck.validate(value, typeCheck.NON_NIL)
-
 	self.debug(debugAction.SET_PENDING, key, value)
 
 	local isValueFunction = type(value) == TYPE_FUNCTION
@@ -142,23 +140,6 @@ end
 
 function Stateful:get()
 	return self[__state], self[__prevState]
-end
-
-function Stateful:replaceState(newState)
-	-- validate state shape to make sure its same as what it was initially
-	if isDevelopment then
-		for k,v in pairs(self.initialState) do
-			if newState[k] == nil then
-				error("[stateful.replaceState] state shape is incorrect. Missing key `"..k.."`")
-			end
-		end
-	end
-
-	-- use the setter method so we can trigger subscribers
-	for k,v in pairs(newState) do
-		self:set(k, v)
-	end
-	return self
 end
 
 local subscribeId = 0
