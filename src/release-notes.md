@@ -1,27 +1,32 @@
 # RELEASE NOTES
 
-## 6.1.0-pre-alpha
+## 6.2.0-pre-alpha
 
-NEW
+We will be switching to a new game engine which means this is the last release running on the Love2d game engine. We are currently evaluating unity and maybe gamemaker or godot. We're not sure how long the switch will take, but expect at least a month before the next release. We'll still address any major game-breaking bugs that show up, but other than that, our focus now is on porting to a new engine. Thank you!
 
-Settings
+SETTINGS/OPTIONS
 
 * Added display scale options
 
 GAMEPLAY
 
-* Added universe map so you can teleport between levels
-* Added doors
+* Redesigned maps to have more interesting layouts.
+* Added universe map so you can teleport between levels.
+* Added doors.
+* Tweaked ability graphics and added some particle effects for some.
 
 BALANCE
 
 * Many abilities have been adjusted to make things feel a bit more balanced. As always, we'll continue to adjust things as needed.
 * Many item modifier values have been reduced to make them less overpowered.
+* Frost orb now can only hit a maximum number of times per second. This prevents it from being too powerful on larger targets. To compensate for this change, the shards now pierce through targets.
 
 FIXES
 
+* Fixed issue with boss spawning ai outside of map.
+* Fixed issue with items dropping in unwalkable areas.
 * Fixed an issue with memory leaks.
-* Fixed issue with enemies sometimes spawning outside of the map
+* Fixed issue with enemies sometimes spawning outside of the map.
 
 ## 6.0.0-pre-alpha
 
