@@ -2,7 +2,11 @@
 
 "ai-1/ai-0":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":141,"y":106,"w":19,"h":17},
+=======
+	"frame": {"x":1672,"y":4,"w":19,"h":17},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":3,"w":19,"h":17},
@@ -11,7 +15,11 @@
 },
 "ai-1/ai-1":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":164,"y":106,"w":19,"h":17},
+=======
+	"frame": {"x":1657,"y":47,"w":19,"h":17},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":3,"y":3,"w":19,"h":17},
@@ -20,7 +28,11 @@
 },
 "ai-1/ai-2":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":804,"y":102,"w":19,"h":19},
+=======
+	"frame": {"x":409,"y":97,"w":19,"h":19},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":3,"y":1,"w":19,"h":19},
@@ -29,7 +41,11 @@
 },
 "ai-1/ai-3":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":187,"y":106,"w":18,"h":17},
+=======
+	"frame": {"x":1678,"y":25,"w":18,"h":17},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":3,"y":3,"w":18,"h":17},
@@ -38,7 +54,11 @@
 },
 "ai-1/ai-4":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":117,"y":106,"w":20,"h":17},
+=======
+	"frame": {"x":1654,"y":26,"w":20,"h":17},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":3,"w":20,"h":17},
@@ -47,7 +67,11 @@
 },
 "ai-1/ai-5":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":827,"y":102,"w":18,"h":19},
+=======
+	"frame": {"x":1317,"y":104,"w":18,"h":19},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":1,"w":18,"h":19},
@@ -56,7 +80,11 @@
 },
 "ai-1/ai-6":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":187,"y":106,"w":18,"h":17},
+=======
+	"frame": {"x":1678,"y":25,"w":18,"h":17},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":3,"y":3,"w":18,"h":17},
@@ -65,7 +93,11 @@
 },
 "ai-1/ai-7":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":358,"y":106,"w":18,"h":16},
+=======
+	"frame": {"x":262,"y":77,"w":18,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":3,"y":4,"w":18,"h":16},
@@ -83,7 +115,11 @@
 },
 "ai-1/ai-9":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":358,"y":106,"w":18,"h":16},
+=======
+	"frame": {"x":262,"y":77,"w":18,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":3,"y":4,"w":18,"h":16},
@@ -92,7 +128,11 @@
 },
 "ai-legendaries/legendary-1/legendary-ai-1":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":380,"y":106,"w":16,"h":16},
+=======
+	"frame": {"x":284,"y":77,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -101,7 +141,11 @@
 },
 "augmentation-defender":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1315,"y":95,"w":28,"h":28},
+=======
+	"frame": {"x":1435,"y":69,"w":28,"h":28},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":2,"w":28,"h":28},
@@ -110,7 +154,11 @@
 },
 "augmentation-one":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1420,"y":4,"w":28,"h":29},
+=======
+	"frame": {"x":1295,"y":38,"w":28,"h":29},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":2,"w":28,"h":29},
@@ -119,7 +167,11 @@
 },
 "augmentation-rage":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1434,"y":37,"w":28,"h":29},
+=======
+	"frame": {"x":1305,"y":4,"w":28,"h":29},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":2,"w":28,"h":29},
@@ -128,7 +180,11 @@
 },
 "body-armor-basic":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1386,"y":4,"w":30,"h":30},
+=======
+	"frame": {"x":1271,"y":4,"w":30,"h":30},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":1,"y":1,"w":30,"h":30},
@@ -137,7 +193,11 @@
 },
 "boss-1/beam-strike-glyph-inner":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1355,"y":78,"w":12,"h":12},
+=======
+	"frame": {"x":1285,"y":111,"w":12,"h":12},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":12,"h":12},
@@ -146,7 +206,11 @@
 },
 "boss-1/beam-strike-glyph-outer":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1151,"y":4,"w":37,"h":37},
+=======
+	"frame": {"x":1064,"y":4,"w":37,"h":37},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":37,"h":37},
@@ -155,7 +219,11 @@
 },
 "boss-1/beam-strike-head":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1153,"y":85,"w":18,"h":6},
+=======
+	"frame": {"x":1209,"y":116,"w":18,"h":6},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":1,"y":0,"w":18,"h":6},
@@ -164,7 +232,11 @@
 },
 "boss-1/beam-strike-middle":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":717,"y":56,"w":20,"h":1},
+=======
+	"frame": {"x":593,"y":56,"w":20,"h":1},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":1},
@@ -173,7 +245,11 @@
 },
 "boss-1/beam-strike-tail":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1175,"y":85,"w":18,"h":6},
+=======
+	"frame": {"x":1231,"y":116,"w":18,"h":6},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":1,"y":0,"w":18,"h":6},
@@ -182,7 +258,11 @@
 },
 "boss-1/boss-1":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":232,"y":4,"w":130,"h":69},
+=======
+	"frame": {"x":234,"y":4,"w":130,"h":69},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":130,"h":69},
@@ -191,7 +271,11 @@
 },
 "boss-1/Slice":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":377,"y":68,"w":9,"h":4},
+=======
+	"frame": {"x":1559,"y":119,"w":9,"h":4},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":9,"h":4},
@@ -200,7 +284,11 @@
 },
 "bullet/bullet-1":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1231,"y":83,"w":6,"h":6},
+=======
+	"frame": {"x":1264,"y":115,"w":6,"h":6},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":3,"y":3,"w":6,"h":6},
@@ -209,7 +297,11 @@
 },
 "cloud":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1702,"y":90,"w":11,"h":11},
+=======
+	"frame": {"x":1850,"y":52,"w":11,"h":11},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":11,"h":11},
@@ -218,7 +310,11 @@
 },
 "companion/inner":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1253,"y":81,"w":9,"h":9},
+=======
+	"frame": {"x":570,"y":113,"w":9,"h":9},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":9,"h":9},
@@ -227,7 +323,11 @@
 },
 "companion/outer":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1717,"y":90,"w":11,"h":11},
+=======
+	"frame": {"x":1850,"y":67,"w":11,"h":11},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":11,"h":11},
@@ -236,7 +336,11 @@
 },
 "cube":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":400,"y":106,"w":16,"h":16},
+=======
+	"frame": {"x":304,"y":77,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -245,7 +349,11 @@
 },
 "cursor-move-2x":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1153,"y":45,"w":36,"h":36},
+=======
+	"frame": {"x":1105,"y":4,"w":36,"h":36},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":4,"w":36,"h":36},
@@ -254,7 +362,11 @@
 },
 "cursor-move-3x":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":524,"y":4,"w":54,"h":54},
+=======
+	"frame": {"x":432,"y":68,"w":54,"h":54},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":3,"y":6,"w":54,"h":54},
@@ -263,7 +375,11 @@
 },
 "cursor-move":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1630,"y":60,"w":18,"h":18},
+=======
+	"frame": {"x":1654,"y":95,"w":18,"h":18},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":1,"y":2,"w":18,"h":18},
@@ -272,7 +388,11 @@
 },
 "cursor-pointer-2x":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1639,"y":30,"w":18,"h":18},
+=======
+	"frame": {"x":1595,"y":4,"w":18,"h":18},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":18,"y":18,"w":18,"h":18},
@@ -281,7 +401,11 @@
 },
 "cursor-pointer-3x":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1093,"y":96,"w":27,"h":27},
+=======
+	"frame": {"x":925,"y":96,"w":27,"h":27},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":27,"y":27,"w":27,"h":27},
@@ -290,7 +414,11 @@
 },
 "cursor-pointer":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1609,"y":114,"w":9,"h":9},
+=======
+	"frame": {"x":583,"y":113,"w":9,"h":9},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":9,"y":9,"w":9,"h":9},
@@ -299,7 +427,11 @@
 },
 "cursor-speech-2x":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1271,"y":95,"w":40,"h":28},
+=======
+	"frame": {"x":1397,"y":4,"w":40,"h":28},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":8,"w":40,"h":28},
@@ -308,7 +440,11 @@
 },
 "cursor-speech-3x":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1065,"y":50,"w":60,"h":42},
+=======
+	"frame": {"x":907,"y":50,"w":60,"h":42},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":3,"y":12,"w":60,"h":42},
@@ -317,7 +453,11 @@
 },
 "cursor-speech":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1796,"y":101,"w":20,"h":14},
+=======
+	"frame": {"x":1790,"y":43,"w":20,"h":14},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":1,"y":4,"w":20,"h":14},
@@ -326,7 +466,11 @@
 },
 "door-1-front-facing-center":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1059,"y":4,"w":64,"h":42},
+=======
+	"frame": {"x":885,"y":4,"w":64,"h":42},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":42},
@@ -335,7 +479,11 @@
 },
 "door-1-front-facing-left-wall":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":999,"y":4,"w":16,"h":43},
+=======
+	"frame": {"x":747,"y":51,"w":16,"h":43},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":43},
@@ -344,7 +492,11 @@
 },
 "door-1-front-facing-lip":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":366,"y":4,"w":62,"h":60},
+=======
+	"frame": {"x":368,"y":4,"w":62,"h":60},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":62,"h":60},
@@ -353,7 +505,11 @@
 },
 "door-1-front-facing-right-wall":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1005,"y":51,"w":16,"h":43},
+=======
+	"frame": {"x":755,"y":4,"w":16,"h":43},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":43},
@@ -362,7 +518,11 @@
 },
 "door-1-side-facing-bottom-wall":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1127,"y":4,"w":20,"h":42},
+=======
+	"frame": {"x":953,"y":4,"w":20,"h":42},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":42},
@@ -371,7 +531,11 @@
 },
 "door-1-side-facing-center":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":210,"y":4,"w":18,"h":89},
+=======
+	"frame": {"x":212,"y":4,"w":18,"h":89},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":18,"h":89},
@@ -380,7 +544,11 @@
 },
 "door-1-side-facing-lip":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1154,"y":95,"w":60,"h":28},
+=======
+	"frame": {"x":1371,"y":70,"w":60,"h":28},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":60,"h":28},
@@ -389,7 +557,11 @@
 },
 "door-1-side-facing-top-wall":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1129,"y":50,"w":20,"h":42},
+=======
+	"frame": {"x":971,"y":50,"w":20,"h":42},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":42},
@@ -398,7 +570,11 @@
 },
 "environment-breakable-1":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":891,"y":102,"w":15,"h":19},
+=======
+	"frame": {"x":1557,"y":4,"w":15,"h":19},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":19},
@@ -407,7 +583,11 @@
 },
 "environment-breakable-2":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":910,"y":102,"w":15,"h":19},
+=======
+	"frame": {"x":1576,"y":4,"w":15,"h":19},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":19},
@@ -416,7 +596,11 @@
 },
 "environment-breakable-3":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":929,"y":102,"w":15,"h":19},
+=======
+	"frame": {"x":1544,"y":79,"w":15,"h":19},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":19},
@@ -425,7 +609,11 @@
 },
 "environment-door":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":529,"y":62,"w":16,"h":40},
+=======
+	"frame": {"x":977,"y":4,"w":16,"h":40},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":1,"w":16,"h":40},
@@ -434,7 +622,11 @@
 },
 "environment-entrance":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":488,"y":4,"w":32,"h":58},
+=======
+	"frame": {"x":490,"y":4,"w":32,"h":58},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":58},
@@ -443,7 +635,11 @@
 },
 "eyeball/eyeball":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":420,"y":106,"w":16,"h":16},
+=======
+	"frame": {"x":324,"y":77,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -452,7 +648,11 @@
 },
 "fireball/fireball":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":232,"y":77,"w":24,"h":16},
+=======
+	"frame": {"x":234,"y":77,"w":24,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":1,"y":1,"w":24,"h":16},
@@ -461,7 +661,11 @@
 },
 "floor-1":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":440,"y":106,"w":16,"h":16},
+=======
+	"frame": {"x":344,"y":77,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -470,7 +674,11 @@
 },
 "floor-2":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":520,"y":106,"w":16,"h":16},
+=======
+	"frame": {"x":1694,"y":88,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -479,7 +687,11 @@
 },
 "floor-3":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":540,"y":106,"w":16,"h":16},
+=======
+	"frame": {"x":1702,"y":67,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -488,7 +700,11 @@
 },
 "floor-4":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1698,"y":26,"w":16,"h":16},
+=======
+	"frame": {"x":1714,"y":46,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -497,7 +713,11 @@
 },
 "floor-5":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1714,"y":4,"w":16,"h":16},
+=======
+	"frame": {"x":1719,"y":25,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -506,7 +726,11 @@
 },
 "floor-6":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1702,"y":70,"w":16,"h":16},
+=======
+	"frame": {"x":1734,"y":4,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -515,7 +739,11 @@
 },
 "floor-7":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1704,"y":105,"w":16,"h":16},
+=======
+	"frame": {"x":1714,"y":87,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -524,7 +752,11 @@
 },
 "floor-8":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1724,"y":105,"w":16,"h":16},
+=======
+	"frame": {"x":1726,"y":107,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -533,7 +765,11 @@
 },
 "floor-9":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1709,"y":46,"w":16,"h":16},
+=======
+	"frame": {"x":1722,"y":66,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -542,7 +778,11 @@
 },
 "floor-10":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":460,"y":106,"w":16,"h":16},
+=======
+	"frame": {"x":364,"y":77,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -551,7 +791,11 @@
 },
 "floor-11":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":480,"y":106,"w":16,"h":16},
+=======
+	"frame": {"x":384,"y":77,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -560,7 +804,11 @@
 },
 "floor-12":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":500,"y":106,"w":16,"h":16},
+=======
+	"frame": {"x":404,"y":77,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -569,7 +817,11 @@
 },
 "floor-cross-section-0":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1452,"y":4,"w":16,"h":29},
+=======
+	"frame": {"x":1311,"y":71,"w":16,"h":29},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":29},
@@ -578,7 +830,11 @@
 },
 "floor-empty":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":524,"y":62,"w":1,"h":1},
+=======
+	"frame": {"x":212,"y":97,"w":1,"h":1},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":1},
@@ -587,7 +843,11 @@
 },
 "frost-orb/frost-orb-core":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":209,"y":106,"w":17,"h":17},
+=======
+	"frame": {"x":1695,"y":4,"w":17,"h":17},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":1,"y":1,"w":17,"h":17},
@@ -596,7 +856,11 @@
 },
 "frost-orb/frost-orb-shard":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1639,"y":52,"w":5,"h":3},
+=======
+	"frame": {"x":409,"y":120,"w":5,"h":3},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":5,"h":3},
@@ -605,7 +869,11 @@
 },
 "frost-spark/frost-spark":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1291,"y":78,"w":13,"h":13},
+=======
+	"frame": {"x":1569,"y":102,"w":13,"h":13},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":13,"h":13},
@@ -614,7 +882,11 @@
 },
 "gui-arrow-small":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":366,"y":68,"w":7,"h":5},
+=======
+	"frame": {"x":1274,"y":115,"w":7,"h":5},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":2,"w":7,"h":5},
@@ -623,7 +895,11 @@
 },
 "gui-button":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1266,"y":78,"w":21,"h":13},
+=======
+	"frame": {"x":1544,"y":102,"w":21,"h":13},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":21,"h":13},
@@ -632,7 +908,11 @@
 },
 "gui-dashboard-abilities-underlay":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":549,"y":62,"w":146,"h":37},
+=======
+	"frame": {"x":995,"y":48,"w":146,"h":37},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":146,"h":37},
@@ -641,7 +921,11 @@
 },
 "gui-dashboard-menu-left":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1509,"y":93,"w":4,"h":26},
+=======
+	"frame": {"x":279,"y":97,"w":4,"h":26},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":2,"w":4,"h":26},
@@ -650,7 +934,11 @@
 },
 "gui-dashboard-menu-middle":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1517,"y":93,"w":1,"h":26},
+=======
+	"frame": {"x":287,"y":97,"w":1,"h":26},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":2,"w":1,"h":26},
@@ -659,7 +947,11 @@
 },
 "gui-dashboard-menu-right":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1218,"y":95,"w":49,"h":28},
+=======
+	"frame": {"x":1387,"y":37,"w":49,"h":28},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":49,"h":28},
@@ -668,7 +960,11 @@
 },
 "gui-dashboard-status-bar-fancy-highlight":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":210,"y":97,"w":60,"h":5},
+=======
+	"frame": {"x":368,"y":68,"w":60,"h":5},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":60,"h":5},
@@ -677,7 +973,11 @@
 },
 "gui-dashboard-status-bar-fancy":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1622,"y":105,"w":60,"h":18},
+=======
+	"frame": {"x":1599,"y":73,"w":60,"h":18},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":60,"h":18},
@@ -686,7 +986,11 @@
 },
 "gui-dashboard-status-bars-underlay":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":391,"y":68,"w":134,"h":34},
+=======
+	"frame": {"x":1014,"y":89,"w":134,"h":34},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":134,"h":34},
@@ -695,7 +999,11 @@
 },
 "gui-dashboard-vials-underlay":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":699,"y":61,"w":63,"h":37},
+=======
+	"frame": {"x":997,"y":4,"w":63,"h":37},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":63,"h":37},
@@ -704,7 +1012,11 @@
 },
 "gui-exclamation-mark":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1792,"y":22,"w":6,"h":14},
+=======
+	"frame": {"x":1813,"y":22,"w":6,"h":14},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":14},
@@ -713,7 +1025,11 @@
 },
 "gui-gradient-background":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":786,"y":51,"w":100,"h":1},
+=======
+	"frame": {"x":526,"y":61,"w":100,"h":1},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":1},
@@ -722,7 +1038,11 @@
 },
 "gui-home-button--hover":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1801,"y":40,"w":12,"h":12},
+=======
+	"frame": {"x":1301,"y":111,"w":12,"h":12},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":2,"w":12,"h":12},
@@ -740,7 +1060,11 @@
 },
 "gui-home-portal-button--hover":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1802,"y":22,"w":12,"h":12},
+=======
+	"frame": {"x":1782,"y":102,"w":12,"h":12},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":2,"w":12,"h":12},
@@ -758,7 +1082,11 @@
 },
 "gui-input-box-label":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1197,"y":83,"w":19,"h":8},
+=======
+	"frame": {"x":609,"y":113,"w":19,"h":8},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":19,"h":8},
@@ -767,7 +1095,11 @@
 },
 "gui-inventory-button--hover":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1805,"y":4,"w":12,"h":12},
+=======
+	"frame": {"x":1788,"y":81,"w":12,"h":12},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":2,"w":12,"h":12},
@@ -785,7 +1117,11 @@
 },
 "gui-main-map-button--hover":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":260,"y":77,"w":10,"h":12},
+=======
+	"frame": {"x":1836,"y":68,"w":10,"h":12},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":3,"y":2,"w":10,"h":12},
@@ -803,7 +1139,11 @@
 },
 "gui-map-gui-legend":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":717,"y":4,"w":65,"h":48},
+=======
+	"frame": {"x":593,"y":4,"w":65,"h":48},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":65,"h":48},
@@ -812,7 +1152,11 @@
 },
 "gui-map-gui-view-toggle":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":766,"y":56,"w":96,"h":42},
+=======
+	"frame": {"x":807,"y":51,"w":96,"h":42},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":96,"h":42},
@@ -821,7 +1165,11 @@
 },
 "gui-map-pointer":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1850,"y":20,"w":9,"h":12},
+=======
+	"frame": {"x":1823,"y":4,"w":9,"h":12},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":9,"h":12},
@@ -830,7 +1178,11 @@
 },
 "gui-map-portal-point-locked":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":230,"y":106,"w":17,"h":17},
+=======
+	"frame": {"x":1663,"y":68,"w":17,"h":17},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":17,"h":17},
@@ -839,7 +1191,11 @@
 },
 "gui-map-portal-point":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":251,"y":106,"w":17,"h":17},
+=======
+	"frame": {"x":1680,"y":46,"w":17,"h":17},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":17,"h":17},
@@ -848,7 +1204,11 @@
 },
 "gui-map-quest-point":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1308,"y":78,"w":13,"h":13},
+=======
+	"frame": {"x":1676,"y":110,"w":13,"h":13},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":13,"h":13},
@@ -857,7 +1217,11 @@
 },
 "gui-panel-dialogue":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":866,"y":56,"w":66,"h":42},
+=======
+	"frame": {"x":815,"y":4,"w":66,"h":42},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":66,"h":42},
@@ -866,7 +1230,11 @@
 },
 "gui-panel-menu-translucent":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":650,"y":4,"w":63,"h":53},
+=======
+	"frame": {"x":526,"y":4,"w":63,"h":53},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":63,"h":53},
@@ -875,7 +1243,11 @@
 },
 "gui-panel-menu":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":582,"y":4,"w":64,"h":53},
+=======
+	"frame": {"x":490,"y":66,"w":64,"h":53},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":53},
@@ -884,7 +1256,11 @@
 },
 "gui-player-position-indicator-glow":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1848,"y":84,"w":11,"h":11},
+=======
+	"frame": {"x":1850,"y":82,"w":11,"h":11},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":11,"h":11},
@@ -893,7 +1269,11 @@
 },
 "gui-player-position-indicator":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1848,"y":99,"w":11,"h":11},
+=======
+	"frame": {"x":1830,"y":105,"w":11,"h":11},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":11,"h":11},
@@ -902,7 +1282,11 @@
 },
 "gui-quest-log-button--hover":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1810,"y":56,"w":12,"h":12},
+=======
+	"frame": {"x":1798,"y":97,"w":12,"h":12},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":2,"w":12,"h":12},
@@ -911,7 +1295,11 @@
 },
 "gui-quest-log-button":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1732,"y":86,"w":14,"h":15},
+=======
+	"frame": {"x":117,"y":108,"w":14,"h":15},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":1,"y":1,"w":14,"h":15},
@@ -920,7 +1308,11 @@
 },
 "gui-selected-indicator":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1562,"y":117,"w":43,"h":4},
+=======
+	"frame": {"x":1512,"y":119,"w":43,"h":4},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":43,"h":4},
@@ -929,7 +1321,11 @@
 },
 "gui-skill-tree-button--hover":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1817,"y":38,"w":12,"h":12},
+=======
+	"frame": {"x":1804,"y":81,"w":12,"h":12},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":2,"w":12,"h":12},
@@ -938,7 +1334,11 @@
 },
 "gui-skill-tree-button":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1774,"y":4,"w":14,"h":15},
+=======
+	"frame": {"x":135,"y":108,"w":14,"h":15},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":1,"y":1,"w":14,"h":15},
@@ -947,7 +1347,11 @@
 },
 "gui-skill-tree_node_background":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":304,"y":77,"w":25,"h":25},
+=======
+	"frame": {"x":322,"y":97,"w":25,"h":25},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":25,"h":25},
@@ -956,7 +1360,11 @@
 },
 "gui-skill-tree_node_blood-rage":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1238,"y":4,"w":33,"h":33},
+=======
+	"frame": {"x":1172,"y":83,"w":33,"h":33},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":33,"h":33},
@@ -965,7 +1373,11 @@
 },
 "gui-skill-tree_node_cooldown-reduction-2":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1259,"y":41,"w":33,"h":33},
+=======
+	"frame": {"x":1185,"y":42,"w":33,"h":33},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":33,"h":33},
@@ -974,7 +1386,11 @@
 },
 "gui-skill-tree_node_cooldown-reduction":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":333,"y":77,"w":25,"h":25},
+=======
+	"frame": {"x":351,"y":97,"w":25,"h":25},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":25,"h":25},
@@ -983,7 +1399,11 @@
 },
 "gui-skill-tree_node_damage-up":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":362,"y":77,"w":25,"h":25},
+=======
+	"frame": {"x":380,"y":97,"w":25,"h":25},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":25,"h":25},
@@ -992,7 +1412,11 @@
 },
 "gui-skill-tree_node_energy-regeneration":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":948,"y":98,"w":25,"h":25},
+=======
+	"frame": {"x":682,"y":98,"w":25,"h":25},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":25,"h":25},
@@ -1001,7 +1425,11 @@
 },
 "gui-skill-tree_node_energy-steal":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1275,"y":4,"w":33,"h":33},
+=======
+	"frame": {"x":1197,"y":4,"w":33,"h":33},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":33,"h":33},
@@ -1010,7 +1438,11 @@
 },
 "gui-skill-tree_node_health-regeneration":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":977,"y":98,"w":25,"h":25},
+=======
+	"frame": {"x":711,"y":98,"w":25,"h":25},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":25,"h":25},
@@ -1019,7 +1451,11 @@
 },
 "gui-skill-tree_node_heavy-strike":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1296,"y":41,"w":33,"h":33},
+=======
+	"frame": {"x":1209,"y":79,"w":33,"h":33},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":33,"h":33},
@@ -1028,7 +1464,11 @@
 },
 "gui-skill-tree_node_hybrid-regeneration":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1312,"y":4,"w":33,"h":33},
+=======
+	"frame": {"x":1222,"y":41,"w":33,"h":33},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":33,"h":33},
@@ -1037,7 +1477,11 @@
 },
 "gui-skill-tree_node_life-steal":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1333,"y":41,"w":33,"h":33},
+=======
+	"frame": {"x":1234,"y":4,"w":33,"h":33},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":33,"h":33},
@@ -1046,7 +1490,11 @@
 },
 "gui-skill-tree_node_lightning":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1349,"y":4,"w":33,"h":33},
+=======
+	"frame": {"x":1246,"y":78,"w":33,"h":33},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":33,"h":33},
@@ -1055,7 +1503,11 @@
 },
 "gui-skill-tree_node_max-energy":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1006,"y":98,"w":25,"h":25},
+=======
+	"frame": {"x":740,"y":98,"w":25,"h":25},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":25,"h":25},
@@ -1064,7 +1516,11 @@
 },
 "gui-skill-tree_node_max-health-energy":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1035,"y":98,"w":25,"h":25},
+=======
+	"frame": {"x":769,"y":98,"w":25,"h":25},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":25,"h":25},
@@ -1073,7 +1529,11 @@
 },
 "gui-skill-tree_node_max-health":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1064,"y":98,"w":25,"h":25},
+=======
+	"frame": {"x":798,"y":98,"w":25,"h":25},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":25,"h":25},
@@ -1082,7 +1542,11 @@
 },
 "gui-skill-tree_node_root":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1526,"y":37,"w":25,"h":25},
+=======
+	"frame": {"x":827,"y":97,"w":25,"h":25},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":25,"h":25},
@@ -1091,7 +1555,11 @@
 },
 "gui-skill-tree_node_speed-up":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1532,"y":4,"w":25,"h":25},
+=======
+	"frame": {"x":856,"y":97,"w":25,"h":25},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":25,"h":25},
@@ -1100,7 +1568,11 @@
 },
 "gui-square-border":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1370,"y":41,"w":32,"h":32},
+=======
+	"frame": {"x":1259,"y":41,"w":32,"h":32},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -1109,7 +1581,11 @@
 },
 "gui-text-input":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1347,"y":95,"w":26,"h":28},
+=======
+	"frame": {"x":1440,"y":36,"w":26,"h":28},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":26,"h":28},
@@ -1118,7 +1594,11 @@
 },
 "impact-animation/1":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1538,"y":66,"w":15,"h":23},
+=======
+	"frame": {"x":1512,"y":92,"w":15,"h":23},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":23},
@@ -1136,7 +1616,11 @@
 },
 "impact-animation/3":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1798,"y":80,"w":14,"h":14},
+=======
+	"frame": {"x":1795,"y":23,"w":14,"h":14},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":1,"y":5,"w":14,"h":14},
@@ -1145,7 +1629,11 @@
 },
 "impact-animation/4":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1325,"y":78,"w":13,"h":13},
+=======
+	"frame": {"x":1693,"y":110,"w":13,"h":13},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":6,"w":13,"h":13},
@@ -1154,7 +1642,11 @@
 },
 "legendary-item-drop-effect-minimap":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1673,"y":70,"w":9,"h":9},
+=======
+	"frame": {"x":596,"y":113,"w":9,"h":9},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":9,"h":9},
@@ -1163,7 +1655,11 @@
 },
 "legendary-item-drop-effect":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":432,"y":4,"w":52,"h":58},
+=======
+	"frame": {"x":434,"y":4,"w":52,"h":58},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":6,"y":3,"w":52,"h":58},
@@ -1181,7 +1677,11 @@
 },
 "map-ramp-3":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1213,"y":44,"w":16,"h":35},
+=======
+	"frame": {"x":1152,"y":83,"w":16,"h":35},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":35},
@@ -1190,7 +1690,11 @@
 },
 "map-ramp-6":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1729,"y":44,"w":16,"h":16},
+=======
+	"frame": {"x":1746,"y":106,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -1199,7 +1703,11 @@
 },
 "map-ramp-7":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1738,"y":24,"w":16,"h":16},
+=======
+	"frame": {"x":1742,"y":65,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -1208,7 +1716,11 @@
 },
 "map-ramp-9":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1218,"y":4,"w":16,"h":35},
+=======
+	"frame": {"x":1165,"y":44,"w":16,"h":35},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":35},
@@ -1217,7 +1729,11 @@
 },
 "map-ramp-11":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1193,"y":44,"w":16,"h":35},
+=======
+	"frame": {"x":1145,"y":44,"w":16,"h":35},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":35},
@@ -1226,7 +1742,11 @@
 },
 "map-ramp-12":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1718,"y":24,"w":16,"h":16},
+=======
+	"frame": {"x":1734,"y":45,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -1235,7 +1755,11 @@
 },
 "map-ramp-13":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1734,"y":4,"w":16,"h":16},
+=======
+	"frame": {"x":1739,"y":24,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -1244,7 +1768,11 @@
 },
 "map-ramp-14":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1722,"y":66,"w":16,"h":16},
+=======
+	"frame": {"x":1754,"y":4,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -1253,7 +1781,11 @@
 },
 "map-ramp-15":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1744,"y":105,"w":16,"h":16},
+=======
+	"frame": {"x":1734,"y":86,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -1262,7 +1794,11 @@
 },
 "map-wall-0":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":786,"y":4,"w":20,"h":43},
+=======
+	"frame": {"x":558,"y":66,"w":20,"h":43},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":43},
@@ -1271,7 +1807,11 @@
 },
 "map-wall-1":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":810,"y":4,"w":20,"h":43},
+=======
+	"frame": {"x":582,"y":66,"w":20,"h":43},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":43},
@@ -1280,7 +1820,11 @@
 },
 "map-wall-2":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":954,"y":4,"w":19,"h":43},
+=======
+	"frame": {"x":702,"y":51,"w":19,"h":43},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":19,"h":43},
@@ -1289,7 +1833,11 @@
 },
 "map-wall-3":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":960,"y":51,"w":19,"h":43},
+=======
+	"frame": {"x":710,"y":4,"w":19,"h":43},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":19,"h":43},
@@ -1298,7 +1846,11 @@
 },
 "map-wall-4":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":834,"y":4,"w":20,"h":43},
+=======
+	"frame": {"x":606,"y":66,"w":20,"h":43},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":43},
@@ -1307,7 +1859,11 @@
 },
 "map-wall-5":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":858,"y":4,"w":20,"h":43},
+=======
+	"frame": {"x":630,"y":56,"w":20,"h":43},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":43},
@@ -1316,7 +1872,11 @@
 },
 "map-wall-6":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":882,"y":4,"w":20,"h":43},
+=======
+	"frame": {"x":654,"y":56,"w":20,"h":43},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":43},
@@ -1325,7 +1885,11 @@
 },
 "map-wall-7":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":906,"y":4,"w":20,"h":43},
+=======
+	"frame": {"x":662,"y":4,"w":20,"h":43},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":43},
@@ -1334,7 +1898,11 @@
 },
 "map-wall-8":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":930,"y":4,"w":20,"h":43},
+=======
+	"frame": {"x":678,"y":51,"w":20,"h":43},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":43},
@@ -1343,7 +1911,11 @@
 },
 "map-wall-9":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":936,"y":51,"w":20,"h":43},
+=======
+	"frame": {"x":686,"y":4,"w":20,"h":43},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":43},
@@ -1352,6 +1924,7 @@
 },
 "map-wall-10":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1019,"y":4,"w":16,"h":43},
 	"rotated": false,
 	"trimmed": false,
@@ -1470,6 +2043,131 @@
 "map-wall-15":
 {
 	"frame": {"x":1045,"y":51,"w":16,"h":43},
+=======
+	"frame": {"x":767,"y":51,"w":16,"h":43},
+>>>>>>> Stashed changes
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":2,"y":0,"w":16,"h":43},
+	"sourceSize": {"w":16,"h":43},
+	"pivot": {"x":0,"y":0.581395}
+},
+<<<<<<< Updated upstream
+"melee-bot/melee-bot-0":
+{
+	"frame": {"x":849,"y":102,"w":17,"h":19},
+=======
+"map-wall-10_1":
+{
+	"frame": {"x":1327,"y":37,"w":16,"h":29},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":29},
+	"sourceSize": {"w":16,"h":29},
+	"pivot": {"x":0,"y":0.37931}
+},
+"map-wall-10_2":
+{
+	"frame": {"x":1337,"y":4,"w":16,"h":29},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":29},
+	"sourceSize": {"w":16,"h":29},
+	"pivot": {"x":0,"y":0.37931}
+},
+"map-wall-10_3":
+{
+	"frame": {"x":1331,"y":70,"w":16,"h":29},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":29},
+	"sourceSize": {"w":16,"h":29},
+	"pivot": {"x":0,"y":0.37931}
+},
+"map-wall-10_4":
+{
+	"frame": {"x":1347,"y":37,"w":16,"h":29},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":29},
+	"sourceSize": {"w":16,"h":29},
+	"pivot": {"x":0,"y":0.37931}
+},
+"map-wall-10_5":
+{
+	"frame": {"x":1357,"y":4,"w":16,"h":29},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":29},
+	"sourceSize": {"w":16,"h":29},
+	"pivot": {"x":0,"y":0.37931}
+},
+"map-wall-10_6":
+{
+	"frame": {"x":1351,"y":70,"w":16,"h":29},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":29},
+	"sourceSize": {"w":16,"h":29},
+	"pivot": {"x":0,"y":0.37931}
+},
+"map-wall-10_7":
+{
+	"frame": {"x":1367,"y":37,"w":16,"h":29},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":29},
+	"sourceSize": {"w":16,"h":29},
+	"pivot": {"x":0,"y":0.37931}
+},
+"map-wall-10_8":
+{
+	"frame": {"x":1377,"y":4,"w":16,"h":29},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":29},
+	"sourceSize": {"w":16,"h":29},
+	"pivot": {"x":0,"y":0.37931}
+},
+"map-wall-11":
+{
+	"frame": {"x":775,"y":4,"w":16,"h":43},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":2,"y":0,"w":16,"h":43},
+	"sourceSize": {"w":16,"h":43},
+	"pivot": {"x":0,"y":0.581395}
+},
+"map-wall-12":
+{
+	"frame": {"x":725,"y":51,"w":18,"h":43},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":2,"y":0,"w":18,"h":43},
+	"sourceSize": {"w":18,"h":43},
+	"pivot": {"x":0,"y":0.581395}
+},
+"map-wall-13":
+{
+	"frame": {"x":733,"y":4,"w":18,"h":43},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":2,"y":0,"w":18,"h":43},
+	"sourceSize": {"w":18,"h":43},
+	"pivot": {"x":0,"y":0.581395}
+},
+"map-wall-14":
+{
+	"frame": {"x":787,"y":51,"w":16,"h":43},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":2,"y":0,"w":16,"h":43},
+	"sourceSize": {"w":16,"h":43},
+	"pivot": {"x":0,"y":0.581395}
+},
+"map-wall-15":
+{
+	"frame": {"x":795,"y":4,"w":16,"h":43},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":0,"w":16,"h":43},
@@ -1478,7 +2176,8 @@
 },
 "melee-bot/melee-bot-0":
 {
-	"frame": {"x":849,"y":102,"w":17,"h":19},
+	"frame": {"x":1543,"y":56,"w":17,"h":19},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":1,"y":1,"w":17,"h":19},
@@ -1487,7 +2186,11 @@
 },
 "melee-bot/melee-bot-1":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":870,"y":102,"w":17,"h":19},
+=======
+	"frame": {"x":1556,"y":28,"w":17,"h":19},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":1,"y":1,"w":17,"h":19},
@@ -1496,7 +2199,11 @@
 },
 "melee-bot/melee-bot-2":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":631,"y":103,"w":17,"h":20},
+=======
+	"frame": {"x":1360,"y":103,"w":17,"h":20},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":1,"y":0,"w":17,"h":20},
@@ -1505,7 +2212,11 @@
 },
 "melee-bot/melee-bot-3":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":849,"y":102,"w":17,"h":19},
+=======
+	"frame": {"x":1543,"y":56,"w":17,"h":19},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":1,"y":1,"w":17,"h":19},
@@ -1514,7 +2225,11 @@
 },
 "melee-bot/melee-bot-4":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1430,"y":72,"w":14,"h":19},
+=======
+	"frame": {"x":1564,"y":51,"w":14,"h":19},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":1,"w":14,"h":19},
@@ -1523,7 +2238,11 @@
 },
 "melee-bot/melee-bot-5":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":652,"y":103,"w":14,"h":20},
+=======
+	"frame": {"x":1415,"y":102,"w":14,"h":20},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":0,"w":14,"h":20},
@@ -1532,7 +2251,11 @@
 },
 "melee-bot/melee-bot-6":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1448,"y":70,"w":14,"h":19},
+=======
+	"frame": {"x":1577,"y":27,"w":14,"h":19},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":1,"w":14,"h":19},
@@ -1541,7 +2264,11 @@
 },
 "melee-bot/melee-bot-7":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1411,"y":72,"w":15,"h":19},
+=======
+	"frame": {"x":1563,"y":79,"w":15,"h":19},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":1,"w":15,"h":19},
@@ -1550,7 +2277,11 @@
 },
 "melee-bot/melee-bot-8":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1677,"y":4,"w":15,"h":18},
+=======
+	"frame": {"x":1617,"y":26,"w":15,"h":18},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":2,"w":15,"h":18},
@@ -1559,7 +2290,11 @@
 },
 "melee-bot/melee-bot-9":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":272,"y":106,"w":15,"h":17},
+=======
+	"frame": {"x":1700,"y":25,"w":15,"h":17},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":3,"w":15,"h":17},
@@ -1568,7 +2303,11 @@
 },
 "melee-bot/melee-bot-10":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1661,"y":26,"w":15,"h":18},
+=======
+	"frame": {"x":1617,"y":4,"w":15,"h":18},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":2,"w":15,"h":18},
@@ -1577,7 +2316,11 @@
 },
 "melee-bot/melee-bot-11":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1652,"y":52,"w":17,"h":18},
+=======
+	"frame": {"x":1600,"y":48,"w":17,"h":18},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":2,"w":17,"h":18},
@@ -1586,7 +2329,11 @@
 },
 "melee-bot/melee-bot-12":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1411,"y":72,"w":15,"h":19},
+=======
+	"frame": {"x":1563,"y":79,"w":15,"h":19},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":1,"w":15,"h":19},
@@ -1595,7 +2342,11 @@
 },
 "melee-bot/melee-bot-13":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1613,"y":60,"w":13,"h":19},
+=======
+	"frame": {"x":1582,"y":73,"w":13,"h":19},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":1,"w":13,"h":19},
@@ -1604,7 +2355,11 @@
 },
 "melee-bot/melee-bot-14":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":610,"y":103,"w":17,"h":20},
+=======
+	"frame": {"x":1339,"y":103,"w":17,"h":20},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":3,"y":0,"w":17,"h":20},
@@ -1613,7 +2368,11 @@
 },
 "nova":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":108,"y":4,"w":98,"h":98},
+=======
+	"frame": {"x":108,"y":4,"w":100,"h":100},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":1,"y":1,"w":98,"h":98},
@@ -1622,7 +2381,11 @@
 },
 "npc-quest-master/character-1":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1673,"y":48,"w":14,"h":18},
+=======
+	"frame": {"x":1621,"y":48,"w":14,"h":18},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":6,"w":14,"h":18},
@@ -1631,7 +2394,11 @@
 },
 "npc-quest-master/character-2":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":524,"y":62,"w":1,"h":1},
+=======
+	"frame": {"x":212,"y":97,"w":1,"h":1},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":1},
@@ -1640,7 +2407,11 @@
 },
 "npc-quest-master/character-3":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":524,"y":62,"w":1,"h":1},
+=======
+	"frame": {"x":212,"y":97,"w":1,"h":1},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":1},
@@ -1649,7 +2420,11 @@
 },
 "npc-quest-master/character-4":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":524,"y":62,"w":1,"h":1},
+=======
+	"frame": {"x":212,"y":97,"w":1,"h":1},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":1},
@@ -1658,7 +2433,11 @@
 },
 "npc-quest-master/character-5":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":524,"y":62,"w":1,"h":1},
+=======
+	"frame": {"x":212,"y":97,"w":1,"h":1},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":1},
@@ -1667,7 +2446,11 @@
 },
 "npc-quest-master/character-6":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":524,"y":62,"w":1,"h":1},
+=======
+	"frame": {"x":212,"y":97,"w":1,"h":1},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":1},
@@ -1676,7 +2459,11 @@
 },
 "npc-quest-master/character-7":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":524,"y":62,"w":1,"h":1},
+=======
+	"frame": {"x":212,"y":97,"w":1,"h":1},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":1},
@@ -1685,7 +2472,11 @@
 },
 "npc-quest-master/character-8":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1673,"y":48,"w":14,"h":18},
+=======
+	"frame": {"x":1621,"y":48,"w":14,"h":18},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":6,"w":14,"h":18},
@@ -1694,7 +2485,11 @@
 },
 "npc-quest-master/character-9":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":291,"y":106,"w":14,"h":17},
+=======
+	"frame": {"x":1716,"y":4,"w":14,"h":17},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":7,"w":14,"h":17},
@@ -1703,7 +2498,11 @@
 },
 "npc-quest-master/character-10":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1758,"y":24,"w":14,"h":16},
+=======
+	"frame": {"x":1754,"y":85,"w":14,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":8,"w":14,"h":16},
@@ -1712,7 +2511,11 @@
 },
 "npc-quest-master/character-11":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":291,"y":106,"w":14,"h":17},
+=======
+	"frame": {"x":1716,"y":4,"w":14,"h":17},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":7,"w":14,"h":17},
@@ -1721,7 +2524,11 @@
 },
 "npc-quest-master/character-12":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":524,"y":62,"w":1,"h":1},
+=======
+	"frame": {"x":212,"y":97,"w":1,"h":1},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":1},
@@ -1730,7 +2537,11 @@
 },
 "npc-quest-master/character-13":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":524,"y":62,"w":1,"h":1},
+=======
+	"frame": {"x":212,"y":97,"w":1,"h":1},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":1},
@@ -1739,7 +2550,11 @@
 },
 "npc-quest-master/character-14":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":524,"y":62,"w":1,"h":1},
+=======
+	"frame": {"x":212,"y":97,"w":1,"h":1},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":1},
@@ -1748,7 +2563,11 @@
 },
 "npc-quest-master/character-15":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1680,"y":26,"w":14,"h":18},
+=======
+	"frame": {"x":1636,"y":4,"w":14,"h":18},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":5,"w":14,"h":18},
@@ -1757,7 +2576,11 @@
 },
 "npc-quest-master/character-16":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1696,"y":4,"w":14,"h":18},
+=======
+	"frame": {"x":1636,"y":26,"w":14,"h":18},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":4,"w":14,"h":18},
@@ -1766,7 +2589,11 @@
 },
 "npc-quest-master/character-17":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1684,"y":83,"w":14,"h":18},
+=======
+	"frame": {"x":1639,"y":48,"w":14,"h":18},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":6,"w":14,"h":18},
@@ -1775,7 +2602,11 @@
 },
 "npc-quest-master/character-18":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":309,"y":106,"w":14,"h":17},
+=======
+	"frame": {"x":1676,"y":89,"w":14,"h":17},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":7,"w":14,"h":17},
@@ -1784,7 +2615,11 @@
 },
 "npc-quest-master/character-19":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":524,"y":62,"w":1,"h":1},
+=======
+	"frame": {"x":212,"y":97,"w":1,"h":1},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":1},
@@ -1793,7 +2628,11 @@
 },
 "npc-quest-master/character-20":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":524,"y":62,"w":1,"h":1},
+=======
+	"frame": {"x":212,"y":97,"w":1,"h":1},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":1},
@@ -1802,7 +2641,11 @@
 },
 "npc-quest-master/character-21":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":524,"y":62,"w":1,"h":1},
+=======
+	"frame": {"x":212,"y":97,"w":1,"h":1},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":1},
@@ -1811,7 +2654,11 @@
 },
 "npc-quest-master/character-22":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1466,"y":70,"w":14,"h":19},
+=======
+	"frame": {"x":1582,"y":50,"w":14,"h":19},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":5,"w":14,"h":19},
@@ -1820,7 +2667,11 @@
 },
 "npc-quest-master/character-23":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":327,"y":106,"w":14,"h":17},
+=======
+	"frame": {"x":1684,"y":67,"w":14,"h":17},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":5,"w":14,"h":17},
@@ -1829,7 +2680,11 @@
 },
 "npc-quest-master/character-24":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1686,"y":105,"w":14,"h":18},
+=======
+	"frame": {"x":1654,"y":4,"w":14,"h":18},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":5,"w":14,"h":18},
@@ -1838,7 +2693,11 @@
 },
 "npc-quest-master/character-25":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":327,"y":106,"w":14,"h":17},
+=======
+	"frame": {"x":1684,"y":67,"w":14,"h":17},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":7,"w":14,"h":17},
@@ -1847,7 +2706,11 @@
 },
 "npc-quest-master/character-26":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1758,"y":24,"w":14,"h":16},
+=======
+	"frame": {"x":1754,"y":85,"w":14,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":8,"w":14,"h":16},
@@ -1856,7 +2719,11 @@
 },
 "npc-quest-master/character-27":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":327,"y":106,"w":14,"h":17},
+=======
+	"frame": {"x":1684,"y":67,"w":14,"h":17},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":7,"w":14,"h":17},
@@ -1865,7 +2732,11 @@
 },
 "npc-quest-master/character-28":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1673,"y":48,"w":14,"h":18},
+=======
+	"frame": {"x":1621,"y":48,"w":14,"h":18},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":6,"w":14,"h":18},
@@ -1874,13 +2745,18 @@
 },
 "pixel-white-1x1":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":741,"y":56,"w":1,"h":1},
+=======
+	"frame": {"x":212,"y":102,"w":1,"h":1},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":1},
 	"sourceSize": {"w":1,"h":1},
 	"pivot": {"x":0,"y":0}
 },
+<<<<<<< Updated upstream
 "player/character-1":
 {
 	"frame": {"x":670,"y":103,"w":14,"h":20},
@@ -2060,82 +2936,128 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":1},
 	"sourceSize": {"w":1,"h":1},
 	"pivot": {"x":8,"y":16}
-},
-"player/character-21":
+=======
+"player/idle-0":
 {
+	"frame": {"x":1526,"y":32,"w":13,"h":22},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":6,"y":1,"w":13,"h":22},
+	"sourceSize": {"w":13,"h":22},
+	"pivot": {"x":0.461538,"y":0.5}
+>>>>>>> Stashed changes
+},
+"player/idle-1":
+{
+<<<<<<< Updated upstream
 	"frame": {"x":524,"y":62,"w":1,"h":1},
+=======
+	"frame": {"x":1527,"y":4,"w":13,"h":22},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":1},
-	"sourceSize": {"w":1,"h":1},
-	"pivot": {"x":8,"y":16}
+	"spriteSourceSize": {"x":6,"y":1,"w":13,"h":22},
+	"sourceSize": {"w":13,"h":22},
+	"pivot": {"x":0.461538,"y":0.5}
 },
-"player/character-22":
+"player/idle-2":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":706,"y":102,"w":14,"h":21},
+=======
+	"frame": {"x":1381,"y":102,"w":13,"h":21},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":3,"w":14,"h":21},
-	"sourceSize": {"w":14,"h":21},
-	"pivot": {"x":0.571429,"y":0.619048}
+	"spriteSourceSize": {"x":6,"y":2,"w":13,"h":21},
+	"sourceSize": {"w":13,"h":21},
+	"pivot": {"x":0.461538,"y":0.47619}
 },
-"player/character-23":
+"player/idle-3":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1520,"y":70,"w":14,"h":19},
+=======
+	"frame": {"x":1527,"y":4,"w":13,"h":22},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":3,"w":14,"h":19},
-	"sourceSize": {"w":14,"h":19},
-	"pivot": {"x":0.571429,"y":0.684211}
+	"spriteSourceSize": {"x":6,"y":1,"w":13,"h":22},
+	"sourceSize": {"w":13,"h":22},
+	"pivot": {"x":0.461538,"y":0.5}
 },
-"player/character-24":
+"player/idle-4":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":760,"y":102,"w":14,"h":20},
+=======
+	"frame": {"x":1526,"y":32,"w":13,"h":22},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":3,"w":14,"h":20},
-	"sourceSize": {"w":14,"h":20},
-	"pivot": {"x":0.571429,"y":0.65}
+	"spriteSourceSize": {"x":6,"y":1,"w":13,"h":22},
+	"sourceSize": {"w":13,"h":22},
+	"pivot": {"x":0.461538,"y":0.5}
 },
-"player/character-25":
+"player/run-0":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1520,"y":70,"w":14,"h":19},
+=======
+	"frame": {"x":1523,"y":60,"w":16,"h":22},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":5,"w":14,"h":19},
-	"sourceSize": {"w":14,"h":19},
-	"pivot": {"x":0.571429,"y":0.578948}
+	"spriteSourceSize": {"x":4,"y":0,"w":16,"h":22},
+	"sourceSize": {"w":16,"h":22},
+	"pivot": {"x":0.5,"y":0.545455}
 },
-"player/character-26":
+"player/run-1":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1691,"y":48,"w":14,"h":18},
+=======
+	"frame": {"x":1526,"y":32,"w":13,"h":22},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":6,"w":14,"h":18},
-	"sourceSize": {"w":14,"h":18},
-	"pivot": {"x":0.571429,"y":0.555556}
+	"spriteSourceSize": {"x":6,"y":1,"w":13,"h":22},
+	"sourceSize": {"w":13,"h":22},
+	"pivot": {"x":0.461538,"y":0.5}
 },
-"player/character-27":
+"player/run-2":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1520,"y":70,"w":14,"h":19},
+=======
+	"frame": {"x":1398,"y":102,"w":13,"h":21},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":5,"w":14,"h":19},
-	"sourceSize": {"w":14,"h":19},
-	"pivot": {"x":0.571429,"y":0.578948}
+	"spriteSourceSize": {"x":6,"y":0,"w":13,"h":21},
+	"sourceSize": {"w":13,"h":21},
+	"pivot": {"x":0.461538,"y":0.571429}
 },
-"player/character-28":
+"player/run-3":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":670,"y":103,"w":14,"h":20},
+=======
+	"frame": {"x":1526,"y":32,"w":13,"h":22},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":4,"w":14,"h":20},
-	"sourceSize": {"w":14,"h":20},
-	"pivot": {"x":0.571429,"y":0.6}
+	"spriteSourceSize": {"x":6,"y":1,"w":13,"h":22},
+	"sourceSize": {"w":13,"h":22},
+	"pivot": {"x":0.461538,"y":0.5}
 },
 "shoe_1":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1750,"y":84,"w":12,"h":15},
+=======
+	"frame": {"x":153,"y":108,"w":12,"h":15},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":1,"w":12,"h":15},
@@ -2144,7 +3066,11 @@
 },
 "shoe_2":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1769,"y":44,"w":12,"h":15},
+=======
+	"frame": {"x":185,"y":108,"w":12,"h":15},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":1,"w":12,"h":15},
@@ -2153,7 +3079,11 @@
 },
 "shoe_3":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1764,"y":103,"w":12,"h":15},
+=======
+	"frame": {"x":1710,"y":108,"w":12,"h":15},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":1,"w":12,"h":15},
@@ -2162,7 +3092,11 @@
 },
 "shoe_4":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1766,"y":83,"w":12,"h":15},
+=======
+	"frame": {"x":1762,"y":64,"w":12,"h":15},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":1,"w":12,"h":15},
@@ -2171,7 +3105,11 @@
 },
 "shoe_5":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1778,"y":63,"w":12,"h":15},
+=======
+	"frame": {"x":1774,"y":44,"w":12,"h":15},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":1,"w":12,"h":15},
@@ -2180,7 +3118,11 @@
 },
 "shoe_6":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1785,"y":42,"w":12,"h":15},
+=======
+	"frame": {"x":1779,"y":24,"w":12,"h":15},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":1,"w":12,"h":15},
@@ -2189,7 +3131,11 @@
 },
 "shoe_7":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1780,"y":102,"w":12,"h":15},
+=======
+	"frame": {"x":1794,"y":4,"w":12,"h":15},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":1,"w":12,"h":15},
@@ -2198,7 +3144,11 @@
 },
 "shoe_8":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1782,"y":82,"w":12,"h":15},
+=======
+	"frame": {"x":1766,"y":105,"w":12,"h":15},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":1,"w":12,"h":15},
@@ -2207,7 +3157,11 @@
 },
 "shoe_9":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1794,"y":61,"w":12,"h":15},
+=======
+	"frame": {"x":1772,"y":83,"w":12,"h":15},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":1,"w":12,"h":15},
@@ -2216,7 +3170,11 @@
 },
 "shoe_10":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1818,"y":20,"w":12,"h":12},
+=======
+	"frame": {"x":1818,"y":57,"w":12,"h":12},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":2,"w":12,"h":12},
@@ -2225,7 +3183,11 @@
 },
 "shoe_11":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1821,"y":4,"w":12,"h":12},
+=======
+	"frame": {"x":1814,"y":97,"w":12,"h":12},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":2,"w":12,"h":12},
@@ -2234,7 +3196,11 @@
 },
 "shoe_12":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1837,"y":4,"w":12,"h":12},
+=======
+	"frame": {"x":1820,"y":73,"w":12,"h":12},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":2,"w":12,"h":12},
@@ -2243,7 +3209,11 @@
 },
 "shoe_13":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1816,"y":72,"w":12,"h":12},
+=======
+	"frame": {"x":1836,"y":4,"w":12,"h":12},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":3,"y":2,"w":12,"h":12},
@@ -2252,7 +3222,11 @@
 },
 "shoe_14":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1826,"y":54,"w":12,"h":12},
+=======
+	"frame": {"x":1823,"y":20,"w":12,"h":12},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":2,"w":12,"h":12},
@@ -2261,7 +3235,11 @@
 },
 "shoe_15":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1833,"y":36,"w":12,"h":12},
+=======
+	"frame": {"x":1827,"y":36,"w":12,"h":12},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":2,"w":12,"h":12},
@@ -2270,7 +3248,11 @@
 },
 "shoe_16":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1834,"y":20,"w":12,"h":12},
+=======
+	"frame": {"x":1839,"y":20,"w":12,"h":12},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":2,"w":12,"h":12},
@@ -2279,7 +3261,11 @@
 },
 "shoe_17":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1842,"y":52,"w":12,"h":12},
+=======
+	"frame": {"x":1834,"y":52,"w":12,"h":12},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":2,"w":12,"h":12},
@@ -2288,7 +3274,11 @@
 },
 "shoe_18":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1842,"y":68,"w":12,"h":12},
+=======
+	"frame": {"x":1843,"y":36,"w":12,"h":12},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":2,"w":12,"h":12},
@@ -2297,7 +3287,11 @@
 },
 "shoe_19":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1762,"y":64,"w":12,"h":15},
+=======
+	"frame": {"x":169,"y":108,"w":12,"h":15},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":1,"w":12,"h":15},
@@ -2306,7 +3300,11 @@
 },
 "shoe_20":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1776,"y":23,"w":12,"h":15},
+=======
+	"frame": {"x":201,"y":108,"w":12,"h":15},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":1,"w":12,"h":15},
@@ -2315,7 +3313,11 @@
 },
 "shoe_21":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1832,"y":84,"w":12,"h":12},
+=======
+	"frame": {"x":1830,"y":89,"w":12,"h":12},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":2,"w":12,"h":12},
@@ -2324,7 +3326,11 @@
 },
 "shoe_22":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1820,"y":100,"w":12,"h":12},
+=======
+	"frame": {"x":1846,"y":97,"w":12,"h":12},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":2,"y":2,"w":12,"h":12},
@@ -2333,7 +3339,11 @@
 },
 "slime/slime1":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1377,"y":95,"w":26,"h":28},
+=======
+	"frame": {"x":1441,"y":4,"w":26,"h":28},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":8,"w":26,"h":28},
@@ -2342,7 +3352,11 @@
 },
 "slime/slime2":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1406,"y":38,"w":24,"h":30},
+=======
+	"frame": {"x":1283,"y":77,"w":24,"h":30},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":6,"w":24,"h":30},
@@ -2351,7 +3365,11 @@
 },
 "slime/slime3":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1233,"y":43,"w":22,"h":34},
+=======
+	"frame": {"x":1171,"y":4,"w":22,"h":34},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":2,"w":22,"h":34},
@@ -2360,7 +3378,11 @@
 },
 "slime/slime4":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1192,"y":4,"w":22,"h":36},
+=======
+	"frame": {"x":1145,"y":4,"w":22,"h":36},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":22,"h":36},
@@ -2369,7 +3391,11 @@
 },
 "slime/slime5":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1616,"y":83,"w":64,"h":18},
+=======
+	"frame": {"x":1586,"y":96,"w":64,"h":18},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":18,"w":64,"h":18},
@@ -2378,7 +3404,11 @@
 },
 "slime/slime6":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":560,"y":103,"w":46,"h":20},
+=======
+	"frame": {"x":632,"y":103,"w":46,"h":20},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":16,"w":46,"h":20},
@@ -2387,7 +3417,11 @@
 },
 "slime/slime7":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1617,"y":4,"w":34,"h":22},
+=======
+	"frame": {"x":1446,"y":101,"w":34,"h":22},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":14,"w":34,"h":22},
@@ -2396,7 +3430,11 @@
 },
 "slime/slime8":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1407,"y":95,"w":28,"h":26},
+=======
+	"frame": {"x":217,"y":97,"w":28,"h":26},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":10,"w":28,"h":26},
@@ -2405,7 +3443,11 @@
 },
 "slime/slime9":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1377,"y":95,"w":26,"h":28},
+=======
+	"frame": {"x":1441,"y":4,"w":26,"h":28},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":8,"w":26,"h":28},
@@ -2414,7 +3456,11 @@
 },
 "slime/slime10":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1377,"y":95,"w":26,"h":28},
+=======
+	"frame": {"x":1441,"y":4,"w":26,"h":28},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":8,"w":26,"h":28},
@@ -2423,7 +3469,11 @@
 },
 "slime/slime11":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1124,"y":96,"w":26,"h":27},
+=======
+	"frame": {"x":956,"y":96,"w":26,"h":27},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":9,"w":26,"h":27},
@@ -2432,7 +3482,11 @@
 },
 "slime/slime12":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1439,"y":95,"w":26,"h":26},
+=======
+	"frame": {"x":249,"y":97,"w":26,"h":26},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":10,"w":26,"h":26},
@@ -2441,7 +3495,11 @@
 },
 "slime/slime13":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":274,"y":77,"w":26,"h":25},
+=======
+	"frame": {"x":292,"y":97,"w":26,"h":25},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":11,"w":26,"h":25},
@@ -2450,7 +3508,11 @@
 },
 "slime/slime14":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1439,"y":95,"w":26,"h":26},
+=======
+	"frame": {"x":249,"y":97,"w":26,"h":26},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":10,"w":26,"h":26},
@@ -2459,7 +3521,11 @@
 },
 "slime/slime15":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1124,"y":96,"w":26,"h":27},
+=======
+	"frame": {"x":956,"y":96,"w":26,"h":27},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":9,"w":26,"h":27},
@@ -2468,7 +3534,11 @@
 },
 "slime/slime16":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1377,"y":95,"w":26,"h":28},
+=======
+	"frame": {"x":1441,"y":4,"w":26,"h":28},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":8,"w":26,"h":28},
@@ -2477,7 +3547,11 @@
 },
 "status-frenzy":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1754,"y":4,"w":16,"h":16},
+=======
+	"frame": {"x":1754,"y":44,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -2486,7 +3560,11 @@
 },
 "status-legendary-enemy":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1742,"y":64,"w":16,"h":16},
+=======
+	"frame": {"x":1759,"y":24,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -2495,7 +3573,11 @@
 },
 "status-shield":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1749,"y":44,"w":16,"h":16},
+=======
+	"frame": {"x":1774,"y":4,"w":16,"h":16},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -2504,7 +3586,11 @@
 },
 "status-slow":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1655,"y":4,"w":18,"h":18},
+=======
+	"frame": {"x":1595,"y":26,"w":18,"h":18},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":18,"h":18},
@@ -2513,7 +3599,11 @@
 },
 "swipe/1":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1241,"y":81,"w":8,"h":10},
+=======
+	"frame": {"x":558,"y":113,"w":8,"h":10},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":12,"y":4,"w":8,"h":10},
@@ -2522,7 +3612,11 @@
 },
 "swipe/2":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1792,"y":4,"w":9,"h":14},
+=======
+	"frame": {"x":1810,"y":4,"w":9,"h":14},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":12,"y":4,"w":9,"h":14},
@@ -2531,7 +3625,11 @@
 },
 "swipe/3":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":778,"y":102,"w":9,"h":20},
+=======
+	"frame": {"x":1433,"y":102,"w":9,"h":20},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":12,"y":4,"w":9,"h":20},
@@ -2540,7 +3638,11 @@
 },
 "swipe/4":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":778,"y":102,"w":9,"h":20},
+=======
+	"frame": {"x":1433,"y":102,"w":9,"h":20},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":12,"y":4,"w":9,"h":20},
@@ -2549,7 +3651,11 @@
 },
 "swipe/5":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":791,"y":102,"w":9,"h":20},
+=======
+	"frame": {"x":1544,"y":4,"w":9,"h":20},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":12,"y":4,"w":9,"h":20},
@@ -2558,7 +3664,11 @@
 },
 "swipe/6":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":345,"y":106,"w":9,"h":17},
+=======
+	"frame": {"x":1701,"y":46,"w":9,"h":17},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":12,"y":7,"w":9,"h":17},
@@ -2567,7 +3677,11 @@
 },
 "swipe/7":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1342,"y":78,"w":9,"h":13},
+=======
+	"frame": {"x":1814,"y":40,"w":9,"h":13},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":12,"y":11,"w":9,"h":13},
@@ -2576,7 +3690,11 @@
 },
 "swipe/8":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1220,"y":83,"w":7,"h":8},
+=======
+	"frame": {"x":1253,"y":115,"w":7,"h":8},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":12,"y":16,"w":7,"h":8},
@@ -2585,7 +3703,11 @@
 },
 "swipe/9":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1220,"y":83,"w":7,"h":8},
+=======
+	"frame": {"x":1253,"y":115,"w":7,"h":8},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":12,"y":16,"w":7,"h":8},
@@ -2594,7 +3716,11 @@
 },
 "treasure-chest-body":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1522,"y":93,"w":36,"h":24},
+=======
+	"frame": {"x":885,"y":97,"w":36,"h":24},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":36,"h":24},
@@ -2603,7 +3729,11 @@
 },
 "treasure-chest-lid":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1371,"y":77,"w":36,"h":14},
+=======
+	"frame": {"x":1778,"y":63,"w":36,"h":14},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":36,"h":14},
@@ -2612,7 +3742,11 @@
 },
 "vial-energy":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1590,"y":88,"w":9,"h":22},
+=======
+	"frame": {"x":1531,"y":86,"w":9,"h":22},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":3,"y":0,"w":9,"h":22},
@@ -2621,7 +3755,11 @@
 },
 "vial-health":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1603,"y":88,"w":9,"h":22},
+=======
+	"frame": {"x":1543,"y":30,"w":9,"h":22},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":3,"y":0,"w":9,"h":22},
@@ -2630,7 +3768,11 @@
 },
 "weapon-module-empty":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1555,"y":33,"w":24,"h":24},
+=======
+	"frame": {"x":986,"y":96,"w":24,"h":24},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":24,"h":24},
@@ -2639,7 +3781,11 @@
 },
 "weapon-module-fireball":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1561,"y":4,"w":24,"h":24},
+=======
+	"frame": {"x":1467,"y":68,"w":24,"h":24},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":24,"h":24},
@@ -2648,7 +3794,11 @@
 },
 "weapon-module-frost-orb":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1557,"y":61,"w":24,"h":24},
+=======
+	"frame": {"x":1484,"y":96,"w":24,"h":24},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":24,"h":24},
@@ -2657,7 +3807,11 @@
 },
 "weapon-module-hammer":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1583,"y":32,"w":24,"h":24},
+=======
+	"frame": {"x":1470,"y":36,"w":24,"h":24},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":24,"h":24},
@@ -2666,7 +3820,11 @@
 },
 "weapon-module-initiate":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1589,"y":4,"w":24,"h":24},
+=======
+	"frame": {"x":1495,"y":64,"w":24,"h":24},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":24,"h":24},
@@ -2675,7 +3833,11 @@
 },
 "weapon-module-lightning-rod":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1562,"y":89,"w":24,"h":24},
+=======
+	"frame": {"x":1471,"y":4,"w":24,"h":24},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":24,"h":24},
@@ -2684,7 +3846,11 @@
 },
 "weapon-module-slow-time":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1585,"y":60,"w":24,"h":24},
+=======
+	"frame": {"x":1498,"y":32,"w":24,"h":24},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":24,"h":24},
@@ -2693,7 +3859,11 @@
 },
 "weapon-module-swipe":
 {
+<<<<<<< Updated upstream
 	"frame": {"x":1611,"y":32,"w":24,"h":24},
+=======
+	"frame": {"x":1499,"y":4,"w":24,"h":24},
+>>>>>>> Stashed changes
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":24,"h":24},
@@ -2705,8 +3875,14 @@
 	"version": "1.0",
 	"image": "sprite.png",
 	"format": "RGBA8888",
+<<<<<<< Updated upstream
 	"size": {"w":1863,"h":127},
 	"scale": "1",
 	"smartupdate": "$TexturePacker:SmartUpdate:896e7b4bcafb67bd9acd152ecce4206f:4c07dd820e9bf8ec70ceefec99f21dfe:68d88b3cf7eafc9b5accfffdfb2fda91$"
+=======
+	"size": {"w":1865,"h":127},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:8c401e7f747ea79dd2ee2cd4e53b4d27:1824d7f0d63016fe4af55b8e9b510b7d:68d88b3cf7eafc9b5accfffdfb2fda91$"
+>>>>>>> Stashed changes
 }
 }
