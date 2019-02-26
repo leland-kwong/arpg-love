@@ -431,17 +431,17 @@ local Player = {
 
     self.animations = {
       idle = animationFactory:new({
-        'player/character-1',
-        'player/character-8',
-        'player/character-9',
-        'player/character-10',
-        'player/character-11'
+        'player/idle-0',
+        'player/idle-1',
+        'player/idle-2',
+        'player/idle-3',
+        'player/idle-4'
       }):setDuration(1.25),
       run = animationFactory:new({
-        'player/character-15',
-        'player/character-16',
-        'player/character-17',
-        'player/character-18',
+        'player/run-0',
+        'player/run-1',
+        'player/run-2',
+        'player/run-3',
       })
     }
 
@@ -582,7 +582,7 @@ local function handleAnimation(self, dt, nextX, nextY, moveSpeed)
   -- ANIMATION STATES
   if moving then
     self.animation = self.animations.run
-      :setDuration(0.25 - (moveSpeed * 0.0004))
+      :setDuration(0.4 - (moveSpeed * 0.00004))
       :update(dt)
   else
     self.animations.run:reset()
