@@ -197,9 +197,8 @@ local Bullet = {
 
     -- draw in several passes to give it a brighter blur effect
     drawBullet(self, 1, 1)
-    drawBullet(self, 1.4, 0.5)
-    drawBullet(self, 1.8, 0.2)
-    drawBullet(self, 3, 0.2)
+    -- drawBullet(self, 1.4, 0.5)
+    drawBullet(self, 2, 0.2)
 
     if config.collisionDebug then
       local debug = require 'modules.debug'

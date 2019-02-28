@@ -49,6 +49,8 @@ function DissipateEffectBlueprint.update(self, dt)
 end
 
 function DissipateEffectBlueprint.draw(self)
+  local oBlendMode = love.graphics.getBlendMode()
+  love.graphics.setBlendMode('add')
   love.graphics.setColor(1,1,1,self.opacity)
   local ox, oy = self.animation:getOffset()
   love.graphics.draw(
@@ -62,6 +64,7 @@ function DissipateEffectBlueprint.draw(self)
     ox,
     oy
   )
+  love.graphics.setBlendMode(oBlendMode)
 end
 
 local DissipateEffect = Component.createFactory(DissipateEffectBlueprint)
