@@ -239,7 +239,7 @@ local Player = {
       maxHealth = 200,
       maxEnergy = 100,
       moveSpeed = 80,
-      lightRadius = 50,
+      lightRadius = 85,
     }, inherentStats)
   end,
   attackRecoveryTime = 0,
