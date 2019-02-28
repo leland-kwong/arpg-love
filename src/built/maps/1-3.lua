@@ -8,8 +8,8 @@ return {
   height = 80,
   tilewidth = 16,
   tileheight = 16,
-  nextlayerid = 7,
-  nextobjectid = 63,
+  nextlayerid = 8,
+  nextobjectid = 68,
   properties = {},
   tilesets = {
     {
@@ -411,6 +411,94 @@ return {
     },
     {
       type = "objectgroup",
+      id = 7,
+      name = "lights",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      draworder = "topdown",
+      properties = {},
+      objects = {
+        {
+          id = 63,
+          name = "light",
+          type = "light",
+          shape = "point",
+          x = 488,
+          y = 641,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["radius"] = 40
+          }
+        },
+        {
+          id = 64,
+          name = "light",
+          type = "light",
+          shape = "point",
+          x = 152,
+          y = 641,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["radius"] = 40
+          }
+        },
+        {
+          id = 65,
+          name = "light",
+          type = "light",
+          shape = "point",
+          x = 824,
+          y = 641,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["radius"] = 40
+          }
+        },
+        {
+          id = 66,
+          name = "light",
+          type = "light",
+          shape = "point",
+          x = 488,
+          y = 856,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["radius"] = 40
+          }
+        },
+        {
+          id = 67,
+          name = "light",
+          type = "light",
+          shape = "point",
+          x = 488,
+          y = 408,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["radius"] = 40
+          }
+        }
+      }
+    },
+    {
+      type = "objectgroup",
       id = 3,
       name = "spawn-points",
       visible = true,
@@ -438,7 +526,7 @@ return {
           type = "legendaryEnemy",
           shape = "ellipse",
           x = 464,
-          y = 608,
+          y = 616,
           width = 48,
           height = 48,
           rotation = 0,
