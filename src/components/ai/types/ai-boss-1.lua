@@ -1,5 +1,6 @@
 local AiEyeball = require 'components.ai.types.ai-eyeball'
 local collisionGroups = require 'modules.collision-groups'
+local collisionWorlds = require 'components.collision-worlds'
 local debounce = require 'modules.debounce'
 local animationFactory = require 'components.animation-factory'
 local itemConfig = require(require('alias').path.items..'.config')
@@ -24,7 +25,24 @@ Component.newGroup({
 })
 
 local function randomSign()
-  return math.random() == 0 and 1 or -1
+  return math.random(0, 1) == 0 and 1 or -1
+end
+
+local tempObj = {}
+local defaultFilter = function(item, other)
+  local isBoss = other.parent == Component.get('Erion')
+  return (collisionGroups.matches(other.group, 'obstacle player enemyAi') and (not isBoss)) and
+    'slide' or
+    false
+end
+local getActionPosition = function(collisionWorld, startX, startY, targetX, targetY, filter)
+  local cw = collisionWorld
+  local size = config.gridSize * 2
+  local offset = size/2
+  cw:add(tempObj, startX - offset, startY - offset, size, size)
+  local actualX, actualY = cw:move(tempObj, targetX - offset, targetY - offset, filter or defaultFilter)
+  cw:remove(tempObj)
+  return actualX + offset, actualY + offset
 end
 
 local function getRandomBeamPosition(activeBeamPositions, targetX, targetY)
@@ -59,6 +77,16 @@ function AbilityBeamStrike.use(self, state, targetX, targetY)
         and Vec2(targetX, targetY)
         or getRandomBeamPosition(beamPositions, targetX, targetY)
       table.insert(beamPositions, p)
+      p.x,p.y = getActionPosition(
+        collisionWorlds.map,
+        char.x,
+        char.y,
+        p.x,
+        p.y,
+        function(item, other)
+          return collisionGroups.matches(other.group, 'obstacle') and 'slide' or false
+        end
+      )
       local bs = BeamStrike.create({
         group = Component.groups.all,
         x = p.x,
@@ -169,7 +197,7 @@ end
 local SpawnMinions = {
   range = 40,
   actionSpeed = 0.3,
-  cooldown = 2,
+  cooldown = 0.5,
   maxMinions = 8
 }
 
@@ -185,7 +213,7 @@ local function countMinions()
   return count
 end
 
-local minionWarpTime = 1.5
+local minionWarpTime = 1
 
 local function fadeInMinions()
   for _,minion in pairs(Component.groups.boss1Minions.getAll()) do
@@ -218,16 +246,25 @@ function SpawnMinions.update(_, state, dt)
       local minionType = require 'components.ai.types.ai-melee-bot'
       local playerRef = Component.get('PLAYER')
       local config = require 'config.config'
+      local char = Component.get('Erion')
+      local x,y = getActionPosition(
+        collisionWorlds.map,
+        char.x,
+        char.y,
+        ((playerRef.x / config.gridSize) + randomSign() * 3) * config.gridSize,
+        ((playerRef.y / config.gridSize) + randomSign() * 3) * config.gridSize
+      )
       local minions = Spawn({
         grid = Component.get('MAIN_SCENE').mapGrid,
         WALKABLE = require 'modules.map-generator.index'.WALKABLE,
+        preventStacking = false,
         rarity = function(ai)
           local aiRarity = require 'components.ai.rarity'
-          return aiRarity(ai)
+          return aiRarity(ai, 'normal')
         end,
         target = require 'components.ai.find-target'.player,
-        x = playerRef.x / config.gridSize,
-        y = playerRef.y / config.gridSize - 4,
+        x = x/config.gridSize,
+        y = y/config.gridSize,
         types = {
           minionType
         }
@@ -431,7 +468,7 @@ return AiBlueprint({
     }
     table.insert(aiProps.abilities, AbilityBeamStrike)
     table.insert(aiProps.abilities, SpawnMinions)
-    table.insert(aiProps.abilities, MultiShot)
+    -- table.insert(aiProps.abilities, MultiShot)
     return aiProps
   end
 })

@@ -32,6 +32,7 @@ function MainGameHomeScene.init(self)
         settings.isDevelopment = not settings.isDevelopment
         return settings
       end)
+      print('DEV MODE '.. (_DEVELOPMENT_ and 'ENABLED' or 'DISABLED'))
     end
   end)
 

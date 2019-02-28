@@ -15,9 +15,11 @@ local SlimeAttack = Component.createFactory({
   maxDamage = 20,
   itemLevel = 1,
   init = function(self)
+    local attackX, attackY = self.x2 - self.w/2,
+      self.y2 - self.h/2
     local items, len = collisionWorlds.map:queryRect(
-      self.x2 - self.w/2,
-      self.y2,
+      attackX,
+      attackY,
       self.w,
       self.h,
       slimeAttackCollisionFilter
@@ -69,7 +71,7 @@ end
 
 local SlimeSlap =  {
   range = 2,
-  actionSpeed = 0.8,
+  actionSpeed = 1.2,
   cooldown = 0.4
 }
 
@@ -102,8 +104,8 @@ function SlimeSlap.update(self, state, dt)
         , y = self.y
         , x2 = state.targetX
         , y2 = state.targetY
-        , w = 64
-        , h = 36
+        , w = 32
+        , h = 32
         , targetGroup = collisionGroups.player
       })
     end

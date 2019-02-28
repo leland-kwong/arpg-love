@@ -57,12 +57,7 @@ function meta:newStaticSprite(name)
   return animation
 end
 
-local max = math.max
--- sets the animation to the frame index and resets the time
-function meta:setFrame(index)
-  self.index = index
-  self.time = 0
-
+function meta:updateFrameQuad()
   local frameKey = self.aniFrames[self.index]
   self.frame = self.frameData[frameKey]
 
@@ -85,7 +80,14 @@ function meta:setFrame(index)
   end
   self.sprite = sprite
   self.lastIndex = self.index
+end
 
+local max = math.max
+-- sets the animation to the frame index and resets the time
+function meta:setFrame(index)
+  self.index = index
+  self.time = self.timePerFrame * index
+  self:updateFrameQuad()
   return self
 end
 
@@ -171,19 +173,16 @@ function meta:update(dt, data)
   self.time = self.time + dt
 
   if self.numFrames > 1 then
-    -- whether we should move forward or backward in the animation
-    local direction = dt > 0 and 1 or -1
-    if abs(self.time) >= self.timePerFrame then
+    self.index = math.ceil(self.time/self.timePerFrame)
+    -- reset to the start
+    if (self.index > self.numFrames) then
+      self.index = 1
       self.time = 0
-      self.index = self.index + direction
-      -- reset to the start
-      if (self.index > self.numFrames) then
-        self.index = 1
-      end
-      -- reset to the end
-      if (self.index < 1) then
-        self.index = self.numFrames
-      end
+    end
+    -- reset to the end
+    if (self.index < 1) then
+      self.time = 0
+      self.index = self.numFrames
     end
   end
 
@@ -192,7 +191,7 @@ function meta:update(dt, data)
     return self
   end
 
-  self:setFrame(self.index)
+  self:updateFrameQuad()
   return self
 end
 
