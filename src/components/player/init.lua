@@ -553,8 +553,8 @@ local function handleMovement(self, dt)
       forceY = forceY + v.magnitude.y
     end
   end
-  local dx, dy = vx * moveAmount + forceX,
-    vy * moveAmount + forceY
+  local dx, dy = (vx + forceX) * moveAmount,
+    (vy + forceY) * moveAmount
 
   if self.mapGrid then
     local Grid = require 'utils.grid'

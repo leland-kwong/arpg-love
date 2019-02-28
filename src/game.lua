@@ -96,8 +96,11 @@ function love.update(dt)
   groups.hud.updateAll(dt)
 
   camera:attach()
-  groups.firstLayer.updateAll(dt)
-  groups.all.updateAll(dt)
+
+  local gameDt = config.gameSpeedMultiplier * dt
+  groups.firstLayer.updateAll(gameDt)
+  groups.all.updateAll(gameDt)
+
   groups.overlay.updateAll(dt)
   groups.debug.updateAll(dt)
   camera:detach()
