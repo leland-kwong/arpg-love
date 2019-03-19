@@ -4,7 +4,7 @@
         <key>fileFormatVersion</key>
         <int>4</int>
         <key>texturePackerVersion</key>
-        <string>4.8.3</string>
+        <string>4.12.0</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -56,7 +56,7 @@
         <key>jxrCompressionLevel</key>
         <uint>0</uint>
         <key>ditherType</key>
-        <enum type="SettingsBase::DitherType">NearestNeighbour</enum>
+        <enum type="SettingsBase::DitherType">PngQuantLow</enum>
         <key>backgroundColor</key>
         <uint>0</uint>
         <key>libGdx</key>
@@ -70,7 +70,7 @@
             </struct>
         </struct>
         <key>shapePadding</key>
-        <uint>0</uint>
+        <uint>4</uint>
         <key>jpgQuality</key>
         <uint>80</uint>
         <key>pngOptimizationLevel</key>
@@ -84,13 +84,13 @@
         <key>textureFormat</key>
         <enum type="SettingsBase::TextureFormat">png</enum>
         <key>borderPadding</key>
-        <uint>0</uint>
+        <uint>4</uint>
         <key>maxTextureSize</key>
         <QSize>
             <key>width</key>
-            <int>2048</int>
+            <int>16384</int>
             <key>height</key>
-            <int>2048</int>
+            <int>16384</int>
         </QSize>
         <key>fixedTextureSize</key>
         <QSize>
@@ -132,7 +132,7 @@
             <key>data</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>../built/sprite.json</filename>
+                <filename>../../src/built/sprite.json</filename>
             </struct>
         </map>
         <key>multiPack</key>
@@ -161,15 +161,15 @@
             <key>scale</key>
             <double>1</double>
             <key>scaleMode</key>
-            <enum type="ScaleMode">Smooth</enum>
+            <enum type="ScaleMode">Fast</enum>
             <key>extrude</key>
-            <uint>1</uint>
+            <uint>0</uint>
             <key>trimThreshold</key>
             <uint>1</uint>
             <key>trimMargin</key>
-            <uint>1</uint>
+            <uint>0</uint>
             <key>trimMode</key>
-            <enum type="SpriteSettings::TrimMode">Trim</enum>
+            <enum type="SpriteSettings::TrimMode">CropKeepPos</enum>
             <key>tracerTolerance</key>
             <int>200</int>
             <key>heuristicMask</key>
@@ -181,6 +181,361 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_1.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_10.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_11.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_12.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_13.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_14.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_15.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_16.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_17.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_18.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_19.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_2.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_20.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_21.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_22.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_3.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_4.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_5.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_6.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_7.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_8.png</key>
+            <key type="filename">custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes/shoe_9.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.266667</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9Paddings</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/abilities/bullet/bullet-1.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>3,3,6,6</rect>
+                <key>scale9Paddings</key>
+                <rect>3,3,6,6</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/abilities/fireball/fireball.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>7,5,13,9</rect>
+                <key>scale9Paddings</key>
+                <rect>7,5,13,9</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/abilities/frost-orb/frost-orb-core.png</key>
+            <key type="filename">custom-art/status-effect-icons/status-slow.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,5,9,9</rect>
+                <key>scale9Paddings</key>
+                <rect>5,5,9,9</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/abilities/frost-orb/frost-orb-shard.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>1,1,3,1</rect>
+                <key>scale9Paddings</key>
+                <rect>1,1,3,1</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/abilities/frost-spark/frost-spark.png</key>
+            <key type="filename">custom-art/gui/gui-map-quest-point.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>3,3,7,7</rect>
+                <key>scale9Paddings</key>
+                <rect>3,3,7,7</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/abilities/impact-animation/1.png</key>
+            <key type="filename">custom-art/abilities/impact-animation/2.png</key>
+            <key type="filename">custom-art/abilities/impact-animation/3.png</key>
+            <key type="filename">custom-art/abilities/impact-animation/4.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,6,7,11</rect>
+                <key>scale9Paddings</key>
+                <rect>4,6,7,11</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/abilities/swipe/1.png</key>
+            <key type="filename">custom-art/abilities/swipe/2.png</key>
+            <key type="filename">custom-art/abilities/swipe/3.png</key>
+            <key type="filename">custom-art/abilities/swipe/4.png</key>
+            <key type="filename">custom-art/abilities/swipe/5.png</key>
+            <key type="filename">custom-art/abilities/swipe/6.png</key>
+            <key type="filename">custom-art/abilities/swipe/7.png</key>
+            <key type="filename">custom-art/abilities/swipe/8.png</key>
+            <key type="filename">custom-art/abilities/swipe/9.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>6,8,12,15</rect>
+                <key>scale9Paddings</key>
+                <rect>6,8,12,15</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/characters/ai-1/ai-0.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-1.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-2.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-3.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-4.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-5.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-6.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-7.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-8.png</key>
+            <key type="filename">custom-art/characters/ai-1/ai-9.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>6,5,12,10</rect>
+                <key>scale9Paddings</key>
+                <rect>6,5,12,10</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/characters/ai-legendaries/legendary-1/legendary-ai-1.png</key>
+            <key type="filename">custom-art/characters/eyeball/eyeball.png</key>
+            <key type="filename">custom-art/gui/gui-home-button--hover.png</key>
+            <key type="filename">custom-art/gui/gui-home-button.png</key>
+            <key type="filename">custom-art/gui/gui-home-portal-button--hover.png</key>
+            <key type="filename">custom-art/gui/gui-home-portal-button.png</key>
+            <key type="filename">custom-art/gui/gui-inventory-button--hover.png</key>
+            <key type="filename">custom-art/gui/gui-inventory-button.png</key>
+            <key type="filename">custom-art/gui/gui-main-map-button--hover.png</key>
+            <key type="filename">custom-art/gui/gui-main-map-button.png</key>
+            <key type="filename">custom-art/gui/gui-quest-log-button--hover.png</key>
+            <key type="filename">custom-art/gui/gui-quest-log-button.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree-button--hover.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree-button.png</key>
+            <key type="filename">custom-art/items/cube.png</key>
+            <key type="filename">custom-art/items/vial-energy.png</key>
+            <key type="filename">custom-art/items/vial-health.png</key>
+            <key type="filename">custom-art/status-effect-icons/status-frenzy.png</key>
+            <key type="filename">custom-art/status-effect-icons/status-legendary-enemy.png</key>
+            <key type="filename">custom-art/status-effect-icons/status-shield.png</key>
+            <key type="filename">custom-art/tiles/floor-empty.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9Paddings</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/characters/boss-1/Slice.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>2,1,5,2</rect>
+                <key>scale9Paddings</key>
+                <rect>2,1,5,2</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/characters/boss-1/beam-strike-glyph-inner.png</key>
+            <key type="filename">custom-art/characters/companion/outer.png</key>
+            <key type="filename">custom-art/effects/cloud.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>3,3,5,5</rect>
+                <key>scale9Paddings</key>
+                <rect>3,3,5,5</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/characters/boss-1/beam-strike-glyph-outer.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>8,10,17,19</rect>
+                <key>scale9Paddings</key>
+                <rect>8,10,17,19</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/characters/boss-1/beam-strike-head.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.166667</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>2,1,5,2</rect>
+                <key>scale9Paddings</key>
+                <rect>2,1,5,2</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/characters/boss-1/beam-strike-middle.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>2,0,5,1</rect>
+                <key>scale9Paddings</key>
+                <rect>2,0,5,1</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/characters/boss-1/beam-strike-tail.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,1</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>2,1,5,2</rect>
+                <key>scale9Paddings</key>
+                <rect>2,1,5,2</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/characters/boss-1/boss-1.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>33,17,65,35</rect>
+                <key>scale9Paddings</key>
+                <rect>33,17,65,35</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/characters/companion/inner.png</key>
+            <key type="filename">custom-art/gui/gui-map-portal-point-locked.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>2,2,5,5</rect>
+                <key>scale9Paddings</key>
+                <rect>2,2,5,5</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-0.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-1.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-10.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-11.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-12.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-13.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-14.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-2.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-3.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-4.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-5.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-6.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-7.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-8.png</key>
+            <key type="filename">custom-art/characters/melee-bot/melee-bot-9.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.475,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>7,8,14,16</rect>
+                <key>scale9Paddings</key>
+                <rect>7,8,14,16</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/characters/npc-quest-master/character-1.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-10.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-11.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-12.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-13.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-14.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-15.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-16.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-17.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-18.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-19.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-2.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-20.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-21.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-22.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-23.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-24.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-25.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-26.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-27.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-28.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-3.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-4.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-5.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-6.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-7.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-8.png</key>
+            <key type="filename">custom-art/characters/npc-quest-master/character-9.png</key>
             <key type="filename">custom-art/characters/player/character-1.png</key>
             <key type="filename">custom-art/characters/player/character-10.png</key>
             <key type="filename">custom-art/characters/player/character-11.png</key>
@@ -211,7 +566,7 @@
             <key type="filename">custom-art/characters/player/character-9.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
+                <point_f>0.5,0.666667</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -221,17 +576,980 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">custom-art/characters/slime/slime1.png</key>
+            <key type="filename">custom-art/characters/slime/slime10.png</key>
+            <key type="filename">custom-art/characters/slime/slime11.png</key>
+            <key type="filename">custom-art/characters/slime/slime2.png</key>
+            <key type="filename">custom-art/characters/slime/slime3.png</key>
+            <key type="filename">custom-art/characters/slime/slime4.png</key>
+            <key type="filename">custom-art/characters/slime/slime5.png</key>
+            <key type="filename">custom-art/characters/slime/slime6.png</key>
+            <key type="filename">custom-art/characters/slime/slime7.png</key>
+            <key type="filename">custom-art/characters/slime/slime8.png</key>
+            <key type="filename">custom-art/characters/slime/slime9.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.25,0.611111</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,9,32,18</rect>
+                <key>scale9Paddings</key>
+                <rect>16,9,32,18</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/characters/slime/slime12.png</key>
+            <key type="filename">custom-art/characters/slime/slime13.png</key>
+            <key type="filename">custom-art/characters/slime/slime14.png</key>
+            <key type="filename">custom-art/characters/slime/slime15.png</key>
+            <key type="filename">custom-art/characters/slime/slime16.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.234375,0.611111</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,9,32,18</rect>
+                <key>scale9Paddings</key>
+                <rect>16,9,32,18</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-arrow-small.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>2,2,3,3</rect>
+                <key>scale9Paddings</key>
+                <rect>2,2,3,3</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-button.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,3,11,7</rect>
+                <key>scale9Paddings</key>
+                <rect>5,3,11,7</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-dashboard-abilities-underlay.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>37,9,73,19</rect>
+                <key>scale9Paddings</key>
+                <rect>37,9,73,19</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-dashboard-menu-left.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>1,7,2,13</rect>
+                <key>scale9Paddings</key>
+                <rect>1,7,2,13</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-dashboard-menu-middle.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>0,7,1,13</rect>
+                <key>scale9Paddings</key>
+                <rect>0,7,1,13</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-dashboard-menu-right.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>12,7,25,13</rect>
+                <key>scale9Paddings</key>
+                <rect>12,7,25,13</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-dashboard-status-bar-fancy-highlight.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>15,1,30,3</rect>
+                <key>scale9Paddings</key>
+                <rect>15,1,30,3</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-dashboard-status-bar-fancy.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>15,5,30,9</rect>
+                <key>scale9Paddings</key>
+                <rect>15,5,30,9</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-dashboard-status-bars-underlay.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>34,9,67,17</rect>
+                <key>scale9Paddings</key>
+                <rect>34,9,67,17</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-dashboard-vials-underlay.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,10,31,19</rect>
+                <key>scale9Paddings</key>
+                <rect>16,10,31,19</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-exclamation-mark.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>2,4,3,7</rect>
+                <key>scale9Paddings</key>
+                <rect>2,4,3,7</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-gradient-background.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>92,0,183,1</rect>
+                <key>scale9Paddings</key>
+                <rect>92,0,183,1</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-input-box-label.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,2,9,4</rect>
+                <key>scale9Paddings</key>
+                <rect>5,2,9,4</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-map-gui-legend.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,12,33,24</rect>
+                <key>scale9Paddings</key>
+                <rect>16,12,33,24</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-map-gui-view-toggle.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>24,10,48,20</rect>
+                <key>scale9Paddings</key>
+                <rect>24,10,48,20</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-map-pointer.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>2,3,5,6</rect>
+                <key>scale9Paddings</key>
+                <rect>2,3,5,6</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-map-portal-point.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,4,9,9</rect>
+                <key>scale9Paddings</key>
+                <rect>4,4,9,9</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-panel-dialogue.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>17,11,33,21</rect>
+                <key>scale9Paddings</key>
+                <rect>17,11,33,21</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-panel-menu-translucent.png</key>
+            <key type="filename">custom-art/gui/gui-panel-menu.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,13,32,27</rect>
+                <key>scale9Paddings</key>
+                <rect>16,13,32,27</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-player-position-indicator-glow.png</key>
+            <key type="filename">custom-art/gui/gui-player-position-indicator.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.454545,0.454545</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>3,3,6,6</rect>
+                <key>scale9Paddings</key>
+                <rect>3,3,6,6</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-selected-indicator.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>11,1,21,2</rect>
+                <key>scale9Paddings</key>
+                <rect>11,1,21,2</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_background.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_blood-rage.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_cooldown-reduction.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_damage-up.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_energy-regeneration.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_health-regeneration.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_heavy-strike.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_hybrid-regeneration.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_lightning.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_max-energy.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_max-health-energy.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_max-health.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_root.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_speed-up.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>6,6,13,13</rect>
+                <key>scale9Paddings</key>
+                <rect>6,6,13,13</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_cooldown-reduction-2.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_energy-steal.png</key>
+            <key type="filename">custom-art/gui/gui-skill-tree_node_life-steal.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>8,8,17,17</rect>
+                <key>scale9Paddings</key>
+                <rect>8,8,17,17</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-square-border.png</key>
+            <key type="filename">custom-art/items/augmentation-defender.png</key>
+            <key type="filename">custom-art/items/augmentation-one.png</key>
+            <key type="filename">custom-art/items/augmentation-rage.png</key>
+            <key type="filename">custom-art/items/body-armor-basic.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>8,8,16,16</rect>
+                <key>scale9Paddings</key>
+                <rect>8,8,16,16</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/gui/gui-text-input.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>7,7,13,14</rect>
+                <key>scale9Paddings</key>
+                <rect>7,7,13,14</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/items/legendary-item-drop-effect-minimap.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.444444,0.444444</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>24,4,48,8</rect>
+                <key>scale9Paddings</key>
+                <rect>24,4,48,8</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/items/legendary-item-drop-effect.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,16,32,32</rect>
+                <key>scale9Paddings</key>
+                <rect>16,16,32,32</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/items/weapon-module-empty.png</key>
+            <key type="filename">custom-art/items/weapon-module-fireball.png</key>
+            <key type="filename">custom-art/items/weapon-module-frost-orb.png</key>
+            <key type="filename">custom-art/items/weapon-module-hammer.png</key>
+            <key type="filename">custom-art/items/weapon-module-initiate.png</key>
+            <key type="filename">custom-art/items/weapon-module-lightning-rod.png</key>
+            <key type="filename">custom-art/items/weapon-module-slow-time.png</key>
+            <key type="filename">custom-art/items/weapon-module-swipe.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>6,6,12,12</rect>
+                <key>scale9Paddings</key>
+                <rect>6,6,12,12</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/light-blur.png</key>
+            <key type="filename">custom-art/nova.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>25,25,50,50</rect>
+                <key>scale9Paddings</key>
+                <rect>25,25,50,50</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/mouse-cursors/cursor-move-2x.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>11,11,21,22</rect>
+                <key>scale9Paddings</key>
+                <rect>11,11,21,22</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/mouse-cursors/cursor-move-3x.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,17,31,33</rect>
+                <key>scale9Paddings</key>
+                <rect>16,17,31,33</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/mouse-cursors/cursor-move.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,6,11,11</rect>
+                <key>scale9Paddings</key>
+                <rect>5,6,11,11</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/mouse-cursors/cursor-pointer-2x.png</key>
+            <key type="filename">custom-art/mouse-cursors/cursor-speech-2x.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>11,11,22,22</rect>
+                <key>scale9Paddings</key>
+                <rect>11,11,22,22</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/mouse-cursors/cursor-pointer-3x.png</key>
+            <key type="filename">custom-art/mouse-cursors/cursor-speech-3x.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>17,17,33,33</rect>
+                <key>scale9Paddings</key>
+                <rect>17,17,33,33</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/mouse-cursors/cursor-pointer.png</key>
+            <key type="filename">custom-art/mouse-cursors/cursor-speech.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>6,6,11,11</rect>
+                <key>scale9Paddings</key>
+                <rect>6,6,11,11</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/primitives/pixel-white-1x1.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>0,0,1,1</rect>
+                <key>scale9Paddings</key>
+                <rect>0,0,1,1</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/door-1-front-facing-center.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0.581395</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>16,11,32,21</rect>
+                <key>scale9Paddings</key>
+                <rect>16,11,32,21</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/door-1-front-facing-left-wall.png</key>
+            <key type="filename">custom-art/tiles/door-1-front-facing-right-wall.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0.581395</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,11,8,21</rect>
+                <key>scale9Paddings</key>
+                <rect>4,11,8,21</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/door-1-front-facing-lip.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.366667</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>7,15,14,30</rect>
+                <key>scale9Paddings</key>
+                <rect>7,15,14,30</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/door-1-side-facing-bottom-wall.png</key>
+            <key type="filename">custom-art/tiles/door-1-side-facing-top-wall.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.1,0.595238</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,11,10,21</rect>
+                <key>scale9Paddings</key>
+                <rect>5,11,10,21</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/door-1-side-facing-center.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.0555556,0.284091</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,22,9,44</rect>
+                <key>scale9Paddings</key>
+                <rect>5,22,9,44</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/door-1-side-facing-lip.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.366667,0.517241</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>15,7,30,15</rect>
+                <key>scale9Paddings</key>
+                <rect>15,7,30,15</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/environment-breakable-1.png</key>
+            <key type="filename">custom-art/tiles/environment-breakable-2.png</key>
+            <key type="filename">custom-art/tiles/environment-breakable-3.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,5,7,9</rect>
+                <key>scale9Paddings</key>
+                <rect>4,5,7,9</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/environment-door.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0.609756</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,14,8,28</rect>
+                <key>scale9Paddings</key>
+                <rect>4,14,8,28</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/environment-entrance.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0.448276</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>8,11,16,21</rect>
+                <key>scale9Paddings</key>
+                <rect>8,11,16,21</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/floor-1.png</key>
+            <key type="filename">custom-art/tiles/floor-10.png</key>
+            <key type="filename">custom-art/tiles/floor-11.png</key>
+            <key type="filename">custom-art/tiles/floor-12.png</key>
+            <key type="filename">custom-art/tiles/floor-2.png</key>
+            <key type="filename">custom-art/tiles/floor-3.png</key>
+            <key type="filename">custom-art/tiles/floor-4.png</key>
+            <key type="filename">custom-art/tiles/floor-5.png</key>
+            <key type="filename">custom-art/tiles/floor-6.png</key>
+            <key type="filename">custom-art/tiles/floor-7.png</key>
+            <key type="filename">custom-art/tiles/floor-8.png</key>
+            <key type="filename">custom-art/tiles/floor-9.png</key>
+            <key type="filename">custom-art/tiles/map-ramp-11.png</key>
+            <key type="filename">custom-art/tiles/map-ramp-12.png</key>
+            <key type="filename">custom-art/tiles/map-ramp-13.png</key>
+            <key type="filename">custom-art/tiles/map-ramp-15.png</key>
+            <key type="filename">custom-art/tiles/map-ramp-6.png</key>
+            <key type="filename">custom-art/tiles/map-ramp-7.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9Paddings</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/floor-cross-section-0.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,7,8,15</rect>
+                <key>scale9Paddings</key>
+                <rect>4,7,8,15</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/map-ramp-14.png</key>
+            <key type="filename">custom-art/tiles/map-ramp-3.png</key>
+            <key type="filename">custom-art/tiles/map-ramp-9.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,9,8,17</rect>
+                <key>scale9Paddings</key>
+                <rect>4,9,8,17</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/map-wall-0.png</key>
+            <key type="filename">custom-art/tiles/map-wall-1.png</key>
+            <key type="filename">custom-art/tiles/map-wall-10.png</key>
+            <key type="filename">custom-art/tiles/map-wall-2.png</key>
+            <key type="filename">custom-art/tiles/map-wall-3.png</key>
+            <key type="filename">custom-art/tiles/map-wall-4.png</key>
+            <key type="filename">custom-art/tiles/map-wall-5.png</key>
+            <key type="filename">custom-art/tiles/map-wall-6.png</key>
+            <key type="filename">custom-art/tiles/map-wall-7.png</key>
+            <key type="filename">custom-art/tiles/map-wall-8.png</key>
+            <key type="filename">custom-art/tiles/map-wall-9.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.1,0.581395</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,9,10,18</rect>
+                <key>scale9Paddings</key>
+                <rect>5,9,10,18</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/map-wall-10_1.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0.37931</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,13,8,25</rect>
+                <key>scale9Paddings</key>
+                <rect>4,13,8,25</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/map-wall-10_2.png</key>
+            <key type="filename">custom-art/tiles/map-wall-10_3.png</key>
+            <key type="filename">custom-art/tiles/map-wall-10_4.png</key>
+            <key type="filename">custom-art/tiles/map-wall-10_5.png</key>
+            <key type="filename">custom-art/tiles/map-wall-10_6.png</key>
+            <key type="filename">custom-art/tiles/map-wall-10_7.png</key>
+            <key type="filename">custom-art/tiles/map-wall-10_8.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0.37931</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,11,8,21</rect>
+                <key>scale9Paddings</key>
+                <rect>4,11,8,21</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/map-wall-11.png</key>
+            <key type="filename">custom-art/tiles/map-wall-12.png</key>
+            <key type="filename">custom-art/tiles/map-wall-13.png</key>
+            <key type="filename">custom-art/tiles/map-wall-14.png</key>
+            <key type="filename">custom-art/tiles/map-wall-15.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.1,0.581395</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,11,10,21</rect>
+                <key>scale9Paddings</key>
+                <rect>5,11,10,21</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/treasure-chest-body.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>9,6,18,12</rect>
+                <key>scale9Paddings</key>
+                <rect>9,6,18,12</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">custom-art/tiles/treasure-chest-lid.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,1.14286</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>9,4,18,7</rect>
+                <key>scale9Paddings</key>
+                <rect>9,4,18,7</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">fx/charging/charging_0.png</key>
+            <key type="filename">fx/charging/charging_1.png</key>
+            <key type="filename">fx/charging/charging_10.png</key>
+            <key type="filename">fx/charging/charging_100.png</key>
+            <key type="filename">fx/charging/charging_101.png</key>
+            <key type="filename">fx/charging/charging_102.png</key>
+            <key type="filename">fx/charging/charging_103.png</key>
+            <key type="filename">fx/charging/charging_104.png</key>
+            <key type="filename">fx/charging/charging_105.png</key>
+            <key type="filename">fx/charging/charging_106.png</key>
+            <key type="filename">fx/charging/charging_107.png</key>
+            <key type="filename">fx/charging/charging_108.png</key>
+            <key type="filename">fx/charging/charging_109.png</key>
+            <key type="filename">fx/charging/charging_11.png</key>
+            <key type="filename">fx/charging/charging_110.png</key>
+            <key type="filename">fx/charging/charging_111.png</key>
+            <key type="filename">fx/charging/charging_112.png</key>
+            <key type="filename">fx/charging/charging_113.png</key>
+            <key type="filename">fx/charging/charging_114.png</key>
+            <key type="filename">fx/charging/charging_115.png</key>
+            <key type="filename">fx/charging/charging_116.png</key>
+            <key type="filename">fx/charging/charging_117.png</key>
+            <key type="filename">fx/charging/charging_118.png</key>
+            <key type="filename">fx/charging/charging_119.png</key>
+            <key type="filename">fx/charging/charging_12.png</key>
+            <key type="filename">fx/charging/charging_13.png</key>
+            <key type="filename">fx/charging/charging_14.png</key>
+            <key type="filename">fx/charging/charging_15.png</key>
+            <key type="filename">fx/charging/charging_16.png</key>
+            <key type="filename">fx/charging/charging_17.png</key>
+            <key type="filename">fx/charging/charging_18.png</key>
+            <key type="filename">fx/charging/charging_19.png</key>
+            <key type="filename">fx/charging/charging_2.png</key>
+            <key type="filename">fx/charging/charging_20.png</key>
+            <key type="filename">fx/charging/charging_21.png</key>
+            <key type="filename">fx/charging/charging_22.png</key>
+            <key type="filename">fx/charging/charging_23.png</key>
+            <key type="filename">fx/charging/charging_24.png</key>
+            <key type="filename">fx/charging/charging_25.png</key>
+            <key type="filename">fx/charging/charging_26.png</key>
+            <key type="filename">fx/charging/charging_27.png</key>
+            <key type="filename">fx/charging/charging_28.png</key>
+            <key type="filename">fx/charging/charging_29.png</key>
+            <key type="filename">fx/charging/charging_3.png</key>
+            <key type="filename">fx/charging/charging_30.png</key>
+            <key type="filename">fx/charging/charging_31.png</key>
+            <key type="filename">fx/charging/charging_32.png</key>
+            <key type="filename">fx/charging/charging_33.png</key>
+            <key type="filename">fx/charging/charging_34.png</key>
+            <key type="filename">fx/charging/charging_35.png</key>
+            <key type="filename">fx/charging/charging_36.png</key>
+            <key type="filename">fx/charging/charging_37.png</key>
+            <key type="filename">fx/charging/charging_38.png</key>
+            <key type="filename">fx/charging/charging_39.png</key>
+            <key type="filename">fx/charging/charging_4.png</key>
+            <key type="filename">fx/charging/charging_40.png</key>
+            <key type="filename">fx/charging/charging_41.png</key>
+            <key type="filename">fx/charging/charging_42.png</key>
+            <key type="filename">fx/charging/charging_43.png</key>
+            <key type="filename">fx/charging/charging_44.png</key>
+            <key type="filename">fx/charging/charging_45.png</key>
+            <key type="filename">fx/charging/charging_46.png</key>
+            <key type="filename">fx/charging/charging_47.png</key>
+            <key type="filename">fx/charging/charging_48.png</key>
+            <key type="filename">fx/charging/charging_49.png</key>
+            <key type="filename">fx/charging/charging_5.png</key>
+            <key type="filename">fx/charging/charging_50.png</key>
+            <key type="filename">fx/charging/charging_51.png</key>
+            <key type="filename">fx/charging/charging_52.png</key>
+            <key type="filename">fx/charging/charging_53.png</key>
+            <key type="filename">fx/charging/charging_54.png</key>
+            <key type="filename">fx/charging/charging_55.png</key>
+            <key type="filename">fx/charging/charging_56.png</key>
+            <key type="filename">fx/charging/charging_57.png</key>
+            <key type="filename">fx/charging/charging_58.png</key>
+            <key type="filename">fx/charging/charging_59.png</key>
+            <key type="filename">fx/charging/charging_6.png</key>
+            <key type="filename">fx/charging/charging_60.png</key>
+            <key type="filename">fx/charging/charging_61.png</key>
+            <key type="filename">fx/charging/charging_62.png</key>
+            <key type="filename">fx/charging/charging_63.png</key>
+            <key type="filename">fx/charging/charging_64.png</key>
+            <key type="filename">fx/charging/charging_65.png</key>
+            <key type="filename">fx/charging/charging_66.png</key>
+            <key type="filename">fx/charging/charging_67.png</key>
+            <key type="filename">fx/charging/charging_68.png</key>
+            <key type="filename">fx/charging/charging_69.png</key>
+            <key type="filename">fx/charging/charging_7.png</key>
+            <key type="filename">fx/charging/charging_70.png</key>
+            <key type="filename">fx/charging/charging_71.png</key>
+            <key type="filename">fx/charging/charging_72.png</key>
+            <key type="filename">fx/charging/charging_73.png</key>
+            <key type="filename">fx/charging/charging_74.png</key>
+            <key type="filename">fx/charging/charging_75.png</key>
+            <key type="filename">fx/charging/charging_76.png</key>
+            <key type="filename">fx/charging/charging_77.png</key>
+            <key type="filename">fx/charging/charging_78.png</key>
+            <key type="filename">fx/charging/charging_79.png</key>
+            <key type="filename">fx/charging/charging_8.png</key>
+            <key type="filename">fx/charging/charging_80.png</key>
+            <key type="filename">fx/charging/charging_81.png</key>
+            <key type="filename">fx/charging/charging_82.png</key>
+            <key type="filename">fx/charging/charging_83.png</key>
+            <key type="filename">fx/charging/charging_84.png</key>
+            <key type="filename">fx/charging/charging_85.png</key>
+            <key type="filename">fx/charging/charging_86.png</key>
+            <key type="filename">fx/charging/charging_87.png</key>
+            <key type="filename">fx/charging/charging_88.png</key>
+            <key type="filename">fx/charging/charging_89.png</key>
+            <key type="filename">fx/charging/charging_9.png</key>
+            <key type="filename">fx/charging/charging_90.png</key>
+            <key type="filename">fx/charging/charging_91.png</key>
+            <key type="filename">fx/charging/charging_92.png</key>
+            <key type="filename">fx/charging/charging_93.png</key>
+            <key type="filename">fx/charging/charging_94.png</key>
+            <key type="filename">fx/charging/charging_95.png</key>
+            <key type="filename">fx/charging/charging_96.png</key>
+            <key type="filename">fx/charging/charging_97.png</key>
+            <key type="filename">fx/charging/charging_98.png</key>
+            <key type="filename">fx/charging/charging_99.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.55</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>25,25,50,50</rect>
+                <key>scale9Paddings</key>
+                <rect>25,25,50,50</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
         </map>
         <key>fileList</key>
         <array>
-            <filename>custom-art/characters/player</filename>
+            <filename>custom-art/tiles</filename>
+            <filename>custom-art/primitives</filename>
+            <filename>custom-art/Pixeltiers_16x16_RPG_Pack_V1.4/shoes</filename>
+            <filename>custom-art/status-effect-icons</filename>
+            <filename>custom-art/effects</filename>
+            <filename>custom-art/characters</filename>
+            <filename>custom-art/gui</filename>
+            <filename>custom-art/nova.png</filename>
+            <filename>custom-art/abilities</filename>
+            <filename>custom-art/items</filename>
+            <filename>custom-art/light-blur.png</filename>
+            <filename>custom-art/mouse-cursors</filename>
+            <filename>fx</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
         <key>replaceList</key>
         <array/>
         <key>ignoredWarnings</key>
-        <array/>
+        <array>
+            <string>large-max-texture-size</string>
+        </array>
         <key>commonDivisorX</key>
         <uint>1</uint>
         <key>commonDivisorY</key>
