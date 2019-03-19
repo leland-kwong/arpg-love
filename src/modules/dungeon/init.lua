@@ -394,6 +394,25 @@ local objectParsersByType = {
         end
       })
     end,
+  },
+  ['lights'] = {
+    light = function(obj, grid, origin)
+      local Component = require 'modules.component'
+      Component.create({
+        class = 'environment',
+        x = obj.x,
+        y = obj.y,
+        radius = obj.properties.radius,
+        group = 'all',
+        init = function(self)
+          Component.addToGroup(self, 'mapStateSerializers')
+        end,
+        draw = function(self)
+          local lw = Component.get('lightWorld')
+          lw:addLight(self.x, self.y, self.radius)
+        end
+      })
+    end
   }
 }
 

@@ -227,7 +227,6 @@ function Sandbox.init(self)
           return drawOrder() + 2
         end
       })
-      msgBus.send(msgBus.PLAY_GAME_MENU_TOGGLE)
     elseif self.activeSceneMenu then
       self.activeSceneMenu:delete(true)
       self.activeSceneMenu = nil

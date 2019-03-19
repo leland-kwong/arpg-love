@@ -58,7 +58,7 @@ local function restoreComponentsFromState(self, serializedState)
 end
 
 function MainScene.init(self)
-  Component.get('lightWorld'):setAmbientColor({0.5,0.5,0.5,1})
+  Component.get('lightWorld'):setAmbientColor({0.4,0.4,0.4,1})
 
   gsa('setBackgroundColor', {0,0,0,1})
 

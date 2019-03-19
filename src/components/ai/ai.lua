@@ -326,20 +326,6 @@ function Ai.getActualSpeed(self, dt)
   return max(0, self.stats:get('moveSpeed') * dt)
 end
 
-local function createLight(self)
-  if self.lightRadius then
-    local lightWorld = Component.get('lightWorld')
-    local lightColor = self.lightColor or self.rarityColor
-    lightWorld:addLight(
-      self.x,
-      self.y,
-      self.lightRadius,
-      lightColor,
-      self.opacity
-    )
-  end
-end
-
 function Ai.update(self, dt)
   if self.destroyedAnimation then
     return
@@ -579,8 +565,6 @@ function Ai.draw(self)
 
     self.losDebug()
   end
-
-  createLight(self)
 
   local oBlendMode = love.graphics.getBlendMode()
   local ox, oy = self.animation:getOffset()

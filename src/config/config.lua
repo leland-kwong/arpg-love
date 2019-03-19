@@ -46,7 +46,7 @@ M.performanceProfile = false
 M.debugDrawQueue = false
 M.collisionDebug = false
 
-M.performacneProfileEnabled = false
+M.gameSpeedMultiplier = 1
 
 M.gameTitle = 'Citizen of Nowhere'
 

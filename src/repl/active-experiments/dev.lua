@@ -61,6 +61,42 @@ function M.init(self)
 
       local layoutItems = {
         {
+         MenuItem({
+            label = 'change game speed',
+            onClick = function()
+              closeMenu()
+              local config = require 'config.config'
+              local camera = require 'components.camera'
+              local width, height = camera:getSize(true)
+              local clamp = require 'utils.math'.clamp
+              local interactOverlay = Gui.create({
+                width = width,
+                height = height,
+                onWheel = function(_, ev)
+                  consoleLog(
+                    Inspect(ev)
+                  )
+                  local dy = ev[2]/10
+                  local newSpeed = clamp(config.gameSpeedMultiplier + dy, 0, 4)
+                  msgBus.send('SET_CONFIG', {
+                    gameSpeedMultiplier = newSpeed
+                  })
+                end,
+                render = function()
+                  love.graphics.setColor(1,1,0)
+                  love.graphics.print('Speed: '..config.gameSpeedMultiplier, 100, 100)
+                  love.graphics.setColor(1,1,1)
+                  love.graphics.print('Mouse wheel to adjust dt multiplier', 100, 120)
+                end,
+                onFinal = function()
+                  MenuManager.pop()
+                end
+              })
+              MenuManager.push(interactOverlay)
+            end,
+          })
+        },
+        {
           MenuItem({
             label = 'spawn ai',
             onClick = function()

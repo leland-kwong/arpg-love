@@ -36,9 +36,10 @@ return itemSystem.registerModule({
         )
       end
 
-      local imageDrawOrder = playerRef:drawOrder()
+      local imageDrawOrder = 2
       Component.create({
         imageDuration = 0.5,
+        clock = 0,
         init = function(self)
           Component.addToGroup(self, 'all')
           self.lifetime = props.duration
@@ -46,8 +47,8 @@ return itemSystem.registerModule({
         end,
         update = function(self, dt)
           self.lifetime = self.lifetime - dt
-          local shouldMakeImages = self.lifetime > 0
-          if shouldMakeImages then
+          local shouldMakeImage = (self.lifetime > 0) and (self.clock == 0)
+          if shouldMakeImage then
             local colorChange = (#self.images * 40)
             local color = {Color.rgba255(244 - colorChange, 244, 65)}
 
@@ -76,6 +77,12 @@ return itemSystem.registerModule({
           local complete = #self.images == 0
           if complete then
             self:delete()
+          end
+
+          self.clock = self.clock + dt
+          local imageInterval = 1/60
+          if self.clock >= imageInterval then
+            self.clock = 0
           end
         end,
         draw = function(self)

@@ -1,6 +1,7 @@
 local Component = require 'modules.component'
 local userSettings = require 'config.user-settings'
 local userSettingsState = require 'config.user-settings.state'
+local msgBus = require 'components.msg-bus'
 
 Component.create({
   id = 'newsDialog',
@@ -26,7 +27,6 @@ Component.create({
           end, function(err)
             print('error', err)
           end)
-          local msgBus = require 'components.msg-bus'
           msgBus.send(msgBus.LATEST_NEWS_TOGGLE, true)
           self:delete()
         end, function(err)
@@ -35,6 +35,7 @@ Component.create({
         end)
     else
       self:delete()
+      msgBus.send('PLAY_GAME_MENU_TOGGLE')
     end
   end
 })
